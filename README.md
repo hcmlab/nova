@@ -33,7 +33,7 @@ An example SSI Pipeline for recording a wide range of interessting features will
 
 ##Publications:
 
-Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagner, Birgit Lugrin, Elisabeth André, Patrick Gebahard, “Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions” in ACM Transactions on Interactive Intelligent Systems (TiiS) 5.2, 2015
+ “Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions”, Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagner, Birgit Lugrin, Elisabeth André, Patrick Gebhard, in ACM Transactions on Interactive Intelligent Systems (TiiS) 5.2, 2015
 
 <pre><code>
 
@@ -49,7 +49,7 @@ Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagne
 }
 
 </code></pre>
-Tobias Baur, Ionut Damian, Florian Lingenfelser, Johannes Wagner and Elisabeth André, “NovA: Automated Analysis of Nonverbal Signals in Social Interactions” in Human Behavior Understanding, LNCS 8212, 2013.
+ “NovA: Automated Analysis of Nonverbal Signals in Social Interactions” Tobias Baur, Ionut Damian, Florian Lingenfelser, Johannes Wagner and Elisabeth André, in Human Behavior Understanding, LNCS 8212, 2013.
 
 <pre><code>
 @incollection{
