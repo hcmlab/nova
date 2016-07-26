@@ -19,9 +19,11 @@ FAQ:
 -An example SSI Pipeline for recording a wide range of interessting features will be provided in the next update (as it existed for the old version, but updated for Kinect 2, and some more new features 🙂 ).
 
 
-Publications:
+##Publications:
 
 Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagner, Birgit Lugrin, Elisabeth André, Patrick Gebahard, “Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions” in ACM Transactions on Interactive Intelligent Systems (TiiS) 5.2, 2015
+
+<pre><code>
 
 @article{
   title={Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions},
@@ -33,8 +35,11 @@ Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagne
   year={2015},
   publisher={ACM}
 }
+
+</code></pre>
 Tobias Baur, Ionut Damian, Florian Lingenfelser, Johannes Wagner and Elisabeth André, “NovA: Automated Analysis of Nonverbal Signals in Social Interactions” in Human Behavior Understanding, LNCS 8212, 2013.
 
+<pre><code>
 @incollection{
 year={2013},
 isbn={978-3-319-02713-5},
@@ -48,3 +53,5 @@ url={http://dx.doi.org/10.1007/978-3-319-02714-2_14},
 publisher={Springer International Publishing},
 author={Baur, Tobias and Damian, Ionut and Lingenfelser, Florian and Wagner, Johannes and André, Elisabeth},
 pages={160-171}}
+
+</code></pre>
