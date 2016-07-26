@@ -12,11 +12,23 @@ The Annotation format can easily be imported in other tools, like ELAN or Excel.
 
 The new reworked version is now online for Download.
 
-FAQ:
--NovA runs on Windows only
--It is Software under development and is provided “as is”. If you run into any problems or find bugs feel free to open an issue
--If you want to open a video but it doesn’t show, please make sure you installed the according Videocodec on your System. E.g. The K-Lite Codec Pack might be a good solution for most missing codecs.
--An example SSI Pipeline for recording a wide range of interessting features will be provided in the next update (as it existed for the old version, but updated for Kinect 2, and some more new features 🙂 ).
+###FAQ:
+
+<strong>Help, I opened a video but it doesn't show up</strong>
+
+Please make sure you installed the according Videocodec on your System. E.g. The K-Lite Codec Pack might be a good solution for most missing codecs.
+
+<strong>Will NovA run on my Mac/Linux Machine?</strong>
+
+As NovA is an WPF Application it will run on Windows. Nevertheless you can of course use a Virtual Machine to use it.
+
+<strong>I found a bug, can you fix it?</strong>
+
+NovA is  Software under development and is provided “as is”. If you run into any problems or find bugs (or want to contribute to the project) feel free to open an issue here on github.
+
+<strong>Is there an example pipeline to automatically create annotations?</strong>
+
+An example SSI Pipeline for recording a wide range of interessting features will be provided in the next update (as it existed for the old version, but updated for Kinect 2, and some more new features 🙂 ).
 
 
 ##Publications:
