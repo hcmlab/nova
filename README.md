@@ -16,7 +16,7 @@ The new reworked version is now online for Download.
 
 <strong>Help, I opened a video but it doesn't show up</strong>
 
-Please make sure you installed the according Videocodec on your System. E.g. The K-Lite Codec Pack might be a good solution for most missing codecs.
+Please make sure you installed the according Video Codec on your System. E.g. The K-Lite Codec Pack might be a good solution for most missing codecs.
 
 <strong>Will NovA run on my Mac/Linux Machine?</strong>
 
@@ -58,7 +58,7 @@ isbn={978-3-319-02713-5},
 booktitle={Human Behavior Understanding},
 volume={8212},
 series={Lecture Notes in Computer Science},
-editor={Salah, AlbertAli and Hung, Hayley and Aran, Oya and Gunes, Hatice},
+editor={Salah, Albert Ali and Hung, Hayley and Aran, Oya and Gunes, Hatice},
 doi={10.1007/978-3-319-02714-2_14},
 title={NovA: Automated Analysis of Nonverbal Signals in Social Interactions},
 url={http://dx.doi.org/10.1007/978-3-319-02714-2_14},
