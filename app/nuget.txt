@@ -1,0 +1,4 @@
+In case its required use VS NUget console and type:
+
+Install-Package Costura.Fody
+Install-CleanReferencesTarget

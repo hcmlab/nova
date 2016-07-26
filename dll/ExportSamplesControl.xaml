@@ -1,0 +1,69 @@
+﻿<UserControl x:Class="ssi.ExportSamplesControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             Height="Auto" Width="Auto" Background="LightGray">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+              <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0">User Name</Label>
+        <Label Grid.Row="1" Grid.Column="0">Annotation</Label>
+        <Label Grid.Row="3" Grid.Column="0">Signals</Label>
+
+        <TextBox Name="userNameTextBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Margin="5" Height="25" Text="DefaultUser"></TextBox>
+
+        <ComboBox Name="annoComboBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="5" Height="25" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ComboBox>
+        <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Height="28">Annotations appear here after they are stored with "Save Single Tier as"</Label>
+        <ListBox Name="signalAvailableListBox" Grid.Row="3" Grid.Column="1" Margin="5" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+        <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center">
+            <Button Name="selectAllButton" Background="Transparent" Margin="5">&gt;&gt;</Button>
+            <Button Name="selectButton" Background="Transparent" Margin="5">&gt;</Button>
+            <Button Name="unselectButton" Background="Transparent" Margin="5">&lt;</Button>
+            <Button Name="unselectAllButton" Background="Transparent" Margin="5">&lt;&lt;</Button>
+        </StackPanel>
+        <ListBox Name="signalSelectedListBox" Grid.Row="3" Grid.Column="3" Margin="5" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+
+        <CheckBox Name="continuousCheckBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Margin="5">Continuous</CheckBox>
+        <Grid Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="5" Margin="5" IsEnabled="{Binding ElementName=continuousCheckBox, Path=IsChecked}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Margin="5">Frame Size (s)</Label>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Name="frameTextBox">1.0</TextBox>
+            <Label Grid.Row="1" Grid.Column="0" Margin="5" >Delta Size (s)</Label>
+            <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Name="deltaTextBox">0.0</TextBox>
+            <Label Grid.Row="2" Grid.Column="0" Margin="5" >Label Overlap (0..1)</Label>
+            <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Name="percentTextBox">0.5</TextBox>
+            <Label Grid.Row="3" Grid.Column="0" Margin="5" >Default Label</Label>
+            <TextBox Grid.Row="3" Grid.Column="1" Margin="5" Name="labelTextBox">GARBAGE</TextBox>
+        </Grid>
+
+        <StackPanel Grid.Row="6" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Name="exportButton"  Width="45" Height="25" Margin="5" VerticalAlignment="Center">Export</Button>
+            <Button Name="cancelButton" Width="45" Height="25" Margin="5" VerticalAlignment="Center">Cancel</Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

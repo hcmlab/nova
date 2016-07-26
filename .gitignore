@@ -18,7 +18,6 @@
 x64/
 x86/
 bld/
-[Bb]in/
 [Oo]bj/
 [Ll]og/
 
@@ -250,3 +249,12 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+app/viewui.csproj
+bin/nova.vshost.exe
+bin/AvalonControlsLibrary.dll
+bin/WriteableBitmapEx.dll
+bin/WPFMediaKit.dll
+bin/ssiview.dll
+bin/PropertyTools.Wpf.dll
+bin/nova.vshost.exe.manifest

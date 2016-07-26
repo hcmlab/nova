@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="ssi.TimeTrackControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:ssi"
+    xmlns:acl="http://schemas.AvalonControls/AvalonControlsLibrary/Controls"
+    Height="60" Width="Auto">
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="5" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <local:TimeTrack x:Name="timeTrackSelection" Grid.Row="0" Grid.Column="1" Height="20"></local:TimeTrack>
+        <local:TimeRangeSlider x:Name="rangeSlider" Grid.Row="1" Grid.Column="1"></local:TimeRangeSlider>
+        <local:TimeTrack x:Name="timeTrack" Grid.Row="2" Grid.Column="1" Height="20"></local:TimeTrack>
+    </Grid>
+</UserControl>
