@@ -62,12 +62,15 @@ namespace ssi
             // add signal track
             SignalTrack track = new SignalTrack(signal);
             track.SignalColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
+          
             //track.BackgroundColor = SystemColors.ActiveBorderBrush;
             track.BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(background));
 
             SignalTrackEx trackex = new SignalTrackEx();
             trackex.CloseButton.Click += removeTrack;
             trackex.AddTrack(track);
+            trackex.SignalColor = track.SignalColor.Color;
+            trackex.BackColor = track.BackgroundColor.Color ;
 
             this.signalTrackGrid.Children.Add(trackex);
 

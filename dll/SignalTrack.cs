@@ -75,7 +75,8 @@ namespace ssi
         public SolidColorBrush BackgroundColor
         {
             get { return b; }
-            set { b = value; }
+            set { b = value;
+            }
         }
 
         public SignalTrack(Signal signal)
