@@ -170,7 +170,9 @@ namespace ssi
 
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyboardDevice.IsKeyDown(Key.Space))
+            if (!this.view.annoListControl.editTextBox.IsFocused)
+            {
+                if (e.KeyboardDevice.IsKeyDown(Key.Space))
             {
                 bool is_playing = IsPlaying();
                 if (!is_playing)
@@ -178,7 +180,12 @@ namespace ssi
                     Play();
                 }
                 else { Stop(); }
-                e.Handled = true;
+
+
+               
+                    e.Handled = true;
+               
+               
             }
 
             if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
@@ -238,121 +245,180 @@ namespace ssi
                 keyDown = true;
                 e.Handled = true;
             }
+
+            }
         }
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+            if (!this.view.annoListControl.editTextBox.IsFocused)
             {
-                if (AnnoTrack.GetSelectedTrack().isDiscrete) saveAnno();
-                else saveAnnoContinous();
-            }
-            else if (e.KeyboardDevice.IsKeyDown(Key.Delete))
-            {
-                if (AnnoTrack.GetSelectedSegment() == null && Mouse.DirectlyOver == AnnoTrack.GetSelectedTrack())
+
+                if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    removeTier();
+                    if (AnnoTrack.GetSelectedTrack().isDiscrete) saveAnno();
+                    else saveAnnoContinous();
                 }
-                else
+                else if (e.KeyboardDevice.IsKeyDown(Key.Delete))
                 {
-                    AnnoTrack.OnKeyDownHandler(sender, e);
-                }
-            }
-
-            if (e.KeyboardDevice.IsKeyDown(Key.E) && !keyDown)
-            {
-                if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false)
-                {
-                    UIElement container = VisualTreeHelper.GetParent(AnnoTrack.GetSelectedSegment()) as UIElement;
-                    Point relativeLocation = AnnoTrack.GetSelectedSegment().TranslatePoint(new Point(0, 0), container);
-
-                    media_list.move(ViewHandler.Time.TimeFromPixel(relativeLocation.X + AnnoTrack.GetSelectedSegment().Width));
-
-                    annoCursor.X = relativeLocation.X;
-                    signalCursor.X = relativeLocation.X + AnnoTrack.GetSelectedSegment().Width;
-
-                    time.CurrentSelectPosition = annoCursor.X;
-                    time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-                    AnnoTrack.GetSelectedSegment().select(true);
-                    keyDown = true;
-                }
-            }
-
-            if (e.KeyboardDevice.IsKeyDown(Key.Q) && !keyDown)
-            {
-                if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false)
-                {
-                    UIElement container = VisualTreeHelper.GetParent(AnnoTrack.GetSelectedSegment()) as UIElement;
-                    Point relativeLocation = AnnoTrack.GetSelectedSegment().TranslatePoint(new Point(0, 0), container);
-
-                    media_list.move(ViewHandler.Time.TimeFromPixel(relativeLocation.X));
-
-                    annoCursor.X = relativeLocation.X + AnnoTrack.GetSelectedSegment().Width;
-                    signalCursor.X = relativeLocation.X;
-
-                    time.CurrentSelectPosition = annoCursor.X;
-                    time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-                    AnnoTrack.GetSelectedSegment().select(true);
-                    keyDown = true;
-                }
-            }
-
-            if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.A) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && AnnoTrack.GetSelectedTrack().isDiscrete)
-            {
-                if (AnnoTrack.GetSelectedSegment() == null)
-                {
-                    AnnoTrack.GetSelectedTrack().newAnnokey();
-                }
-                else
-                {
-                    ShowLabelBox();
-                }
-                AnnoTrack.GetSelectedSegment().select(true);
-                keyDown = true;
-                // e.Handled = true;
-            }
-
-            if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !keyDown*/)
-            {
-                int i = 0;
-                double fps = 1.0 / 30.0;
-                foreach (IMedia im in media_list.Medias)
-                {
-                    if (im.IsVideo())
+                    if (AnnoTrack.GetSelectedSegment() == null && Mouse.DirectlyOver == AnnoTrack.GetSelectedTrack())
                     {
-                        break;
+                        removeTier();
                     }
-                    i++;
-                }
-
-                if (i < media_list.Medias.Count)
-                {
-                    fps = 1.0 / media_list.Medias[i].GetSampleRate();
-                }
-
-                //In case no media is loaded it takes the sr of the first loaded signal
-                else
-                {
-                    if (signals.Count > 0)
+                    else
                     {
-                        fps = 1.0 / signals[0].rate;
+                        AnnoTrack.OnKeyDownHandler(sender, e);
                     }
                 }
 
-                media_list.move(ViewHandler.Time.TimeFromPixel(signalCursor.X) + fps);
-
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                if (e.KeyboardDevice.IsKeyDown(Key.E) && !keyDown)
                 {
-                    annoCursor.X = annoCursor.X + ViewHandler.Time.PixelFromTime(fps);
+                    if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false)
+                    {
+                        UIElement container = VisualTreeHelper.GetParent(AnnoTrack.GetSelectedSegment()) as UIElement;
+                        Point relativeLocation = AnnoTrack.GetSelectedSegment().TranslatePoint(new Point(0, 0), container);
+
+                        media_list.move(ViewHandler.Time.TimeFromPixel(relativeLocation.X + AnnoTrack.GetSelectedSegment().Width));
+
+                        annoCursor.X = relativeLocation.X;
+                        signalCursor.X = relativeLocation.X + AnnoTrack.GetSelectedSegment().Width;
+
+                        time.CurrentSelectPosition = annoCursor.X;
+                        time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+                        AnnoTrack.GetSelectedSegment().select(true);
+                        keyDown = true;
+                    }
                 }
-                else signalCursor.X = signalCursor.X + ViewHandler.Time.PixelFromTime(fps);
 
-                time.CurrentSelectPosition = annoCursor.X;
-                time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-                time.CurrentPlayPositionPrecise = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-
-                if (AnnoTrack.GetSelectedSegment() != null)
+                if (e.KeyboardDevice.IsKeyDown(Key.Q) && !keyDown)
                 {
+                    if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false)
+                    {
+                        UIElement container = VisualTreeHelper.GetParent(AnnoTrack.GetSelectedSegment()) as UIElement;
+                        Point relativeLocation = AnnoTrack.GetSelectedSegment().TranslatePoint(new Point(0, 0), container);
+
+                        media_list.move(ViewHandler.Time.TimeFromPixel(relativeLocation.X));
+
+                        annoCursor.X = relativeLocation.X + AnnoTrack.GetSelectedSegment().Width;
+                        signalCursor.X = relativeLocation.X;
+
+                        time.CurrentSelectPosition = annoCursor.X;
+                        time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+                        AnnoTrack.GetSelectedSegment().select(true);
+                        keyDown = true;
+                    }
+                }
+
+                if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.A) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                {
+                    if (AnnoTrack.GetSelectedSegment() == null)
+                    {
+                        AnnoTrack.GetSelectedTrack().newAnnokey();
+                    }
+                    else
+                    {
+                        ShowLabelBox();
+                    }
+                    AnnoTrack.GetSelectedSegment().select(true);
+                    keyDown = true;
+                    // e.Handled = true;
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !keyDown*/)
+                {
+                    int i = 0;
+                    double fps = 1.0 / 30.0;
+                    foreach (IMedia im in media_list.Medias)
+                    {
+                        if (im.IsVideo())
+                        {
+                            break;
+                        }
+                        i++;
+                    }
+
+                    if (i < media_list.Medias.Count)
+                    {
+                        fps = 1.0 / media_list.Medias[i].GetSampleRate();
+                    }
+
+                    //In case no media is loaded it takes the sr of the first loaded signal
+                    else
+                    {
+                        if (signals.Count > 0)
+                        {
+                            fps = 1.0 / signals[0].rate;
+                        }
+                    }
+
+                    media_list.move(ViewHandler.Time.TimeFromPixel(signalCursor.X) + fps);
+
+                    if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                    {
+                        annoCursor.X = annoCursor.X + ViewHandler.Time.PixelFromTime(fps);
+                    }
+                    else signalCursor.X = signalCursor.X + ViewHandler.Time.PixelFromTime(fps);
+
+                    time.CurrentSelectPosition = annoCursor.X;
+                    time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+                    time.CurrentPlayPositionPrecise = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+
+                    if (AnnoTrack.GetSelectedSegment() != null)
+                    {
+                        double start = annoCursor.X;
+                        double end = signalCursor.X;
+
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                        {
+                            start = signalCursor.X;
+                            end = annoCursor.X;
+                        }
+                        if (end > start)
+                        {
+                            AnnoTrack.GetSelectedSegment().resize_right(ViewHandler.Time.PixelFromTime(fps));
+                        }
+                        else
+                        {
+                            AnnoTrack.GetSelectedSegment().resize_left(ViewHandler.Time.PixelFromTime(fps));
+                        }
+                        AnnoTrack.GetSelectedSegment().select(true);
+                    }
+
+                    keyDown = true;
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt)/* && !keyDown*/)
+                {
+                    int i = 0;
+                    double fps = 1.0 / 30.0;
+                    foreach (IMedia im in media_list.Medias)
+                    {
+                        if (im.IsVideo())
+                        {
+                            break;
+                        }
+                        i++;
+                    }
+
+                    if (i < media_list.Medias.Count)
+                    {
+                        fps = 1.0 / media_list.Medias[i].GetSampleRate();
+                    }
+
+                    media_list.move(ViewHandler.Time.TimeFromPixel(signalCursor.X) - fps);
+                    if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                    {
+                        annoCursor.X = annoCursor.X - ViewHandler.Time.PixelFromTime(fps);
+                    }
+                    else
+                    {
+                        signalCursor.X = signalCursor.X - ViewHandler.Time.PixelFromTime(fps);
+                    }
+
+                    time.CurrentSelectPosition = annoCursor.X;
+                    time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+                    time.CurrentPlayPositionPrecise = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+
                     double start = annoCursor.X;
                     double end = signalCursor.X;
 
@@ -361,82 +427,29 @@ namespace ssi
                         start = signalCursor.X;
                         end = annoCursor.X;
                     }
-                    if (end > start)
+
+                    if (AnnoTrack.GetSelectedSegment() != null)
                     {
-                        AnnoTrack.GetSelectedSegment().resize_right(ViewHandler.Time.PixelFromTime(fps));
+                        if (end > start)
+                        {
+                            AnnoTrack.GetSelectedSegment().resize_right(-ViewHandler.Time.PixelFromTime(fps));
+                        }
+                        else
+                        {
+                            AnnoTrack.GetSelectedSegment().resize_left(-ViewHandler.Time.PixelFromTime(fps));
+                        }
+                        AnnoTrack.GetSelectedSegment().select(true);
                     }
-                    else
-                    {
-                        AnnoTrack.GetSelectedSegment().resize_left(ViewHandler.Time.PixelFromTime(fps));
-                    }
-                    AnnoTrack.GetSelectedSegment().select(true);
-                }
 
-                keyDown = true;
-            }
-
-            if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt)/* && !keyDown*/)
-            {
-                int i = 0;
-                double fps = 1.0 / 30.0;
-                foreach (IMedia im in media_list.Medias)
-                {
-                    if (im.IsVideo())
-                    {
-                        break;
-                    }
-                    i++;
-                }
-
-                if (i < media_list.Medias.Count)
-                {
-                    fps = 1.0 / media_list.Medias[i].GetSampleRate();
-                }
-
-                media_list.move(ViewHandler.Time.TimeFromPixel(signalCursor.X) - fps);
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                {
-                    annoCursor.X = annoCursor.X - ViewHandler.Time.PixelFromTime(fps);
+                    keyDown = true;
                 }
                 else
                 {
-                    signalCursor.X = signalCursor.X - ViewHandler.Time.PixelFromTime(fps);
+                    AnnoTrack.OnKeyDownHandler(sender, e);
                 }
 
-                time.CurrentSelectPosition = annoCursor.X;
-                time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-                time.CurrentPlayPositionPrecise = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-
-                double start = annoCursor.X;
-                double end = signalCursor.X;
-
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                {
-                    start = signalCursor.X;
-                    end = annoCursor.X;
-                }
-
-                if (AnnoTrack.GetSelectedSegment() != null)
-                {
-                    if (end > start)
-                    {
-                        AnnoTrack.GetSelectedSegment().resize_right(-ViewHandler.Time.PixelFromTime(fps));
-                    }
-                    else
-                    {
-                        AnnoTrack.GetSelectedSegment().resize_left(-ViewHandler.Time.PixelFromTime(fps));
-                    }
-                    AnnoTrack.GetSelectedSegment().select(true);
-                }
-
-                keyDown = true;
             }
-            else
-            {
-                AnnoTrack.OnKeyDownHandler(sender, e);
-            }
-
-            //SignalTrackStatic.OnSignalTrackKeyDown(sender, e);
+           
         }
 
         private void OnTrackControlSizeChanged(object sender, SizeChangedEventArgs e)
