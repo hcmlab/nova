@@ -91,6 +91,9 @@
     <Reference Include="MediaToolkit">
       <HintPath>.\MediaToolkit.dll</HintPath>
     </Reference>
+    <Reference Include="MongoDB">
+      <HintPath>.\MongoDB.dll</HintPath>
+    </Reference>
     <Reference Include="PropertyTools.Wpf">
       <HintPath>.\PropertyTools.Wpf.dll</HintPath>
     </Reference>
@@ -140,6 +143,7 @@
     <Compile Include="AnnoTrackSegment.cs" />
     <Compile Include="ContinuousColorTheme.cs" />
     <Compile Include="Cursor.cs" />
+    <Compile Include="DatabaseHandler.cs" />
     <Compile Include="ExportSamplesControl.xaml.cs">
       <DependentUpon>ExportSamplesControl.xaml</DependentUpon>
     </Compile>
