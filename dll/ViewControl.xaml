@@ -59,13 +59,13 @@
                 Grid.Row="0" BorderThickness="2" Margin="5">
                 <Grid Name="videoskel" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="Auto" Height="Auto" Grid.Column="0" Grid.Row="0">
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
 
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
                     <local:MediaControl x:Name="videoControl" Margin="0,19,0,0" Grid.Column="0"></local:MediaControl>
                     <local:SkeletonControl x:Name="skeletonControl" Margin="0,19,0,0" Grid.Column="1"></local:SkeletonControl>
                 </Grid>
