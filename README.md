@@ -12,6 +12,8 @@ Additionally it's now possible to store/load annotations in a local or external 
 ![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2016/07/cont.png)
 
 The new reworked version is now online for Download.
+The latest binaries can always be found [here](https://github.com/tobiasbaur/nova/releases) 
+
 
 ###FAQ:
 
@@ -32,10 +34,12 @@ NovA is  Software under development and is provided “as is”. If you run into
 An example SSI Pipeline for recording a wide range of interessting features will be provided in one of the next updates (as it existed for the old version, but updated for Kinect 2, and some more new features 🙂 ).
 
 
-The latest binaries can always be found [here](https://github.com/tobiasbaur/nova/releases) 
+
 
 
 ##Publications:
+
+If you are using NovA for your research please consider giving us a citation:
 
  “Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions”, Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagner, Birgit Lugrin, Elisabeth André, Patrick Gebhard, in ACM Transactions on Interactive Intelligent Systems (TiiS) 5.2, 2015
 
