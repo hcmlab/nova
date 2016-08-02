@@ -40,6 +40,11 @@
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
                 <MenuItem Header="Convert to cont Anno" Name="convertocontannoemenu" />
             </MenuItem>
+            <MenuItem Header="Database">
+                <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
+                <MenuItem Header="Store Tier to MongoDB" Name="mongodbmenu" />
+                <MenuItem Header="Load Tier from MongoDB " Name="mongodbmenu2" />
+            </MenuItem>
             <MenuItem Header="?"  Name="help" />
         </Menu>
 

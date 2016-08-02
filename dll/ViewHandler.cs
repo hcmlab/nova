@@ -60,6 +60,7 @@ namespace ssi
         private bool keyDown = false;
         private double skelfps;
         private double lasttimepos = 0;
+        private string mongodbip = "127.0.0.1:27017";
 
         private ViewControl view;
         private String annofilepath = "";
@@ -99,6 +100,8 @@ namespace ssi
             // this.view.calculatepraat.Click += calculatepraat_Click;
             this.view.savetiermenu.Click += saveAnnoAsButton_Click;
             this.view.convertocontannoemenu.Click += convertocontanno_Click;
+            this.view.mongodbmenu.Click += mongodb_Store;
+            this.view.mongodbmenu2.Click += mongodb_Load;
             this.view.tiermenu.MouseEnter += tierMenu_Click;
             this.view.help.Click += helpMenu_Click;
 
@@ -173,79 +176,74 @@ namespace ssi
             if (!this.view.annoListControl.editTextBox.IsFocused)
             {
                 if (e.KeyboardDevice.IsKeyDown(Key.Space))
-            {
-                bool is_playing = IsPlaying();
-                if (!is_playing)
                 {
-                    Play();
-                }
-                else { Stop(); }
+                    bool is_playing = IsPlaying();
+                    if (!is_playing)
+                    {
+                        Play();
+                    }
+                    else { Stop(); }
 
-
-               
                     e.Handled = true;
-               
-               
-            }
+                }
 
-            if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
-            {
-                if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false /*&& AnnoTrack.GetSelectedSegment() == null*/)
+                if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    UIElement container = VisualTreeHelper.GetParent(AnnoTrack.GetSelectedSegment()) as UIElement;
-                    Point relativeLocation = AnnoTrack.GetSelectedSegment().TranslatePoint(new Point(0, 0), container);
-
-                    media_list.move(ViewHandler.Time.TimeFromPixel(relativeLocation.X + AnnoTrack.GetSelectedSegment().Width));
-
-                    if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                    if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false /*&& AnnoTrack.GetSelectedSegment() == null*/)
                     {
-                        annoCursor.X = relativeLocation.X + AnnoTrack.GetSelectedSegment().Width;
+                        UIElement container = VisualTreeHelper.GetParent(AnnoTrack.GetSelectedSegment()) as UIElement;
+                        Point relativeLocation = AnnoTrack.GetSelectedSegment().TranslatePoint(new Point(0, 0), container);
+
+                        media_list.move(ViewHandler.Time.TimeFromPixel(relativeLocation.X + AnnoTrack.GetSelectedSegment().Width));
+
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                        {
+                            annoCursor.X = relativeLocation.X + AnnoTrack.GetSelectedSegment().Width;
+                        }
+                        else signalCursor.X = relativeLocation.X + AnnoTrack.GetSelectedSegment().Width;
+
+                        time.CurrentSelectPosition = annoCursor.X;
+                        time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+                        time.CurrentPlayPositionPrecise = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+                        AnnoTrack.GetSelectedSegment().select(true);
+                        keyDown = true;
                     }
-                    else signalCursor.X = relativeLocation.X + AnnoTrack.GetSelectedSegment().Width;
-
-                    time.CurrentSelectPosition = annoCursor.X;
-                    time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-                    time.CurrentPlayPositionPrecise = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-                    AnnoTrack.GetSelectedSegment().select(true);
-                    keyDown = true;
+                    e.Handled = true;
                 }
-                e.Handled = true;
-            }
 
-            if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
-            {
-                if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false /*&& AnnoTrack.GetSelectedSegment() == null*/)
+                if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    UIElement container = VisualTreeHelper.GetParent(AnnoTrack.GetSelectedSegment()) as UIElement;
-                    Point relativeLocation = AnnoTrack.GetSelectedSegment().TranslatePoint(new Point(0, 0), container);
-
-                    media_list.move(ViewHandler.Time.TimeFromPixel(relativeLocation.X));
-
-                    if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                    if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false /*&& AnnoTrack.GetSelectedSegment() == null*/)
                     {
-                        annoCursor.X = relativeLocation.X;
+                        UIElement container = VisualTreeHelper.GetParent(AnnoTrack.GetSelectedSegment()) as UIElement;
+                        Point relativeLocation = AnnoTrack.GetSelectedSegment().TranslatePoint(new Point(0, 0), container);
+
+                        media_list.move(ViewHandler.Time.TimeFromPixel(relativeLocation.X));
+
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                        {
+                            annoCursor.X = relativeLocation.X;
+                        }
+                        else signalCursor.X = relativeLocation.X;
+
+                        time.CurrentSelectPosition = annoCursor.X;
+                        time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+                        time.CurrentPlayPositionPrecise = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+                        AnnoTrack.GetSelectedSegment().select(true);
+                        keyDown = true;
                     }
-                    else signalCursor.X = relativeLocation.X;
-
-                    time.CurrentSelectPosition = annoCursor.X;
-                    time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-                    time.CurrentPlayPositionPrecise = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-                    AnnoTrack.GetSelectedSegment().select(true);
-                    keyDown = true;
+                    e.Handled = true;
                 }
-                e.Handled = true;
-            }
 
-            if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !keyDown)
-            {
-                if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !keyDown)
                 {
-                    AnnoTrack.GetSelectedTrack().ContAnnoMode();
+                    if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
+                    {
+                        AnnoTrack.GetSelectedTrack().ContAnnoMode();
+                    }
+                    keyDown = true;
+                    e.Handled = true;
                 }
-                keyDown = true;
-                e.Handled = true;
-            }
-
             }
         }
 
@@ -253,7 +251,6 @@ namespace ssi
         {
             if (!this.view.annoListControl.editTextBox.IsFocused)
             {
-
                 if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
                     if (AnnoTrack.GetSelectedTrack().isDiscrete) saveAnno();
@@ -447,9 +444,7 @@ namespace ssi
                 {
                     AnnoTrack.OnKeyDownHandler(sender, e);
                 }
-
             }
-           
         }
 
         private void OnTrackControlSizeChanged(object sender, SizeChangedEventArgs e)
@@ -631,8 +626,8 @@ namespace ssi
                     ViewHandler.Time.CurrentPlayPositionPrecise = (ViewHandler.Time.CurrentPlayPositionPrecise + (fps / 1000.0));
                     if (media_list.Medias.Count == 0) signalCursor.X = ViewHandler.Time.PixelFromTime(ViewHandler.Time.CurrentPlayPositionPrecise);
 
-                        //hm additional syncstep..
-                        if (lasttimepos != ViewHandler.Time.CurrentPlayPosition)
+                    //hm additional syncstep..
+                    if (lasttimepos != ViewHandler.Time.CurrentPlayPosition)
                     {
                         lasttimepos = ViewHandler.Time.CurrentPlayPosition;
                         ViewHandler.Time.CurrentPlayPositionPrecise = lasttimepos;
@@ -764,11 +759,8 @@ namespace ssi
             updateTimeRange(maxdur);
         }
 
-        private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon")
+        private void handleAnnotation(AnnoList anno, string filename, double samplerate = 1)
         {
-            //Temp list that contains all annotations from file
-            AnnoList anno = AnnoList.LoadfromFile(filename, samplerate, type);
-
             if (anno.isDiscrete && annofilepath == "") annofilepath = filename;
             double maxdur = 0;
             //Get all tier ids that haven't been added before
@@ -824,6 +816,13 @@ namespace ssi
 
             //Adjust the view
             updateTimeRange(maxdur);
+        }
+
+        private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon")
+        {
+            //Temp list that contains all annotations from file
+            AnnoList anno = AnnoList.LoadfromFile(filename, samplerate, type);
+            handleAnnotation(anno, filename, samplerate = 1);
         }
 
         private void loadElan(string filename)
@@ -2174,6 +2173,99 @@ namespace ssi
         private void closeTier_Click(object sender, RoutedEventArgs e)
         {
             removeTier();
+        }
+
+        private void mongodb_Store(object sender, RoutedEventArgs e)
+        {
+            if (AnnoTrack.GetSelectedTrack() != null)
+            {
+              
+
+                //Todo, use e.g. folder name for default suggestion
+
+                string table = "SessionId";
+
+                if (media_list.Medias.Count > 0)
+                    table = new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Parent.Name + "_" + new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Name;
+                else if (signals.Count > 0)
+                    table = new DirectoryInfo(signals[0].Filepath).Parent.Name;
+     
+
+
+
+
+                LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server, and Database", mongodbip, null, 2, table);
+                inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                inputBox.ShowDialog();
+                inputBox.Close();
+                if (inputBox.DialogResult == true)
+                {
+                    mongodbip = inputBox.Result();
+                    table = inputBox.Result2();
+                }
+
+                try
+                {
+                    DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
+                    db.StoretoDatabase(table, AnnoTrack.GetSelectedTrack().AnnoList);
+                    MessageBox.Show("Track " + AnnoTrack.GetSelectedTrack().TierId + " has been stored in the Database " + table);
+                }
+                catch
+                {
+                    MessageBox.Show("Could not connect to MongoDB Server");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Select  Annotation Track first");
+            }
+        }
+
+        private void mongodb_Load(object sender, RoutedEventArgs e)
+        {
+        
+            LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server", mongodbip, null, 1);
+            inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            inputBox.ShowDialog();
+            inputBox.Close();
+            if (inputBox.DialogResult == true)
+            {
+                mongodbip = inputBox.Result();
+
+                DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);                                                                    
+                AnnoList anno = db.LoadfromDatabase();
+                if (anno != null)
+                {
+                    //Todo.. checking for continuous or discrete labels based on the first 2 samples (could be done nicer)
+                    if (anno[0].Start + anno[0].Duration == anno[1].Start && anno[1].Start + anno[1].Duration == anno[2].Start)
+                    {
+                        anno.isDiscrete = false;
+                        handleAnnotation(anno, "database", anno[0].Duration);
+                    }
+                    else
+                    {
+                        anno.isDiscrete = true;
+                        anno.Filepath = "db";
+                        anno.SampleAnnoPath = "db";
+                        double maxdur = 0;
+
+                        foreach (AnnoListItem ali in anno)
+                        {
+                            if (ali.Stop > maxdur)
+                            {
+                                maxdur = ali.Stop;
+                            }
+                        }
+                        if (anno != null)
+                        {
+                            setAnnoList(anno);
+                            addAnno(anno, anno.isDiscrete, 1);
+                        }
+
+                        updateTimeRange(maxdur);
+                    }
+                }
+            }
         }
 
         private void convertocontanno_Click(object sender, RoutedEventArgs e)
