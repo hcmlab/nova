@@ -2202,7 +2202,7 @@ namespace ssi
                 {
                     mongodbip = inputBox.Result();
                     table = inputBox.Result2();
-                }
+                
 
                 try
                 {
@@ -2218,6 +2218,7 @@ namespace ssi
             else
             {
                 MessageBox.Show("Select  Annotation Track first");
+            }
             }
         }
 
