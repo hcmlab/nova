@@ -1,0 +1,28 @@
+﻿<Window x:Class="ssi.LabelInputBox"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
+    Title="" Height="Auto" Width="350" FocusManager.FocusedElement="{Binding ElementName=ib_labelText}" SizeToContent="Height">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="160*" />
+            <ColumnDefinition Width="47*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.ColumnSpan="1" Grid.Column="0">
+
+            <Label Name="ib_label" Height="27"  Margin="5"></Label>
+            <TextBox x:FieldModifier="public" Margin="5" Name="ib_labelText3" Height="23" Focusable="True" TabIndex="0" Visibility="Hidden" />
+
+            <TextBox x:FieldModifier="public" Margin="5" Name="ib_labelText" Height="23" Focusable="True" TabIndex="0" />
+            <TextBox x:FieldModifier="public" Margin="5" Name="ib_labelText2" Height="23" Focusable="True" TabIndex="0" Visibility="Hidden" />
+
+            <ComboBox Name="ib_suggestions_comboBox" Margin="5,5,10,5"></ComboBox>
+            <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal" Name="tab" Margin="100,5,5,5">
+                <Button Margin="5,5,5,5" Name="ib_cancel" Width="60" Height="23" Click="ib_cancel_Click" IsCancel="True" TabIndex="2">Cancel</Button>
+                <Button Margin="5,5,5,5" Name="ib_ok" Width="60" Height="23" Click="ib_ok_Click" IsDefault="True" TabIndex="1">OK</Button>
+            </StackPanel>
+        </StackPanel>
+        <p:ColorPicker Name="ib_color" SelectedColor="{Binding sColor}"  IsEnabled="true" Height="20" Grid.Column="1" Margin="0,141,31,50" Visibility="Hidden" />
+        <!--<Button x:Name="ib_color" Click="ib_color_Click"  Grid.Column="1" Margin="10,142,15,49" Visibility="Hidden" />-->
+    </Grid>
+</Window>

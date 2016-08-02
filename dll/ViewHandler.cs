@@ -60,6 +60,7 @@ namespace ssi
         private bool keyDown = false;
         private double skelfps;
         private double lasttimepos = 0;
+        private string mongodbip = "127.0.0.1:27017";
 
         private ViewControl view;
         private String annofilepath = "";
@@ -76,7 +77,6 @@ namespace ssi
 
         public ViewHandler(ViewControl view)
         {
-
             this.view = view;
             this.view.Dispatcher.ShutdownStarted += Dispatcher_ShutdownStarted;
 
@@ -100,9 +100,8 @@ namespace ssi
             // this.view.calculatepraat.Click += calculatepraat_Click;
             this.view.savetiermenu.Click += saveAnnoAsButton_Click;
             this.view.convertocontannoemenu.Click += convertocontanno_Click;
-            this.view.mongodbmenu.Click += mongodb_Click;
-            this.view.mongodbmenu2.Click += mongodb_Click2;
-            this.view.mongodbmenu3.Click += mongodb_Click3;
+            this.view.mongodbmenu.Click += mongodb_Store;
+            this.view.mongodbmenu2.Click += mongodb_Load;
             this.view.tiermenu.MouseEnter += tierMenu_Click;
             this.view.help.Click += helpMenu_Click;
 
@@ -760,11 +759,8 @@ namespace ssi
             updateTimeRange(maxdur);
         }
 
-        private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon")
+        private void handleAnnotation(AnnoList anno, string filename, double samplerate = 1)
         {
-            //Temp list that contains all annotations from file
-            AnnoList anno = AnnoList.LoadfromFile(filename, samplerate, type);
-
             if (anno.isDiscrete && annofilepath == "") annofilepath = filename;
             double maxdur = 0;
             //Get all tier ids that haven't been added before
@@ -820,6 +816,13 @@ namespace ssi
 
             //Adjust the view
             updateTimeRange(maxdur);
+        }
+
+        private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon")
+        {
+            //Temp list that contains all annotations from file
+            AnnoList anno = AnnoList.LoadfromFile(filename, samplerate, type);
+            handleAnnotation(anno, filename, samplerate = 1);
         }
 
         private void loadElan(string filename)
@@ -2172,71 +2175,98 @@ namespace ssi
             removeTier();
         }
 
-
-        private void mongodb_Click(object sender, RoutedEventArgs e)
+        private void mongodb_Store(object sender, RoutedEventArgs e)
         {
-            if(AnnoTrack.GetSelectedTrack() != null)
+            if (AnnoTrack.GetSelectedTrack() != null)
             {
+              
 
-            DatabaseHandler db = new DatabaseHandler("Server=127.0.0.1:27017", AnnoTrack.GetSelectedTrack().TierId, AnnoTrack.GetSelectedTrack().AnnoList); //TODO Make a dialogue where the ip and port can be selected
-            db.StoretoDatabase();
-            MessageBox.Show("Track " + AnnoTrack.GetSelectedTrack().TierId + " has been stored in the Database");
+                //Todo, use e.g. folder name for default suggestion
+
+                string table = "SessionId";
+
+                if (media_list.Medias.Count > 0)
+                    table = new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Parent.Name + "_" + new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Name;
+                else if (signals.Count > 0)
+                    table = new DirectoryInfo(signals[0].Filepath).Parent.Name;
+     
+
+
+
+
+                LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server, and Database", mongodbip, null, 2, table);
+                inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                inputBox.ShowDialog();
+                inputBox.Close();
+                if (inputBox.DialogResult == true)
+                {
+                    mongodbip = inputBox.Result();
+                    table = inputBox.Result2();
+                }
+
+                try
+                {
+                    DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
+                    db.StoretoDatabase(table, AnnoTrack.GetSelectedTrack().AnnoList);
+                    MessageBox.Show("Track " + AnnoTrack.GetSelectedTrack().TierId + " has been stored in the Database " + table);
+                }
+                catch
+                {
+                    MessageBox.Show("Could not connect to MongoDB Server");
+                }
             }
-
             else
             {
                 MessageBox.Show("Select  Annotation Track first");
             }
         }
 
-        private void mongodb_Click2(object sender, RoutedEventArgs e)
+        private void mongodb_Load(object sender, RoutedEventArgs e)
         {
-            if (AnnoTrack.GetSelectedTrack() != null)
+        
+            LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server", mongodbip, null, 1);
+            inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            inputBox.ShowDialog();
+            inputBox.Close();
+            if (inputBox.DialogResult == true)
             {
-                DatabaseHandler db = new DatabaseHandler("Server=127.0.0.1:27017", AnnoTrack.GetSelectedTrack().TierId, AnnoTrack.GetSelectedTrack().AnnoList); //TODO Make a dialogue where the ip and port can be selected                                                                 //db.Setup();                                                        // db.Run();
-               AnnoList anno =  db.LoadfromDatabase(AnnoTrack.GetSelectedTrack().TierId); //Define somewhere which database to load
-                anno.Filepath = "db";
-                anno.SampleAnnoPath = "db";
-                double maxdur = 0;
+                mongodbip = inputBox.Result();
 
-                foreach (AnnoListItem ali in anno)
-                {
-                    if (ali.Stop > maxdur)
-                    {
-                        maxdur = ali.Stop;
-                    }
-                }
+                DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);                                                                    
+                AnnoList anno = db.LoadfromDatabase();
                 if (anno != null)
                 {
-                    setAnnoList(anno);
-                    addAnno(anno, anno.isDiscrete, 1);
+                    //Todo.. checking for continuous or discrete labels based on the first 2 samples (could be done nicer)
+                    if (anno[0].Start + anno[0].Duration == anno[1].Start && anno[1].Start + anno[1].Duration == anno[2].Start)
+                    {
+                        anno.isDiscrete = false;
+                        handleAnnotation(anno, "database", anno[0].Duration);
+                    }
+                    else
+                    {
+                        anno.isDiscrete = true;
+                        anno.Filepath = "db";
+                        anno.SampleAnnoPath = "db";
+                        double maxdur = 0;
+
+                        foreach (AnnoListItem ali in anno)
+                        {
+                            if (ali.Stop > maxdur)
+                            {
+                                maxdur = ali.Stop;
+                            }
+                        }
+                        if (anno != null)
+                        {
+                            setAnnoList(anno);
+                            addAnno(anno, anno.isDiscrete, 1);
+                        }
+
+                        updateTimeRange(maxdur);
+                    }
                 }
-
-                updateTimeRange(maxdur);
-            }
-            else
-            {
-                MessageBox.Show("Select  Annotation Track first");
             }
         }
-
-
-        private void mongodb_Click3(object sender, RoutedEventArgs e)
-        {
-            if (AnnoTrack.GetSelectedTrack() != null)
-            {
-                DatabaseHandler db = new DatabaseHandler("Server=127.0.0.1:27017", AnnoTrack.GetSelectedTrack().TierId, AnnoTrack.GetSelectedTrack().AnnoList); //TODO Make a dialogue where the ip and port can be selected                                                              //db.Setup();                                                                     // db.Run();
-                db.CleanTable(AnnoTrack.GetSelectedTrack().TierId);
-            }
-
-            else
-            {
-                MessageBox.Show("Select  Annotation Track first");
-            }
-        }
-
-
-
 
         private void convertocontanno_Click(object sender, RoutedEventArgs e)
         {

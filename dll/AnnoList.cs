@@ -25,7 +25,7 @@ namespace ssi
         private String filepath = null;
         private String sampleannopath = null;
         private double lowborder = 0.0;
-        private double highborder = 0.0;
+        private double highborder = 1.0;
 
         private static bool _isDiscrete = true;
 

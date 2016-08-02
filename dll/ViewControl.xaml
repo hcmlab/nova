@@ -42,9 +42,8 @@
             </MenuItem>
             <MenuItem Header="Database">
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
-                <MenuItem Header="MongoDB Store Tier to Database" Name="mongodbmenu" />
-                <MenuItem Header="MongoDB Load Tier from Database" Name="mongodbmenu2" />
-                <MenuItem Header="MongoDB Clean Test" Name="mongodbmenu3" />
+                <MenuItem Header="Store Tier to MongoDB" Name="mongodbmenu" />
+                <MenuItem Header="Load Tier from MongoDB " Name="mongodbmenu2" />
             </MenuItem>
             <MenuItem Header="?"  Name="help" />
         </Menu>

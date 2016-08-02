@@ -260,3 +260,4 @@ bin/PropertyTools.Wpf.dll
 bin/nova.vshost.exe.manifest
 bin/MediaToolkit.dll
 bin/MongoDB.dll
+mongodd.bat
