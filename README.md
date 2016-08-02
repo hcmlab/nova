@@ -32,7 +32,7 @@ NovA is  Software under development and is provided “as is”. If you run into
 An example SSI Pipeline for recording a wide range of interessting features will be provided in one of the next updates (as it existed for the old version, but updated for Kinect 2, and some more new features 🙂 ).
 
 
-The latest binaries can always be found [here]https://github.com/tobiasbaur/nova/releases) 
+The latest binaries can always be found [here](https://github.com/tobiasbaur/nova/releases) 
 
 
 ##Publications:
