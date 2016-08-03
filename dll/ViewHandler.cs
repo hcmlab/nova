@@ -478,7 +478,7 @@ namespace ssi
                     if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
                     else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
 
-                    configfilepath = ViewTools.SaveFileDialog("project", ".vui", firstmediadir, 4);
+                    configfilepath = ViewTools.SaveFileDialog("project", ".nova", firstmediadir, 4);
                     if (configfilepath != null)
                     {
                         saveConfig(anno_tracks, media_list, signal_tracks, configfilepath);
@@ -496,64 +496,71 @@ namespace ssi
             bool anytrackchanged = false;
             foreach (AnnoTrack track in anno_tracks)
             {
-                if (track.AnnoList.HasChanged && track.isDiscrete) anytrackchanged = true;
+                if (track.AnnoList.HasChanged) anytrackchanged = true;
             }
 
             if (anno_tracks.Count > 0 && anytrackchanged)
             {
-                if (anno_tracks.Count == 1)
-                {
-                    if (annofilepath == "" || annofilepath == null) annofilepath = anno_tracks[0].AnnoList.Filepath;
-                }
+                    string csvfilepath =  "";
 
-                string csvfilepath = annofilepath;
-                if (csvfilepath == null) csvfilepath = "";
-
-                MessageBoxResult mbx = MessageBox.Show("Save annotations to file " + csvfilepath.ToString() + "?", "Question", MessageBoxButton.YesNo);
-                if (mbx == MessageBoxResult.Yes)
-                {
-                    if (csvfilepath == "")
+                    MessageBoxResult mbx = MessageBox.Show("Save annotations to file ?", "Question", MessageBoxButton.YesNo);
+                    if (mbx == MessageBoxResult.Yes)
                     {
-                        //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
-                        string firstmediadir = "";
-                        if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
-                        else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
-
-                        csvfilepath = ViewTools.SaveFileDialog("anno", ".csv", firstmediadir);
-                        if (csvfilepath != null)
+                        MessageBoxResult mbx2 = MessageBox.Show("Store discrete tiers in a single file?", "Question", MessageBoxButton.YesNo);
+                        if (mbx2 == MessageBoxResult.Yes)
                         {
-                            //config will be the project config later, for now its the anno file containing all tiers.
-                            saveCSVAnno(anno_tracks, csvfilepath);
+                                //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
+                                string firstmediadir = "";
+                                if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
+                                else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
+
+                                csvfilepath = ViewTools.SaveFileDialog("anno", ".csv", firstmediadir);
+                               
+                                    //config will be the project config later, for now its the anno file containing all tiers.
+                                    saveCSVAnno(anno_tracks, csvfilepath);
+                                    foreach (AnnoTrack track in anno_tracks)
+                                    {
+                                        if (track.isDiscrete) track.AnnoList.HasChanged = false;
+                                    }
+                                
+                        }
+                        else if (mbx2 == MessageBoxResult.No)
+                        {
+
                             foreach (AnnoTrack track in anno_tracks)
                             {
-                                if (track.isDiscrete) track.AnnoList.HasChanged = false;
+                                if (track.AnnoList.HasChanged && track.isDiscrete)
+                                {
+                                    MessageBoxResult mbr = MessageBox.Show("Save changes on tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
+                                    if (mbr == MessageBoxResult.Yes)
+                                    {
+                                        saveAnno(track.AnnoList, track.AnnoList.Filepath);
+                                        track.AnnoList.HasChanged = false; ;
+                                    }
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        saveCSVAnno(anno_tracks, csvfilepath);
+
+
+                        //Always handle continuous tracks seperatly
                         foreach (AnnoTrack track in anno_tracks)
                         {
-                            if (track.isDiscrete) track.AnnoList.HasChanged = false;
+                            if (track.AnnoList.HasChanged && !track.isDiscrete)
+                            {
+                                MessageBoxResult mbr = MessageBox.Show("Save changes on continous tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
+                                if (mbr == MessageBoxResult.Yes)
+                                {
+                                    saveAnnoContinous(track.AnnoList, track.AnnoList.Filepath);
+                                    if (!track.isDiscrete) track.AnnoList.HasChanged = false; ;
+                                }
+                            }
                         }
-                    }
+
+
+                    
                 }
             }
 
-            //handle continous tracks se
-            foreach (AnnoTrack track in anno_tracks)
-            {
-                if (track.AnnoList.HasChanged && !track.isDiscrete)
-                {
-                    MessageBoxResult mbr = MessageBox.Show("Save changes on continous tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
-                    if (mbr == MessageBoxResult.Yes)
-                    {
-                        saveAnnoContinous(track.AnnoList, track.AnnoList.Filepath);
-                        if (!track.isDiscrete) track.AnnoList.HasChanged = false; ;
-                    }
-                }
-            }
         }
 
         public void clear()
@@ -818,10 +825,10 @@ namespace ssi
             updateTimeRange(maxdur);
         }
 
-        private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon")
+        private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
         {
             //Temp list that contains all annotations from file
-            AnnoList anno = AnnoList.LoadfromFile(filename, samplerate, type);
+            AnnoList anno = AnnoList.LoadfromFile(filename, samplerate, type, filter);
             handleAnnotation(anno, filename, samplerate = 1);
         }
 
@@ -1317,7 +1324,7 @@ namespace ssi
         public void saveConfig(List<AnnoTrack> tracks, MediaList ml, List<ISignalTrack> signal_tracks, string filepath)
         {
             StreamWriter sw = new StreamWriter(filepath, false, System.Text.Encoding.Default);
-            sw.WriteLine("<ViewUIproject version=\"1\">");
+            sw.WriteLine("<novaproject version=\"1\">");
 
             sw.WriteLine("\t<medias>");
             if (ml != null)
@@ -1349,11 +1356,11 @@ namespace ssi
                     if (path == "")
                     {
                         path = t.AnnoList.Filepath;
-                        sw.WriteLine("\t\t<discrete filepath=\"" + t.AnnoList.Filepath + "\">");
+                        sw.WriteLine("\t\t<discrete>");
                         nodisretefound = false;
                     }
 
-                    sw.WriteLine("\t\t\t<tier bg=\"" + t.BackgroundColor + "\" name=\"" + t.AnnoList.Name + "\">");
+                    sw.WriteLine("\t\t\t<tier bg=\"" + t.BackgroundColor  +"\" filepath =\"" + t.AnnoList.Filepath  + "\" name=\"" + t.AnnoList.Name  + "\">");
 
                     HashSet<LabelColorPair> h = new HashSet<LabelColorPair>();
                     foreach (AnnoListItem item in t.AnnoList)
@@ -1390,14 +1397,14 @@ namespace ssi
             {
                 if (!t.isDiscrete)
                 {
-                    sw.WriteLine("\t\t\t<tier bg=\"" + t.BackgroundColor + "\" filepath=\"" + t.AnnoList.Filepath + "\">" + t.AnnoList.Name + "</tier>");
+                    sw.WriteLine("\t\t\t<tier bg=\"" + t.BackgroundColor + "\" filepath=\"" + t.AnnoList.Filepath + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
                 }
             }
             sw.WriteLine("\t\t</continuous>");
 
             sw.WriteLine("\t</tiers>");
 
-            sw.WriteLine("</ViewUIproject>");
+            sw.WriteLine("</novaproject>");
             sw.Close();
         }
 
@@ -1434,23 +1441,28 @@ namespace ssi
 
             //
 
-            foreach (XmlNode child in (doc.SelectNodes("//discrete")))
-            {
-                if (child.Attributes.Count > 0)
-                {
-                    if (child.Attributes[0].InnerText.Contains("csv"))
-                    {
-                        loadCSVAnnotation(child.Attributes[0].InnerText);
-                    }
-                    else if (child.Attributes[0].InnerText.Contains("anno"))
-                    {
-                        loadAnno(child.Attributes[0].InnerText);
-                    }
-                }
-            }
+            //foreach (XmlNode child in (doc.SelectNodes("//discrete")))
+            //{
+               
+            //}
 
             foreach (XmlNode child in (doc.SelectNodes("//tier")))
             {
+
+                if (child.Attributes.Count > 0)
+                {
+                    if (child.Attributes[1].InnerText.Contains("csv"))
+                    {
+                        loadCSVAnnotation(child.Attributes[1].InnerText,1,"semicolon", child.Attributes[2].InnerText);
+                       // loadCSVAnnotation(child.Attributes[1].InnerText);
+                    }
+                    else if (child.Attributes[1].InnerText.Contains("anno"))
+                    {
+                        loadAnno(child.Attributes[1].InnerText);
+                    }
+                }
+
+
                 HashSet<LabelColorPair> h = new HashSet<LabelColorPair>();
                 foreach (XmlNode grandchild in child.ChildNodes)
                 {
@@ -2179,8 +2191,6 @@ namespace ssi
         {
             if (AnnoTrack.GetSelectedTrack() != null)
             {
-              
-
                 //Todo, use e.g. folder name for default suggestion
 
                 string table = "SessionId";
@@ -2189,10 +2199,6 @@ namespace ssi
                     table = new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Parent.Name + "_" + new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Name;
                 else if (signals.Count > 0)
                     table = new DirectoryInfo(signals[0].Filepath).Parent.Name;
-     
-
-
-
 
                 LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server, and Database", mongodbip, null, 2, table);
                 inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -2202,29 +2208,27 @@ namespace ssi
                 {
                     mongodbip = inputBox.Result();
                     table = inputBox.Result2();
-                
 
-                try
-                {
-                    DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
-                    db.StoretoDatabase(table, AnnoTrack.GetSelectedTrack().AnnoList);
-                    MessageBox.Show("Track " + AnnoTrack.GetSelectedTrack().TierId + " has been stored in the Database " + table);
+                    try
+                    {
+                        DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
+                        db.StoretoDatabase(table, AnnoTrack.GetSelectedTrack().AnnoList);
+                        MessageBox.Show("Track " + AnnoTrack.GetSelectedTrack().TierId + " has been stored in the Database " + table);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Could not connect to MongoDB Server");
+                    }
                 }
-                catch
+                else
                 {
-                    MessageBox.Show("Could not connect to MongoDB Server");
+                    MessageBox.Show("Select  Annotation Track first");
                 }
-            }
-            else
-            {
-                MessageBox.Show("Select  Annotation Track first");
-            }
             }
         }
 
         private void mongodb_Load(object sender, RoutedEventArgs e)
         {
-        
             LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server", mongodbip, null, 1);
             inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             inputBox.ShowDialog();
@@ -2233,7 +2237,7 @@ namespace ssi
             {
                 mongodbip = inputBox.Result();
 
-                DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);                                                                    
+                DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
                 AnnoList anno = db.LoadfromDatabase();
                 if (anno != null)
                 {

@@ -180,7 +180,7 @@ namespace ssi
             return list;
         }
 
-        public static AnnoList LoadfromFile(String filepath, double samplerate = 1, string type = "legacy")
+        public static AnnoList LoadfromFile(String filepath, double samplerate = 1, string type = "legacy", string filter = null)
         {
             AnnoList list = new AnnoList(filepath);
             list.Lowborder = 0.0;
@@ -218,6 +218,8 @@ namespace ssi
                         }
 
                         AnnoListItem e = new AnnoListItem(start, duration, label, meta, tier);
+
+                        if (filter == null || tier == filter)
                         list.Add(e);
                     }
                     else if (type == "continuous")
@@ -251,6 +253,7 @@ namespace ssi
                         else
                         {
                             AnnoListItem e = new AnnoListItem(start, samplerate, label, "", tier);
+                            if (filter == null || tier == filter)
                             list.Add(e);
                         }
                     }
@@ -265,7 +268,7 @@ namespace ssi
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         double duration = Convert.ToDouble(data[1], CultureInfo.InvariantCulture) - Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         string label = "";
-                        string track = "";
+                        string tier = "";
                         if (data.Length > 2)
                         {
                             label = data[2];
@@ -273,15 +276,16 @@ namespace ssi
 
                         if (data.Length > 3)
                         {
-                            track = data[3];
+                            tier = data[3];
                         }
 
                         for (int i = 4; i < data.Length; i++)
                         {
                             label += " " + data[i];
                         }
-                        AnnoListItem e = new AnnoListItem(start, duration, label, "", track);
-                        list.Add(e);
+                        AnnoListItem e = new AnnoListItem(start, duration, label, "", tier);
+                        if (filter == null || tier == filter)
+                            list.Add(e);
                     }
                 }
                 sr.Close(); ;

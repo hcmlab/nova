@@ -33,7 +33,9 @@ NovA is  Software under development and is provided “as is”. If you run into
 
 An example SSI Pipeline for recording a wide range of interessting features will be provided in one of the next updates (as it existed for the old version, but updated for Kinect 2, and some more new features 🙂 ).
 
+<strong>I would like to contribute to the project</strong>
 
+Please feel free to fork or create an issue
 
 
 

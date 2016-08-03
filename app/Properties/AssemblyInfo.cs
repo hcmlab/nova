@@ -5,11 +5,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("app")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("NovA")]
+[assembly: AssemblyDescription("Nonverbal Open Variable Annotator")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Universität Augsburg")]
-[assembly: AssemblyProduct("app")]
+[assembly: AssemblyProduct("NovA")]
 [assembly: AssemblyCopyright("Copyright © Universität Augsburg 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
