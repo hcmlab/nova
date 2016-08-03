@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace ssi
 {
@@ -12,8 +8,8 @@ namespace ssi
     /// </summary>
     public partial class DataBaseResultsWindow : Window
     {
+        private bool shoulddelete = false;
 
-        bool shoulddelete = false;
         public DataBaseResultsWindow(List<string> sessions)
         {
             InitializeComponent();
@@ -31,19 +27,16 @@ namespace ssi
             this.Close();
         }
 
-
         public string Result()
         {
-            if(DataBaseResultsBox.SelectedItem != null)
-            return DataBaseResultsBox.SelectedItem.ToString();
-
+            if (DataBaseResultsBox.SelectedItem != null)
+                return DataBaseResultsBox.SelectedItem.ToString();
             else return null;
         }
 
         public bool ShouldDelete()
         {
             return shoulddelete;
-
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
