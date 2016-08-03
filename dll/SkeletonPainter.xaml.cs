@@ -189,21 +189,24 @@ namespace ssi
                     //points[i].X = (int) (signal.data[(index * dim) + i * jointvalues + 0] - _min_value_x[0] / (_max_value_x[0] - _min_value_x[0]) * width + 0.5f) + width/2;
                     //points[i].Y = (int) (( height - signal.data[(index * dim) + i * jointvalues + 1] - _min_value_y[0]) / (_max_value_y[0] - _min_value_y[0]) * height + 0.5f) - height/2;
 
-                    if (signal.meta_type == "ssi")
+                    if (index *dim  < signal.data.Length)
+                    {
+                        if (signal.meta_type == "ssi")
 
-                    {
-                        points[i].X = (int)(signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 0] * 75 / width + width / 2);
-                        points[i].Y = (int)(height - signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 1] * 75 / height - height / 2);
-                    }
-                    else if (signal.meta_type == "kinect1")
-                    {
-                        points[i].X = (int)(signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 0] * 75000 / width + width / 2);
-                        points[i].Y = (int)(height - signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 1] * 75000 / height - height / 2);
-                    }
-                    else if (signal.meta_type == "kinect2")
-                    {
-                        points[i].X = (int)(signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 0] * 75000 / width + width / 2);
-                        points[i].Y = (int)(height - signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 1] * 75000 / height - height / 2);
+                        {
+                            points[i].X = (int)(signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 0] * 75 / width + width / 2);
+                            points[i].Y = (int)(height - signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 1] * 75 / height - height / 2);
+                        }
+                        else if (signal.meta_type == "kinect1")
+                        {
+                            points[i].X = (int)(signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 0] * 75000 / width + width / 2);
+                            points[i].Y = (int)(height - signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 1] * 75000 / height - height / 2);
+                        }
+                        else if (signal.meta_type == "kinect2")
+                        {
+                            points[i].X = (int)(signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 0] * 75000 / width + width / 2);
+                            points[i].Y = (int)(height - signal.data[s * dim / numskeletons + (index * dim) + i * jointvalues + 1] * 75000 / height - height / 2);
+                        }
                     }
                 }
 

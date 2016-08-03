@@ -29,7 +29,9 @@ namespace ssi
             EVENTS,
             EAF,
             ANVIL,
-            VUI
+            PROJECT,
+            IGNORE
+           
         }
 
         private static readonly string[] SSI_FILE_TYPE_NAME = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui" };
@@ -1321,6 +1323,8 @@ namespace ssi
             }
         }
 
+
+
         public void saveConfig(List<AnnoTrack> tracks, MediaList ml, List<ISignalTrack> signal_tracks, string filepath)
         {
             StreamWriter sw = new StreamWriter(filepath, false, System.Text.Encoding.Default);
@@ -1852,7 +1856,13 @@ namespace ssi
 
                     case "nova":
                     case "vui":
-                        ftype = ssi_file_type.VUI;
+                        ftype = ssi_file_type.PROJECT;
+                        break;
+
+                    case "stream~":
+                    case "zip":
+                    case "rar":
+                        ftype = ssi_file_type.IGNORE;
                         break;
                 }
             }
@@ -1946,9 +1956,12 @@ namespace ssi
                     loaded = true;
                     break;
 
-                case ssi_file_type.VUI:
+                case ssi_file_type.PROJECT:
                     loadConfig(filename);
                     loaded = true;
+                    break;
+
+                case ssi_file_type.IGNORE:
                     break;
 
                 default:

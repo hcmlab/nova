@@ -10,6 +10,7 @@ namespace ssi
         private String meta;
         private String tier;
         private String bg;
+        private double confidence;
 
         public double Start
         {
@@ -55,6 +56,16 @@ namespace ssi
             }
         }
 
+        public double Confidence
+        {
+            get { return confidence; }
+            set
+            {
+                confidence = value;
+                OnPropertyChanged("Confidence");
+            }
+        }
+
         public String Tier
         {
             get { return tier; }
@@ -85,7 +96,7 @@ namespace ssi
             }
         }
 
-        public AnnoListItem(double _start, double _duration, String _label, String _meta = "", String _tier = "", String _bg = "#000000")
+        public AnnoListItem(double _start, double _duration, String _label, String _meta = "", String _tier = "", String _bg = "#000000", double _confidence = 1.0)
         {
             start = _start;
             duration = Math.Max(0, _duration);
@@ -93,6 +104,7 @@ namespace ssi
             meta = _meta;
             tier = _tier;
             bg = _bg;
+            confidence = _confidence;
         }
     }
 }
