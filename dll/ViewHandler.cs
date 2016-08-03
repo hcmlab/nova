@@ -2179,8 +2179,6 @@ namespace ssi
         {
             if (AnnoTrack.GetSelectedTrack() != null)
             {
-              
-
                 //Todo, use e.g. folder name for default suggestion
 
                 string table = "SessionId";
@@ -2189,10 +2187,6 @@ namespace ssi
                     table = new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Parent.Name + "_" + new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Name;
                 else if (signals.Count > 0)
                     table = new DirectoryInfo(signals[0].Filepath).Parent.Name;
-     
-
-
-
 
                 LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server, and Database", mongodbip, null, 2, table);
                 inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -2202,29 +2196,27 @@ namespace ssi
                 {
                     mongodbip = inputBox.Result();
                     table = inputBox.Result2();
-                
 
-                try
-                {
-                    DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
-                    db.StoretoDatabase(table, AnnoTrack.GetSelectedTrack().AnnoList);
-                    MessageBox.Show("Track " + AnnoTrack.GetSelectedTrack().TierId + " has been stored in the Database " + table);
+                    try
+                    {
+                        DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
+                        db.StoretoDatabase(table, AnnoTrack.GetSelectedTrack().AnnoList);
+                        MessageBox.Show("Track " + AnnoTrack.GetSelectedTrack().TierId + " has been stored in the Database " + table);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Could not connect to MongoDB Server");
+                    }
                 }
-                catch
+                else
                 {
-                    MessageBox.Show("Could not connect to MongoDB Server");
+                    MessageBox.Show("Select  Annotation Track first");
                 }
-            }
-            else
-            {
-                MessageBox.Show("Select  Annotation Track first");
-            }
             }
         }
 
         private void mongodb_Load(object sender, RoutedEventArgs e)
         {
-        
             LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server", mongodbip, null, 1);
             inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             inputBox.ShowDialog();
@@ -2233,7 +2225,7 @@ namespace ssi
             {
                 mongodbip = inputBox.Result();
 
-                DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);                                                                    
+                DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
                 AnnoList anno = db.LoadfromDatabase();
                 if (anno != null)
                 {
