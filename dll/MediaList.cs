@@ -50,9 +50,10 @@ namespace ssi
             medias.Clear();
         }
 
-        public IMedia addMedia(string filename, double pos_in_seconds)
+        public IMedia addMedia(string filename, double pos_in_seconds, string url = null)
         {
             MediaKit media = new MediaKit(filename, pos_in_seconds);
+            media.Url(url);
             // Media media = new Media(filename, pos_in_seconds);
             this.medias.Add(media);
             return media;

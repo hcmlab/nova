@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:view="clr-namespace:ssi;assembly=ssiview"
     xmlns:local="clr-namespace:ssi"
-    Title="Novel Open Variable Annotator v0.9.8.9.6 (http://openssi.net)" WindowState="Maximized" Height="Auto" Width="Auto" AllowDrop="True" AllowsTransparency="False" Icon="ui.ico">
+    Title="Novel Open Variable Annotator v0.9.9.0.2 (http://openssi.net)" WindowState="Maximized" Height="Auto" Width="Auto" AllowDrop="True" AllowsTransparency="False" Icon="ui.ico">
 
     <Grid>
 

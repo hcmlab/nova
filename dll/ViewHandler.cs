@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
+using Tamir.SharpSsh;
 
 namespace ssi
 {
@@ -31,7 +36,6 @@ namespace ssi
             ANVIL,
             PROJECT,
             IGNORE
-           
         }
 
         private static readonly string[] SSI_FILE_TYPE_NAME = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui" };
@@ -62,10 +66,15 @@ namespace ssi
         private bool keyDown = false;
         private double skelfps;
         private double lasttimepos = 0;
-        private string mongodbip = "127.0.0.1:27017";
-
+        private string lastdlfile = null;
+        private bool loadedfromdb = false;
         private ViewControl view;
         private String annofilepath = "";
+        private bool credentialsentered = false;
+        private int numberofparalleldownloads = 0;
+        private List<long> downloadsreceived = new List<long>();
+        private List<long> downloadstotal = new List<long>();
+        private List<string> filestoload = new List<string>();
 
         public MenuItem LoadButton
         {
@@ -99,11 +108,17 @@ namespace ssi
             this.view.exportSamples.Click += exportSamplesButton_Click;
             this.view.convertodiscretemenu.Click += converttodiscrete_Click;
             this.view.convertosignalemenu.Click += convertosignal_Click;
+            this.view.exporttracktoxps.Click += exporttracktoxps_Click;
+            this.view.exporttracktopng.Click += exporttracktopng_Click;
             // this.view.calculatepraat.Click += calculatepraat_Click;
             this.view.savetiermenu.Click += saveAnnoAsButton_Click;
             this.view.convertocontannoemenu.Click += convertocontanno_Click;
             this.view.mongodbmenu.Click += mongodb_Store;
             this.view.mongodbmenu2.Click += mongodb_Load;
+            this.view.mongodbmenushow.Click += mongodb_Show;
+            this.view.addmongodb.Click += mongodb_Add;
+            this.view.mongodbchangefolder.Click += mongodb_ChangeFolder;
+
             this.view.tiermenu.MouseEnter += tierMenu_Click;
             this.view.help.Click += helpMenu_Click;
 
@@ -128,6 +143,7 @@ namespace ssi
             time.SelectionInPixel = this.view.trackControl.ActualWidth;
             this.view.trackControl.timeTrackControl.rangeSlider.ViewTime = time;
 
+            
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += this.view.trackControl.timeTrackControl.timeTrack.timeRangeChanged;
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += this.view.trackControl.timeTrackControl.timeTrackSelection.timeRangeChanged;
             this.view.trackControl.timeTrackControl.rangeSlider.Update();
@@ -318,7 +334,7 @@ namespace ssi
                     {
                         ShowLabelBox();
                     }
-                    AnnoTrack.GetSelectedSegment().select(true);
+                   if(AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(true);
                     keyDown = true;
                     // e.Handled = true;
                 }
@@ -503,66 +519,59 @@ namespace ssi
 
             if (anno_tracks.Count > 0 && anytrackchanged)
             {
-                    string csvfilepath =  "";
+                string csvfilepath = "";
 
-                    MessageBoxResult mbx = MessageBox.Show("Save annotations to file ?", "Question", MessageBoxButton.YesNo);
-                    if (mbx == MessageBoxResult.Yes)
+                MessageBoxResult mbx = MessageBox.Show("Save annotations to file ?", "Question", MessageBoxButton.YesNo);
+                if (mbx == MessageBoxResult.Yes)
+                {
+                    MessageBoxResult mbx2 = MessageBox.Show("Store discrete tiers in a single file?", "Question", MessageBoxButton.YesNo);
+                    if (mbx2 == MessageBoxResult.Yes)
                     {
-                        MessageBoxResult mbx2 = MessageBox.Show("Store discrete tiers in a single file?", "Question", MessageBoxButton.YesNo);
-                        if (mbx2 == MessageBoxResult.Yes)
-                        {
-                                //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
-                                string firstmediadir = "";
-                                if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
-                                else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
+                        //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
+                        string firstmediadir = "";
+                        if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
+                        else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
 
-                                csvfilepath = ViewTools.SaveFileDialog("anno", ".csv", firstmediadir);
-                               
-                                    //config will be the project config later, for now its the anno file containing all tiers.
-                                    saveCSVAnno(anno_tracks, csvfilepath);
-                                    foreach (AnnoTrack track in anno_tracks)
-                                    {
-                                        if (track.isDiscrete) track.AnnoList.HasChanged = false;
-                                    }
-                                
-                        }
-                        else if (mbx2 == MessageBoxResult.No)
-                        {
+                        csvfilepath = ViewTools.SaveFileDialog("anno", ".csv", firstmediadir);
 
-                            foreach (AnnoTrack track in anno_tracks)
-                            {
-                                if (track.AnnoList.HasChanged && track.isDiscrete)
-                                {
-                                    MessageBoxResult mbr = MessageBox.Show("Save changes on tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
-                                    if (mbr == MessageBoxResult.Yes)
-                                    {
-                                        saveAnno(track.AnnoList, track.AnnoList.Filepath);
-                                        track.AnnoList.HasChanged = false; ;
-                                    }
-                                }
-                            }
-                        }
-
-
-                        //Always handle continuous tracks seperatly
+                        //config will be the project config later, for now its the anno file containing all tiers.
+                        saveCSVAnno(anno_tracks, csvfilepath);
                         foreach (AnnoTrack track in anno_tracks)
                         {
-                            if (track.AnnoList.HasChanged && !track.isDiscrete)
+                            if (track.isDiscrete) track.AnnoList.HasChanged = false;
+                        }
+                    }
+                    else if (mbx2 == MessageBoxResult.No)
+                    {
+                        foreach (AnnoTrack track in anno_tracks)
+                        {
+                            if (track.AnnoList.HasChanged && track.isDiscrete)
                             {
-                                MessageBoxResult mbr = MessageBox.Show("Save changes on continous tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
+                                MessageBoxResult mbr = MessageBox.Show("Save changes on tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
                                 if (mbr == MessageBoxResult.Yes)
                                 {
-                                    saveAnnoContinous(track.AnnoList, track.AnnoList.Filepath);
-                                    if (!track.isDiscrete) track.AnnoList.HasChanged = false; ;
+                                    saveAnno(track.AnnoList, track.AnnoList.Filepath);
+                                    track.AnnoList.HasChanged = false; ;
                                 }
                             }
                         }
+                    }
 
-
-                    
+                    //Always handle continuous tracks seperatly
+                    foreach (AnnoTrack track in anno_tracks)
+                    {
+                        if (track.AnnoList.HasChanged && !track.isDiscrete)
+                        {
+                            MessageBoxResult mbr = MessageBox.Show("Save changes on continous tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
+                            if (mbr == MessageBoxResult.Yes)
+                            {
+                                saveAnnoContinous(track.AnnoList, track.AnnoList.Filepath);
+                                if (!track.isDiscrete) track.AnnoList.HasChanged = false; ;
+                            }
+                        }
+                    }
                 }
             }
-
         }
 
         public void clear()
@@ -633,13 +642,29 @@ namespace ssi
                 _timerp.Tick += new EventHandler(delegate (object sender, EventArgs a)
                 {
                     ViewHandler.Time.CurrentPlayPositionPrecise = (ViewHandler.Time.CurrentPlayPositionPrecise + (fps / 1000.0));
-                    if (media_list.Medias.Count == 0) signalCursor.X = ViewHandler.Time.PixelFromTime(ViewHandler.Time.CurrentPlayPositionPrecise);
+                    if (media_list.Medias.Count == 0)
 
-                    //hm additional syncstep..
-                    if (lasttimepos != ViewHandler.Time.CurrentPlayPosition)
+                    {
+                        signalCursor.X = ViewHandler.Time.PixelFromTime(ViewHandler.Time.CurrentPlayPositionPrecise);
+                        if (Time.CurrentPlayPositionPrecise >= Time.SelectionStop && this.view.navigator.followplaybox.IsChecked == true)
+                        {
+                            this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
+                            this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, 1.0f);
+                        }
+
+                        else if  (Time.CurrentPlayPositionPrecise <= Time.SelectionStart && this.view.navigator.followplaybox.IsChecked == true)
+                            {
+                            this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
+                            this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(false, 1.0f);
+                            }
+                        else if (this.view.navigator.followplaybox.IsChecked == false) this.view.trackControl.timeTrackControl.rangeSlider.followmedia = false;
+
+                        //hm additional syncstep..
+                        if (lasttimepos != ViewHandler.Time.CurrentPlayPosition)
                     {
                         lasttimepos = ViewHandler.Time.CurrentPlayPosition;
                         ViewHandler.Time.CurrentPlayPositionPrecise = lasttimepos;
+                        }
                     }
 
                     if (!innomediaplaymode) _timerp.Stop();
@@ -658,19 +683,34 @@ namespace ssi
 
             signalCursor.X = pos;
 
-            if (ViewHandler.Time.TimeFromPixel(signalCursor.X) > ViewHandler.time.TotalDuration - 0.5)
-            {
-                Stop();
-            }
-            Time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-            // Time.CurrentPlayPosition = e.pos;
+           
+          //  Time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
+             Time.CurrentPlayPosition = e.pos;
 
-            if (Time.CurrentPlayPosition > Time.SelectionStop && this.view.navigator.followplaybox.IsChecked == true)
+            if (Time.CurrentPlayPosition >= Time.SelectionStop  && this.view.navigator.followplaybox.IsChecked == true)
+            {
+                this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
                 this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, 1.0f);
+              
+            }
+                
+
+            else if (Time.CurrentPlayPosition <= Time.SelectionStart && this.view.navigator.followplaybox.IsChecked == true)
+            {
+                this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
+                this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(false, 1.0f);
+            }
+
+            else if (this.view.navigator.followplaybox.IsChecked == false) this.view.trackControl.timeTrackControl.rangeSlider.followmedia = false;
 
             double time = Time.TimeFromPixel(pos);
             this.view.trackControl.signalPositionLabel.Text = ViewTools.FormatSeconds(time);
             this.view.trackControl.annoTrackControl.currenttime = Time.TimeFromPixel(pos);
+
+            if (e.pos > ViewHandler.time.TotalDuration - 0.5)
+            {
+                Stop();
+            }
         }
 
         private void annoDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -680,7 +720,8 @@ namespace ssi
             if (grid.SelectedIndex >= 0 && grid.SelectedIndex < grid.Items.Count)
             {
                 AnnoListItem item = current_anno[grid.SelectedIndex];
-                //moveCursorTo (item.Start);
+                moveCursorTo (item.Start);
+               
             }
         }
 
@@ -741,6 +782,7 @@ namespace ssi
                 AnnoTrack.GetSelectedTrack().ContiniousBrush = background;
                 AnnoTrack.GetSelectedTrack().Background = background;
             }
+            track.timeRangeChanged(ViewHandler.Time);
             track.timeRangeChanged(ViewHandler.Time);
         }
 
@@ -986,10 +1028,10 @@ namespace ssi
             }
         }
 
-        private void loadMedia(string filename, bool is_video)
+        private void loadMedia(string filename, bool is_video, string url = null)
         {
             double pos = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-            IMedia media = media_list.addMedia(filename, pos);
+            IMedia media = media_list.addMedia(filename, pos, url);
             this.view.videoControl.addMedia(media, is_video);
             this.view.navigator.playButton.IsEnabled = true;
             innomediaplaymode = false;
@@ -1048,8 +1090,8 @@ namespace ssi
 
         private void playButton_Click(object sender, RoutedEventArgs e)
         {
-            //if(media_list.Medias.Count == 0)
-            //{
+            if(media_list.Medias.Count == 0)
+            {
             if ((string)this.view.navigator.playButton.Content == "II")
             {
                 innomediaplaymode = false;
@@ -1063,7 +1105,7 @@ namespace ssi
                 this.view.navigator.playButton.Content = "II";
             }
 
-            //   }
+               }
 
             infastbackward = false;
             infastforward = false;
@@ -1323,8 +1365,6 @@ namespace ssi
             }
         }
 
-
-
         public void saveConfig(List<AnnoTrack> tracks, MediaList ml, List<ISignalTrack> signal_tracks, string filepath)
         {
             StreamWriter sw = new StreamWriter(filepath, false, System.Text.Encoding.Default);
@@ -1364,7 +1404,7 @@ namespace ssi
                         nodisretefound = false;
                     }
 
-                    sw.WriteLine("\t\t\t<tier bg=\"" + t.BackgroundColor  +"\" filepath =\"" + t.AnnoList.Filepath  + "\" name=\"" + t.AnnoList.Name  + "\">");
+                    sw.WriteLine("\t\t\t<tier bg=\"" + t.BackgroundColor + "\" filepath =\"" + t.AnnoList.Filepath + "\" name=\"" + t.AnnoList.Name + "\">");
 
                     HashSet<LabelColorPair> h = new HashSet<LabelColorPair>();
                     foreach (AnnoListItem item in t.AnnoList)
@@ -1447,25 +1487,22 @@ namespace ssi
 
             //foreach (XmlNode child in (doc.SelectNodes("//discrete")))
             //{
-               
             //}
 
             foreach (XmlNode child in (doc.SelectNodes("//tier")))
             {
-
                 if (child.Attributes.Count > 0)
                 {
                     if (child.Attributes[1].InnerText.Contains("csv"))
                     {
-                        loadCSVAnnotation(child.Attributes[1].InnerText,1,"semicolon", child.Attributes[2].InnerText);
-                       // loadCSVAnnotation(child.Attributes[1].InnerText);
+                        loadCSVAnnotation(child.Attributes[1].InnerText, 1, "semicolon", child.Attributes[2].InnerText);
+                        // loadCSVAnnotation(child.Attributes[1].InnerText);
                     }
                     else if (child.Attributes[1].InnerText.Contains("anno"))
                     {
                         loadAnno(child.Attributes[1].InnerText);
                     }
                 }
-
 
                 HashSet<LabelColorPair> h = new HashSet<LabelColorPair>();
                 foreach (XmlNode grandchild in child.ChildNodes)
@@ -1623,7 +1660,8 @@ namespace ssi
                         }
                     }
 
-                    LabelInputBox inputBox = new LabelInputBox("Input", "Enter a new label name", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true);
+                    LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true);
+                    inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                     inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     inputBox.ShowDialog();
                     inputBox.Close();
@@ -1631,6 +1669,7 @@ namespace ssi
                     {
                         rename(inputBox.Result());
                         AnnoTrack.GetSelectedSegment().Item.Bg = inputBox.Color();
+                        AnnoTrack.GetSelectedSegment().Item.Confidence = inputBox.ResultSlider();
 
                         AnnoTrackStatic.used_labels.Clear();
                         foreach (AnnoListItem a in AnnoTrack.GetSelectedTrack().AnnoList)
@@ -1724,12 +1763,14 @@ namespace ssi
                                 }
                             }
 
-                            LabelInputBox inputBox = new LabelInputBox("Input", "Enter a new label name", "Label", AnnoTrackStatic.used_labels, 1, "", "", true);
+                            LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", "Label", AnnoTrackStatic.used_labels, 1, "", "", true);
+                            inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                             inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                             inputBox.ShowDialog();
                             inputBox.Close();
                             if (inputBox.DialogResult == true && AnnoTrack.GetSelectedSegment() != null)
                             {
+                                AnnoTrack.GetSelectedSegment().Item.Confidence = inputBox.ResultSlider();
                                 AnnoTrack.GetSelectedSegment().Item.Label = inputBox.Result();
                                 AnnoTrack.GetSelectedSegment().Item.Bg = inputBox.Color();
 
@@ -1775,8 +1816,9 @@ namespace ssi
             }
         }
 
-        public void LoadFiles(string[] filenames)
+        public void LoadFiles(string[] filenames, string[] url = null)
         {
+            int i = 0;
             foreach (string filename in filenames)
             {
                 FileAttributes attr = File.GetAttributes(filename);
@@ -1787,16 +1829,31 @@ namespace ssi
                 }
                 else
                 {
-                    if (!loadFromFile(filename))
+                    if (url != null)
                     {
-                        //ViewTools.ShowErrorMessage("could not load " + filenames[i]);
+                        loadFromFile(filename, url[i]);
+                        i++;
                     }
+                    else
+                    {
+                        loadFromFile(filename);
+                    }
+
+                    //if (!loadFromFile(filename, url[0]))
+                    //{
+                    //    //ViewTools.ShowErrorMessage("could not load " + filenames[i]);
+                    //}
                 }
             }
         }
 
-        public bool loadFromFile(string filename)
+        public bool loadFromFile(string filename, string url = null)
         {
+            Action EmptyDelegate = delegate () { };
+            this.view.ShadowBox.Visibility = Visibility.Visible;
+            view.UpdateLayout();
+            view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
             bool loaded = false;
 
             ssi_file_type ftype = ssi_file_type.UNKOWN;
@@ -1814,6 +1871,7 @@ namespace ssi
                     case "MOV":
                     case "m4a":
                     case "mkv":
+                    case "divx":
                     case "mpg":
                     case "JPG":
                     case "JPEG":
@@ -1839,6 +1897,7 @@ namespace ssi
                         break;
 
                     case "stream":
+                    case "stream~":
                         ftype = ssi_file_type.STREAM;
                         break;
 
@@ -1859,7 +1918,6 @@ namespace ssi
                         ftype = ssi_file_type.PROJECT;
                         break;
 
-                    case "stream~":
                     case "zip":
                     case "rar":
                         ftype = ssi_file_type.IGNORE;
@@ -1870,7 +1928,7 @@ namespace ssi
             switch (ftype)
             {
                 case ssi_file_type.VIDEO:
-                    loadMedia(filename, true);
+                    loadMedia(filename, true, url);
                     loaded = true;
                     break;
 
@@ -1969,7 +2027,7 @@ namespace ssi
 
                     break;
             }
-
+            this.view.ShadowBox.Visibility = Visibility.Collapsed;
             return loaded;
         }
 
@@ -2004,6 +2062,13 @@ namespace ssi
                     this.view.trackControl.annoNameLabel.Content = "#" + inputBox.Result();
                     AnnoTrack.GetSelectedTrack().TierId = inputBox.Result();
                     AnnoTrack.GetSelectedTrack().AnnoList.Name = AnnoTrack.GetSelectedTrack().TierId;
+
+                    foreach (AnnoListItem ali in AnnoTrack.GetSelectedTrack().AnnoList)
+
+                    {
+                        ali.Tier = AnnoTrack.GetSelectedTrack().TierId;
+                    }
+
                     if (AnnoTrack.GetSelectedTrack().isDiscrete)
                     {
                         AnnoTrack.GetSelectedTrack().BackgroundColor = (SolidColorBrush)(new BrushConverter().ConvertFrom(inputBox.Color()));
@@ -2200,482 +2265,843 @@ namespace ssi
             removeTier();
         }
 
+        private string DownloadFileSFTP(string ftphost, string folder, string db, string sessionid, string fileName, string login, string password)
+        {
+            ;
+            string localfilepath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\";
+            lastdlfile = fileName;
+
+            string ftpfilepath = folder + "/" + fileName;
+            if (!File.Exists(localfilepath + fileName))
+            {
+                try
+                {
+                    Tamir.SharpSsh.Sftp sftp = new Tamir.SharpSsh.Sftp(ftphost, login, password);
+                    sftp.OnTransferStart += new FileTransferEvent(sshCp_OnTransferStart);
+                    sftp.OnTransferProgress += new FileTransferEvent(sshCp_OnTransferProgress);
+                    sftp.OnTransferEnd += new FileTransferEvent(sshCp_OnTransferEnd);
+
+                    Console.Write("Connecting...");
+                    sftp.Connect();
+                    Console.WriteLine("OK");
+
+                    Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid);
+                    Console.Write("Downloading...");
+                    sftp.Get(ftpfilepath, localfilepath);
+
+                    Console.Write("Disconnecting...");
+                    sftp.Close();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+            else { Console.Write("File already exists..."); }
+
+            return (localfilepath + fileName);
+        }
+
+        private void sshCp_OnTransferStart(string src, string dst, int transferredBytes, int totalBytes, string message)
+        {
+            Action EmptyDelegate = delegate () { };
+            this.view.navigator.Statusbar.Content = "Starting Download of " + lastdlfile;
+            this.view.navigator.Statusbar.UpdateLayout();
+            this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+            Action EmptyDelegate2 = delegate () { };
+            this.view.ShadowBox.Visibility = Visibility.Visible;
+            view.UpdateLayout();
+            view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate2);
+        }
+
+        private void sshCp_OnTransferProgress(string src, string dst, int transferredBytes, int totalBytes, string message)
+        {
+            Action EmptyDelegate = delegate () { };
+            double percent = ((double)transferredBytes / (double)totalBytes) * 100.0;
+
+            this.view.navigator.Statusbar.Content = "Downloading " + lastdlfile + "  (" + percent.ToString("F3") + "%)" + message;
+            this.view.navigator.Statusbar.UpdateLayout();
+            this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+            this.view.tb.Text = "Downloading " + lastdlfile + "  (" + percent.ToString("F2") + "%)";
+        }
+
+        private void sshCp_OnTransferEnd(string src, string dst, int transferredBytes, int totalBytes, string message)
+        {
+            Action EmptyDelegate = delegate () { };
+            this.view.navigator.Statusbar.Content = "© 2016 HCM-Lab, Augsburg University";
+            this.view.navigator.Statusbar.UpdateLayout();
+            this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+            this.view.tb.Text = "Loading Data";
+            this.view.ShadowBox.Visibility = Visibility.Collapsed;
+        }
+
+        private void httpPost(string URL, string filename, string db, string login, string password, string sessionid = "Default")
+        {
+            string fileName = URL.Substring(URL.LastIndexOf("/") + 1, (URL.Length - URL.LastIndexOf("/") - 1));
+            string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
+
+            if (!File.Exists(Properties.Settings.Default.DataPath + "\\" + sessionid + "\\" + fileName))
+            {
+                try
+                {
+                    // Create a new WebClient instance.
+
+                    WebClient client = new WebClient();
+
+                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                    //  client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadFileCompleted);
+                    Mouse.SetCursor(System.Windows.Input.Cursors.Hand);
+
+                    // Concatenate the domain with the Web resource filename.
+                    Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", fileName, URL);
+                    // Download the Web resource and save it into the current filesystem folder.
+                    Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + sessionid);
+
+                    var values = new NameValueCollection();
+                    values["username"] = login;
+                    values["password"] = password;
+                    values["session_id"] = sessionid;
+                    values["filename"] = filename;
+
+                    var response = client.UploadValues(URL, values);
+                    var responseString = Encoding.Default.GetString(response);
+
+                    Console.WriteLine(responseString);
+
+                    /*
+                     *  Todo, something with the response
+                     */
+
+                    client.DownloadFile(URL, "Data\\" + sessionid + "\\" + fileName);
+                }
+                catch { MessageBox.Show("Url not found"); }
+            }
+            loadFromFile(localpath);
+        }
+
+        private void httpGet(string URL, string db, string sessionid = "Default")
+        {
+            string fileName = URL.Substring(URL.LastIndexOf("/") + 1, (URL.Length - URL.LastIndexOf("/") - 1));
+
+            ////Treat ~ in browser format special
+            //if (fileName.EndsWith("%7E"))
+            //{
+            //    fileName = fileName.Remove(fileName.Length - 3);
+            //    fileName = fileName + "~";
+            //}
+
+            string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
+
+            if (!File.Exists(localpath))
+            {
+                try
+                {
+                    WebClient client = new WebClient();
+
+                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                    client.DownloadFileCompleted += client_DownloadFileCompleted;
+                    client.QueryString.Add("file", localpath);
+                    client.QueryString.Add("id", numberofparalleldownloads.ToString());
+                    downloadstotal.Add(0);
+                    downloadsreceived.Add(0);
+                    if (!localpath.EndsWith(".stream~")) filestoload.Add(localpath);
+                    numberofparalleldownloads++;
+                    Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid);
+                    client.DownloadFileAsync(new Uri(URL), Properties.Settings.Default.DataPath + "\\" + db + " \\" + sessionid + "\\" + fileName);
+                }
+                catch { MessageBox.Show("Url not found"); }
+            }
+            else if (!localpath.EndsWith(".stream~")) loadFromFile(localpath);
+        }
+
+        private void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            string id_ = ((System.Net.WebClient)(sender)).QueryString["id"];
+            int id = Int32.Parse(id_);
+
+            string filename = ((System.Net.WebClient)(sender)).QueryString["file"];
+
+            numberofparalleldownloads--;
+            if (numberofparalleldownloads == 0)
+            {
+                Action EmptyDelegate = delegate () { };
+                this.view.navigator.Statusbar.Content = "© 2016 HCM-Lab, Augsburg University";
+                this.view.navigator.Statusbar.UpdateLayout();
+                this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                this.view.tb.UpdateLayout();
+                this.view.tb.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                this.view.tb.Text = "Loading Data";
+                this.view.ShadowBox.Visibility = Visibility.Collapsed;
+                this.view.ShadowBox.UpdateLayout();
+                downloadsreceived.Clear();
+                downloadstotal.Clear();
+                string[] files = new string[filestoload.Count];
+                for (int i = 0; i < filestoload.Count; i++)
+                {
+                    files[i] = filestoload[i];
+                }
+                LoadFiles(files);
+                filestoload.Clear();
+            }
+        }
+
+        private void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            try
+            {
+                Action EmptyDelegate = delegate () { };
+
+                string filename = ((System.Net.WebClient)(sender)).QueryString["file"];
+                string id_ = ((System.Net.WebClient)(sender)).QueryString["id"];
+                int id = Int32.Parse(id_);
+
+                downloadsreceived[id] = e.BytesReceived;
+                downloadstotal[id] = e.TotalBytesToReceive;
+
+                double bytesreceived = 0;
+                double bytestotal = 0;
+                for (int i = 0; i < downloadstotal.Count; i++)
+
+                {
+                    bytesreceived = bytesreceived + downloadsreceived[i];
+                    bytestotal = bytestotal + downloadstotal[i];
+                }
+
+                double percent = ((double)bytesreceived / (double)bytestotal) * 100.0;
+
+                this.view.navigator.Statusbar.Content = "Downloading " + lastdlfile + "  (" + percent.ToString("F3") + "%)";
+                this.view.navigator.Statusbar.UpdateLayout();
+                this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                this.view.ShadowBox.Visibility = Visibility.Visible;
+                this.view.tb.Text = "Downloading Files... Total progress: " + "  (" + percent.ToString("F2") + "%)";
+            }
+            catch (Exception e1)
+            {
+            }
+        }
+
         private void mongodb_Store(object sender, RoutedEventArgs e)
         {
-            if (AnnoTrack.GetSelectedTrack() != null)
+            mongodbStore();
+        }
+
+        private void mongodb_Load(object sender, RoutedEventArgs e)
+        {
+            mongodbLoad();
+        }
+
+        private void mongodb_Add(object sender, RoutedEventArgs e)
+        {
+            mongodbAdd();
+        }
+
+
+        private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)
+        {
+            LabelInputBox inputBox = new LabelInputBox("Database Folder", "Choose path for local files", Properties.Settings.Default.DataPath, null);
+            inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            inputBox.ShowDialog();
+            inputBox.Close();
+
+            if (inputBox.DialogResult == true)
             {
-                //Todo, use e.g. folder name for default suggestion
+                Properties.Settings.Default.DataPath = inputBox.Result();
+            }
+        }
 
-                string table = "SessionId";
 
-                if (media_list.Medias.Count > 0)
-                    table = new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Parent.Name + "_" + new DirectoryInfo(media_list.Medias[0].GetFilepath()).Parent.Name;
-                else if (signals.Count > 0)
-                    table = new DirectoryInfo(signals[0].Filepath).Parent.Name;
+        private void mongodbAdd()
 
-                LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server, and Database", mongodbip, null, 2, table);
+        {
+
+            DatabaseAdminWindow daw = new DatabaseAdminWindow();
+            daw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            daw.ShowDialog();
+            
+        }
+
+
+        private void mongodbStore()
+        {
+            if (loadedfromdb)
+            {
+                string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
+               
+                try
+                {
+                    if (anno_tracks.Count > 0)
+                    {
+                        DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
+                        db.StoretoDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks);
+
+                        MessageBox.Show("Annotation Tracks have been stored in the database " + Properties.Settings.Default.LastSessionId);
+                    }
+                    else MessageBox.Show("No Annotation Tracks available");
+                }
+                catch
+                {
+                    MessageBox.Show("Could not connect to MongoDB Server");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Load a session from Database first");
+            }
+        }
+
+
+        private void mongodbLoad()
+        {
+            clear();
+
+            System.Collections.IList annotations = null;
+            List<string> media = null;
+            List<DatabaseMediaInfo> ci = null;
+            DatabaseHandlerWindow dbhw = new DatabaseHandlerWindow();
+            dbhw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dbhw.ShowDialog();
+
+            if (dbhw.DialogResult == true)
+            {
+                annotations = dbhw.Annotations();
+                media = dbhw.Media();
+                ci = dbhw.MediaConnectionInfo();
+            }
+
+            string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
+            DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
+
+           
+                this.view.addmongodb.Visibility = Visibility.Visible;
+                this.view.mongodbmenu.IsEnabled = true;
+            
+
+            if (annotations != null)
+            {
+                Action EmptyDelegate = delegate () { };
+                this.view.ShadowBox.Visibility = Visibility.Visible;
+                view.UpdateLayout();
+                view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+                List<AnnoList> annos = db.LoadfromDatabase(annotations, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+                try
+                {
+                    if (annos != null)
+                {
+                    foreach (AnnoList anno in annos)
+
+                    {
+                           
+                              //  if(anno.isDiscrete == false && anno.Count > 0)
+                                if (anno.Count > 2 && anno[0].Start + anno[0].Duration == anno[1].Start && anno[1].Start + anno[1].Duration == anno[2].Start)
+                                {
+                                    anno.isDiscrete = false;
+                                    handleAnnotation(anno, "database", anno[0].Duration);
+                                }
+                                else
+                                {
+                                    anno.isDiscrete = true;
+                                    anno.Filepath = "db";
+                                    anno.SampleAnnoPath = "db";
+                                    double maxdur = 0;
+
+                                    foreach (AnnoListItem ali in anno)
+                                    {
+                                        if (ali.Stop > maxdur)
+                                        {
+                                            maxdur = ali.Stop;
+                                        }
+                                    }
+                                    if (anno != null)
+                                    {
+                                        setAnnoList(anno);
+
+                                        addAnno(anno, anno.isDiscrete, 1);
+                                    }
+
+                                    updateTimeRange(maxdur);
+                                }
+                           
+                           
+                    }
+
+                    view.ShadowBox.Visibility = Visibility.Collapsed;
+
+
+                            //handle media
+
+                     
+                        if(media.Count > 0)
+                        { 
+
+
+                     for (int i = 0; i < media.Count; i++)
+                    {
+                        foreach (DatabaseMediaInfo c in ci)
+
+                        {
+                            Properties.Settings.Default.DataServerConnectionType = c.connection;
+
+                            if (c.filename == media[i].ToString())
+
+                            {
+                                if (c.connection == "sftp")
+                                {
+                                    Properties.Settings.Default.DataServerConnectionType = "sftp";
+
+                                    string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
+                                    if (!file.EndsWith("stream~")) filestoload.Add(file);
+                                }
+                                else if (ci[i].connection == "httpGet")
+                                {
+                                    Properties.Settings.Default.DataServerConnectionType = "httpGet";
+                                    httpGet(c.filename, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+                                }
+                                else if (ci[i].connection == "httpPost")
+                                {
+                                    Properties.Settings.Default.DataServerConnectionType = "httpPost";
+
+                                    //This has not been tested and probably needs rework.
+                                    httpPost(c.filename, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+                                }
+                            }
+                        }
+                    }
+
+                    if (Properties.Settings.Default.DataServerConnectionType == "sftp")
+                    {
+                        string[] files2 = new string[filestoload.Count];
+                        for (int i = 0; i < filestoload.Count; i++)
+                        {
+                            files2[i] = filestoload[i];
+                        }
+                      if(files2.Length > 0)  LoadFiles(files2);
+                        filestoload.Clear();
+                    }
+
+                   
+
+
+                    }
+                    }
+                    loadedfromdb = true;
+                }
+                catch (TimeoutException e1)
+                {
+                    MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
+                }
+            }
+        }
+
+        private void mongodb_Show(object sender, RoutedEventArgs e)
+{
+    Directory.CreateDirectory(Properties.Settings.Default.DataPath);
+    Process.Start(Properties.Settings.Default.DataPath);
+}
+
+private void convertocontanno_Click(object sender, RoutedEventArgs e)
+{
+    if (SignalTrack.SelectedSignal != null)
+    {
+        Signal s = SignalTrack.SelectedSignal;
+        AnnoList al = new AnnoList();
+        AnnoListItem ali;
+
+        double dur = (1000.0 / s.rate) / 1000.0;
+        if (s != null)
+        {
+            string tier = s.Name;
+
+            for (int i = 0; i < s.number; i++)
+            {
+                ali = new AnnoListItem(i * dur, dur, s.data[i * s.dim + s.ShowDim].ToString(), "", s.Name + "_dim" + s.ShowDim);
+                al.Add(ali);
+                al.Name = ali.Tier;
+            }
+
+            al.Lowborder = s.min[s.ShowDim];
+            al.Highborder = s.max[s.ShowDim];
+
+            AnnoList result = al.saveContinousToFile();
+
+            if (result != null)
+            {
+                MessageBoxResult mb = MessageBoxResult.None;
+                mb = MessageBox.Show("Successfully converted stream to anno. Load the anno?", "Success", MessageBoxButton.YesNo);
+                if (mb == MessageBoxResult.Yes)
+                {
+                    loadCSVAnnotation(result.Filename, dur, "continuous");
+                }
+            }
+        }
+    }
+}
+
+private void exporttracktoxps_Click(object sender, RoutedEventArgs e)
+{
+    string filepath = ViewTools.SaveFileDialog("export_track", "xps", "", 5);
+    var uri = new System.Uri(filepath);
+
+    if (AnnoTrack.GetSelectedTrack().isDiscrete) AnnoTrack.GetSelectedTrack().Background = AnnoTrack.GetSelectedTrack().BackgroundColor;
+    AnnoTrack.GetSelectedTrack().ExportToXPS(uri, AnnoTrack.GetSelectedTrack());
+    AnnoTrack.GetSelectedTrack().select(true);
+    AnnoTrack.GetSelectedTrack().timeRangeChanged(ViewHandler.Time);
+}
+
+private void exporttracktopng_Click(object sender, RoutedEventArgs e)
+{
+    string filepath = ViewTools.SaveFileDialog("export_track", "png", "", 6);
+    var uri = new System.Uri(filepath);
+    if (AnnoTrack.GetSelectedTrack().isDiscrete) AnnoTrack.GetSelectedTrack().Background = AnnoTrack.GetSelectedTrack().BackgroundColor;
+    AnnoTrack.GetSelectedTrack().ExportToPng(uri, AnnoTrack.GetSelectedTrack());
+    AnnoTrack.GetSelectedTrack().select(true);
+    AnnoTrack.GetSelectedTrack().timeRangeChanged(ViewHandler.Time);
+}
+
+private void convertosignal_Click(object sender, RoutedEventArgs e)
+{
+    AnnoTrack at = AnnoTrack.GetSelectedTrack();
+    if (at.isDiscrete) MessageBox.Show("Selected a continious track to convert to ssi stream");
+    else
+    {
+        double sr = 1000.0 / (at.AnnoList[0].Duration * 1000);
+        double from = 0.0;
+        double to = at.AnnoList[at.AnnoList.Count - 1].Stop;
+        int num = at.AnnoList.Count;
+        string ftype = "ASCII";
+        string type = "FLOAT";
+        int by = sizeof(float);
+        int dim = 1;
+        int ms = Environment.TickCount;
+
+     
+        if (at.AnnoList.HasChanged)
+        {
+            MessageBoxResult m = MessageBoxResult.None;
+            m = MessageBox.Show("You need to save continous annotations on tier #" + at.TierId + " first", "Confirm", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            if (m == MessageBoxResult.OK)
+            {
+                saveContinousAnnoAs();
+                at.AnnoList.HasChanged = false;
+            }
+        }
+
+
+        string filename = Path.GetDirectoryName(at.AnnoList.Filepath) + "\\" + at.TierId + ".stream";
+
+        StreamWriter swheader = new StreamWriter(filename, false, System.Text.Encoding.Default);
+        swheader.WriteLine("<?xml version=\"1.0\" ?>");
+        swheader.WriteLine("<stream ssi-v=\"2\">");
+        swheader.WriteLine("\t<info ftype=\"" + ftype + "\" sr=\"" + sr.ToString("0.000000", CultureInfo.InvariantCulture) + "\" dim=\"" + dim.ToString() + "\" byte=\"" + by.ToString() + "\" type=\"" + type + "\" />");
+        swheader.WriteLine("\t<time ms=\"" + ms + "\" local=\"" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + "\" system=\"" + DateTime.UtcNow.ToString("yyyy/MM/dd HH:mm:ss") + "\"/>");
+        swheader.WriteLine("\t<chunk from=\"" + from.ToString("0.000000", CultureInfo.InvariantCulture) + "\" to=\"" + to.ToString("0.000000", CultureInfo.InvariantCulture) + "\" byte=\"" + "0" + "\" num=\"" + num + "\"/>");
+
+        swheader.WriteLine("</stream>");
+
+        swheader.Close();
+
+        StreamWriter swdata = new StreamWriter(filename + "~", false, System.Text.Encoding.Default);
+        foreach (AnnoListItem i in at.AnnoList)
+        {
+            swdata.WriteLine(i.Label);
+        }
+        swdata.Close();
+
+        MessageBoxResult mb = MessageBoxResult.None;
+        mb = MessageBox.Show("Successfully converted anno to stream. Load the stream?", "Success", MessageBoxButton.YesNo);
+        if (mb == MessageBoxResult.Yes)
+        {
+            loadStream(filename);
+        }
+    }
+}
+
+private void converttodiscrete_Click(object sender, RoutedEventArgs e)
+{
+    AnnoTrack at = AnnoTrack.GetSelectedTrack();
+    if (at != null)
+    {
+        MessageBoxResult mb = MessageBoxResult.None;
+        if (!at.isDiscrete)
+        {
+            if (at.AnnoList.HasChanged)
+            {
+                mb = MessageBox.Show("Save continous annotations on tier #" + at.TierId + " first?", "Confirm", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+
+                if (mb == MessageBoxResult.Yes)
+                {
+                    saveContinousAnnoAs();
+                    at.AnnoList.HasChanged = false;
+                }
+            }
+
+            if (mb != MessageBoxResult.Cancel)
+            {
+                List<string> classes = new List<string>();
+                List<double> upperthresholds = new List<double>();
+                double offset = 0.0;
+                LabelInputBox inputBox = new LabelInputBox("Enter Lables and UpperThresholds seperated by ;", "Enter offset in Seconds if needed", "Low; Medium; High", null, 3, "-0.0", "0.33;0.66;1.0");
                 inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 inputBox.ShowDialog();
                 inputBox.Close();
                 if (inputBox.DialogResult == true)
                 {
-                    mongodbip = inputBox.Result();
-                    table = inputBox.Result2();
-
-                    try
+                    string[] data = inputBox.Result().Split(';');
+                    for (int i = 0; i < data.Length; i++)
                     {
-                        DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
-                        db.StoretoDatabase(table, AnnoTrack.GetSelectedTrack().AnnoList);
-                        MessageBox.Show("Track " + AnnoTrack.GetSelectedTrack().TierId + " has been stored in the Database " + table);
+                        classes.Add(data[i]);
                     }
-                    catch
-                    {
-                        MessageBox.Show("Could not connect to MongoDB Server");
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Select  Annotation Track first");
-                }
-            }
-        }
 
-        private void mongodb_Load(object sender, RoutedEventArgs e)
-        {
-            LabelInputBox inputBox = new LabelInputBox("MongoDB Connection", "Enter Ip and Port of Server", mongodbip, null, 1);
-            inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            inputBox.ShowDialog();
-            inputBox.Close();
-            if (inputBox.DialogResult == true)
-            {
-                mongodbip = inputBox.Result();
-
-                DatabaseHandler db = new DatabaseHandler("mongodb://" + mongodbip);
-                AnnoList anno = db.LoadfromDatabase();
-                if (anno != null)
-                {
-                    //Todo.. checking for continuous or discrete labels based on the first 2 samples (could be done nicer)
-                    if (anno[0].Start + anno[0].Duration == anno[1].Start && anno[1].Start + anno[1].Duration == anno[2].Start)
+                    string[] data2 = inputBox.Result3().Split(';');
+                    for (int i = 0; i < data2.Length; i++)
                     {
-                        anno.isDiscrete = false;
-                        handleAnnotation(anno, "database", anno[0].Duration);
-                    }
-                    else
-                    {
-                        anno.isDiscrete = true;
-                        anno.Filepath = "db";
-                        anno.SampleAnnoPath = "db";
-                        double maxdur = 0;
-
-                        foreach (AnnoListItem ali in anno)
+                        double thresh = -1;
+                        double.TryParse(data2[i], out thresh);
+                        if (thresh > -1)
                         {
-                            if (ali.Stop > maxdur)
+                            upperthresholds.Add(thresh);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Entries in wrong format");
+                        }
+                    }
+                    //If sombody forgets the 1.0
+                    if (data2.Length == data.Length - 1) upperthresholds.Add(1.0);
+                    else if (data2.Length == data.Length + 1) classes.Add("Rest");
+                    else if (data2.Length != data.Length)
+                    {
+                        MessageBox.Show("Number of labels does not match number of threshholds");
+                    }
+
+                    double off = 0.0;
+                    double.TryParse(inputBox.Result2(), out off);
+                    offset = off;
+                }
+                Mouse.SetCursor(System.Windows.Input.Cursors.No);
+
+                AnnoList discretevalues = new AnnoList();
+                at.isDiscrete = true;
+
+                double lowthres = -Double.MaxValue;
+                double highthres = 1.0;
+
+                foreach (AnnoListItem ali in at.AnnoList)
+                {
+                    double val = double.Parse(ali.Label);
+
+                    for (int i = 0; i < classes.Count; i++)
+                    {
+                        highthres = upperthresholds[i];
+                        if (i > 0) lowthres = upperthresholds[i - 1];
+                        else lowthres = -Double.MaxValue;
+
+                        if (val > lowthres && val < highthres)
+                        {
+                            if (discretevalues.Count > 0 && discretevalues[discretevalues.Count - 1].Label == classes[i])
                             {
-                                maxdur = ali.Stop;
+                                discretevalues[discretevalues.Count - 1].Stop = discretevalues[discretevalues.Count - 1].Stop + ali.Duration;
                             }
-                        }
-                        if (anno != null)
-                        {
-                            setAnnoList(anno);
-                            addAnno(anno, anno.isDiscrete, 1);
-                        }
-
-                        updateTimeRange(maxdur);
-                    }
-                }
-            }
-        }
-
-        private void convertocontanno_Click(object sender, RoutedEventArgs e)
-        {
-            if (SignalTrack.SelectedSignal != null)
-            {
-                Signal s = SignalTrack.SelectedSignal;
-                AnnoList al = new AnnoList();
-                AnnoListItem ali;
-
-                double dur = (1000.0 / s.rate) / 1000.0;
-                if (s != null)
-                {
-                    string tier = s.Name;
-
-                    for (int i = 0; i < s.number; i++)
-                    {
-                        ali = new AnnoListItem(i * dur, dur, s.data[i * s.dim + s.ShowDim].ToString(), "", s.Name + "_dim" + s.ShowDim);
-                        al.Add(ali);
-                        al.Name = ali.Tier;
-                    }
-
-                    al.Lowborder = s.min[s.ShowDim];
-                    al.Highborder = s.max[s.ShowDim];
-
-                    AnnoList result = al.saveContinousToFile();
-
-                    if (result != null)
-                    {
-                        MessageBoxResult mb = MessageBoxResult.None;
-                        mb = MessageBox.Show("Successfully converted stream to anno. Load the anno?", "Success", MessageBoxButton.YesNo);
-                        if (mb == MessageBoxResult.Yes)
-                        {
-                            loadCSVAnnotation(result.Filename, dur, "continuous");
-                        }
-                    }
-                }
-            }
-        }
-
-        private void convertosignal_Click(object sender, RoutedEventArgs e)
-        {
-            AnnoTrack at = AnnoTrack.GetSelectedTrack();
-            if (at.isDiscrete) MessageBox.Show("Selected a continious track to convert to ssi stream");
-            else
-            {
-                double sr = 1000.0 / (at.AnnoList[0].Duration * 1000);
-                double from = 0.0;
-                double to = at.AnnoList[at.AnnoList.Count - 1].Stop;
-                int num = at.AnnoList.Count;
-                string ftype = "ASCII";
-                string type = "FLOAT";
-                int by = sizeof(float);
-                int dim = 1;
-                int ms = Environment.TickCount;
-
-                //if (at.AnnoList.Filepath == null)
-                //{
-                if (at.AnnoList.HasChanged)
-                {
-                    MessageBoxResult m = MessageBoxResult.None;
-                    m = MessageBox.Show("You need to save continous annotations on tier #" + at.TierId + " first", "Confirm", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-
-                    if (m == MessageBoxResult.OK)
-                    {
-                        saveContinousAnnoAs();
-                        at.AnnoList.HasChanged = false;
-                    }
-                }
-                //string firstmediadir = "";
-                //if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
-                //else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
-                //filepath = firstmediadir;
-                //}
-
-                //else {
-                //    filepath = at.AnnoList.Filepath;
-                //}
-
-                string filename = Path.GetDirectoryName(at.AnnoList.Filepath) + "\\" + at.TierId + ".stream";
-
-                StreamWriter swheader = new StreamWriter(filename, false, System.Text.Encoding.Default);
-                swheader.WriteLine("<?xml version=\"1.0\" ?>");
-                swheader.WriteLine("<stream ssi-v=\"2\">");
-                swheader.WriteLine("\t<info ftype=\"" + ftype + "\" sr=\"" + sr.ToString("0.000000", CultureInfo.InvariantCulture) + "\" dim=\"" + dim.ToString() + "\" byte=\"" + by.ToString() + "\" type=\"" + type + "\" />");
-                swheader.WriteLine("\t<time ms=\"" + ms + "\" local=\"" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + "\" system=\"" + DateTime.UtcNow.ToString("yyyy/MM/dd HH:mm:ss") + "\"/>");
-                swheader.WriteLine("\t<chunk from=\"" + from.ToString("0.000000", CultureInfo.InvariantCulture) + "\" to=\"" + to.ToString("0.000000", CultureInfo.InvariantCulture) + "\" byte=\"" + "0" + "\" num=\"" + num + "\"/>");
-
-                swheader.WriteLine("</stream>");
-
-                swheader.Close();
-
-                StreamWriter swdata = new StreamWriter(filename + "~", false, System.Text.Encoding.Default);
-                foreach (AnnoListItem i in at.AnnoList)
-                {
-                    swdata.WriteLine(i.Label);
-                }
-                swdata.Close();
-
-                MessageBoxResult mb = MessageBoxResult.None;
-                mb = MessageBox.Show("Successfully converted anno to stream. Load the stream?", "Success", MessageBoxButton.YesNo);
-                if (mb == MessageBoxResult.Yes)
-                {
-                    loadStream(filename);
-                }
-            }
-        }
-
-        private void converttodiscrete_Click(object sender, RoutedEventArgs e)
-        {
-            AnnoTrack at = AnnoTrack.GetSelectedTrack();
-            if (at != null)
-            {
-                MessageBoxResult mb = MessageBoxResult.None;
-                if (!at.isDiscrete)
-                {
-                    if (at.AnnoList.HasChanged)
-                    {
-                        mb = MessageBox.Show("Save continous annotations on tier #" + at.TierId + " first?", "Confirm", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-
-                        if (mb == MessageBoxResult.Yes)
-                        {
-                            saveContinousAnnoAs();
-                            at.AnnoList.HasChanged = false;
-                        }
-                    }
-
-                    if (mb != MessageBoxResult.Cancel)
-                    {
-                        List<string> classes = new List<string>();
-                        List<double> upperthresholds = new List<double>();
-                        double offset = 0.0;
-                        LabelInputBox inputBox = new LabelInputBox("Enter Lables and UpperThresholds seperated by ;", "Enter offset in Seconds if needed", "Low; Medium; High", null, 3, "-0.0", "0.33;0.66;1.0");
-                        inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                        inputBox.ShowDialog();
-                        inputBox.Close();
-                        if (inputBox.DialogResult == true)
-                        {
-                            string[] data = inputBox.Result().Split(';');
-                            for (int i = 0; i < data.Length; i++)
+                            else
                             {
-                                classes.Add(data[i]);
-                            }
-
-                            string[] data2 = inputBox.Result3().Split(';');
-                            for (int i = 0; i < data2.Length; i++)
-                            {
-                                double thresh = -1;
-                                double.TryParse(data2[i], out thresh);
-                                if (thresh > -1)
+                                AnnoListItem newItem = ali;
+                                newItem.Start = ali.Start + offset;
+                                if (newItem.Start < 0.0)
                                 {
-                                    upperthresholds.Add(thresh);
+                                    newItem.Duration = ali.Duration + offset + newItem.Start;
+                                    newItem.Start = 0.0;
+
+                                    newItem.Stop = newItem.Duration;
                                 }
-                                else
-                                {
-                                    MessageBox.Show("Entries in wrong format");
-                                }
+                                newItem.Stop = ali.Stop + offset;
+                                newItem.Label = classes[i];
+                                if (newItem.Duration > 0.0) discretevalues.Add(newItem);
                             }
-                            //If sombody forgets the 1.0
-                            if (data2.Length == data.Length - 1) upperthresholds.Add(1.0);
-                            else if (data2.Length == data.Length + 1) classes.Add("Rest");
-                            else if (data2.Length != data.Length)
-                            {
-                                MessageBox.Show("Number of labels does not match number of threshholds");
-                            }
-
-                            double off = 0.0;
-                            double.TryParse(inputBox.Result2(), out off);
-                            offset = off;
+                            break;
                         }
-                        Mouse.SetCursor(System.Windows.Input.Cursors.No);
-
-                        AnnoList discretevalues = new AnnoList();
-                        at.isDiscrete = true;
-
-                        double lowthres = -Double.MaxValue;
-                        double highthres = 1.0;
-
-                        foreach (AnnoListItem ali in at.AnnoList)
-                        {
-                            double val = double.Parse(ali.Label);
-
-                            for (int i = 0; i < classes.Count; i++)
-                            {
-                                highthres = upperthresholds[i];
-                                if (i > 0) lowthres = upperthresholds[i - 1];
-                                else lowthres = -Double.MaxValue;
-
-                                if (val > lowthres && val < highthres)
-                                {
-                                    if (discretevalues.Count > 0 && discretevalues[discretevalues.Count - 1].Label == classes[i])
-                                    {
-                                        discretevalues[discretevalues.Count - 1].Stop = discretevalues[discretevalues.Count - 1].Stop + ali.Duration;
-                                    }
-                                    else
-                                    {
-                                        AnnoListItem newItem = ali;
-                                        newItem.Start = ali.Start + offset;
-                                        if (newItem.Start < 0.0)
-                                        {
-                                            newItem.Duration = ali.Duration + offset + newItem.Start;
-                                            newItem.Start = 0.0;
-
-                                            newItem.Stop = newItem.Duration;
-                                        }
-                                        newItem.Stop = ali.Stop + offset;
-                                        newItem.Label = classes[i];
-                                        if (newItem.Duration > 0.0) discretevalues.Add(newItem);
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-
-                        at.Children.Clear();
-                        at.AnnoList.Clear();
-
-                        foreach (AnnoListItem ali in discretevalues)
-                        {
-                            at.AnnoList.Add(ali);
-                            at.addSegment(ali);
-                        }
-
-                        Mouse.SetCursor(System.Windows.Input.Cursors.Arrow);
                     }
                 }
-                else
+
+                at.Children.Clear();
+                at.AnnoList.Clear();
+
+                foreach (AnnoListItem ali in discretevalues)
                 {
-                    MessageBox.Show("Tier is already discrete");
+                    at.AnnoList.Add(ali);
+                    at.addSegment(ali);
                 }
+
+                Mouse.SetCursor(System.Windows.Input.Cursors.Arrow);
             }
         }
-
-        private void helpMenu_Click(object sender, RoutedEventArgs e)
+        else
         {
-            MessageBox.Show("Shortcuts:\n\nalt + return to enter fullscreen, esc to close fullscreen\nleftctrl for continuous anno mode, again to close\nalt+click or W on discrete anno to change label/color\nDel on Anno to delete Anno, on tier to delete tier\nalt + right/left to move signalmarker framewise\nshift + alt + right/left to move annomarker framewise\nQ to move signalmarker to start and annomarker to end of selected Segment\nE move annomarker to start and signalmarker to end of selected Segment\na for new Anno between boths markers\nSpace Play/Pause media ", "Quick Reference");
+            MessageBox.Show("Tier is already discrete");
+        }
+    }
+}
+
+private void helpMenu_Click(object sender, RoutedEventArgs e)
+{
+    MessageBox.Show("Shortcuts:\n\nalt + return to enter fullscreen, esc to close fullscreen\nleftctrl for continuous anno mode, again to close\nalt+click or W on discrete anno to change label/color\nDel on Anno to delete Anno, on tier to delete tier\nalt + right/left to move signalmarker framewise\nshift + alt + right/left to move annomarker framewise\nQ to move signalmarker to start and annomarker to end of selected Segment\nE move annomarker to start and signalmarker to end of selected Segment\na for new Anno between boths markers\nSpace Play/Pause media ", "Quick Reference");
+}
+
+private void tierMenu_Click(object sender, RoutedEventArgs e)
+{
+    AnnoTrack a = AnnoTrack.GetSelectedTrack();
+    if (a != null)
+    {
+        if (a.isDiscrete)
+        {
+            this.view.convertodiscretemenu.IsEnabled = false;
+            this.view.convertosignalemenu.IsEnabled = false;
+        }
+        else if (!a.isDiscrete)
+        {
+            this.view.convertodiscretemenu.IsEnabled = true;
+            this.view.convertosignalemenu.IsEnabled = true;
         }
 
-        private void tierMenu_Click(object sender, RoutedEventArgs e)
-        {
-            AnnoTrack a = AnnoTrack.GetSelectedTrack();
-            if (a != null)
-            {
-                if (a.isDiscrete)
-                {
-                    this.view.convertodiscretemenu.IsEnabled = false;
-                    this.view.convertosignalemenu.IsEnabled = false;
-                }
-                else if (!a.isDiscrete)
-                {
-                    this.view.convertodiscretemenu.IsEnabled = true;
-                    this.view.convertosignalemenu.IsEnabled = true;
-                }
+        this.view.savetiermenu.IsEnabled = true;
+    }
+}
 
-                this.view.savetiermenu.IsEnabled = true;
-            }
+private void exportSamplesButton_Click(object sender, RoutedEventArgs e)
+{
+    ExportSamplesWindow window = new ExportSamplesWindow();
+    foreach (AnnoTrack a in this.anno_tracks)
+    {
+        if (a.AnnoList.SampleAnnoPath != null)
+        {
+            //TODO find tiers
+
+            window.control.annoComboBox.Items.Add(a.AnnoList.SampleAnnoPath + "#" + a.TierId);
         }
+    }
+    foreach (Signal signal in signals)
+    {
+        window.control.signalAvailableListBox.Items.Add(signal.Filepath);
+    }
+    window.ShowDialog();
+}
 
-        private void exportSamplesButton_Click(object sender, RoutedEventArgs e)
+private void calculatepraat_Click(object sender, RoutedEventArgs e)
+{
+    if (SignalTrack.SelectedSignal != null)
+    {
+        if (SignalTrack.SelectedSignal.IsAudio)
         {
-            ExportSamplesWindow window = new ExportSamplesWindow();
-            foreach (AnnoTrack a in this.anno_tracks)
-            {
-                if (a.AnnoList.SampleAnnoPath != null)
-                {
-                    //TODO find tiers
-
-                    window.control.annoComboBox.Items.Add(a.AnnoList.SampleAnnoPath + "#" + a.TierId);
-                }
-            }
-            foreach (Signal signal in signals)
-            {
-                window.control.signalAvailableListBox.Items.Add(signal.Filepath);
-            }
-            window.ShowDialog();
-        }
-
-        private void calculatepraat_Click(object sender, RoutedEventArgs e)
-        {
-            if (SignalTrack.SelectedSignal != null)
-            {
-                if (SignalTrack.SelectedSignal.IsAudio)
-                {
-                    try
-                    {
-                        Process process = new Process();
-                        ProcessStartInfo startInfo = new ProcessStartInfo();
-                        startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                        startInfo.FileName = "preannotation.exe";
-                        startInfo.Arguments = SignalTrack.SelectedSignal.Filename + " " + SignalTrack.SelectedSignal.Filepath.Remove(SignalTrack.SelectedSignal.Filepath.Length - SignalTrack.SelectedSignal.Filename.Length - 1);
-                        process.StartInfo = startInfo;
-                        process.Start();
-                    }
-                    catch
-                    {
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Please select an audio signal to calculate Praat features");
-                }
-            }
-        }
-
-        private void exportSampledAnnotationsButton_Click(object sender, RoutedEventArgs e)
-        {
-            LabelInputBox inputBox = new LabelInputBox("Export Sampled Annotations", "Enter file seperator, samplerate in ms and default rest class", "100", null, 3, "notPresent", ";", false);
-            inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            inputBox.ShowDialog();
-            inputBox.Close();
-            if (inputBox.DialogResult == true)
-            {
-                int samplerate;
-                if (Int32.TryParse(inputBox.Result(), out samplerate))
-                {
-                    exportSampledAnnotations(samplerate, inputBox.Result3(), inputBox.Result2());
-                }
-            }
-        }
-
-        public void exportSampledAnnotations(int sr, string seperator, string restclass)
-        {
-            bool found = false;
-            int chunksize = sr;
-
-            List<string> columns = new List<string>();
-
-            foreach (AnnoList anno in annos)
-            {
-                foreach (AnnoListItem ali in anno)
-                {
-                    if (!columns.Contains(ali.Tier)) columns.Add(ali.Tier);
-                }
-            }
-
-            int currenttime = 0;
-            string headline = "";
-
-            foreach (string s in columns)
-            {
-                headline += s + seperator;
-            }
-
-            string firstmediadir = "";
-            if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
-            else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
-
-            string filepath = ViewTools.SaveFileDialog("SampledAnnotations_Export", "txt", firstmediadir, 3);
-
             try
             {
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(filepath, false))
-                {
-                    headline = headline.Remove(headline.Length - 1);
-                    file.WriteLine(headline);
-                    headline = "";
-                    int maxdur = (int)(((Time.TotalDuration - 0.5) * 1000));
-                    Mouse.SetCursor(System.Windows.Input.Cursors.Wait);
-                    while (currenttime < maxdur)
-                    {
-                        foreach (string s in columns)
-                        {
-                            foreach (AnnoList anno in annos)
-                            {
-                                foreach (AnnoListItem ali in anno)
-                                {
-                                    if (ali.Tier == s && (ali.Start * 1000) - (ali.Duration * 1000) < currenttime && ali.Stop * 1000 > currenttime)
-                                    {
-                                        found = true;
-                                        headline += ali.Label + seperator;
-                                        break;
-                                    }
-                                    else found = false;
-                                }
-                                if (found) break;
-                            }
-                            if (!found) headline += restclass + seperator;
-                        }
-
-                        headline = headline.Remove(headline.Length - 1);
-                        file.WriteLine(headline);
-                        headline = "";
-                        currenttime += chunksize;
-                    }
-                }
-                Mouse.SetCursor(System.Windows.Input.Cursors.Arrow);
-                MessageBox.Show("Sampled Annotations Data File successfully created!", "Sucess", MessageBoxButton.OK, MessageBoxImage.Information);
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                startInfo.FileName = "preannotation.exe";
+                startInfo.Arguments = SignalTrack.SelectedSignal.Filename + " " + SignalTrack.SelectedSignal.Filepath.Remove(SignalTrack.SelectedSignal.Filepath.Length - SignalTrack.SelectedSignal.Filename.Length - 1);
+                process.StartInfo = startInfo;
+                process.Start();
             }
             catch
             {
-                MessageBox.Show("Could not create Sampled Annotations Data File!", "Warning", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        else
+        {
+            MessageBox.Show("Please select an audio signal to calculate Praat features");
+        }
+    }
+}
+
+private void exportSampledAnnotationsButton_Click(object sender, RoutedEventArgs e)
+{
+    LabelInputBox inputBox = new LabelInputBox("Export Sampled Annotations", "Enter file seperator, samplerate in ms and default rest class", "100", null, 3, "notPresent", ";", false);
+    inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+    inputBox.ShowDialog();
+    inputBox.Close();
+    if (inputBox.DialogResult == true)
+    {
+        int samplerate;
+        if (Int32.TryParse(inputBox.Result(), out samplerate))
+        {
+            exportSampledAnnotations(samplerate, inputBox.Result3(), inputBox.Result2());
+        }
+    }
+}
+
+public void exportSampledAnnotations(int sr, string seperator, string restclass)
+{
+    bool found = false;
+    int chunksize = sr;
+
+    List<string> columns = new List<string>();
+
+    foreach (AnnoList anno in annos)
+    {
+        foreach (AnnoListItem ali in anno)
+        {
+            if (!columns.Contains(ali.Tier)) columns.Add(ali.Tier);
+        }
+    }
+
+    int currenttime = 0;
+    string headline = "";
+
+    foreach (string s in columns)
+    {
+        headline += s + seperator;
+    }
+
+    string firstmediadir = "";
+    if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
+    else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
+
+    string filepath = ViewTools.SaveFileDialog("SampledAnnotations_Export", "txt", firstmediadir, 3);
+
+    try
+    {
+        using (System.IO.StreamWriter file = new System.IO.StreamWriter(filepath, false))
+        {
+            headline = headline.Remove(headline.Length - 1);
+            file.WriteLine(headline);
+            headline = "";
+            int maxdur = (int)(((Time.TotalDuration - 0.5) * 1000));
+            Mouse.SetCursor(System.Windows.Input.Cursors.Wait);
+            while (currenttime < maxdur)
+            {
+                foreach (string s in columns)
+                {
+                    foreach (AnnoList anno in annos)
+                    {
+                        foreach (AnnoListItem ali in anno)
+                        {
+                            if (ali.Tier == s && (ali.Start * 1000) - (ali.Duration * 1000) < currenttime && ali.Stop * 1000 > currenttime)
+                            {
+                                found = true;
+                                headline += ali.Label + seperator;
+                                break;
+                            }
+                            else found = false;
+                        }
+                        if (found) break;
+                    }
+                    if (!found) headline += restclass + seperator;
+                }
+
+                headline = headline.Remove(headline.Length - 1);
+                file.WriteLine(headline);
+                headline = "";
+                currenttime += chunksize;
+            }
+        }
+        Mouse.SetCursor(System.Windows.Input.Cursors.Arrow);
+        MessageBox.Show("Sampled Annotations Data File successfully created!", "Sucess", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+    catch
+    {
+        MessageBox.Show("Could not create Sampled Annotations Data File!", "Warning", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+}
     }
 }

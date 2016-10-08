@@ -37,7 +37,7 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="Auto" Header="Label" DisplayMemberBinding="{Binding Label}" />
+                        <GridViewColumn Width="70" Header="Label" DisplayMemberBinding="{Binding Label}" />
 
                         <GridViewColumn Width="Auto" Header="From">
                             <GridViewColumn.DisplayMemberBinding>
@@ -54,7 +54,9 @@
                                 <Binding Path="Duration" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Confidence" DisplayMemberBinding="{Binding Confidence}" />
                         <GridViewColumn Width="Auto" Header="Meta" DisplayMemberBinding="{Binding Meta}" />
+                       
                     </GridView>
                 </ListView.View>
             </ListView>

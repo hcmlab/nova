@@ -1,7 +1,11 @@
 ﻿using System;
+using System.IO;
+using System.IO.Packaging;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 
 namespace ssi
@@ -98,6 +102,10 @@ namespace ssi
             this.InvalidateVisual();
         }
 
+
+
+ 
+
         public void changeColour(Brush color)
         {
             SignalColor = (SolidColorBrush)color;
@@ -172,6 +180,22 @@ namespace ssi
             }
         }
 
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
         public Signal getSignal()
         {
             return signal;
@@ -199,8 +223,15 @@ namespace ssi
             }
         }
 
+
+
+
+       
+
+
         protected void Paint(DrawingContext dc, SignalTrack track, Signal signal, uint dimension, double height, uint width, bool isAudio)
         {
+           
             if (signal.number == 0 || signal.data == null || height == 0 || width == 0)
             {
                 return;
@@ -290,6 +321,7 @@ namespace ssi
                     }
                 }
             }
+
         }
 
         protected override void OnRender(DrawingContext dc)

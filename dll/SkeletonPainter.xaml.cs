@@ -189,7 +189,7 @@ namespace ssi
                     //points[i].X = (int) (signal.data[(index * dim) + i * jointvalues + 0] - _min_value_x[0] / (_max_value_x[0] - _min_value_x[0]) * width + 0.5f) + width/2;
                     //points[i].Y = (int) (( height - signal.data[(index * dim) + i * jointvalues + 1] - _min_value_y[0]) / (_max_value_y[0] - _min_value_y[0]) * height + 0.5f) - height/2;
 
-                    if (index *dim  < signal.data.Length)
+                    if (index * dim < signal.data.Length)
                     {
                         if (signal.meta_type == "ssi")
 
@@ -327,9 +327,13 @@ namespace ssi
 
         private Color getColor(int i)
         {
-            Color c;
+            Color c = this.SignalColor ;
             double pos = ViewHandler.Time.CurrentPlayPosition;
             int index = (int)(pos * sr);
+
+        if(signal.data.Length >= (index * dim) + i * jointvalues + 3)
+
+            {
 
             if ((signal.data[(index * dim) + i * jointvalues + 3]) < 0.5)
             {
@@ -345,7 +349,7 @@ namespace ssi
             {
                 c = this.SignalColor;
             }
-
+            }
             return c;
         }
     }

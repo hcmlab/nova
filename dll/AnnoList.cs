@@ -26,6 +26,9 @@ namespace ssi
         private String sampleannopath = null;
         private double lowborder = 0.0;
         private double highborder = 1.0;
+        private double confidence = 1.0;
+        private string role = null;
+        private string subject = null;
 
         private static bool _isDiscrete = true;
 
@@ -33,6 +36,18 @@ namespace ssi
         {
             get { return loaded; }
             set { loaded = value; }
+        }
+
+        public string Role
+        {
+            get { return role; }
+            set { role = value; }
+        }
+
+        public string Subject
+        {
+            get { return subject; }
+            set { subject = value; }
         }
 
         public bool isDiscrete
@@ -62,6 +77,12 @@ namespace ssi
         {
             get { return filepath; }
             set { filepath = value; }
+        }
+
+        public double Confidence
+        {
+            get { return confidence; }
+            set { confidence = value; }
         }
 
         public string SampleAnnoPath
@@ -220,7 +241,7 @@ namespace ssi
                         AnnoListItem e = new AnnoListItem(start, duration, label, meta, tier);
 
                         if (filter == null || tier == filter)
-                        list.Add(e);
+                            list.Add(e);
                     }
                     else if (type == "continuous")
                     {
@@ -254,7 +275,7 @@ namespace ssi
                         {
                             AnnoListItem e = new AnnoListItem(start, samplerate, label, "", tier);
                             if (filter == null || tier == filter)
-                            list.Add(e);
+                                list.Add(e);
                         }
                     }
                     else if (type == "legacy")

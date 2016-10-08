@@ -6,6 +6,8 @@ namespace ssi
     {
         UIElement GetView();
 
+        void Url(string url);
+
         void SetVolume(double volume);
 
         void Play();
