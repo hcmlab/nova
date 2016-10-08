@@ -163,43 +163,34 @@ namespace ssi
                 BsonArray files = new BsonArray();
                 BsonDocument role = new BsonDocument {
                     {"name",  lastrole},
+                    {"isValid",  true}
                 };
 
                 bool subjectalreadypresent = false;
-                foreach (var item in RolesResultBox.Items)
+
+
+                var collection = database.GetCollection<BsonDocument>("Roles");
+                var builder = Builders<BsonDocument>.Filter;
+                var filter = builder.Eq("name", lastrole);
+                var documents = collection.Find(filter).ToList();
+
+                foreach (var item  in documents)
                 {
-                    if (item.ToString() == lastrole)
+                    if (item["name"].ToString() == lastrole)
                     {
                         subjectalreadypresent = true;
+                        var update = Builders<BsonDocument>.Update.Set("isValid", true);
+                        collection.UpdateOne(filter, update);
                     }
                 }
                 if (subjectalreadypresent == false)
                 {
-                    var collection = database.GetCollection<BsonDocument>("Roles");
                     collection.InsertOne(role);
-                    GetRoles(l.Result());
+                  
                 }
-                else MessageBox.Show("Role already exists!");
 
-                //var builder1 = Builders<BsonDocument>.Filter;
-                //var filter1 = builder1.Eq("name", lastrole);
-                //var documents1 = database.GetCollection<BsonDocument>("Roles").Find(filter1).ToList();
-                //ObjectId roleid = documents1[0].GetValue(0).AsObjectId;
+                GetRoles(l.Result());
 
-                //IMongoCollection<BsonDocument> sessions = database.GetCollection<BsonDocument>("Sessions");
-
-                //var builder = Builders<BsonDocument>.Filter;
-                //var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-                //var documents = sessions.Find(filter).ToList();
-
-                ////Should always be one entry, if not use first..
-                //var participants = documents[0]["participants"].AsBsonArray;
-                //BsonArray media = new BsonArray();
-                //BsonArray annotations = new BsonArray();
-                //participants.Add(new BsonDocument { { "role_id", roleid }, { "subject_id", "" }, {"media", media }, {"annotations", annotations } }) ;
-
-                //var update = Builders<BsonDocument>.Update.Set("participants", participants);
-                //var result = sessions.UpdateOne(filter, update);
             }
         }
 
@@ -406,7 +397,7 @@ namespace ssi
 
             foreach (BsonDocument b in documents)
             {
-                RolesResultBox.Items.Add(b["name"].ToString());
+              if(b["isValid"].AsBoolean == true) RolesResultBox.Items.Add(b["name"].ToString());
             }
             RolesResultBox.SelectedItem = selecteditem;
         }
@@ -775,9 +766,13 @@ namespace ssi
         {
             if (RolesResultBox.SelectedItem != null)
             {
+                var collection = database.GetCollection<BsonDocument>("Roles");
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
-                var result = database.GetCollection<BsonDocument>("Roles").DeleteOne(filter);
+                var update = Builders<BsonDocument>.Update.Set("isValid", false);
+                collection.UpdateOne(filter, update);
+                    
+                //var result = database.GetCollection<BsonDocument>("Roles").DeleteOne(filter);
 
                 GetRoles();
             }

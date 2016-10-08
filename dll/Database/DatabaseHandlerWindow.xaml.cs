@@ -274,20 +274,27 @@ namespace ssi
                         var annotdb = database.GetCollection<BsonDocument>("AnnoTypes").Find(filterb).ToList();
                         string annotid = "unknown";
                         if (annotdb.Count > 0) annotid = annotdb[0].GetValue(1).ToString();
-                        
 
 
 
-                        AnnotationResultBox.Items.Add(roleid + "#" + annotid + "#" + a["annotator"].ToString());
+                       
+                       // AnnotationResultBox.Items.Add(roleid + "#" + annotid + "#" + a["annotator"].ToString());
+                      //  AnnotationResultBox.Items.Add(roleid);
+
+
+                        List<DatabaseAnno> items = new List<DatabaseAnno>();
+                        items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = a["annotator"].ToString() });
+                        AnnotationResultBox.ItemsSource = items;
+
                     }
-                        
 
                 }
 
 
-               
+
             }
         }
+      
 
         public List<DatabaseMediaInfo> GetMediaFromDB(string db, string session)
         {

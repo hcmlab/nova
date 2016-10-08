@@ -81,16 +81,15 @@ namespace ssi
         {
 
 
-            MessageBoxResult mb = MessageBox.Show("If you associated one of these entries to an object in your database, you will. Are you sure you want to continue?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-                if(mb == MessageBoxResult.Yes)
-            {
+       
                 var database = mongo.GetDatabase(Properties.Settings.Default.Database);
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", DataBaseResultsBox.SelectedItem.ToString());
-                var result = database.GetCollection<BsonDocument>(collection).DeleteOne(filter);
+                var update = Builders<BsonDocument>.Update.Set("isValid", false);
+                var result = database.GetCollection<BsonDocument>(collection).UpdateOne(filter, update);
                 DataBaseResultsBox.Items.Remove(DataBaseResultsBox.SelectedItem);
-            }
+               
+            
            
 
             //todo care for deleting everything correctly.

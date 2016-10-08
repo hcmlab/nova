@@ -87,7 +87,7 @@ namespace ssi
 
             foreach (var document in sessions)
             {
-                if (document.TryGetElement("name", out value)) roles.Add(document["name"].ToString());
+                if (document["isValid"].AsBoolean == true) roles.Add(document["name"].ToString());
             }
 
             //DataBaseResultsWindow dbw = new DataBaseResultsWindow(roles, false, "On tier " +tier + ": Who?");
@@ -126,14 +126,14 @@ namespace ssi
 
             foreach (var document in sessions)
             {
-                if (document.TryGetElement("name", out value)) annotypes.Add(document["name"].ToString());
+                if (document["isValid"].AsBoolean == true) annotypes.Add(document["name"].ToString());
             }
 
 
 
             int auth = checkAuth(Properties.Settings.Default.MongoDBUser);
             bool hasauth = false;
-            if (auth > 3) hasauth = true;
+            if (auth > 2) hasauth = true;
 
             DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(annotypes, hasauth, "On tier " + tier + ": What ? ", "AnnoTypes");
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
@@ -171,7 +171,8 @@ namespace ssi
 
                 ObjectId roleid;
 
-                if (a.AnnoList.Role == null || a.AnnoList.Role == a.AnnoList.Name) a.AnnoList.Role = LoadRoles(db, a.AnnoList.Name);
+             //   if (a.AnnoList.Role == null || a.AnnoList.Role == a.AnnoList.Name)
+                    a.AnnoList.Role = LoadRoles(db, a.AnnoList.Name);
 
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", a.AnnoList.Role);
@@ -179,12 +180,17 @@ namespace ssi
                 if (roledb.Count > 0)
                 {
                     roleid = roledb[0].GetValue(0).AsObjectId;
+                    var update = Builders<BsonDocument>.Update.Set("isValid", true);
+                    roles.UpdateOne(filter, update);
                 }
                 else
                 {
                     BsonDocument b = new BsonDocument();
                     BsonElement n = new BsonElement("name", a.AnnoList.Name);
+                    BsonElement m = new BsonElement("isValid", true);
+
                     b.Add(n);
+                    b.Add(m);
                     roles.InsertOne(b);
                     roleid = b.GetValue(0).AsObjectId;
                 }
@@ -198,12 +204,16 @@ namespace ssi
                 if (annotdb.Count > 0)
                 {
                     annotid = annotdb[0].GetValue(0).AsObjectId;
+                    var update = Builders<BsonDocument>.Update.Set("isValid", true);
+                    annotypes.UpdateOne(filter, update);
                 }
                 else
                 {
                     BsonDocument b = new BsonDocument();
                     BsonElement n = new BsonElement("name", annotype);
+                    BsonElement m = new BsonElement("isValid", true);
                     b.Add(n);
+                    b.Add(m);
                     annotypes.InsertOne(b);
                     annotid = b.GetValue(0).AsObjectId;
                 }
@@ -301,26 +311,24 @@ namespace ssi
 
             List<AnnoList> l = new List<AnnoList>();
 
-            foreach (string s in collections)
+            foreach (DatabaseAnno s in collections)
             {
 
 
                 AnnoList al = new AnnoList();
-                string[] tiername = s.Split('#');
-
-
-
-                ObjectId roleid = GetObjectID(database, "Roles", "name", tiername[0]);
-                ObjectId annotid = GetObjectID(database, "AnnoTypes", "name", tiername[1]);
-
+               
+                ObjectId roleid = GetObjectID(database, "Roles", "name", s.Role);
                 string roledb = FetchDBRef(database, "Roles", "name", roleid);
+
+
+                ObjectId annotid = GetObjectID(database, "AnnoTypes", "name", s.AnnoType);
                 string annotdb = FetchDBRef(database, "AnnoTypes", "name", annotid);
 
 
                 var builder = Builders<BsonDocument>.Filter;
               
 
-                var filter = builder.Eq("role_id", roleid) & builder.Eq("annotype_id", annotid) & builder.Eq("annotator", tiername[2]);
+                var filter = builder.Eq("role_id", roleid) & builder.Eq("annotype_id", annotid) & builder.Eq("annotator", s.Annotator);
                 var result = collection.Find(filter);
                 var documents = collection.Find(filter).ToList();
                 if (documents[0].TryGetElement("isDiscrete", out value) && documents[0]["isDiscrete"].ToString().Contains("True")) al.isDiscrete = true;
@@ -346,7 +354,7 @@ namespace ssi
                     string label = annotation[i]["Label"].ToString();
                     string confidence = annotation[i]["Confidence"].ToString();
                     // string  color = annotation[i]["Color"].ToString();
-                    AnnoListItem ali = new AnnoListItem(start, duration, label, "", tiername[0], "#000000", double.Parse(confidence));
+                    AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, "#000000", double.Parse(confidence));
                     al.Add(ali);
                 }
 
@@ -390,6 +398,16 @@ namespace ssi
             return id;
         }
 
+    }
+
+
+    public class DatabaseAnno
+    {
+        public string Role { get; set; }
+
+        public string AnnoType { get; set; }
+
+        public string Annotator { get; set; }
     }
 
     public class DatabaseMediaInfo
