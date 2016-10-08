@@ -720,6 +720,16 @@ namespace ssi
             if (grid.SelectedIndex >= 0 && grid.SelectedIndex < grid.Items.Count)
             {
                 AnnoListItem item = current_anno[grid.SelectedIndex];
+                foreach(AnnoListItem a in AnnoTrack.GetSelectedTrack().AnnoList)
+                {
+                    if (a.Start == item.Start)
+                    {
+                        AnnoTrack.SelectSegment(AnnoTrack.GetSelectedTrack().getSegment(a));
+                        break;
+                    }
+                   
+                }
+
                 moveCursorTo (item.Start);
                
             }
