@@ -8,11 +8,11 @@
     <UserControl.Resources>
 
         <ControlTemplate TargetType="{x:Type acl:RangeSlider}" x:Key="rangeSliderTemplate">
-            <StackPanel Name="PART_RangeSliderContainer" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">
+            <StackPanel Name="PART_RangeSliderContainer"  Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">
                 <RepeatButton Name="PART_LeftEdge" Content="" />
                 <Thumb Name="PART_LeftThumb" Cursor="SizeWE" />
                 <!--This size of this thumb will auto matically change by the control to 10-->
-                <Thumb Name="PART_MiddleThumb" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" Cursor="ScrollAll" MinWidth="50" />
+                <Thumb Name="PART_MiddleThumb" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" Cursor="ScrollAll" MinWidth="20" />
                 <Thumb Name="PART_RightThumb" Cursor="SizeWE" />
                 <!--This size of this thumb will auto matically change by the control to 10-->
                 <RepeatButton Name="PART_RightEdge" Content="" />
@@ -20,5 +20,5 @@
         </ControlTemplate>
     </UserControl.Resources>
 
-    <acl:RangeSlider x:Name="ui" Grid.Row="0" Template="{StaticResource rangeSliderTemplate}" Height="20"></acl:RangeSlider>
+    <acl:RangeSlider x:Name="ui" Grid.Row="0"  RangeStart="0" RangeStop="100000" RangeStartSelected="0" RangeStopSelected="100000" MinRange="100" Template="{StaticResource rangeSliderTemplate}" Height="25"></acl:RangeSlider>
 </UserControl>

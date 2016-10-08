@@ -136,6 +136,35 @@ namespace ssi
             }
         }
 
+        public void setPWfield(string text)
+        {
+            this.ib_labelpass.Visibility = Visibility.Visible;
+            this.ib_labelpass.Password = text;
+        }
+
+        public void showSlider(bool showslider, double Confidence)
+        {
+            if(showslider)
+            {
+                this.confidencelabel.Visibility = Visibility.Visible;
+                this.confidencelabelvalue.Visibility = Visibility.Visible;
+                this.Slider.Visibility = Visibility.Visible;
+                this.Slider.Value = Confidence;
+            }
+           
+        }
+
+
+        public double ResultSlider()
+        {
+            return Math.Round(this.Slider.Value, 2); 
+        }
+
+        public string ResultPw()
+        {
+            return this.ib_labelpass.Password;
+        }
+
         private void ib_suggestions_comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (hascolorpicker)
@@ -205,6 +234,12 @@ namespace ssi
         public string SelectedItem()
         {
             return this.ib_suggestions_comboBox.SelectedItem.ToString();
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            confidencelabelvalue.Content = Math.Round(this.Slider.Value, 2).ToString();
+
         }
     }
 }

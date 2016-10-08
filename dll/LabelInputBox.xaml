@@ -14,7 +14,8 @@
             <TextBox x:FieldModifier="public" Margin="5" Name="ib_labelText3" Height="23" Focusable="True" TabIndex="0" Visibility="Hidden" />
 
             <TextBox x:FieldModifier="public" Margin="5" Name="ib_labelText" Height="23" Focusable="True" TabIndex="0" />
-            <TextBox x:FieldModifier="public" Margin="5" Name="ib_labelText2" Height="23" Focusable="True" TabIndex="0" Visibility="Hidden" />
+            <TextBox x:FieldModifier="public" Margin="5" x:Name="ib_labelText2" Height="23" Focusable="True" TabIndex="0" Visibility="Hidden" />
+            <PasswordBox x:FieldModifier="public" Margin="5" x:Name="ib_labelpass" Height="23" Focusable="True" TabIndex="0" Visibility="Hidden" />
 
             <ComboBox Name="ib_suggestions_comboBox" Margin="5,5,10,5"></ComboBox>
             <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal" Name="tab" Margin="100,5,5,5">
@@ -23,6 +24,9 @@
             </StackPanel>
         </StackPanel>
         <p:ColorPicker Name="ib_color" SelectedColor="{Binding sColor}"  IsEnabled="true" Height="20" Grid.Column="1" Margin="0,141,31,50" Visibility="Hidden" />
+        <Label Name="confidencelabel" Content="Confidence" Grid.ColumnSpan="2" Margin="10,119,68,100" Visibility="Collapsed"></Label>
+        <Label Name="confidencelabelvalue" Content="0.0" Margin="192,119,10,100" Visibility="Collapsed"/>
+        <Slider Name="Slider" ValueChanged="Slider_ValueChanged" Focusable="False" Minimum="0.0" Maximum="1.0" Value="1.0" Margin="10,144,10,80" Visibility="Collapsed"/>
         <!--<Button x:Name="ib_color" Click="ib_color_Click"  Grid.Column="1" Margin="10,142,15,49" Visibility="Hidden" />-->
     </Grid>
 </Window>

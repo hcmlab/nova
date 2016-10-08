@@ -313,7 +313,7 @@ namespace ssi
         public static Signal LoadStreamFile(string filepath)
         {
             Signal signal = new Signal();
-
+            if(filepath.EndsWith("~")) filepath = filepath.Remove(filepath.Length - 1);
             try
             {
                 // parse filename
