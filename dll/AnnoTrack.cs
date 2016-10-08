@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Packaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Windows.Xps;
+using System.Windows.Xps.Packaging;
 
 namespace ssi
 {
@@ -192,8 +197,16 @@ namespace ssi
 
         private bool is_selected = false;
 
+
+
+
+
+      
+
         public AnnoTrack(AnnoList list, bool isDiscrete, double sr = 1.0, string tierid = "default", double borderl = 0.0, double borderh = 1.0)
         {
+
+            this.AllowDrop = true;
             this.anno_list = list;
             this.SizeChanged += new SizeChangedEventHandler(sizeChanged);
             AnnoTrack.SelectTrack(this);
@@ -259,6 +272,84 @@ namespace ssi
                 }
             }
         }
+
+
+
+
+        public void ExportToXPS(Uri path, Canvas surface)
+        {
+            if (path == null) return;
+
+            // Save current canvas transorm
+            Transform transform = surface.LayoutTransform;
+            // Temporarily reset the layout transform before saving
+            surface.LayoutTransform = null;
+
+            // Get the size of the canvas
+            Size size = new Size(surface.ActualWidth, surface.ActualHeight);
+            // Measure and arrange elements
+            surface.Measure(size);
+            surface.Arrange(new Rect(size));
+
+            // Open new package
+            Package package = Package.Open(path.LocalPath, FileMode.Create);
+            // Create new xps document based on the package opened
+            XpsDocument doc = new XpsDocument(package);
+            // Create an instance of XpsDocumentWriter for the document
+            XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc);
+            // Write the canvas (as Visual) to the document
+            writer.Write(surface);
+            // Close document
+            doc.Close();
+            // Close package
+            package.Close();
+
+            // Restore previously saved layout
+            surface.LayoutTransform = transform;
+        }
+
+
+        public void ExportToPng(Uri path, Canvas surface)
+        {
+            if (path == null) return;
+            // Save current canvas transform
+            Transform transform = surface.LayoutTransform;
+            // reset current transform (in case it is scaled or rotated)
+            surface.LayoutTransform = null;
+
+            // Get the size of canvas
+            Size size = new Size(surface.ActualWidth, surface.ActualHeight);
+            // Measure and arrange the surface
+            // VERY IMPORTANT
+            surface.Measure(size);
+            surface.Arrange(new Rect(size));
+
+            // Create a render bitmap and push the surface to it
+            RenderTargetBitmap renderBitmap =
+              new RenderTargetBitmap(
+                (int)size.Width,
+                (int)size.Height,
+                96d,
+                96d,
+                PixelFormats.Pbgra32);
+            renderBitmap.Render(surface);
+
+            // Create a file stream for saving image
+            using (FileStream outStream = new FileStream(path.LocalPath, FileMode.Create))
+            {
+                // Use png encoder for our data
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                // push the rendered bitmap to it
+                encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+                // save the data to the stream
+                encoder.Save(outStream);
+            }
+
+            // Restore previously saved layout
+            surface.LayoutTransform = transform;
+        }
+
+
 
         private void sizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -391,7 +482,8 @@ namespace ssi
             }
 
             int drawlinesnumber;
-            if (anno_list.Count > this.ActualWidth) drawlinesnumber = (int)this.ActualWidth;
+            if (this.ActualWidth == 0) drawlinesnumber = 1000;
+            else if (anno_list.Count > this.ActualWidth) drawlinesnumber = (int)this.ActualWidth;
             else drawlinesnumber = anno_list.Count;
 
             for (int i = 0; i < drawlinesnumber; i++)
@@ -421,6 +513,8 @@ namespace ssi
             {
                 timeRangeChanged(ViewHandler.Time);
             }
+
+          
         }
 
         public void ContAnnoMode()
@@ -543,6 +637,7 @@ namespace ssi
                 AnnoListItem temp = new AnnoListItem(start, len, "", "", TierId);
                 anno_list.Add(temp);
                 AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
+                segment.Width = 1;
                 annorightdirection = true;
                 segments.Add(segment);
                 this.Children.Add(segment);
@@ -777,13 +872,16 @@ namespace ssi
                                 if (i % lines.Count < lines.Count - 1 && ali.Stop < time.SelectionStop - ali.Duration) lines[i % lines.Count].X2 = lines[i % lines.Count + 1].X1;
                                 else lines[i % lines.Count].X2 = ViewHandler.Time.PixelFromTime(ali.Stop);
 
+                                //investigate when loaded from db
+                                if (ali.Label == "") ali.Label = "0.5";
+
                                 double value = double.Parse(ali.Label);
                                 double rng = borderhigh - borderlow;
                                 value = 1.0 - (value - borderlow) / rng;
 
                                 lines[i % lines.Count].Y1 = (value) * this.ActualHeight;
                                 if (i % lines.Count < lines.Count - 1 && ali.Stop < time.SelectionStop - ali.Duration) lines[i % lines.Count].Y2 = lines[i % lines.Count + 1].Y1;
-                                else lines[i % lines.Count].Y2 = lines[i % lines.Count - 1].Y1;
+                                else  if(i > 0) lines[i % lines.Count].Y2 = lines[i % lines.Count - 1].Y1;
                                 lines[i % lines.Count].Visibility = Visibility.Visible;
                                 i++;
                             }

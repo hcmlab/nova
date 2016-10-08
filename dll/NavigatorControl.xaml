@@ -24,7 +24,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Column="0" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Left">
-            <Label HorizontalContentAlignment="Center" VerticalAlignment="Center"  BorderThickness="0" FontStyle="Italic" Margin="0,10,0,9" Width="231" Content="© 2016 HCM-Lab, Augsburg University" />
+            <Label Name="Statusbar" HorizontalContentAlignment="Center" VerticalAlignment="Center"  BorderThickness="0" FontStyle="Italic" Margin="0,10,0,9" Width="231" Content="© 2016 HCM-Lab, Augsburg University" />
             <Button Name="newAnnoButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">New Tier</Button>
             <Button Name="newAnnoContButton" Width="88" Height="25" Margin="5" VerticalAlignment="Center">New Cont. Tier</Button>
             <!--<Button Name="saveAnnoAsButton" Width="105" Height="25" Margin="5" VerticalAlignment="Center">Save Selected Tier</Button>-->
@@ -41,9 +41,9 @@
         <StackPanel Grid.Column="2" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
             <!--<Button Name="loadButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Load</Button>-->
 
-            <CheckBox Name="framewisebox" Width="158" Height="25" Margin="0,5" IsChecked="False">Media follows Annotation</CheckBox>
-            <CheckBox Name="askforlabels" Width="95" Height="25" Margin="0,5" IsChecked="False">Ask for labels</CheckBox>
-            <CheckBox Name="followplaybox" Width="130" Height="25" Margin="0,5" IsChecked="True">Zoom follows media</CheckBox>
+            <CheckBox Name="framewisebox" Width="167" Height="25" Margin="0,10" IsChecked="False">Media follows Annotation</CheckBox>
+            <CheckBox Name="askforlabels" Width="109" Height="25" Margin="0,10" IsChecked="False">Ask for labels</CheckBox>
+            <CheckBox Name="followplaybox" Width="147" Height="25" Margin="0,10" IsChecked="True">Zoom follows media</CheckBox>
 
             <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Clear</Button>
         </StackPanel>

@@ -32,8 +32,12 @@ namespace ssi
             TimeTrackSegment.Unit unit = values[++unitCount % values.Length];
             foreach (TimeTrackSegment segment in segments)
             {
-                if (segment != segments[0] && segment != segments[segments.Count - 1]) segment.setUnit(unit); //Little optical workaround to avoid the first and last label to be shown
+                segment.setUnit(unit); //Little optical workaround to avoid the first and last label to be shown
+                if (segments[0] == segment) segment.Text = "";
+                if (segments[segments.Count -1] == segment) segment.Text = "";
             }
+
+         
         }
 
         public double SecondsFrom
@@ -53,7 +57,6 @@ namespace ssi
             this.Width = time.SelectionInPixel;
 
             n_ticks = (uint)(this.Width / TICKGAP + 0.5);
-
             for (int i = segments.Count; i < n_ticks; i++)
             {
                 segments.Add(new TimeTrackSegment(this, view_selection));
@@ -63,7 +66,9 @@ namespace ssi
             for (int i = 0; i < n_ticks; i++)
             {
                 segments[i].setPos(pos, n_ticks);
+              
                 pos += 1.0 / n_ticks;
+               
             }
         }
     }

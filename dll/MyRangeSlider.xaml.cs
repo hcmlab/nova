@@ -8,12 +8,21 @@ namespace ssi
     public partial class TimeRangeSlider : UserControl
     {
         private ViewTime _viewTime = null;
+        private bool _followmedia = false;
 
         public ViewTime ViewTime
         {
             get { return _viewTime; }
             set { _viewTime = value; }
         }
+
+        public bool followmedia
+        {
+            get { return _followmedia; }
+            set { _followmedia = value; }
+        }
+
+        private double min = 1;
 
         public event TimeRangeChanged OnTimeRangeChanged;
 
@@ -26,6 +35,7 @@ namespace ssi
             ui.RangeStartSelected = 0;
             ui.RangeStopSelected = 100000;
             ui.MinRange = 1;
+
             ui.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(OnMouseDoubleClick);
             ui.PreviewMouseUp += (sender, args) => Update();
             ui.PreviewMouseDown += (sender, args) => Update();
@@ -50,12 +60,41 @@ namespace ssi
         {
             if (_viewTime != null)
             {
+                if (ui.RangeStartSelected > ui.RangeStop) ui.RangeStartSelected = ui.RangeStop;
+                if (ui.RangeStopSelected > ui.RangeStop) ui.RangeStopSelected = ui.RangeStop;
+                if (ui.RangeStartSelected < ui.RangeStart) ui.RangeStartSelected = ui.RangeStart;
+                if (ui.RangeStopSelected < ui.RangeStart) ui.RangeStopSelected = ui.RangeStart;
+
+                if (ui.RangeStopSelected < ui.RangeStartSelected)
+                {
+                    long temp;
+                    temp = ui.RangeStopSelected;
+                    ui.RangeStopSelected = ui.RangeStartSelected;
+                    ui.RangeStartSelected = ui.RangeStopSelected;
+                }
+
                 _viewTime.SelectionStart = _viewTime.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
                 _viewTime.SelectionStop = _viewTime.TotalDuration * ((double)ui.RangeStopSelected / (double)ui.RangeStop);
 
-                if (_viewTime.SelectionStop - _viewTime.SelectionStart < 1)
+                if (_viewTime.SelectionStart < 0) _viewTime.SelectionStart = 0;
+                if (_viewTime.SelectionStop - _viewTime.SelectionStart < min)
                 {
-                    _viewTime.SelectionStop = _viewTime.SelectionStart + 1;
+                    _viewTime.SelectionStop = _viewTime.SelectionStart + min;
+                }
+
+                if (followmedia)
+                {
+                    if (_viewTime.SelectionStop < ViewTime.CurrentPlayPosition)
+                    {
+                        _viewTime.SelectionStop = ViewTime.CurrentPlayPosition;
+                        _viewTime.SelectionStart = _viewTime.SelectionStop - min;
+
+                        if (_viewTime.TotalDuration > 0)
+                        {
+                            ui.RangeStartSelected = ((long)_viewTime.SelectionStart * ui.RangeStop) / (long)_viewTime.TotalDuration;
+                            ui.RangeStopSelected = ((long)_viewTime.SelectionStop * ui.RangeStop) / (long)_viewTime.TotalDuration;
+                        }
+                    }
                 }
 
                 if (OnTimeRangeChanged != null)
@@ -73,18 +112,39 @@ namespace ssi
                 return;
             }
 
+            //if (ui.RangeStartSelected > ui.RangeStop) ui.RangeStartSelected = ui.RangeStop;
+            //if (ui.RangeStopSelected > ui.RangeStop) ui.RangeStopSelected = ui.RangeStop;
+            //if (ui.RangeStartSelected < ui.RangeStart) ui.RangeStartSelected = ui.RangeStart;
+            //if (ui.RangeStopSelected < ui.RangeStart) ui.RangeStopSelected = ui.RangeStart;
+            //if (ui.RangeStopSelected < ui.RangeStartSelected)
+            //{
+            //    long temp;
+            //    temp = ui.RangeStopSelected;
+            //    ui.RangeStopSelected = ui.RangeStartSelected;
+            //    ui.RangeStartSelected = ui.RangeStopSelected;
+            //}
+
             var range = ui.RangeStopSelected - ui.RangeStartSelected;
-            var moveStep = (long)Math.Max(1, range * moveWindowPercentage + 0.5f);
+
+            float step = range * moveWindowPercentage + 0.5f;
+            var moveStep = (long)Math.Max(1, step);
+            Console.WriteLine(moveStep);
 
             if (moveRight)
             {
                 var effectiveStep = Math.Min(moveStep, ui.RangeStop - ui.RangeStopSelected); // do not change selection range on border conditions
+                Console.WriteLine(effectiveStep);
+
+                //  if (effectiveStep > ui.RangeStop) effectiveStep = ui.RangeStop;
+
                 ui.RangeStopSelected += effectiveStep;
                 ui.RangeStartSelected += effectiveStep;
+                Console.WriteLine(ui.RangeStopSelected + "  " + ui.RangeStartSelected);
             }
             else
             {
                 var effectiveStep = Math.Min(moveStep, ui.RangeStartSelected - ui.RangeStart); // do not change selection range on border conditions
+                                                                                               //   if (effectiveStep < 10) effectiveStep = 10;
                 ui.RangeStartSelected -= effectiveStep;
                 ui.RangeStopSelected -= effectiveStep;
             }

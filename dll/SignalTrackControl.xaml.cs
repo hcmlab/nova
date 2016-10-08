@@ -41,8 +41,13 @@ namespace ssi
 
         public void clear()
         {
-            this.signalTrackGrid.RowDefinitions.Clear();
-            this.signalTrackGrid.Children.Clear();
+            try
+            {
+                this.signalTrackGrid.Children.Clear();
+                this.signalTrackGrid.RowDefinitions.Clear();
+            }
+            catch { }
+           
         }
 
         public ISignalTrack addSignalTrack(Signal signal, string color, string background)

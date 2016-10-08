@@ -1,7 +1,42 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ssi.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="MongoDBUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MongoDBUser</Value>
+    </Setting>
+    <Setting Name="MongoDBPass" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MongoDBPass</Value>
+    </Setting>
+    <Setting Name="DataServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">sftp.server.yeah</Value>
+    </Setting>
+    <Setting Name="DataServerFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/path/to/your/files/</Value>
+    </Setting>
+    <Setting Name="DataServerLogin" Type="System.String" Scope="User">
+      <Value Profile="(Default)">DataServerLogin</Value>
+    </Setting>
+    <Setting Name="DataServerPass" Type="System.String" Scope="User">
+      <Value Profile="(Default)">DataServerPass</Value>
+    </Setting>
+    <Setting Name="DataServerConnectionType" Type="System.String" Scope="User">
+      <Value Profile="(Default)">sftp</Value>
+    </Setting>
+    <Setting Name="Filenames" Type="System.String" Scope="User">
+      <Value Profile="(Default)">file1.mp4;file2.stream;file2.stream~</Value>
+    </Setting>
+    <Setting Name="LastSessionId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">SessionID</Value>
+    </Setting>
+    <Setting Name="MongoDBIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">127.0.0.1:27017</Value>
+    </Setting>
+    <Setting Name="Database" Type="System.String" Scope="User">
+      <Value Profile="(Default)">database</Value>
+    </Setting>
+    <Setting Name="DataPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Data</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

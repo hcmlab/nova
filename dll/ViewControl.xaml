@@ -35,6 +35,10 @@
                 <MenuItem Header="Save Single Tier as" Name="savetiermenu" IsEnabled="False" />
                 <MenuItem Header="Convert to discrete" Name="convertodiscretemenu" IsEnabled="False" />
                 <MenuItem Header="Convert to stream" Name="convertosignalemenu" IsEnabled="False" />
+                <MenuItem Header="Export" Name="export">
+                    <MenuItem Header="Export to XPS" Name="exporttracktoxps" IsEnabled="True" />
+                    <MenuItem Header="Export to PNG" Name="exporttracktopng" IsEnabled="True" />
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="Signal">
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
@@ -42,8 +46,14 @@
             </MenuItem>
             <MenuItem Header="Database">
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
-                <MenuItem Header="Store Tier to MongoDB" Name="mongodbmenu" />
-                <MenuItem Header="Load Tier from MongoDB " Name="mongodbmenu2" />
+                <MenuItem Header="Load Session from MongoDB " Name="mongodbmenu2" />
+                <MenuItem Header="Store Session to MongoDB" Name="mongodbmenu" IsEnabled="False" />
+                <MenuItem Header="Show Downloaded Files" Name="mongodbmenushow" />
+                <MenuItem Header="Change Download Directory" Name="mongodbchangefolder" />
+            
+               <MenuItem Header="Admin: Manage Database" Visibility="Collapsed" Name="addmongodb" />
+    
+                <!--<MenuItem Header="Test Media to database " Name="mongodbmenu3" />-->
             </MenuItem>
             <MenuItem Header="?"  Name="help" />
         </Menu>
@@ -106,5 +116,17 @@
         <Border Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4">
             <local:NavigatorControl x:Name="navigator" Loaded="navigator_Loaded"></local:NavigatorControl>
         </Border>
+
+        <Grid Name="ShadowBox" Grid.RowSpan="2" Grid.ColumnSpan ="4" Visibility="Collapsed">
+            <Border Background="Black" Opacity=".95" />
+            <Grid Name="Loadingbox" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="299*" />
+                    <ColumnDefinition Width="177*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Name="tb"  Text="Loading Data..." HorizontalAlignment="Center" Foreground="White" FontSize="30" Margin="139,51,141,-51" Grid.ColumnSpan="2" />
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

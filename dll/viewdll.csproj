@@ -94,6 +94,9 @@
     <Reference Include="AvalonControlsLibrary">
       <HintPath>.\AvalonControlsLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="DiffieHellman">
+      <HintPath>.\DiffieHellman.dll</HintPath>
+    </Reference>
     <Reference Include="MediaToolkit">
       <HintPath>.\MediaToolkit.dll</HintPath>
     </Reference>
@@ -106,13 +109,18 @@
     <Reference Include="MongoDB.Driver.Core">
       <HintPath>.\MongoDB.Driver.Core.dll</HintPath>
     </Reference>
+    <Reference Include="MongoDB.Driver.GridFS">
+      <HintPath>.\MongoDB.Driver.GridFS.dll</HintPath>
+    </Reference>
     <Reference Include="PropertyTools.Wpf">
       <HintPath>.\PropertyTools.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="ReachFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Printing" />
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
@@ -123,6 +131,9 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Tamir.SharpSSH">
+      <HintPath>.\Tamir.SharpSSH.dll</HintPath>
+    </Reference>
     <Reference Include="UIAutomationProvider">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -143,6 +154,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\WriteableBitmapEx.dll</HintPath>
     </Reference>
+    <Reference Include="Xceed.Wpf.Toolkit">
+      <HintPath>C:\Users\Tobias\Desktop\playground\dll\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnnoList.cs" />
@@ -155,9 +169,24 @@
     <Compile Include="AnnoTrackSegment.cs" />
     <Compile Include="ContinuousColorTheme.cs" />
     <Compile Include="Cursor.cs" />
-    <Compile Include="DatabaseHandler.cs" />
-    <Compile Include="DataBaseResultsWindow.xaml.cs">
+    <Compile Include="Database\DatabaseAdminWindow.xaml.cs">
+      <DependentUpon>DatabaseAdminWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseDBMeta.xaml.cs">
+      <DependentUpon>DatabaseDBMeta.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseEditSubjectWindow.xaml.cs">
+      <DependentUpon>DatabaseEditSubjectWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseHandler.cs" />
+    <Compile Include="Database\DatabaseHandlerWindow.xaml.cs">
+      <DependentUpon>DatabaseHandlerWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DataBaseResultsWindow.xaml.cs">
       <DependentUpon>DataBaseResultsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseUserTableWindow.xaml.cs">
+      <DependentUpon>DatabaseUserTableWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ExportSamplesControl.xaml.cs">
       <DependentUpon>ExportSamplesControl.xaml</DependentUpon>
@@ -198,6 +227,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Security.cs" />
     <Compile Include="SelectionBox.xaml.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="SignalTrack.cs" />
@@ -224,6 +254,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -243,7 +274,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="DataBaseResultsWindow.xaml">
+    <Page Include="Database\DatabaseAdminWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseDBMeta.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseEditSubjectWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseHandlerWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DataBaseResultsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseUserTableWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
