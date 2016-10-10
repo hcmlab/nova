@@ -69,7 +69,7 @@ namespace ssi
         {
             if (CollectionResultsBox.SelectedItem != null)
             {
-                Properties.Settings.Default.LastSessionId = CollectionResultsBox.SelectedItem.ToString();
+                Properties.Settings.Default.LastSessionId = ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name;
                 Properties.Settings.Default.Save();
 
                 GetAnnotations();
@@ -223,10 +223,19 @@ namespace ssi
 
 
             if (CollectionResultsBox.Items != null) CollectionResultsBox.Items.Clear();
+            List<DatabaseSession> items = new List<DatabaseSession>();
             foreach (var c in sessions)
             {
-                CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
+                //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
+                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString() });
+               
             }
+
+            CollectionResultsBox.ItemsSource = items;
+
+
+
+
         }
 
         public void GetAnnotations(bool onlyme = false)
@@ -404,7 +413,7 @@ namespace ssi
 
 
 
-                var filter2 = builder.Eq("name", CollectionResultsBox.SelectedItem.ToString());
+                var filter2 = builder.Eq("name", CollectionResultsBox.ToString());
                 var session = sessions.Find(filter).ToList();
                 if(session.Count > 0)
 
@@ -438,10 +447,9 @@ namespace ssi
         {
             if (AnnotationResultBox.SelectedItem != null)
             {
-                string[] tiervsname = AnnotationResultBox.SelectedItem.ToString().Split('#');
                 for (int i = 0; i < AnnotationResultBox.SelectedItems.Count; i++)
                 {
-                    if (authlevel > 2 || Properties.Settings.Default.MongoDBUser == tiervsname[2]) DeleteAnnotation.Visibility = Visibility.Visible;
+                    if (authlevel > 2 || Properties.Settings.Default.MongoDBUser ==  ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator) DeleteAnnotation.Visibility = Visibility.Visible;
                 }
             }
         }

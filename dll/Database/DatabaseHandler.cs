@@ -410,6 +410,18 @@ namespace ssi
         public string Annotator { get; set; }
     }
 
+
+    public class DatabaseSession
+    {
+        public string Name { get; set; }
+
+        public string Language { get; set; }
+
+        public string Location { get; set; }
+
+        public string Date { get; set; }
+    }
+
     public class DatabaseMediaInfo
     {
         public string connection;

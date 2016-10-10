@@ -185,6 +185,9 @@
     <Compile Include="Database\DataBaseResultsWindow.xaml.cs">
       <DependentUpon>DataBaseResultsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DataBaseSessionWindow.xaml.cs">
+      <DependentUpon>DataBaseSessionWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseUserTableWindow.xaml.cs">
       <DependentUpon>DatabaseUserTableWindow.xaml</DependentUpon>
     </Compile>
@@ -291,6 +294,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Database\DataBaseResultsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DataBaseSessionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

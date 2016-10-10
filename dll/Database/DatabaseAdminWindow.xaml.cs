@@ -196,19 +196,22 @@ namespace ssi
 
         private void AddSession_Click(object sender, RoutedEventArgs e)
         {
-            LabelInputBox l = new LabelInputBox("New Session", "Enter Session Name", Properties.Settings.Default.LastSessionId);
-            l.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            l.ShowDialog();
+           
+ 
+          
+            DataBaseSessionWindow dbsw = new DataBaseSessionWindow();
+            dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dbsw.ShowDialog();
 
-            if (l.DialogResult == true)
+            if (dbsw.DialogResult == true)
             {
-                Properties.Settings.Default.LastSessionId = l.Result();
+                Properties.Settings.Default.LastSessionId = dbsw.Name();
                 Properties.Settings.Default.Save();
 
-                BsonElement name = new BsonElement("name", l.Result());
-                BsonElement location = new BsonElement("location", "");
-                BsonElement language = new BsonElement("language", "");
-                BsonElement date = new BsonElement("date", new BsonDateTime(0));
+                BsonElement name = new BsonElement("name", dbsw.Name());
+                BsonElement location = new BsonElement("location", dbsw.Location());
+                BsonElement language = new BsonElement("language", dbsw.Language());
+                BsonElement date = new BsonElement("date", dbsw.Date());
                 BsonDocument document = new BsonDocument();
 
                 BsonArray media = new BsonArray();
@@ -226,7 +229,7 @@ namespace ssi
                 bool sessionnamealreadypresent = false;
                 foreach (var item in CollectionResultsBox.Items)
                 {
-                    if (item.ToString() == l.Result())
+                    if (item.ToString() == dbsw.Name())
                     {
                         sessionnamealreadypresent = true;
                     }
@@ -509,6 +512,7 @@ namespace ssi
                 {
                     AddSession.Visibility = Visibility.Visible;
                     DeleteSession.Visibility = Visibility.Visible;
+                    EditSession.Visibility = Visibility.Visible;
                 }
             }
         }
@@ -880,6 +884,46 @@ namespace ssi
                 var result = database.GetCollection<BsonDocument>("MediaTypes").DeleteOne(filter);
 
                 GetMediaType();
+            }
+        }
+
+        private void EditSession_Click(object sender, RoutedEventArgs e)
+        {
+            if(CollectionResultsBox.SelectedItem != null)
+            {
+
+           
+
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("name", CollectionResultsBox.SelectedItem.ToString());
+            var session = database.GetCollection<BsonDocument>("Sessions").Find(filter).ToList();
+
+            if(session.Count>0)
+            {
+
+                DataBaseSessionWindow dbsw = new DataBaseSessionWindow(session[0]["name"].ToString(), session[0]["language"].ToString(),session[0]["location"].ToString(), session[0]["date"].AsDateTime);
+                dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dbsw.ShowDialog();
+
+                if (dbsw.DialogResult == true)
+                {
+               
+                    var updatelocation = Builders<BsonDocument>.Update.Set("location", dbsw.Location());
+                    database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatelocation);
+
+                    var updatelanguage = Builders<BsonDocument>.Update.Set("language", dbsw.Language());
+                    database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatelanguage);
+
+                    var updatedate = Builders<BsonDocument>.Update.Set("date", dbsw.Date());
+                    database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatedate);
+
+                    var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.Name());
+                    database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatename);
+
+                    }
+                }
+                    GetSessions();
+
             }
         }
     }
