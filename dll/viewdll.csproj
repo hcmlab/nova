@@ -154,9 +154,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\WriteableBitmapEx.dll</HintPath>
     </Reference>
-    <Reference Include="Xceed.Wpf.Toolkit">
-      <HintPath>C:\Users\Tobias\Desktop\playground\dll\Xceed.Wpf.Toolkit.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnnoList.cs" />
@@ -164,6 +161,7 @@
       <DependentUpon>AnnoListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="AnnoListItem.cs" />
+    <Compile Include="AnnotationScheme.cs" />
     <Compile Include="AnnoTrack.cs" />
     <Compile Include="AnnoTrackControl.xaml.cs" />
     <Compile Include="AnnoTrackSegment.cs" />
@@ -172,11 +170,14 @@
     <Compile Include="Database\DatabaseAdminWindow.xaml.cs">
       <DependentUpon>DatabaseAdminWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseAnnoScheme.xaml.cs">
+      <DependentUpon>DatabaseAnnoScheme.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseDBMeta.xaml.cs">
       <DependentUpon>DatabaseDBMeta.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Database\DatabaseEditSubjectWindow.xaml.cs">
-      <DependentUpon>DatabaseEditSubjectWindow.xaml</DependentUpon>
+    <Compile Include="Database\DatabaseSubjectWindow.xaml.cs">
+      <DependentUpon>DatabaseSubjectWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Database\DatabaseHandler.cs" />
     <Compile Include="Database\DatabaseHandlerWindow.xaml.cs">
@@ -281,11 +282,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Database\DatabaseAnnoScheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Database\DatabaseDBMeta.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Database\DatabaseEditSubjectWindow.xaml">
+    <Page Include="Database\DatabaseSubjectWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

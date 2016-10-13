@@ -57,7 +57,7 @@
         <Label Content="Annotations" Margin="237,58,270,3" Grid.RowSpan="2"/>
         <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
 
-        <ListView Name="AnnotationResultBox" Margin="246,80,200,216">
+        <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple" Margin="246,80,200,216">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="65" Header="AnnoType" DisplayMemberBinding="{Binding AnnoType}" />

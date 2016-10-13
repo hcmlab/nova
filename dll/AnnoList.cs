@@ -29,6 +29,8 @@ namespace ssi
         private double confidence = 1.0;
         private string role = null;
         private string subject = null;
+        private double sr = 1.0;
+        private AnnotationScheme scheme;
 
         private static bool _isDiscrete = true;
 
@@ -48,6 +50,12 @@ namespace ssi
         {
             get { return subject; }
             set { subject = value; }
+        }
+
+        public double SR
+        {
+            get { return sr; }
+            set { sr = value; }
         }
 
         public bool isDiscrete
@@ -95,6 +103,13 @@ namespace ssi
         {
             get { return name; }
             set { name = value; }
+        }
+
+
+        public AnnotationScheme AnnotationScheme
+        {
+            get { return scheme; }
+            set { scheme = value; }
         }
 
         public AnnoList()
@@ -206,6 +221,7 @@ namespace ssi
             AnnoList list = new AnnoList(filepath);
             list.Lowborder = 0.0;
             list.Highborder = 1.0;
+            list.sr = samplerate;
             try
             {
                 StreamReader sr = new StreamReader(filepath, System.Text.Encoding.Default);
@@ -511,4 +527,27 @@ namespace ssi
             }
         }
     }
+
+
+    public class AnnotationScheme
+    {
+        public string name { get; set; }
+
+        public List<LabelColorPair> LabelsAndColors { get; set; }
+
+        public double minborder { get; set; }
+
+        public double maxborder { get; set; }
+
+        public double sr { get; set; }
+
+        public string mincolor { get; set; }
+
+        public string maxcolor { get; set; }
+
+        public string type { get; set; }
+
+
+    }
+
 }

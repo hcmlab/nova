@@ -7,7 +7,7 @@ namespace ssi
     public class Media : MediaElement, IMedia
     {
         private string filepath;
-        private string url;
+        private string dbId;
 
         public string GetFilepath()
         {
@@ -29,9 +29,9 @@ namespace ssi
             return 0;
         }
 
-        public void Url(string url)
+        public void DBID(string url)
         {
-            this.url = url;
+            this.dbId = url;
         }
 
         public Media(string filepath, double pos_in_seconds)

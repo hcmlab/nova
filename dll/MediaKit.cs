@@ -9,7 +9,7 @@ namespace ssi
     public class MediaKit : MediaUriElement, IMedia
     {
         private string filepath;
-        private string url;
+        private string dbId;
 
         public string GetFilepath()
         {
@@ -24,6 +24,11 @@ namespace ssi
         public void SetVolume(double volume)
         {
             this.Volume = volume;
+        }
+
+        public void DBID(string url)
+        {
+            this.dbId = url;
         }
 
         public MediaKit(string filepath, double pos_in_seconds)
@@ -41,10 +46,7 @@ namespace ssi
             this.filepath = filepath;
         }
 
-        public void Url(string url)
-        {
-            this.url = url;
-        }
+    
 
         public void Move(double to_in_seconds)
         {

@@ -67,6 +67,8 @@ namespace ssi
         static public int closestindexold = 0;
         public static bool continuousannomode = false;
         public static bool askforlabel = false;
+        public static string Defaultlabel = "";
+        public static string DefaultColor = "#000000";
 
         static public event AnnoTrackChangeEventHandler OnTrackChange;
 
@@ -364,12 +366,10 @@ namespace ssi
             }
             else
             {   //it has to be called twice, otherwise there are some weird effects.
-                timeRangeChanged(ViewHandler.Time);
-
-                if (!isDiscrete)
-                {
+               
                     timeRangeChanged(ViewHandler.Time);
-                }
+                    timeRangeChanged(ViewHandler.Time);
+              
             }
         }
 
@@ -508,9 +508,10 @@ namespace ssi
             el.SetValue(Canvas.LeftProperty, 0.0);
             this.Children.Add(el);
 
-            timeRangeChanged(ViewHandler.Time);
+            if(isDiscrete) timeRangeChanged(ViewHandler.Time);
             if (!isDiscrete)
             {
+                timeRangeChanged(ViewHandler.Time);
                 timeRangeChanged(ViewHandler.Time);
             }
 
@@ -634,7 +635,9 @@ namespace ssi
 
             if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
             {
-                AnnoListItem temp = new AnnoListItem(start, len, "", "", TierId);
+
+                
+                AnnoListItem temp = new AnnoListItem(start, len, Defaultlabel, "", TierId, DefaultColor);
                 anno_list.Add(temp);
                 AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                 segment.Width = 1;
@@ -797,10 +800,10 @@ namespace ssi
                             closestindexold = closestindex;
                             timeRangeChanged(ViewHandler.Time);
                             //  nicer drawing but slower
-                            // if (!isDiscrete)
-                            // {
-                            ///    timeRangeChanged(ViewHandler.Time);
-                            // }
+                             if (!isDiscrete)
+                             {
+                                timeRangeChanged(ViewHandler.Time);
+                             }
                         }
                     }
                 }

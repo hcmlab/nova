@@ -96,7 +96,9 @@ namespace ssi
                     }
                 }
 
-                //if (this.item.Label == "") this.Item.Label = "Anno";
+              //  if (this.item.Label == "") this.Item.Label = "Anno";
+
+                
 
                 LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", this.Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true);
                 inputBox.showSlider(true,this.Item.Confidence);
