@@ -31,6 +31,7 @@ namespace ssi
         private string subject = null;
         private double sr = 1.0;
         private AnnotationScheme scheme;
+        public bool usesAnnoScheme = false;
 
         private static bool _isDiscrete = true;
 

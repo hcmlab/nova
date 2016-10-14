@@ -67,8 +67,9 @@ namespace ssi
         static public int closestindexold = 0;
         public static bool continuousannomode = false;
         public static bool askforlabel = false;
-        public static string Defaultlabel = "";
+        public static string Defaultlabel = "Anno";
         public static string DefaultColor = "#000000";
+       
 
         static public event AnnoTrackChangeEventHandler OnTrackChange;
 
@@ -138,7 +139,7 @@ namespace ssi
 
         static public void OnKeyDownHandler(object sender, KeyEventArgs e)
         {
-            if (e.KeyboardDevice.IsKeyDown(Key.Delete))
+            if (e.KeyboardDevice.IsKeyDown(Key.Delete)|| e.KeyboardDevice.IsKeyDown(Key.Back))
             {
                 if (selected_segment != null && selected_track != null && GetSelectedTrack().isDiscrete)
                 {
@@ -382,33 +383,49 @@ namespace ssi
                 {
                     if (this.isDiscrete)
                     {
-                        byte newAlpha = 20;
+                        byte newAlpha = 100;
                         Color newColor = Color.FromArgb(newAlpha, ((SolidColorBrush)BackgroundColor).Color.R, ((SolidColorBrush)BackgroundColor).Color.G, ((SolidColorBrush)BackgroundColor).Color.B);
                         Brush brush = new SolidColorBrush(newColor);
                         this.Background = brush;
                     }
-                    else
+                    else if (ctBrush != null && !isDiscrete)
                     {
-                        if (ctBrush == null)
-                        {
-                            LinearGradientBrush myBrush = new LinearGradientBrush();
-                            myBrush.StartPoint = new Point(0, 0);
-                            myBrush.EndPoint = new Point(0, 1);
-                            myBrush.GradientStops.Add(new GradientStop(Colors.Blue, 0));
-                            myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1));
-                            myBrush.Opacity = 0.75;
-                            ctBrush = myBrush;
-                        }
 
-                        this.Background = ctBrush;
+
+                        LinearGradientBrush myBrush = new LinearGradientBrush();
+                        myBrush.StartPoint = new Point(0, 0);
+                        myBrush.EndPoint = new Point(0, 1);
+                        myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ctBrush).GradientStops[0].Color, 0));
+                        myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ctBrush).GradientStops[1].Color, 1));
+                        myBrush.Opacity = 0.6;
+                        this.Background = myBrush;
+
                     }
                 }
             }
             else
             {
-                if (BackgroundColor != null)
+                if (BackgroundColor != null && isDiscrete)
                 {
                     this.Background = BackgroundColor;
+                }
+
+
+                else if (!isDiscrete)
+                {
+                    if (ctBrush == null)
+                    {
+                        LinearGradientBrush myBrush = new LinearGradientBrush();
+                        myBrush.StartPoint = new Point(0, 0);
+                        myBrush.EndPoint = new Point(0, 1);
+                        myBrush.GradientStops.Add(new GradientStop(Colors.Blue, 0));
+                        myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1));
+                        myBrush.Opacity = 0.75;
+                        ctBrush = myBrush;
+                    }
+
+                    this.Background = ctBrush;
+
                 }
             }
         }
@@ -819,9 +836,15 @@ namespace ssi
                 foreach (AnnoTrackSegment s in segments)
                 {
                     s.Visibility = Visibility.Hidden;
-                    if (s.Item.Start >= time.SelectionStart && s.Item.Stop <= time.SelectionStop)
+                    if (s.Item.Start >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
                     {
                         s.update();
+                        s.Visibility = Visibility.Visible;
+                    }
+
+                    else if (s.Item.Stop >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
+                    {
+                        s.update2();
                         s.Visibility = Visibility.Visible;
                     }
                 }

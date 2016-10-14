@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -67,7 +68,6 @@ namespace ssi
         private double skelfps;
         private double lasttimepos = 0;
         private string lastdlfile = null;
-        private bool loadedfromdb = false;
         public bool annoSchemeloaded = false;
         private ViewControl view;
         private String annofilepath = "";
@@ -86,20 +86,14 @@ namespace ssi
 
                 view.annoListControl.editComboBox.Items.Clear();
 
-                if (AnnoTrack.GetSelectedTrack() != null)
+               
+                if (AnnoTrack.GetSelectedTrack() != null && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
-                    if (!AnnoTrack.GetSelectedTrack().isDiscrete)
-                    {
-                        view.annoListControl.editButton.IsEnabled = false;
-                        view.annoListControl.editComboBox.IsEnabled = false;
-                        view.annoListControl.editTextBox.IsEnabled = false;
-                    }
-                    else
-                    {
+                    
                         view.annoListControl.editButton.IsEnabled = true;
                         view.annoListControl.editComboBox.IsEnabled = true;
                         view.annoListControl.editTextBox.IsEnabled = true;
-                    }
+                   
 
                     view.annoListControl.editComboBox.Items.Clear();
 
@@ -115,9 +109,25 @@ namespace ssi
                                 view.annoListControl.editComboBox.Items.Add(lcp.Label);
                             }
                         view.annoListControl.editComboBox.SelectedIndex = 0;
-                        }
-                   
+                          }
+
                 }
+
+                else  if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
+                {
+                    view.annoListControl.editButton.IsEnabled = false;
+                    view.annoListControl.editComboBox.IsEnabled = false;
+                    view.annoListControl.editTextBox.IsEnabled = false;
+                }
+
+                else
+                {
+                    view.annoListControl.editButton.IsEnabled = true;
+                    view.annoListControl.editComboBox.IsEnabled = false;
+                    view.annoListControl.editTextBox.IsEnabled = true;
+                }
+
+
             }
         }
 
@@ -319,7 +329,7 @@ namespace ssi
                     if (AnnoTrack.GetSelectedTrack().isDiscrete) saveAnno();
                     else saveAnnoContinous();
                 }
-                else if (e.KeyboardDevice.IsKeyDown(Key.Delete))
+                else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
                     if (AnnoTrack.GetSelectedSegment() == null && Mouse.DirectlyOver == AnnoTrack.GetSelectedTrack())
                     {
@@ -624,7 +634,7 @@ namespace ssi
             Stop();
             saveAll();
             AnnoSchemeLoaded = false;
-            loadedfromdb = false;
+           
             this.view.trackControl.signalNameLabel.Text = "";
             this.view.trackControl.signalNameLabel.ToolTip = "";
             this.view.trackControl.signalBytesLabel.Text = "";
@@ -772,6 +782,10 @@ namespace ssi
                 }
 
                 moveCursorTo(item.Start);
+                if (this.view.navigator.framewisebox.IsChecked == true)
+                {
+                    media_list.move(item.Start);
+                }
             }
         }
 
@@ -799,7 +813,7 @@ namespace ssi
         public void newAnno(bool isDiscrete, double samplerate = 1.0, double borderlow = 0, double borderhigh = 1.0, Brush background = null)
         {
             AnnoList anno = new AnnoList();
-            if (loadedfromdb)
+            if (AnnoSchemeLoaded)
             {
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
                 DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
@@ -807,18 +821,17 @@ namespace ssi
                 int type = 0;
                 if (isDiscrete) type = 1;
                 else if (!isDiscrete) type = 2;
-                string annoscheme = db.LoadAnnotationSchemes(Properties.Settings.Default.Database, "New", type);
-
-            
+               
+                anno.Role = db.LoadRoles(Properties.Settings.Default.Database, null);
+                string annoscheme = db.LoadAnnotationSchemes(Properties.Settings.Default.Database, null, type);
                 anno.AnnotationScheme = db.GetAnnotationScheme(annoscheme, isDiscrete);
-                anno.Role = db.LoadRoles(Properties.Settings.Default.Database, anno.Name);
                 anno.Name = anno.Role + " #" + anno.AnnotationScheme.name;
-           
-                AnnoSchemeLoaded = true;
-
+                anno.usesAnnoScheme = true;
+              
                 if(!isDiscrete)
                 {
-                   background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), 90.0);
+                   background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
+                   background.Opacity = 0.75;
                 }
                 else if (anno.AnnotationScheme.mincolor !=  null) { background = new SolidColorBrush((Color)(ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor))); }
 
@@ -853,24 +866,24 @@ namespace ssi
             this.anno_tracks.Add(track);
             this.annos.Add(anno);
 
-            if(AnnoTrack.GetSelectedTrack() != null && background == null && anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && loadedfromdb)
+            if(track != null && background == null && track.AnnoList != null && track.AnnoList.AnnotationScheme != null && anno.usesAnnoScheme)
             {
                 background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor));
 
             }
-            if(loadedfromdb)
+            if(track.AnnoList.usesAnnoScheme &&  track.isDiscrete)
             {
-                AnnoTrack.GetSelectedTrack().Background = background;
-                AnnoTrack.GetSelectedTrack().BackgroundColor = background;
+                track.Background = background;
+                track.BackgroundColor = background;
             }
           
 
 
             AnnoTrack.SelectTrack(track);
-            if (background != null)
+            if (background != null && !track.isDiscrete)
             {
-                AnnoTrack.GetSelectedTrack().ContiniousBrush = background;
-                AnnoTrack.GetSelectedTrack().Background = background;
+                track.ContiniousBrush = background;
+                track.Background = background;
             }
             track.timeRangeChanged(ViewHandler.Time);
             track.timeRangeChanged(ViewHandler.Time);
@@ -954,7 +967,8 @@ namespace ssi
                     annolist.AnnotationScheme.mincolor = anno.AnnotationScheme.mincolor;
                     annolist.AnnotationScheme.maxcolor = anno.AnnotationScheme.maxcolor;
 
-                    background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), 90.0);
+                    background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
+                    background.Opacity = 0.75;
                 }
               
                 if (annolist != null)
@@ -1364,14 +1378,14 @@ namespace ssi
                 }
 
                 view.annoListControl.editComboBox.Items.Clear();
-                if (loadedfromdb)
+                if (AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme)
                 {
                     view.annoListControl.editComboBox.Visibility = Visibility.Visible;
                     view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
 
                     //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
 
-                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete)
+                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete)
                     {
                         foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                         {
@@ -1808,7 +1822,7 @@ namespace ssi
                     AnnoTrackStatic.used_labels.Clear();
 
 
-                    if(annoSchemeloaded)
+                    if(AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme)
 
                     { 
                         if(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null)
@@ -1845,7 +1859,7 @@ namespace ssi
                  
 
                     
-                    LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true, loadedfromdb);
+                    LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true, AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme);
                     inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                     inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     inputBox.ShowDialog();
@@ -2377,26 +2391,26 @@ namespace ssi
 
                 //TODO
 
-                string defaultsr = "40";
+                string defaultsr = "25";
 
                 //check if a video is loaded, and if so use it's sample rate as default
-                //foreach (IMedia m in media_list.Medias)
-                //{
-                //    if (m.IsVideo())
-                //    {
-                //        defaultsr = (1000.0 / m.GetSampleRate()).ToString();
-                //        break;
-                //    }
-                //}
+                foreach (IMedia m in media_list.Medias)
+                {
+                    if (m.IsVideo())
+                    {
+                        defaultsr = (m.GetSampleRate()).ToString();
+                        break;
+                    }
+                }
 
-                if (loadedfromdb)
+                if (AnnoSchemeLoaded)
                 {
                    
                     newAnno(false, 0, 0, 1, resultbrush("RedBlue"));
                 }
                 else
                 {
-                    LabelInputBox inputBox = new LabelInputBox("New Continous Tier", "Enter Samplerate in ms, Min and Max Value", "0", h, 3, "1", defaultsr);
+                    LabelInputBox inputBox = new LabelInputBox("New Continous Tier", "Enter Samplerate in fps, Min and Max Value", "0", h, 3, "1", defaultsr);
                     h.Clear();
                     inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     inputBox.ShowDialog();
@@ -2406,7 +2420,7 @@ namespace ssi
                         double samplerate;
                         if (double.TryParse(inputBox.Result3(), out samplerate))
                         {
-                            newAnno(false, samplerate / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
+                            newAnno(false, (1000.0/  samplerate) / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
                         }
                     }
                 }
@@ -2726,7 +2740,7 @@ namespace ssi
 
         private void mongodbStore()
         {
-            if (loadedfromdb)
+            if (AnnoSchemeLoaded)
             {
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
 
@@ -2787,9 +2801,12 @@ namespace ssi
                 {
                     if (annos != null)
                     {
+                       
                         foreach (AnnoList anno in annos)
 
                         {
+
+                            anno.usesAnnoScheme = true;
                             if (anno.Count > 0)
                             {
                                 //  if(anno.isDiscrete == false && anno.Count > 0)
@@ -2822,7 +2839,7 @@ namespace ssi
                                     updateTimeRange(maxdur);
                                 }
 
-                                AnnoSchemeLoaded = true;
+                                
                             }
                         }
 
@@ -2832,6 +2849,7 @@ namespace ssi
 
                         if (media.Count > 0)
                         {
+                           
                             for (int i = 0; i < media.Count; i++)
                             {
                                 foreach (DatabaseMediaInfo c in ci)
@@ -2877,7 +2895,7 @@ namespace ssi
                             }
                         }
                     }
-                    loadedfromdb = true;
+                    AnnoSchemeLoaded = true;
                 }
                 catch (TimeoutException e1)
                 {
@@ -3294,4 +3312,7 @@ namespace ssi
             }
         }
     }
+
+
+   
 }

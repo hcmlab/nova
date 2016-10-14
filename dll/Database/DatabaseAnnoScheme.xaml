@@ -24,24 +24,24 @@
             <ComboBoxItem>Continuous</ComboBoxItem>
         </ComboBox>
 
-        <Label Content="FPS" Margin="11,147,494,194"/>
-        <TextBox x:FieldModifier="public" Margin="10,175,494,225" x:Name="scheme_fps" Width="150" Focusable="True"/>
-        <Label Content="Min Value" Margin="9,211,496,130"/>
-        <TextBox x:FieldModifier="public" Margin="9,244,495,160" x:Name="scheme_min" Width="150" Focusable="True"/>
-        <Label Content="Max Value" Margin="9,279,496,62"/>
-        <TextBox x:FieldModifier="public" Margin="11,306,493,96" x:Name="scheme_max" Width="150" Focusable="True"/>
-        <Label Name="Colorlabel" Content="Min Color" Margin="9,369,496,12" Grid.RowSpan="2"/>
-        <Label Name="MaxColorLabel" Content="Max Color" Margin="9,411,496,-30" Grid.RowSpan="2"/>
+        <Label Name="FPSLabel" Content="FPS" Margin="13,239,492,102"/>
+        <TextBox x:FieldModifier="public" Margin="12,267,492,133" x:Name="scheme_fps" Width="150" Focusable="True"/>
+        <Label  Name="MinValLabel" Content="Min Value" Margin="11,303,494,38"/>
+        <TextBox x:FieldModifier="public" Margin="13,334,491,70" x:Name="scheme_min" Width="150" Focusable="True"/>
+        <Label Name="MaxValLabel" Content="Max Value" Margin="11,371,494,10" Grid.RowSpan="2"/>
+        <TextBox x:FieldModifier="public" Margin="13,398,491,4" x:Name="scheme_max" Width="150" Focusable="True"/>
+        <Label Name="Colorlabel" Content="Min Color" Margin="11,152,494,189"/>
+        <Label Name="MaxColorLabel" Content="Max Color" Margin="11,194,494,147"/>
 
 
 
-        <p:ColorPicker Name="scheme_colorpickermin"   IsEnabled="true" Margin="108,369,496,38" RenderTransformOrigin="1.3,3.75" />
-        <p:ColorPicker Name="scheme_colorpickermax"   IsEnabled="true" Margin="108,411,496,36" RenderTransformOrigin="1.3,3.75" Grid.RowSpan="2" />
+        <p:ColorPicker Name="scheme_colorpickermin"   IsEnabled="true" Margin="110,152,494,252" RenderTransformOrigin="1.3,3.75" />
+        <p:ColorPicker Name="scheme_colorpickermax"   IsEnabled="true" Margin="110,195,494,209" RenderTransformOrigin="1.3,3.75" />
 
 
 
 
-        <Label Content="Labels" Margin="199,0,308,21"/>
+        <Label Name="labelslabel" Content="Labels" Margin="199,0,308,21"/>
         <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
 
         <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Single" Margin="199,42,247,160">

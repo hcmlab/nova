@@ -1,6 +1,8 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core;
+using MongoDB.Driver.Linq;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,7 +29,7 @@ namespace ssi
             //2 = write
             //1 = read
             //0 = notauthorized
-
+            
             int auth = 0;
             try
             {
@@ -72,7 +74,7 @@ namespace ssi
             return auth;
         }
 
-        public string LoadRoles(string db, string tier)
+        public string LoadRoles(string db, AnnoTrack tier)
         {
             BsonElement value;
             string role = "None";
@@ -97,7 +99,11 @@ namespace ssi
             bool hasauth = false;
             if (auth > 3) hasauth = true;
 
-            DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(roles, hasauth, "On tier " + tier + ": Who ? ", "Roles");
+
+            string name = "New track";
+            if (tier != null) name = tier.AnnoList.Name;
+
+            DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(roles, hasauth, "Tier: " + name + ". Who is annotated? ", "Roles");
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             dbw.ShowDialog();
 
@@ -108,7 +114,7 @@ namespace ssi
             return role;
         }
 
-        public string LoadAnnotationSchemes(string db, string tier, int type =0)
+        public string LoadAnnotationSchemes(string db, AnnoTrack tier, int type =0)
         {
             BsonElement value;
             string annotype = "None";
@@ -116,7 +122,8 @@ namespace ssi
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("AnnotationSchemes");
-
+            bool isDiscrete = true;
+            if (type == 2) isDiscrete = false;
 
 
             var sessions = collection.Find(_ => true).ToList();
@@ -136,7 +143,10 @@ namespace ssi
             bool hasauth = false;
             if (auth > 2) hasauth = true;
 
-            DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(AnnotationSchemes, hasauth, "On tier " + tier + ": What is annotated ? ", "AnnotationSchemes",true);
+            string name = "New Track";
+            if (tier != null) name = tier.AnnoList.Name;
+
+            DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(AnnotationSchemes, hasauth, "Tier: " + name  + ". What is annotated? ", "AnnotationSchemes",isDiscrete, true, tier );
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             dbw.ShowDialog();
 
@@ -149,6 +159,9 @@ namespace ssi
 
         public void StoretoDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null)
         {
+            mongo = new MongoClient(connectionstring);
+            database = mongo.GetDatabase(db);
+
             BsonArray labels = new BsonArray();
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -169,7 +182,7 @@ namespace ssi
                 ObjectId roleid;
 
                 if (a.AnnoList.Role == null || a.AnnoList.Role == a.AnnoList.Name)
-                    a.AnnoList.Role = LoadRoles(db, a.AnnoList.Name);
+                    a.AnnoList.Role = LoadRoles(db, a);
 
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", a.AnnoList.Role);
@@ -195,7 +208,7 @@ namespace ssi
                 ObjectId annotid;
                 string annotype = null;
                 if (a.AnnoList.AnnotationScheme != null)  annotype = a.AnnoList.AnnotationScheme.name;
-                if(annotype == null) annotype = LoadAnnotationSchemes(db, a.AnnoList.Name);
+                if(annotype == null) annotype = LoadAnnotationSchemes(db, a);
                 var filtera = builder.Eq("name", annotype);
                 var annotdb = annotationschemes.Find(filtera).ToList();
                 if (annotdb.Count > 0)
@@ -310,38 +323,52 @@ namespace ssi
                 {
                     annoid = res[0].GetElement(0).Value.AsObjectId;
                 }
-                var result = annotations.DeleteOne(filter2);
-                annotations.InsertOneAsync(document);
 
-                BsonArray annos = new BsonArray();
 
-                var filter3 = builder.Eq("name", session);
-                var documents = sessions.Find(filter3).ToList();
 
-                if (documents.Count > 0)
+
+                UpdateOptions uo = new UpdateOptions();
+                uo.IsUpsert = true;
+                var result = annotations.ReplaceOne(filter2, document, uo);
+                ObjectId oid = annotations.Find(filter2).Single()["_id"].AsObjectId;
+              
+
+                //var result = annotations.DeleteOne(filter2);
+                //annotations.InsertOneAsync(document);
+                //if (documents.Count > 0)
+                //{
+                //    string id = documents[0]["name"].ToString();
+                //    annos = documents[0]["annotations"].AsBsonArray;
+
+                //    for (int j = 0; j < annos.Count; j++)
+                //    {
+                //        if (annos[j]["annotation_id"].AsObjectId == annoid)
+                //        {
+                //            annos.RemoveAt(j);
+                //        }
+                //    }
+                //}
+
+                if (result.MatchedCount == 0)
                 {
-                    string id = documents[0]["name"].ToString();
-                    annos = documents[0]["annotations"].AsBsonArray;
 
-                    for (int j = 0; j < annos.Count; j++)
-                    {
-                        if (annos[j]["annotation_id"].AsObjectId == annoid)
-                        {
-                            annos.RemoveAt(j);
-                        }
-                    }
+                    var filter3 = builder.Eq("name", session);
+                    var ses = sessions.Find(filter3).Single();
+                    BsonArray annos = ses["annotations"].AsBsonArray;
+                    annos.Add(new BsonDocument { { "annotation_id", oid } });
+
+                    var update2 = Builders<BsonDocument>.Update.Set("annotations", annos);
+                    sessions.UpdateOneAsync(filter3, update2);
                 }
-
-                annos.Add(new BsonDocument { { "annotation_id", document.GetElement(0).Value.AsObjectId } });
-
-                var update2 = Builders<BsonDocument>.Update.Set("annotations", annos);
-                sessions.UpdateOneAsync(filter3, update2);
+               
             }
         }
 
 
         public AnnotationScheme GetAnnotationScheme(string name, bool isDiscrete)
         {
+            mongo = new MongoClient(connectionstring);
+            database = mongo.GetDatabase(Properties.Settings.Default.Database);
             BsonElement value;
             AnnotationScheme Scheme = new AnnotationScheme();
             Scheme.LabelsAndColors = new List<LabelColorPair>();
@@ -415,16 +442,16 @@ namespace ssi
 
                 var filterscheme = builder.Eq("_id", annotid);
                 var result = collection.Find(filterscheme);
-                var annosch = annoschemes.Find(filterscheme).ToList();
+                var annosch = annoschemes.Find(filterscheme).Single();
 
                 var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator", s.Annotator);
-                var documents = collection.Find(filter).ToList();
+                var documents = collection.Find(filter).Single();
 
-                if (annosch[0].TryGetElement("type", out value) && annosch[0]["type"].ToString() == "DISCRETE")
+                if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "DISCRETE")
                 {
                     al.isDiscrete = true;
                 }
-               else  if (annosch[0].TryGetElement("type", out value) && annosch[0]["type"].ToString() == "CONTINUOUS")
+               else  if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "CONTINUOUS")
                 {
                     al.isDiscrete = false;
                 }
@@ -435,26 +462,26 @@ namespace ssi
                 
 
                 al.AnnotationScheme = new AnnotationScheme();
-                al.AnnotationScheme.name = annosch[0]["name"].ToString();
+                al.AnnotationScheme.name = annosch["name"].ToString();
                 if (al.isDiscrete == false)
                 {
 
-                    if (annosch[0].TryGetElement("min", out value)) al.Lowborder = double.Parse(annosch[0]["min"].ToString());
-                    if (annosch[0].TryGetElement("max", out value)) al.Highborder = double.Parse(annosch[0]["max"].ToString());
-                    if (annosch[0].TryGetElement("sr", out value)) al.SR = double.Parse(annosch[0]["sr"].ToString());
+                    if (annosch.TryGetElement("min", out value)) al.Lowborder = double.Parse(annosch["min"].ToString());
+                    if (annosch.TryGetElement("max", out value)) al.Highborder = double.Parse(annosch["max"].ToString());
+                    if (annosch.TryGetElement("sr", out value)) al.SR = double.Parse(annosch["sr"].ToString());
 
 
-                    if (annosch[0].TryGetElement("min_color", out value)) al.AnnotationScheme.mincolor = annosch[0]["min_color"].ToString();
-                    if (annosch[0].TryGetElement("max_color", out value)) al.AnnotationScheme.maxcolor = annosch[0]["max_color"].ToString();
+                    if (annosch.TryGetElement("min_color", out value)) al.AnnotationScheme.mincolor = annosch["min_color"].ToString();
+                    if (annosch.TryGetElement("max_color", out value)) al.AnnotationScheme.maxcolor = annosch["max_color"].ToString();
 
 
 
                     al.AnnotationScheme.minborder = al.Lowborder;
                     al.AnnotationScheme.maxborder = al.Highborder;
                     al.AnnotationScheme.sr = al.SR;
-                    //todo colors..
+               
                   
-                    var annotation = documents[0]["frames"].AsBsonArray;
+                    var annotation = documents["frames"].AsBsonArray;
 
                     for (int i = 0; i < annotation.Count; i++)
                     {
@@ -472,36 +499,33 @@ namespace ssi
                 }
                 else
                 {
-                    al.AnnotationScheme.mincolor = annosch[0]["color"].ToString();
-                    var annotation = documents[0]["segments"].AsBsonArray;
+                    al.AnnotationScheme.mincolor = annosch["color"].ToString();
+                    var annotation = documents["segments"].AsBsonArray;
+
 
                     al.AnnotationScheme.LabelsAndColors = new List<LabelColorPair>();
+                   
+
+                    BsonArray schemelabels = annosch["labels"].AsBsonArray;
+                   
+
+                    for (int j = 0; j < schemelabels.Count; j++)
+                    {
+                        al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString()));
+                    }
+
 
                     for (int i = 0; i < annotation.Count; i++)
                     {
-                        BsonArray schemelabels = annosch[0]["labels"].AsBsonArray;
-                      
-
-
                         string SchemeLabel = "";
                         string SchemeColor = "#000000";
+
                         for (int j = 0; j < schemelabels.Count; j++)
                         {
                             if (annotation[i]["id"].AsInt32 == schemelabels[j]["id"].AsInt32)
                             {
                                 SchemeLabel = schemelabels[j]["name"].ToString();
                                 SchemeColor = schemelabels[j]["color"].ToString();
-                                LabelColorPair lcp = new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString());
-                                bool alreadyinscheme = false;
-                                foreach(LabelColorPair lc in al.AnnotationScheme.LabelsAndColors)
-                                {
-                                    if(lc.Label == SchemeLabel)
-                                    {
-                                        alreadyinscheme = true;
-                                    }
-                                }
-                                if(!alreadyinscheme) al.AnnotationScheme.LabelsAndColors.Add(lcp);
-
                                 break;
                             }
                         }
@@ -515,11 +539,13 @@ namespace ssi
 
                         AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, SchemeColor, double.Parse(confidence));
                         al.Add(ali);
-                        al.isDiscrete = true;
+                       
                         
                     }
-                    
-                   
+                    al.isDiscrete = true;
+                
+
+
                 }
               
                 l.Add(al);
@@ -596,59 +622,3 @@ namespace ssi
     }
 }
 
-/*
- * * Legacy code: example how to write/read subcollections
- *
- *
-            BsonElement name = new BsonElement("document", "mediainfo");
-            BsonDocument document = new BsonDocument();
-            BsonDocument[] file = new BsonDocument[filenames.Length];
-
-            for (int i = 0; i< filenames.Length;i++)
-            {
-                file[i] = new BsonDocument
-                {
-                     { "connection", connection },
-                     { "ip", ip },
-                     { "folder", folder },
-                     { "FilePath", filenames[i] }
-                };
-            }
-
-            BsonDocument filecontainer = new BsonDocument();
-            for(int i=0; i<filenames.Length;i++)
-            {
-                filecontainer.Add(i.ToString(), file[i]);
-            }
-
-            document.Add(name);
-            document.Add("files", filecontainer);
-
-            var builder = Builders<BsonDocument>.Filter;
-            var filter= builder.Eq("document", "mediainfo") /*& builder.Eq("files.Filename1.FilePath", "somepath");
-            var result = collections.DeleteOne(filter);
-            collections.InsertOne(document);
-}
-
-load
-var builder = Builders<BsonDocument>.Filter;
-var filter = builder.Eq("document", "mediainfo") /*& builder.Eq("files.Filename1.FilePath", "somepath");
-var result = colllection.Find(filter);
-
-var bson = result.ToBsonDocument();
-
-var documents = colllection.Find(filter).ToList();
-var files = documents[0]["files"];
-
-for (int i = 0; i < files.ToBsonDocument().ElementCount; i++)
-{
-DatabaseMediaInfo c = new DatabaseMediaInfo();
-c.connection = files.ToBsonDocument()[i]["connection"].ToString();
-c.ip = files.ToBsonDocument()[i]["ip"].ToString();
-c.folder = files.ToBsonDocument()[i]["folder"].ToString();
-c.filename = files.ToBsonDocument()[i]["FilePath"].ToString();
-
-do something
-}
-
-*/

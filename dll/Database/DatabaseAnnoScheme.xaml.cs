@@ -23,14 +23,54 @@ namespace ssi
 
         List<LabelColorPair> items;
         List<LabelColorPair> labelcolors;
-        public DatabaseAnnoScheme()
+        private HashSet<LabelColorPair> usedlabels;
+        
+
+        public DatabaseAnnoScheme(string name=null, HashSet<LabelColorPair> _usedlabels=null, bool isDiscrete = true, Brush mincolor = null, Brush maxcolor = null, string samplerate =null, string min = null, string max = null)
         {
             InitializeComponent();
-            scheme_type.SelectedIndex = 0;
-            scheme_colorpickermin.SelectedColor = Colors.Red;
-            scheme_colorpickermax.SelectedColor = Colors.Blue;
+            scheme_colorpickermin.SelectedColor = Colors.Blue;
+            scheme_colorpickermax.SelectedColor = Colors.Red;
+
+            if(isDiscrete) scheme_colorpickermin.SelectedColor = Colors.LightYellow;
+            scheme_max.Text = (1.0).ToString();
+            scheme_min.Text = (0.0).ToString();
+            scheme_fps.Text = (25).ToString();
+            scheme_name.Text = "NewAnnotationType";
+
+            this.usedlabels = _usedlabels;
+            
           
             labelcolors = new List<LabelColorPair>();
+
+            if (name != null) scheme_name.Text = name;
+
+            if (isDiscrete) scheme_type.SelectedIndex = 0;
+            else scheme_type.SelectedIndex = 1;
+
+            if (mincolor != null) scheme_colorpickermin.SelectedColor = (mincolor as SolidColorBrush).Color;
+            if (maxcolor != null) scheme_colorpickermax.SelectedColor = (maxcolor as SolidColorBrush).Color;
+            if (samplerate != null) scheme_fps.Text = samplerate;
+            if (min != null) scheme_min.Text = min;
+            if (max != null) scheme_max.Text = max;
+
+
+            if (usedlabels != null)
+            {
+            
+                items = new List<LabelColorPair>();
+                foreach (LabelColorPair lp in usedlabels)
+                {
+                    items.Add(new LabelColorPair(lp.label, lp.color) { Label = lp.label, Color = lp.color });
+                    labelcolors.Add(new LabelColorPair(lp.label, lp.color));
+
+                }
+
+          
+                AnnotationResultBox.ItemsSource = items;
+
+
+            }
         }
 
 
@@ -166,13 +206,17 @@ namespace ssi
                 Colorlabel.Content = "Color";
                 MaxColorLabel.Visibility = Visibility.Hidden;
                 scheme_colorpickermax.Visibility = Visibility.Collapsed;
-                scheme_min.IsEnabled = false;
-                scheme_max.IsEnabled = false;
-                scheme_fps.IsEnabled = false;
+                scheme_min.Visibility = Visibility.Hidden;
+                scheme_max.Visibility = Visibility.Hidden;
+                scheme_fps.Visibility = Visibility.Hidden;
+                MaxValLabel.Visibility = Visibility.Hidden;
+                MinValLabel.Visibility = Visibility.Hidden;
+                FPSLabel.Visibility = Visibility.Hidden;
 
-                AnnotationResultBox.IsEnabled = true;
-                AddAnnotation.IsEnabled = true;
-                DeleteAnnotation.IsEnabled = true;
+                labelslabel.Visibility = Visibility.Visible;
+                AnnotationResultBox.Visibility = Visibility.Visible;
+                AddAnnotation.Visibility = Visibility.Visible;
+                DeleteAnnotation.Visibility = Visibility.Visible;
 
 
             }
@@ -182,14 +226,18 @@ namespace ssi
                 Colorlabel.Content = "Min Color";
                 scheme_colorpickermin.IsEnabled = true;
                 MaxColorLabel.Visibility = Visibility.Visible;
+                MaxValLabel.Visibility = Visibility.Visible;
+                MinValLabel.Visibility = Visibility.Visible;
+                FPSLabel.Visibility = Visibility.Visible;
                 scheme_colorpickermax.Visibility = Visibility.Visible;
-                scheme_min.IsEnabled = true;
-                scheme_max.IsEnabled = true;
-                scheme_fps.IsEnabled = true;
+                scheme_min.Visibility = Visibility.Visible;
+                scheme_max.Visibility = Visibility.Visible;
+                scheme_fps.Visibility = Visibility.Visible;
 
-                AnnotationResultBox.IsEnabled = false;
-                AddAnnotation.IsEnabled = false;
-                DeleteAnnotation.IsEnabled = false;
+                labelslabel.Visibility = Visibility.Hidden;
+                AnnotationResultBox.Visibility = Visibility.Hidden;
+                AddAnnotation.Visibility = Visibility.Hidden;
+                DeleteAnnotation.Visibility = Visibility.Hidden;
 
             }
         }

@@ -71,9 +71,9 @@ namespace ssi
                 engine.GetMetadata(inputFile);
             }
 
-            if (this.HasVideo)
+            if (this.HasVideo && inputFile.Metadata.VideoData != null)
                 return inputFile.Metadata.VideoData.Fps;
-            else return double.Parse(inputFile.Metadata.AudioData.SampleRate);
+            else return 25.0;
         }
 
         public UIElement GetView()

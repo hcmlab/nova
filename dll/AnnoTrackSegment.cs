@@ -190,6 +190,23 @@ namespace ssi
             }
         }
 
+        public void update2()
+        {
+            double start = ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStart);
+            double stop = ViewHandler.Time.PixelFromTime(item.Stop);
+            double len = Math.Max(MIN_WIDTH, stop - start);
+
+            this.Text = item.Label;
+
+            if (len >= 0 && start >= 0)
+            {
+                this.Height = track.ActualHeight;
+                this.Width = len;
+                this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
+                Canvas.SetLeft(this, start);
+            }
+        }
+
         public void select(bool flag)
         {
             this.is_selected = flag;
