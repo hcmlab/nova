@@ -45,7 +45,7 @@ namespace ssi
 
         private HashSet<LabelColorPair> suggestions;
 
-        public LabelInputBox(String header, String info, String text, HashSet<LabelColorPair> _suggestions = null, int fields = 1, String text2 = "", String text3 = "", bool _hascolorpicker = false)
+        public LabelInputBox(String header, String info, String text, HashSet<LabelColorPair> _suggestions = null, int fields = 1, String text2 = "", String text3 = "", bool _hascolorpicker = false, bool usesannotationscheme = false)
         {
             this.Brush = Brushes.Black;
             this.sColor = Brush.Color;
@@ -74,6 +74,8 @@ namespace ssi
             {
                 this.ib_suggestions_comboBox.Visibility = Visibility.Hidden;
             }
+
+
 
             if (hascolorpicker == true)
             {
@@ -115,7 +117,8 @@ namespace ssi
                 }
                 else //todo: only other case now that uses colorpicker and not suggestion list. probably change this in the future to some more advanced logic
                 {
-                    color1 = ((SolidColorBrush)(AnnoTrack.GetSelectedTrack().BackgroundColor)).Color;
+
+                    color1 = Colors.Black; // ((SolidColorBrush)(AnnoTrack.GetSelectedTrack().BackgroundColor)).Color;
                     this.sColor = color1;
                 }
             }
@@ -134,7 +137,22 @@ namespace ssi
                     }
                 }
             }
+
+
+
+            if (usesannotationscheme == true)
+            {
+
+                this.ib_labelText.IsEnabled = false;
+                this.ib_color.IsEnabled = false;
+                
+
+            }
+
         }
+
+
+
 
         public void setPWfield(string text)
         {

@@ -23,9 +23,61 @@
         <Label Content="Databases" Margin="10,53,-10,-23" Grid.RowSpan="2"/>
         <ListBox Name="DataBasResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,80,448,211" SelectionMode="Single" SelectionChanged="DataBasResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
         <Label Content="Sessions" Margin="10,220,-10,-190" Grid.RowSpan="2"/>
-        <ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,243,448,0" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
+        <!--<ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,243,448,0" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>-->
+        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="10,243,448,0" >
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
+
+                    <GridViewColumn Width="60" Header="Language">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Language" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+                    <GridViewColumn Width="60" Header="Location">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Location" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+                    <GridViewColumn Width="Auto" Header="Date">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Date" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+
+                    <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+
+
+
         <Label Content="Annotations" Margin="237,58,270,3" Grid.RowSpan="2"/>
-        <ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+        <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
+
+        <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple" Margin="246,80,200,216">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="65" Header="AnnoType" DisplayMemberBinding="{Binding AnnoType}" />
+
+                    <GridViewColumn Width="60" Header="Role">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Role" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+                    <GridViewColumn Width="60" Header="Annotator">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Annotator" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+              
+                    <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+
+                </GridView>
+            </ListView.View>
+        </ListView>
         <Label Content="Media" Margin="242,220,195,-2" Grid.RowSpan="2"/>
         <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" Margin="246,243,200,0" SelectionMode="Multiple" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
         <CheckBox Name="showonlymine"  Content="Show only mine" Grid.Column="0" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" Margin="473,186,43,212" />

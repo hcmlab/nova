@@ -98,31 +98,38 @@ namespace ssi
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
 
-            BsonArray files = new BsonArray();
+
             if (CollectionResultsBox.SelectedItem != null)
             {
                 var builder = Builders<BsonDocument>.Filter;
-                var filter = builder.Eq("name", session);
-                var sessions = database.GetCollection<BsonDocument>("Sessions").Find(filter).ToList();
+                var filter = builder.Eq("fileName", session) & builder.Eq("connection", connection);
+                var media = database.GetCollection<BsonDocument>("Media");
 
-                if (sessions.Count > 0)
+
+                var filter2 = builder.Eq("name", session);
+                var sessions = database.GetCollection<BsonDocument>("Sessions").Find(filter2).ToList();
+
+                BsonArray files = new BsonArray();
+                files = sessions[0]["media"].AsBsonArray;
+
+
+
+                bool requiresauth = false;
+
+                if (connection.Contains("sftp") || connection.Contains("httpPost")) requiresauth = true;
+
+                for (int i = 0; i < filenames.Length; i++)
                 {
-                    string id = sessions[0]["name"].ToString();
-                    files = sessions[0]["media"].AsBsonArray;
-                    bool requiresauth = false;
-
-                    if (connection.Contains("sftp") || connection.Contains("httpPost")) requiresauth = true;
-
-                    for (int i = 0; i < filenames.Length; i++)
+                    string filename = filenames[i];
+                    if (isURL(filenames[i]))
                     {
-                        string filename = filenames[i];
-                        if (isURL(filenames[i]))
-                        {
-                            filename = filenames[i].Substring(filenames[i].LastIndexOf("/") + 1, (filenames[i].Length - filenames[i].LastIndexOf("/") - 1));
-                        }
+                        filename = filenames[i].Substring(filenames[i].LastIndexOf("/") + 1, (filenames[i].Length - filenames[i].LastIndexOf("/") - 1));
+                    }
+                    // string id = media[0]["name"].ToString();
 
-                        files.Add(new BsonDocument
-                            {
+                    BsonDocument b = new BsonDocument
+                    {
+
                                  { "connection", connection },
                                  { "ip", ip },
                                  { "folder", folder },
@@ -132,12 +139,23 @@ namespace ssi
                                  { "mediatype_id", "" },
                                  { "role_id", "" },
                                  { "subject_id", "" }
-                            });
-                    }
+                    };
+
+
+              
+                    media.InsertOne(b);
+                    BsonDocument b1 = new BsonDocument();
+                    BsonElement mid = new BsonElement("media_id", b.GetValue(0).AsObjectId);
+                    b1.Add(mid);
+                    files.Add(b1);
+
+
                 }
 
+
                 var update = Builders<BsonDocument>.Update.Set("media", files);
-                var result = database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, update);
+                var filtercoll = builder.Eq("name", session);
+                var result = database.GetCollection<BsonDocument>("Sessions").UpdateOne(filtercoll, update);
 
                 GetMedia();
             }
@@ -163,61 +181,55 @@ namespace ssi
                 BsonArray files = new BsonArray();
                 BsonDocument role = new BsonDocument {
                     {"name",  lastrole},
+                    {"isValid",  true}
                 };
 
                 bool subjectalreadypresent = false;
-                foreach (var item in RolesResultBox.Items)
+
+
+                var collection = database.GetCollection<BsonDocument>("Roles");
+                var builder = Builders<BsonDocument>.Filter;
+                var filter = builder.Eq("name", lastrole);
+                var documents = collection.Find(filter).ToList();
+
+                foreach (var item  in documents)
                 {
-                    if (item.ToString() == lastrole)
+                    if (item["name"].ToString() == lastrole)
                     {
                         subjectalreadypresent = true;
+                        var update = Builders<BsonDocument>.Update.Set("isValid", true);
+                        collection.UpdateOne(filter, update);
                     }
                 }
                 if (subjectalreadypresent == false)
                 {
-                    var collection = database.GetCollection<BsonDocument>("Roles");
                     collection.InsertOne(role);
-                    GetRoles(l.Result());
+                  
                 }
-                else MessageBox.Show("Role already exists!");
 
-                //var builder1 = Builders<BsonDocument>.Filter;
-                //var filter1 = builder1.Eq("name", lastrole);
-                //var documents1 = database.GetCollection<BsonDocument>("Roles").Find(filter1).ToList();
-                //ObjectId roleid = documents1[0].GetValue(0).AsObjectId;
+                GetRoles(l.Result());
 
-                //IMongoCollection<BsonDocument> sessions = database.GetCollection<BsonDocument>("Sessions");
-
-                //var builder = Builders<BsonDocument>.Filter;
-                //var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-                //var documents = sessions.Find(filter).ToList();
-
-                ////Should always be one entry, if not use first..
-                //var participants = documents[0]["participants"].AsBsonArray;
-                //BsonArray media = new BsonArray();
-                //BsonArray annotations = new BsonArray();
-                //participants.Add(new BsonDocument { { "role_id", roleid }, { "subject_id", "" }, {"media", media }, {"annotations", annotations } }) ;
-
-                //var update = Builders<BsonDocument>.Update.Set("participants", participants);
-                //var result = sessions.UpdateOne(filter, update);
             }
         }
 
         private void AddSession_Click(object sender, RoutedEventArgs e)
         {
-            LabelInputBox l = new LabelInputBox("New Session", "Enter Session Name", Properties.Settings.Default.LastSessionId);
-            l.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            l.ShowDialog();
+           
+ 
+          
+            DataBaseSessionWindow dbsw = new DataBaseSessionWindow();
+            dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dbsw.ShowDialog();
 
-            if (l.DialogResult == true)
+            if (dbsw.DialogResult == true)
             {
-                Properties.Settings.Default.LastSessionId = l.Result();
+                Properties.Settings.Default.LastSessionId = dbsw.Name();
                 Properties.Settings.Default.Save();
 
-                BsonElement name = new BsonElement("name", l.Result());
-                BsonElement location = new BsonElement("location", "");
-                BsonElement language = new BsonElement("language", "");
-                BsonElement date = new BsonElement("date", new BsonDateTime(0));
+                BsonElement name = new BsonElement("name", dbsw.Name());
+                BsonElement location = new BsonElement("location", dbsw.Location());
+                BsonElement language = new BsonElement("language", dbsw.Language());
+                BsonElement date = new BsonElement("date", dbsw.Date());
                 BsonDocument document = new BsonDocument();
 
                 BsonArray media = new BsonArray();
@@ -235,7 +247,7 @@ namespace ssi
                 bool sessionnamealreadypresent = false;
                 foreach (var item in CollectionResultsBox.Items)
                 {
-                    if (item.ToString() == l.Result())
+                    if (item.ToString() == dbsw.Name())
                     {
                         sessionnamealreadypresent = true;
                     }
@@ -384,14 +396,24 @@ namespace ssi
 
         {
             database = mongo.GetDatabase(Properties.Settings.Default.Database);
-            var collectionsdb = database.GetCollection<BsonDocument>("Sessions");
-            var documents = collectionsdb.Find(_ => true).ToList();
 
-            if (CollectionResultsBox.Items != null) CollectionResultsBox.Items.Clear();
-            foreach (var c in documents)
+            var sessioncollection = database.GetCollection<BsonDocument>("Sessions");
+            var sessions = sessioncollection.Find(_ => true).ToList();
+
+
+
+            if (CollectionResultsBox.HasItems) CollectionResultsBox.ItemsSource = null;  
+            List<DatabaseSession> items = new List<DatabaseSession>();
+            foreach (var c in sessions)
             {
-                CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
+                //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
+                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString() });
+
             }
+
+            CollectionResultsBox.ItemsSource = items;
+
+
         }
 
         public void GetRoles(string selecteditem = null)
@@ -406,7 +428,7 @@ namespace ssi
 
             foreach (BsonDocument b in documents)
             {
-                RolesResultBox.Items.Add(b["name"].ToString());
+              if(b["isValid"].AsBoolean == true) RolesResultBox.Items.Add(b["name"].ToString());
             }
             RolesResultBox.SelectedItem = selecteditem;
         }
@@ -452,7 +474,7 @@ namespace ssi
             {
                 List<DatabaseMediaInfo> ci = new List<DatabaseMediaInfo>();
                 MediaResultBox.Items.Clear();
-                ci = GetMediafromDB(DataBasResultsBox.SelectedItem.ToString(), CollectionResultsBox.SelectedItem.ToString());
+                ci = GetMediafromDB(DataBasResultsBox.SelectedItem.ToString(), Properties.Settings.Default.LastSessionId);
 
                 foreach (DatabaseMediaInfo c in ci)
                 {
@@ -469,11 +491,12 @@ namespace ssi
             BsonElement value;
             List<DatabaseMediaInfo> paths = new List<DatabaseMediaInfo>();
             var colllection = database.GetCollection<BsonDocument>("Sessions");
+            var media = database.GetCollection<BsonDocument>("Media");
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", session);
-            var result = colllection.Find(filter);
-
+          
+         
             var documents = colllection.Find(filter).ToList();
 
             foreach (var document in documents)
@@ -482,24 +505,42 @@ namespace ssi
                 if (document.TryGetElement("name", out value)) id = document["name"].ToString();
                 if (document.TryGetElement("media", out value))
                 {
+                    ObjectId media_id;
                     BsonArray files = document["media"].AsBsonArray;
 
                     for (int i = 0; i < files.Count; i++)
                     {
-                        DatabaseMediaInfo c = new DatabaseMediaInfo();
-                        c.connection = files[i]["connection"].ToString();
-                        c.ip = files[i]["ip"].ToString();
-                        c.folder = files[i]["folder"].ToString();
-                        c.filepath = files[i]["filePath"].ToString();
-                        c.filename = files[i]["fileName"].ToString();
-                        c.requiresauth = files[i]["requiresAuth"].ToString();
 
-                        //Todo: solve references
-                        c.subject = files[i]["subject_id"].ToString();
-                        c.role = files[i]["role_id"].ToString();
-                        c.mediatype = files[i]["mediatype_id"].ToString();
+                      media_id = files[i]["media_id"].AsObjectId;
 
-                        paths.Add(c);
+                        var filtermedia = builder.Eq("_id", media_id);
+                        var selectedmedialist = media.Find(filtermedia).ToList();
+                            
+                         if(selectedmedialist.Count> 0)
+                        {
+
+                            var selectedmedia = selectedmedialist[0];
+                            DatabaseMediaInfo c = new DatabaseMediaInfo();
+                            c.connection = selectedmedia["connection"].ToString();
+                            c.ip = selectedmedia["ip"].ToString();
+                            c.folder = selectedmedia["folder"].ToString();
+                            c.filepath = selectedmedia["filePath"].ToString();
+                            c.filename = selectedmedia["fileName"].ToString();
+                            c.requiresauth = selectedmedia["requiresAuth"].ToString();
+
+                            //Todo: solve references
+                            c.subject = selectedmedia["subject_id"].ToString();
+                            c.role = selectedmedia["role_id"].ToString();
+                            c.mediatype = selectedmedia["mediatype_id"].ToString();
+
+                            paths.Add(c);
+
+                        }
+                           
+
+                       
+                    
+
                     }
                 }
             }
@@ -518,6 +559,7 @@ namespace ssi
                 {
                     AddSession.Visibility = Visibility.Visible;
                     DeleteSession.Visibility = Visibility.Visible;
+                    EditSession.Visibility = Visibility.Visible;
                 }
             }
         }
@@ -526,8 +568,10 @@ namespace ssi
         {
             if (CollectionResultsBox.SelectedItem != null)
             {
-                Properties.Settings.Default.LastSessionId = CollectionResultsBox.SelectedItem.ToString();
-                Properties.Settings.Default.Save();
+
+            
+                    Properties.Settings.Default.LastSessionId = ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name;
+                    Properties.Settings.Default.Save();
 
                 GetMedia();
 
@@ -557,28 +601,46 @@ namespace ssi
             {
                 var sessions = database.GetCollection<BsonDocument>("Sessions");
                 var subjects = database.GetCollection<BsonDocument>("Subjects");
+                var media = database.GetCollection<BsonDocument>("Media");
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
                 var documents = sessions.Find(filter).ToList();
 
-                var filter2 = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
-                var subs = subjects.Find(filter2).ToList();
 
-                BsonArray files = documents[0]["media"].AsBsonArray;
-
-                for (int i = 0; i < files.Count; i++)
+                foreach (var document in documents)
                 {
-                    if (files[i]["fileName"].ToString() == MediaResultBox.SelectedItem.ToString())
+
+                    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
+
                     {
-                        files[i]["subject_id"] = subs[0].GetValue(0).AsObjectId;
+
+                        BsonArray mediafiles = document["media"].AsBsonArray;
+
+                        foreach (var el in mediafiles)
+                        {
+
+                            var filter2 = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
+                            var subjectsresult = subjects.Find(filter2).ToList();
+
+                            var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
+                            var mediadocuments = media.Find(filtermedia).ToList();
+
+                            if (mediadocuments.Count > 0)
+                            {
+                                var update = Builders<BsonDocument>.Update.Set("subject_id", subjectsresult[0].GetValue(0).AsObjectId);
+                                media.UpdateOne(filtermedia, update);
+                                break;
+
+
+                            }
+
+                        }
                         break;
                     }
-                }
 
-                var update = Builders<BsonDocument>.Update.Set("media", files);
-                sessions.UpdateOne(filter, update);
+                }
             }
-        }
+            }
 
         private void MediaResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -592,17 +654,28 @@ namespace ssi
                 var roles = database.GetCollection<BsonDocument>("Roles");
                 var subjects = database.GetCollection<BsonDocument>("Subjects");
                 var mediatypes = database.GetCollection<BsonDocument>("MediaTypes");
+                var media = database.GetCollection<BsonDocument>("Media");
 
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
                 var documents = sessions.Find(filter).ToList();
+
+
+                var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString());
+                var mediadocs = media.Find(filtermedia).ToList();
+                if(mediadocs.Count >0)
+                {
+
+                    var mediadoc = mediadocs[0];
+
                 BsonArray files = documents[0]["media"].AsBsonArray;
 
                 for (int i = 0; i < files.Count; i++)
                 {
-                    if (files[i]["fileName"].ToString() == MediaResultBox.SelectedItem.ToString())
+
+                    if (files[i]["media_id"] == GetObjectID(database,"Media", "fileName",  MediaResultBox.SelectedItem.ToString()))
                     {
-                        var filter2 = builder.Eq("_id", files[i]["role_id"]);
+                        var filter2 = builder.Eq("_id", mediadoc["role_id"]);
                         var rolescollection = roles.Find(filter2).ToList();
                         if (rolescollection.Count > 0)
                         {
@@ -612,11 +685,12 @@ namespace ssi
                                 if (Item.ToString() == role["name"].ToString())
                                 {
                                     RolesResultBox.SelectedItem = Item;
+                                    break;
                                 }
                             }
                         }
 
-                        var filter3 = builder.Eq("_id", files[i]["subject_id"]);
+                        var filter3 = builder.Eq("_id", mediadoc["subject_id"]);
                         var subjectcollection = subjects.Find(filter3).ToList();
 
                         if (subjectcollection.Count > 0)
@@ -627,10 +701,12 @@ namespace ssi
                                 if (Item.ToString() == subject["name"].ToString())
                                 {
                                     SubjectsResultBox.SelectedItem = Item;
-                                }
+                                        break;
+                                    }
                             }
 
-                            var filter4 = builder.Eq("_id", files[i]["mediatype_id"]);
+                         }
+                            var filter4 = builder.Eq("_id", mediadoc["mediatype_id"]);
                             var mediatypecollection = mediatypes.Find(filter4).ToList();
                             if (mediatypecollection.Count > 0)
                             {
@@ -640,10 +716,12 @@ namespace ssi
                                     if (Item.ToString() == (mediatype["name"] + "#" + mediatype["type"]).ToString())
                                     {
                                         MediatypeResultsBox.SelectedItem = Item;
-                                    }
+                                            break;
+                                        }
                                 }
                             }
-                        }
+                       
+                    }
                     }
                 }
             }
@@ -703,20 +781,34 @@ namespace ssi
             if (MediaResultBox.SelectedItem != null)
             {
                 var sessions = database.GetCollection<BsonDocument>("Sessions");
+                var media = database.GetCollection<BsonDocument>("Media");
 
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
                 var documents = sessions.Find(filter).ToList();
                 BsonArray files = documents[0]["media"].AsBsonArray;
 
+                var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString());
+                var mediadocuments = media.Find(filtermedia).ToList();
+
+
+                if(mediadocuments.Count > 0)
+                {
+
+
+               ObjectId media_id = mediadocuments[0]["_id"].AsObjectId; 
+
                 for (int j = 0; j < files.Count; j++)
                 {
-                    if (files[j]["fileName"].ToString() == MediaResultBox.SelectedItem.ToString())
+                    if (files[j]["media_id"] == media_id)
                     {
                         files.RemoveAt(j);
                         break;
                     }
                 }
+
+
+                 media.DeleteOne(filtermedia);
 
                 var update = Builders<BsonDocument>.Update.Set("media", files);
                 sessions.UpdateOne(filter, update);
@@ -726,29 +818,64 @@ namespace ssi
                 MediatypeResultsBox.Items.Clear();
 
                 GetMedia();
+                }
             }
         }
 
         private void EditSubject_Click(object sender, RoutedEventArgs e)
         {
-            DatabaseEditSubjectWindow dbesw = new DatabaseEditSubjectWindow(lastrole);
-            dbesw.Show();
+
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("name", SubjectsResultBox.SelectedValue.ToString());
+            var session = database.GetCollection<BsonDocument>("Subjects").Find(filter).ToList();
+
+            if (session.Count > 0)
+            {
+
+                DatabaseSubjectWindow dbsw = new DatabaseSubjectWindow(session[0]["name"].ToString(), session[0]["gender"].ToString(), session[0]["age"].ToString(), session[0]["culture"].ToString());
+                dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dbsw.ShowDialog();
+
+                if (dbsw.DialogResult == true)
+                {
+
+                    var updatelocation = Builders<BsonDocument>.Update.Set("gender", dbsw.Gender());
+                    database.GetCollection<BsonDocument>("Subjects").UpdateOne(filter, updatelocation);
+
+                    var updatelanguage = Builders<BsonDocument>.Update.Set("age", dbsw.Age());
+                    database.GetCollection<BsonDocument>("Subjects").UpdateOne(filter, updatelanguage);
+
+                    var updatedate = Builders<BsonDocument>.Update.Set("culture", dbsw.Culture());
+                    database.GetCollection<BsonDocument>("Subjects").UpdateOne(filter, updatedate);
+
+                    var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.Name());
+                    database.GetCollection<BsonDocument>("Subjects").UpdateOne(filter, updatename);
+
+                }
+
+                GetSubjects(dbsw.Name());
+            }
+
         }
 
         private void AddSubject_Click(object sender, RoutedEventArgs e)
         {
-            LabelInputBox l = new LabelInputBox("New Subject", "Enter Subject Name", "");
+            //LabelInputBox l = new LabelInputBox("New Subject", "Enter Subject Name", "");
+          
+
+            DatabaseSubjectWindow l = new DatabaseSubjectWindow();
             l.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             l.ShowDialog();
+
 
             if (l.DialogResult == true)
             {
                 //Todo: Add more
                 BsonDocument subject = new BsonDocument {
-                    {"name",  l.Result()},
-                    {"gender",  ""},
-                    {"age",  ""},
-                    {"culture",  ""},
+                    {"name",  l.Name()},
+                    {"gender",  l.Gender()},
+                    {"age",  l.Age()},
+                    {"culture",  l.Culture()},
                     {"education",  ""},
                     {"personality",  ""},
                 };
@@ -756,7 +883,7 @@ namespace ssi
                 bool subjectalreadypresent = false;
                 foreach (var item in SubjectsResultBox.Items)
                 {
-                    if (item.ToString() == l.Result())
+                    if (item.ToString() == l.Name())
                     {
                         subjectalreadypresent = true;
                     }
@@ -765,7 +892,7 @@ namespace ssi
                 {
                     var collection = database.GetCollection<BsonDocument>("Subjects");
                     collection.InsertOne(subject);
-                    GetSubjects(l.Result());
+                    GetSubjects(l.Name());
                 }
                 else MessageBox.Show("Subject already exists!");
             }
@@ -775,9 +902,13 @@ namespace ssi
         {
             if (RolesResultBox.SelectedItem != null)
             {
+                var collection = database.GetCollection<BsonDocument>("Roles");
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
-                var result = database.GetCollection<BsonDocument>("Roles").DeleteOne(filter);
+                var update = Builders<BsonDocument>.Update.Set("isValid", false);
+                collection.UpdateOne(filter, update);
+                    
+                //var result = database.GetCollection<BsonDocument>("Roles").DeleteOne(filter);
 
                 GetRoles();
             }
@@ -791,26 +922,60 @@ namespace ssi
 
                 var sessions = database.GetCollection<BsonDocument>("Sessions");
                 var roles = database.GetCollection<BsonDocument>("Roles");
+                var media = database.GetCollection<BsonDocument>("Media");
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
                 var documents = sessions.Find(filter).ToList();
 
-                var filter2 = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
-                var rolesresult = roles.Find(filter2).ToList();
+              
 
-                BsonArray files = documents[0]["media"].AsBsonArray;
-
-                for (int i = 0; i < files.Count; i++)
+                foreach (var document in documents)
                 {
-                    if (files[i]["fileName"].ToString() == MediaResultBox.SelectedItem.ToString())
+
+                    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
+
                     {
-                        files[i]["role_id"] = rolesresult[0].GetValue(0).AsObjectId;
+
+                         BsonArray mediafiles = document["media"].AsBsonArray;
+                      
+                        foreach(var el in mediafiles)
+                        {
+                            
+                            var filter2 = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
+                            var rolesresult = roles.Find(filter2).ToList();
+
+                            var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
+                            var mediadocuments = media.Find(filtermedia).ToList();
+
+                            if(mediadocuments.Count > 0)
+                            {
+                                var update = Builders<BsonDocument>.Update.Set("role_id", rolesresult[0].GetValue(0).AsObjectId);
+                                media.UpdateOne(filtermedia, update);
+                                break;
+                              
+
+                             }
+
+                        }
                         break;
                     }
+
+                 
                 }
 
-                var update = Builders<BsonDocument>.Update.Set("media", files);
-                sessions.UpdateOne(filter, update);
+               
+
+                //for (int i = 0; i < files.Count; i++)
+                //{
+                //    if (files[i]["fileName"].ToString() == MediaResultBox.SelectedItem.ToString())
+                //    {
+                //        files[i]["role_id"] = rolesresult[0].GetValue(0).AsObjectId;
+                //        break;
+                //    }
+                //}
+
+                //var update = Builders<BsonDocument>.Update.Set("media", files);
+                //sessions.UpdateOne(filter, update);
             }
         }
 
@@ -819,28 +984,50 @@ namespace ssi
             if (MediatypeResultsBox.SelectedItem != null)
             {
                 var sessions = database.GetCollection<BsonDocument>("Sessions");
-                var subjects = database.GetCollection<BsonDocument>("MediaTypes");
+                var mediatypes = database.GetCollection<BsonDocument>("MediaTypes");
+                var media = database.GetCollection<BsonDocument>("Media");
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
                 var documents = sessions.Find(filter).ToList();
 
-                string[] split = MediatypeResultsBox.SelectedItem.ToString().Split('#');
-                var filter2 = builder.Eq("name", split[0]) & builder.Eq("type", split[1]);
-                var subs = subjects.Find(filter2).ToList();
 
-                BsonArray files = documents[0]["media"].AsBsonArray;
 
-                for (int i = 0; i < files.Count; i++)
+                foreach (var document in documents)
                 {
-                    if (files[i]["fileName"].ToString() == MediaResultBox.SelectedItem.ToString())
+
+                    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
+
                     {
-                        files[i]["mediatype_id"] = subs[0].GetValue(0).AsObjectId;
+
+                        BsonArray mediafiles = document["media"].AsBsonArray;
+
+                        foreach (var el in mediafiles)
+                        {
+                            string[] split = MediatypeResultsBox.SelectedItem.ToString().Split('#');
+
+                            var filter2 = builder.Eq("name", split[0]) & builder.Eq("type", split[1]);
+                            var mediatyperesult = mediatypes.Find(filter2).ToList();
+
+                            var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
+                            var mediadocuments = media.Find(filtermedia).ToList();
+
+                            if (mediadocuments.Count > 0)
+                            {
+                                var update = Builders<BsonDocument>.Update.Set("mediatype_id", mediatyperesult[0].GetValue(0).AsObjectId);
+                                media.UpdateOne(filtermedia, update);
+                                break;
+
+                            }
+
+                        }
                         break;
                     }
+
+
                 }
 
-                var update = Builders<BsonDocument>.Update.Set("media", files);
-                sessions.UpdateOne(filter, update);
+
+
             }
         }
 
@@ -886,6 +1073,78 @@ namespace ssi
 
                 GetMediaType();
             }
+        }
+
+        private void EditSession_Click(object sender, RoutedEventArgs e)
+        {
+            if(CollectionResultsBox.SelectedItem != null)
+            {
+
+           
+
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("name", ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name);
+            var session = database.GetCollection<BsonDocument>("Sessions").Find(filter).ToList();
+
+            if(session.Count>0)
+            {
+
+                DataBaseSessionWindow dbsw = new DataBaseSessionWindow(session[0]["name"].ToString(), session[0]["language"].ToString(),session[0]["location"].ToString(), session[0]["date"].AsDateTime);
+                dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dbsw.ShowDialog();
+
+                if (dbsw.DialogResult == true)
+                {
+               
+                    var updatelocation = Builders<BsonDocument>.Update.Set("location", dbsw.Location());
+                    database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatelocation);
+
+                    var updatelanguage = Builders<BsonDocument>.Update.Set("language", dbsw.Language());
+                    database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatelanguage);
+
+                    var updatedate = Builders<BsonDocument>.Update.Set("date", dbsw.Date());
+                    database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatedate);
+
+                    var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.Name());
+                    database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatename);
+
+                 }
+             }
+                    GetSessions();
+
+            }
+        }
+
+
+        public string FetchDBRef(IMongoDatabase database, string collection, string attribute, ObjectId reference)
+        {
+            string output = "";
+            var builder = Builders<BsonDocument>.Filter;
+            var filtera = builder.Eq("_id", reference);
+            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
+
+            if (result.Count > 0)
+            {
+                output = result[0][attribute].ToString();
+            }
+
+            return output;
+
+
+
+        }
+
+        public ObjectId GetObjectID(IMongoDatabase database, string collection, string value, string attribute)
+        {
+
+            ObjectId id = new ObjectId();
+            var builder = Builders<BsonDocument>.Filter;
+            var filtera = builder.Eq(value, attribute);
+            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
+
+            if (result.Count > 0) id = result[0].GetValue(0).AsObjectId;
+
+            return id;
         }
     }
 }

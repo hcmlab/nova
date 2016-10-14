@@ -1,0 +1,43 @@
+﻿<Window x:Class="ssi.DatabaseSubjectWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        mc:Ignorable="d"
+        Title="Details for Subject" Height="364.92" Width="392.938" Background="DarkGray">
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+
+        <Label Content="Name:" Margin="10,0,228,303"></Label>
+        <TextBox Name="Namefield" Text=" " Margin="10,36,228,262"></TextBox>
+
+        <Label Content="Gender:" Margin="10,77,284,220"></Label>
+        <ComboBox Name="Genderbox" Margin="10,119,228,182" >
+            <ComboBoxItem>Female</ComboBoxItem>
+            <ComboBoxItem>Male</ComboBoxItem>
+            <ComboBoxItem>None</ComboBoxItem>
+        </ComboBox>
+
+
+        <Label Content="Age:" Margin="10,157,308,143"></Label>
+        <TextBox Name="Agefield" Text=" " Margin="10,196,228,106"></TextBox>
+
+        <Label Content="Culture:" Margin="10,233,308,66"></Label>
+        <TextBox Name="Culturefield" Text=" " Margin="10,273,228,30"></TextBox>
+
+
+        <Button Content="Done" Margin="295,299,10,10" Click="Button_Click"></Button>
+
+    </Grid>
+</Window>
