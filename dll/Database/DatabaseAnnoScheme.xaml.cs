@@ -20,27 +20,24 @@ namespace ssi
     /// </summary>
     public partial class DatabaseAnnoScheme : Window
     {
-
-        List<LabelColorPair> items;
-        List<LabelColorPair> labelcolors;
+        private List<LabelColorPair> items;
+        private List<LabelColorPair> labelcolors;
         private HashSet<LabelColorPair> usedlabels;
-        
 
-        public DatabaseAnnoScheme(string name=null, HashSet<LabelColorPair> _usedlabels=null, bool isDiscrete = true, Brush mincolor = null, Brush maxcolor = null, string samplerate =null, string min = null, string max = null)
+        public DatabaseAnnoScheme(string name = null, HashSet<LabelColorPair> _usedlabels = null, bool isDiscrete = true, Brush mincolor = null, Brush maxcolor = null, string samplerate = null, string min = null, string max = null)
         {
             InitializeComponent();
             scheme_colorpickermin.SelectedColor = Colors.Blue;
             scheme_colorpickermax.SelectedColor = Colors.Red;
 
-            if(isDiscrete) scheme_colorpickermin.SelectedColor = Colors.LightYellow;
+            if (isDiscrete) scheme_colorpickermin.SelectedColor = Colors.LightYellow;
             scheme_max.Text = (1.0).ToString();
             scheme_min.Text = (0.0).ToString();
             scheme_fps.Text = (25).ToString();
             scheme_name.Text = "NewAnnotationType";
 
             this.usedlabels = _usedlabels;
-            
-          
+
             labelcolors = new List<LabelColorPair>();
 
             if (name != null) scheme_name.Text = name;
@@ -54,95 +51,68 @@ namespace ssi
             if (min != null) scheme_min.Text = min;
             if (max != null) scheme_max.Text = max;
 
-
             if (usedlabels != null)
             {
-            
                 items = new List<LabelColorPair>();
                 foreach (LabelColorPair lp in usedlabels)
                 {
                     items.Add(new LabelColorPair(lp.label, lp.color) { Label = lp.label, Color = lp.color });
                     labelcolors.Add(new LabelColorPair(lp.label, lp.color));
-
                 }
 
-          
                 AnnotationResultBox.ItemsSource = items;
-
-
             }
         }
 
-
-
         private void AnnotationResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
         }
 
         private void AddAnnotation_Click(object sender, RoutedEventArgs e)
         {
-
             LabelInputBox l = new LabelInputBox("Add new Label", "Add new label", "", null, 1, "", "", true);
             l.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             l.ShowDialog();
 
-          
-            
-            if (l.DialogResult ==  true)
+            if (l.DialogResult == true)
             {
                 items = new List<LabelColorPair>();
                 string label = l.Result();
                 string color = l.Color();
-                LabelColorPair lcp = new LabelColorPair(label,color);
+                LabelColorPair lcp = new LabelColorPair(label, color);
 
                 labelcolors.Add(lcp);
 
-                foreach(LabelColorPair lp in labelcolors)
+                foreach (LabelColorPair lp in labelcolors)
                 {
                     items.Add(new LabelColorPair(label, color) { Label = lp.label, Color = lp.color });
-
                 }
 
-            
                 AnnotationResultBox.ItemsSource = items;
             }
-
-
-
-
-
-           
         }
 
         private void DeleteAnnotation_Click(object sender, RoutedEventArgs e)
         {
-
-
             IEditableCollectionView items = AnnotationResultBox.Items; //Cast to interface
             if (items.CanRemove)
             {
                 foreach (LabelColorPair lp in labelcolors)
                 {
-                   string selection = ((LabelColorPair) AnnotationResultBox.SelectedItem).label;
-                   if (lp.Label == selection)
+                    string selection = ((LabelColorPair)AnnotationResultBox.SelectedItem).label;
+                    if (lp.Label == selection)
                     {
                         labelcolors.Remove(lp);
                         break;
                     }
-
                 }
                 items.Remove(AnnotationResultBox.SelectedItem);
             }
-
-
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-
-
-                DialogResult = true;
+            DialogResult = true;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -154,49 +124,41 @@ namespace ssi
         public string GetName()
         {
             return scheme_name.Text;
-
         }
 
         public string GetMin()
         {
             return scheme_min.Text;
-
         }
 
         public string GetMax()
         {
             return scheme_max.Text;
-
         }
+
         public string GetFps()
         {
             return scheme_fps.Text;
-
         }
-
 
         public string GetType()
         {
             return scheme_type.SelectionBoxItem.ToString();
-
         }
 
         public List<LabelColorPair> GetLabelColorPairs()
         {
             return labelcolors;
-
         }
 
         public string GetColorMin()
         {
             return scheme_colorpickermin.SelectedColor.ToString();
-
         }
 
         public string GetColorMax()
         {
             return scheme_colorpickermax.SelectedColor.ToString();
-
         }
 
         private void scheme_type_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -217,10 +179,7 @@ namespace ssi
                 AnnotationResultBox.Visibility = Visibility.Visible;
                 AddAnnotation.Visibility = Visibility.Visible;
                 DeleteAnnotation.Visibility = Visibility.Visible;
-
-
             }
-
             else
             {
                 Colorlabel.Content = "Min Color";
@@ -238,7 +197,6 @@ namespace ssi
                 AnnotationResultBox.Visibility = Visibility.Hidden;
                 AddAnnotation.Visibility = Visibility.Hidden;
                 DeleteAnnotation.Visibility = Visibility.Hidden;
-
             }
         }
     }

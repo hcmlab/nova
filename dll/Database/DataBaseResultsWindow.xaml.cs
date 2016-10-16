@@ -14,12 +14,10 @@ namespace ssi
 
         public DataBaseResultsWindow(List<string> sessions, bool showdelete = true, string title = "Select Database")
         {
-
-           
             InitializeComponent();
             this.Title = title;
-            if(showdelete)
-            this.Delete.Visibility = Visibility.Visible;
+            if (showdelete)
+                this.Delete.Visibility = Visibility.Visible;
             else this.Delete.Visibility = Visibility.Hidden;
 
             foreach (string session in sessions)
@@ -50,25 +48,20 @@ namespace ssi
             else return null;
         }
 
-
         public bool Isokayhit()
         {
             return okayhit;
         }
+
         public bool ShouldDelete()
         {
-            if(shoulddelete)
+            if (shoulddelete)
             {
-
-             MessageBoxResult mb =  MessageBox.Show("Are you sure you want to delete the selection? This can't be undone!","Question", MessageBoxButton.YesNo,MessageBoxImage.Question);
-             if (mb == MessageBoxResult.Yes) return true;
-               
+                MessageBoxResult mb = MessageBox.Show("Are you sure you want to delete the selection? This can't be undone!", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (mb == MessageBoxResult.Yes) return true;
             }
 
             return false;
-
-
-  
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -88,7 +81,6 @@ namespace ssi
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-
         }
     }
 }

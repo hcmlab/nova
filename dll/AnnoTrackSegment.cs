@@ -49,8 +49,6 @@ namespace ssi
             this.TextAlignment = TextAlignment.Center;
             this.TextTrimming = TextTrimming.WordEllipsis;
 
-          
-
             ToolTip tt = new ToolTip();
             tt.Background = Brushes.Black;
             tt.Foreground = Brushes.White;
@@ -96,21 +94,18 @@ namespace ssi
                     }
                 }
 
-              //  if (this.item.Label == "") this.Item.Label = "Anno";
-
-                
+                //  if (this.item.Label == "") this.Item.Label = "Anno";
 
                 LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", this.Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true);
-                inputBox.showSlider(true,this.Item.Confidence);
+                inputBox.showSlider(true, this.Item.Confidence);
                 inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 inputBox.ShowDialog();
                 inputBox.Close();
                 if (inputBox.DialogResult == true)
                 {
                     rename(inputBox.Result());
-                   this.item.Bg = inputBox.Color();
-                   this.Item.Confidence = inputBox.ResultSlider();
-
+                    this.item.Bg = inputBox.Color();
+                    this.Item.Confidence = inputBox.ResultSlider();
 
                     AnnoTrackStatic.used_labels.Clear();
                     foreach (AnnoListItem a in track.AnnoList)

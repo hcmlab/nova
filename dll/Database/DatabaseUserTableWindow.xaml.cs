@@ -80,14 +80,12 @@ namespace ssi
         {
             if (DataBaseResultsBox.SelectedItem != null)
             {
-
-          
-            var database = mongo.GetDatabase(Properties.Settings.Default.Database);
-            var builder = Builders<BsonDocument>.Filter;
-            var filter = builder.Eq("name", DataBaseResultsBox.SelectedItem.ToString());
-            var update = Builders<BsonDocument>.Update.Set("isValid", false);
-            var result = database.GetCollection<BsonDocument>(collection).UpdateOne(filter, update);
-            DataBaseResultsBox.Items.Remove(DataBaseResultsBox.SelectedItem);
+                var database = mongo.GetDatabase(Properties.Settings.Default.Database);
+                var builder = Builders<BsonDocument>.Filter;
+                var filter = builder.Eq("name", DataBaseResultsBox.SelectedItem.ToString());
+                var update = Builders<BsonDocument>.Update.Set("isValid", false);
+                var result = database.GetCollection<BsonDocument>(collection).UpdateOne(filter, update);
+                DataBaseResultsBox.Items.Remove(DataBaseResultsBox.SelectedItem);
             }
             //todo care for deleting everything correctly.
         }
@@ -127,8 +125,6 @@ namespace ssi
                             if (detected == false) usedlabels.Add(l);
                         }
                         col1 = a.BackgroundColor;
-
-                       
                     }
                     else
                     {
@@ -138,7 +134,6 @@ namespace ssi
                         min = a.AnnoList.Lowborder.ToString();
                         max = a.AnnoList.Highborder.ToString();
                     }
-
                 }
 
                 storeAnnotationSchemetoDatabase(name, usedlabels, isdiscrete, col1, col2, sr, min, max);
@@ -157,10 +152,8 @@ namespace ssi
             }
         }
 
- 
         private void storeAnnotationSchemetoDatabase(string name = null, HashSet<LabelColorPair> _usedlabels = null, bool isDiscrete = true, Brush col1 = null, Brush col2 = null, string sr = null, string min = null, string max = null)
         {
-           
             DatabaseAnnoScheme dbas = new DatabaseAnnoScheme(name, usedlabels, isdiscrete, col1, col2, sr, min, max);
             dbas.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbas.ShowDialog();
@@ -217,17 +210,14 @@ namespace ssi
                 var filterup = builder.Eq("name", name);
                 UpdateOptions uo = new UpdateOptions();
                 uo.IsUpsert = true;
-                var result = coll.ReplaceOne(filterup,d,uo);
-               
+                var result = coll.ReplaceOne(filterup, d, uo);
 
-               // coll.InsertOne(d);
+                // coll.InsertOne(d);
             }
-
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
-            
             Brush col1 = null;
             Brush col2 = null;
             string sr = null;
@@ -235,10 +225,9 @@ namespace ssi
             string max = null;
 
             DatabaseHandler dh = new DatabaseHandler(connectionstring);
-            AnnotationScheme a =  dh.GetAnnotationScheme(DataBaseResultsBox.SelectedItem.ToString(), isdiscrete);
+            AnnotationScheme a = dh.GetAnnotationScheme(DataBaseResultsBox.SelectedItem.ToString(), isdiscrete);
             bool isDiscete = true;
             if (a.type == "CONTINUOUS") isDiscete = false;
-
 
             col1 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.mincolor));
 
@@ -259,23 +248,16 @@ namespace ssi
 
                     if (detected == false) usedlabels.Add(item);
                 }
-
             }
-
             else
             {
-
                 col2 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.maxcolor));
-                 sr = a.sr.ToString();
-                 min = a.minborder.ToString();
-                 max = a.maxborder.ToString();
-
+                sr = a.sr.ToString();
+                min = a.minborder.ToString();
+                max = a.maxborder.ToString();
             }
 
-
-            storeAnnotationSchemetoDatabase(a.name, usedlabels, isDiscete,  col1, col2, sr, min, max);
-
-
+            storeAnnotationSchemetoDatabase(a.name, usedlabels, isDiscete, col1, col2, sr, min, max);
         }
     }
 }

@@ -12,13 +12,12 @@ namespace ssi
     /// </summary>
     public partial class DatabaseSubjectWindow : Window
     {
-
         private MongoClient mongo;
-        IMongoDatabase database;
+        private IMongoDatabase database;
         private string connectionstring = "mongodb://127.0.0.1:27017";
+
         public DatabaseSubjectWindow(string name = null, string gender = null, string age = null, string culture = null)
         {
-
             InitializeComponent();
 
             connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP;
@@ -31,8 +30,6 @@ namespace ssi
             var filter = builder.Eq("name", name);
             documents = session.Find(filter).ToList();
 
-
-
             if (name != null) Namefield.Text = name;
 
             foreach (var item in Genderbox.Items)
@@ -43,7 +40,6 @@ namespace ssi
 
             if (age != null) Agefield.Text = age;
             if (culture != null) Culturefield.Text = culture;
-
         }
 
         public string Name()
@@ -63,14 +59,12 @@ namespace ssi
 
         public string Culture()
         {
-            return Culturefield.Text; 
+            return Culturefield.Text;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
         }
-
     }
-    
 }

@@ -46,8 +46,6 @@ namespace ssi
             this.filepath = filepath;
         }
 
-    
-
         public void Move(double to_in_seconds)
         {
             this.MediaPosition = (long)(to_in_seconds * 10000000.0);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace ssi
 {
@@ -9,6 +10,7 @@ namespace ssi
     {
         private ViewTime _viewTime = null;
         private bool _followmedia = false;
+        private bool _movetoanno = false;
 
         public ViewTime ViewTime
         {
@@ -38,8 +40,8 @@ namespace ssi
 
             ui.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(OnMouseDoubleClick);
             ui.PreviewMouseUp += (sender, args) => Update();
-            ui.PreviewMouseDown += (sender, args) => Update();
-            ui.PreviewMouseMove += (sender, args) => Update();
+            ;
+            ui.PreviewMouseMove += (sender, args) => MouseMove();
 
             //OnTimeRangeChanged += time =>
             //{
@@ -56,21 +58,28 @@ namespace ssi
             ui.SetSelectedRange(ui.RangeStart, ui.RangeStop);
         }
 
+        public void MouseMove()
+
+        {
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            {
+                Update();
+            }
+        }
+
         public void Update()
         {
             if (_viewTime != null)
             {
+                //seens to be a bug in avalon lib when mo.try to fix it by adjusting the value
+
                 if (ui.RangeStartSelected > ui.RangeStop) ui.RangeStartSelected = ui.RangeStop;
                 if (ui.RangeStopSelected > ui.RangeStop) ui.RangeStopSelected = ui.RangeStop;
                 if (ui.RangeStartSelected < ui.RangeStart) ui.RangeStartSelected = ui.RangeStart;
                 if (ui.RangeStopSelected < ui.RangeStart) ui.RangeStopSelected = ui.RangeStart;
-
-                if (ui.RangeStopSelected < ui.RangeStartSelected)
+                if (ui.RangeStopSelected < ui.RangeStartSelected + 1)
                 {
-                    long temp;
-                    temp = ui.RangeStopSelected;
-                    ui.RangeStopSelected = ui.RangeStartSelected;
-                    ui.RangeStartSelected = ui.RangeStopSelected;
+                    ui.RangeStartSelected = ui.RangeStopSelected - 1;
                 }
 
                 _viewTime.SelectionStart = _viewTime.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
@@ -86,9 +95,6 @@ namespace ssi
                 {
                     if (_viewTime.SelectionStop < ViewTime.CurrentPlayPosition)
                     {
-                        _viewTime.SelectionStop = ViewTime.CurrentPlayPosition;
-                        _viewTime.SelectionStart = _viewTime.SelectionStop - min;
-
                         if (_viewTime.TotalDuration > 0)
                         {
                             ui.RangeStartSelected = ((long)_viewTime.SelectionStart * ui.RangeStop) / (long)_viewTime.TotalDuration;
@@ -105,46 +111,29 @@ namespace ssi
             }
         }
 
-        public void MoveAndUpdate(bool moveRight, float moveWindowPercentage)
+        public void MoveAndUpdate(bool moveRight, double moveWindowPercentage)
         {
             if (_viewTime == null)
             {
                 return;
             }
 
-            //if (ui.RangeStartSelected > ui.RangeStop) ui.RangeStartSelected = ui.RangeStop;
-            //if (ui.RangeStopSelected > ui.RangeStop) ui.RangeStopSelected = ui.RangeStop;
-            //if (ui.RangeStartSelected < ui.RangeStart) ui.RangeStartSelected = ui.RangeStart;
-            //if (ui.RangeStopSelected < ui.RangeStart) ui.RangeStopSelected = ui.RangeStart;
-            //if (ui.RangeStopSelected < ui.RangeStartSelected)
-            //{
-            //    long temp;
-            //    temp = ui.RangeStopSelected;
-            //    ui.RangeStopSelected = ui.RangeStartSelected;
-            //    ui.RangeStartSelected = ui.RangeStopSelected;
-            //}
-
             var range = ui.RangeStopSelected - ui.RangeStartSelected;
 
-            float step = range * moveWindowPercentage + 0.5f;
+            double step = range * moveWindowPercentage + 0.5;
             var moveStep = (long)Math.Max(1, step);
-            Console.WriteLine(moveStep);
 
             if (moveRight)
             {
                 var effectiveStep = Math.Min(moveStep, ui.RangeStop - ui.RangeStopSelected); // do not change selection range on border conditions
-                Console.WriteLine(effectiveStep);
-
-                //  if (effectiveStep > ui.RangeStop) effectiveStep = ui.RangeStop;
 
                 ui.RangeStopSelected += effectiveStep;
                 ui.RangeStartSelected += effectiveStep;
-                Console.WriteLine(ui.RangeStopSelected + "  " + ui.RangeStartSelected);
             }
             else
             {
                 var effectiveStep = Math.Min(moveStep, ui.RangeStartSelected - ui.RangeStart); // do not change selection range on border conditions
-                                                                                               //   if (effectiveStep < 10) effectiveStep = 10;
+
                 ui.RangeStartSelected -= effectiveStep;
                 ui.RangeStopSelected -= effectiveStep;
             }

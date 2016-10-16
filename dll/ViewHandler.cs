@@ -65,6 +65,7 @@ namespace ssi
         private DispatcherTimer _timerp = new DispatcherTimer();
         private bool mouseDown = false;
         private bool keyDown = false;
+        private bool movemedialock = false;
         private double skelfps;
         private double lasttimepos = 0;
         private string lastdlfile = null;
@@ -86,48 +87,40 @@ namespace ssi
 
                 view.annoListControl.editComboBox.Items.Clear();
 
-               
                 if (AnnoTrack.GetSelectedTrack() != null && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
-                    
-                        view.annoListControl.editButton.IsEnabled = true;
-                        view.annoListControl.editComboBox.IsEnabled = true;
-                        view.annoListControl.editTextBox.IsEnabled = true;
-                   
+                    view.annoListControl.editButton.IsEnabled = true;
+                    view.annoListControl.editComboBox.IsEnabled = true;
+                    view.annoListControl.editTextBox.IsEnabled = true;
 
                     view.annoListControl.editComboBox.Items.Clear();
 
-                        view.annoListControl.editComboBox.Visibility = Visibility.Visible;
-                        view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
+                    view.annoListControl.editComboBox.Visibility = Visibility.Visible;
+                    view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
 
-                        //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
+                    //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
 
-                        if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete)
+                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete)
+                    {
+                        foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                         {
-                            foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
-                            {
-                                view.annoListControl.editComboBox.Items.Add(lcp.Label);
-                            }
+                            view.annoListControl.editComboBox.Items.Add(lcp.Label);
+                        }
                         view.annoListControl.editComboBox.SelectedIndex = 0;
-                          }
-
+                    }
                 }
-
-                else  if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
+                else if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     view.annoListControl.editButton.IsEnabled = false;
                     view.annoListControl.editComboBox.IsEnabled = false;
                     view.annoListControl.editTextBox.IsEnabled = false;
                 }
-
                 else
                 {
                     view.annoListControl.editButton.IsEnabled = true;
                     view.annoListControl.editComboBox.IsEnabled = false;
                     view.annoListControl.editTextBox.IsEnabled = true;
                 }
-
-
             }
         }
 
@@ -523,7 +516,7 @@ namespace ssi
         private void OnTrackControlSizeChanged(object sender, SizeChangedEventArgs e)
         {
             ViewHandler.time.SelectionInPixel = this.view.trackControl.ActualWidth;
-            this.view.trackControl.timeTrackControl.rangeSlider.Update();
+            if (!movemedialock) this.view.trackControl.timeTrackControl.rangeSlider.Update();
         }
 
         public AnnoList getCurrentAnno()
@@ -634,7 +627,7 @@ namespace ssi
             Stop();
             saveAll();
             AnnoSchemeLoaded = false;
-           
+
             this.view.trackControl.signalNameLabel.Text = "";
             this.view.trackControl.signalNameLabel.ToolTip = "";
             this.view.trackControl.signalBytesLabel.Text = "";
@@ -681,7 +674,7 @@ namespace ssi
             double fps;
             if (s != null)
             {
-                fps = 1000.0 / s.rate;
+                fps = s.rate;
                 skelfps = fps;
             }
             else
@@ -689,37 +682,38 @@ namespace ssi
                 fps = skelfps;
             }
 
-            lasttimepos = ViewHandler.Time.CurrentPlayPosition;
             if (innomediaplaymode)
             {
+                lasttimepos = ViewHandler.Time.CurrentPlayPosition;
                 this.view.navigator.playButton.Content = "II";
                 // Play();
                 _timerp.Interval = TimeSpan.FromMilliseconds(fps);
                 _timerp.Tick += new EventHandler(delegate (object sender, EventArgs a)
                 {
-                    ViewHandler.Time.CurrentPlayPositionPrecise = (ViewHandler.Time.CurrentPlayPositionPrecise + (fps / 1000.0));
-                    if (media_list.Medias.Count == 0)
-
+                    if (!movemedialock)
                     {
-                        signalCursor.X = ViewHandler.Time.PixelFromTime(ViewHandler.Time.CurrentPlayPositionPrecise);
-                        if (Time.CurrentPlayPositionPrecise >= Time.SelectionStop && this.view.navigator.followplaybox.IsChecked == true)
-                        {
-                            this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
-                            this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, 1.0f);
-                        }
-                        else if (Time.CurrentPlayPositionPrecise <= Time.SelectionStart && this.view.navigator.followplaybox.IsChecked == true)
-                        {
-                            this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
-                            this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(false, 1.0f);
-                        }
-                        else if (this.view.navigator.followplaybox.IsChecked == false) this.view.trackControl.timeTrackControl.rangeSlider.followmedia = false;
+                        ViewHandler.Time.CurrentPlayPositionPrecise = (ViewHandler.Time.CurrentPlayPositionPrecise + (fps / 1000.0));
+                        if (media_list.Medias.Count == 0)
 
+                        {
+                            signalCursor.X = ViewHandler.Time.PixelFromTime(ViewHandler.Time.CurrentPlayPositionPrecise);
+
+                            if (Time.CurrentPlayPositionPrecise >= Time.SelectionStop && this.view.navigator.followplaybox.IsChecked == true)
+                            {
+                                double factor = (((Time.CurrentPlayPositionPrecise - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
+
+                                this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
+                                this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+                            }
+                            else if (this.view.navigator.followplaybox.IsChecked == false) this.view.trackControl.timeTrackControl.rangeSlider.followmedia = false;
+                        }
                         //hm additional syncstep..
                         if (lasttimepos != ViewHandler.Time.CurrentPlayPosition)
                         {
                             lasttimepos = ViewHandler.Time.CurrentPlayPosition;
                             ViewHandler.Time.CurrentPlayPositionPrecise = lasttimepos;
                         }
+                        if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(true);
                     }
 
                     if (!innomediaplaymode) _timerp.Stop();
@@ -734,33 +728,38 @@ namespace ssi
 
         private void mediaPlayHandler(MediaList videos, MediaPlayEventArgs e)
         {
-            double pos = ViewHandler.Time.PixelFromTime(e.pos);
-
-            signalCursor.X = pos;
-
-            //  Time.CurrentPlayPosition = ViewHandler.Time.TimeFromPixel(signalCursor.X);
-            Time.CurrentPlayPosition = e.pos;
-
-            if (Time.CurrentPlayPosition >= Time.SelectionStop && this.view.navigator.followplaybox.IsChecked == true)
+            if (movemedialock == false)
             {
-                this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
-                this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, 1.0f);
+                double pos = ViewHandler.Time.PixelFromTime(e.pos);
+
+                if (Time.SelectionStop - Time.SelectionStart < 1) Time.SelectionStart = Time.SelectionStop - 1;
+
+                Time.CurrentPlayPosition = e.pos;
+
+                signalCursor.X = pos;
+                //   Console.WriteLine("5 " + signalCursor.X);
+                //if (ViewHandler.Time.TimeFromPixel(signalCursor.X) > Time.SelectionStop || signalCursor.X <= 1 ) signalCursor.X = ViewHandler.Time.PixelFromTime(Time.SelectionStart);
+                // Console.WriteLine(signalCursor.X + "_____" + Time.SelectionStart);
+
+                double time = Time.TimeFromPixel(pos);
+                this.view.trackControl.signalPositionLabel.Text = ViewTools.FormatSeconds(time);
+                this.view.trackControl.annoTrackControl.currenttime = Time.TimeFromPixel(pos);
+
+                if (e.pos > ViewHandler.time.TotalDuration - 0.5)
+                {
+                    Stop();
+                }
             }
-            else if (Time.CurrentPlayPosition <= Time.SelectionStart && this.view.navigator.followplaybox.IsChecked == true)
+
+            if (Time.CurrentPlayPosition >= Time.SelectionStop && this.view.navigator.followplaybox.IsChecked == true && !movemedialock)
             {
+                double factor = (((Time.CurrentPlayPosition - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
+
                 this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
-                this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(false, 1.0f);
+                this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
             }
             else if (this.view.navigator.followplaybox.IsChecked == false) this.view.trackControl.timeTrackControl.rangeSlider.followmedia = false;
-
-            double time = Time.TimeFromPixel(pos);
-            this.view.trackControl.signalPositionLabel.Text = ViewTools.FormatSeconds(time);
-            this.view.trackControl.annoTrackControl.currenttime = Time.TimeFromPixel(pos);
-
-            if (e.pos > ViewHandler.time.TotalDuration - 0.5)
-            {
-                Stop();
-            }
+            if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(true);
         }
 
         private void annoDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -771,9 +770,29 @@ namespace ssi
             {
                 AnnoListItem item = current_anno[grid.SelectedIndex];
                 view.annoListControl.editComboBox.SelectedItem = item.Label;
+                movemedialock = true;
+
+                //  signalCursor.X = ViewHandler.Time.PixelFromTime(item.Start);
+                Time.CurrentPlayPosition = item.Start;
+                Time.CurrentPlayPositionPrecise = item.Start;
+
+                media_list.move(item.Start);
+                moveCursorTo(item.Start);
+
+                if (item.Start >= time.SelectionStop)
+                {
+                    float factor = (float)(((item.Start - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
+                    this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+                }
+                else if (item.Stop <= time.SelectionStart)
+                {
+                    float factor = (float)(((Time.SelectionStart - item.Start)) / (Time.SelectionStop - Time.SelectionStart));
+                    this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
+                }
+
                 foreach (AnnoListItem a in AnnoTrack.GetSelectedTrack().AnnoList)
                 {
-                    if (a.Start == item.Start)
+                    if (a.Start == item.Start && a.Stop == item.Stop && item.Label == a.Label)
                     {
                         AnnoTrack.SelectSegment(AnnoTrack.GetSelectedTrack().getSegment(a));
                         view.annoListControl.editComboBox.SelectedItem = item.Label;
@@ -781,11 +800,7 @@ namespace ssi
                     }
                 }
 
-                moveCursorTo(item.Start);
-                if (this.view.navigator.framewisebox.IsChecked == true)
-                {
-                    media_list.move(item.Start);
-                }
+                movemedialock = false;
             }
         }
 
@@ -804,7 +819,9 @@ namespace ssi
         private void moveCursorTo(double seconds)
         {
             double pos = ViewHandler.Time.PixelFromTime(seconds);
+
             signalCursor.X = pos;
+
             //this.view.trackControl.scrollViewer.ScrollToHorizontalOffset(Math.Max(0, pos - this.view.trackControl.scrollViewer.ActualWidth / 2));
             double time = Time.TimeFromPixel(pos);
             this.view.trackControl.signalPositionLabel.Text = ViewTools.FormatSeconds(time);
@@ -821,19 +838,19 @@ namespace ssi
                 int type = 0;
                 if (isDiscrete) type = 1;
                 else if (!isDiscrete) type = 2;
-               
+
                 anno.Role = db.LoadRoles(Properties.Settings.Default.Database, null);
                 string annoscheme = db.LoadAnnotationSchemes(Properties.Settings.Default.Database, null, type);
                 anno.AnnotationScheme = db.GetAnnotationScheme(annoscheme, isDiscrete);
                 anno.Name = anno.Role + " #" + anno.AnnotationScheme.name;
                 anno.usesAnnoScheme = true;
-              
-                if(!isDiscrete)
+
+                if (!isDiscrete)
                 {
-                   background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
-                   background.Opacity = 0.75;
+                    background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
+                    background.Opacity = 0.75;
                 }
-                else if (anno.AnnotationScheme.mincolor !=  null) { background = new SolidColorBrush((Color)(ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor))); }
+                else if (anno.AnnotationScheme.mincolor != null) { background = new SolidColorBrush((Color)(ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor))); }
 
                 addAnno(anno, isDiscrete, (1000.0 / anno.AnnotationScheme.sr) / 1000.0, null, anno.AnnotationScheme.minborder, anno.AnnotationScheme.maxborder, background);
                 view.annoListControl.editComboBox.SelectedIndex = 0;
@@ -866,18 +883,15 @@ namespace ssi
             this.anno_tracks.Add(track);
             this.annos.Add(anno);
 
-            if(track != null && background == null && track.AnnoList != null && track.AnnoList.AnnotationScheme != null && anno.usesAnnoScheme)
+            if (track != null && background == null && track.AnnoList != null && track.AnnoList.AnnotationScheme != null && anno.usesAnnoScheme)
             {
                 background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor));
-
             }
-            if(track.AnnoList.usesAnnoScheme &&  track.isDiscrete)
+            if (track.AnnoList.usesAnnoScheme && track.isDiscrete)
             {
                 track.Background = background;
                 track.BackgroundColor = background;
             }
-          
-
 
             AnnoTrack.SelectTrack(track);
             if (background != null && !track.isDiscrete)
@@ -970,7 +984,7 @@ namespace ssi
                     background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
                     background.Opacity = 0.75;
                 }
-              
+
                 if (annolist != null)
                 {
                     setAnnoList(annolist);
@@ -1140,7 +1154,7 @@ namespace ssi
             if (duration > ViewHandler.Time.TotalDuration)
             {
                 ViewHandler.Time.TotalDuration = duration;
-                this.view.trackControl.timeTrackControl.rangeSlider.Update();
+                if (!movemedialock) this.view.trackControl.timeTrackControl.rangeSlider.Update();
             }
         }
 
@@ -1206,20 +1220,17 @@ namespace ssi
 
         private void playButton_Click(object sender, RoutedEventArgs e)
         {
-            if (media_list.Medias.Count == 0)
+            if ((string)this.view.navigator.playButton.Content == "II")
             {
-                if ((string)this.view.navigator.playButton.Content == "II")
-                {
-                    innomediaplaymode = false;
-                    nomediaPlayHandler(null);
-                    this.view.navigator.playButton.Content = ">";
-                }
-                else
-                {
-                    innomediaplaymode = true;
-                    nomediaPlayHandler(null);
-                    this.view.navigator.playButton.Content = "II";
-                }
+                innomediaplaymode = false;
+                nomediaPlayHandler(null);
+                this.view.navigator.playButton.Content = ">";
+            }
+            else
+            {
+                innomediaplaymode = true;
+                nomediaPlayHandler(null);
+                this.view.navigator.playButton.Content = "II";
             }
 
             infastbackward = false;
@@ -1420,29 +1431,21 @@ namespace ssi
             }
         }
 
-
         private void changed_annoschemeselectionbox(Object sender, EventArgs e)
         {
-            if(view.annoListControl.editComboBox.SelectedItem != null)
+            if (view.annoListControl.editComboBox.SelectedItem != null)
             {
-
-                foreach(LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
+                foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                 {
-                    if(lcp.Label == view.annoListControl.editComboBox.SelectedItem.ToString())
+                    if (lcp.Label == view.annoListControl.editComboBox.SelectedItem.ToString())
                     {
-
                         AnnoTrack.Defaultlabel = lcp.Label;
                         AnnoTrack.DefaultColor = lcp.Color;
                         break;
                     }
                 }
-              
             }
-         
-           
         }
-
-        
 
         private void changeSignalTrackHandler(ISignalTrack track, EventArgs e)
         {
@@ -1821,20 +1824,16 @@ namespace ssi
                 {
                     AnnoTrackStatic.used_labels.Clear();
 
+                    if (AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme)
 
-                    if(AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme)
-
-                    { 
-                        if(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null)
+                    {
+                        if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null)
                         {
-
                             foreach (LabelColorPair l in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                             {
                                 AnnoTrackStatic.used_labels.Add(l);
                             }
                         }
-
-                      
                     }
                     else
                     {
@@ -1856,9 +1855,7 @@ namespace ssi
                             }
                         }
                     }
-                 
 
-                    
                     LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true, AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme);
                     inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                     inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -2310,17 +2307,14 @@ namespace ssi
                 if (view.annoListControl.editComboBox.Visibility == Visibility.Visible && view.annoListControl.editComboBox.Items.Count > 0)
                 {
                     item.Label = view.annoListControl.editComboBox.SelectedItem.ToString();
-                    foreach(LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
+                    foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                     {
-                        if(lcp.Label == item.Label)
+                        if (lcp.Label == item.Label)
                         {
                             item.Bg = lcp.Color;
                             break;
                         }
-                     
-
                     }
-                   
                 }
                 else item.Label = view.annoListControl.editTextBox.Text;
             }
@@ -2405,7 +2399,6 @@ namespace ssi
 
                 if (AnnoSchemeLoaded)
                 {
-                   
                     newAnno(false, 0, 0, 1, resultbrush("RedBlue"));
                 }
                 else
@@ -2420,7 +2413,7 @@ namespace ssi
                         double samplerate;
                         if (double.TryParse(inputBox.Result3(), out samplerate))
                         {
-                            newAnno(false, (1000.0/  samplerate) / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
+                            newAnno(false, (1000.0 / samplerate) / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
                         }
                     }
                 }
@@ -2801,11 +2794,9 @@ namespace ssi
                 {
                     if (annos != null)
                     {
-                       
                         foreach (AnnoList anno in annos)
 
                         {
-
                             anno.usesAnnoScheme = true;
                             if (anno.Count > 0)
                             {
@@ -2832,14 +2823,12 @@ namespace ssi
                                     if (anno != null)
                                     {
                                         setAnnoList(anno);
-                                       
+
                                         addAnno(anno, anno.isDiscrete, 1);
                                     }
 
                                     updateTimeRange(maxdur);
                                 }
-
-                                
                             }
                         }
 
@@ -2849,7 +2838,6 @@ namespace ssi
 
                         if (media.Count > 0)
                         {
-                           
                             for (int i = 0; i < media.Count; i++)
                             {
                                 foreach (DatabaseMediaInfo c in ci)
@@ -3312,7 +3300,4 @@ namespace ssi
             }
         }
     }
-
-
-   
 }

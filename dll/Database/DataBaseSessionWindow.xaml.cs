@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace ssi
 {
@@ -21,12 +21,11 @@ namespace ssi
     /// </summary>
     public partial class DataBaseSessionWindow : Window
     {
-
         private MongoClient mongo;
-        IMongoDatabase database;
+        private IMongoDatabase database;
         private string connectionstring = "mongodb://127.0.0.1:27017";
 
-        public DataBaseSessionWindow(string name = null,string language = null, string location = null, BsonDateTime date = null)
+        public DataBaseSessionWindow(string name = null, string language = null, string location = null, BsonDateTime date = null)
         {
             InitializeComponent();
 
@@ -37,17 +36,15 @@ namespace ssi
 
             if (name != null) Namefield.Text = name;
 
-            foreach(var item in LanguageField.Items)
+            foreach (var item in LanguageField.Items)
             {
                 if (language != null && item.ToString().Contains(language))
                     LanguageField.SelectedItem = item;
             }
-           
+
             if (location != null) LocationField.Text = location;
             if (date != null) datepicker.SelectedDate = date.AsDateTime;
         }
-
-
 
         public string Name()
         {

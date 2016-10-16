@@ -69,7 +69,6 @@ namespace ssi
         public static bool askforlabel = false;
         public static string Defaultlabel = "Anno";
         public static string DefaultColor = "#000000";
-       
 
         static public event AnnoTrackChangeEventHandler OnTrackChange;
 
@@ -139,7 +138,7 @@ namespace ssi
 
         static public void OnKeyDownHandler(object sender, KeyEventArgs e)
         {
-            if (e.KeyboardDevice.IsKeyDown(Key.Delete)|| e.KeyboardDevice.IsKeyDown(Key.Back))
+            if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
             {
                 if (selected_segment != null && selected_track != null && GetSelectedTrack().isDiscrete)
                 {
@@ -200,15 +199,8 @@ namespace ssi
 
         private bool is_selected = false;
 
-
-
-
-
-      
-
         public AnnoTrack(AnnoList list, bool isDiscrete, double sr = 1.0, string tierid = "default", double borderl = 0.0, double borderh = 1.0)
         {
-
             this.AllowDrop = true;
             this.anno_list = list;
             this.SizeChanged += new SizeChangedEventHandler(sizeChanged);
@@ -276,9 +268,6 @@ namespace ssi
             }
         }
 
-
-
-
         public void ExportToXPS(Uri path, Canvas surface)
         {
             if (path == null) return;
@@ -310,7 +299,6 @@ namespace ssi
             // Restore previously saved layout
             surface.LayoutTransform = transform;
         }
-
 
         public void ExportToPng(Uri path, Canvas surface)
         {
@@ -352,8 +340,6 @@ namespace ssi
             surface.LayoutTransform = transform;
         }
 
-
-
         private void sizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (isDiscrete)
@@ -367,10 +353,8 @@ namespace ssi
             }
             else
             {   //it has to be called twice, otherwise there are some weird effects.
-               
-                    timeRangeChanged(ViewHandler.Time);
-                    timeRangeChanged(ViewHandler.Time);
-              
+                timeRangeChanged(ViewHandler.Time);
+                timeRangeChanged(ViewHandler.Time);
             }
         }
 
@@ -390,8 +374,6 @@ namespace ssi
                     }
                     else if (ctBrush != null && !isDiscrete)
                     {
-
-
                         LinearGradientBrush myBrush = new LinearGradientBrush();
                         myBrush.StartPoint = new Point(0, 0);
                         myBrush.EndPoint = new Point(0, 1);
@@ -399,7 +381,6 @@ namespace ssi
                         myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ctBrush).GradientStops[1].Color, 1));
                         myBrush.Opacity = 0.6;
                         this.Background = myBrush;
-
                     }
                 }
             }
@@ -409,8 +390,6 @@ namespace ssi
                 {
                     this.Background = BackgroundColor;
                 }
-
-
                 else if (!isDiscrete)
                 {
                     if (ctBrush == null)
@@ -425,7 +404,6 @@ namespace ssi
                     }
 
                     this.Background = ctBrush;
-
                 }
             }
         }
@@ -525,14 +503,12 @@ namespace ssi
             el.SetValue(Canvas.LeftProperty, 0.0);
             this.Children.Add(el);
 
-            if(isDiscrete) timeRangeChanged(ViewHandler.Time);
+            if (isDiscrete) timeRangeChanged(ViewHandler.Time);
             if (!isDiscrete)
             {
                 timeRangeChanged(ViewHandler.Time);
                 timeRangeChanged(ViewHandler.Time);
             }
-
-          
         }
 
         public void ContAnnoMode()
@@ -652,8 +628,6 @@ namespace ssi
 
             if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
             {
-
-                
                 AnnoListItem temp = new AnnoListItem(start, len, Defaultlabel, "", TierId, DefaultColor);
                 anno_list.Add(temp);
                 AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
@@ -817,10 +791,10 @@ namespace ssi
                             closestindexold = closestindex;
                             timeRangeChanged(ViewHandler.Time);
                             //  nicer drawing but slower
-                             if (!isDiscrete)
-                             {
+                            if (!isDiscrete)
+                            {
                                 timeRangeChanged(ViewHandler.Time);
-                             }
+                            }
                         }
                     }
                 }
@@ -841,7 +815,6 @@ namespace ssi
                         s.update();
                         s.Visibility = Visibility.Visible;
                     }
-
                     else if (s.Item.Stop >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
                     {
                         s.update2();
@@ -907,7 +880,7 @@ namespace ssi
 
                                 lines[i % lines.Count].Y1 = (value) * this.ActualHeight;
                                 if (i % lines.Count < lines.Count - 1 && ali.Stop < time.SelectionStop - ali.Duration) lines[i % lines.Count].Y2 = lines[i % lines.Count + 1].Y1;
-                                else  if(i > 0) lines[i % lines.Count].Y2 = lines[i % lines.Count - 1].Y1;
+                                else if (i > 0) lines[i % lines.Count].Y2 = lines[i % lines.Count - 1].Y1;
                                 lines[i % lines.Count].Visibility = Visibility.Visible;
                                 i++;
                             }

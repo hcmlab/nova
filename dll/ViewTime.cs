@@ -1,4 +1,6 @@
-﻿namespace ssi
+﻿using System;
+
+namespace ssi
 {
     public class ViewTime
     {
@@ -73,17 +75,30 @@
 
         public double PixelFromTime(double time)
         {
+            if (SelectionStop < SelectionStart + 1)
+            {
+                SelectionStart = SelectionStop - 1;
+            }
+
             if (time > selectionStop)
             {
                 return SelectionInPixel;
             }
-            if (time > selectionStart)
+            if (time >= selectionStart)
             {
                 return ((time - selectionStart) / (selectionStop - selectionStart)) * selectionInPixel;
             }
             else if (time < selectionStart)
             {
-                return (time / (selectionStop - selectionStart)) * selectionInPixel;
+                double range = 1.0;
+                if (selectionStop - selectionStart < 1.0) range = 1.0;
+                else range = selectionStop - selectionStart;
+
+                double range2 = 1.0;
+                if (((selectionStart - time) < 1.0)) range2 = 1.0;
+                else range2 = selectionStart - time;
+
+                return (range2 / range) * selectionInPixel;
             }
             else
             {

@@ -34,10 +34,8 @@ namespace ssi
             {
                 segment.setUnit(unit); //Little optical workaround to avoid the first and last label to be shown
                 if (segments[0] == segment) segment.Text = "";
-                if (segments[segments.Count -1] == segment) segment.Text = "";
+                if (segments[segments.Count - 1] == segment) segment.Text = "";
             }
-
-         
         }
 
         public double SecondsFrom
@@ -66,9 +64,8 @@ namespace ssi
             for (int i = 0; i < n_ticks; i++)
             {
                 segments[i].setPos(pos, n_ticks);
-              
+
                 pos += 1.0 / n_ticks;
-               
             }
         }
     }

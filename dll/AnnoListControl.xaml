@@ -56,7 +56,6 @@
                         </GridViewColumn>
                         <GridViewColumn Width="Auto" Header="Confidence" DisplayMemberBinding="{Binding Confidence}" />
                         <GridViewColumn Width="Auto" Header="Meta" DisplayMemberBinding="{Binding Meta}" />
-                       
                     </GridView>
                 </ListView.View>
             </ListView>

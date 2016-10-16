@@ -106,7 +106,6 @@ namespace ssi
             set { name = value; }
         }
 
-
         public AnnotationScheme AnnotationScheme
         {
             get { return scheme; }
@@ -529,7 +528,6 @@ namespace ssi
         }
     }
 
-
     public class AnnotationScheme
     {
         public string name { get; set; }
@@ -547,8 +545,5 @@ namespace ssi
         public string maxcolor { get; set; }
 
         public string type { get; set; }
-
-
     }
-
 }

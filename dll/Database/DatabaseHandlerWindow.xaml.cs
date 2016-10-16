@@ -265,9 +265,8 @@ namespace ssi
                 if (annos.TryGetElement("annotator", out value) && annos.TryGetElement("annotator", out value))
                 {
                     var filtera = builder.Eq("_id", annos["role_id"]);
-                    var roledb =  database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
+                    var roledb = database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
                     string roleid = roleid = roledb.GetValue(1).ToString();
-
 
                     var filterb = builder.Eq("_id", annos["scheme_id"]);
                     var annotdb = database.GetCollection<BsonDocument>("AnnotationSchemes").Find(filterb).Single();

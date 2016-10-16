@@ -6,20 +6,18 @@
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
         Title="DatabaseUserTableWindow" Height="300" Width="300" WindowStyle="None">
-    
+
     <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="30"></RowDefinition>
-            </Grid.RowDefinitions>
-             <Label Name="titlelabel"  Content="Hello" Margin="10,7,18,226"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Name="titlelabel"  Content="Hello" Margin="10,7,18,226" />
         <ListBox Name="DataBaseResultsBox" Grid.Row="0" Grid.Column="0" Margin="5,41,5,5" SelectionMode="Single"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-            <Button Name="Ok"  Content="Ok" Grid.Row="1" Grid.Column="0" Click="Ok_Click" Margin="219,5,5,5" ></Button>
-            <Button Name="Cancel" Content="Cancel" Grid.Row="1" Grid.Column="0" Click="Cancel_Click" Visibility="Collapsed" Margin="151,5,78,5" ></Button>
-            <Button Name="Delete" Content="X" Grid.Row="1" Grid.Column="0" Click="Delete_Click" Margin="34,5,233,5" ></Button>
-            <Button Name="Add" Content="+" Grid.Row="1" Grid.Column="0" Click="Add_Click" Margin="5,5,263,5" ></Button>
-            <Button Name="Edit" Content="E" Grid.Row="1" Grid.Column="0" Click="Edit_Click" Margin="64,5,204,5" Visibility="Hidden"></Button>
-
+        <Button Name="Ok"  Content="Ok" Grid.Row="1" Grid.Column="0" Click="Ok_Click" Margin="219,5,5,5" ></Button>
+        <Button Name="Cancel" Content="Cancel" Grid.Row="1" Grid.Column="0" Click="Cancel_Click" Visibility="Collapsed" Margin="151,5,78,5" ></Button>
+        <Button Name="Delete" Content="X" Grid.Row="1" Grid.Column="0" Click="Delete_Click" Margin="34,5,233,5" ></Button>
+        <Button Name="Add" Content="+" Grid.Row="1" Grid.Column="0" Click="Add_Click" Margin="5,5,263,5" ></Button>
+        <Button Name="Edit" Content="E" Grid.Row="1" Grid.Column="0" Click="Edit_Click" Margin="64,5,204,5" Visibility="Hidden"></Button>
     </Grid>
-
 </Window>
