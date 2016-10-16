@@ -46,8 +46,6 @@ namespace ssi
             this.filepath = filepath;
         }
 
-    
-
         public void Move(double to_in_seconds)
         {
             this.MediaPosition = (long)(to_in_seconds * 10000000.0);
@@ -71,9 +69,9 @@ namespace ssi
                 engine.GetMetadata(inputFile);
             }
 
-            if (this.HasVideo)
+            if (this.HasVideo && inputFile.Metadata.VideoData != null)
                 return inputFile.Metadata.VideoData.Fps;
-            else return double.Parse(inputFile.Metadata.AudioData.SampleRate);
+            else return 25.0;
         }
 
         public UIElement GetView()

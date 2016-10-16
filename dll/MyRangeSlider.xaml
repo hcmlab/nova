@@ -12,7 +12,7 @@
                 <RepeatButton Name="PART_LeftEdge" Content="" />
                 <Thumb Name="PART_LeftThumb" Cursor="SizeWE" />
                 <!--This size of this thumb will auto matically change by the control to 10-->
-                <Thumb Name="PART_MiddleThumb" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" Cursor="ScrollAll" MinWidth="20" />
+                <Thumb Name="PART_MiddleThumb" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" Cursor="ScrollAll" MinWidth="15" />
                 <Thumb Name="PART_RightThumb" Cursor="SizeWE" />
                 <!--This size of this thumb will auto matically change by the control to 10-->
                 <RepeatButton Name="PART_RightEdge" Content="" />

@@ -75,8 +75,6 @@ namespace ssi
                 this.ib_suggestions_comboBox.Visibility = Visibility.Hidden;
             }
 
-
-
             if (hascolorpicker == true)
             {
                 ib_color.Visibility = Visibility.Visible;
@@ -117,7 +115,6 @@ namespace ssi
                 }
                 else //todo: only other case now that uses colorpicker and not suggestion list. probably change this in the future to some more advanced logic
                 {
-
                     color1 = Colors.Black; // ((SolidColorBrush)(AnnoTrack.GetSelectedTrack().BackgroundColor)).Color;
                     this.sColor = color1;
                 }
@@ -138,21 +135,12 @@ namespace ssi
                 }
             }
 
-
-
             if (usesannotationscheme == true)
             {
-
                 this.ib_labelText.IsEnabled = false;
                 this.ib_color.IsEnabled = false;
-                
-
             }
-
         }
-
-
-
 
         public void setPWfield(string text)
         {
@@ -162,20 +150,18 @@ namespace ssi
 
         public void showSlider(bool showslider, double Confidence)
         {
-            if(showslider)
+            if (showslider)
             {
                 this.confidencelabel.Visibility = Visibility.Visible;
                 this.confidencelabelvalue.Visibility = Visibility.Visible;
                 this.Slider.Visibility = Visibility.Visible;
                 this.Slider.Value = Confidence;
             }
-           
         }
-
 
         public double ResultSlider()
         {
-            return Math.Round(this.Slider.Value, 2); 
+            return Math.Round(this.Slider.Value, 2);
         }
 
         public string ResultPw()
@@ -257,7 +243,6 @@ namespace ssi
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             confidencelabelvalue.Content = Math.Round(this.Slider.Value, 2).ToString();
-
         }
     }
 }

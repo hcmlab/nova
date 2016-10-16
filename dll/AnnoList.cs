@@ -31,6 +31,7 @@ namespace ssi
         private string subject = null;
         private double sr = 1.0;
         private AnnotationScheme scheme;
+        public bool usesAnnoScheme = false;
 
         private static bool _isDiscrete = true;
 
@@ -104,7 +105,6 @@ namespace ssi
             get { return name; }
             set { name = value; }
         }
-
 
         public AnnotationScheme AnnotationScheme
         {
@@ -528,7 +528,6 @@ namespace ssi
         }
     }
 
-
     public class AnnotationScheme
     {
         public string name { get; set; }
@@ -546,8 +545,5 @@ namespace ssi
         public string maxcolor { get; set; }
 
         public string type { get; set; }
-
-
     }
-
 }

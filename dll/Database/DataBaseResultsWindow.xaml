@@ -15,6 +15,5 @@
         <Button Name="Ok"  Content="Ok" Grid.Row="1" Grid.Column="0" Click="Ok_Click" Margin="219,5,5,5" ></Button>
         <Button Name="Cancel" Content="Cancel" Grid.Row="1" Grid.Column="0" Click="Cancel_Click" Margin="141,5,88,5" ></Button>
         <Button Name="Delete" Content="Delete" Grid.Row="1" Grid.Column="0" Click="Delete_Click" Margin="10,5,219,5" ></Button>
-        
     </Grid>
 </Window>
