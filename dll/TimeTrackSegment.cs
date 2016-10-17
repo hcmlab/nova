@@ -73,10 +73,10 @@ namespace ssi
         public void setPos(double pos, uint n_ticks)
         {
             double length = track.Width / n_ticks;
-          
-                Canvas.SetLeft(this, pos * track.Width - ActualWidth / 2 - drawingoffset);
-                time = track.SecondsFrom + (track.SecondsTo - track.SecondsFrom) * pos;
-                setUnit(unit);
+
+            Canvas.SetLeft(this, pos * track.Width - ActualWidth / 2 - drawingoffset);
+            time = track.SecondsFrom + (track.SecondsTo - track.SecondsFrom) * pos;
+            setUnit(unit);
 
             if (pos == 0) this.Text = "";
             if (track.Width - pos * track.Width < 100)

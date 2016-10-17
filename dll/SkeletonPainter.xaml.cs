@@ -327,28 +327,27 @@ namespace ssi
 
         private Color getColor(int i)
         {
-            Color c = this.SignalColor ;
+            Color c = this.SignalColor;
             double pos = ViewHandler.Time.CurrentPlayPosition;
             int index = (int)(pos * sr);
 
-        if(signal.data.Length >= (index * dim) + i * jointvalues + 3)
+            if (signal.data.Length >= (index * dim) + i * jointvalues + 3)
 
             {
-
-            if ((signal.data[(index * dim) + i * jointvalues + 3]) < 0.5)
-            {
-                c = this.SignalColor;
-                c.A = 128;
-            }
-            else if ((signal.data[(index * dim) + i * jointvalues + 3]) < 1.0)
-            {
-                c = this.SignalColor;
-                c.A = 0;
-            }
-            else
-            {
-                c = this.SignalColor;
-            }
+                if ((signal.data[(index * dim) + i * jointvalues + 3]) < 0.5)
+                {
+                    c = this.SignalColor;
+                    c.A = 128;
+                }
+                else if ((signal.data[(index * dim) + i * jointvalues + 3]) < 1.0)
+                {
+                    c = this.SignalColor;
+                    c.A = 0;
+                }
+                else
+                {
+                    c = this.SignalColor;
+                }
             }
             return c;
         }

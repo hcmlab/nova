@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-
 namespace ssi
 {
     /// <summary>
@@ -13,14 +12,14 @@ namespace ssi
     public partial class AnnoTrackControl : UserControl
     {
         public double currenttime = 0;
-        
+
         // True if a drag is in progress.
         private bool DragInProgress = false;
 
         // The drag's last point.
         private Point LastPoint;
 
-        UIElement track;
+        private UIElement track;
 
         public AnnoTrackControl()
         {
@@ -64,11 +63,9 @@ namespace ssi
             track.BackgroundColor = selectColor(this.annoTrackGrid.RowDefinitions.Count - 1); ;
             track.Background = track.BackgroundColor;
             this.annoTrackGrid.Children.Add(track);
-            
+
             return track;
         }
-
-
 
         //Default Color Scheme, make changeable in the config
         private Brush selectColor(int index)

@@ -9,7 +9,7 @@ namespace ssi
     public class MediaKit : MediaUriElement, IMedia
     {
         private string filepath;
-        private string url;
+        private string dbId;
 
         public string GetFilepath()
         {
@@ -26,6 +26,11 @@ namespace ssi
             this.Volume = volume;
         }
 
+        public void DBID(string url)
+        {
+            this.dbId = url;
+        }
+
         public MediaKit(string filepath, double pos_in_seconds)
         {
             this.LoadedBehavior = WPFMediaKit.DirectShow.MediaPlayers.MediaState.Manual;
@@ -39,11 +44,6 @@ namespace ssi
             this.Volume = 1.0;
             this.Pause();
             this.filepath = filepath;
-        }
-
-        public void Url(string url)
-        {
-            this.url = url;
         }
 
         public void Move(double to_in_seconds)
@@ -69,9 +69,9 @@ namespace ssi
                 engine.GetMetadata(inputFile);
             }
 
-            if (this.HasVideo)
+            if (this.HasVideo && inputFile.Metadata.VideoData != null)
                 return inputFile.Metadata.VideoData.Fps;
-            else return double.Parse(inputFile.Metadata.AudioData.SampleRate);
+            else return 25.0;
         }
 
         public UIElement GetView()

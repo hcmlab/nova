@@ -1,0 +1,74 @@
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+
+namespace ssi
+{
+    /// <summary>
+    /// Interaktionslogik für DataBaseSessionWindow.xaml
+    /// </summary>
+    public partial class DataBaseSessionWindow : Window
+    {
+        private MongoClient mongo;
+        private IMongoDatabase database;
+        private string connectionstring = "mongodb://127.0.0.1:27017";
+
+        public DataBaseSessionWindow(string name = null, string language = null, string location = null, BsonDateTime date = null)
+        {
+            InitializeComponent();
+
+            connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP;
+            mongo = new MongoClient(connectionstring);
+            database = mongo.GetDatabase(Properties.Settings.Default.Database);
+            var session = database.GetCollection<BsonDocument>(Properties.Settings.Default.LastSessionId);
+
+            if (name != null) Namefield.Text = name;
+
+            foreach (var item in LanguageField.Items)
+            {
+                if (language != null && item.ToString().Contains(language))
+                    LanguageField.SelectedItem = item;
+            }
+
+            if (location != null) LocationField.Text = location;
+            if (date != null) datepicker.SelectedDate = date.AsDateTime;
+        }
+
+        public string Name()
+        {
+            return Namefield.Text;
+        }
+
+        public string Language()
+        {
+            return LanguageField.SelectionBoxItem.ToString();
+        }
+
+        public string Location()
+        {
+            return LocationField.Text;
+        }
+
+        public DateTime Date()
+        {
+            return datepicker.SelectedDate.Value;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = true;
+        }
+    }
+}

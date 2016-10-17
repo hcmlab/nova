@@ -6,7 +6,7 @@ namespace ssi
     {
         UIElement GetView();
 
-        void Url(string url);
+        void DBID(string url);
 
         void SetVolume(double volume);
 

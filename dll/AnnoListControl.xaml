@@ -56,7 +56,6 @@
                         </GridViewColumn>
                         <GridViewColumn Width="Auto" Header="Confidence" DisplayMemberBinding="{Binding Confidence}" />
                         <GridViewColumn Width="Auto" Header="Meta" DisplayMemberBinding="{Binding Meta}" />
-                       
                     </GridView>
                 </ListView.View>
             </ListView>
@@ -74,6 +73,7 @@
 
             <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="5" >Rename</Button>
             <TextBox Name="editTextBox" Grid.Column="1" Grid.Row="0" Margin="5"></TextBox>
+            <ComboBox Name="editComboBox" Grid.Column="1" Grid.Row="0" Margin="5" Visibility="Collapsed"></ComboBox>
         </Grid>
     </Grid>
 </UserControl>

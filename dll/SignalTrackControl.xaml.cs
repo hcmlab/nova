@@ -47,7 +47,6 @@ namespace ssi
                 this.signalTrackGrid.RowDefinitions.Clear();
             }
             catch { }
-           
         }
 
         public ISignalTrack addSignalTrack(Signal signal, string color, string background)

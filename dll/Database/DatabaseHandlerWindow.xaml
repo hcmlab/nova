@@ -14,31 +14,78 @@
         </Grid.RowDefinitions>
 
         <Label Content="Server:IP" Margin="10,0,-10,0"></Label>
-        <TextBox x:FieldModifier="public" Margin="10,28,436,368" x:Name="db_server" Height="25" Focusable="True"/>
+        <TextBox x:FieldModifier="public" Margin="10,28,436,368" x:Name="db_server" Height="25" Focusable="True" />
         <Label Content="Database Login" Margin="212,0,-212,0"></Label>
-        <TextBox x:FieldModifier="public" Margin="212,28,270,368" x:Name="db_login" Height="25" Width="150" Focusable="True"/>
-        <Label Content="Database Password" Margin="379,0,-379,0"/>
+        <TextBox x:FieldModifier="public" Margin="212,28,270,368" x:Name="db_login" Height="25" Width="150" Focusable="True" />
+        <Label Content="Database Password" Margin="379,0,-379,0" />
         <PasswordBox x:FieldModifier="public" Margin="378,28,104,368" x:Name="db_pass" Height="25" Width="150" Focusable="True" />
 
-        <Label Content="Databases" Margin="10,53,-10,-23" Grid.RowSpan="2"/>
+        <Label Content="Databases" Margin="10,53,-10,-23" Grid.RowSpan="2" />
         <ListBox Name="DataBasResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,80,448,211" SelectionMode="Single" SelectionChanged="DataBasResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <Label Content="Sessions" Margin="10,220,-10,-190" Grid.RowSpan="2"/>
-        <ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,243,448,0" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
-        <Label Content="Annotations" Margin="237,58,270,3" Grid.RowSpan="2"/>
-        <ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <Label Content="Media" Margin="242,220,195,-2" Grid.RowSpan="2"/>
+        <Label Content="Sessions" Margin="10,220,-10,-190" Grid.RowSpan="2" />
+        <!--<ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,243,448,0" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" />-->
+        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="10,243,448,0">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
+
+                    <GridViewColumn Width="60" Header="Language">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Language" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+                    <GridViewColumn Width="60" Header="Location">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Location" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+                    <GridViewColumn Width="Auto" Header="Date">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Date" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+
+                    <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <Label Content="Annotations" Margin="237,58,270,3" Grid.RowSpan="2" />
+        <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
+
+        <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple" Margin="246,80,200,216">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="65" Header="AnnoType" DisplayMemberBinding="{Binding AnnoType}" />
+
+                    <GridViewColumn Width="60" Header="Role">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Role" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+                    <GridViewColumn Width="60" Header="Annotator">
+                        <GridViewColumn.DisplayMemberBinding>
+                            <Binding Path="Annotator" />
+                        </GridViewColumn.DisplayMemberBinding>
+                    </GridViewColumn>
+
+                    <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Label Content="Media" Margin="242,220,195,-2" Grid.RowSpan="2" />
         <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" Margin="246,243,200,0" SelectionMode="Multiple" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
         <CheckBox Name="showonlymine"  Content="Show only mine" Grid.Column="0" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" Margin="473,186,43,212" />
-        <CheckBox Name="requireslogin"  Content="Server requires auth" Grid.Column="0" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" Margin="473,227,10,171" IsEnabled="False"/>
-        <Label Content="Data Server Login" Margin="473,253,43,139"/>
-        <TextBox x:FieldModifier="public" Margin="473,280,23,116" x:Name="server_login" Height="25" Focusable="True" IsEnabled="False"/>
-        <Label Content="Data Server Password" Margin="473,312,23,77"/>
+        <CheckBox Name="requireslogin"  Content="Server requires auth" Grid.Column="0" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" Margin="473,227,10,171" IsEnabled="False" />
+        <Label Content="Data Server Login" Margin="473,253,43,139" />
+        <TextBox x:FieldModifier="public" Margin="473,280,23,116" x:Name="server_login" Height="25" Focusable="True" IsEnabled="False" />
+        <Label Content="Data Server Password" Margin="473,312,23,77" />
         <PasswordBox x:FieldModifier="public" Margin="473,334,23,67" x:Name="server_pass" Height="25" Focusable="True" IsEnabled="False" />
 
         <Button Name="Connect"  Content="Connect" Grid.Column="0" Click="Connect_Click" Margin="559,23,23,378" />
         <Button Name="Ok"  Content="Ok" Grid.Column="0" Grid.Row="1" Click="Ok_Click"  Height="25"  Margin="539,2,55,3" />
-        <Button Name="Cancel" Content="Cancel" Grid.Row="1"  Click="Cancel_Click"   Height="25" RenderTransformOrigin="3.367,0.24" Margin="459,2,135,3"  />
-       
+        <Button Name="Cancel" Content="Cancel" Grid.Row="1"  Click="Cancel_Click"   Height="25" RenderTransformOrigin="3.367,0.24" Margin="459,2,135,3" />
+
         <Button Name="DeleteAnnotation" Content="X" Grid.Column="0" Click="DeleteAnnotation_Click" Margin="454,80,169,320"  Visibility="Collapsed" />
     </Grid>
 </Window>

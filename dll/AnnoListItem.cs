@@ -11,7 +11,6 @@ namespace ssi
         private String tier;
         private String bg;
         private double confidence;
-       
 
         public double Start
         {
