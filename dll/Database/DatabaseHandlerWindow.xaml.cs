@@ -17,8 +17,8 @@ namespace ssi
         private string connectionstring = "mongodb://127.0.0.1:27017";
         private int authlevel = 0;
         private List<DatabaseMediaInfo> ci;
-        private List<string> files = new List<string>();
-        private List<string> allfiles = new List<string>();
+        private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
+        private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
 
         public DatabaseHandlerWindow()
         {
@@ -84,7 +84,7 @@ namespace ssi
 
             foreach (DatabaseMediaInfo c in ci)
             {
-                files.Add(c.filepath);
+                files.Add(c);
                 if (!c.filepath.Contains(".stream~"))
                 {
                     MediaResultBox.Items.Add(c.filename);
@@ -144,7 +144,7 @@ namespace ssi
             else return null;
         }
 
-        public List<string> Media()
+        public List<DatabaseMediaInfo> Media()
         {
             if (MediaResultBox.SelectedItems != null)
                 return allfiles;
@@ -245,46 +245,43 @@ namespace ssi
 
             BsonDocument documents;
             var builder = Builders<BsonDocument>.Filter;
-            if (onlyme)
-            {
-                var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-                documents = sessions.Find(filter).Single();
-            }
-            else
-            {
-                var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-                documents = sessions.Find(filter).Single();
-            }
+
+
+            var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
+            documents = sessions.Find(filter).Single();
+
 
             foreach (var c in documents["annotations"].AsBsonArray)
             {
                 var filteranno = builder.Eq("_id", c["annotation_id"].AsObjectId);
                 var annos = annotations.Find(filteranno).Single();
 
-                BsonElement value;
-                if (annos.TryGetElement("annotator", out value) && annos.TryGetElement("annotator", out value))
+
+                var filtera = builder.Eq("_id", annos["role_id"]);
+                var roledb = database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
+                string roleid = roleid = roledb.GetValue(1).ToString();
+
+                var filterb = builder.Eq("_id", annos["scheme_id"]);
+                var annotdb = database.GetCollection<BsonDocument>("AnnotationSchemes").Find(filterb).Single();
+                string annotid = annotid = annotdb.GetValue(1).ToString();
+
+
+                var filterc = builder.Eq("_id", annos["annotator_id"]);
+                var annotatdb = database.GetCollection<BsonDocument>("Annotators").Find(filterc).Single();
+                string annotatid = annotatdb.GetValue(1).ToString();
+
+                // AnnotationResultBox.Items.Add(roleid + "#" + annotid + "#" + a["annotator"].ToString());
+                //  AnnotationResultBox.Items.Add(roleid);
+
+                if (onlyme)
                 {
-                    var filtera = builder.Eq("_id", annos["role_id"]);
-                    var roledb = database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
-                    string roleid = roleid = roledb.GetValue(1).ToString();
-
-                    var filterb = builder.Eq("_id", annos["scheme_id"]);
-                    var annotdb = database.GetCollection<BsonDocument>("AnnotationSchemes").Find(filterb).Single();
-                    string annotid = "unknown";
-                    annotid = annotdb.GetValue(1).ToString();
-
-                    // AnnotationResultBox.Items.Add(roleid + "#" + annotid + "#" + a["annotator"].ToString());
-                    //  AnnotationResultBox.Items.Add(roleid);
-
-                    if (onlyme)
+                    if (Properties.Settings.Default.MongoDBUser == annotatdb.GetValue(1).ToString())
                     {
-                        if (Properties.Settings.Default.MongoDBUser == annos["annotator"].ToString())
-                        {
-                            items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annos["annotator"].ToString() });
-                        }
+                        items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
                     }
-                    else items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annos["annotator"].ToString() });
                 }
+                else items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
+
             }
             AnnotationResultBox.ItemsSource = items;
         }
@@ -350,9 +347,9 @@ namespace ssi
                 {
                     for (int j = 0; j < files.Count; j++)
                     {
-                        if (files[j].Contains(MediaResultBox.SelectedItems[i].ToString()))
+                        if (files[j].filename.Contains(MediaResultBox.SelectedItems[i].ToString()))
                         {
-                            allfiles.Add(files[j].ToString());
+                            allfiles.Add(files[j]);
                         }
                     }
                 }
@@ -382,8 +379,9 @@ namespace ssi
             {
                 var sessions = database.GetCollection<BsonDocument>("Sessions");
                 var roles = database.GetCollection<BsonDocument>("Roles");
-                var AnnotationSchemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+                var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
                 var annotations = database.GetCollection<BsonDocument>("Annotations");
+                var annotators = database.GetCollection<BsonDocument>("Annotators");
 
                 ObjectId roleid = new ObjectId();
                 var builder = Builders<BsonDocument>.Filter;
@@ -393,10 +391,16 @@ namespace ssi
 
                 ObjectId annotid = new ObjectId(); ;
                 var filterb = builder.Eq("name", ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).AnnoType);
-                var annotdb = AnnotationSchemes.Find(filterb).ToList();
+                var annotdb = annotationschemes.Find(filterb).ToList();
                 if (annotdb.Count > 0) annotid = annotdb[0].GetValue(0).AsObjectId;
 
-                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator", ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator);
+
+                ObjectId annotatid = new ObjectId(); ;
+                var filterc = builder.Eq("name", ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator);
+                var annotatdb = annotators.Find(filterc).ToList();
+                if (annotatdb.Count > 0) annotatid = annotatdb[0].GetValue(0).AsObjectId;
+
+                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid);
                 var anno = annotations.Find(filter).ToList();
 
                 var filter2 = builder.Eq("name", ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name);
