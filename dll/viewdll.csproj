@@ -161,7 +161,6 @@
       <DependentUpon>AnnoListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="AnnoListItem.cs" />
-    <Compile Include="AnnotationScheme.cs" />
     <Compile Include="AnnoTrack.cs" />
     <Compile Include="AnnoTrackControl.xaml.cs" />
     <Compile Include="AnnoTrackSegment.cs" />

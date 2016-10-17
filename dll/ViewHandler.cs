@@ -72,7 +72,7 @@ namespace ssi
         public bool annoSchemeloaded = false;
         private ViewControl view;
         private String annofilepath = "";
-        private bool credentialsentered = false;
+        List<DatabaseMediaInfo> loadedDBmedia = null;
         private int numberofparalleldownloads = 0;
         private List<long> downloadsreceived = new List<long>();
         private List<long> downloadstotal = new List<long>();
@@ -2742,7 +2742,7 @@ namespace ssi
                     if (anno_tracks.Count > 0)
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
-                        db.StoretoDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks);
+                        db.StoretoDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
 
                         MessageBox.Show("Annotation Tracks have been stored in the database " + Properties.Settings.Default.LastSessionId);
                     }
@@ -2762,9 +2762,8 @@ namespace ssi
         private void mongodbLoad()
         {
             clear();
-
+           
             System.Collections.IList annotations = null;
-            List<string> media = null;
             List<DatabaseMediaInfo> ci = null;
             DatabaseHandlerWindow dbhw = new DatabaseHandlerWindow();
             dbhw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -2773,7 +2772,7 @@ namespace ssi
             if (dbhw.DialogResult == true)
             {
                 annotations = dbhw.Annotations();
-                media = dbhw.Media();
+                loadedDBmedia = dbhw.Media();
                 ci = dbhw.MediaConnectionInfo();
             }
 
@@ -2800,7 +2799,7 @@ namespace ssi
                             anno.usesAnnoScheme = true;
                             if (anno.Count > 0)
                             {
-                                //  if(anno.isDiscrete == false && anno.Count > 0)
+                                //  here isDiscrete should be 
                                 if (anno[0].Duration == anno[1].Start && anno[1].Duration == anno[0].Duration)
                                 {
                                     anno.isDiscrete = false;
@@ -2836,16 +2835,16 @@ namespace ssi
 
                         //handle media
 
-                        if (media.Count > 0)
+                        if (loadedDBmedia.Count > 0)
                         {
-                            for (int i = 0; i < media.Count; i++)
+                            for (int i = 0; i < loadedDBmedia.Count; i++)
                             {
                                 foreach (DatabaseMediaInfo c in ci)
 
                                 {
                                     Properties.Settings.Default.DataServerConnectionType = c.connection;
 
-                                    if (c.filename == media[i].ToString())
+                                    if (c.filename == loadedDBmedia[i].filename.ToString())
 
                                     {
                                         if (c.connection == "sftp")

@@ -115,8 +115,7 @@ namespace ssi
 
         public string LoadAnnotationSchemes(string db, AnnoTrack tier, int type = 0)
         {
-            BsonElement value;
-            string annotype = "None";
+                       string annotype = "None";
             List<string> AnnotationSchemes = new List<string>();
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -154,7 +153,7 @@ namespace ssi
             return annotype;
         }
 
-        public void StoretoDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null)
+        public void StoretoDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null, List<DatabaseMediaInfo> loadedDBmedia = null)
         {
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -163,8 +162,10 @@ namespace ssi
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
             var annotations = database.GetCollection<BsonDocument>("Annotations");
+            var annotators = database.GetCollection<BsonDocument>("Annotators");
             var sessions = database.GetCollection<BsonDocument>("Sessions");
             var roles = database.GetCollection<BsonDocument>("Roles");
+            var medias = database.GetCollection<BsonDocument>("Media");
             var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
 
             foreach (AnnoTrack a in anno_tracks)
@@ -201,6 +202,27 @@ namespace ssi
                     roles.InsertOne(b);
                     roleid = b.GetValue(0).AsObjectId;
                 }
+
+
+
+
+
+                BsonDocument annotatordoc = new BsonDocument();
+                BsonElement annotatorname = new BsonElement("name", dbuser);
+                BsonElement annotatoremail = new BsonElement("email", "");
+
+                annotatordoc.Add(annotatorname);
+                annotatordoc.Add(annotatoremail);
+
+                var filterannotator = builder.Eq("name", dbuser);
+                UpdateOptions uoa = new UpdateOptions();
+                uoa.IsUpsert = true;
+                var resann = annotators.ReplaceOne(filterannotator, annotatordoc, uoa);
+                ObjectId annotatoroid = annotators.Find(filterannotator).Single()["_id"].AsObjectId;
+
+
+
+
 
                 ObjectId annotid;
                 string annotype = null;
@@ -259,13 +281,38 @@ namespace ssi
                     annotid = b.GetValue(0).AsObjectId;
                 }
 
-                BsonElement user = new BsonElement("annotator", dbuser);
+
+         
+
+                BsonElement user = new BsonElement("annotator_id", annotatoroid);
                 BsonElement role = new BsonElement("role_id", roleid);
                 BsonElement annot = new BsonElement("scheme_id", annotid);
                 BsonElement date = new BsonElement("date", new BsonDateTime(DateTime.Now));
                 BsonDocument document = new BsonDocument();
 
                 BsonArray media = new BsonArray();
+
+                foreach(DatabaseMediaInfo dmi in loadedDBmedia)
+                {
+
+                    BsonDocument mediadocument = new BsonDocument();
+                    ObjectId mediaid;
+
+                    var filtermedia = builder.Eq("fileName", dmi.filename) & builder.Eq("connection", dmi.connection);
+                    var mediadb = medias.Find(filtermedia).Single();
+                    mediaid = mediadb.GetValue(0).AsObjectId;
+                       
+                    BsonElement media_id = new BsonElement("media_id", mediaid);
+                    mediadocument.Add(media_id);
+                    media.Add(mediadocument);
+
+                }
+
+
+
+
+
+
 
                 //todo add currently opend medias..
 
@@ -309,7 +356,16 @@ namespace ssi
                     }
                 }
 
-                var filter2 = builder.Eq("scheme_id", annotid) & builder.Eq("role_id", roleid) & builder.Eq("annotator", dbuser);
+
+
+
+
+              
+
+
+
+
+                var filter2 = builder.Eq("scheme_id", annotid) & builder.Eq("role_id", roleid) & builder.Eq("annotator_id", annotatoroid);
 
                 ObjectId annoid = new ObjectId();
                 var res = annotations.Find(filter2).ToList();
@@ -323,21 +379,6 @@ namespace ssi
                 var result = annotations.ReplaceOne(filter2, document, uo);
                 ObjectId oid = annotations.Find(filter2).Single()["_id"].AsObjectId;
 
-                //var result = annotations.DeleteOne(filter2);
-                //annotations.InsertOneAsync(document);
-                //if (documents.Count > 0)
-                //{
-                //    string id = documents[0]["name"].ToString();
-                //    annos = documents[0]["annotations"].AsBsonArray;
-
-                //    for (int j = 0; j < annos.Count; j++)
-                //    {
-                //        if (annos[j]["annotation_id"].AsObjectId == annoid)
-                //        {
-                //            annos.RemoveAt(j);
-                //        }
-                //    }
-                //}
 
                 if (result.MatchedCount == 0)
                 {
@@ -417,13 +458,16 @@ namespace ssi
                 ObjectId annotid = GetObjectID(database, "AnnotationSchemes", "name", s.AnnoType);
                 string annotdb = FetchDBRef(database, "AnnotationSchemes", "name", annotid);
 
+                ObjectId annotatid = GetObjectID(database, "Annotators", "name", s.Annotator);
+                string annotatdb = FetchDBRef(database, "Annotators", "name", annotatid);
+
                 var builder = Builders<BsonDocument>.Filter;
 
                 var filterscheme = builder.Eq("_id", annotid);
                 var result = collection.Find(filterscheme);
                 var annosch = annoschemes.Find(filterscheme).Single();
 
-                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator", s.Annotator);
+                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid);
                 var documents = collection.Find(filter).Single();
 
                 if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "DISCRETE")
