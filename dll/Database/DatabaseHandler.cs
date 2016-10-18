@@ -76,7 +76,7 @@ namespace ssi
 
         public string LoadRoles(string db, AnnoTrack tier)
         {
-            BsonElement value;
+           
             string role = "None";
             List<string> roles = new List<string>();
             mongo = new MongoClient(connectionstring);
@@ -115,7 +115,7 @@ namespace ssi
 
         public string LoadAnnotationSchemes(string db, AnnoTrack tier, int type = 0)
         {
-                       string annotype = "None";
+            string annotype = "None";
             List<string> AnnotationSchemes = new List<string>();
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -298,7 +298,7 @@ namespace ssi
                     BsonDocument mediadocument = new BsonDocument();
                     ObjectId mediaid;
 
-                    var filtermedia = builder.Eq("fileName", dmi.filename) & builder.Eq("connection", dmi.connection);
+                    var filtermedia = builder.Eq("name", dmi.filename) & builder.Eq("connection", dmi.connection);
                     var mediadb = medias.Find(filtermedia).Single();
                     mediaid = mediadb.GetValue(0).AsObjectId;
                        
@@ -308,13 +308,6 @@ namespace ssi
 
                 }
 
-
-
-
-
-
-
-                //todo add currently opend medias..
 
                 BsonArray data = new BsonArray();
 
@@ -355,14 +348,6 @@ namespace ssi
                         document.Add("frames", data);
                     }
                 }
-
-
-
-
-
-              
-
-
 
 
                 var filter2 = builder.Eq("scheme_id", annotid) & builder.Eq("role_id", roleid) & builder.Eq("annotator_id", annotatoroid);
