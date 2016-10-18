@@ -143,8 +143,8 @@ namespace ssi
 
                     string url = "";
 
-                    if (connection == "sftp") url = "sftp://" + ip + folder  + filename;
-                    if (connection == "ftp") url =  "ftp://" + ip + folder + filename;
+                    if (connection == "sftp") url = "sftp://" + ip + folder + "/" + filename;
+                    if (connection == "ftp") url =  "ftp://" + ip + folder + "/" + filename;
                     if (connection == "http") url = filenames[i];
 
 

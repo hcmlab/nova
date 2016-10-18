@@ -67,7 +67,7 @@ namespace ssi
         static public int closestindexold = 0;
         public static bool continuousannomode = false;
         public static bool askforlabel = false;
-        public static string Defaultlabel = "Anno";
+        public static string Defaultlabel = "";
         public static string DefaultColor = "#000000";
 
         static public event AnnoTrackChangeEventHandler OnTrackChange;
@@ -547,8 +547,7 @@ namespace ssi
                 double closestposition = start;
                 closestindex = getClosestContinousIndex(closestposition);
                 closestindexold = closestindex;
-                string label = "";
-                string color = "#DE000000";
+               
 
                 AnnoTrackStatic.used_labels.Clear();
                 foreach (AnnoListItem item in AnnoTrack.GetSelectedTrack().AnnoList)
@@ -568,16 +567,15 @@ namespace ssi
                         if (detected == false)
                         {
                             AnnoTrackStatic.used_labels.Add(l);
-                            label = l.Label;
-                            color = l.Color;
+                           
                         }
                     }
                 }
 
                 if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
                 {
-                    AnnoListItem temp = new AnnoListItem(start, len, label, "", TierId);
-                    temp.Bg = color;
+                    AnnoListItem temp = new AnnoListItem(start, len, AnnoTrackStatic.Defaultlabel, AnnoTrackStatic.DefaultColor, TierId);
+                    temp.Bg = AnnoTrackStatic.DefaultColor;
                     anno_list.Add(temp);
                     AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                     annorightdirection = true;
@@ -628,7 +626,7 @@ namespace ssi
 
             if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
             {
-                AnnoListItem temp = new AnnoListItem(start, len, Defaultlabel, "", TierId, DefaultColor);
+                AnnoListItem temp = new AnnoListItem(start, len, AnnoTrackStatic.Defaultlabel, "", TierId, AnnoTrackStatic.DefaultColor);
                 anno_list.Add(temp);
                 AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                 segment.Width = 1;

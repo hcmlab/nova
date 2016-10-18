@@ -1889,6 +1889,9 @@ namespace ssi
                         }
 
                         AnnoTrack.GetSelectedTrack().track_used_labels = AnnoTrackStatic.used_labels;
+                        AnnoTrackStatic.Defaultlabel = inputBox.Result();
+                        AnnoTrackStatic.DefaultColor = inputBox.Color();
+
                     }
                 }
             }
@@ -2486,7 +2489,7 @@ namespace ssi
             string localfilepath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\";
             lastdlfile = fileName;
 
-            string ftpfilepath = folder + "/" + fileName;
+            string ftpfilepath = "/" + folder +  fileName;
             if (!File.Exists(localfilepath + fileName))
             {
                 try
@@ -2859,7 +2862,8 @@ namespace ssi
                                             Properties.Settings.Default.DataServerConnectionType = "sftp";
 
                                             string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
-                                            if (!file.EndsWith("stream~") && !file.EndsWith("stream%7E") ) filestoload.Add(file);
+                                            if (!file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
+
                                         }
                                         else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
                                         {
