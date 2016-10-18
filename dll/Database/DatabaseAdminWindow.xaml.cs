@@ -29,71 +29,93 @@ namespace ssi
 
         private void AddFiles_Click(object sender, RoutedEventArgs e)
         {
-            LabelInputBox inputBox2 = new LabelInputBox("MongoDB Connection", "Enter sftp, httpGet or httpPost", Properties.Settings.Default.DataServerConnectionType);
-            inputBox2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            inputBox2.ShowDialog();
-            inputBox2.Close();
 
-            if (inputBox2.DialogResult == true)
+            DatabaseMediaWindow dbmw = new DatabaseMediaWindow();
+            dbmw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dbmw.ShowDialog();
+
+            if (dbmw.DialogResult == true)
             {
-                Properties.Settings.Default.DataServerConnectionType = inputBox2.Result();
-                Properties.Settings.Default.Save();
 
-                if (Properties.Settings.Default.DataServerConnectionType == "sftp")
-                {
-                    LabelInputBox inputBox3 = new LabelInputBox("Storage Data", "Files, seperated by ; server & folder ", Properties.Settings.Default.DataServer, null, 3, Properties.Settings.Default.DataServerFolder, Properties.Settings.Default.Filenames);
-                    inputBox3.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                    inputBox3.ShowDialog();
-                    inputBox3.Close();
+                Properties.Settings.Default.DataServerConnectionType = dbmw.Type();
+                Properties.Settings.Default.Filenames = dbmw.Files();
+                Properties.Settings.Default.DataServer = dbmw.Server(); ;
+                Properties.Settings.Default.DataServerFolder = dbmw.Folder(); ;
+                bool requiresAuth = dbmw.Auth();
 
-                    if (inputBox3.DialogResult == true)
-                    {
-                        Properties.Settings.Default.Filenames = inputBox3.Result3();
-                        Properties.Settings.Default.DataServer = inputBox3.Result(); ;
-                        Properties.Settings.Default.DataServerFolder = inputBox3.Result2(); ;
-                        Properties.Settings.Default.Save();
 
-                        string[] fnames = Properties.Settings.Default.Filenames.Split(';');
-                        AddMediatoDatabase(Properties.Settings.Default.DataServerConnectionType, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.DataServer, Properties.Settings.Default.DataServerFolder, fnames);
-                    }
-                }
-                else if (Properties.Settings.Default.DataServerConnectionType == "httpPost")
-                {
-                    LabelInputBox inputBox3 = new LabelInputBox("Storage Data", "Files, seperated by ; Url ", Properties.Settings.Default.DataServer, null, 2, Properties.Settings.Default.Filenames);
-                    inputBox3.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                    inputBox3.ShowDialog();
-                    inputBox3.Close();
 
-                    if (inputBox3.DialogResult == true)
-                    {
-                        Properties.Settings.Default.Filenames = inputBox3.Result();
-                        Properties.Settings.Default.DataServer = inputBox3.Result2(); ;
-                        Properties.Settings.Default.Save();
-
-                        string[] fnames = Properties.Settings.Default.Filenames.Split(';');
-                        AddMediatoDatabase(Properties.Settings.Default.DataServerConnectionType, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.DataServer, Properties.Settings.Default.DataServerFolder, fnames);
-                    }
-                }
-                else if (Properties.Settings.Default.DataServerConnectionType == "httpGet")
-                {
-                    LabelInputBox inputBox3 = new LabelInputBox("Storage Data", "Files, seperated by ;", Properties.Settings.Default.Filenames, null, 1);
-                    inputBox3.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                    inputBox3.ShowDialog();
-                    inputBox3.Close();
-
-                    if (inputBox3.DialogResult == true)
-                    {
-                        Properties.Settings.Default.Filenames = inputBox3.Result();
-                        Properties.Settings.Default.Save();
-
-                        string[] fnames = Properties.Settings.Default.Filenames.Split(';');
-                        AddMediatoDatabase(Properties.Settings.Default.DataServerConnectionType, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, "", "", fnames);
-                    }
-                }
+                string[] fnames = Properties.Settings.Default.Filenames.Split(';');
+                AddMediatoDatabase(Properties.Settings.Default.DataServerConnectionType, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.DataServer, Properties.Settings.Default.DataServerFolder, fnames, requiresAuth);
             }
+
+
+
+            //LabelInputBox inputBox2 = new LabelInputBox("MongoDBConnection", "Enter ftp, sftp, httpPost or httpGet ", Properties.Settings.Default.DataServerConnectionType);
+            //inputBox2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //inputBox2.ShowDialog();
+            //inputBox2.Close();
+
+            //if (inputBox2.DialogResult == true)
+            //{
+            //    Properties.Settings.Default.DataServerConnectionType = inputBox2.Result();
+            //    Properties.Settings.Default.Save();
+
+            //    if (Properties.Settings.Default.DataServerConnectionType == "sftp" || Properties.Settings.Default.DataServerConnectionType == "ftp")
+            //    {
+            //        LabelInputBox inputBox3 = new LabelInputBox("Storage Data", "Files, seperated by ; server & folder ", Properties.Settings.Default.DataServer, null, 3, Properties.Settings.Default.DataServerFolder, Properties.Settings.Default.Filenames);
+            //        inputBox3.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //        inputBox3.ShowDialog();
+            //        inputBox3.Close();
+
+            //        if (inputBox3.DialogResult == true)
+            //        {
+            //            Properties.Settings.Default.Filenames = inputBox3.Result3();
+            //            Properties.Settings.Default.DataServer = inputBox3.Result(); ;
+            //            Properties.Settings.Default.DataServerFolder = inputBox3.Result2(); ;
+            //            Properties.Settings.Default.Save();
+
+            //            string[] fnames = Properties.Settings.Default.Filenames.Split(';');
+            //            AddMediatoDatabase(Properties.Settings.Default.DataServerConnectionType, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.DataServer, Properties.Settings.Default.DataServerFolder, fnames);
+            //        }
+            //    }
+            //    else if (Properties.Settings.Default.DataServerConnectionType == "httpPost")
+            //    {
+            //        LabelInputBox inputBox3 = new LabelInputBox("Storage Data", "Files, seperated by ; Url ", Properties.Settings.Default.DataServer, null, 2, Properties.Settings.Default.Filenames);
+            //        inputBox3.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //        inputBox3.ShowDialog();
+            //        inputBox3.Close();
+
+            //        if (inputBox3.DialogResult == true)
+            //        {
+            //            Properties.Settings.Default.Filenames = inputBox3.Result();
+            //            Properties.Settings.Default.DataServer = inputBox3.Result2(); ;
+            //            Properties.Settings.Default.Save();
+
+            //            string[] fnames = Properties.Settings.Default.Filenames.Split(';');
+            //            AddMediatoDatabase(Properties.Settings.Default.DataServerConnectionType, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.DataServer, Properties.Settings.Default.DataServerFolder, fnames);
+            //        }
+            //    }
+            //    else if (Properties.Settings.Default.DataServerConnectionType == "httpGet")
+            //    {
+            //        LabelInputBox inputBox3 = new LabelInputBox("Storage Data", "Files, seperated by ;", Properties.Settings.Default.Filenames, null, 1);
+            //        inputBox3.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //        inputBox3.ShowDialog();
+            //        inputBox3.Close();
+
+            //        if (inputBox3.DialogResult == true)
+            //        {
+            //            Properties.Settings.Default.Filenames = inputBox3.Result();
+            //            Properties.Settings.Default.Save();
+
+            //            string[] fnames = Properties.Settings.Default.Filenames.Split(';');
+            //            AddMediatoDatabase(Properties.Settings.Default.DataServerConnectionType, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, "", "", fnames);
+            //        }
+            //    }
+            //}
         }
 
-        public void AddMediatoDatabase(string connection, string db, string session, string ip, string folder, string[] filenames)
+        public void AddMediatoDatabase(string connection, string db, string session, string ip, string folder, string[] filenames, bool auth=false)
         {
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -101,7 +123,7 @@ namespace ssi
             if (CollectionResultsBox.SelectedItem != null)
             {
                 var builder = Builders<BsonDocument>.Filter;
-                var filter = builder.Eq("fileName", session) & builder.Eq("connection", connection);
+                var filter = builder.Eq("name", session) & builder.Eq("connection", connection);
                 var media = database.GetCollection<BsonDocument>("Media");
 
                 var filter2 = builder.Eq("name", session);
@@ -109,10 +131,6 @@ namespace ssi
 
                 BsonArray files = new BsonArray();
                 files = sessions[0]["media"].AsBsonArray;
-
-                bool requiresauth = false;
-
-                if (connection.Contains("sftp") || connection.Contains("httpPost")) requiresauth = true;
 
                 for (int i = 0; i < filenames.Length; i++)
                 {
@@ -123,14 +141,20 @@ namespace ssi
                     }
                     // string id = media[0]["name"].ToString();
 
+                    string url = "";
+
+                    if (connection == "sftp") url = "sftp://" + ip + folder  + filename;
+                    if (connection == "ftp") url =  "ftp://" + ip + folder + filename;
+                    if (connection == "http") url = filenames[i];
+
+
+
+
                     BsonDocument b = new BsonDocument
                     {
-                                 { "connection", connection },
-                                 { "ip", ip },
-                                 { "folder", folder },
-                                 { "fileName", filename },
-                                 { "filePath", filenames[i] },
-                                 { "requiresAuth", requiresauth },
+                                 { "name", filename },
+                                 { "url", url },
+                                 { "requiresAuth", auth},
                                  { "mediatype_id", "" },
                                  { "role_id", "" },
                                  { "subject_id", "" }
@@ -495,11 +519,24 @@ namespace ssi
                         {
                             var selectedmedia = selectedmedialist[0];
                             DatabaseMediaInfo c = new DatabaseMediaInfo();
-                            c.connection = selectedmedia["connection"].ToString();
-                            c.ip = selectedmedia["ip"].ToString();
-                            c.folder = selectedmedia["folder"].ToString();
-                            c.filepath = selectedmedia["filePath"].ToString();
-                            c.filename = selectedmedia["fileName"].ToString();
+
+                            string url = selectedmedia["url"].ToString();
+                            string[] split = url.Split(':');
+                            c.connection = split[0];
+
+                            if (split[0] == "ftp" || split[0] == "sftp")
+                            {
+
+                                string[] split2 = split[1].Split(new char[] { '/' }, 4);
+                                c.ip = split2[2];
+                                string filename = split2[3].Substring(split2[3].LastIndexOf("/") + 1, (split2[3].Length - split2[3].LastIndexOf("/") - 1));
+                                c.folder = split2[3].Remove(split2[3].Length - filename.Length);
+
+                            }
+
+
+                            c.filepath = url;
+                            c.filename = selectedmedia["name"].ToString();
                             c.requiresauth = selectedmedia["requiresAuth"].ToString();
 
                             //Todo: solve references
@@ -584,7 +621,7 @@ namespace ssi
                             var filter2 = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
                             var subjectsresult = subjects.Find(filter2).ToList();
 
-                            var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
+                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
                             var mediadocuments = media.Find(filtermedia).ToList();
 
                             if (mediadocuments.Count > 0)
@@ -618,7 +655,7 @@ namespace ssi
                 var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
                 var documents = sessions.Find(filter).ToList();
 
-                var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString());
+                var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString());
                 var mediadocs = media.Find(filtermedia).ToList();
                 if (mediadocs.Count > 0)
                 {
@@ -628,7 +665,7 @@ namespace ssi
 
                     for (int i = 0; i < files.Count; i++)
                     {
-                        if (files[i]["media_id"] == GetObjectID(database, "Media", "fileName", MediaResultBox.SelectedItem.ToString()))
+                        if (files[i]["media_id"] == GetObjectID(database, "Media", "name", MediaResultBox.SelectedItem.ToString()))
                         {
                             var filter2 = builder.Eq("_id", mediadoc["role_id"]);
                             var rolescollection = roles.Find(filter2).ToList();
@@ -741,7 +778,7 @@ namespace ssi
                 var documents = sessions.Find(filter).ToList();
                 BsonArray files = documents[0]["media"].AsBsonArray;
 
-                var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString());
+                var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString());
                 var mediadocuments = media.Find(filtermedia).ToList();
 
                 if (mediadocuments.Count > 0)
@@ -881,7 +918,7 @@ namespace ssi
                             var filter2 = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
                             var rolesresult = roles.Find(filter2).ToList();
 
-                            var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
+                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
                             var mediadocuments = media.Find(filtermedia).ToList();
 
                             if (mediadocuments.Count > 0)
@@ -934,7 +971,7 @@ namespace ssi
                             var filter2 = builder.Eq("name", split[0]) & builder.Eq("type", split[1]);
                             var mediatyperesult = mediatypes.Find(filter2).ToList();
 
-                            var filtermedia = builder.Eq("fileName", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
+                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
                             var mediadocuments = media.Find(filtermedia).ToList();
 
                             if (mediadocuments.Count > 0)

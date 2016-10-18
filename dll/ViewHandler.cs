@@ -2094,6 +2094,7 @@ namespace ssi
 
                     case "stream":
                     case "stream~":
+                    case "stream%7E":
                         ftype = ssi_file_type.STREAM;
                         break;
 
@@ -2594,18 +2595,23 @@ namespace ssi
             loadFromFile(localpath);
         }
 
-        private void httpGet(string URL, string db, string sessionid = "Default")
+        private void httpGet(string URL, string db, string sessionid = "Default", string filename="")
         {
-            string fileName = URL.Substring(URL.LastIndexOf("/") + 1, (URL.Length - URL.LastIndexOf("/") - 1));
+            string fileName = filename;
+            if(fileName.EndsWith(".stream%7E"))
+            {
+                fileName = fileName.Remove(fileName.Length - 3);
+                fileName = fileName + "~";
+            }
 
-            ////Treat ~ in browser format special
-            //if (fileName.EndsWith("%7E"))
-            //{
-            //    fileName = fileName.Remove(fileName.Length - 3);
-            //    fileName = fileName + "~";
-            //}
+                ////Treat ~ in browser format special
+                //if (fileName.EndsWith("%7E"))
+                //{
+                //    fileName = fileName.Remove(fileName.Length - 3);
+                //    fileName = fileName + "~";
+                //}
 
-            string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
+                string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
 
             if (!File.Exists(localpath))
             {
@@ -2619,6 +2625,7 @@ namespace ssi
                     client.QueryString.Add("id", numberofparalleldownloads.ToString());
                     downloadstotal.Add(0);
                     downloadsreceived.Add(0);
+                  
                     if (!localpath.EndsWith(".stream~")) filestoload.Add(localpath);
                     numberofparalleldownloads++;
                     Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid);
@@ -2626,7 +2633,7 @@ namespace ssi
                 }
                 catch { MessageBox.Show("Url not found"); }
             }
-            else if (!localpath.EndsWith(".stream~")) loadFromFile(localpath);
+            else if (!localpath.EndsWith(".stream~") && !localpath.EndsWith(".stream%7E")) loadFromFile(localpath);
         }
 
         private void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -2852,19 +2859,20 @@ namespace ssi
                                             Properties.Settings.Default.DataServerConnectionType = "sftp";
 
                                             string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
-                                            if (!file.EndsWith("stream~")) filestoload.Add(file);
+                                            if (!file.EndsWith("stream~") && !file.EndsWith("stream%7E") ) filestoload.Add(file);
                                         }
-                                        else if (ci[i].connection == "httpGet")
+                                        else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
                                         {
-                                            Properties.Settings.Default.DataServerConnectionType = "httpGet";
-                                            httpGet(c.filename, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+                                            Properties.Settings.Default.DataServerConnectionType = "http";
+                                            httpGet(c.filepath, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename);
+
                                         }
-                                        else if (ci[i].connection == "httpPost")
+                                        else if (ci[i].connection == "http" ||ci[i].connection == "https" && ci[i].requiresauth == "true")
                                         {
-                                            Properties.Settings.Default.DataServerConnectionType = "httpPost";
+                                            Properties.Settings.Default.DataServerConnectionType = "http";
 
                                             //This has not been tested and probably needs rework.
-                                            httpPost(c.filename, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+                                            httpPost(c.filepath, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
                                         }
                                     }
                                 }

@@ -175,6 +175,9 @@
     <Compile Include="Database\DatabaseDBMeta.xaml.cs">
       <DependentUpon>DatabaseDBMeta.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseMediaWindow.xaml.cs">
+      <DependentUpon>DatabaseMediaWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseSubjectWindow.xaml.cs">
       <DependentUpon>DatabaseSubjectWindow.xaml</DependentUpon>
     </Compile>
@@ -286,6 +289,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Database\DatabaseDBMeta.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseMediaWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
