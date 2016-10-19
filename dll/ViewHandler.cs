@@ -166,6 +166,7 @@ namespace ssi
             this.view.mongodbmenu2.Click += mongodb_Load;
             this.view.mongodbmenushow.Click += mongodb_Show;
             this.view.addmongodb.Click += mongodb_Add;
+            this.view.mongodbfunctions.Click += mongodb_Functions;
             this.view.mongodbchangefolder.Click += mongodb_ChangeFolder;
 
             this.view.tiermenu.MouseEnter += tierMenu_Click;
@@ -2736,7 +2737,23 @@ namespace ssi
         {
             mongodbAdd();
         }
+        private void mongodb_Functions(object sender, RoutedEventArgs e)
+        {
+            System.Collections.IList annotations = null;
+            DatabaseFunctions dbf = new DatabaseFunctions();
+            dbf.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dbf.ShowDialog();
 
+            if(dbf.DialogResult == true && dbf.Median() != null)
+            {
+                addAnno(dbf.Median(), false, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null);
+
+                updateTimeRange(dbf.Median().Last().Stop);
+
+            }
+        }
+
+            
         private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)
         {
             LabelInputBox inputBox = new LabelInputBox("Database Folder", "Choose path for local files", Properties.Settings.Default.DataPath, null);
