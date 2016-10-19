@@ -29,10 +29,26 @@ namespace ssi
             this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
             this.server_login.Text = Properties.Settings.Default.DataServerLogin;
             this.server_pass.Password = Properties.Settings.Default.DataServerPass;
+
+
+            if (Properties.Settings.Default.Autologin == true)
+            {
+                Autologin.IsChecked = true;
+            }
+            else Autologin.IsChecked = false;
+
+
+            if (Autologin.IsChecked == true)
+            {
+                ConnecttoDB();
+
+            }
         }
 
-        private void Connect_Click(object sender, RoutedEventArgs e)
+
+        private void ConnecttoDB()
         {
+
             Properties.Settings.Default.MongoDBIP = this.db_server.Text;
             Properties.Settings.Default.MongoDBUser = this.db_login.Text;
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
@@ -52,6 +68,11 @@ namespace ssi
             catch { MessageBox.Show("Could not connect to Database!"); }
 
             authlevel = checkAuth(this.db_login.Text, Properties.Settings.Default.Database);
+        }
+
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+            ConnecttoDB();
         }
 
         private void DataBasResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -85,7 +106,7 @@ namespace ssi
             foreach (DatabaseMediaInfo c in ci)
             {
                 files.Add(c);
-                if (!c.filepath.Contains(".stream~"))
+                if (!c.filepath.Contains(".stream~") && !c.filepath.Contains(".stream%7E") )
                 {
                     MediaResultBox.Items.Add(c.filename);
                 }
@@ -220,15 +241,23 @@ namespace ssi
             var sessioncollection = database.GetCollection<BsonDocument>("Sessions");
             var sessions = sessioncollection.Find(_ => true).ToList();
 
-            if (CollectionResultsBox.Items != null) CollectionResultsBox.Items.Clear();
-            List<DatabaseSession> items = new List<DatabaseSession>();
-            foreach (var c in sessions)
+            if (sessions.Count > 0)
             {
-                //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
-                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString() });
-            }
 
-            CollectionResultsBox.ItemsSource = items;
+
+
+                if (CollectionResultsBox.Items != null) CollectionResultsBox.Items.Clear();
+                List<DatabaseSession> items = new List<DatabaseSession>();
+                foreach (var c in sessions)
+                {
+                    //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString() });
+                }
+
+                CollectionResultsBox.ItemsSource = items;
+
+            }
+            else CollectionResultsBox.ItemsSource = null;
         }
 
         public void GetAnnotations(bool onlyme = false)
@@ -318,11 +347,28 @@ namespace ssi
                         {
                             var selectedmedia = selectedmedialist[0];
                             DatabaseMediaInfo c = new DatabaseMediaInfo();
-                            c.connection = selectedmedia["connection"].ToString();
-                            c.ip = selectedmedia["ip"].ToString();
-                            c.folder = selectedmedia["folder"].ToString();
-                            c.filepath = selectedmedia["filePath"].ToString();
-                            c.filename = selectedmedia["fileName"].ToString();
+                            string url = selectedmedia["url"].ToString();
+
+                            string[] split = url.Split(':');
+
+                            c.connection = split[0];
+
+                            if (split[0] == "ftp" || split[0] == "sftp")
+                                {
+
+                                string[] split2 = split[1].Split(new char[] { '/' }, 4);
+                                c.ip = split2[2];
+
+                                string filename = split2[3].Substring(split2[3].LastIndexOf("/") + 1, (split2[3].Length - split2[3].LastIndexOf("/") - 1));
+                                c.folder = split2[3].Remove(split2[3].Length - filename.Length);
+
+                            }
+                           
+
+                          
+                         
+                            c.filepath = selectedmedia["url"].ToString();
+                            c.filename = selectedmedia["name"].ToString();
                             c.requiresauth = selectedmedia["requiresAuth"].ToString();
 
                             //Todo: solve references
@@ -437,6 +483,18 @@ namespace ssi
                     if (authlevel > 2 || Properties.Settings.Default.MongoDBUser == ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator) DeleteAnnotation.Visibility = Visibility.Visible;
                 }
             }
+        }
+
+        private void Autologin_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Autologin = false;
+            Properties.Settings.Default.Save();
+        }
+
+        private void Autologin_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Autologin = true;
+            Properties.Settings.Default.Save();
         }
     }
 }

@@ -262,6 +262,66 @@ namespace ssi
             return false;
         }
 
+
+        
+
+        public static Signal LoadARFFFile(string filepath)
+        {
+            Signal signal = null;
+
+            try
+            {
+                ViewTools.SSI_TYPE type = ViewTools.SSI_TYPE.FLOAT;
+                uint dim = 0;
+                double rate = 0;
+
+                string[] lines = File.ReadAllLines(filepath);
+                char[] delims = { ' ', '\t', ';', ',' };
+                string[] tokens = lines[0].Split(delims);
+                dim =  (uint)tokens.Length;
+
+                string[] row = null;
+
+
+
+                row = lines[0].Split(delims);
+                double time1 = double.Parse(row[1]);
+                row = lines[1].Split(delims);
+                double time2 = double.Parse(row[1]);
+
+                double step = time2 - time1;
+                rate = 1000.0 / (1000.0 * step);
+
+               
+                    uint number = (uint)lines.Length;
+                    uint bytes = ViewTools.SSI_BYTES[(int)type];
+
+               
+
+                        if (dim > 0)
+                        {
+                            signal = new Signal(filepath, rate, 1, bytes, number, type);
+
+                            StreamReader fs_data = new StreamReader(filepath);
+                            LoadDataArff(signal, fs_data, dim-1);
+                            fs_data.Close();
+
+                       
+                            signal.ShowDim = 0;
+                            signal.loaded = true;
+                        }
+                    
+                
+            }
+            catch (Exception e)
+            {
+                ViewTools.ShowErrorMessage(e.ToString());
+                return null;
+            }
+
+            return signal;
+        }
+
         public static Signal LoadCSVFile(string filepath)
         {
             Signal signal = null;
@@ -436,6 +496,27 @@ namespace ssi
             }
 
             return signal;
+        }
+
+
+        public static bool LoadDataArff(Signal signal, StreamReader fs, uint dim)
+        {
+            
+            string line = null;
+            string[] row = null;
+
+            char[] split = { ' ', '\t', ';', ',' };
+            for (UInt32 i = 0; i < signal.number; i++)
+            {
+                line = fs.ReadLine();
+                row = line.Split(split);
+                signal.data[i] = float.Parse(row[dim]);
+             
+                
+            }
+            signal.minmax();
+
+            return true;
         }
 
         public static bool LoadDataV2a(Signal signal, StreamReader fs)

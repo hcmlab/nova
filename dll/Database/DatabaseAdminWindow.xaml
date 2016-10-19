@@ -81,7 +81,8 @@
         <Button Name="DeleteFiles" Content="X" Grid.Column="0" Click="DeleteFiles_Click" Margin="255,395,530,5"  Visibility="Collapsed" RenderTransformOrigin="0.677,1.201" />
         <Button Name="DeleteSubject" Content="X" Grid.Column="0" Click="DeleteSubject_Click" Margin="592,271,192,129"  Visibility="Visible" RenderTransformOrigin="0.585,2.711" />
         <Button Name="EditSession" Content="E" Grid.Column="0" Click="EditSession_Click" Margin="110,395,671,5" Visibility="Collapsed" RenderTransformOrigin="-1.293,4.267" />
-
+        <CheckBox Name="Autologin" Margin="553,10,-20,398" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"/>
+        <Label Content="AutoLogin" Margin="574,0,149,396" />
         <Label Content="Subjects" Margin="384,248,316,150" />
         <ComboBox x:Name="SubjectsResultBox" Grid.Row="0" Grid.Column="0" Margin="390,271,284,129" SelectionChanged="SubjectsResultBox_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
     </Grid>
