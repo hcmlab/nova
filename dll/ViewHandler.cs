@@ -35,11 +35,12 @@ namespace ssi
             EVENTS,
             EAF,
             ANVIL,
+            ARFF,
             PROJECT,
             IGNORE
         }
 
-        private static readonly string[] SSI_FILE_TYPE_NAME = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui" };
+        private static readonly string[] SSI_FILE_TYPE_NAME = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff" };
 
         public static ViewTime Time
         {
@@ -1119,6 +1120,15 @@ namespace ssi
             }
         }
 
+        private void loadARFF(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
+        {
+            Signal signal = Signal.LoadARFFFile(filename);
+            if (signal != null && signal.loaded)
+            {
+                addSignal(signal, color, background);
+            }
+        }
+
         private void loadWav(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
         {
             Signal signal = Signal.LoadWaveFile(filename);
@@ -2097,7 +2107,6 @@ namespace ssi
 
                     case "stream":
                     case "stream~":
-                    case "stream%7E":
                         ftype = ssi_file_type.STREAM;
                         break;
 
@@ -2107,6 +2116,9 @@ namespace ssi
 
                     case "eaf":
                         ftype = ssi_file_type.EAF;
+                        break;
+                    case "arff":
+                        ftype = ssi_file_type.ARFF;
                         break;
 
                     case "anvil":
@@ -2206,6 +2218,11 @@ namespace ssi
 
                 case ssi_file_type.EAF:
                     loadElan(filename);
+                    loaded = true;
+                    break;
+
+                case ssi_file_type.ARFF:
+                    loadARFF(filename);
                     loaded = true;
                     break;
 

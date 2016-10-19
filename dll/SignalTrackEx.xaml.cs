@@ -95,9 +95,9 @@ namespace ssi
 
             for (int i = 0; i < track.getSignal().dim; i++)
             {
-                DimComboBox.Items.Add(i + 1);
+                DimComboBox.Items.Add(i);
             }
-            DimComboBox.SelectedItem = 1;
+            DimComboBox.SelectedItem = 0;
 
             this.grid.Children.Add(track);
             this.track = track;

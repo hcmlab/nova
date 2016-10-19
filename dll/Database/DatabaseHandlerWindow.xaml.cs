@@ -29,10 +29,26 @@ namespace ssi
             this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
             this.server_login.Text = Properties.Settings.Default.DataServerLogin;
             this.server_pass.Password = Properties.Settings.Default.DataServerPass;
+
+
+            if (Properties.Settings.Default.Autologin == true)
+            {
+                Autologin.IsChecked = true;
+            }
+            else Autologin.IsChecked = false;
+
+
+            if (Autologin.IsChecked == true)
+            {
+                ConnecttoDB();
+
+            }
         }
 
-        private void Connect_Click(object sender, RoutedEventArgs e)
+
+        private void ConnecttoDB()
         {
+
             Properties.Settings.Default.MongoDBIP = this.db_server.Text;
             Properties.Settings.Default.MongoDBUser = this.db_login.Text;
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
@@ -52,6 +68,11 @@ namespace ssi
             catch { MessageBox.Show("Could not connect to Database!"); }
 
             authlevel = checkAuth(this.db_login.Text, Properties.Settings.Default.Database);
+        }
+
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+            ConnecttoDB();
         }
 
         private void DataBasResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -462,6 +483,18 @@ namespace ssi
                     if (authlevel > 2 || Properties.Settings.Default.MongoDBUser == ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator) DeleteAnnotation.Visibility = Visibility.Visible;
                 }
             }
+        }
+
+        private void Autologin_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Autologin = false;
+            Properties.Settings.Default.Save();
+        }
+
+        private void Autologin_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Autologin = true;
+            Properties.Settings.Default.Save();
         }
     }
 }

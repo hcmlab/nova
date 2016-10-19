@@ -25,6 +25,18 @@ namespace ssi
             this.db_server.Text = Properties.Settings.Default.MongoDBIP;
             this.db_login.Text = Properties.Settings.Default.MongoDBUser;
             this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
+            if(Properties.Settings.Default.Autologin == true)
+            {
+                Autologin.IsChecked = true;
+            }
+            else Autologin.IsChecked = false;
+
+
+            if(Autologin.IsChecked == true)
+            {
+                ConnecttoDB();
+
+            }
         }
 
         private void AddFiles_Click(object sender, RoutedEventArgs e)
@@ -295,7 +307,8 @@ namespace ssi
             }
         }
 
-        private void Connect_Click(object sender, RoutedEventArgs e)
+
+        private void ConnecttoDB()
         {
             Properties.Settings.Default.MongoDBIP = this.db_server.Text;
             Properties.Settings.Default.MongoDBUser = this.db_login.Text;
@@ -320,6 +333,12 @@ namespace ssi
                 DeleteDB.Visibility = Visibility.Visible;
                 AddDB.Visibility = Visibility.Visible;
             }
+
+        }
+
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+            ConnecttoDB();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -1089,6 +1108,20 @@ namespace ssi
             if (result.Count > 0) id = result[0].GetValue(0).AsObjectId;
 
             return id;
+        }
+
+
+        private void Autologin_Checked(object sender, RoutedEventArgs e)
+        {
+         
+            Properties.Settings.Default.Autologin = true;
+            Properties.Settings.Default.Save();
+        }
+
+        private void Autologin_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Autologin = false;
+            Properties.Settings.Default.Save();
         }
     }
 }
