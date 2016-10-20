@@ -29,7 +29,7 @@ namespace ssi
             this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
             this.server_login.Text = Properties.Settings.Default.DataServerLogin;
             this.server_pass.Password = Properties.Settings.Default.DataServerPass;
-
+            Autologin.IsEnabled = false;
 
             if (Properties.Settings.Default.Autologin == true)
             {
@@ -49,6 +49,7 @@ namespace ssi
         private void ConnecttoDB()
         {
 
+          
             Properties.Settings.Default.MongoDBIP = this.db_server.Text;
             Properties.Settings.Default.MongoDBUser = this.db_login.Text;
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
@@ -62,7 +63,11 @@ namespace ssi
 
                 authlevel = checkAuth(this.db_login.Text, "admin");
 
-                if (authlevel > 0) SelectDatabase();
+                if (authlevel > 0)
+                {
+                    SelectDatabase();
+                    Autologin.IsEnabled = true;
+                }
                 else MessageBox.Show("You have no rights to access the database list");
             }
             catch { MessageBox.Show("Could not connect to Database!"); }
@@ -495,6 +500,20 @@ namespace ssi
         {
             Properties.Settings.Default.Autologin = true;
             Properties.Settings.Default.Save();
+        }
+
+        private void db_login_TextChanged(object sender, TextChangedEventArgs e)
+        {
+          
+            Autologin.IsChecked = false;
+            Autologin.IsEnabled = false;
+        }
+
+        private void db_pass_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+         
+            Autologin.IsChecked = false;
+            Autologin.IsEnabled = false;
         }
     }
 }

@@ -84,6 +84,7 @@ namespace ssi
             get { return annoSchemeloaded; }
             set
             {
+     
                 annoSchemeloaded = value;
 
                 view.annoListControl.editComboBox.Items.Clear();
@@ -2788,7 +2789,7 @@ namespace ssi
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
                         db.StoretoDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
 
-                        MessageBox.Show("Annotation Tracks have been stored in the database " + Properties.Settings.Default.LastSessionId);
+                        MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
                     }
                     else MessageBox.Show("No Annotation Tracks available");
                 }
