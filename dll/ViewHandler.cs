@@ -73,7 +73,7 @@ namespace ssi
         public bool annoSchemeloaded = false;
         private ViewControl view;
         private String annofilepath = "";
-        List<DatabaseMediaInfo> loadedDBmedia = null;
+        private List<DatabaseMediaInfo> loadedDBmedia = null;
         private int numberofparalleldownloads = 0;
         private List<long> downloadsreceived = new List<long>();
         private List<long> downloadstotal = new List<long>();
@@ -84,7 +84,6 @@ namespace ssi
             get { return annoSchemeloaded; }
             set
             {
-     
                 annoSchemeloaded = value;
 
                 view.annoListControl.editComboBox.Items.Clear();
@@ -937,42 +936,64 @@ namespace ssi
             //Get all tier ids that haven't been added before
             //(This is where in the future tiers will be read from the config)
             List<String> TierIds = new List<String>();
-            foreach (AnnoListItem ali in anno)
+
+
+            if (anno.Count > 0)
             {
-                if (!TierIds.Contains(ali.Tier))
+
+                foreach (AnnoListItem ali in anno)
                 {
-                    TierIds.Add(ali.Tier);
+                    if (!TierIds.Contains(ali.Tier))
+                    {
+                        TierIds.Add(ali.Tier);
+                    }
+
+                    //While doing this anyway, we find the latest time to adjust the view according to the latest annotation
+                    if (ali.Stop > maxdur)
+                    {
+                        maxdur = ali.Stop;
+                    }
                 }
 
-                //While doing this anyway, we find the latest time to adjust the view according to the latest annotation
-                if (ali.Stop > maxdur)
-                {
-                    maxdur = ali.Stop;
-                }
+
             }
+
+            else
+            {
+                TierIds.Add(anno.Name);
+            }
+
+            
 
             //Create a new AnnoList per tierId and add it
             foreach (String tierid in TierIds)
             {
                 AnnoList annolist = new AnnoList();
-                foreach (AnnoListItem ali in anno)
+
+                if(anno.Count > 0)
                 {
-                    if (ali.Tier == tierid)
+
+                    foreach (AnnoListItem ali in anno)
                     {
-                        annolist.Name = tierid;
-                        //check if trackid is already used
-                        foreach (AnnoTrack a in anno_tracks)
+                        if (ali.Tier == tierid)
                         {
-                            if (a.AnnoList.Name == tierid)
+                            annolist.Name = tierid;
+                            //check if trackid is already used
+                            foreach (AnnoTrack a in anno_tracks)
                             {
-                                annolist.Name = tierid + tiercount.ToString();
-                                break;
+                                if (a.AnnoList.Name == tierid)
+                                {
+                                    annolist.Name = tierid + tiercount.ToString();
+                                    break;
+                                }
                             }
+                            ali.Tier = annolist.Name;
+                            annolist.Add(ali);
                         }
-                        ali.Tier = annolist.Name;
-                        annolist.Add(ali);
                     }
+
                 }
+                else annolist.Name = anno.Name;
                 annolist.Highborder = anno.Highborder;
                 annolist.Lowborder = anno.Lowborder;
                 annolist.AnnotationScheme = anno.AnnotationScheme;
@@ -1903,7 +1924,6 @@ namespace ssi
                         AnnoTrack.GetSelectedTrack().track_used_labels = AnnoTrackStatic.used_labels;
                         AnnoTrackStatic.Defaultlabel = inputBox.Result();
                         AnnoTrackStatic.DefaultColor = inputBox.Color();
-
                     }
                 }
             }
@@ -2119,6 +2139,7 @@ namespace ssi
                     case "eaf":
                         ftype = ssi_file_type.EAF;
                         break;
+
                     case "arff":
                         ftype = ssi_file_type.ARFF;
                         break;
@@ -2162,28 +2183,35 @@ namespace ssi
                     StreamReader sr = new StreamReader(filename, System.Text.Encoding.Default);
                     string line = sr.ReadLine();
                     double samplerate = 1.0;
-                    bool iscontinouswithtier = regcontnew.IsMatch(line);
+                 
 
-                    if (reg.IsMatch(line) && !iscontinouswithtier) type = "semicolon";
-                    else if ((regcont.IsMatch(line) || iscontinouswithtier))
+                    if (line != null)
                     {
-                        string[] data = line.Split(';');
-                        try
+                        bool iscontinouswithtier = regcontnew.IsMatch(line);
+                        if (reg.IsMatch(line) && !iscontinouswithtier) type = "semicolon";
+                        else if ((regcont.IsMatch(line) || iscontinouswithtier))
                         {
-                            double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                            line = sr.ReadLine();
-                            data = line.Split(';');
-                            double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                            samplerate = start2 - start;
-                            type = "continuous";
+                            string[] data = line.Split(';');
+                            try
+                            {
+                                double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                line = sr.ReadLine();
+                                data = line.Split(';');
+                                double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                samplerate = start2 - start;
+                                type = "continuous";
+                            }
+                            catch
+                            {
+                                MessageBox.Show("Error reading continuous file");
+                            }
                         }
-                        catch
-                        {
-                            MessageBox.Show("Error reading continuous file");
-                        }
+
+                        sr.Close();
                     }
 
-                    sr.Close();
+                    else type = "semicolon";
+
 
                     if (type == "continuous" || type == "semicolon")
                     {
@@ -2193,8 +2221,8 @@ namespace ssi
                     {
                         loadCSV(filename);
                     }
-                    loaded = true;
 
+                    loaded = true;
                     break;
 
                 case ssi_file_type.AUDIO:
@@ -2508,7 +2536,7 @@ namespace ssi
             string localfilepath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\";
             lastdlfile = fileName;
 
-            string ftpfilepath = "/" + folder +  fileName;
+            string ftpfilepath = "/" + folder + fileName;
             if (!File.Exists(localfilepath + fileName))
             {
                 try
@@ -2617,23 +2645,23 @@ namespace ssi
             loadFromFile(localpath);
         }
 
-        private void httpGet(string URL, string db, string sessionid = "Default", string filename="")
+        private void httpGet(string URL, string db, string sessionid = "Default", string filename = "")
         {
             string fileName = filename;
-            if(fileName.EndsWith(".stream%7E"))
+            if (fileName.EndsWith(".stream%7E"))
             {
                 fileName = fileName.Remove(fileName.Length - 3);
                 fileName = fileName + "~";
             }
 
-                ////Treat ~ in browser format special
-                //if (fileName.EndsWith("%7E"))
-                //{
-                //    fileName = fileName.Remove(fileName.Length - 3);
-                //    fileName = fileName + "~";
-                //}
+            ////Treat ~ in browser format special
+            //if (fileName.EndsWith("%7E"))
+            //{
+            //    fileName = fileName.Remove(fileName.Length - 3);
+            //    fileName = fileName + "~";
+            //}
 
-                string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
+            string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
 
             if (!File.Exists(localpath))
             {
@@ -2647,7 +2675,7 @@ namespace ssi
                     client.QueryString.Add("id", numberofparalleldownloads.ToString());
                     downloadstotal.Add(0);
                     downloadsreceived.Add(0);
-                  
+
                     if (!localpath.EndsWith(".stream~")) filestoload.Add(localpath);
                     numberofparalleldownloads++;
                     Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid);
@@ -2738,6 +2766,7 @@ namespace ssi
         {
             mongodbAdd();
         }
+
         private void mongodb_Functions(object sender, RoutedEventArgs e)
         {
             System.Collections.IList annotations = null;
@@ -2745,16 +2774,14 @@ namespace ssi
             dbf.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbf.ShowDialog();
 
-            if(dbf.DialogResult == true && dbf.Median() != null)
+            if (dbf.DialogResult == true && dbf.Median() != null)
             {
                 addAnno(dbf.Median(), false, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null);
 
                 updateTimeRange(dbf.Median().Last().Stop);
-
             }
         }
 
-            
         private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)
         {
             LabelInputBox inputBox = new LabelInputBox("Database Folder", "Choose path for local files", Properties.Settings.Default.DataPath, null);
@@ -2807,7 +2834,7 @@ namespace ssi
         private void mongodbLoad()
         {
             clear();
-           
+
             System.Collections.IList annotations = null;
             List<DatabaseMediaInfo> ci = null;
             DatabaseHandlerWindow dbhw = new DatabaseHandlerWindow();
@@ -2844,7 +2871,7 @@ namespace ssi
                             anno.usesAnnoScheme = true;
                             if (anno.Count > 0)
                             {
-                                //  here isDiscrete should be 
+                                //  here isDiscrete should be
                                 if (anno[0].Duration == anno[1].Start && anno[1].Duration == anno[0].Duration)
                                 {
                                     anno.isDiscrete = false;
@@ -2898,15 +2925,13 @@ namespace ssi
 
                                             string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
                                             if (!file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
-
                                         }
                                         else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
                                         {
                                             Properties.Settings.Default.DataServerConnectionType = "http";
                                             httpGet(c.filepath, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename);
-
                                         }
-                                        else if (ci[i].connection == "http" ||ci[i].connection == "https" && ci[i].requiresauth == "true")
+                                        else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "true")
                                         {
                                             Properties.Settings.Default.DataServerConnectionType = "http";
 
