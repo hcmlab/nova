@@ -448,6 +448,8 @@ namespace ssi
 
                 double sum_sq = 0;
                 double mse;
+                double minerr = double.MaxValue;
+                double maxerr = 0.0;
 
                 double[] array = new double[al[0].Count];
 
@@ -456,20 +458,24 @@ namespace ssi
                     for (int i = 0; i < al[0].Count; i++)
                     {
                         double err = double.Parse(al[0][i].Label) - double.Parse(al[1][i].Label);
+                        if (err > maxerr) maxerr = err;
+                        if (err < minerr) minerr = err;
                         sum_sq += err * err;
                     }
                     mse = (double)sum_sq / (al[0].Count);
-                    MessageBox.Show("The Mean Square Error for Annotation " + al[1].Name + " is " + mse + ". This is for your information only, no new tier has been created!");
+                    MessageBox.Show("The Mean Square Error for Annotation " + al[1].Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
                 }
                 else if (al[1].Annotator != null  && al[1].Annotator.Contains("RMS"))
                 {
                     for (int i = 0; i < al[0].Count; i++)
                     {
                         double err = double.Parse(al[1][i].Label) - double.Parse(al[0][i].Label);
+                        if (err > maxerr) maxerr = err;
+                        if (err < minerr) minerr = err;
                         sum_sq += err * err;
                     }
                     mse = (double)sum_sq / (al[1].Count);
-                    MessageBox.Show("The Mean Square Error for Annotation " + al[0].Name + " is " + mse +  ". This is for your information only, no new tier has been created!");
+                    MessageBox.Show("The Mean Square Error for Annotation " + al[0].Name + " is " + mse + " (Normalized: " + mse/(maxerr-minerr) +  "). This is for your information only, no new tier has been created!");
                 }
                 else MessageBox.Show("Select RMS Annotation and Reference Annotation. If RMS Annotation is not present, please create it first.");
         }
