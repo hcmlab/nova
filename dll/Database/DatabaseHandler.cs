@@ -208,13 +208,30 @@ namespace ssi
 
 
                 BsonDocument annotatordoc = new BsonDocument();
+<<<<<<< HEAD
+
+
+                //We could choose here if we want to overwrite other peoples annotations. For now, we we might want to overwrite automatically created annotations and own annotations only
+
+                if (! (a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break;
+
+                if (a.AnnoList.Annotator == null) a.AnnoList.Annotator = dbuser;
+
+
+                BsonElement annotatorname = new BsonElement("name", a.AnnoList.Annotator);
+=======
                 BsonElement annotatorname = new BsonElement("name", dbuser);
+>>>>>>> origin/develop
                 BsonElement annotatoremail = new BsonElement("email", "");
 
                 annotatordoc.Add(annotatorname);
                 annotatordoc.Add(annotatoremail);
 
+<<<<<<< HEAD
+                var filterannotator = builder.Eq("name", a.AnnoList.Annotator);
+=======
                 var filterannotator = builder.Eq("name", dbuser);
+>>>>>>> origin/develop
                 UpdateOptions uoa = new UpdateOptions();
                 uoa.IsUpsert = true;
                 var resann = annotators.ReplaceOne(filterannotator, annotatordoc, uoa);
@@ -292,6 +309,27 @@ namespace ssi
 
                 BsonArray media = new BsonArray();
 
+<<<<<<< HEAD
+                if(loadedDBmedia != null )
+                {
+
+              
+                    foreach(DatabaseMediaInfo dmi in loadedDBmedia)
+                    {
+
+                        BsonDocument mediadocument = new BsonDocument();
+                        ObjectId mediaid;
+
+                        var filtermedia = builder.Eq("name", dmi.filename) & builder.Eq("connection", dmi.connection);
+                        var mediadb = medias.Find(filtermedia).Single();
+                        mediaid = mediadb.GetValue(0).AsObjectId;
+                       
+                        BsonElement media_id = new BsonElement("media_id", mediaid);
+                        mediadocument.Add(media_id);
+                        media.Add(mediadocument);
+
+                    }
+=======
                 foreach(DatabaseMediaInfo dmi in loadedDBmedia)
                 {
 
@@ -306,6 +344,7 @@ namespace ssi
                     mediadocument.Add(media_id);
                     media.Add(mediadocument);
 
+>>>>>>> origin/develop
                 }
 
 
@@ -380,7 +419,9 @@ namespace ssi
 
         public AnnotationScheme GetAnnotationScheme(string name, bool isDiscrete)
         {
-            mongo = new MongoClient(connectionstring);
+           
+
+             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(Properties.Settings.Default.Database);
             BsonElement value;
             AnnotationScheme Scheme = new AnnotationScheme();
@@ -445,6 +486,10 @@ namespace ssi
 
                 ObjectId annotatid = GetObjectID(database, "Annotators", "name", s.Annotator);
                 string annotatdb = FetchDBRef(database, "Annotators", "name", annotatid);
+<<<<<<< HEAD
+                al.Annotator = annotatdb;
+=======
+>>>>>>> origin/develop
 
                 var builder = Builders<BsonDocument>.Filter;
 
@@ -465,7 +510,7 @@ namespace ssi
                 }
 
                 al.Role = roledb;
-                al.Name = al.Role + " #" + annotdb;
+                al.Name = al.Role + " #" + annotdb + " #" + annotatdb;
 
                 al.AnnotationScheme = new AnnotationScheme();
                 al.AnnotationScheme.name = annosch["name"].ToString();

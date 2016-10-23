@@ -116,7 +116,7 @@ namespace ssi
                             bool detected = false;
                             foreach (LabelColorPair p in usedlabels)
                             {
-                                if (p.label == l.label)
+                                if (p.Label == l.Label)
                                 {
                                     detected = true;
                                 }
@@ -186,7 +186,7 @@ namespace ssi
 
                 foreach (LabelColorPair l in lcp)
                 {
-                    labels.Add(new BsonDocument() { { "id", index++ }, { "name", l.label }, { "color", l.color }, { "isValid", true } });
+                    labels.Add(new BsonDocument() { { "id", index++ }, { "name", l.Label }, { "color", l.Color }, { "isValid", true } });
                 }
 
                 d.Add(a);
@@ -240,7 +240,7 @@ namespace ssi
                     bool detected = false;
                     foreach (LabelColorPair p in usedlabels)
                     {
-                        if (p.label == item.label)
+                        if (p.Label == item.Label)
                         {
                             detected = true;
                         }

@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -25,7 +26,8 @@ namespace ssi
             this.db_server.Text = Properties.Settings.Default.MongoDBIP;
             this.db_login.Text = Properties.Settings.Default.MongoDBUser;
             this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
-            if(Properties.Settings.Default.Autologin == true)
+            Autologin.IsEnabled = false;
+            if (Properties.Settings.Default.Autologin == true)
             {
                 Autologin.IsChecked = true;
             }
@@ -319,21 +321,50 @@ namespace ssi
 
             try
             {
+
                 mongo = new MongoClient(connectionstring);
+                int count = 0;
+                while (mongo.Cluster.Description.State.ToString() == "Disconnected")
+                {
+                    Thread.Sleep(100);
+                    if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
+
+                }
 
                 authlevel = checkAuth(this.db_login.Text, "admin");
 
-                if (authlevel > 0) GetDatabase();
+                if (authlevel > 0)
+                {
+<<<<<<< HEAD
+                    GetDatabase();
+                    Autologin.IsEnabled = true;
+                }
+                else MessageBox.Show("You have no rights to access the database list");
+
+                if (authlevel > 3)
+                {
+                    DeleteDB.Visibility = Visibility.Visible;
+                    AddDB.Visibility = Visibility.Visible;
+                }
+=======
+                    Autologin.IsEnabled = true;
+                    GetDatabase();
+                }
                 else MessageBox.Show("You have no aceess rights to load the database list");
+>>>>>>> origin/develop
             }
-            catch { MessageBox.Show("Could not connect to Database!"); }
+            catch (MongoException e)
 
-            if (authlevel > 3)
             {
-                DeleteDB.Visibility = Visibility.Visible;
-                AddDB.Visibility = Visibility.Visible;
+                MessageBox.Show(e.Message);
+                mongo.Cluster.Dispose();
             }
 
+<<<<<<< HEAD
+           
+
+=======
+>>>>>>> origin/develop
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -1122,6 +1153,18 @@ namespace ssi
         {
             Properties.Settings.Default.Autologin = false;
             Properties.Settings.Default.Save();
+        }
+
+        private void db_pass_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            Autologin.IsChecked = false;
+            Autologin.IsEnabled = false;
+        }
+
+        private void db_login_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Autologin.IsChecked = false;
+            Autologin.IsEnabled = false;
         }
     }
 }

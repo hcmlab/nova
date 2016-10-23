@@ -175,6 +175,9 @@
     <Compile Include="Database\DatabaseDBMeta.xaml.cs">
       <DependentUpon>DatabaseDBMeta.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseFunctions.xaml.cs">
+      <DependentUpon>DatabaseFunctions.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseMediaWindow.xaml.cs">
       <DependentUpon>DatabaseMediaWindow.xaml</DependentUpon>
     </Compile>
@@ -243,6 +246,7 @@
     <Compile Include="SignalTrackControl.xaml.cs" />
     <Compile Include="SingleInstance.cs" />
     <Compile Include="SkeletonControl.cs" />
+    <Compile Include="Statistics.cs" />
     <Compile Include="TimeTrack.cs" />
     <Compile Include="TimeTrackControl.xaml.cs" />
     <Compile Include="TimeTrackSegment.cs" />
@@ -289,6 +293,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Database\DatabaseDBMeta.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseFunctions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -32,8 +32,9 @@ namespace ssi
 
     public partial class LabelColorPair
     {
-        public string label;
-        public string color;
+        private string label;
+        private string color;
+       
 
         public String Label
         {
@@ -46,6 +47,8 @@ namespace ssi
             get { return color; }
             set { color = value; }
         }
+
+       
 
         public LabelColorPair(string _label, string _color)
         {
@@ -558,7 +561,7 @@ namespace ssi
                         bool detected = false;
                         foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
                         {
-                            if (p.label == l.label)
+                            if (p.Label == l.Label)
                             {
                                 detected = true;
                             }

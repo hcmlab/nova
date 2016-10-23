@@ -84,7 +84,7 @@ namespace ssi
                         bool detected = false;
                         foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
                         {
-                            if (p.label == l.label)
+                            if (p.Label == l.Label)
                             {
                                 detected = true;
                             }
@@ -118,7 +118,7 @@ namespace ssi
                             bool detected = false;
                             foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
                             {
-                                if (p.label == l.label)
+                                if (p.Label == l.Label)
                                 {
                                     detected = true;
                                 }
