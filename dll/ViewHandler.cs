@@ -2775,7 +2775,6 @@ namespace ssi
             dbf.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbf.ShowDialog();
 
-<<<<<<< HEAD
             if (dbf.DialogResult == true)  {
 
                 if(dbf.Median() != null)
@@ -2797,14 +2796,6 @@ namespace ssi
             }
             this.view.mongodbmenu.IsEnabled = true;
             AnnoSchemeLoaded = true;
-=======
-            if (dbf.DialogResult == true && dbf.Median() != null)
-            {
-                addAnno(dbf.Median(), false, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null);
-
-                updateTimeRange(dbf.Median().Last().Stop);
-            }
->>>>>>> origin/develop
         }
 
         private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)

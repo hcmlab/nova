@@ -50,11 +50,7 @@
                 <MenuItem Header="Store Session to MongoDB" Name="mongodbmenu" IsEnabled="False" />
                 <MenuItem Header="Show Downloaded Files" Name="mongodbmenushow" />
                 <MenuItem Header="Change Download Directory" Name="mongodbchangefolder" />
-<<<<<<< HEAD
                 <MenuItem Header="Admin: Database Functions" Name="mongodbfunctions" Visibility="Collapsed"/>
-=======
-                <MenuItem Header="Database Functions" Name="mongodbfunctions" />
->>>>>>> origin/develop
                 <MenuItem Header="Admin: Manage Database" Visibility="Collapsed" Name="addmongodb" />
 
                 <!--<MenuItem Header="Test Media to database " Name="mongodbmenu3" />-->

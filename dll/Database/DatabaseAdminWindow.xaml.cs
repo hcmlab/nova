@@ -335,7 +335,6 @@ namespace ssi
 
                 if (authlevel > 0)
                 {
-<<<<<<< HEAD
                     GetDatabase();
                     Autologin.IsEnabled = true;
                 }
@@ -346,12 +345,6 @@ namespace ssi
                     DeleteDB.Visibility = Visibility.Visible;
                     AddDB.Visibility = Visibility.Visible;
                 }
-=======
-                    Autologin.IsEnabled = true;
-                    GetDatabase();
-                }
-                else MessageBox.Show("You have no aceess rights to load the database list");
->>>>>>> origin/develop
             }
             catch (MongoException e)
 
@@ -360,11 +353,8 @@ namespace ssi
                 mongo.Cluster.Dispose();
             }
 
-<<<<<<< HEAD
            
 
-=======
->>>>>>> origin/develop
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
