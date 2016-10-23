@@ -22,10 +22,7 @@ namespace ssi
         private List<DatabaseMediaInfo> ci;
         private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
         private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
-<<<<<<< HEAD
         List<DatabaseAnno> AnnoItems = new List<DatabaseAnno>();
-=======
->>>>>>> origin/develop
 
         public DatabaseHandlerWindow()
         {
@@ -94,11 +91,6 @@ namespace ssi
 
             //now that we made sure the user can see database, check if he has any admin/writing rights on this specific database
          
-        }
-
-        private void Connect_Click(object sender, RoutedEventArgs e)
-        {
-            ConnecttoDB();
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -338,7 +330,6 @@ namespace ssi
 
                 var filteranno = builder.Eq("_id", c["annotation_id"].AsObjectId);
 
-<<<<<<< HEAD
                 using (var cursor = await annotations.FindAsync(filteranno))
                 {
                     await cursor.ForEachAsync(d => addAnnotoList(d, onlyme));
@@ -388,34 +379,7 @@ namespace ssi
                 if (Properties.Settings.Default.MongoDBUser == annotatid)
                 {
                     AnnoItems.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
-=======
-
-                var filtera = builder.Eq("_id", annos["role_id"]);
-                var roledb = database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
-                string roleid = roleid = roledb.GetValue(1).ToString();
-
-                var filterb = builder.Eq("_id", annos["scheme_id"]);
-                var annotdb = database.GetCollection<BsonDocument>("AnnotationSchemes").Find(filterb).Single();
-                string annotid = annotid = annotdb.GetValue(1).ToString();
-
-
-                var filterc = builder.Eq("_id", annos["annotator_id"]);
-                var annotatdb = database.GetCollection<BsonDocument>("Annotators").Find(filterc).Single();
-                string annotatid = annotatdb.GetValue(1).ToString();
-
-                // AnnotationResultBox.Items.Add(roleid + "#" + annotid + "#" + a["annotator"].ToString());
-                //  AnnotationResultBox.Items.Add(roleid);
-
-                if (onlyme)
-                {
-                    if (Properties.Settings.Default.MongoDBUser == annotatdb.GetValue(1).ToString())
-                    {
-                        items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
-                    }
->>>>>>> origin/develop
                 }
-                else items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
-
             }
             else AnnoItems.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
             AnnotationResultBox.ItemsSource = AnnoItems;

@@ -246,7 +246,6 @@
     <Compile Include="SignalTrackControl.xaml.cs" />
     <Compile Include="SingleInstance.cs" />
     <Compile Include="SkeletonControl.cs" />
-    <Compile Include="Statistics.cs" />
     <Compile Include="TimeTrack.cs" />
     <Compile Include="TimeTrackControl.xaml.cs" />
     <Compile Include="TimeTrackSegment.cs" />
