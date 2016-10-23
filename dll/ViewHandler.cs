@@ -860,7 +860,7 @@ namespace ssi
             else addAnno(anno, isDiscrete, samplerate, null, borderlow, borderhigh, background);
         }
 
-        public void addAnno(AnnoList anno, bool isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null)
+        public void addAnno(AnnoList anno, bool isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null, string annotator = null)
         {
             string TierId;
             if (anno.Count > 0) samplerate = anno[0].Duration;
@@ -879,6 +879,7 @@ namespace ssi
             track.AnnoList.Lowborder = borderlow;
             track.AnnoList.Highborder = borderhigh;
             track.AnnoList.isDiscrete = isdiscrete;
+            track.AnnoList.Annotator = annotator;
 
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.timeRangeChanged;
 
@@ -902,7 +903,7 @@ namespace ssi
                 track.Background = background;
             }
             track.timeRangeChanged(ViewHandler.Time);
-            track.timeRangeChanged(ViewHandler.Time);
+          //  track.timeRangeChanged(ViewHandler.Time);
         }
 
         private void loadAnno(string filename)
@@ -1630,7 +1631,7 @@ namespace ssi
                         bool detected = false;
                         foreach (LabelColorPair p in h)
                         {
-                            if (p.label == l.label)
+                            if (p.Label == l.Label)
                             {
                                 detected = true;
                             }
@@ -1878,7 +1879,7 @@ namespace ssi
                                 bool detected = false;
                                 foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
                                 {
-                                    if (p.label == l.label)
+                                    if (p.Label == l.Label)
                                     {
                                         detected = true;
                                     }
@@ -1911,7 +1912,7 @@ namespace ssi
                                 bool detected = false;
                                 foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
                                 {
-                                    if (p.label == l.label)
+                                    if (p.Label == l.Label)
                                     {
                                         detected = true;
                                     }
@@ -1984,7 +1985,7 @@ namespace ssi
                                     bool detected = false;
                                     foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
                                     {
-                                        if (p.label == l.label)
+                                        if (p.Label == l.Label)
                                         {
                                             detected = true;
                                         }
@@ -2774,12 +2775,36 @@ namespace ssi
             dbf.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbf.ShowDialog();
 
+<<<<<<< HEAD
+            if (dbf.DialogResult == true)  {
+
+                if(dbf.Median() != null)
+                {
+
+                    addAnno(dbf.Median(), false, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null, "Median");
+
+                    updateTimeRange(dbf.Median().Last().Stop);
+                }
+
+                if (dbf.RMS() != null)
+                {
+
+                    addAnno(dbf.RMS(), false, dbf.RMS().SR, null, dbf.RMS().Lowborder, dbf.RMS().Highborder, null, "RMS");
+
+                    updateTimeRange(dbf.RMS().Last().Stop);
+                }
+
+            }
+            this.view.mongodbmenu.IsEnabled = true;
+            AnnoSchemeLoaded = true;
+=======
             if (dbf.DialogResult == true && dbf.Median() != null)
             {
                 addAnno(dbf.Median(), false, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null);
 
                 updateTimeRange(dbf.Median().Last().Stop);
             }
+>>>>>>> origin/develop
         }
 
         private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)
@@ -2841,15 +2866,30 @@ namespace ssi
             dbhw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbhw.ShowDialog();
 
+
             if (dbhw.DialogResult == true)
             {
                 annotations = dbhw.Annotations();
                 loadedDBmedia = dbhw.Media();
                 ci = dbhw.MediaConnectionInfo();
+                this.view.mongodbmenu.IsEnabled = true;
+
+
+                //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
+                if (dbhw.Authlevel() > 2)
+                {
+                    this.view.addmongodb.Visibility = Visibility.Visible;
+                    this.view.mongodbfunctions.Visibility = Visibility.Visible;
+                }
+               
             }
+            
 
             string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
             DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
+            
+            this.view.mongodbmenu.IsEnabled = true;
+            this.view.mongodbfunctions.IsEnabled = true;
 
             if (annotations != null)
             {
@@ -2857,8 +2897,8 @@ namespace ssi
                 this.view.ShadowBox.Visibility = Visibility.Visible;
                 view.UpdateLayout();
                 view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-                this.view.addmongodb.Visibility = Visibility.Visible;
-                this.view.mongodbmenu.IsEnabled = true;
+             
+               
 
                 List<AnnoList> annos = db.LoadfromDatabase(annotations, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
                 try
@@ -3304,12 +3344,18 @@ namespace ssi
 
             List<string> columns = new List<string>();
 
-            foreach (AnnoList anno in annos)
+            foreach (AnnoTrack anno in anno_tracks)
             {
-                foreach (AnnoListItem ali in anno)
+                if (anno.AnnoList.Count > 0)
                 {
-                    if (!columns.Contains(ali.Tier)) columns.Add(ali.Tier);
+
+
+                    foreach (AnnoListItem ali in anno.AnnoList)
+                    {
+                        if (!columns.Contains(ali.Tier)) columns.Add(ali.Tier);
+                    }
                 }
+                else columns.Add(anno.AnnoList.Name);
             }
 
             int currenttime = 0;
@@ -3339,19 +3385,27 @@ namespace ssi
                     {
                         foreach (string s in columns)
                         {
-                            foreach (AnnoList anno in annos)
+                            foreach (AnnoTrack anno in anno_tracks)
                             {
-                                foreach (AnnoListItem ali in anno)
+                                if (anno.AnnoList.Count > 0)
                                 {
-                                    if (ali.Tier == s && (ali.Start * 1000) - (ali.Duration * 1000) < currenttime && ali.Stop * 1000 > currenttime)
+                                    foreach (AnnoListItem ali in anno.AnnoList)
                                     {
-                                        found = true;
-                                        headline += ali.Label + seperator;
-                                        break;
+                                        if (ali.Tier == s && (ali.Start * 1000) - (ali.Duration * 1000) < currenttime && ali.Stop * 1000 > currenttime)
+                                        {
+                                            found = true;
+                                            headline += ali.Label + seperator;
+                                            break;
+                                        }
+                                        else found = false;
                                     }
-                                    else found = false;
+                                    if (found) break;
                                 }
-                                if (found) break;
+                                else
+                                {
+                                    found = false;
+                                }
+
                             }
                             if (!found) headline += restclass + seperator;
                         }

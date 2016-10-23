@@ -1,7 +1,9 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,9 +18,14 @@ namespace ssi
         private IMongoDatabase database;
         private string connectionstring = "mongodb://127.0.0.1:27017";
         private int authlevel = 0;
+        private int localauthlevel = 0;
         private List<DatabaseMediaInfo> ci;
         private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
         private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
+<<<<<<< HEAD
+        List<DatabaseAnno> AnnoItems = new List<DatabaseAnno>();
+=======
+>>>>>>> origin/develop
 
         public DatabaseHandlerWindow()
         {
@@ -59,7 +66,15 @@ namespace ssi
 
             try
             {
+              
                 mongo = new MongoClient(connectionstring);
+                int count = 0;
+                while (mongo.Cluster.Description.State.ToString() == "Disconnected")
+                {
+                    Thread.Sleep(100);
+                    if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + ":" + mongo.Settings.Server.Port + " is online and you entered your credentials correctly!");
+ 
+                }
 
                 authlevel = checkAuth(this.db_login.Text, "admin");
 
@@ -69,10 +84,21 @@ namespace ssi
                     Autologin.IsEnabled = true;
                 }
                 else MessageBox.Show("You have no rights to access the database list");
+                authlevel = checkAuth(this.db_login.Text, Properties.Settings.Default.Database);
             }
-            catch { MessageBox.Show("Could not connect to Database!"); }
+            catch (MongoException e)
 
-            authlevel = checkAuth(this.db_login.Text, Properties.Settings.Default.Database);
+            { MessageBox.Show(e.Message,"Connection failed",MessageBoxButton.OK,MessageBoxImage.Warning);
+                mongo.Cluster.Dispose();
+            }
+
+            //now that we made sure the user can see database, check if he has any admin/writing rights on this specific database
+         
+        }
+
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+            ConnecttoDB();
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -87,7 +113,10 @@ namespace ssi
                 Properties.Settings.Default.Database = DataBasResultsBox.SelectedItem.ToString();
                 Properties.Settings.Default.Save();
 
-                GetSessions();
+
+
+                localauthlevel = Math.Max(checkAuth(this.db_login.Text, "admin"), checkAuth(this.db_login.Text, Properties.Settings.Default.Database));
+                if(localauthlevel > 1) GetSessions();
             }
         }
 
@@ -97,9 +126,10 @@ namespace ssi
             {
                 Properties.Settings.Default.LastSessionId = ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name;
                 Properties.Settings.Default.Save();
-
-                GetAnnotations();
+                AnnoItems.Clear();
                 GetMedia();
+                GetAnnotations();
+            
             }
         }
 
@@ -132,12 +162,19 @@ namespace ssi
 
         private void showonlymine_Checked(object sender, RoutedEventArgs e)
         {
+            AnnoItems.Clear(); 
             GetAnnotations(true);
         }
 
         private void showonlymine_Unchecked(object sender, RoutedEventArgs e)
         {
+            AnnoItems.Clear();
             GetAnnotations(false);
+        }
+
+        public int Authlevel()
+        {
+            return authlevel;
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
@@ -188,18 +225,18 @@ namespace ssi
             int auth = 0;
             try
             {
-                var adminDB = mongo.GetDatabase(db);
+                var adminDB = mongo.GetDatabase("admin");
                 var cmd = new BsonDocument("usersInfo", dbuser);
                 var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
                 var roles = (BsonArray)queryResult[0][0]["roles"];
 
                 for (int i = 0; i < roles.Count; i++)
                 {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "userAdmin" && auth < 3) auth = 3;
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && auth < 2) auth = 2;
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read" && auth < 1) auth = 1;
-                    else auth = 0;
+                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db && auth <= 4) auth = 4;
+                    else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "userAdmin" && roles[i]["db"] == db && auth <= 3) auth = 3;
+                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" &&roles[i]["db"] == db && auth <= 2) auth = 2;
+                    else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read"  && roles[i]["db"] == db && auth <= 1) auth = 1;
+                    else if(auth == 0) auth = 0;
 
                     //edit/add more roles if you want to change security levels
                 }
@@ -226,16 +263,25 @@ namespace ssi
             return auth;
         }
 
-        public void SelectDatabase()
+        public async void SelectDatabase()
         {
             DataBasResultsBox.Items.Clear();
 
-            var databases = mongo.ListDatabasesAsync().Result.ToListAsync().Result;
-            foreach (var c in databases)
+            using (var cursor = await mongo.ListDatabasesAsync())
             {
-                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local")
-                    DataBasResultsBox.Items.Add(c.GetElement(0).Value.ToString());
+                await cursor.ForEachAsync(d => addDbtoList(d["name"].ToString()));
             }
+
+         
+        }
+
+        public void addDbtoList(string name)
+        {
+            if(name != "admin" && name != "local" && checkAuth(Properties.Settings.Default.MongoDBUser, name) > 1)
+            {
+                DataBasResultsBox.Items.Add(name);
+            }
+
         }
 
         public void GetSessions()
@@ -265,7 +311,7 @@ namespace ssi
             else CollectionResultsBox.ItemsSource = null;
         }
 
-        public void GetAnnotations(bool onlyme = false)
+        public async void GetAnnotations(bool onlyme = false)
 
         {
             AnnotationResultBox.ItemsSource = null;
@@ -287,9 +333,62 @@ namespace ssi
 
             foreach (var c in documents["annotations"].AsBsonArray)
             {
-                var filteranno = builder.Eq("_id", c["annotation_id"].AsObjectId);
-                var annos = annotations.Find(filteranno).Single();
 
+
+
+                var filteranno = builder.Eq("_id", c["annotation_id"].AsObjectId);
+
+<<<<<<< HEAD
+                using (var cursor = await annotations.FindAsync(filteranno))
+                {
+                    await cursor.ForEachAsync(d => addAnnotoList(d, onlyme));
+                }
+               
+            }
+           
+        }
+        public string FetchDBRef(IMongoDatabase database, string collection, string attribute, ObjectId reference)
+        {
+            string output = "";
+            var builder = Builders<BsonDocument>.Filter;
+            var filtera = builder.Eq("_id", reference);
+            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).Single();
+
+            if (result != null)
+            {
+                output = result[attribute].ToString();
+            }
+
+            return output;
+        }
+
+        public ObjectId GetObjectID(IMongoDatabase database, string collection, string value, string attribute)
+        {
+            ObjectId id = new ObjectId();
+            var builder = Builders<BsonDocument>.Filter;
+            var filtera = builder.Eq(value, attribute);
+            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
+
+            if (result.Count > 0) id = result[0].GetValue(0).AsObjectId;
+
+            return id;
+        }
+
+
+        public void addAnnotoList(BsonDocument annos, bool onlyme)
+        {
+            AnnotationResultBox.ItemsSource = null;
+
+            string roleid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Roles", "name", annos["role_id"].AsObjectId);
+            string annotid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "AnnotationSchemes", "name", annos["scheme_id"].AsObjectId);
+            string annotatid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "name", annos["annotator_id"].AsObjectId);
+
+            if (onlyme)
+            {
+                if (Properties.Settings.Default.MongoDBUser == annotatid)
+                {
+                    AnnoItems.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
+=======
 
                 var filtera = builder.Eq("_id", annos["role_id"]);
                 var roledb = database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
@@ -313,12 +412,15 @@ namespace ssi
                     {
                         items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
                     }
+>>>>>>> origin/develop
                 }
                 else items.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
 
             }
-            AnnotationResultBox.ItemsSource = items;
+            else AnnoItems.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
+            AnnotationResultBox.ItemsSource = AnnoItems;
         }
+
 
         public List<DatabaseMediaInfo> GetMediaFromDB(string db, string session)
         {
@@ -388,6 +490,9 @@ namespace ssi
             }
             return paths;
         }
+
+
+
 
         private void MediaResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

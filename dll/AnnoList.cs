@@ -32,6 +32,7 @@ namespace ssi
         private double sr = 1.0;
         private AnnotationScheme scheme;
         public bool usesAnnoScheme = false;
+        private string  annotator = null;
 
         private static bool _isDiscrete = true;
 
@@ -80,6 +81,14 @@ namespace ssi
         public string Filename
         {
             get { return filename; }
+        }
+
+ 
+
+        public string Annotator
+        {
+            get { return annotator; }
+            set { annotator = value; }
         }
 
         public string Filepath
