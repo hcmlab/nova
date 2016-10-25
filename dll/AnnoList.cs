@@ -214,7 +214,12 @@ namespace ssi
                             break;
                     }
 
-                    list.Add(new AnnoListItem(start, duration, label, meta));
+                    var state_attr = e.Attribute("state");
+                    if(state_attr.Value.ToString() == "COMPLETED")
+                    {
+                        list.Add(new AnnoListItem(start, duration, label, meta));
+                    }
+                  
                 }
             }
             catch (Exception ex)

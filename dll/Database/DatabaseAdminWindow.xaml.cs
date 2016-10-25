@@ -140,11 +140,10 @@ namespace ssi
                 var filter = builder.Eq("name", session) & builder.Eq("connection", connection);
                 var media = database.GetCollection<BsonDocument>("Media");
 
-                var filter2 = builder.Eq("name", session);
-                var sessions = database.GetCollection<BsonDocument>("Sessions").Find(filter2).ToList();
+                //var filter2 = builder.Eq("name", session);
+                //var sessions = database.GetCollection<BsonDocument>("Sessions").Find(filter2).ToList();
 
-                BsonArray files = new BsonArray();
-                files = sessions[0]["media"].AsBsonArray;
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
 
                 for (int i = 0; i < filenames.Length; i++)
                 {
@@ -169,21 +168,27 @@ namespace ssi
                                  { "name", filename },
                                  { "url", url },
                                  { "requiresAuth", auth},
+                                 { "session_id", sessionid},
                                  { "mediatype_id", "" },
                                  { "role_id", "" },
                                  { "subject_id", "" }
                     };
 
+
+
                     media.InsertOne(b);
-                    BsonDocument b1 = new BsonDocument();
-                    BsonElement mid = new BsonElement("media_id", b.GetValue(0).AsObjectId);
-                    b1.Add(mid);
-                    files.Add(b1);
+
+
+
+                    //BsonDocument b1 = new BsonDocument();
+                    //BsonElement mid = new BsonElement("media_id", b.GetValue(0).AsObjectId);
+                    //b1.Add(mid);
+                    //files.Add(b1);
                 }
 
-                var update = Builders<BsonDocument>.Update.Set("media", files);
-                var filtercoll = builder.Eq("name", session);
-                var result = database.GetCollection<BsonDocument>("Sessions").UpdateOne(filtercoll, update);
+                //var update = Builders<BsonDocument>.Update.Set("media", files);
+                //var filtercoll = builder.Eq("name", session);
+                //var result = database.GetCollection<BsonDocument>("Sessions").UpdateOne(filtercoll, update);
 
                 GetMedia();
             }
@@ -252,10 +257,11 @@ namespace ssi
                 BsonElement location = new BsonElement("location", dbsw.Location());
                 BsonElement language = new BsonElement("language", dbsw.Language());
                 BsonElement date = new BsonElement("date", dbsw.Date());
+                BsonElement isValid = new BsonElement("isValid", true);
                 BsonDocument document = new BsonDocument();
 
-                BsonArray media = new BsonArray();
-                BsonArray annotations = new BsonArray();
+                //BsonArray media = new BsonArray();
+                //BsonArray annotations = new BsonArray();
 
                 // participants.Add(new BsonDocument { { "role_id", "" }, { "subject_id", "" }, {"media", media }, {"annotations", annotations } }) ;
 
@@ -263,8 +269,9 @@ namespace ssi
                 document.Add(location);
                 document.Add(language);
                 document.Add(date);
-                document.Add("media", media);
-                document.Add("annotations", annotations);
+                document.Add(isValid);
+                //document.Add("media", media);
+                //document.Add("annotations", annotations);
 
                 bool sessionnamealreadypresent = false;
                 foreach (var item in CollectionResultsBox.Items)
@@ -529,35 +536,40 @@ namespace ssi
 
         public List<DatabaseMediaInfo> GetMediafromDB(string db, string session)
         {
-            BsonElement value;
+         
             List<DatabaseMediaInfo> paths = new List<DatabaseMediaInfo>();
             var colllection = database.GetCollection<BsonDocument>("Sessions");
             var media = database.GetCollection<BsonDocument>("Media");
 
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+
+
+
             var builder = Builders<BsonDocument>.Filter;
-            var filter = builder.Eq("name", session);
+            var filter = builder.Eq("session_id", sessionid);
+            var selectedmedialist = media.Find(filter).ToList();
 
-            var documents = colllection.Find(filter).ToList();
 
-            foreach (var document in documents)
+
+            foreach (var selectedmedia in selectedmedialist)
             {
-                string id;
-                if (document.TryGetElement("name", out value)) id = document["name"].ToString();
-                if (document.TryGetElement("media", out value))
-                {
-                    ObjectId media_id;
-                    BsonArray files = document["media"].AsBsonArray;
+                //string id;
+                //if (document.TryGetElement("name", out value)) id = document["name"].ToString();
+                //if (document.TryGetElement("media", out value))
+                //{
+                //    ObjectId media_id;
+                //    BsonArray files = document["media"].AsBsonArray;
 
-                    for (int i = 0; i < files.Count; i++)
-                    {
-                        media_id = files[i]["media_id"].AsObjectId;
+                //    for (int i = 0; i < files.Count; i++)
+                //    {
+                //        media_id = files[i]["media_id"].AsObjectId;
 
-                        var filtermedia = builder.Eq("_id", media_id);
-                        var selectedmedialist = media.Find(filtermedia).ToList();
+                //        var filtermedia = builder.Eq("_id", media_id);
+                //        var selectedmedialist = media.Find(filtermedia).ToList();
 
-                        if (selectedmedialist.Count > 0)
+                //        if (selectedmedialist.Count > 0)
                         {
-                            var selectedmedia = selectedmedialist[0];
+                          //  var selectedmedia = selectedmedialist[0];
                             DatabaseMediaInfo c = new DatabaseMediaInfo();
 
                             string url = selectedmedia["url"].ToString();
@@ -583,11 +595,12 @@ namespace ssi
                             c.subject = selectedmedia["subject_id"].ToString();
                             c.role = selectedmedia["role_id"].ToString();
                             c.mediatype = selectedmedia["mediatype_id"].ToString();
-
+                            c.session = selectedmedia["session_id"].ToString();
+                            
                             paths.Add(c);
                         }
-                    }
-                }
+                 //   }
+               // }
             }
             return paths;
         }
@@ -646,34 +659,36 @@ namespace ssi
                 var subjects = database.GetCollection<BsonDocument>("Subjects");
                 var media = database.GetCollection<BsonDocument>("Media");
                 var builder = Builders<BsonDocument>.Filter;
-                var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-                var documents = sessions.Find(filter).ToList();
+                //var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
+                //var documents = sessions.Find(filter).ToList();
 
-                foreach (var document in documents)
-                {
-                    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
+                //foreach (var document in documents)
+                //{
+                //    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
 
-                    {
-                        BsonArray mediafiles = document["media"].AsBsonArray;
+                //    {
+                //        BsonArray mediafiles = document["media"].AsBsonArray;
 
-                        foreach (var el in mediafiles)
-                        {
-                            var filter2 = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
-                            var subjectsresult = subjects.Find(filter2).ToList();
+                //        foreach (var el in mediafiles)
+                //        {
 
-                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
+                            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                            var filter = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
+                            var subjectsresult = subjects.Find(filter).ToList();
+
+                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
                             var mediadocuments = media.Find(filtermedia).ToList();
 
                             if (mediadocuments.Count > 0)
                             {
                                 var update = Builders<BsonDocument>.Update.Set("subject_id", subjectsresult[0].GetValue(0).AsObjectId);
                                 media.UpdateOne(filtermedia, update);
-                                break;
+                               
                             }
-                        }
-                        break;
-                    }
-                }
+                //        }
+                //        break;
+                //    }
+                //}
             }
         }
 
@@ -694,19 +709,14 @@ namespace ssi
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
                 var documents = sessions.Find(filter).ToList();
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
+                var mediadoc = media.Find(filtermedia).Single();
+               
 
-                var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString());
-                var mediadocs = media.Find(filtermedia).ToList();
-                if (mediadocs.Count > 0)
-                {
-                    var mediadoc = mediadocs[0];
+                   // BsonArray files = documents[0]["media"].AsBsonArray;
 
-                    BsonArray files = documents[0]["media"].AsBsonArray;
-
-                    for (int i = 0; i < files.Count; i++)
-                    {
-                        if (files[i]["media_id"] == GetObjectID(database, "Media", "name", MediaResultBox.SelectedItem.ToString()))
-                        {
+     
                             var filter2 = builder.Eq("_id", mediadoc["role_id"]);
                             var rolescollection = roles.Find(filter2).ToList();
                             if (rolescollection.Count > 0)
@@ -751,9 +761,9 @@ namespace ssi
                                     }
                                 }
                             }
-                        }
-                    }
-                }
+                        
+                    
+                
             }
         }
 
@@ -784,9 +794,18 @@ namespace ssi
                     for (int i = 0; i < CollectionResultsBox.SelectedItems.Count; i++)
                     {
                         var builder = Builders<BsonDocument>.Filter;
-                        var filter = builder.Eq("name", CollectionResultsBox.SelectedItem.ToString());
-                        var result = database.GetCollection<BsonDocument>("Sessions").DeleteOne(filter);
+
+
+                        var filter = builder.Eq("name", ((DatabaseSession)CollectionResultsBox.SelectedItem).Name);
+                        var session = database.GetCollection<BsonDocument>("Sessions").Find(filter).Single();
+                        ObjectId sessionid = session.GetValue(0).AsObjectId;
+
+                        var filtersession = builder.Eq("session_id", sessionid);
+                        database.GetCollection<BsonDocument>("Annotations").DeleteManyAsync(filtersession);
+                        database.GetCollection<BsonDocument>("Media").DeleteManyAsync(filtersession);
+                        database.GetCollection<BsonDocument>("Sessions").DeleteOne(filter);
                     }
+
                 }
             }
             else { MessageBox.Show("You are not authorized to delete this Session"); }
@@ -814,37 +833,41 @@ namespace ssi
                 var media = database.GetCollection<BsonDocument>("Media");
 
                 var builder = Builders<BsonDocument>.Filter;
-                var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-                var documents = sessions.Find(filter).ToList();
-                BsonArray files = documents[0]["media"].AsBsonArray;
+                //var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
+                //var documents = sessions.Find(filter).ToList();
+                //BsonArray files = documents[0]["media"].AsBsonArray;
 
-                var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString());
+
+            
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
                 var mediadocuments = media.Find(filtermedia).ToList();
 
                 if (mediadocuments.Count > 0)
                 {
-                    ObjectId media_id = mediadocuments[0]["_id"].AsObjectId;
+                    media.DeleteOne(filtermedia);
+                }
 
-                    for (int j = 0; j < files.Count; j++)
+
+
+                //For Stream files we also delete the stream~ without the user having to care for it.
+                if (MediaResultBox.SelectedItem.ToString().EndsWith(".stream"))
+                {
+                  
+                    var filtermedia2 = builder.Eq("name", MediaResultBox.SelectedItem.ToString() + "~") & builder.Eq("session_id", sessionid);
+                    var mediadocuments2 = media.Find(filtermedia2).ToList();
+                    if (mediadocuments2.Count > 0)
                     {
-                        if (files[j]["media_id"] == media_id)
-                        {
-                            files.RemoveAt(j);
-                            break;
-                        }
+                        media.DeleteOne(filtermedia2);
                     }
 
-                    media.DeleteOne(filtermedia);
-
-                    var update = Builders<BsonDocument>.Update.Set("media", files);
-                    sessions.UpdateOne(filter, update);
+                }
 
                     RolesResultBox.Items.Clear();
                     SubjectsResultBox.Items.Clear();
                     MediatypeResultsBox.Items.Clear();
-
                     GetMedia();
-                }
+                
             }
         }
 
@@ -939,38 +962,39 @@ namespace ssi
             {
                 lastrole = RolesResultBox.SelectedItem.ToString();
 
-                var sessions = database.GetCollection<BsonDocument>("Sessions");
+           
                 var roles = database.GetCollection<BsonDocument>("Roles");
                 var media = database.GetCollection<BsonDocument>("Media");
                 var builder = Builders<BsonDocument>.Filter;
-                var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-                var documents = sessions.Find(filter).ToList();
+                //var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
+                //var documents = sessions.Find(filter).ToList();
 
-                foreach (var document in documents)
-                {
-                    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
+                //foreach (var document in documents)
+                //{
+                //    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
 
-                    {
-                        BsonArray mediafiles = document["media"].AsBsonArray;
+                //    {
+                //        BsonArray mediafiles = document["media"].AsBsonArray;
 
-                        foreach (var el in mediafiles)
-                        {
-                            var filter2 = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
-                            var rolesresult = roles.Find(filter2).ToList();
+                //        foreach (var el in mediafiles)
+                //        {
+                            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                            var filter = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
+                            var rolesresult = roles.Find(filter).ToList();
 
-                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
+                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
                             var mediadocuments = media.Find(filtermedia).ToList();
 
                             if (mediadocuments.Count > 0)
                             {
                                 var update = Builders<BsonDocument>.Update.Set("role_id", rolesresult[0].GetValue(0).AsObjectId);
                                 media.UpdateOne(filtermedia, update);
-                                break;
+                             
                             }
-                        }
-                        break;
-                    }
-                }
+                    //    }
+                    //    break;
+                    //}
+               // }
 
                 //for (int i = 0; i < files.Count; i++)
                 //{
@@ -990,40 +1014,40 @@ namespace ssi
         {
             if (MediatypeResultsBox.SelectedItem != null)
             {
-                var sessions = database.GetCollection<BsonDocument>("Sessions");
                 var mediatypes = database.GetCollection<BsonDocument>("MediaTypes");
                 var media = database.GetCollection<BsonDocument>("Media");
                 var builder = Builders<BsonDocument>.Filter;
-                var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-                var documents = sessions.Find(filter).ToList();
+                //var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
+                //var documents = sessions.Find(filter).ToList();
 
-                foreach (var document in documents)
-                {
-                    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
+                //foreach (var document in documents)
+                //{
+                //    if (document["name"].ToString() == Properties.Settings.Default.LastSessionId)
 
-                    {
-                        BsonArray mediafiles = document["media"].AsBsonArray;
+                //    {
+                //        BsonArray mediafiles = document["media"].AsBsonArray;
 
-                        foreach (var el in mediafiles)
-                        {
-                            string[] split = MediatypeResultsBox.SelectedItem.ToString().Split('#');
+                //        foreach (var el in mediafiles)
+                //        {
+                             ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                             string[] split = MediatypeResultsBox.SelectedItem.ToString().Split('#');
 
                             var filter2 = builder.Eq("name", split[0]) & builder.Eq("type", split[1]);
-                            var mediatyperesult = mediatypes.Find(filter2).ToList();
+                            var mediatyperesult = mediatypes.Find(filter2).Single();
 
-                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("_id", el["media_id"].AsObjectId);
-                            var mediadocuments = media.Find(filtermedia).ToList();
+                            var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
+                            //var mediadocuments = media.Find(filtermedia).ToList();
 
-                            if (mediadocuments.Count > 0)
-                            {
-                                var update = Builders<BsonDocument>.Update.Set("mediatype_id", mediatyperesult[0].GetValue(0).AsObjectId);
+                            //if (mediadocuments.Count > 0)
+                            //{
+                                var update = Builders<BsonDocument>.Update.Set("mediatype_id", mediatyperesult.GetValue(0).AsObjectId);
                                 media.UpdateOne(filtermedia, update);
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
+                              
+                           // }
+                        //}
+                        //break;
+                   // }
+                //}
             }
         }
 
