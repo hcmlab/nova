@@ -103,6 +103,9 @@ namespace ssi
             this.track = track;
         }
 
+  
+
+
         public void RemoveTrack(SignalTrack track)
         {
             this.grid.Children.Remove(track);

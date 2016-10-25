@@ -1,16 +1,21 @@
 ﻿using System;
+using System.IO;
+using System.IO.Packaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Xps;
+using System.Windows.Xps.Packaging;
 
 namespace ssi
 {
     public delegate void SignalTrackChangeEventHandler(SignalTrack track, EventArgs e);
 
-    public partial class SignalTrackStatic : Panel
+    public partial class SignalTrackStatic : Canvas
     {
-        static protected SignalTrack selected_track = null;
+        static public SignalTrack selected_track = null;
 
         static public event SignalTrackChangeEventHandler OnChange;
 
@@ -330,6 +335,56 @@ namespace ssi
             this.Width = pixel;
             this.resample = true;
             this.InvalidateVisual();
+        }
+
+
+        public void ExportToXPS(Uri path, Canvas surface)
+        {
+            if (path == null) return;
+
+            Transform transform = surface.LayoutTransform;
+            surface.LayoutTransform = null;
+
+            Size size = new Size(surface.ActualWidth, surface.ActualHeight);
+            surface.Measure(size);
+            surface.Arrange(new Rect(size));
+
+            Package package = Package.Open(path.LocalPath, FileMode.Create);
+            XpsDocument doc = new XpsDocument(package);
+            XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc);
+            writer.Write(surface);
+            doc.Close();
+            package.Close();
+            surface.LayoutTransform = transform;
+        }
+
+        public void ExportToPng(Uri path, Canvas surface)
+        {
+            if (path == null) return;
+            Transform transform = surface.LayoutTransform;
+            surface.LayoutTransform = null;
+
+            Size size = new Size(surface.ActualWidth, surface.ActualHeight);
+            surface.Measure(size);
+            surface.Arrange(new Rect(size));
+            RenderTargetBitmap renderBitmap =
+              new RenderTargetBitmap(
+                (int)size.Width,
+                (int)size.Height,
+                96d,
+                96d,
+                PixelFormats.Pbgra32);
+            renderBitmap.Render(surface);
+
+
+            using (FileStream outStream = new FileStream(path.LocalPath, FileMode.Create))
+            {
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+                encoder.Save(outStream);
+            }
+
+            surface.LayoutTransform = transform;
         }
     }
 }

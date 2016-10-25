@@ -159,6 +159,8 @@ namespace ssi
             this.view.convertosignalemenu.Click += convertosignal_Click;
             this.view.exporttracktoxps.Click += exporttracktoxps_Click;
             this.view.exporttracktopng.Click += exporttracktopng_Click;
+            this.view.exportsignaltoxps.Click += exportsignaltoxps_Click;
+            this.view.exportsignaltopng.Click += exportsignaltopng_Click;
             // this.view.calculatepraat.Click += calculatepraat_Click;
             this.view.savetiermenu.Click += saveAnnoAsButton_Click;
             this.view.convertocontannoemenu.Click += convertocontanno_Click;
@@ -3020,22 +3022,58 @@ namespace ssi
         private void exporttracktoxps_Click(object sender, RoutedEventArgs e)
         {
             string filepath = ViewTools.SaveFileDialog("export_track", "xps", "", 5);
-            var uri = new System.Uri(filepath);
-
-            if (AnnoTrack.GetSelectedTrack().isDiscrete) AnnoTrack.GetSelectedTrack().Background = AnnoTrack.GetSelectedTrack().BackgroundColor;
-            AnnoTrack.GetSelectedTrack().ExportToXPS(uri, AnnoTrack.GetSelectedTrack());
-            AnnoTrack.GetSelectedTrack().select(true);
-            AnnoTrack.GetSelectedTrack().timeRangeChanged(ViewHandler.Time);
+            if (filepath != null)
+            {
+                var uri = new System.Uri(filepath);
+                if (AnnoTrack.GetSelectedTrack() != null)
+                {
+                    if (AnnoTrack.GetSelectedTrack().isDiscrete) AnnoTrack.GetSelectedTrack().Background = AnnoTrack.GetSelectedTrack().BackgroundColor;
+                    AnnoTrack.GetSelectedTrack().ExportToXPS(uri, AnnoTrack.GetSelectedTrack());
+                    AnnoTrack.GetSelectedTrack().select(true);
+                    AnnoTrack.GetSelectedTrack().timeRangeChanged(ViewHandler.Time);
+                }
+            }
         }
 
         private void exporttracktopng_Click(object sender, RoutedEventArgs e)
         {
             string filepath = ViewTools.SaveFileDialog("export_track", "png", "", 6);
-            var uri = new System.Uri(filepath);
-            if (AnnoTrack.GetSelectedTrack().isDiscrete) AnnoTrack.GetSelectedTrack().Background = AnnoTrack.GetSelectedTrack().BackgroundColor;
-            AnnoTrack.GetSelectedTrack().ExportToPng(uri, AnnoTrack.GetSelectedTrack());
-            AnnoTrack.GetSelectedTrack().select(true);
-            AnnoTrack.GetSelectedTrack().timeRangeChanged(ViewHandler.Time);
+            if (filepath != null)
+            {
+                var uri = new System.Uri(filepath);
+                if (AnnoTrack.GetSelectedTrack().isDiscrete) AnnoTrack.GetSelectedTrack().Background = AnnoTrack.GetSelectedTrack().BackgroundColor;
+                AnnoTrack.GetSelectedTrack().ExportToPng(uri, AnnoTrack.GetSelectedTrack());
+                AnnoTrack.GetSelectedTrack().select(true);
+                AnnoTrack.GetSelectedTrack().timeRangeChanged(ViewHandler.Time);
+            }
+        }
+
+        private void exportsignaltoxps_Click(object sender, RoutedEventArgs e)
+        {
+            string filepath = ViewTools.SaveFileDialog("export_signal", "xps", "", 5);
+            if (filepath != null)
+            {
+                var uri = new System.Uri(filepath);
+
+                if (SignalTrack.selected_track != null)
+                {
+                    SignalTrack.selected_track.ExportToXPS(uri, SignalTrack.selected_track);
+                }
+            }
+        }
+
+        private void exportsignaltopng_Click(object sender, RoutedEventArgs e)
+        {
+            string filepath = ViewTools.SaveFileDialog("export_signal", "png", "", 6);
+            if (filepath != null)
+            {
+                var uri = new System.Uri(filepath);
+
+                if (SignalTrack.selected_track != null)
+                {
+                    SignalTrack.selected_track.ExportToPng(uri, SignalTrack.selected_track);
+                }
+            }
         }
 
         private void convertosignal_Click(object sender, RoutedEventArgs e)

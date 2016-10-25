@@ -43,6 +43,10 @@
             <MenuItem Header="Signal">
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
                 <MenuItem Header="Convert to cont Anno" Name="convertocontannoemenu" />
+                <MenuItem Header="Export" Name="exports">
+                    <MenuItem Header="Export to XPS" Name="exportsignaltoxps" IsEnabled="True" />
+                    <MenuItem Header="Export to PNG" Name="exportsignaltopng" IsEnabled="True" />
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="Database">
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
