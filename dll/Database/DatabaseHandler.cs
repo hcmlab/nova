@@ -1,13 +1,9 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Core;
-using MongoDB.Driver.Linq;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ssi
 {
@@ -76,7 +72,6 @@ namespace ssi
 
         public string LoadRoles(string db, AnnoTrack tier)
         {
-           
             string role = "None";
             List<string> roles = new List<string>();
             mongo = new MongoClient(connectionstring);
@@ -203,19 +198,13 @@ namespace ssi
                     roleid = b.GetValue(0).AsObjectId;
                 }
 
-
-
-
-
                 BsonDocument annotatordoc = new BsonDocument();
-
 
                 //We could choose here if we want to overwrite other peoples annotations. For now, we we might want to overwrite automatically created annotations and own annotations only
 
-                if (! (a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break;
+                if (!(a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break;
 
                 if (a.AnnoList.Annotator == null) a.AnnoList.Annotator = dbuser;
-
 
                 BsonElement annotatorname = new BsonElement("name", a.AnnoList.Annotator);
                 BsonElement annotatoremail = new BsonElement("email", "");
@@ -231,16 +220,11 @@ namespace ssi
                 var resann = annotators.ReplaceOne(filterannotator, annotatordoc, uoa);
                 ObjectId annotatoroID = annotators.Find(filterannotator).Single()["_id"].AsObjectId;
 
-
-
                 ObjectId sessionID;
-
 
                 var filtersid = builder.Eq("name", session);
                 var ses = sessions.Find(filtersid).Single();
                 sessionID = ses.GetValue(0).AsObjectId;
-
-
 
                 ObjectId annotid;
                 string annotype = null;
@@ -299,9 +283,6 @@ namespace ssi
                     annotid = b.GetValue(0).AsObjectId;
                 }
 
-
-         
-
                 BsonElement user = new BsonElement("annotator_id", annotatoroID);
                 BsonElement role = new BsonElement("role_id", roleid);
                 BsonElement annot = new BsonElement("scheme_id", annotid);
@@ -311,20 +292,17 @@ namespace ssi
 
                 BsonArray media = new BsonArray();
 
-                if(loadedDBmedia != null )
+                if (loadedDBmedia != null)
                 {
-
-              
-                    foreach(DatabaseMediaInfo dmi in loadedDBmedia)
+                    foreach (DatabaseMediaInfo dmi in loadedDBmedia)
                     {
-
                         BsonDocument mediadocument = new BsonDocument();
                         ObjectId mediaid;
-                 
+
                         var filtermedia = builder.Eq("name", dmi.filename) & builder.Eq("session_id", sessionID);
                         var mediadb = medias.Find(filtermedia).ToList();
 
-                        if(mediadb.Count > 0)
+                        if (mediadb.Count > 0)
                         {
                             mediaid = mediadb[0].GetValue(0).AsObjectId;
 
@@ -332,11 +310,8 @@ namespace ssi
                             mediadocument.Add(media_id);
                             media.Add(mediadocument);
                         }
-                       
-
                     }
                 }
-
 
                 BsonArray data = new BsonArray();
                 document.Add(sessionid);
@@ -378,7 +353,6 @@ namespace ssi
                     }
                 }
 
-
                 var filter2 = builder.Eq("scheme_id", annotid) & builder.Eq("role_id", roleid) & builder.Eq("annotator_id", annotatoroID) & builder.Eq("session_id", sessionID);
 
                 ObjectId annoid = new ObjectId();
@@ -396,9 +370,7 @@ namespace ssi
 
         public AnnotationScheme GetAnnotationScheme(string name, bool isDiscrete)
         {
-           
-
-             mongo = new MongoClient(connectionstring);
+            mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(Properties.Settings.Default.Database);
             BsonElement value;
             AnnotationScheme Scheme = new AnnotationScheme();
@@ -505,8 +477,6 @@ namespace ssi
                     al.AnnotationScheme.minborder = al.Lowborder;
                     al.AnnotationScheme.maxborder = al.Highborder;
                     al.AnnotationScheme.sr = al.SR;
-
-                    
 
                     for (int i = 0; i < annotation.Count; i++)
                     {

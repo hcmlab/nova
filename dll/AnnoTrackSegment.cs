@@ -129,7 +129,6 @@ namespace ssi
                     }
 
                     track.track_used_labels = AnnoTrackStatic.used_labels;
-                   
                 }
             }
         }

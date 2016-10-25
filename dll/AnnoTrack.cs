@@ -34,7 +34,6 @@ namespace ssi
     {
         private string label;
         private string color;
-       
 
         public String Label
         {
@@ -47,8 +46,6 @@ namespace ssi
             get { return color; }
             set { color = value; }
         }
-
-       
 
         public LabelColorPair(string _label, string _color)
         {
@@ -550,7 +547,6 @@ namespace ssi
                 double closestposition = start;
                 closestindex = getClosestContinousIndex(closestposition);
                 closestindexold = closestindex;
-               
 
                 AnnoTrackStatic.used_labels.Clear();
                 foreach (AnnoListItem item in AnnoTrack.GetSelectedTrack().AnnoList)
@@ -570,7 +566,6 @@ namespace ssi
                         if (detected == false)
                         {
                             AnnoTrackStatic.used_labels.Add(l);
-                           
                         }
                     }
                 }

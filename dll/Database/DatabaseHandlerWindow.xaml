@@ -16,9 +16,9 @@
         <Label Content="Server:IP" Margin="10,0,521,378"></Label>
         <TextBox x:FieldModifier="public" Margin="10,28,436,368" x:Name="db_server" Height="25" Focusable="True" />
         <Label Content="Database Login" Margin="212,0,-212,0"></Label>
-        <TextBox x:FieldModifier="public" Margin="212,28,270,368" x:Name="db_login" Height="25" Width="150" Focusable="True" TextChanged="db_login_TextChanged"/>
-        <Label Content="Database Password" Margin="379,0,150,373"/>
-        <PasswordBox x:FieldModifier="public" Margin="378,28,104,368" x:Name="db_pass" Height="25" Width="150" Focusable="True" PasswordChanged="db_pass_PasswordChanged"/>
+        <TextBox x:FieldModifier="public" Margin="212,28,270,368" x:Name="db_login" Height="25" Width="150" Focusable="True" TextChanged="db_login_TextChanged" />
+        <Label Content="Database Password" Margin="379,0,150,373" />
+        <PasswordBox x:FieldModifier="public" Margin="378,28,104,368" x:Name="db_pass" Height="25" Width="150" Focusable="True" PasswordChanged="db_pass_PasswordChanged" />
 
         <Label Content="Databases" Margin="10,53,-10,-23" Grid.RowSpan="2" />
         <ListBox Name="DataBasResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,80,448,211" SelectionMode="Single" SelectionChanged="DataBasResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
@@ -88,7 +88,7 @@
 
         <Button Name="DeleteAnnotation" Content="X" Grid.Column="0" Click="DeleteAnnotation_Click" Margin="454,80,169,320"  Visibility="Collapsed" />
 
-        <CheckBox Name="Autologin" Margin="548,10,61,393" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"/>
+        <CheckBox Name="Autologin" Margin="548,10,61,393" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked" />
 
         <Label Content="Autologin" Margin="565,2,-10,383" />
     </Grid>

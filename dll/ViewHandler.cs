@@ -903,7 +903,7 @@ namespace ssi
                 track.Background = background;
             }
             track.timeRangeChanged(ViewHandler.Time);
-          //  track.timeRangeChanged(ViewHandler.Time);
+            //  track.timeRangeChanged(ViewHandler.Time);
         }
 
         private void loadAnno(string filename)
@@ -938,10 +938,8 @@ namespace ssi
             //(This is where in the future tiers will be read from the config)
             List<String> TierIds = new List<String>();
 
-
             if (anno.Count > 0)
             {
-
                 foreach (AnnoListItem ali in anno)
                 {
                     if (!TierIds.Contains(ali.Tier))
@@ -955,25 +953,19 @@ namespace ssi
                         maxdur = ali.Stop;
                     }
                 }
-
-
             }
-
             else
             {
                 TierIds.Add(anno.Name);
             }
-
-            
 
             //Create a new AnnoList per tierId and add it
             foreach (String tierid in TierIds)
             {
                 AnnoList annolist = new AnnoList();
 
-                if(anno.Count > 0)
+                if (anno.Count > 0)
                 {
-
                     foreach (AnnoListItem ali in anno)
                     {
                         if (ali.Tier == tierid)
@@ -992,7 +984,6 @@ namespace ssi
                             annolist.Add(ali);
                         }
                     }
-
                 }
                 else annolist.Name = anno.Name;
                 annolist.Highborder = anno.Highborder;
@@ -2184,7 +2175,6 @@ namespace ssi
                     StreamReader sr = new StreamReader(filename, System.Text.Encoding.Default);
                     string line = sr.ReadLine();
                     double samplerate = 1.0;
-                 
 
                     if (line != null)
                     {
@@ -2210,9 +2200,7 @@ namespace ssi
 
                         sr.Close();
                     }
-
                     else type = "semicolon";
-
 
                     if (type == "continuous" || type == "semicolon")
                     {
@@ -2775,11 +2763,10 @@ namespace ssi
             dbf.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbf.ShowDialog();
 
-            if (dbf.DialogResult == true)  {
-
-                if(dbf.Median() != null)
+            if (dbf.DialogResult == true)
+            {
+                if (dbf.Median() != null)
                 {
-
                     addAnno(dbf.Median(), false, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null, "Median");
 
                     updateTimeRange(dbf.Median().Last().Stop);
@@ -2787,12 +2774,10 @@ namespace ssi
 
                 if (dbf.RMS() != null)
                 {
-
                     addAnno(dbf.RMS(), false, dbf.RMS().SR, null, dbf.RMS().Lowborder, dbf.RMS().Highborder, null, "RMS");
 
                     updateTimeRange(dbf.RMS().Last().Stop);
                 }
-
             }
             this.view.mongodbmenu.IsEnabled = true;
             AnnoSchemeLoaded = true;
@@ -2857,7 +2842,6 @@ namespace ssi
             dbhw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbhw.ShowDialog();
 
-
             if (dbhw.DialogResult == true)
             {
                 annotations = dbhw.Annotations();
@@ -2865,20 +2849,17 @@ namespace ssi
                 ci = dbhw.MediaConnectionInfo();
                 this.view.mongodbmenu.IsEnabled = true;
 
-
                 //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
                 if (dbhw.Authlevel() > 2)
                 {
                     this.view.addmongodb.Visibility = Visibility.Visible;
                     this.view.mongodbfunctions.Visibility = Visibility.Visible;
                 }
-               
             }
-            
 
             string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
             DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
-            
+
             this.view.mongodbmenu.IsEnabled = true;
             this.view.mongodbfunctions.IsEnabled = true;
 
@@ -2888,8 +2869,6 @@ namespace ssi
                 this.view.ShadowBox.Visibility = Visibility.Visible;
                 view.UpdateLayout();
                 view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-             
-               
 
                 List<AnnoList> annos = db.LoadfromDatabase(annotations, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
                 try
@@ -3339,8 +3318,6 @@ namespace ssi
             {
                 if (anno.AnnoList.Count > 0)
                 {
-
-
                     foreach (AnnoListItem ali in anno.AnnoList)
                     {
                         if (!columns.Contains(ali.Tier)) columns.Add(ali.Tier);
@@ -3396,7 +3373,6 @@ namespace ssi
                                 {
                                     found = false;
                                 }
-
                             }
                             if (!found) headline += restclass + seperator;
                         }

@@ -15,7 +15,7 @@
         <Label Content="Server:IP" Margin="7,0,716,388" />
         <TextBox x:FieldModifier="public" Margin="10,33,646,368" x:Name="db_server" Focusable="True" />
         <Label Content="Database Login" Margin="205,0,495,398"></Label>
-        <TextBox x:FieldModifier="public" Margin="205,33,458,368" x:Name="db_login" Focusable="True" TextChanged="db_login_TextChanged"/>
+        <TextBox x:FieldModifier="public" Margin="205,33,458,368" x:Name="db_login" Focusable="True" TextChanged="db_login_TextChanged" />
         <Label Content="Database Password" Margin="384,0,289,396" />
         <PasswordBox x:FieldModifier="public" Margin="384,33,284,368" x:Name="db_pass" Focusable="True" PasswordChanged="db_pass_PasswordChanged" />
 
@@ -81,7 +81,7 @@
         <Button Name="DeleteFiles" Content="X" Grid.Column="0" Click="DeleteFiles_Click" Margin="255,395,530,5"  Visibility="Collapsed" RenderTransformOrigin="0.677,1.201" />
         <Button Name="DeleteSubject" Content="X" Grid.Column="0" Click="DeleteSubject_Click" Margin="592,271,192,129"  Visibility="Visible" RenderTransformOrigin="0.585,2.711" />
         <Button Name="EditSession" Content="E" Grid.Column="0" Click="EditSession_Click" Margin="110,395,671,5" Visibility="Collapsed" RenderTransformOrigin="-1.293,4.267" />
-        <CheckBox Name="Autologin" Margin="553,10,-20,398" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"/>
+        <CheckBox Name="Autologin" Margin="553,10,-20,398" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked" />
         <Label Content="AutoLogin" Margin="574,0,149,396" />
         <Label Content="Subjects" Margin="384,248,316,150" />
         <ComboBox x:Name="SubjectsResultBox" Grid.Row="0" Grid.Column="0" Margin="390,271,284,129" SelectionChanged="SubjectsResultBox_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
