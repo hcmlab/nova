@@ -219,17 +219,26 @@ namespace ssi
 
                 BsonElement annotatorname = new BsonElement("name", a.AnnoList.Annotator);
                 BsonElement annotatoremail = new BsonElement("email", "");
+                BsonElement annotatorexpertise = new BsonElement("expertise", "");
 
                 annotatordoc.Add(annotatorname);
                 annotatordoc.Add(annotatoremail);
+                annotatordoc.Add(annotatorexpertise);
 
                 var filterannotator = builder.Eq("name", a.AnnoList.Annotator);
                 UpdateOptions uoa = new UpdateOptions();
                 uoa.IsUpsert = true;
                 var resann = annotators.ReplaceOne(filterannotator, annotatordoc, uoa);
-                ObjectId annotatoroid = annotators.Find(filterannotator).Single()["_id"].AsObjectId;
+                ObjectId annotatoroID = annotators.Find(filterannotator).Single()["_id"].AsObjectId;
 
 
+
+                ObjectId sessionID;
+
+
+                var filtersid = builder.Eq("name", session);
+                var ses = sessions.Find(filtersid).Single();
+                sessionID = ses.GetValue(0).AsObjectId;
 
 
 
@@ -293,9 +302,10 @@ namespace ssi
 
          
 
-                BsonElement user = new BsonElement("annotator_id", annotatoroid);
+                BsonElement user = new BsonElement("annotator_id", annotatoroID);
                 BsonElement role = new BsonElement("role_id", roleid);
                 BsonElement annot = new BsonElement("scheme_id", annotid);
+                BsonElement sessionid = new BsonElement("session_id", sessionID);
                 BsonElement date = new BsonElement("date", new BsonDateTime(DateTime.Now));
                 BsonDocument document = new BsonDocument();
 
@@ -310,21 +320,26 @@ namespace ssi
 
                         BsonDocument mediadocument = new BsonDocument();
                         ObjectId mediaid;
+                 
+                        var filtermedia = builder.Eq("name", dmi.filename) & builder.Eq("session_id", sessionID);
+                        var mediadb = medias.Find(filtermedia).ToList();
 
-                        var filtermedia = builder.Eq("name", dmi.filename) & builder.Eq("connection", dmi.connection);
-                        var mediadb = medias.Find(filtermedia).Single();
-                        mediaid = mediadb.GetValue(0).AsObjectId;
+                        if(mediadb.Count > 0)
+                        {
+                            mediaid = mediadb[0].GetValue(0).AsObjectId;
+
+                            BsonElement media_id = new BsonElement("media_id", mediaid);
+                            mediadocument.Add(media_id);
+                            media.Add(mediadocument);
+                        }
                        
-                        BsonElement media_id = new BsonElement("media_id", mediaid);
-                        mediadocument.Add(media_id);
-                        media.Add(mediadocument);
 
                     }
                 }
 
 
                 BsonArray data = new BsonArray();
-
+                document.Add(sessionid);
                 document.Add(user);
                 document.Add(role);
                 document.Add(annot);
@@ -350,7 +365,7 @@ namespace ssi
                             }
                         }
 
-                        document.Add("segments", data);
+                        document.Add("labels", data);
                     }
                     else
                     {
@@ -359,12 +374,12 @@ namespace ssi
                             data.Add(new BsonDocument { { "score", a.AnnoList[i].Label }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                         }
 
-                        document.Add("frames", data);
+                        document.Add("labels", data);
                     }
                 }
 
 
-                var filter2 = builder.Eq("scheme_id", annotid) & builder.Eq("role_id", roleid) & builder.Eq("annotator_id", annotatoroid);
+                var filter2 = builder.Eq("scheme_id", annotid) & builder.Eq("role_id", roleid) & builder.Eq("annotator_id", annotatoroID) & builder.Eq("session_id", sessionID);
 
                 ObjectId annoid = new ObjectId();
                 var res = annotations.Find(filter2).ToList();
@@ -376,19 +391,6 @@ namespace ssi
                 UpdateOptions uo = new UpdateOptions();
                 uo.IsUpsert = true;
                 var result = annotations.ReplaceOne(filter2, document, uo);
-                ObjectId oid = annotations.Find(filter2).Single()["_id"].AsObjectId;
-
-
-                if (result.MatchedCount == 0)
-                {
-                    var filter3 = builder.Eq("name", session);
-                    var ses = sessions.Find(filter3).Single();
-                    BsonArray annos = ses["annotations"].AsBsonArray;
-                    annos.Add(new BsonDocument { { "annotation_id", oid } });
-
-                    var update2 = Builders<BsonDocument>.Update.Set("annotations", annos);
-                    sessions.UpdateOneAsync(filter3, update2);
-                }
             }
         }
 
@@ -463,14 +465,18 @@ namespace ssi
                 string annotatdb = FetchDBRef(database, "Annotators", "name", annotatid);
                 al.Annotator = annotatdb;
 
+                ObjectId sessionid = GetObjectID(database, "Sessions", "name", session);
+                string sessiondb = FetchDBRef(database, "Sessions", "name", sessionid);
+                al.Annotator = annotatdb;
+
                 var builder = Builders<BsonDocument>.Filter;
 
                 var filterscheme = builder.Eq("_id", annotid);
                 var result = collection.Find(filterscheme);
                 var annosch = annoschemes.Find(filterscheme).Single();
 
-                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid);
-                var documents = collection.Find(filter).Single();
+                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
+                var documents = collection.Find(filter).ToList();
 
                 if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "DISCRETE")
                 {
@@ -486,6 +492,7 @@ namespace ssi
 
                 al.AnnotationScheme = new AnnotationScheme();
                 al.AnnotationScheme.name = annosch["name"].ToString();
+                var annotation = documents[0]["labels"].AsBsonArray;
                 if (al.isDiscrete == false)
                 {
                     if (annosch.TryGetElement("min", out value)) al.Lowborder = double.Parse(annosch["min"].ToString());
@@ -499,7 +506,7 @@ namespace ssi
                     al.AnnotationScheme.maxborder = al.Highborder;
                     al.AnnotationScheme.sr = al.SR;
 
-                    var annotation = documents["frames"].AsBsonArray;
+                    
 
                     for (int i = 0; i < annotation.Count; i++)
                     {
@@ -508,7 +515,6 @@ namespace ssi
                         double start = i * ((1000.0 / al.SR) / 1000.0);
                         double dur = (1000.0 / al.SR) / 1000.0;
 
-                        // string  color = annotation[i]["Color"].ToString();
                         AnnoListItem ali = new AnnoListItem(start, dur, label, "", al.Name, "#000000", double.Parse(confidence));
 
                         al.Add(ali);
@@ -518,7 +524,6 @@ namespace ssi
                 else
                 {
                     al.AnnotationScheme.mincolor = annosch["color"].ToString();
-                    var annotation = documents["segments"].AsBsonArray;
 
                     al.AnnotationScheme.LabelsAndColors = new List<LabelColorPair>();
 
@@ -549,7 +554,6 @@ namespace ssi
                         double duration = stop - start;
                         string label = SchemeLabel;
                         string confidence = annotation[i]["conf"].ToString();
-                        // string  color = annotation[i]["Color"].ToString();
 
                         AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, SchemeColor, double.Parse(confidence));
                         al.Add(ali);
@@ -598,6 +602,8 @@ namespace ssi
         public string AnnoType { get; set; }
 
         public string Annotator { get; set; }
+
+        public string Session { get; set; }
     }
 
     public class DatabaseSession
@@ -624,5 +630,6 @@ namespace ssi
         public string role;
         public string subject;
         public string mediatype;
+        public string session;
     }
 }

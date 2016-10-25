@@ -220,6 +220,19 @@ namespace ssi
             else CollectionResultsBox.ItemsSource = null;
         }
 
+
+        public ObjectId GetObjectID(IMongoDatabase database, string collection, string value, string attribute)
+        {
+            ObjectId id = new ObjectId();
+            var builder = Builders<BsonDocument>.Filter;
+            var filtera = builder.Eq(value, attribute);
+            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
+
+            if (result.Count > 0) id = result[0].GetValue(0).AsObjectId;
+
+            return id;
+        }
+
         public void GetAnnotations(bool onlyme = false)
 
         {
@@ -234,7 +247,7 @@ namespace ssi
             var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
             var roles = database.GetCollection<BsonDocument>("Roles");
 
-            BsonDocument documents;
+ 
             var builder = Builders<BsonDocument>.Filter;
 
             ObjectId schemeid = new ObjectId();
@@ -263,29 +276,28 @@ namespace ssi
                 result2 = roles.Find(filterat).Single();
                 if (result2.ElementCount > 0) roleid = result2.GetValue(0).AsObjectId;
             }
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+            var filter = builder.Eq("session_id", sessionid);
+            var annos = annotations.Find(filter).ToList();
 
-            var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
-            documents = sessions.Find(filter).Single();
-
-            foreach (var c in documents["annotations"].AsBsonArray)
+            foreach (var anno in annos)
             {
-                var filteranno = builder.Eq("_id", c["annotation_id"].AsObjectId);
-                var annos = annotations.Find(filteranno).Single();
-
-                var filtera = builder.Eq("_id", annos["role_id"]);
+                
+                var filtera = builder.Eq("_id", anno["role_id"]);
                 var roledb = database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
                 string rolename = roledb.GetValue(1).ToString();
 
-                var filterb = builder.Eq("_id", annos["scheme_id"]);
+                var filterb = builder.Eq("_id", anno["scheme_id"]);
                 var annotdb = database.GetCollection<BsonDocument>("AnnotationSchemes").Find(filterb).Single();
                 string annoschemename = annotdb.GetValue(1).ToString();
                 string type = annotdb.GetValue(2).ToString();
 
-                var filterc = builder.Eq("_id", annos["annotator_id"]);
+                var filterc = builder.Eq("_id", anno["annotator_id"]);
                 var annotatdb = database.GetCollection<BsonDocument>("Annotators").Find(filterc).Single();
                 string annotatorname = annotatdb.GetValue(1).ToString();
 
-                if (result.ElementCount > 0 && result2.ElementCount > 0 && annos["scheme_id"].AsObjectId == schemeid && annos["role_id"].AsObjectId == roleid)
+
+                if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
                     items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname });
                 }
@@ -293,7 +305,7 @@ namespace ssi
                 //{
                 //    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname });
                 //}
-                else if (result.ElementCount > 0 && result2.ElementCount == 0 && annos["scheme_id"].AsObjectId == schemeid)
+                else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
                     items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname });
                 }
@@ -301,6 +313,11 @@ namespace ssi
 
             AnnotationResultBox.ItemsSource = items;
         }
+
+
+
+
+
 
         public void GetAnnotationSchemes()
         {

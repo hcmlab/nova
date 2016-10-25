@@ -63,7 +63,9 @@ namespace ssi
 
         public DateTime Date()
         {
-            return datepicker.SelectedDate.Value;
+            if (datepicker.SelectedDate != null)
+                return datepicker.SelectedDate.Value;
+            else return new DateTime();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
