@@ -34,7 +34,7 @@ namespace ssi
         public bool usesAnnoScheme = false;
         private string annotator = null;
 
-        private static bool _isDiscrete = true;
+        private  int _Type = 0;
 
         public bool Loaded
         {
@@ -60,10 +60,10 @@ namespace ssi
             set { sr = value; }
         }
 
-        public bool isDiscrete
+        public int AnnotationType
         {
-            get { return _isDiscrete; }
-            set { _isDiscrete = value; }
+            get { return _Type; }
+            set { _Type = value; }
         }
 
         public double Lowborder
@@ -241,7 +241,7 @@ namespace ssi
                 {
                     if (type == "semicolon")
                     {
-                        _isDiscrete = true;
+                        list.AnnotationType = 1;
                         string[] data = line.Split(';');
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         double duration = Convert.ToDouble(data[1]) - Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
@@ -272,7 +272,7 @@ namespace ssi
                     }
                     else if (type == "continuous")
                     {
-                        _isDiscrete = false;
+                        list.AnnotationType = 2;
                         string[] data = line.Split(';');
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         string label = "";
@@ -307,7 +307,7 @@ namespace ssi
                     }
                     else if (type == "legacy")
                     {
-                        _isDiscrete = true;
+                        list.AnnotationType = 1;
                         string[] data;
                         data = line.Split(' ');
                         if (data.Length < 2) data = line.Split('\t');

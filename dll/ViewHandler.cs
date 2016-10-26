@@ -101,7 +101,7 @@ namespace ssi
 
                     //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
 
-                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete)
+                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && ( AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == 0|| AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == 1))
                     {
                         foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                         {
@@ -831,7 +831,7 @@ namespace ssi
             this.view.trackControl.signalPositionLabel.Text = ViewTools.FormatSeconds(time);
         }
 
-        public void newAnno(bool isDiscrete, double samplerate = 1.0, double borderlow = 0, double borderhigh = 1.0, Brush background = null)
+        public void newAnno(int isDiscrete, double samplerate = 1.0, double borderlow = 0, double borderhigh = 1.0, Brush background = null)
         {
             AnnoList anno = new AnnoList();
             if (AnnoSchemeLoaded)
@@ -839,17 +839,15 @@ namespace ssi
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
                 DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
-                int type = 0;
-                if (isDiscrete) type = 1;
-                else if (!isDiscrete) type = 2;
-
                 anno.Role = db.LoadRoles(Properties.Settings.Default.Database, null);
-                string annoscheme = db.LoadAnnotationSchemes(Properties.Settings.Default.Database, null, type);
+                string annoscheme = db.LoadAnnotationSchemes(Properties.Settings.Default.Database, null, isDiscrete);
                 anno.AnnotationScheme = db.GetAnnotationScheme(annoscheme, isDiscrete);
+                if (anno.AnnotationScheme.type != "FREE") anno.usesAnnoScheme = true;
+                else anno.usesAnnoScheme = false;
                 anno.Name = anno.Role + " #" + anno.AnnotationScheme.name;
-                anno.usesAnnoScheme = true;
+               
 
-                if (!isDiscrete)
+                if (isDiscrete == 2)
                 {
                     background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
                     background.Opacity = 0.75;
@@ -862,7 +860,7 @@ namespace ssi
             else addAnno(anno, isDiscrete, samplerate, null, borderlow, borderhigh, background);
         }
 
-        public void addAnno(AnnoList anno, bool isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null, string annotator = null)
+        public void addAnno(AnnoList anno, int isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null, string annotator = null)
         {
             string TierId;
             if (anno.Count > 0) samplerate = anno[0].Duration;
@@ -880,8 +878,9 @@ namespace ssi
             track.AnnoList.Filepath = filepath;
             track.AnnoList.Lowborder = borderlow;
             track.AnnoList.Highborder = borderhigh;
-            track.AnnoList.isDiscrete = isdiscrete;
+            track.AnnoList.AnnotationType = isdiscrete;
             track.AnnoList.Annotator = annotator;
+            track.AnnoList.usesAnnoScheme = anno.usesAnnoScheme;
 
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.timeRangeChanged;
 
@@ -926,7 +925,7 @@ namespace ssi
             if (anno != null)
             {
                 setAnnoList(anno);
-                addAnno(anno, anno.isDiscrete, 1, filename);
+                addAnno(anno, anno.AnnotationType, 1, filename);
             }
 
             updateTimeRange(maxdur);
@@ -934,7 +933,7 @@ namespace ssi
 
         private void handleAnnotation(AnnoList anno, string filename, double samplerate = 1)
         {
-            if (anno.isDiscrete && annofilepath == "") annofilepath = filename;
+            if ((anno.AnnotationType == 0 || anno.AnnotationType == 1 ) && annofilepath == "") annofilepath = filename;
             double maxdur = 0;
             //Get all tier ids that haven't been added before
             //(This is where in the future tiers will be read from the config)
@@ -942,19 +941,31 @@ namespace ssi
 
             if (anno.Count > 0)
             {
-                foreach (AnnoListItem ali in anno)
+                if (anno.AnnotationType != 2)
                 {
-                    if (!TierIds.Contains(ali.Tier))
-                    {
-                        TierIds.Add(ali.Tier);
-                    }
 
-                    //While doing this anyway, we find the latest time to adjust the view according to the latest annotation
-                    if (ali.Stop > maxdur)
+
+                    foreach (AnnoListItem ali in anno)
                     {
-                        maxdur = ali.Stop;
+                        if (!TierIds.Contains(ali.Tier))
+                        {
+                            TierIds.Add(ali.Tier);
+                        }
+
+
+                        //While doing this anyway, we find the latest time to adjust the view according to the latest annotation
+                        if (ali.Stop > maxdur)
+                        {
+                            maxdur = ali.Stop;
+                        }
                     }
                 }
+                else
+                {
+                    TierIds.Add(anno.Name);
+                    maxdur = anno[anno.Count - 1].Stop;
+                }
+            
             }
             else
             {
@@ -992,6 +1003,7 @@ namespace ssi
                 annolist.Lowborder = anno.Lowborder;
                 annolist.AnnotationScheme = anno.AnnotationScheme;
                 annolist.Role = anno.Role;
+                annolist.AnnotationType = anno.AnnotationType;
 
                 LinearGradientBrush background = null;
                 if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null)
@@ -1007,7 +1019,7 @@ namespace ssi
                 {
                     setAnnoList(annolist);
                     annolist.SampleAnnoPath = filename;
-                    addAnno(annolist, annolist.isDiscrete, samplerate, filename, annolist.Lowborder, annolist.Highborder, background);
+                    addAnno(annolist, annolist.AnnotationType, samplerate, filename, annolist.Lowborder, annolist.Highborder, background);
                     annolist.HasChanged = false;
                     tiercount++;
                 }
@@ -1043,7 +1055,7 @@ namespace ssi
 
                     annos.Add(a);
                     setAnnoList(a);
-                    addAnno(a, true, 1);
+                    addAnno(a, 1, 1);
                 }
             }
             updateTimeRange(maxdur);
@@ -1068,7 +1080,7 @@ namespace ssi
 
                     annos.Add(a);
                     setAnnoList(a);
-                    addAnno(a, true, 1);
+                    addAnno(a, 1, 1);
                 }
             }
             updateTimeRange(maxdur);
@@ -1091,7 +1103,7 @@ namespace ssi
 
                 annos.Add(anno);
                 setAnnoList(anno);
-                addAnno(anno, true);
+                addAnno(anno, 1);
             }
 
             updateTimeRange(maxdur);
@@ -1423,7 +1435,7 @@ namespace ssi
 
                     //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
 
-                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete)
+                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == 0)
                     {
                         foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                         {
@@ -2409,7 +2421,7 @@ namespace ssi
 
         private void newAnnoButton_Click(object sender, RoutedEventArgs e)
         {
-            newAnno(true);
+            newAnno(1);
         }
 
         private void newAnnoContButton_Click(object sender, RoutedEventArgs e)
@@ -2441,7 +2453,7 @@ namespace ssi
 
                 if (AnnoSchemeLoaded)
                 {
-                    newAnno(false, 0, 0, 1, resultbrush("RedBlue"));
+                    newAnno(2, 0, 0, 1, resultbrush("RedBlue"));
                 }
                 else
                 {
@@ -2455,7 +2467,7 @@ namespace ssi
                         double samplerate;
                         if (double.TryParse(inputBox.Result3(), out samplerate))
                         {
-                            newAnno(false, (1000.0 / samplerate) / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
+                            newAnno(2, (1000.0 / samplerate) / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
                         }
                     }
                 }
@@ -2769,20 +2781,20 @@ namespace ssi
             {
                 if (dbf.Median() != null)
                 {
-                    addAnno(dbf.Median(), false, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null, "Median");
+                    addAnno(dbf.Median(), 2, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null, "Median");
 
                     updateTimeRange(dbf.Median().Last().Stop);
                 }
 
                 if (dbf.RMS() != null)
                 {
-                    addAnno(dbf.RMS(), false, dbf.RMS().SR, null, dbf.RMS().Lowborder, dbf.RMS().Highborder, null, "RMS");
+                    addAnno(dbf.RMS(), 2, dbf.RMS().SR, null, dbf.RMS().Lowborder, dbf.RMS().Highborder, null, "RMS");
 
                     updateTimeRange(dbf.RMS().Last().Stop);
                 }
             }
             this.view.mongodbmenu.IsEnabled = true;
-            AnnoSchemeLoaded = true;
+          //  AnnoSchemeLoaded = true;
         }
 
         private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)
@@ -2880,18 +2892,22 @@ namespace ssi
                         foreach (AnnoList anno in annos)
 
                         {
-                            anno.usesAnnoScheme = true;
+                         
                             if (anno.Count > 0)
                             {
                                 //  here isDiscrete should be
-                                if (anno[0].Duration == anno[1].Start && anno[1].Duration == anno[0].Duration)
+                                if   (anno.AnnotationType == 2) //(anno[0].Duration == anno[1].Start && anno[1].Duration == anno[0].Duration)
                                 {
-                                    anno.isDiscrete = false;
+                                   // anno.AnnotationType = 2;
+                                    anno.usesAnnoScheme = true;
                                     handleAnnotation(anno, "database", (1000.0 / anno.SR) / 1000.0);
                                 }
-                                else
+                                else if(anno.AnnotationType == 0 || anno.AnnotationType == 1)
                                 {
-                                    anno.isDiscrete = true;
+
+                                    if(anno.AnnotationType == 0) anno.usesAnnoScheme = true;
+                                    if (anno.AnnotationType == 1) anno.usesAnnoScheme = false;
+                                    // anno.AnnotationType = 0;
                                     anno.Filepath = "db";
                                     anno.SampleAnnoPath = "db";
                                     double maxdur = 0;
@@ -2907,7 +2923,7 @@ namespace ssi
                                     {
                                         setAnnoList(anno);
 
-                                        addAnno(anno, anno.isDiscrete, 1);
+                                        addAnno(anno, anno.AnnotationType, 1);
                                     }
 
                                     updateTimeRange(maxdur);
