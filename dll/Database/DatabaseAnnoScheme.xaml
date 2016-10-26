@@ -19,6 +19,7 @@
         <Label Content="Type" Margin="9,79,-9,-39" Grid.RowSpan="2"></Label>
         <ComboBox x:FieldModifier="public" Margin="11,112,493,289" x:Name="scheme_type" Focusable="True"   SelectionChanged="scheme_type_SelectionChanged">
             <ComboBoxItem>Discrete</ComboBoxItem>
+            <ComboBoxItem>Free</ComboBoxItem>
             <ComboBoxItem>Continuous</ComboBoxItem>
         </ComboBox>
 

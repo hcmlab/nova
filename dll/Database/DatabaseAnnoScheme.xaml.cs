@@ -15,13 +15,13 @@ namespace ssi
         private List<LabelColorPair> labelcolors;
         private HashSet<LabelColorPair> usedlabels;
 
-        public DatabaseAnnoScheme(string name = null, HashSet<LabelColorPair> _usedlabels = null, bool isDiscrete = true, Brush mincolor = null, Brush maxcolor = null, string samplerate = null, string min = null, string max = null)
+        public DatabaseAnnoScheme(string name = null, HashSet<LabelColorPair> _usedlabels = null, int isDiscrete = 0, Brush mincolor = null, Brush maxcolor = null, string samplerate = null, string min = null, string max = null)
         {
             InitializeComponent();
             scheme_colorpickermin.SelectedColor = Colors.Blue;
             scheme_colorpickermax.SelectedColor = Colors.Red;
 
-            if (isDiscrete) scheme_colorpickermin.SelectedColor = Colors.LightYellow;
+            if (isDiscrete == 0) scheme_colorpickermin.SelectedColor = Colors.LightYellow;
             scheme_max.Text = (1.0).ToString();
             scheme_min.Text = (0.0).ToString();
             scheme_fps.Text = (25).ToString();
@@ -33,8 +33,7 @@ namespace ssi
 
             if (name != null) scheme_name.Text = name;
 
-            if (isDiscrete) scheme_type.SelectedIndex = 0;
-            else scheme_type.SelectedIndex = 1;
+            scheme_type.SelectedIndex = isDiscrete;
 
             if (mincolor != null) scheme_colorpickermin.SelectedColor = (mincolor as SolidColorBrush).Color;
             if (maxcolor != null) scheme_colorpickermax.SelectedColor = (maxcolor as SolidColorBrush).Color;
@@ -171,6 +170,27 @@ namespace ssi
                 AddAnnotation.Visibility = Visibility.Visible;
                 DeleteAnnotation.Visibility = Visibility.Visible;
             }
+
+            else if (scheme_type.SelectedIndex == 1)
+            {
+
+                Colorlabel.Content = "Color";
+                MaxColorLabel.Visibility = Visibility.Hidden;
+                scheme_colorpickermax.Visibility = Visibility.Collapsed;
+                scheme_min.Visibility = Visibility.Hidden;
+                scheme_max.Visibility = Visibility.Hidden;
+                scheme_fps.Visibility = Visibility.Hidden;
+                MaxValLabel.Visibility = Visibility.Hidden;
+                MinValLabel.Visibility = Visibility.Hidden;
+                FPSLabel.Visibility = Visibility.Hidden;
+
+                labelslabel.Visibility = Visibility.Hidden;
+                AnnotationResultBox.Visibility = Visibility.Hidden;
+                AddAnnotation.Visibility = Visibility.Hidden;
+                DeleteAnnotation.Visibility = Visibility.Hidden;
+
+            }
+
             else
             {
                 Colorlabel.Content = "Min Color";

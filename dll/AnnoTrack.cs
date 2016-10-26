@@ -199,13 +199,14 @@ namespace ssi
 
         private bool is_selected = false;
 
-        public AnnoTrack(AnnoList list, bool isDiscrete, double sr = 1.0, string tierid = "default", double borderl = 0.0, double borderh = 1.0)
+        public AnnoTrack(AnnoList list, int discrete, double sr = 1.0, string tierid = "default", double borderl = 0.0, double borderh = 1.0)
         {
             this.AllowDrop = true;
             this.anno_list = list;
             this.SizeChanged += new SizeChangedEventHandler(sizeChanged);
-            AnnoTrack.SelectTrack(this);
-            this.isDiscrete = isDiscrete;
+         
+            if (discrete == 0 || discrete == 1) this.isDiscrete = true;
+            else this.isDiscrete = false;
             this.samplerate = sr;
             this.TierId = tierid;
             this.borderlow = borderl;
@@ -213,6 +214,8 @@ namespace ssi
 
             double median = (borderlow + borderhigh) / 2;
             double range = borderhigh - borderlow;
+
+            AnnoTrack.SelectTrack(this);
 
             if (!isDiscrete)
             {
@@ -318,7 +321,8 @@ namespace ssi
 
         private void sizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (isDiscrete)
+          
+            if (AnnoList.AnnotationType == 0 || AnnoList.AnnotationType == 1)
             {
                 this.Visibility = Visibility.Hidden;
                 foreach (AnnoTrackSegment segment in segments)
@@ -735,7 +739,7 @@ namespace ssi
                     }
                 }
             }
-            else if (!isDiscrete)
+            else if (AnnoList.AnnotationType == 2)
             {
                 if (continuousannomode) el.Visibility = Visibility.Visible;
                 else el.Visibility = Visibility.Hidden;
@@ -777,7 +781,7 @@ namespace ssi
         {
             this.Width = time.SelectionInPixel;
 
-            if (this.isDiscrete)
+            if (this.AnnoList.AnnotationType == 0 || this.AnnoList.AnnotationType == 1)
             {
                 foreach (AnnoTrackSegment s in segments)
                 {

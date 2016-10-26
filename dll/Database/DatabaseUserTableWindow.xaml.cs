@@ -17,9 +17,9 @@ namespace ssi
         private string connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP;
         private AnnoTrack a = null;
         private HashSet<LabelColorPair> usedlabels = null;
-        private bool isdiscrete = true;
+        private int isdiscrete = 0;
 
-        public DatabaseUserTableWindow(List<string> sessions, bool showadminbuttons, string title = "Select Database", string Collection = "none", bool isDiscrete = true, bool scheme = false, AnnoTrack _a = null)
+        public DatabaseUserTableWindow(List<string> sessions, bool showadminbuttons, string title = "Select Database", string Collection = "none", int isDiscrete = 0, bool scheme = false, AnnoTrack _a = null)
         {
             InitializeComponent();
             this.titlelabel.Content = title;
@@ -94,7 +94,9 @@ namespace ssi
                 if (a != null)
                 {
                     name = a.AnnoList.Name;
-                    isdiscrete = a.AnnoList.isDiscrete;
+
+                    isdiscrete = a.AnnoList.AnnotationType;
+                  
 
                     if (a.isDiscrete)
                     {
@@ -142,7 +144,7 @@ namespace ssi
             }
         }
 
-        private void storeAnnotationSchemetoDatabase(string name = null, HashSet<LabelColorPair> _usedlabels = null, bool isDiscrete = true, Brush col1 = null, Brush col2 = null, string sr = null, string min = null, string max = null)
+        private void storeAnnotationSchemetoDatabase(string name = null, HashSet<LabelColorPair> _usedlabels = null, int isDiscrete = 0, Brush col1 = null, Brush col2 = null, string sr = null, string min = null, string max = null)
         {
             DatabaseAnnoScheme dbas = new DatabaseAnnoScheme(name, usedlabels, isdiscrete, col1, col2, sr, min, max);
             dbas.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -183,7 +185,7 @@ namespace ssi
                 d.Add(b);
                 d.Add(c);
                 d.Add(i2);
-                if (dbas.GetType() == "Discrete")
+                if (dbas.GetType().ToUpper() == "DISCRETE")
                 {
                     d.Add("labels", labels);
                 }
@@ -216,12 +218,13 @@ namespace ssi
 
             DatabaseHandler dh = new DatabaseHandler(connectionstring);
             AnnotationScheme a = dh.GetAnnotationScheme(DataBaseResultsBox.SelectedItem.ToString(), isdiscrete);
-            bool isDiscete = true;
-            if (a.type == "CONTINUOUS") isDiscete = false;
+            int isDiscete = 0;
+            if (a.type == "FREE") isDiscete = 1;
+            if (a.type == "CONTINUOUS") isDiscete = 2;
 
             col1 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.mincolor));
 
-            if (isDiscete)
+            if (isDiscete == 0)
             {
                 usedlabels = new HashSet<LabelColorPair>();
 
@@ -239,7 +242,13 @@ namespace ssi
                     if (detected == false) usedlabels.Add(item);
                 }
             }
-            else
+
+            else if (isDiscete == 1)
+            {
+                col1 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.mincolor));
+            }
+
+            else if (isDiscete == 2)
             {
                 col2 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.maxcolor));
                 sr = a.sr.ToString();
