@@ -32,7 +32,7 @@ namespace ssi
         private double sr = 1.0;
         private AnnotationScheme scheme;
         public bool usesAnnoScheme = false;
-        private string  annotator = null;
+        private string annotator = null;
 
         private static bool _isDiscrete = true;
 
@@ -82,8 +82,6 @@ namespace ssi
         {
             get { return filename; }
         }
-
- 
 
         public string Annotator
         {
@@ -215,11 +213,10 @@ namespace ssi
                     }
 
                     var state_attr = e.Attribute("state");
-                    if(state_attr.Value.ToString() == "COMPLETED")
+                    if (state_attr.Value.ToString() == "COMPLETED")
                     {
                         list.Add(new AnnoListItem(start, duration, label, meta));
                     }
-                  
                 }
             }
             catch (Exception ex)

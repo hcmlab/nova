@@ -12,7 +12,6 @@
             <ComboBoxItem>sftp</ComboBoxItem>
             <ComboBoxItem>ftp</ComboBoxItem>
             <ComboBoxItem>http</ComboBoxItem>
-
         </ComboBox>
         <Label Margin="255,0,0,280"  Visibility="Visible">Requires Auth</Label>
         <CheckBox Name="requiresAuth" IsChecked="True" Margin="263,37,46,249"  Visibility="Visible"></CheckBox>

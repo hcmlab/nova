@@ -17,10 +17,8 @@ namespace ssi
         private IMongoDatabase database;
         private string connectionstring = "mongodb://127.0.0.1:27017";
         private int authlevel = 0;
-        private List<DatabaseMediaInfo> ci;
         private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
         private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
-        private bool IsDiscrete = true;
         private AnnoList median;
         private AnnoList rms;
 
@@ -56,14 +54,12 @@ namespace ssi
 
             try
             {
-
                 mongo = new MongoClient(connectionstring);
                 int count = 0;
                 while (mongo.Cluster.Description.State.ToString() == "Disconnected")
                 {
                     Thread.Sleep(100);
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
-
                 }
 
                 authlevel = checkAuth(this.db_login.Text, "admin");
@@ -82,8 +78,6 @@ namespace ssi
                 MessageBox.Show(e.Message);
                 mongo.Cluster.Dispose();
             }
-
-           
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -135,7 +129,6 @@ namespace ssi
             else return null;
         }
 
-    
         private int checkAuth(string dbuser, string db = "admin")
         {
             //4 = root
@@ -220,7 +213,6 @@ namespace ssi
             else CollectionResultsBox.ItemsSource = null;
         }
 
-
         public ObjectId GetObjectID(IMongoDatabase database, string collection, string value, string attribute)
         {
             ObjectId id = new ObjectId();
@@ -247,7 +239,6 @@ namespace ssi
             var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
             var roles = database.GetCollection<BsonDocument>("Roles");
 
- 
             var builder = Builders<BsonDocument>.Filter;
 
             ObjectId schemeid = new ObjectId();
@@ -282,7 +273,6 @@ namespace ssi
 
             foreach (var anno in annos)
             {
-                
                 var filtera = builder.Eq("_id", anno["role_id"]);
                 var roledb = database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
                 string rolename = roledb.GetValue(1).ToString();
@@ -295,7 +285,6 @@ namespace ssi
                 var filterc = builder.Eq("_id", anno["annotator_id"]);
                 var annotatdb = database.GetCollection<BsonDocument>("Annotators").Find(filterc).Single();
                 string annotatorname = annotatdb.GetValue(1).ToString();
-
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
@@ -313,11 +302,6 @@ namespace ssi
 
             AnnotationResultBox.ItemsSource = items;
         }
-
-
-
-
-
 
         public void GetAnnotationSchemes()
         {
@@ -482,7 +466,7 @@ namespace ssi
                     mse = (double)sum_sq / (al[0].Count);
                     MessageBox.Show("The Mean Square Error for Annotation " + al[1].Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
                 }
-                else if (al[1].Annotator != null  && al[1].Annotator.Contains("RMS"))
+                else if (al[1].Annotator != null && al[1].Annotator.Contains("RMS"))
                 {
                     for (int i = 0; i < al[0].Count; i++)
                     {
@@ -492,10 +476,10 @@ namespace ssi
                         sum_sq += err * err;
                     }
                     mse = (double)sum_sq / (al[1].Count);
-                    MessageBox.Show("The Mean Square Error for Annotation " + al[0].Name + " is " + mse + " (Normalized: " + mse/(maxerr-minerr) +  "). This is for your information only, no new tier has been created!");
+                    MessageBox.Show("The Mean Square Error for Annotation " + al[0].Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
                 }
                 else MessageBox.Show("Select RMS Annotation and Reference Annotation. If RMS Annotation is not present, please create it first.");
-        }
+            }
             else MessageBox.Show("Select RMS Annotation and ONE Reference Annotation. If RMS Annotation is not present, please create it first.");
         }
 

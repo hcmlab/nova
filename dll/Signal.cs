@@ -262,9 +262,6 @@ namespace ssi
             return false;
         }
 
-
-        
-
         public static Signal LoadARFFFile(string filepath)
         {
             Signal signal = null;
@@ -278,11 +275,9 @@ namespace ssi
                 string[] lines = File.ReadAllLines(filepath);
                 char[] delims = { ' ', '\t', ';', ',' };
                 string[] tokens = lines[0].Split(delims);
-                dim =  (uint)tokens.Length;
+                dim = (uint)tokens.Length;
 
                 string[] row = null;
-
-
 
                 row = lines[0].Split(delims);
                 double time1 = double.Parse(row[1]);
@@ -292,26 +287,20 @@ namespace ssi
                 double step = time2 - time1;
                 rate = 1000.0 / (1000.0 * step);
 
-               
-                    uint number = (uint)lines.Length;
-                    uint bytes = ViewTools.SSI_BYTES[(int)type];
+                uint number = (uint)lines.Length;
+                uint bytes = ViewTools.SSI_BYTES[(int)type];
 
-               
+                if (dim > 0)
+                {
+                    signal = new Signal(filepath, rate, 1, bytes, number, type);
 
-                        if (dim > 0)
-                        {
-                            signal = new Signal(filepath, rate, 1, bytes, number, type);
+                    StreamReader fs_data = new StreamReader(filepath);
+                    LoadDataArff(signal, fs_data, dim - 1);
+                    fs_data.Close();
 
-                            StreamReader fs_data = new StreamReader(filepath);
-                            LoadDataArff(signal, fs_data, dim-1);
-                            fs_data.Close();
-
-                       
-                            signal.ShowDim = 0;
-                            signal.loaded = true;
-                        }
-                    
-                
+                    signal.ShowDim = 0;
+                    signal.loaded = true;
+                }
             }
             catch (Exception e)
             {
@@ -498,10 +487,8 @@ namespace ssi
             return signal;
         }
 
-
         public static bool LoadDataArff(Signal signal, StreamReader fs, uint dim)
         {
-            
             string line = null;
             string[] row = null;
 
@@ -511,8 +498,6 @@ namespace ssi
                 line = fs.ReadLine();
                 row = line.Split(split);
                 signal.data[i] = float.Parse(row[dim]);
-             
-                
             }
             signal.minmax();
 

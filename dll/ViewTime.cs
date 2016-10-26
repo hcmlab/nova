@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ssi
+﻿namespace ssi
 {
     public class ViewTime
     {

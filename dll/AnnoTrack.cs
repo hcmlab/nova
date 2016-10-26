@@ -34,7 +34,6 @@ namespace ssi
     {
         private string label;
         private string color;
-       
 
         public String Label
         {
@@ -47,8 +46,6 @@ namespace ssi
             get { return color; }
             set { color = value; }
         }
-
-       
 
         public LabelColorPair(string _label, string _color)
         {
@@ -275,50 +272,30 @@ namespace ssi
         {
             if (path == null) return;
 
-            // Save current canvas transorm
             Transform transform = surface.LayoutTransform;
-            // Temporarily reset the layout transform before saving
             surface.LayoutTransform = null;
 
-            // Get the size of the canvas
             Size size = new Size(surface.ActualWidth, surface.ActualHeight);
-            // Measure and arrange elements
             surface.Measure(size);
             surface.Arrange(new Rect(size));
 
-            // Open new package
             Package package = Package.Open(path.LocalPath, FileMode.Create);
-            // Create new xps document based on the package opened
             XpsDocument doc = new XpsDocument(package);
-            // Create an instance of XpsDocumentWriter for the document
             XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc);
-            // Write the canvas (as Visual) to the document
             writer.Write(surface);
-            // Close document
             doc.Close();
-            // Close package
             package.Close();
-
-            // Restore previously saved layout
             surface.LayoutTransform = transform;
         }
 
         public void ExportToPng(Uri path, Canvas surface)
         {
             if (path == null) return;
-            // Save current canvas transform
             Transform transform = surface.LayoutTransform;
-            // reset current transform (in case it is scaled or rotated)
             surface.LayoutTransform = null;
-
-            // Get the size of canvas
             Size size = new Size(surface.ActualWidth, surface.ActualHeight);
-            // Measure and arrange the surface
-            // VERY IMPORTANT
             surface.Measure(size);
             surface.Arrange(new Rect(size));
-
-            // Create a render bitmap and push the surface to it
             RenderTargetBitmap renderBitmap =
               new RenderTargetBitmap(
                 (int)size.Width,
@@ -328,14 +305,10 @@ namespace ssi
                 PixelFormats.Pbgra32);
             renderBitmap.Render(surface);
 
-            // Create a file stream for saving image
             using (FileStream outStream = new FileStream(path.LocalPath, FileMode.Create))
             {
-                // Use png encoder for our data
                 PngBitmapEncoder encoder = new PngBitmapEncoder();
-                // push the rendered bitmap to it
                 encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-                // save the data to the stream
                 encoder.Save(outStream);
             }
 
@@ -550,7 +523,6 @@ namespace ssi
                 double closestposition = start;
                 closestindex = getClosestContinousIndex(closestposition);
                 closestindexold = closestindex;
-               
 
                 AnnoTrackStatic.used_labels.Clear();
                 foreach (AnnoListItem item in AnnoTrack.GetSelectedTrack().AnnoList)
@@ -570,7 +542,6 @@ namespace ssi
                         if (detected == false)
                         {
                             AnnoTrackStatic.used_labels.Add(l);
-                           
                         }
                     }
                 }

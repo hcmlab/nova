@@ -43,6 +43,10 @@
             <MenuItem Header="Signal">
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
                 <MenuItem Header="Convert to cont Anno" Name="convertocontannoemenu" />
+                <MenuItem Header="Export" Name="exports">
+                    <MenuItem Header="Export to XPS" Name="exportsignaltoxps" IsEnabled="True" />
+                    <MenuItem Header="Export to PNG" Name="exportsignaltopng" IsEnabled="True" />
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="Database">
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
@@ -50,7 +54,7 @@
                 <MenuItem Header="Store Session to MongoDB" Name="mongodbmenu" IsEnabled="False" />
                 <MenuItem Header="Show Downloaded Files" Name="mongodbmenushow" />
                 <MenuItem Header="Change Download Directory" Name="mongodbchangefolder" />
-                <MenuItem Header="Admin: Database Functions" Name="mongodbfunctions" Visibility="Collapsed"/>
+                <MenuItem Header="Admin: Database Functions" Name="mongodbfunctions" Visibility="Collapsed" />
                 <MenuItem Header="Admin: Manage Database" Visibility="Collapsed" Name="addmongodb" />
 
                 <!--<MenuItem Header="Test Media to database " Name="mongodbmenu3" />-->

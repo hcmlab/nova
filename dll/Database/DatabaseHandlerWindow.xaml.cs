@@ -22,7 +22,7 @@ namespace ssi
         private List<DatabaseMediaInfo> ci;
         private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
         private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
-        List<DatabaseAnno> AnnoItems = new List<DatabaseAnno>();
+        private List<DatabaseAnno> AnnoItems = new List<DatabaseAnno>();
 
         public DatabaseHandlerWindow()
         {
@@ -41,19 +41,14 @@ namespace ssi
             }
             else Autologin.IsChecked = false;
 
-
             if (Autologin.IsChecked == true)
             {
                 ConnecttoDB();
-
             }
         }
 
-
         private void ConnecttoDB()
         {
-
-          
             Properties.Settings.Default.MongoDBIP = this.db_server.Text;
             Properties.Settings.Default.MongoDBUser = this.db_login.Text;
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
@@ -63,14 +58,12 @@ namespace ssi
 
             try
             {
-              
                 mongo = new MongoClient(connectionstring);
                 int count = 0;
                 while (mongo.Cluster.Description.State.ToString() == "Disconnected")
                 {
                     Thread.Sleep(100);
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + ":" + mongo.Settings.Server.Port + " is online and you entered your credentials correctly!");
- 
                 }
 
                 authlevel = checkAuth(this.db_login.Text, "admin");
@@ -85,12 +78,12 @@ namespace ssi
             }
             catch (MongoException e)
 
-            { MessageBox.Show(e.Message,"Connection failed",MessageBoxButton.OK,MessageBoxImage.Warning);
+            {
+                MessageBox.Show(e.Message, "Connection failed", MessageBoxButton.OK, MessageBoxImage.Warning);
                 mongo.Cluster.Dispose();
             }
 
             //now that we made sure the user can see database, check if he has any admin/writing rights on this specific database
-         
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -105,10 +98,8 @@ namespace ssi
                 Properties.Settings.Default.Database = DataBasResultsBox.SelectedItem.ToString();
                 Properties.Settings.Default.Save();
 
-
-
                 localauthlevel = Math.Max(checkAuth(this.db_login.Text, "admin"), checkAuth(this.db_login.Text, Properties.Settings.Default.Database));
-                if(localauthlevel > 1) GetSessions();
+                if (localauthlevel > 1) GetSessions();
             }
         }
 
@@ -121,7 +112,6 @@ namespace ssi
                 AnnoItems.Clear();
                 GetMedia();
                 GetAnnotations();
-            
             }
         }
 
@@ -133,7 +123,7 @@ namespace ssi
             foreach (DatabaseMediaInfo c in ci)
             {
                 files.Add(c);
-                if (!c.filepath.Contains(".stream~") && !c.filepath.Contains(".stream%7E") )
+                if (!c.filepath.Contains(".stream~") && !c.filepath.Contains(".stream%7E"))
                 {
                     MediaResultBox.Items.Add(c.filename);
                 }
@@ -154,7 +144,7 @@ namespace ssi
 
         private void showonlymine_Checked(object sender, RoutedEventArgs e)
         {
-            AnnoItems.Clear(); 
+            AnnoItems.Clear();
             GetAnnotations(true);
         }
 
@@ -226,9 +216,9 @@ namespace ssi
                 {
                     if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db && auth <= 4) auth = 4;
                     else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "userAdmin" && roles[i]["db"] == db && auth <= 3) auth = 3;
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" &&roles[i]["db"] == db && auth <= 2) auth = 2;
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read"  && roles[i]["db"] == db && auth <= 1) auth = 1;
-                    else if(auth == 0) auth = 0;
+                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db && auth <= 2) auth = 2;
+                    else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db && auth <= 1) auth = 1;
+                    else if (auth == 0) auth = 0;
 
                     //edit/add more roles if you want to change security levels
                 }
@@ -263,17 +253,14 @@ namespace ssi
             {
                 await cursor.ForEachAsync(d => addDbtoList(d["name"].ToString()));
             }
-
-         
         }
 
         public void addDbtoList(string name)
         {
-            if(name != "admin" && name != "local" && checkAuth(Properties.Settings.Default.MongoDBUser, name) > 1)
+            if (name != "admin" && name != "local" && checkAuth(Properties.Settings.Default.MongoDBUser, name) > 1)
             {
                 DataBasResultsBox.Items.Add(name);
             }
-
         }
 
         public void GetSessions()
@@ -286,10 +273,7 @@ namespace ssi
 
             if (sessions.Count > 0)
             {
-
-
-
-                if (CollectionResultsBox.Items != null) CollectionResultsBox.Items.Clear();
+                if (CollectionResultsBox.Items != null) CollectionResultsBox.ItemsSource = null;
                 List<DatabaseSession> items = new List<DatabaseSession>();
                 foreach (var c in sessions)
                 {
@@ -298,10 +282,10 @@ namespace ssi
                 }
 
                 CollectionResultsBox.ItemsSource = items;
-
             }
             else CollectionResultsBox.ItemsSource = null;
         }
+
         public string FetchDBRef(IMongoDatabase database, string collection, string attribute, ObjectId reference)
         {
             string output = "";
@@ -341,30 +325,26 @@ namespace ssi
             var sessions = database.GetCollection<BsonDocument>("Sessions");
             var annotations = database.GetCollection<BsonDocument>("Annotations");
 
-           // BsonDocument documents;
+            // BsonDocument documents;
             var builder = Builders<BsonDocument>.Filter;
 
             ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
-          //  string sessionid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", annos["annotator_id"].AsObjectId);
-         //   var filter = builder.Eq("session_id", sessionid);
-          //  var documents = annotations.Find(filter).ToList();
-
+            //  string sessionid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", annos["annotator_id"].AsObjectId);
+            //   var filter = builder.Eq("session_id", sessionid);
+            //  var documents = annotations.Find(filter).ToList();
 
             var filter = builder.Eq("session_id", sessionid);
-            
+
             using (var cursor = await annotations.FindAsync(filter))
-               {
-                   await cursor.ForEachAsync(d => addAnnotoList(d, onlyme));
-               }
+            {
+                await cursor.ForEachAsync(d => addAnnotoList(d, onlyme));
+            }
             AnnotationResultBox.ItemsSource = AnnoItems;
-
-
         }
- 
 
         public void addAnnotoList(BsonDocument annos, bool onlyme)
         {
-           // AnnotationResultBox.ItemsSource = null;
+            // AnnotationResultBox.ItemsSource = null;
 
             string roleid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Roles", "name", annos["role_id"].AsObjectId);
             string annotid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "AnnotationSchemes", "name", annos["scheme_id"].AsObjectId);
@@ -378,46 +358,22 @@ namespace ssi
                 }
             }
             else AnnoItems.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
-           
         }
-
-
 
         public List<DatabaseMediaInfo> GetMediaFromDB(string db, string session)
         {
-
             List<DatabaseMediaInfo> paths = new List<DatabaseMediaInfo>();
             var colllection = database.GetCollection<BsonDocument>("Sessions");
             var media = database.GetCollection<BsonDocument>("Media");
 
             ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
 
-
-
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("session_id", sessionid);
             var selectedmedialist = media.Find(filter).ToList();
 
-
-
             foreach (var selectedmedia in selectedmedialist)
             {
-                //string id;
-                //if (document.TryGetElement("name", out value)) id = document["name"].ToString();
-                //if (document.TryGetElement("media", out value))
-                //{
-                //    ObjectId media_id;
-                //    BsonArray files = document["media"].AsBsonArray;
-
-                //    for (int i = 0; i < files.Count; i++)
-                //    {
-                //        media_id = files[i]["media_id"].AsObjectId;
-
-                //        var filtermedia = builder.Eq("_id", media_id);
-                //        var selectedmedialist = media.Find(filtermedia).ToList();
-
-                //        if (selectedmedialist.Count > 0)
-
                 DatabaseMediaInfo c = new DatabaseMediaInfo();
                 string url = selectedmedia["url"].ToString();
 
@@ -427,17 +383,12 @@ namespace ssi
 
                 if (split[0] == "ftp" || split[0] == "sftp")
                 {
-
                     string[] split2 = split[1].Split(new char[] { '/' }, 4);
                     c.ip = split2[2];
 
                     string filename = split2[3].Substring(split2[3].LastIndexOf("/") + 1, (split2[3].Length - split2[3].LastIndexOf("/") - 1));
                     c.folder = split2[3].Remove(split2[3].Length - filename.Length);
-
                 }
-
-
-
 
                 c.filepath = selectedmedia["url"].ToString();
                 c.filename = selectedmedia["name"].ToString();
@@ -449,85 +400,9 @@ namespace ssi
                 c.mediatype = selectedmedia["mediatype_id"].ToString();
                 c.session = selectedmedia["session_id"].ToString();
                 paths.Add(c);
-            
-                //   }
-                // }
             }
             return paths;
         }
-
-
-        //public List<DatabaseMediaInfo> GetMediaFromDB(string db, string session)
-        //{
-        //    BsonElement value;
-        //    List<DatabaseMediaInfo> paths = new List<DatabaseMediaInfo>();
-        //    var colllection = database.GetCollection<BsonDocument>("Sessions");
-        //    var media = database.GetCollection<BsonDocument>("Media");
-
-        //    var builder = Builders<BsonDocument>.Filter;
-        //    var filter = builder.Eq("name", session);
-
-        //    var documents = colllection.Find(filter).ToList();
-
-        //    foreach (var document in documents)
-        //    {
-        //        string id;
-        //        if (document.TryGetElement("name", out value)) id = document["name"].ToString();
-        //        if (document.TryGetElement("media", out value))
-        //        {
-        //            ObjectId media_id;
-        //            BsonArray files = document["media"].AsBsonArray;
-
-        //            for (int i = 0; i < files.Count; i++)
-        //            {
-        //                media_id = files[i]["media_id"].AsObjectId;
-
-        //                var filtermedia = builder.Eq("_id", media_id);
-        //                var selectedmedialist = media.Find(filtermedia).ToList();
-
-        //                if (selectedmedialist.Count > 0)
-        //                {
-        //                    var selectedmedia = selectedmedialist[0];
-        //                    DatabaseMediaInfo c = new DatabaseMediaInfo();
-        //                    string url = selectedmedia["url"].ToString();
-
-        //                    string[] split = url.Split(':');
-
-        //                    c.connection = split[0];
-
-        //                    if (split[0] == "ftp" || split[0] == "sftp")
-        //                    {
-
-        //                        string[] split2 = split[1].Split(new char[] { '/' }, 4);
-        //                        c.ip = split2[2];
-
-        //                        string filename = split2[3].Substring(split2[3].LastIndexOf("/") + 1, (split2[3].Length - split2[3].LastIndexOf("/") - 1));
-        //                        c.folder = split2[3].Remove(split2[3].Length - filename.Length);
-
-        //                    }
-
-
-
-
-        //                    c.filepath = selectedmedia["url"].ToString();
-        //                    c.filename = selectedmedia["name"].ToString();
-        //                    c.requiresauth = selectedmedia["requiresAuth"].ToString();
-
-        //                    Todo: solve references
-        //                    c.subject = selectedmedia["subject_id"].ToString();
-        //                    c.role = selectedmedia["role_id"].ToString();
-        //                    c.mediatype = selectedmedia["mediatype_id"].ToString();
-
-        //                    paths.Add(c);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return paths;
-        //}
-
-
-
 
         private void MediaResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -585,15 +460,10 @@ namespace ssi
                 var annotdb = annotationschemes.Find(filterb).ToList();
                 if (annotdb.Count > 0) annotid = annotdb[0].GetValue(0).AsObjectId;
 
-
-
-
                 ObjectId annotatid = new ObjectId(); ;
                 var filterc = builder.Eq("name", ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator);
                 var annotatdb = annotators.Find(filterc).ToList();
                 if (annotatdb.Count > 0) annotatid = annotatdb[0].GetValue(0).AsObjectId;
-
-
 
                 ObjectId sessionid = new ObjectId(); ;
                 var filterd = builder.Eq("name", (Properties.Settings.Default.LastSessionId));
@@ -602,26 +472,6 @@ namespace ssi
 
                 var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
                 var anno = annotations.Find(filter).ToList();
-
-                //var filter2 = builder.Eq("name", ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name);
-                //var session = sessions.Find(filter2).ToList();
-                //if (session.Count > 0)
-
-                //{
-                //    var annos = session[0]["annotations"].AsBsonArray;
-
-                //    for (int i = 0; i < annos.Count; i++)
-                //    {
-                //        if (annos[i]["annotation_id"] == anno[0]["_id"])
-                //        {
-                //            annos.RemoveAt(i);
-                //            break;
-                //        }
-                //    }
-
-                //    var update = Builders<BsonDocument>.Update.Set("annotations", annos);
-                //    sessions.UpdateOne(filter2, update);
-                //}
 
                 var result = annotations.DeleteOne(filter);
                 AnnoItems.Clear();
@@ -654,14 +504,12 @@ namespace ssi
 
         private void db_login_TextChanged(object sender, TextChangedEventArgs e)
         {
-          
             Autologin.IsChecked = false;
             Autologin.IsEnabled = false;
         }
 
         private void db_pass_PasswordChanged(object sender, RoutedEventArgs e)
         {
-         
             Autologin.IsChecked = false;
             Autologin.IsEnabled = false;
         }
