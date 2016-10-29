@@ -9,6 +9,13 @@ using System.Xml.Linq;
 
 namespace ssi
 {
+    public enum AnnoType
+    {
+        DISCRETE,
+        FREE,
+        CONTINUOUS,
+    }
+
     public class AnnoList : MyEventList
     {
         private enum Type
@@ -18,6 +25,8 @@ namespace ssi
             TUPLE,
             STRING,
         }
+
+     
 
         private bool loaded = false;
         private String name = null;
@@ -33,8 +42,9 @@ namespace ssi
         private AnnotationScheme scheme;
         public bool usesAnnoScheme = false;
         private string annotator = null;
+        private string ftype = "ASCII";
 
-        private  int _Type = 0;
+        private  AnnoType _Type = AnnoType.DISCRETE;
 
         public bool Loaded
         {
@@ -48,6 +58,14 @@ namespace ssi
             set { role = value; }
         }
 
+
+        public string Ftype
+        {
+            get { return ftype; }
+            set { ftype = value; }
+        }
+
+
         public string Subject
         {
             get { return subject; }
@@ -60,7 +78,7 @@ namespace ssi
             set { sr = value; }
         }
 
-        public int AnnotationType
+        public AnnoType AnnotationType
         {
             get { return _Type; }
             set { _Type = value; }
@@ -233,6 +251,8 @@ namespace ssi
             list.Lowborder = 0.0;
             list.Highborder = 1.0;
             list.sr = samplerate;
+            list.Filepath = Path.GetDirectoryName(filepath);
+            list.AnnotationScheme = new AnnotationScheme();
             try
             {
                 StreamReader sr = new StreamReader(filepath, System.Text.Encoding.Default);
@@ -241,21 +261,30 @@ namespace ssi
                 {
                     if (type == "semicolon")
                     {
-                        list.AnnotationType = 1;
+                        list.AnnotationType = AnnoType.FREE;
                         string[] data = line.Split(';');
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         double duration = Convert.ToDouble(data[1]) - Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         string label = "";
                         string tier = "";
                         string meta = "";
+                        double confidence = 1.0;
                         if (data.Length > 2)
                         {
                             label = data[2];
                         }
                         if (data.Length > 3)
                         {
+                            if (data[3].Contains("#"))
+                            {
                             tier = data[3];
                             tier = tier.Remove(0, 1);
+                            }
+
+                            else 
+                            {
+                              bool isconfidence = double.TryParse(data[3], out confidence);
+                            }
                         }
                         if (data.Length > 4)
                         {
@@ -265,18 +294,20 @@ namespace ssi
                             }
                         }
 
-                        AnnoListItem e = new AnnoListItem(start, duration, label, meta, tier);
+                        AnnoListItem e = new AnnoListItem(start, duration, label, meta, tier, "#000000", confidence);
 
                         if (filter == null || tier == filter)
                             list.Add(e);
                     }
                     else if (type == "continuous")
                     {
-                        list.AnnotationType = 2;
+                        list.AnnotationType = AnnoType.CONTINUOUS;
+                        list.SR = (1000.0 / (samplerate * 1000.0));
                         string[] data = line.Split(';');
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         string label = "";
                         string tier = "";
+                        double confidence = 1.0;
 
                         if (data.Length > 1)
                         {
@@ -284,8 +315,16 @@ namespace ssi
                         }
                         if (data.Length > 2)
                         {
-                            tier = data[2];
-                            tier = tier.Remove(0, 1);
+                            if (data[2].Contains("#"))
+                            {
+                                tier = data[2];
+                                tier = tier.Remove(0, 1);
+                            }
+
+                            else
+                            {
+                                bool isconfidence = double.TryParse(data[3], out confidence);
+                            }
                         }
                         if (data.Length > 3)
                         {
@@ -304,10 +343,12 @@ namespace ssi
                             if (filter == null || tier == filter)
                                 list.Add(e);
                         }
-                    }
+                      
+                    
+                }
                     else if (type == "legacy")
                     {
-                        list.AnnotationType = 1;
+                        list.AnnotationType = AnnoType.FREE;
                         string[] data;
                         data = line.Split(' ');
                         if (data.Length < 2) data = line.Split('\t');
@@ -347,6 +388,219 @@ namespace ssi
 
             return list;
         }
+
+
+        public static AnnoList LoadfromFileNew(String filepath)
+        {
+
+            AnnoList list = new AnnoList(filepath);
+            list.Lowborder = 0.0;
+            list.Highborder = 1.0;
+            list.sr = 1;
+           
+            list.AnnotationScheme = new AnnotationScheme();
+            list.AnnotationScheme.LabelsAndColors = new List<LabelColorPair>();
+           // list.AnnotationScheme.mincolor = "#FFFFFF";
+
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(filepath);
+
+                XmlNode annotation = doc.SelectSingleNode("annotation");
+
+                XmlNode info = annotation.SelectSingleNode("info");
+                list.Ftype = info.Attributes["ftype"].Value;
+                int size = Int32.Parse(info.Attributes["size"].Value);
+
+                XmlNode meta = annotation.SelectSingleNode("meta");
+                if(meta != null)
+                {
+                    if (meta.Attributes["role"] != null) list.Role = meta.Attributes["role"].Value;
+                    if (meta.Attributes["annotator"] != null) list.Annotator = meta.Attributes["annotator"].Value;
+                }
+
+                XmlNode scheme = annotation.SelectSingleNode("scheme");
+                if (scheme.Attributes["name"] != null) list.Name = scheme.Attributes["name"].Value;
+                string type = "FREE";
+                if (scheme.Attributes["type"] != null) type = scheme.Attributes["type"].Value;
+                if (scheme.Attributes["color"] != null) list.AnnotationScheme.mincolor = scheme.Attributes["color"].Value;
+                else if (scheme.Attributes["mincolor"] != null) list.AnnotationScheme.mincolor = scheme.Attributes["mincolor"].Value;
+                if (scheme.Attributes["maxcolor"] != null) list.AnnotationScheme.maxcolor = scheme.Attributes["maxcolor"].Value;
+
+                if (type == "DISCRETE") list.AnnotationType = AnnoType.DISCRETE;
+               else if (type == "CONTINUOUS") list.AnnotationType = AnnoType.CONTINUOUS;
+               else list.AnnotationType = AnnoType.FREE;
+
+
+
+                Dictionary<string, string> LabelIds = new Dictionary<string, string>();
+
+                if (list.AnnotationType == AnnoType.DISCRETE)
+                {
+                    list.usesAnnoScheme = true;
+                    foreach (XmlNode item in scheme)
+                    {
+                        LabelIds.Add(item.Attributes["id"].Value, item.Attributes["name"].Value);
+
+                        string color = "#000000";
+                        if (item.Attributes["color"] != null) color = item.Attributes["color"].Value;
+                        LabelColorPair lcp = new LabelColorPair(item.Attributes["name"].Value, color);
+                        list.AnnotationScheme.LabelsAndColors.Add(lcp);
+                    }
+                }
+
+                else if (list.AnnotationType == AnnoType.FREE)
+                {
+                    list.usesAnnoScheme = false;
+                }
+
+                else if (list.AnnotationType == AnnoType.CONTINUOUS)
+                {
+                    list.usesAnnoScheme = true;
+                    list.sr =  Double.Parse(scheme.Attributes["sr"].Value);
+                    list.Lowborder = Double.Parse(scheme.Attributes["min"].Value);
+                    list.Highborder = Double.Parse(scheme.Attributes["max"].Value);
+                }
+
+                if (File.Exists(filepath + "~"))
+
+                {
+
+
+                    if (list.Ftype == "ASCII")
+                    {
+                        StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.Default);
+                        string line = null;
+                        double start = 0.0;
+
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            string[] data = line.Split(';');
+                            if (list.AnnotationType == AnnoType.CONTINUOUS)
+                            {
+                                string value = data[0];
+                                double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.SR) / 1000.0, value, "", list.Name, "#000000", confidence);
+                                list.Add(e);
+                                start = start + (1000.0 / list.SR) / 1000.0;
+                            }
+
+                            else if (list.AnnotationType == AnnoType.DISCRETE)
+                            {
+
+                                start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                double dur = stop - start;
+                                string label = "";
+                                LabelIds.TryGetValue(data[2], out label);
+                                string color = "#000000";
+
+                                if (list.AnnotationScheme.LabelsAndColors.Find(x => x.Label == label) != null)
+                                {
+                                    color = list.AnnotationScheme.LabelsAndColors.Find(x => x.Label == label).Color;
+                                }
+
+
+                                double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
+                                AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                list.Add(e);
+                            }
+
+                            else if (list.AnnotationType == AnnoType.FREE)
+                            {
+                                start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                double dur = stop - start;
+                                string label = data[2];
+                                string color = "#000000";
+
+                                double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
+                                AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                list.Add(e);
+
+                            }
+                        }
+                        sr.Close();
+                    }
+
+
+                    else if (list.Ftype == "BINARY")
+                    {
+                        BinaryReader binaryReader = new BinaryReader(File.Open(filepath + "~", FileMode.Open));
+                        long length = (binaryReader.BaseStream.Length);
+
+                        double start = 0.0;
+                        while (binaryReader.BaseStream.Position < binaryReader.BaseStream.Length)
+                        {
+
+                            if (list.AnnotationType == AnnoType.CONTINUOUS)
+                            {
+                                string value = binaryReader.ReadSingle().ToString();
+                                double confidence = (double)binaryReader.ReadSingle();
+                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.SR) / 1000.0, value, "", list.Name, "#000000", confidence);
+                                list.Add(e);
+                                start = start + (1000.0 / list.SR) / 1000.0;
+
+                            }
+                            else if (list.AnnotationType == AnnoType.DISCRETE)
+                            {
+
+                                start = binaryReader.ReadDouble();
+                                double dur = binaryReader.ReadDouble();
+                                string label = "";
+                                int index = binaryReader.ReadInt32();
+                                LabelIds.TryGetValue(index.ToString(), out label);
+                                string color = "#000000";
+
+                                if (list.AnnotationScheme.LabelsAndColors.Find(x => x.Label == label) != null)
+                                {
+                                    color = list.AnnotationScheme.LabelsAndColors.Find(x => x.Label == label).Color;
+                                }
+                                double confidence = Math.Round(binaryReader.ReadSingle(), 3, MidpointRounding.AwayFromZero);
+                                AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                list.Add(e);
+                            }
+
+                            else if (list.AnnotationType == AnnoType.FREE)
+                            {
+                                MessageBox.Show("Binary Free Annotations are not supported at the time");
+                                break;
+
+
+                                //start = binaryReader.ReadDouble();
+                                //double dur = binaryReader.ReadDouble();
+                                //string label = binaryReader.ReadString();
+                                //string color = "#000000";
+
+
+                                //double confidence = Math.Round(binaryReader.ReadSingle(), 3, MidpointRounding.AwayFromZero);
+                                //AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                //list.Add(e);
+
+                            }
+
+
+                        }
+
+                        binaryReader.Close();
+
+                    }
+                }
+                else MessageBox.Show("Annotation Data was not found. Loaded as AnnotationScheme");
+
+                list.loaded = true;
+                list.HasChanged = false;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Can't read annotation file. Is it used by another program?");
+            }
+
+            return list;
+        }
+
+
 
         public static AnnoList[] LoadfromElanFile(String filepath)
         {
@@ -457,17 +711,167 @@ namespace ssi
 
         public AnnoList saveToFile()
         {
-            if (filepath == null || filepath.Split('.')[1] == "eaf")
+            if (filepath == null || filepath.Split('.')[1] != "csv")
             {
-                filepath = ViewTools.SaveFileDialog("", ".csv");
+                filepath = ViewTools.SaveFileDialog(this.Name, ".csv", Path.GetDirectoryName(this.Filepath),2);
+            }
+            this.Filepath = filepath;
+            return saveToFile(filepath);
+        }
+
+
+        public AnnoList saveToFileNew()
+        {
+            if (filepath == null || filepath.Split('.')[1] == "eaf" || filepath.Split('.')[1] == "anvil" || filepath.Split('.')[1] == "anno" || filepath.Split('.')[1] == "csv")
+            {
+                filepath = ViewTools.SaveFileDialog(this.Name, ".annotation", Path.GetDirectoryName(this.Filepath));
                 if (filepath != null)
                 {
                     filename = filepath.Split('.')[0];
                 }
             }
 
-            return saveToFile(filepath);
+            return saveToFileNew(filepath);
         }
+
+
+        public AnnoList saveToFileNew(String _filename, String _delimiter = ";")
+        {
+            this.Filepath = _filename;
+            Dictionary<string, string> LabelIds = new Dictionary<string, string>();
+          
+            try
+            {
+                StreamWriter sw = new StreamWriter(_filename, false, System.Text.Encoding.Default);
+                sw.WriteLine("<?xml version=\"1.0\" ?>");
+                sw.WriteLine("<annotation ssi-v=\"3\">");
+
+                //todo check if loaded anno is ascii or binary... for now always overwrite in ascii...
+                sw.WriteLine("\t<info ftype=\""+ this.Ftype + "\" size=\"" + this.Count + "\" />");
+                sw.WriteLine("\t<meta role=\"None\" annotator=\"None\" />");
+                if(this.AnnotationType == AnnoType.CONTINUOUS)
+                {
+                    sw.WriteLine("\t<scheme name=\"" + this.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.SR + "\" min=\"" + this.Lowborder+"\" max=\"" + this.Highborder + "\" mincolor=\"" + this.AnnotationScheme.mincolor + "\" maxcolor=\"" + this.AnnotationScheme.maxcolor + "\" />");
+                }
+
+                else if (this.AnnotationType == AnnoType.FREE)
+                {
+                    sw.WriteLine("\t<scheme name=\"" + this.Name + "\" type=\"FREE\" color=\"" + this.AnnotationScheme.mincolor + "\"/>");
+                }
+
+                else if (this.AnnotationType == AnnoType.DISCRETE)
+                {
+                    sw.WriteLine("\t<scheme name=\"" + this.Name + "\" type=\"DISCRETE\"  color=\"" + this.AnnotationScheme.mincolor + "\">");
+                    int index = 0;
+               
+                    foreach (LabelColorPair lp in this.AnnotationScheme.LabelsAndColors)
+                    {
+                        sw.WriteLine("\t\t<item name=\"" + lp.Label + "\" id=\"" +index + "\" color=\"" + lp.Color + "\" />");
+                        LabelIds.Add(lp.Label, index.ToString());
+                        index++;
+                    }
+                    sw.WriteLine("\t</scheme>");
+                }
+
+                sw.WriteLine("</annotation>");
+                sw.Close();
+            }
+
+            catch
+            {
+                return null;
+            }
+
+
+            try
+            {
+                if(this.Ftype == "ASCII")
+                {
+                    StreamWriter sw = new StreamWriter(_filename + "~", false, System.Text.Encoding.Default);
+                    if (this.AnnotationType == AnnoType.CONTINUOUS)
+                    {
+                        foreach (AnnoListItem e in this)
+                        {
+                            sw.WriteLine(e.Label + _delimiter + e.Confidence.ToString("n2"));
+                        }
+                    }
+
+                    else if (this.AnnotationType == AnnoType.FREE)
+                    {
+                        foreach (AnnoListItem e in this)
+                        {
+                            sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + e.Label + _delimiter + e.Confidence.ToString("n2"));
+                        }
+                    }
+
+                    else if (this.AnnotationType == AnnoType.DISCRETE)
+                    {
+                        string index = "";
+                  
+                        foreach (AnnoListItem e in this)
+                        {
+                            LabelIds.TryGetValue(e.Label, out index);
+                            sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + index + _delimiter + e.Confidence.ToString("n2"));
+                        }
+                    }
+
+                    sw.Close();
+                }
+
+                else
+                {
+                    BinaryWriter bw = new BinaryWriter(new FileStream(_filename + "~", FileMode.Create));
+                    if (this.AnnotationType == AnnoType.CONTINUOUS)
+                    {
+                        foreach (AnnoListItem e in this)
+                        {
+                            bw.Write(float.Parse(e.Label));
+                            bw.Write((float)e.Confidence);
+                        }
+                    }
+
+                    else if (this.AnnotationType == AnnoType.FREE)
+                    {
+                        foreach (AnnoListItem e in this)
+                        {
+                            bw.Write(e.Start);
+                            bw.Write(e.Duration);
+                            bw.Write(e.Label);
+                            bw.Write((float)e.Confidence);
+                        }
+                    }
+
+                    else if (this.AnnotationType == AnnoType.DISCRETE)
+                    {
+                        string index = "";
+                        foreach (AnnoListItem e in this)
+                        {
+                            LabelIds.TryGetValue(e.Label, out index);
+                            int i = Int32.Parse(index);
+                            bw.Write(e.Start);
+                            bw.Write(e.Duration);
+                            bw.Write(i);
+                            bw.Write((float)e.Confidence);
+                          
+                        }
+                    }
+                    bw.Close();
+
+                }
+
+                HasChanged = false;
+                AnnoList newAnno = new AnnoList(_filename);
+                return newAnno;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+
+
+
 
         public AnnoList saveToFile(String _filename, String _delimiter = ";")
         {
@@ -477,7 +881,7 @@ namespace ssi
 
                 foreach (AnnoListItem e in this)
                 {
-                    sw.WriteLine(e.Start.ToString() + _delimiter + e.Stop.ToString() + _delimiter + e.Label + _delimiter + "#" + this.Name);
+                    sw.WriteLine(e.Start.ToString() + _delimiter + e.Stop.ToString() + _delimiter + e.Label + _delimiter+ e.Confidence);
                 }
                 sw.Close();
 
@@ -493,14 +897,13 @@ namespace ssi
 
         public AnnoList saveContinousToFile()
         {
-            if (filepath == null)
+            
+   
+            if (filepath == null || filepath.Split('.')[1] != "csv")
             {
-                filepath = ViewTools.SaveFileDialog(this.name, ".csv");
-                if (filepath != null)
-                {
-                    filename = filepath.Split('.')[0];
-                }
+                filepath = ViewTools.SaveFileDialog(this.Name, ".csv", Path.GetDirectoryName(this.Filepath), 2);
             }
+            this.Filepath = filepath;
 
             return saveContinousToFile(filepath);
         }
@@ -516,12 +919,12 @@ namespace ssi
                 {
                     if (!metawritten)
                     {
-                        sw.WriteLine(e.Start.ToString() + ";" + e.Label + ";#" + this.Name + ";" + this.lowborder + ";" + this.highborder);
+                        sw.WriteLine(e.Start.ToString() + ";" + e.Label + ";" + e.Confidence + ";"  + this.lowborder + ";" + this.highborder);
                         metawritten = true;
                     }
                     else
                     {
-                        sw.WriteLine(e.Start.ToString() + ";" + e.Label + ";#" + this.Name);
+                        sw.WriteLine(e.Start.ToString() + ";" + e.Label + ";" + e.Confidence);
                     }
                 }
                 sw.Close();
@@ -537,6 +940,10 @@ namespace ssi
                 return null;
             }
         }
+
+
+
+
     }
 
     public class AnnotationScheme

@@ -36,6 +36,7 @@
                 <MenuItem Header="Convert to discrete" Name="convertodiscretemenu" IsEnabled="False" />
                 <MenuItem Header="Convert to stream" Name="convertosignalemenu" IsEnabled="False" />
                 <MenuItem Header="Export" Name="export">
+                    <MenuItem Header="Export to CSV" Name="exporttracktocsv" IsEnabled="True" />
                     <MenuItem Header="Export to XPS" Name="exporttracktoxps" IsEnabled="True" />
                     <MenuItem Header="Export to PNG" Name="exporttracktopng" IsEnabled="True" />
                 </MenuItem>

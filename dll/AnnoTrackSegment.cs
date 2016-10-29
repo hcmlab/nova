@@ -34,20 +34,23 @@ namespace ssi
         {
             this.track = track;
             this.item = item;
-
+          
             this.is_selected = false;
             this.is_resizeable_left = false;
             this.is_resizeable_right = false;
             this.is_moveable = false;
 
+   
             this.Inlines.Add(item.Label);
             this.FontSize = 12;
             this.TextWrapping = TextWrapping.Wrap;
             this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
             this.Foreground = Brushes.White;
             this.Opacity = 0.75;
+           
             this.TextAlignment = TextAlignment.Center;
             this.TextTrimming = TextTrimming.WordEllipsis;
+
 
             ToolTip tt = new ToolTip();
             tt.Background = Brushes.Black;

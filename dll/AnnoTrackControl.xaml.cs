@@ -30,7 +30,7 @@ namespace ssi
             this.annoTrackGrid.Children.Clear();
         }
 
-        public AnnoTrack addAnnoTrack(AnnoList list, int isdiscrete, double samplerate = 1, string tierid = "default", double borderlow = 0.0, double borderhigh = 1.0)
+        public AnnoTrack addAnnoTrack(AnnoList list, AnnoType isdiscrete, double samplerate = 1, string tierid = "default", double borderlow = 0.0, double borderhigh = 1.0)
         {
             if (this.annoTrackGrid.RowDefinitions.Count > 0)
             {
