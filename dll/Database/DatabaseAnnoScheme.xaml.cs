@@ -15,13 +15,13 @@ namespace ssi
         private List<LabelColorPair> labelcolors;
         private HashSet<LabelColorPair> usedlabels;
 
-        public DatabaseAnnoScheme(string name = null, HashSet<LabelColorPair> _usedlabels = null, int isDiscrete = 0, Brush mincolor = null, Brush maxcolor = null, string samplerate = null, string min = null, string max = null)
+        public DatabaseAnnoScheme(string name = null, HashSet<LabelColorPair> _usedlabels = null, AnnoType isDiscrete = AnnoType.DISCRETE, Brush mincolor = null, Brush maxcolor = null, string samplerate = null, string min = null, string max = null)
         {
             InitializeComponent();
             scheme_colorpickermin.SelectedColor = Colors.Blue;
             scheme_colorpickermax.SelectedColor = Colors.Red;
 
-            if (isDiscrete == 0) scheme_colorpickermin.SelectedColor = Colors.LightYellow;
+            if (isDiscrete == AnnoType.DISCRETE || isDiscrete == AnnoType.FREE) scheme_colorpickermin.SelectedColor = Colors.LightYellow;
             scheme_max.Text = (1.0).ToString();
             scheme_min.Text = (0.0).ToString();
             scheme_fps.Text = (25).ToString();
@@ -33,7 +33,10 @@ namespace ssi
 
             if (name != null) scheme_name.Text = name;
 
-            scheme_type.SelectedIndex = isDiscrete;
+            if (isDiscrete == AnnoType.DISCRETE) scheme_type.SelectedIndex = 0;
+            else if (isDiscrete == AnnoType.FREE) scheme_type.SelectedIndex = 1;
+            else if (isDiscrete == AnnoType.CONTINUOUS) scheme_type.SelectedIndex = 2;
+
 
             if (mincolor != null) scheme_colorpickermin.SelectedColor = (mincolor as SolidColorBrush).Color;
             if (maxcolor != null) scheme_colorpickermax.SelectedColor = (maxcolor as SolidColorBrush).Color;

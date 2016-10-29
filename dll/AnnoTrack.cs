@@ -140,7 +140,7 @@ namespace ssi
         {
             if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
             {
-                if (selected_segment != null && selected_track != null && GetSelectedTrack().isDiscrete)
+                if (selected_segment != null && selected_track != null/* && GetSelectedTrack().isDiscrete*/)
                 {
                     AnnoTrackSegment tmp = selected_segment;
                     UnselectSegment();
@@ -164,6 +164,7 @@ namespace ssi
         private List<Line> lines = new List<Line>();
         private List<Line> markers = new List<Line>();
         private AnnoList anno_list = null;
+        private AnnoList anno_markers = new AnnoList();
         private Brush bgBrush;
         private Brush ctBrush;
         private Ellipse el = new Ellipse();
@@ -188,7 +189,9 @@ namespace ssi
         public Brush BackgroundColor
         {
             get { return bgBrush; }
-            set { bgBrush = value; }
+            set { bgBrush = value;
+            if(this.AnnoList.AnnotationType != AnnoType.CONTINUOUS && this.AnnoList.AnnotationScheme.mincolor == null) this.AnnoList.AnnotationScheme.mincolor = this.bgBrush.ToString();
+            }
         }
 
         public Brush ContiniousBrush
@@ -199,13 +202,13 @@ namespace ssi
 
         private bool is_selected = false;
 
-        public AnnoTrack(AnnoList list, int discrete, double sr = 1.0, string tierid = "default", double borderl = 0.0, double borderh = 1.0)
+        public AnnoTrack(AnnoList list, AnnoType discrete, double sr = 1.0, string tierid = "default", double borderl = 0.0, double borderh = 1.0)
         {
             this.AllowDrop = true;
             this.anno_list = list;
             this.SizeChanged += new SizeChangedEventHandler(sizeChanged);
-         
-            if (discrete == 0 || discrete == 1) this.isDiscrete = true;
+            if (this.AnnoList.AnnotationScheme == null) this.AnnoList.AnnotationScheme = new AnnotationScheme();
+            if (discrete == AnnoType.DISCRETE || discrete == AnnoType.FREE) this.isDiscrete = true;
             else this.isDiscrete = false;
             this.samplerate = sr;
             this.TierId = tierid;
@@ -256,6 +259,7 @@ namespace ssi
                 };
             }
             selected_track = this;
+           
             foreach (AnnoListItem item in list)
             {
                 //For now the TierId is overwritten based on the track id.
@@ -322,7 +326,7 @@ namespace ssi
         private void sizeChanged(object sender, SizeChangedEventArgs e)
         {
           
-            if (AnnoList.AnnotationType == 0 || AnnoList.AnnotationType == 1)
+            if (AnnoList.AnnotationType == AnnoType.DISCRETE  || AnnoList.AnnotationType == AnnoType.FREE)
             {
                 this.Visibility = Visibility.Hidden;
                 foreach (AnnoTrackSegment segment in segments)
@@ -351,6 +355,7 @@ namespace ssi
                         Color newColor = Color.FromArgb(newAlpha, ((SolidColorBrush)BackgroundColor).Color.R, ((SolidColorBrush)BackgroundColor).Color.G, ((SolidColorBrush)BackgroundColor).Color.B);
                         Brush brush = new SolidColorBrush(newColor);
                         this.Background = brush;
+  
                     }
                     else if (ctBrush != null && !isDiscrete)
                     {
@@ -368,7 +373,8 @@ namespace ssi
             {
                 if (BackgroundColor != null && isDiscrete)
                 {
-                    this.Background = BackgroundColor;
+                    this.Background = BackgroundColor;           
+                    
                 }
                 else if (!isDiscrete)
                 {
@@ -402,6 +408,7 @@ namespace ssi
 
         public AnnoTrackSegment addSegment(AnnoListItem item)
         {
+
             AnnoTrackSegment segment = new AnnoTrackSegment(item, this);
             segments.Add(segment);
             this.Children.Add(segment);
@@ -443,16 +450,16 @@ namespace ssi
             {
                 for (int i = anno_list.Count; i < samples; i++)
                 {
-                    if (i == 0)
-                    {
-                        AnnoListItem ali = new AnnoListItem(i * sr, sr, median.ToString("F4"), "Range: " + borderlow + "-" + borderhigh, TierId);
-                        anno_list.Add(ali);
-                    }
-                    else
-                    {
+                    //if (i == 0)
+                    //{
+                    //    AnnoListItem ali = new AnnoListItem(i * sr, sr, median.ToString("F4"), "Range: " + borderlow + "-" + borderhigh, TierId);
+                    //    anno_list.Add(ali);
+                    //}
+                    //else
+                    //{
                         AnnoListItem ali = new AnnoListItem(i * sr, sr, median.ToString("F4"), "", TierId);
                         anno_list.Add(ali);
-                    }
+                 //   }
                 }
             }
 
@@ -575,7 +582,7 @@ namespace ssi
             }
 
             UnselectSegment();
-            if (isDiscrete)
+            if (isDiscrete || (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift)) )
             {
                 // check for segment selection
 
@@ -614,6 +621,26 @@ namespace ssi
                 SelectSegment(segment);
                 this.select(true);
             }
+
+            else if (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift) && stop < ViewHandler.Time.TotalDuration)
+            {
+                Color c = new Color();
+                c.R = 0;
+                c.G = 0;
+                c.B = 128;
+                c.A = 128;
+
+
+                AnnoListItem temp = new AnnoListItem(start, len, "", "", TierId, c.ToString());
+                anno_markers.Add(temp);
+                AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
+                segment.Width = 1;
+                annorightdirection = true;
+                segments.Add(segment);
+                this.Children.Add(segment);
+                SelectSegment(segment);
+                this.select(true);
+            }
         }
 
         public int getClosestContinousIndex(double nearestitem)
@@ -637,7 +664,7 @@ namespace ssi
             direction = (dx > 0) ? 1 : 0;
             lastX = e.GetPosition(Application.Current.MainWindow).X;
 
-            if (isDiscrete)
+            if (isDiscrete || (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift)))
             {
                 if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
                 {
@@ -739,7 +766,7 @@ namespace ssi
                     }
                 }
             }
-            else if (AnnoList.AnnotationType == 2)
+            else if (AnnoList.AnnotationType == AnnoType.CONTINUOUS && !Keyboard.IsKeyDown(Key.LeftAlt))
             {
                 if (continuousannomode) el.Visibility = Visibility.Visible;
                 else el.Visibility = Visibility.Hidden;
@@ -781,8 +808,7 @@ namespace ssi
         {
             this.Width = time.SelectionInPixel;
 
-            if (this.AnnoList.AnnotationType == 0 || this.AnnoList.AnnotationType == 1)
-            {
+          
                 foreach (AnnoTrackSegment s in segments)
                 {
                     s.Visibility = Visibility.Hidden;
@@ -797,8 +823,8 @@ namespace ssi
                         s.Visibility = Visibility.Visible;
                     }
                 }
-            }
-            else
+            
+            if(this.AnnoList.AnnotationType == AnnoType.CONTINUOUS)
             {
                 if (this.ActualHeight > 0)
                 {

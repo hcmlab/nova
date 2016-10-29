@@ -52,7 +52,7 @@ namespace ssi
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.FileName = defaultname;
             dlg.DefaultExt = extension;
-            dlg.Filter = "Annotation (*.csv)|*.csv|Annotation (*.anno)|*.anno|Plain Text (*.txt)|*.txt|Project File (*.nova)|*.nova|Vector Graphic (*.xps)|*.xps|PNG (*.png)|*.png|All Files (*.*)|*.*";
+            dlg.Filter = "Annotation (*.annotation)|*.annotation|Annotation (*.csv)|*.csv|Annotation (*.anno)|*.anno|Plain Text (*.txt)|*.txt|Project File (*.nova)|*.nova|Vector Graphic (*.xps)|*.xps|PNG (*.png)|*.png|All Files (*.*)|*.*";
             dlg.FilterIndex = index;
             dlg.InitialDirectory = directory;
 
