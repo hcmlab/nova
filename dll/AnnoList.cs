@@ -42,14 +42,9 @@ namespace ssi
         private AnnotationScheme scheme;
         public bool usesAnnoScheme = false;
         private string annotator = null;
-<<<<<<< HEAD
         private string ftype = "ASCII";
 
         private  AnnoType _Type = AnnoType.DISCRETE;
-=======
-
-        private  int _Type = 0;
->>>>>>> origin/develop
 
         public bool Loaded
         {
@@ -83,11 +78,7 @@ namespace ssi
             set { sr = value; }
         }
 
-<<<<<<< HEAD
         public AnnoType AnnotationType
-=======
-        public int AnnotationType
->>>>>>> origin/develop
         {
             get { return _Type; }
             set { _Type = value; }
@@ -270,11 +261,7 @@ namespace ssi
                 {
                     if (type == "semicolon")
                     {
-<<<<<<< HEAD
                         list.AnnotationType = AnnoType.FREE;
-=======
-                        list.AnnotationType = 1;
->>>>>>> origin/develop
                         string[] data = line.Split(';');
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         double duration = Convert.ToDouble(data[1]) - Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
@@ -314,12 +301,8 @@ namespace ssi
                     }
                     else if (type == "continuous")
                     {
-<<<<<<< HEAD
                         list.AnnotationType = AnnoType.CONTINUOUS;
                         list.SR = (1000.0 / (samplerate * 1000.0));
-=======
-                        list.AnnotationType = 2;
->>>>>>> origin/develop
                         string[] data = line.Split(';');
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         string label = "";
@@ -365,11 +348,7 @@ namespace ssi
                 }
                     else if (type == "legacy")
                     {
-<<<<<<< HEAD
                         list.AnnotationType = AnnoType.FREE;
-=======
-                        list.AnnotationType = 1;
->>>>>>> origin/develop
                         string[] data;
                         data = line.Split(' ');
                         if (data.Length < 2) data = line.Split('\t');

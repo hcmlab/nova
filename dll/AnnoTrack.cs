@@ -202,22 +202,13 @@ namespace ssi
 
         private bool is_selected = false;
 
-<<<<<<< HEAD
         public AnnoTrack(AnnoList list, AnnoType discrete, double sr = 1.0, string tierid = "default", double borderl = 0.0, double borderh = 1.0)
-=======
-        public AnnoTrack(AnnoList list, int discrete, double sr = 1.0, string tierid = "default", double borderl = 0.0, double borderh = 1.0)
->>>>>>> origin/develop
         {
             this.AllowDrop = true;
             this.anno_list = list;
             this.SizeChanged += new SizeChangedEventHandler(sizeChanged);
-<<<<<<< HEAD
             if (this.AnnoList.AnnotationScheme == null) this.AnnoList.AnnotationScheme = new AnnotationScheme();
             if (discrete == AnnoType.DISCRETE || discrete == AnnoType.FREE) this.isDiscrete = true;
-=======
-         
-            if (discrete == 0 || discrete == 1) this.isDiscrete = true;
->>>>>>> origin/develop
             else this.isDiscrete = false;
             this.samplerate = sr;
             this.TierId = tierid;
@@ -335,11 +326,7 @@ namespace ssi
         private void sizeChanged(object sender, SizeChangedEventArgs e)
         {
           
-<<<<<<< HEAD
             if (AnnoList.AnnotationType == AnnoType.DISCRETE  || AnnoList.AnnotationType == AnnoType.FREE)
-=======
-            if (AnnoList.AnnotationType == 0 || AnnoList.AnnotationType == 1)
->>>>>>> origin/develop
             {
                 this.Visibility = Visibility.Hidden;
                 foreach (AnnoTrackSegment segment in segments)
@@ -779,11 +766,7 @@ namespace ssi
                     }
                 }
             }
-<<<<<<< HEAD
             else if (AnnoList.AnnotationType == AnnoType.CONTINUOUS && !Keyboard.IsKeyDown(Key.LeftAlt))
-=======
-            else if (AnnoList.AnnotationType == 2)
->>>>>>> origin/develop
             {
                 if (continuousannomode) el.Visibility = Visibility.Visible;
                 else el.Visibility = Visibility.Hidden;
@@ -825,12 +808,7 @@ namespace ssi
         {
             this.Width = time.SelectionInPixel;
 
-<<<<<<< HEAD
           
-=======
-            if (this.AnnoList.AnnotationType == 0 || this.AnnoList.AnnotationType == 1)
-            {
->>>>>>> origin/develop
                 foreach (AnnoTrackSegment s in segments)
                 {
                     s.Visibility = Visibility.Hidden;

@@ -324,11 +324,7 @@ namespace ssi
                 if (a != null)
                 {
                 
-<<<<<<< HEAD
                     if  (a.AnnoList.AnnotationType == AnnoType.DISCRETE)
-=======
-                    if  (a.AnnoList.AnnotationType == 0)
->>>>>>> origin/develop
                     {
                         BsonArray Labels = annotdb[0]["labels"].AsBsonArray;
                         int index = 0;
@@ -347,11 +343,7 @@ namespace ssi
 
                     }
 
-<<<<<<< HEAD
                     else if (a.AnnoList.AnnotationType == AnnoType.FREE)
-=======
-                    else if (a.AnnoList.AnnotationType == 1)
->>>>>>> origin/develop
                     {
                         for (int i = 0; i < a.AnnoList.Count; i++)
                         {
@@ -363,11 +355,7 @@ namespace ssi
 
 
 
-<<<<<<< HEAD
                     else if  (a.AnnoList.AnnotationType == AnnoType.CONTINUOUS)
-=======
-                    else if  (a.AnnoList.AnnotationType == 2)
->>>>>>> origin/develop
                     {
                         for (int i = 0; i < a.AnnoList.Count; i++)
                         {
@@ -394,11 +382,7 @@ namespace ssi
             }
         }
 
-<<<<<<< HEAD
         public AnnotationScheme GetAnnotationScheme(string name, AnnoType isDiscrete)
-=======
-        public AnnotationScheme GetAnnotationScheme(string name, int isDiscrete)
->>>>>>> origin/develop
         {
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(Properties.Settings.Default.Database);
@@ -407,7 +391,6 @@ namespace ssi
             Scheme.LabelsAndColors = new List<LabelColorPair>();
             var annoschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
             var builder = Builders<BsonDocument>.Filter;
-<<<<<<< HEAD
 
             FilterDefinition<BsonDocument> filterscheme;
             if (isDiscrete != AnnoType.CONTINUOUS)
@@ -415,12 +398,6 @@ namespace ssi
                  filterscheme = builder.Eq("name", name) & (builder.Eq("type", "DISCRETE") | builder.Eq("type", "FREE"));
             }
             else  filterscheme = builder.Eq("name", name) & builder.Eq("type", "CONTINUOUS");
-=======
-            string type = "DISCRETE";
-            if (isDiscrete == 1) type = "FREE";
-            if (isDiscrete == 2) type = "CONTINUOUS";
-            var filterscheme = builder.Eq("name", name) & builder.Eq("type", type);
->>>>>>> origin/develop
             var annosch = annoschemes.Find(filterscheme).ToList();
 
             if (annosch[0].TryGetElement("type", out value)) Scheme.type = annosch[0]["type"].ToString();
@@ -434,11 +411,7 @@ namespace ssi
                 if (annosch[0].TryGetElement("min_color", out value)) Scheme.mincolor = annosch[0]["min_color"].ToString();
                 if (annosch[0].TryGetElement("max_color", out value)) Scheme.maxcolor = annosch[0]["max_color"].ToString();
             }
-<<<<<<< HEAD
             else if(Scheme.type == "DISCRETE")
-=======
-            else if(type == "DISCRETE")
->>>>>>> origin/develop
             {
                 if (annosch[0].TryGetElement("color", out value)) Scheme.mincolor = annosch[0]["color"].ToString();
                 BsonArray schemelabels = annosch[0]["labels"].AsBsonArray;
@@ -456,11 +429,7 @@ namespace ssi
             }
 
 
-<<<<<<< HEAD
             else if (Scheme.type == "FREE")
-=======
-            else if (type == "FREE")
->>>>>>> origin/develop
             {
                 if (annosch[0].TryGetElement("color", out value)) Scheme.mincolor = annosch[0]["color"].ToString();
               
@@ -508,28 +477,16 @@ namespace ssi
 
                 if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "DISCRETE")
                 {
-<<<<<<< HEAD
                     al.AnnotationType = AnnoType.DISCRETE;
-=======
-                    al.AnnotationType = 0;
->>>>>>> origin/develop
                 }
 
                 else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "FREE")
                 {
-<<<<<<< HEAD
                     al.AnnotationType = AnnoType.FREE;
                 }
                 else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "CONTINUOUS")
                 {
                     al.AnnotationType = AnnoType.CONTINUOUS;
-=======
-                    al.AnnotationType = 1;
-                }
-                else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "CONTINUOUS")
-                {
-                    al.AnnotationType = 2;
->>>>>>> origin/develop
                 }
 
                 al.Role = roledb;
@@ -538,11 +495,7 @@ namespace ssi
                 al.AnnotationScheme = new AnnotationScheme();
                 al.AnnotationScheme.name = annosch["name"].ToString();
                 var annotation = documents[0]["labels"].AsBsonArray;
-<<<<<<< HEAD
                 if (al.AnnotationType == AnnoType.CONTINUOUS)
-=======
-                if (al.AnnotationType == 2)
->>>>>>> origin/develop
                 {
                     if (annosch.TryGetElement("min", out value)) al.Lowborder = double.Parse(annosch["min"].ToString());
                     if (annosch.TryGetElement("max", out value)) al.Highborder = double.Parse(annosch["max"].ToString());
@@ -611,11 +564,7 @@ namespace ssi
                     }
                 }
 
-<<<<<<< HEAD
                 else if (al.AnnotationType == AnnoType.FREE)
-=======
-                else if (al.AnnotationType == 1)
->>>>>>> origin/develop
                 {
 
                     al.AnnotationScheme.mincolor = annosch["color"].ToString();

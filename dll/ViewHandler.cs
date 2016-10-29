@@ -108,7 +108,6 @@ namespace ssi
         //            view.annoListControl.editComboBox.Visibility = Visibility.Visible;
         //            view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
 
-<<<<<<< HEAD
         //            //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
 
         //            if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && ( AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE|| AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.FREE))
@@ -134,31 +133,6 @@ namespace ssi
         //        }
         //    }
         //}
-=======
-                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && ( AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == 0|| AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == 1))
-                    {
-                        foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
-                        {
-                            view.annoListControl.editComboBox.Items.Add(lcp.Label);
-                        }
-                        view.annoListControl.editComboBox.SelectedIndex = 0;
-                    }
-                }
-                else if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
-                {
-                    view.annoListControl.editButton.IsEnabled = false;
-                    view.annoListControl.editComboBox.IsEnabled = false;
-                    view.annoListControl.editTextBox.IsEnabled = false;
-                }
-                else
-                {
-                    view.annoListControl.editButton.IsEnabled = true;
-                    view.annoListControl.editComboBox.IsEnabled = false;
-                    view.annoListControl.editTextBox.IsEnabled = true;
-                }
-            }
-        }
->>>>>>> origin/develop
 
         public MenuItem LoadButton
         {
@@ -196,10 +170,7 @@ namespace ssi
             this.view.exporttracktopng.Click += exporttracktopng_Click;
             this.view.exportsignaltoxps.Click += exportsignaltoxps_Click;
             this.view.exportsignaltopng.Click += exportsignaltopng_Click;
-<<<<<<< HEAD
             this.view.exporttracktocsv.Click += exporttracktocsv_Click;
-=======
->>>>>>> origin/develop
             // this.view.calculatepraat.Click += calculatepraat_Click;
             this.view.savetiermenu.Click += saveAnnoAsButton_Click;
             this.view.convertocontannoemenu.Click += convertocontanno_Click;
@@ -884,11 +855,7 @@ namespace ssi
             this.view.trackControl.signalPositionLabel.Text = ViewTools.FormatSeconds(time);
         }
 
-<<<<<<< HEAD
         public void newAnno(AnnoType isDiscrete, double samplerate = 1.0, double borderlow = 0, double borderhigh = 1.0, Brush background = null)
-=======
-        public void newAnno(int isDiscrete, double samplerate = 1.0, double borderlow = 0, double borderhigh = 1.0, Brush background = null)
->>>>>>> origin/develop
         {
             AnnoList anno = new AnnoList();
             if (DatabaseLoaded)
@@ -899,7 +866,6 @@ namespace ssi
                 anno.Role = db.LoadRoles(Properties.Settings.Default.Database, null);
                 string annoscheme = db.LoadAnnotationSchemes(Properties.Settings.Default.Database, null, isDiscrete);
                 anno.AnnotationScheme = db.GetAnnotationScheme(annoscheme, isDiscrete);
-<<<<<<< HEAD
                 if (anno.AnnotationScheme.type == "FREE") anno.AnnotationType = AnnoType.FREE;
                 else if (anno.AnnotationScheme.type == "DISCRETE") anno.AnnotationType = AnnoType.DISCRETE;
                 else if (anno.AnnotationScheme.type == "CONTINUOUS") anno.AnnotationType = AnnoType.CONTINUOUS;
@@ -910,14 +876,6 @@ namespace ssi
                 anno.Name = anno.Role + " #" + anno.AnnotationScheme.name;
 
                 if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null)
-=======
-                if (anno.AnnotationScheme.type != "FREE") anno.usesAnnoScheme = true;
-                else anno.usesAnnoScheme = false;
-                anno.Name = anno.Role + " #" + anno.AnnotationScheme.name;
-               
-
-                if (isDiscrete == 2)
->>>>>>> origin/develop
                 {
                     background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
                     background.Opacity = 0.75;
@@ -945,11 +903,7 @@ namespace ssi
                 
         }
 
-<<<<<<< HEAD
         public void addAnno(AnnoList anno, AnnoType isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null, string annotator = null)
-=======
-        public void addAnno(AnnoList anno, int isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null, string annotator = null)
->>>>>>> origin/develop
         {
             string TierId;
             //if (anno.Count > 0) samplerate = anno[0].Duration;
@@ -970,12 +924,9 @@ namespace ssi
             track.AnnoList.AnnotationType = isdiscrete;
             track.AnnoList.Annotator = annotator;
             track.AnnoList.usesAnnoScheme = anno.usesAnnoScheme;
-<<<<<<< HEAD
             track.AnnoList.AnnotationScheme = anno.AnnotationScheme;
       
      
-=======
->>>>>>> origin/develop
 
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.timeRangeChanged;
 
@@ -1065,11 +1016,7 @@ namespace ssi
             if (anno != null)
             {
                 setAnnoList(anno);
-<<<<<<< HEAD
                 addAnno(anno, anno.AnnotationType, anno.SR, filename);
-=======
-                addAnno(anno, anno.AnnotationType, 1, filename);
->>>>>>> origin/develop
             }
 
             updateTimeRange(maxdur);
@@ -1081,11 +1028,7 @@ namespace ssi
 
 private void handleAnnotation(AnnoList anno, string filename)
         {
-<<<<<<< HEAD
             if ((anno.AnnotationType == AnnoType.FREE || anno.AnnotationType == AnnoType.DISCRETE ) && annofilepath == "") annofilepath = filename;
-=======
-            if ((anno.AnnotationType == 0 || anno.AnnotationType == 1 ) && annofilepath == "") annofilepath = filename;
->>>>>>> origin/develop
             double maxdur = 0;
             //Get all tier ids that haven't been added before
             //(This is where in the future tiers will be read from the config)
@@ -1093,16 +1036,9 @@ private void handleAnnotation(AnnoList anno, string filename)
 
             if (anno.Count > 0)
             {
-<<<<<<< HEAD
                 if (anno.AnnotationType != AnnoType.CONTINUOUS)
                 {
 
-=======
-                if (anno.AnnotationType != 2)
-                {
-
-
->>>>>>> origin/develop
                     foreach (AnnoListItem ali in anno)
                     {
                         if (!TierIds.Contains(ali.Tier))
@@ -1110,10 +1046,6 @@ private void handleAnnotation(AnnoList anno, string filename)
                             TierIds.Add(ali.Tier);
                         }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/develop
                         //While doing this anyway, we find the latest time to adjust the view according to the latest annotation
                         if (ali.Stop > maxdur)
                         {
@@ -1123,14 +1055,10 @@ private void handleAnnotation(AnnoList anno, string filename)
                 }
                 else
                 {
-<<<<<<< HEAD
                     string tier = "";
                     if (anno[0].Tier != null) tier = anno[0].Tier;
                     else tier = anno.Name;
                     TierIds.Add(tier);
-=======
-                    TierIds.Add(anno.Name);
->>>>>>> origin/develop
                     maxdur = anno[anno.Count - 1].Stop;
                 }
             
@@ -1173,14 +1101,10 @@ private void handleAnnotation(AnnoList anno, string filename)
                 annolist.AnnotationScheme = anno.AnnotationScheme;
                 annolist.AnnotationScheme.name = anno.AnnotationScheme.name;
                 annolist.Role = anno.Role;
-<<<<<<< HEAD
                 annolist.SR = anno.SR;
                 annolist.AnnotationType = anno.AnnotationType;
                 annolist.Filepath = anno.Filepath;
                 annolist.SampleAnnoPath = anno.SampleAnnoPath;
-=======
-                annolist.AnnotationType = anno.AnnotationType;
->>>>>>> origin/develop
 
                 Brush background = null;
                 if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null && anno.AnnotationType == AnnoType.CONTINUOUS)
@@ -1206,11 +1130,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                 {
                     setAnnoList(annolist);
                     annolist.SampleAnnoPath = filename;
-<<<<<<< HEAD
                     addAnno(annolist, annolist.AnnotationType, (1000.0 / annolist.SR) / 1000.0, filename, annolist.Lowborder, annolist.Highborder, background);
-=======
-                    addAnno(annolist, annolist.AnnotationType, samplerate, filename, annolist.Lowborder, annolist.Highborder, background);
->>>>>>> origin/develop
                     annolist.HasChanged = false;
                     tiercount++;
                 }
@@ -1246,11 +1166,7 @@ private void handleAnnotation(AnnoList anno, string filename)
 
                     annos.Add(a);
                     setAnnoList(a);
-<<<<<<< HEAD
                     addAnno(a, AnnoType.FREE, 1);
-=======
-                    addAnno(a, 1, 1);
->>>>>>> origin/develop
                 }
             }
             updateTimeRange(maxdur);
@@ -1275,11 +1191,7 @@ private void handleAnnotation(AnnoList anno, string filename)
 
                     annos.Add(a);
                     setAnnoList(a);
-<<<<<<< HEAD
                     addAnno(a, AnnoType.FREE, 1);
-=======
-                    addAnno(a, 1, 1);
->>>>>>> origin/develop
                 }
             }
             updateTimeRange(maxdur);
@@ -1302,11 +1214,7 @@ private void handleAnnotation(AnnoList anno, string filename)
 
                 annos.Add(anno);
                 setAnnoList(anno);
-<<<<<<< HEAD
                 addAnno(anno, AnnoType.FREE);
-=======
-                addAnno(anno, 1);
->>>>>>> origin/develop
             }
 
             updateTimeRange(maxdur);
@@ -1664,11 +1572,7 @@ private void handleAnnotation(AnnoList anno, string filename)
 
                     //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
 
-<<<<<<< HEAD
                     if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE)
-=======
-                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == 0)
->>>>>>> origin/develop
                     {
                         foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                         {
@@ -2688,12 +2592,8 @@ private void handleAnnotation(AnnoList anno, string filename)
 
         private void newAnnoButton_Click(object sender, RoutedEventArgs e)
         {
-<<<<<<< HEAD
              newAnno(AnnoType.FREE);
 
-=======
-            newAnno(1);
->>>>>>> origin/develop
         }
 
         private void newAnnoContButton_Click(object sender, RoutedEventArgs e)
@@ -2725,11 +2625,7 @@ private void handleAnnotation(AnnoList anno, string filename)
 
                 if (DatabaseLoaded)
                 {
-<<<<<<< HEAD
                     newAnno(AnnoType.CONTINUOUS, 0, 0, 1, resultbrush("RedBlue"));
-=======
-                    newAnno(2, 0, 0, 1, resultbrush("RedBlue"));
->>>>>>> origin/develop
                 }
                 else
                 {
@@ -2743,11 +2639,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                         double samplerate;
                         if (double.TryParse(inputBox.Result3(), out samplerate))
                         {
-<<<<<<< HEAD
                             newAnno(AnnoType.CONTINUOUS, (1000.0 / samplerate) / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
-=======
-                            newAnno(2, (1000.0 / samplerate) / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
->>>>>>> origin/develop
                         }
                     }
                 }
@@ -3062,22 +2954,14 @@ private void handleAnnotation(AnnoList anno, string filename)
             {
                 if (dbf.Median() != null)
                 {
-<<<<<<< HEAD
                     addAnno(dbf.Median(), AnnoType.CONTINUOUS, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null, "Median");
-=======
-                    addAnno(dbf.Median(), 2, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null, "Median");
->>>>>>> origin/develop
 
                     updateTimeRange(dbf.Median().Last().Stop);
                 }
 
                 if (dbf.RMS() != null)
                 {
-<<<<<<< HEAD
                     addAnno(dbf.RMS(), AnnoType.CONTINUOUS, dbf.RMS().SR, null, dbf.RMS().Lowborder, dbf.RMS().Highborder, null, "RMS");
-=======
-                    addAnno(dbf.RMS(), 2, dbf.RMS().SR, null, dbf.RMS().Lowborder, dbf.RMS().Highborder, null, "RMS");
->>>>>>> origin/develop
 
                     updateTimeRange(dbf.RMS().Last().Stop);
                 }
@@ -3184,7 +3068,6 @@ private void handleAnnotation(AnnoList anno, string filename)
                          
                             if (anno.Count > 0)
                             {
-<<<<<<< HEAD
 
                                 anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.Annotator;
                                 anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.Annotator;
@@ -3212,40 +3095,6 @@ private void handleAnnotation(AnnoList anno, string filename)
                                     //}
 
                                     //updateTimeRange(maxdur);
-=======
-                                //  here isDiscrete should be
-                                if   (anno.AnnotationType == 2) //(anno[0].Duration == anno[1].Start && anno[1].Duration == anno[0].Duration)
-                                {
-                                   // anno.AnnotationType = 2;
-                                    anno.usesAnnoScheme = true;
-                                    handleAnnotation(anno, "database", (1000.0 / anno.SR) / 1000.0);
-                                }
-                                else if(anno.AnnotationType == 0 || anno.AnnotationType == 1)
-                                {
-
-                                    if(anno.AnnotationType == 0) anno.usesAnnoScheme = true;
-                                    if (anno.AnnotationType == 1) anno.usesAnnoScheme = false;
-                                    // anno.AnnotationType = 0;
-                                    anno.Filepath = "db";
-                                    anno.SampleAnnoPath = "db";
-                                    double maxdur = 0;
-
-                                    foreach (AnnoListItem ali in anno)
-                                    {
-                                        if (ali.Stop > maxdur)
-                                        {
-                                            maxdur = ali.Stop;
-                                        }
-                                    }
-                                    if (anno != null)
-                                    {
-                                        setAnnoList(anno);
-
-                                        addAnno(anno, anno.AnnotationType, 1);
-                                    }
-
-                                    updateTimeRange(maxdur);
->>>>>>> origin/develop
                                 }
                             
                         }
@@ -3395,23 +3244,6 @@ private void handleAnnotation(AnnoList anno, string filename)
                     SignalTrack.selected_track.ExportToXPS(uri, SignalTrack.selected_track);
                 }
             }
-<<<<<<< HEAD
-=======
-        }
-
-        private void exportsignaltopng_Click(object sender, RoutedEventArgs e)
-        {
-            string filepath = ViewTools.SaveFileDialog("export_signal", "png", "", 6);
-            if (filepath != null)
-            {
-                var uri = new System.Uri(filepath);
-
-                if (SignalTrack.selected_track != null)
-                {
-                    SignalTrack.selected_track.ExportToPng(uri, SignalTrack.selected_track);
-                }
-            }
->>>>>>> origin/develop
         }
 
         private void exportsignaltopng_Click(object sender, RoutedEventArgs e)
