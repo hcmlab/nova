@@ -17,9 +17,15 @@ namespace ssi
         private string connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP;
         private AnnoTrack a = null;
         private HashSet<LabelColorPair> usedlabels = null;
+<<<<<<< HEAD
         private AnnoType isdiscrete = AnnoType.DISCRETE;
 
         public DatabaseUserTableWindow(List<string> sessions, bool showadminbuttons, string title = "Select Database", string Collection = "none", AnnoType isDiscrete = AnnoType.DISCRETE, bool scheme = false, AnnoTrack _a = null)
+=======
+        private int isdiscrete = 0;
+
+        public DatabaseUserTableWindow(List<string> sessions, bool showadminbuttons, string title = "Select Database", string Collection = "none", int isDiscrete = 0, bool scheme = false, AnnoTrack _a = null)
+>>>>>>> origin/develop
         {
             InitializeComponent();
             this.titlelabel.Content = title;
@@ -144,7 +150,11 @@ namespace ssi
             }
         }
 
+<<<<<<< HEAD
         private void storeAnnotationSchemetoDatabase(string name = null, HashSet<LabelColorPair> _usedlabels = null, AnnoType isDiscrete = AnnoType.DISCRETE, Brush col1 = null, Brush col2 = null, string sr = null, string min = null, string max = null)
+=======
+        private void storeAnnotationSchemetoDatabase(string name = null, HashSet<LabelColorPair> _usedlabels = null, int isDiscrete = 0, Brush col1 = null, Brush col2 = null, string sr = null, string min = null, string max = null)
+>>>>>>> origin/develop
         {
             DatabaseAnnoScheme dbas = new DatabaseAnnoScheme(name, usedlabels, isdiscrete, col1, col2, sr, min, max);
             dbas.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -218,6 +228,7 @@ namespace ssi
 
             DatabaseHandler dh = new DatabaseHandler(connectionstring);
             AnnotationScheme a = dh.GetAnnotationScheme(DataBaseResultsBox.SelectedItem.ToString(), isdiscrete);
+<<<<<<< HEAD
             AnnoType isDiscete = AnnoType.DISCRETE;
             if (a.type == "FREE") isDiscete = AnnoType.FREE;
             if (a.type == "CONTINUOUS") isDiscete = AnnoType.CONTINUOUS;
@@ -225,6 +236,15 @@ namespace ssi
             col1 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.mincolor));
 
             if (isDiscete == AnnoType.DISCRETE)
+=======
+            int isDiscete = 0;
+            if (a.type == "FREE") isDiscete = 1;
+            if (a.type == "CONTINUOUS") isDiscete = 2;
+
+            col1 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.mincolor));
+
+            if (isDiscete == 0)
+>>>>>>> origin/develop
             {
                 usedlabels = new HashSet<LabelColorPair>();
 
@@ -243,12 +263,20 @@ namespace ssi
                 }
             }
 
+<<<<<<< HEAD
             else if (isDiscete == AnnoType.FREE)
+=======
+            else if (isDiscete == 1)
+>>>>>>> origin/develop
             {
                 col1 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.mincolor));
             }
 
+<<<<<<< HEAD
             else if (isDiscete == AnnoType.CONTINUOUS)
+=======
+            else if (isDiscete == 2)
+>>>>>>> origin/develop
             {
                 col2 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.maxcolor));
                 sr = a.sr.ToString();
