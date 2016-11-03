@@ -29,6 +29,7 @@
                     <MenuItem Header="SSI SampleList" Name="exportSamples" />
                     <MenuItem Header="Sampled Annotations" Name="exportSampledAnnotations" />
                 </MenuItem>
+                <MenuItem Header="Settings" Name="settingsMenu" />
                 <MenuItem Header="Clear" Name="clearMenu" />
             </MenuItem>
             <MenuItem Header="Tier" Name="tiermenu">

@@ -4,12 +4,15 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
+
 namespace ssi
 {
     public class AnnoTrackSegment : TextBlock
     {
         public const int RESIZE_OFFSET = 5;
         public const int MIN_WIDTH = 2;
+        public const string CONFBRUSH = "BorderBrush";
+        private PatternBrushes res = new PatternBrushes();
 
         public bool is_selected;
         public bool is_resizeable_right;
@@ -68,14 +71,15 @@ namespace ssi
 
             item.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(item_PropertyChanged);
 
-            MouseDown += new MouseButtonEventHandler(OnAnnoTrackSegmentMouseDown);
+            MouseLeftButtonDown += new MouseButtonEventHandler(OnAnnoTrackSegmentMouseDown);
 
             update();
         }
 
         private void OnAnnoTrackSegmentMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
+            if (e.ClickCount == 2)
+         
             {
                 AnnoTrackStatic.used_labels.Clear();
 
@@ -184,6 +188,14 @@ namespace ssi
                 this.Height = track.ActualHeight;
                 this.Width = len;
                 this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
+                if(item.Confidence < Properties.Settings.Default.UncertaintyLevel)
+                {
+
+                  
+                    VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
+                    this.Background = vb;
+
+                }
                 Canvas.SetLeft(this, start);
             }
         }
@@ -201,6 +213,14 @@ namespace ssi
                 this.Height = track.ActualHeight;
                 this.Width = len;
                 this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
+                if (item.Confidence < Properties.Settings.Default.UncertaintyLevel)
+                {
+
+                    var res = new PatternBrushes();
+                    VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
+                    this.Background = vb;
+
+                }
                 Canvas.SetLeft(this, start);
             }
         }
@@ -215,6 +235,14 @@ namespace ssi
             else
             {
                 this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
+                if (item.Confidence < Properties.Settings.Default.UncertaintyLevel)
+                {
+
+                    var res = new PatternBrushes();
+                    VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
+                    this.Background = vb;
+
+                }
                 //this.Opacity = 0.75;
             }
         }

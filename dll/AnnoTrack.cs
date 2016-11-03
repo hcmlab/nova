@@ -14,6 +14,7 @@ using System.Windows.Xps.Packaging;
 
 namespace ssi
 {
+   
     public class AnnoTrackPlayEventArgs : EventArgs
     {
         public AnnoListItem item = null;
@@ -69,6 +70,7 @@ namespace ssi
         public static bool askforlabel = false;
         public static string Defaultlabel = "";
         public static string DefaultColor = "#000000";
+        private static  bool correctmode = false;
 
         static public event AnnoTrackChangeEventHandler OnTrackChange;
 
@@ -86,6 +88,13 @@ namespace ssi
         static public AnnoTrack GetSelectedTrack()
         {
             return selected_track;
+        }
+
+        public static bool CorrectMode
+        {
+            get { return correctmode; }
+            set { correctmode = value;
+            }
         }
 
         static public void SelectTrack(AnnoTrack t)
@@ -175,6 +184,7 @@ namespace ssi
         private double borderlow = 0.0;
         private double borderhigh = 1.0;
         public HashSet<LabelColorPair> track_used_labels;
+      
 
         private double lastX;
         private int direction;
@@ -406,6 +416,9 @@ namespace ssi
             return null;
         }
 
+
+
+
         public AnnoTrackSegment addSegment(AnnoListItem item)
         {
 
@@ -517,6 +530,10 @@ namespace ssi
 
         public void newAnnokey()
         {
+            if(!CorrectMode)
+            {
+
+           
             if (isDiscrete)
             {
                 double start = ViewHandler.Time.TimeFromPixel(ViewHandler.Time.CurrentSelectPosition);
@@ -569,6 +586,7 @@ namespace ssi
                     SelectSegment(segment);
                 }
             }
+            }
         }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -600,7 +618,10 @@ namespace ssi
         protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseRightButtonDown(e);
+            if(!CorrectMode)
+            {
 
+           
             double start = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X);
             double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X) + 0.5;
             //  double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X + AnnoTrackSegment.RESIZE_OFFSET);
@@ -641,6 +662,7 @@ namespace ssi
                 SelectSegment(segment);
                 this.select(true);
             }
+            }
         }
 
         public int getClosestContinousIndex(double nearestitem)
@@ -658,150 +680,161 @@ namespace ssi
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
+           
+                double dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
 
-            double dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
+                direction = (dx > 0) ? 1 : 0;
+                lastX = e.GetPosition(Application.Current.MainWindow).X;
 
-            direction = (dx > 0) ? 1 : 0;
-            lastX = e.GetPosition(Application.Current.MainWindow).X;
-
-            if (isDiscrete || (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift)))
-            {
-                if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
+                if (isDiscrete || (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift)))
                 {
-                    Point point = e.GetPosition(selected_segment);
+              
+                    if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
+                    {
+                        Point point = e.GetPosition(selected_segment);
 
-                    if (selected_segment != null)
+                        if (selected_segment != null)
+                        {
+                            this.select(true);
+                            double delta = point.X - selected_segment.ActualWidth;
+                            if (annorightdirection)
+                            {
+                                //fight the rounding error
+                                if (ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) > ViewHandler.Time.CurrentSelectPosition && ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) > ViewHandler.Time.CurrentSelectPosition)
+                                {
+                                    selected_segment.Item.Start = ViewHandler.Time.TimeFromPixel(ViewHandler.Time.CurrentSelectPosition);
+                                }
+                                selected_segment.resize_right(delta);
+
+                                FireOnMove(selected_segment.Item.Stop);
+                                ViewHandler.Time.CurrentPlayPosition = selected_segment.Item.Stop;
+
+                                Console.WriteLine(ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) + "   " + ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) + "   " + ViewHandler.Time.CurrentSelectPosition + "    " + annorightdirection);
+
+                                if (ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) >= ViewHandler.Time.CurrentSelectPosition - 1 && ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) >= ViewHandler.Time.CurrentSelectPosition - 1 && point.X < 0) annorightdirection = false;
+                                SelectSegment(selected_segment);
+                                this.select(true);
+                            }
+                            else
+                            {
+                                delta = point.X;
+                                //fight the rounding error
+                                if (ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) < ViewHandler.Time.CurrentSelectPosition && ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) < ViewHandler.Time.CurrentSelectPosition)
+                                {
+                                    selected_segment.Item.Stop = ViewHandler.Time.TimeFromPixel(ViewHandler.Time.CurrentSelectPosition);
+                                }
+                                selected_segment.resize_left(delta);
+                                FireOnMove(selected_segment.Item.Start);
+                                ViewHandler.Time.CurrentPlayPosition = selected_segment.Item.Start;
+                                Console.WriteLine(ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) + "   " + ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) + "   " + ViewHandler.Time.CurrentSelectPosition + "   " + annorightdirection);
+                                if ((ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) > ViewHandler.Time.CurrentSelectPosition - 1)) annorightdirection = true;
+                                SelectSegment(selected_segment);
+                                this.select(true);
+                            }
+                        }
+                    }
+
+                    if (selected_segment != null && this.is_selected)
                     {
                         this.select(true);
-                        double delta = point.X - selected_segment.ActualWidth;
-                        if (annorightdirection)
+                        Point point = e.GetPosition(selected_segment);
+
+                        // check if use wants to resize/move
+
+                        if (e.LeftButton == MouseButtonState.Pressed)
                         {
-                            //fight the rounding error
-                            if (ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) > ViewHandler.Time.CurrentSelectPosition && ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) > ViewHandler.Time.CurrentSelectPosition)
+                            // resize segment left
+                            if (selected_segment.is_resizeable_left)
                             {
-                                selected_segment.Item.Start = ViewHandler.Time.TimeFromPixel(ViewHandler.Time.CurrentSelectPosition);
+                                double delta = point.X;
+                                if (selected_segment.ActualWidth - delta > AnnoTrackSegment.RESIZE_OFFSET)
+                                {
+                                    selected_segment.resize_left(delta);
+                                    SelectSegment(selected_segment);
+                                    this.select(true);
+                                    FireOnMove(selected_segment.Item.Start);
+                                }
                             }
-                            selected_segment.resize_right(delta);
-
-                            FireOnMove(selected_segment.Item.Stop);
-                            ViewHandler.Time.CurrentPlayPosition = selected_segment.Item.Stop;
-
-                            Console.WriteLine(ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) + "   " + ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) + "   " + ViewHandler.Time.CurrentSelectPosition + "    " + annorightdirection);
-
-                            if (ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) >= ViewHandler.Time.CurrentSelectPosition - 1 && ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) >= ViewHandler.Time.CurrentSelectPosition - 1 && point.X < 0) annorightdirection = false;
-                            SelectSegment(selected_segment);
-                            this.select(true);
+                            // resize segment right
+                            else if (selected_segment.is_resizeable_right)
+                            {
+                                double delta = point.X - selected_segment.ActualWidth;
+                                if (point.X > AnnoTrackSegment.RESIZE_OFFSET)
+                                {
+                                    if (point.X > ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop)) delta = ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop) - selected_segment.ActualWidth;
+                                    selected_segment.resize_right(delta);
+                                    SelectSegment(selected_segment);
+                                    this.select(true);
+                                    FireOnMove(selected_segment.Item.Stop);
+                                }
+                            }
+                            // move segment
+                            else if (selected_segment.is_moveable)
+                            {
+                                double pos = GetLeft(selected_segment);
+                                double delta = point.X - selected_segment.ActualWidth / 2;
+                                if (pos + delta >= 0 && pos + selected_segment.ActualWidth + delta <= this.Width)
+                                {
+                                    selected_segment.move(delta);
+                                    SelectSegment(selected_segment);
+                                    this.select(true);
+                                    FireOnMove(selected_segment.Item.Start + (selected_segment.Item.Stop - selected_segment.Item.Start) * 0.5);
+                                }
+                            }
                         }
                         else
                         {
-                            delta = point.X;
-                            //fight the rounding error
-                            if (ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) < ViewHandler.Time.CurrentSelectPosition && ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) < ViewHandler.Time.CurrentSelectPosition)
-                            {
-                                selected_segment.Item.Stop = ViewHandler.Time.TimeFromPixel(ViewHandler.Time.CurrentSelectPosition);
-                            }
-                            selected_segment.resize_left(delta);
-                            FireOnMove(selected_segment.Item.Start);
-                            ViewHandler.Time.CurrentPlayPosition = selected_segment.Item.Start;
-                            Console.WriteLine(ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) + "   " + ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) + "   " + ViewHandler.Time.CurrentSelectPosition + "   " + annorightdirection);
-                            if ((ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) > ViewHandler.Time.CurrentSelectPosition - 1)) annorightdirection = true;
-                            SelectSegment(selected_segment);
-                            this.select(true);
+                            // check if use can resize/move
+                            selected_segment.checkResizeable(point);
                         }
-                    }
+                    
                 }
 
-                if (selected_segment != null && this.is_selected)
-                {
-                    this.select(true);
-                    Point point = e.GetPosition(selected_segment);
-
-                    // check if use wants to resize/move
-
-                    if (e.LeftButton == MouseButtonState.Pressed)
-                    {
-                        // resize segment left
-                        if (selected_segment.is_resizeable_left)
-                        {
-                            double delta = point.X;
-                            if (selected_segment.ActualWidth - delta > AnnoTrackSegment.RESIZE_OFFSET)
-                            {
-                                selected_segment.resize_left(delta);
-                                SelectSegment(selected_segment);
-                                this.select(true);
-                                FireOnMove(selected_segment.Item.Start);
-                            }
-                        }
-                        // resize segment right
-                        else if (selected_segment.is_resizeable_right)
-                        {
-                            double delta = point.X - selected_segment.ActualWidth;
-                            if (point.X > AnnoTrackSegment.RESIZE_OFFSET)
-                            {
-                                if (point.X > ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop)) delta = ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop) - selected_segment.ActualWidth;
-                                selected_segment.resize_right(delta);
-                                SelectSegment(selected_segment);
-                                this.select(true);
-                                FireOnMove(selected_segment.Item.Stop);
-                            }
-                        }
-                        // move segment
-                        else if (selected_segment.is_moveable)
-                        {
-                            double pos = GetLeft(selected_segment);
-                            double delta = point.X - selected_segment.ActualWidth / 2;
-                            if (pos + delta >= 0 && pos + selected_segment.ActualWidth + delta <= this.Width)
-                            {
-                                selected_segment.move(delta);
-                                SelectSegment(selected_segment);
-                                this.select(true);
-                                FireOnMove(selected_segment.Item.Start + (selected_segment.Item.Stop - selected_segment.Item.Start) * 0.5);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // check if use can resize/move
-                        selected_segment.checkResizeable(point);
-                    }
-                }
             }
             else if (AnnoList.AnnotationType == AnnoType.CONTINUOUS && !Keyboard.IsKeyDown(Key.LeftAlt))
-            {
-                if (continuousannomode) el.Visibility = Visibility.Visible;
-                else el.Visibility = Visibility.Hidden;
-
-                if (e.RightButton == MouseButtonState.Pressed && this.is_selected)
                 {
-                    double deltaDirection = currentPositionX - e.GetPosition(this).X;
-                    currentPositionX = e.GetPosition(this).X;
+                    if (continuousannomode) el.Visibility = Visibility.Visible;
+                    else el.Visibility = Visibility.Hidden;
 
-                    if (deltaDirection < 0)
+                    if (e.RightButton == MouseButtonState.Pressed && this.is_selected)
                     {
-                        double closestposition = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X);
-                        closestindex = getClosestContinousIndex(closestposition);
-                        if (closestindex > -1)
-                        {
-                            double range = borderhigh - borderlow;
-                            double normal = 1.0 - ((e.GetPosition(this).Y / this.ActualHeight));
-                            double normalized = (normal * range) + borderlow;
-                            anno_list[closestindex].Label = normalized.ToString();
+                        double deltaDirection = currentPositionX - e.GetPosition(this).X;
+                        currentPositionX = e.GetPosition(this).X;
 
-                            for (int i = closestindexold; i < closestindex; i++)
+                        if (deltaDirection < 0)
+                        {
+                            double closestposition = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X);
+                            closestindex = getClosestContinousIndex(closestposition);
+                            if (closestindex > -1)
                             {
-                                anno_list[i].Label = normalized.ToString();
-                            }
-                            closestindexold = closestindex;
-                            timeRangeChanged(ViewHandler.Time);
-                            //  nicer drawing but slower
-                            if (!isDiscrete)
-                            {
+                                double range = borderhigh - borderlow;
+                                double normal = 1.0 - ((e.GetPosition(this).Y / this.ActualHeight));
+                                double normalized = (normal * range) + borderlow;
+                                anno_list[closestindex].Label = normalized.ToString();
+
+                                for (int i = closestindexold; i < closestindex; i++)
+                                {
+                                if (anno_list[i].Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true)
+                                {
+                                    anno_list[i].Label = normalized.ToString();
+                                  
+                                }
+                                    
+                                else if(CorrectMode == false) anno_list[i].Label = normalized.ToString();
+
+                                }
+                                closestindexold = closestindex;
                                 timeRangeChanged(ViewHandler.Time);
+                                //  nicer drawing but slower
+                                if (!isDiscrete)
+                                {
+                                    timeRangeChanged(ViewHandler.Time);
+                                }
                             }
                         }
                     }
                 }
-            }
+            
         }
 
         public void timeRangeChanged(ViewTime time)
@@ -815,12 +848,18 @@ namespace ssi
                     if (s.Item.Start >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
                     {
                         s.update();
-                        s.Visibility = Visibility.Visible;
+                    if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
+                    else if (CorrectMode == false) s.Visibility = Visibility.Visible;
+                    else s.Visibility = Visibility.Collapsed;
+                   // s.Visibility = Visibility.Visible;
                     }
                     else if (s.Item.Stop >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
                     {
                         s.update2();
-                        s.Visibility = Visibility.Visible;
+                    if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
+                    else if (CorrectMode == false) s.Visibility = Visibility.Visible;
+                    else s.Visibility = Visibility.Collapsed;
+                   // s.Visibility = Visibility.Visible;
                     }
                 }
             
@@ -883,7 +922,10 @@ namespace ssi
                                 lines[i % lines.Count].Y1 = (value) * this.ActualHeight;
                                 if (i % lines.Count < lines.Count - 1 && ali.Stop < time.SelectionStop - ali.Duration) lines[i % lines.Count].Y2 = lines[i % lines.Count + 1].Y1;
                                 else if (i > 0) lines[i % lines.Count].Y2 = lines[i % lines.Count - 1].Y1;
-                                lines[i % lines.Count].Visibility = Visibility.Visible;
+                                if (ali.Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) lines[i % lines.Count].Visibility = Visibility.Visible;
+                                else if (CorrectMode == false) lines[i % lines.Count].Visibility = Visibility.Visible;
+                                else lines[i % lines.Count].Visibility = Visibility.Collapsed;
+
                                 i++;
                             }
                         }
@@ -931,7 +973,10 @@ namespace ssi
                                 }
                                 if (i < lines.Count - 1 && anno_list[index + offset].Stop <= time.SelectionStop) s.Y2 = lines[i + 1].Y1;
                                 else s.Y2 = s.Y1;
-                                s.Visibility = Visibility.Visible;
+
+                                if (anno_list[index].Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
+                                else if (CorrectMode == false) s.Visibility = Visibility.Visible;
+                                else s.Visibility = Visibility.Collapsed;
                             }
                             i++;
                         }

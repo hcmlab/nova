@@ -120,6 +120,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Printing" />
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Xaml" />
@@ -203,6 +204,9 @@
     <Compile Include="ExportSamplesWindow.xaml.cs">
       <DependentUpon>ExportSamplesWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PatternBrushes.xaml.cs">
+      <DependentUpon>PatternBrushes.xaml</DependentUpon>
+    </Compile>
     <Compile Include="IMedia.cs" />
     <Compile Include="ISignalTrack.cs" />
     <Compile Include="LabelInputBox.xaml.cs" />
@@ -238,6 +242,9 @@
     </Compile>
     <Compile Include="Security.cs" />
     <Compile Include="SelectionBox.xaml.cs" />
+    <Compile Include="Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Signal.cs" />
     <Compile Include="SignalTrack.cs" />
     <Compile Include="SignalTrackEx.xaml.cs">
@@ -331,6 +338,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="PatternBrushes.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="LabelInputBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -370,6 +381,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SignalTrackEx.xaml">
       <SubType>Designer</SubType>

@@ -41,5 +41,11 @@
     <Setting Name="Autologin" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="UncertaintyLevel" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.7</Value>
+    </Setting>
+    <Setting Name="Annotator" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Unknown</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
