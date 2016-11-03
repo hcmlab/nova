@@ -54,6 +54,8 @@ namespace ssi
             this.Title = header;
             this.ib_label.Content = info;
             this.ib_labelText.Text = text;
+
+       
             this.suggestions = _suggestions;
             this.hascolorpicker = _hascolorpicker;
 
@@ -140,6 +142,7 @@ namespace ssi
                 this.ib_labelText.IsEnabled = false;
                 this.ib_color.IsEnabled = false;
             }
+            else this.ib_labelText.SelectAll();
         }
 
         public void setPWfield(string text)

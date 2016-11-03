@@ -383,7 +383,7 @@ namespace ssi
             }
             catch (Exception e)
             {
-                MessageBox.Show("Can't read annotation file. Is it used by another program?");
+                MessageBox.Show("Can't read annotation file.");
             }
 
             return list;
@@ -547,7 +547,8 @@ namespace ssi
                             {
 
                                 start = binaryReader.ReadDouble();
-                                double dur = binaryReader.ReadDouble();
+                                double stop = binaryReader.ReadDouble();
+                                double dur = stop - start;
                                 string label = "";
                                 int index = binaryReader.ReadInt32();
                                 LabelIds.TryGetValue(index.ToString(), out label);
@@ -564,19 +565,22 @@ namespace ssi
 
                             else if (list.AnnotationType == AnnoType.FREE)
                             {
-                                MessageBox.Show("Binary Free Annotations are not supported at the time");
-                                break;
+                                //MessageBox.Show("Binary Free Annotations are not supported at the time");
+                                //break;
 
 
-                                //start = binaryReader.ReadDouble();
-                                //double dur = binaryReader.ReadDouble();
-                                //string label = binaryReader.ReadString();
-                                //string color = "#000000";
+                                start = binaryReader.ReadDouble();
+                                double stop = binaryReader.ReadDouble();
+                                double dur = stop - start;
+                                int stringlength = (int) binaryReader.ReadUInt32();
+                                byte[] labelasbytes = (binaryReader.ReadBytes(stringlength));
+                                string label = System.Text.Encoding.Default.GetString(labelasbytes);
+                                string color = "#000000";
 
 
-                                //double confidence = Math.Round(binaryReader.ReadSingle(), 3, MidpointRounding.AwayFromZero);
-                                //AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
-                                //list.Add(e);
+                                double confidence = Math.Round(binaryReader.ReadSingle(), 3, MidpointRounding.AwayFromZero);
+                                AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                list.Add(e);
 
                             }
 
@@ -746,31 +750,31 @@ namespace ssi
                 sw.WriteLine("<?xml version=\"1.0\" ?>");
                 sw.WriteLine("<annotation ssi-v=\"3\">");
 
-                //todo check if loaded anno is ascii or binary... for now always overwrite in ascii...
-                sw.WriteLine("\t<info ftype=\""+ this.Ftype + "\" size=\"" + this.Count + "\" />");
-                sw.WriteLine("\t<meta role=\"None\" annotator=\"None\" />");
+
+                sw.WriteLine("    <info ftype=\""+ this.Ftype + "\" size=\"" + this.Count + "\" />");
+                sw.WriteLine("    <meta annotator=" + Properties.Settings.Default.Annotator +"/>");
                 if(this.AnnotationType == AnnoType.CONTINUOUS)
                 {
-                    sw.WriteLine("\t<scheme name=\"" + this.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.SR + "\" min=\"" + this.Lowborder+"\" max=\"" + this.Highborder + "\" mincolor=\"" + this.AnnotationScheme.mincolor + "\" maxcolor=\"" + this.AnnotationScheme.maxcolor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.SR + "\" min=\"" + this.Lowborder+"\" max=\"" + this.Highborder + "\" mincolor=\"" + this.AnnotationScheme.mincolor + "\" maxcolor=\"" + this.AnnotationScheme.maxcolor + "\" />");
                 }
 
                 else if (this.AnnotationType == AnnoType.FREE)
                 {
-                    sw.WriteLine("\t<scheme name=\"" + this.Name + "\" type=\"FREE\" color=\"" + this.AnnotationScheme.mincolor + "\"/>");
+                    sw.WriteLine("    <scheme name=\"" + this.Name + "\" type=\"FREE\" color=\"" + this.AnnotationScheme.mincolor + "\"/>");
                 }
 
                 else if (this.AnnotationType == AnnoType.DISCRETE)
                 {
-                    sw.WriteLine("\t<scheme name=\"" + this.Name + "\" type=\"DISCRETE\"  color=\"" + this.AnnotationScheme.mincolor + "\">");
+                    sw.WriteLine("    <scheme name=\"" + this.Name + "\" type=\"DISCRETE\"  color=\"" + this.AnnotationScheme.mincolor + "\">");
                     int index = 0;
                
                     foreach (LabelColorPair lp in this.AnnotationScheme.LabelsAndColors)
                     {
-                        sw.WriteLine("\t\t<item name=\"" + lp.Label + "\" id=\"" +index + "\" color=\"" + lp.Color + "\" />");
+                        sw.WriteLine("        <item name=\"" + lp.Label + "\" id=\"" +index + "\" color=\"" + lp.Color + "\" />");
                         LabelIds.Add(lp.Label, index.ToString());
                         index++;
                     }
-                    sw.WriteLine("\t</scheme>");
+                    sw.WriteLine("    </scheme>");
                 }
 
                 sw.WriteLine("</annotation>");
@@ -835,8 +839,10 @@ namespace ssi
                         foreach (AnnoListItem e in this)
                         {
                             bw.Write(e.Start);
-                            bw.Write(e.Duration);
-                            bw.Write(e.Label);
+                            bw.Write(e.Stop);
+                            bw.Write((uint) e.Label.Length);
+                            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(e.Label);
+                            bw.Write(bytes);
                             bw.Write((float)e.Confidence);
                         }
                     }
@@ -849,7 +855,7 @@ namespace ssi
                             LabelIds.TryGetValue(e.Label, out index);
                             int i = Int32.Parse(index);
                             bw.Write(e.Start);
-                            bw.Write(e.Duration);
+                            bw.Write(e.Stop);
                             bw.Write(i);
                             bw.Write((float)e.Confidence);
                           

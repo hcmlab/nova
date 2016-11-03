@@ -163,6 +163,7 @@ namespace ssi
             this.view.clearMenu.Click += clearButton_Click;
             this.view.saveMenu.Click += saveButton_Click;
             this.view.saveProject.Click += saveProject_Click;
+            this.view.settingsMenu.Click += settingsMenu_Click;
             this.view.exportSamples.Click += exportSamplesButton_Click;
             this.view.convertodiscretemenu.Click += converttodiscrete_Click;
             this.view.convertosignalemenu.Click += convertosignal_Click;
@@ -194,6 +195,8 @@ namespace ssi
             this.view.navigator.framewisebox.Unchecked += frameWiseBox_Unchecked;
             this.view.exportSampledAnnotations.Click += exportSampledAnnotationsButton_Click;
             this.view.annoListControl.editComboBox.SelectionChanged += changed_annoschemeselectionbox;
+            this.view.navigator.hideHighConf.Click += check_lowconfonly;
+
 
             //AnnoTrack.OnTrackPlay += playTrackHandler;
             AnnoTrack.OnTrackChange += changeAnnoTrackHandler;
@@ -333,8 +336,8 @@ namespace ssi
             {
                 if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                     saveAnno();
-               
+                    saveAnno();
+
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
@@ -412,7 +415,7 @@ namespace ssi
 
 
                 }
-                        if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !keyDown*/)
+                if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !keyDown*/)
                 {
                     int i = 0;
                     double fps = 1.0 / 30.0;
@@ -634,7 +637,7 @@ namespace ssi
 
 
                     //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
-   
+
                     foreach (AnnoTrack track in anno_tracks)
                     {
                         if (track.AnnoList.HasChanged /*&& !track.isDiscrete*/)
@@ -643,7 +646,8 @@ namespace ssi
                             if (mbr == MessageBoxResult.Yes)
                             {
                                 saveAnno(track.AnnoList, track.AnnoList.Filepath);
-                               /* if (!track.isDiscrete)*/ track.AnnoList.HasChanged = false;
+                                /* if (!track.isDiscrete)*/
+                                track.AnnoList.HasChanged = false;
                             }
                         }
                     }
@@ -890,17 +894,17 @@ namespace ssi
 
                 if (isDiscrete == AnnoType.CONTINUOUS)
                 {
-                    if(anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null)
+                    if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null)
                     {
                         background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
                         background.Opacity = 0.75;
                     }
-   
-                 
+
+
                 }
                 addAnno(anno, isDiscrete, samplerate, null, borderlow, borderhigh, background);
             }
-                
+
         }
 
         public void addAnno(AnnoList anno, AnnoType isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null, string annotator = null)
@@ -925,8 +929,8 @@ namespace ssi
             track.AnnoList.Annotator = annotator;
             track.AnnoList.usesAnnoScheme = anno.usesAnnoScheme;
             track.AnnoList.AnnotationScheme = anno.AnnotationScheme;
-      
-     
+
+
 
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.timeRangeChanged;
 
@@ -941,11 +945,11 @@ namespace ssi
             {
                 track.Background = background;
                 track.BackgroundColor = background;
-             
+
 
 
             }
-            
+
             AnnoTrack.SelectTrack(track);
             if (track.AnnoList.AnnotationType == AnnoType.CONTINUOUS)
             {
@@ -958,7 +962,7 @@ namespace ssi
                 else background = resultbrush("RedBlue");
                 track.ContiniousBrush = background;
                 track.Background = background;
-              
+
             }
             if (track.AnnoList.AnnotationType == AnnoType.CONTINUOUS)
             {
@@ -966,7 +970,7 @@ namespace ssi
                 track.AnnoList.AnnotationScheme.mincolor = new SolidColorBrush(((LinearGradientBrush)track.ContiniousBrush).GradientStops[0].Color).ToString();
                 track.AnnoList.AnnotationScheme.maxcolor = new SolidColorBrush(((LinearGradientBrush)track.ContiniousBrush).GradientStops[1].Color).ToString();
             }
-           
+
             track.timeRangeChanged(ViewHandler.Time);
             //  track.timeRangeChanged(ViewHandler.Time);
         }
@@ -976,7 +980,7 @@ namespace ssi
         {
             AnnoList anno = AnnoList.LoadfromFile(filename);
             anno.SampleAnnoPath = filename;
-            anno.Filepath =filename;
+            anno.Filepath = filename;
             double maxdur = 0;
 
             foreach (AnnoListItem ali in anno)
@@ -1026,9 +1030,9 @@ namespace ssi
 
 
 
-private void handleAnnotation(AnnoList anno, string filename)
+        private void handleAnnotation(AnnoList anno, string filename)
         {
-            if ((anno.AnnotationType == AnnoType.FREE || anno.AnnotationType == AnnoType.DISCRETE ) && annofilepath == "") annofilepath = filename;
+            if ((anno.AnnotationType == AnnoType.FREE || anno.AnnotationType == AnnoType.DISCRETE) && annofilepath == "") annofilepath = filename;
             double maxdur = 0;
             //Get all tier ids that haven't been added before
             //(This is where in the future tiers will be read from the config)
@@ -1061,7 +1065,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                     TierIds.Add(tier);
                     maxdur = anno[anno.Count - 1].Stop;
                 }
-            
+
             }
             else
             {
@@ -1094,7 +1098,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                         }
                     }
                 }
-              
+
                 annolist.Name = anno.Name;
                 annolist.Highborder = anno.Highborder;
                 annolist.Lowborder = anno.Lowborder;
@@ -1105,6 +1109,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                 annolist.AnnotationType = anno.AnnotationType;
                 annolist.Filepath = anno.Filepath;
                 annolist.SampleAnnoPath = anno.SampleAnnoPath;
+                annolist.usesAnnoScheme = anno.usesAnnoScheme;
 
                 Brush background = null;
                 if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null && anno.AnnotationType == AnnoType.CONTINUOUS)
@@ -1119,14 +1124,14 @@ private void handleAnnotation(AnnoList anno, string filename)
                     background = resultbrush("RedBlue");
                     background.Opacity = 0.75;
                 }
-               
-                else if  (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null  && anno.AnnotationType != AnnoType.CONTINUOUS)
+
+                else if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationType != AnnoType.CONTINUOUS)
                 {
                     annolist.AnnotationScheme.mincolor = anno.AnnotationScheme.mincolor;
                 }
 
 
-               if (annolist != null)
+                if (annolist != null)
                 {
                     setAnnoList(annolist);
                     annolist.SampleAnnoPath = filename;
@@ -1544,6 +1549,7 @@ private void handleAnnotation(AnnoList anno, string filename)
         private void changeAnnoTrackHandler(AnnoTrack track, EventArgs e)
         {
             this.view.trackControl.annoNameLabel.Content = "#" + track.TierId;
+
             //  this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             setAnnoList(track.AnnoList);
 
@@ -1666,7 +1672,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                 else
                 {
                     anno.saveToFileNew();
-                 //   anno.saveToFile();
+                    //   anno.saveToFile();
                 }
             }
         }
@@ -1675,7 +1681,7 @@ private void handleAnnotation(AnnoList anno, string filename)
         {
             if (anno != null)
             {
-                if(anno.AnnotationType == AnnoType.CONTINUOUS)
+                if (anno.AnnotationType == AnnoType.CONTINUOUS)
                 {
                     anno.saveContinousToFile();
                 }
@@ -1683,7 +1689,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                 {
                     anno.saveToFile();
                 }
- 
+
             }
         }
 
@@ -2029,7 +2035,11 @@ private void handleAnnotation(AnnoList anno, string filename)
                     }
 
                     LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true, AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme);
-                    inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
+                    if(view.navigator.hideHighConf.IsChecked == true)
+                    {
+                        inputBox.showSlider(true,1.0);
+                    }
+                    else inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                     inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     inputBox.ShowDialog();
                     inputBox.Close();
@@ -2075,28 +2085,28 @@ private void handleAnnotation(AnnoList anno, string filename)
         {
             if (AnnoTrack.GetSelectedTrack() != null)
             {
-                
-  
-                    LabelInputBox inputBox = new LabelInputBox("Input", "Enter Confidence for selected Area", "", null, 1, "", "", false,true);
-                    inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
-                    inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                    inputBox.ShowDialog();
-                    inputBox.Close();
-                    if (inputBox.DialogResult == true)
+
+
+                LabelInputBox inputBox = new LabelInputBox("Input", "Enter Confidence for selected Area", "", null, 1, "", "", false, true);
+                inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
+                inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                inputBox.ShowDialog();
+                inputBox.Close();
+                if (inputBox.DialogResult == true)
+                {
+
+                    foreach (AnnoListItem ali in AnnoTrack.GetSelectedTrack().AnnoList)
                     {
-
-                        foreach(AnnoListItem ali in AnnoTrack.GetSelectedTrack().AnnoList)
+                        if (ali.Start >= AnnoTrack.GetSelectedSegment().Item.Start && ali.Stop <= AnnoTrack.GetSelectedSegment().Item.Stop)
                         {
-                            if (ali.Start >= AnnoTrack.GetSelectedSegment().Item.Start && ali.Stop <= AnnoTrack.GetSelectedSegment().Item.Stop)
-                            {
-                                ali.Confidence = inputBox.ResultSlider();
-                            }
-                        
-
+                            ali.Confidence = inputBox.ResultSlider();
                         }
-                      
+
+
                     }
-                
+
+                }
+
             }
         }
 
@@ -2585,6 +2595,24 @@ private void handleAnnotation(AnnoList anno, string filename)
             saveAll();
         }
 
+        private void settingsMenu_Click(object sender, RoutedEventArgs e)
+        {
+            Settings s = new Settings();
+            s.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            s.ShowDialog();
+
+            if(s.DialogResult == true)
+            {
+                Properties.Settings.Default.UncertaintyLevel = s.Uncertainty();
+                Properties.Settings.Default.Annotator = s.AnnotatorName();
+                Properties.Settings.Default.MongoDBIP = s.MongoServer();
+                Properties.Settings.Default.MongoDBUser = s.MongoUser();
+                Properties.Settings.Default.MongoDBPass = s.MongoPass();
+                Properties.Settings.Default.Save();
+
+            }
+        }
+        
         private void saveProject_Click(object sender, RoutedEventArgs e)
         {
             saveProject();
@@ -2592,7 +2620,7 @@ private void handleAnnotation(AnnoList anno, string filename)
 
         private void newAnnoButton_Click(object sender, RoutedEventArgs e)
         {
-             newAnno(AnnoType.FREE);
+            newAnno(AnnoType.FREE);
 
         }
 
@@ -2657,8 +2685,8 @@ private void handleAnnotation(AnnoList anno, string filename)
             if (AnnoTrack.GetSelectedTrack() != null)
             {
                 //if (AnnoTrack.GetSelectedTrack().isDiscrete)
-                    saveAnnoAs();
-             //   else saveContinousAnnoAs();
+                saveAnnoAs();
+                //   else saveContinousAnnoAs();
             }
         }
 
@@ -2676,7 +2704,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                     if (mb == MessageBoxResult.Yes)
                     {
                         saveAnno();
-                       
+
 
                         at.AnnoList.HasChanged = false;
                     }
@@ -2967,7 +2995,7 @@ private void handleAnnotation(AnnoList anno, string filename)
                 }
             }
             this.view.mongodbmenu.IsEnabled = true;
-          //  AnnoSchemeLoaded = true;
+            //  AnnoSchemeLoaded = true;
         }
 
         private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)
@@ -3065,38 +3093,38 @@ private void handleAnnotation(AnnoList anno, string filename)
                         foreach (AnnoList anno in annos)
 
                         {
-                         
+
                             if (anno.Count > 0)
                             {
 
                                 anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.Annotator;
                                 anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.Annotator;
-                            
-                          
-                                    if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
-                                    else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
-                                    else  if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
 
-                                    handleAnnotation(anno,null);
-                                  
-                                    //double maxdur = 0;
-                                    //foreach (AnnoListItem ali in anno)
-                                    //{
-                                    //    if (ali.Stop > maxdur)
-                                    //    {
-                                    //        maxdur = ali.Stop;
-                                    //    }
-                                    //}
-                                    //if (anno != null)
-                                    //{
-                                    //    setAnnoList(anno);
 
-                                    //    addAnno(anno, anno.AnnotationType, 1);
-                                    //}
+                                if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
+                                else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
+                                else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
 
-                                    //updateTimeRange(maxdur);
-                                }
-                            
+                                handleAnnotation(anno, null);
+
+                                //double maxdur = 0;
+                                //foreach (AnnoListItem ali in anno)
+                                //{
+                                //    if (ali.Stop > maxdur)
+                                //    {
+                                //        maxdur = ali.Stop;
+                                //    }
+                                //}
+                                //if (anno != null)
+                                //{
+                                //    setAnnoList(anno);
+
+                                //    addAnno(anno, anno.AnnotationType, 1);
+                                //}
+
+                                //updateTimeRange(maxdur);
+                            }
+
                         }
 
                         view.ShadowBox.Visibility = Visibility.Collapsed;
@@ -3261,16 +3289,16 @@ private void handleAnnotation(AnnoList anno, string filename)
         }
         private void exporttracktocsv_Click(object sender, RoutedEventArgs e)
         {
-            if(AnnoTrack.GetSelectedTrack() != null)
+            if (AnnoTrack.GetSelectedTrack() != null)
             {
                 exportAnnotoCSV(AnnoTrack.GetSelectedTrack().AnnoList);
             }
-           
+
 
         }
 
 
-        
+
 
         private void convertosignal_Click(object sender, RoutedEventArgs e)
         {
@@ -3524,6 +3552,24 @@ private void handleAnnotation(AnnoList anno, string filename)
                 }
             }
         }
+
+
+        private void check_lowconfonly(object sender, RoutedEventArgs e)
+        {
+            if (view.navigator.hideHighConf.IsChecked == true) AnnoTrack.CorrectMode = true;
+            else AnnoTrack.CorrectMode = false;
+
+
+            foreach (AnnoTrack a in anno_tracks)
+            {
+                a.timeRangeChanged(time);
+            }
+           
+        
+    
+
+
+    }
 
         private void exportSampledAnnotationsButton_Click(object sender, RoutedEventArgs e)
         {

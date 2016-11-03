@@ -478,15 +478,18 @@ namespace ssi
                 if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "DISCRETE")
                 {
                     al.AnnotationType = AnnoType.DISCRETE;
+                    al.usesAnnoScheme = true;
                 }
 
                 else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "FREE")
                 {
                     al.AnnotationType = AnnoType.FREE;
+                    al.usesAnnoScheme = false;
                 }
                 else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "CONTINUOUS")
                 {
                     al.AnnotationType = AnnoType.CONTINUOUS;
+                    al.usesAnnoScheme = true;
                 }
 
                 al.Role = roledb;

@@ -88,6 +88,7 @@
                 <StatusBar Grid.Column="0" Grid.Row="0">
 
                     <Button Name="annoNameLabel">#NoTier</Button>
+                   
                     <StatusBarItem HorizontalContentAlignment="Right">
                         <StackPanel Orientation="Horizontal" Width="82">
                             <TextBlock Name="annoPositionLabel">00:00:00.00</TextBlock>

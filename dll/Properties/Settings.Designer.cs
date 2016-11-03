@@ -178,5 +178,29 @@ namespace ssi.Properties {
                 this["Autologin"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.7")]
+        public double UncertaintyLevel {
+            get {
+                return ((double)(this["UncertaintyLevel"]));
+            }
+            set {
+                this["UncertaintyLevel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Unknown")]
+        public string Annotator {
+            get {
+                return ((string)(this["Annotator"]));
+            }
+            set {
+                this["Annotator"] = value;
+            }
+        }
     }
 }

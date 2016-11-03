@@ -43,6 +43,7 @@
             <CheckBox Name="followplaybox" Width="147" Height="25" Margin="0,10" IsChecked="True">Zoom follows media</CheckBox>
             <CheckBox x:Name="framewisebox" Width="167" Height="25" Margin="0,10" IsChecked="False" Content="Media follows Anno" />
             <CheckBox x:Name="askforlabels" Width="109" Height="25" Margin="0,10" IsChecked="False" Content="Ask for labels" />
+            <CheckBox Name="hideHighConf"  Margin="0,10" Visibility="Visible">Correction Mode</CheckBox>
 
             <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Clear</Button>
         </StackPanel>
