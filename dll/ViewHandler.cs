@@ -572,7 +572,7 @@ namespace ssi
                     if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
                     else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
 
-                    configfilepath = ViewTools.SaveFileDialog("project", ".nova", firstmediadir, 4);
+                    configfilepath = ViewTools.SaveFileDialog("project", ".nova", firstmediadir, 5);
                     if (configfilepath != null)
                     {
                         saveConfig(anno_tracks, media_list, signal_tracks, configfilepath);
@@ -1020,7 +1020,7 @@ namespace ssi
             if (anno != null)
             {
                 setAnnoList(anno);
-                addAnno(anno, anno.AnnotationType, anno.SR, filename);
+                addAnno(anno, anno.AnnotationType, anno.SR, filename, anno.Lowborder, anno.Highborder);
             }
 
             updateTimeRange(maxdur);
@@ -1110,6 +1110,8 @@ namespace ssi
                 annolist.Filepath = anno.Filepath;
                 annolist.SampleAnnoPath = anno.SampleAnnoPath;
                 annolist.usesAnnoScheme = anno.usesAnnoScheme;
+                annolist.AnnotationScheme.minborder = anno.AnnotationScheme.minborder;
+                annolist.AnnotationScheme.maxborder = anno.AnnotationScheme.maxborder;
 
                 Brush background = null;
                 if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null && anno.AnnotationType == AnnoType.CONTINUOUS)
@@ -1751,61 +1753,13 @@ namespace ssi
             sw.WriteLine("\t</signals>");
             sw.WriteLine("\t<tiers>");
 
-            string path = "";
-            bool nodisretefound = true;
             foreach (AnnoTrack t in tracks)
             {
-                if (t.isDiscrete)
-                {
-                    if (path == "")
-                    {
-                        path = t.AnnoList.Filepath;
-                        sw.WriteLine("\t\t<discrete>");
-                        nodisretefound = false;
-                    }
-
-                    sw.WriteLine("\t\t\t<tier bg=\"" + t.BackgroundColor + "\" filepath =\"" + t.AnnoList.Filepath + "\" name=\"" + t.AnnoList.Name + "\">");
-
-                    HashSet<LabelColorPair> h = new HashSet<LabelColorPair>();
-                    foreach (AnnoListItem item in t.AnnoList)
-                    {
-                        //  if (item.Label != "")
-                        //  {
-                        LabelColorPair l = new LabelColorPair(item.Label, item.Bg);
-                        bool detected = false;
-                        foreach (LabelColorPair p in h)
-                        {
-                            if (p.Label == l.Label)
-                            {
-                                detected = true;
-                            }
-                        }
-
-                        if (detected == false)
-                        {
-                            sw.WriteLine("\t\t\t\t<annotation color=\"" + l.Color + "\">" + l.Label + "</annotation>");
-                            h.Add(l);
-                        }
-                        // }
-                    }
-
-                    sw.WriteLine("\t\t\t</tier>");
-                }
+               
+                    sw.WriteLine("\t\t<tier filepath=\"" + t.AnnoList.Filepath + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
+             
             }
-            if (nodisretefound) sw.WriteLine("\t\t<discrete>");
-
-            sw.WriteLine("\t\t</discrete>");
-
-            sw.WriteLine("\t\t<continuous>");
-            foreach (AnnoTrack t in tracks)
-            {
-                if (!t.isDiscrete)
-                {
-                    sw.WriteLine("\t\t\t<tier bg=\"" + t.BackgroundColor + "\" filepath=\"" + t.AnnoList.Filepath + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
-                }
-            }
-            sw.WriteLine("\t\t</continuous>");
-
+  
             sw.WriteLine("\t</tiers>");
 
             sw.WriteLine("</novaproject>");
@@ -1843,89 +1797,22 @@ namespace ssi
                 }
             }
 
-            //
-
-            //foreach (XmlNode child in (doc.SelectNodes("//discrete")))
-            //{
-            //}
 
             foreach (XmlNode child in (doc.SelectNodes("//tier")))
             {
                 if (child.Attributes.Count > 0)
                 {
-                    if (child.Attributes[1].InnerText.Contains("csv"))
+                    if (child.Attributes[0].InnerText.Contains("csv"))
                     {
                         loadCSVAnnotation(child.Attributes[1].InnerText, 1, "semicolon", child.Attributes[2].InnerText);
-                        // loadCSVAnnotation(child.Attributes[1].InnerText);
                     }
-                    else if (child.Attributes[1].InnerText.Contains("anno"))
+                    else if (child.Attributes[0].InnerText.Contains("annotation"))
                     {
-                        loadAnno(child.Attributes[1].InnerText);
+                        loadAnnotation(child.Attributes[0].InnerText);
                     }
                 }
 
-                HashSet<LabelColorPair> h = new HashSet<LabelColorPair>();
-                foreach (XmlNode grandchild in child.ChildNodes)
-                {
-                    if (child.Attributes.Count > 0 && grandchild.Attributes != null)
-                    {
-                        LabelColorPair l = new LabelColorPair(grandchild.InnerText, grandchild.Attributes[0].InnerText);
-                        h.Add(l);
-                    }
-
-                    foreach (AnnoTrack at in this.anno_tracks)
-                    {
-                        if (child.Attributes[1].InnerText == at.TierId && at.isDiscrete)
-                        {
-                            at.BackgroundColor = (SolidColorBrush)(new BrushConverter().ConvertFrom(child.Attributes[0].InnerText));
-                            at.Background = at.BackgroundColor;
-
-                            foreach (AnnoListItem ali in at.AnnoList)
-                            {
-                                foreach (LabelColorPair l in h)
-                                {
-                                    if (ali.Label == l.Label)
-                                    {
-                                        ali.Bg = l.Color;
-                                    }
-                                }
-                            }
-                            h.Clear();
-                            h = new HashSet<LabelColorPair>();
-                        }
-                    }
-                }
             }
-
-            XmlNode cont = doc.SelectSingleNode("//continuous");
-
-            foreach (XmlNode child in cont)
-            {
-                double samplerate = 1; ;
-                StreamReader sr = new StreamReader(child.Attributes[1].InnerText, System.Text.Encoding.Default);
-                string line = sr.ReadLine();
-
-                string[] data = line.Split(';');
-                try
-                {
-                    double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                    line = sr.ReadLine();
-                    data = line.Split(';');
-                    double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                    samplerate = start2 - start;
-                }
-                catch
-                {
-                    MessageBox.Show("Error reading continuous file");
-                }
-                sr.Close();
-                loadCSVAnnotation(child.Attributes[1].InnerText, samplerate, "continuous");
-            }
-            //}
-            //catch (Exception ex)
-            //{
-            //    ViewTools.ShowErrorMessage(ex.ToString());
-            //}
         }
 
         private void annoTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
@@ -3215,6 +3102,13 @@ namespace ssi
 
                     al.Lowborder = s.min[s.ShowDim];
                     al.Highborder = s.max[s.ShowDim];
+                    al.AnnotationScheme = new AnnotationScheme();
+                    al.AnnotationScheme.minborder = al.Lowborder;
+                    al.AnnotationScheme.maxborder = al.Highborder;
+                    al.AnnotationScheme.mincolor = "#FFFF0000";
+                    al.AnnotationScheme.maxcolor = "#FF0000FF";
+                    al.AnnotationType = AnnoType.CONTINUOUS;
+                    al.SR = s.rate;
 
                     AnnoList result = al.saveToFileNew();
 
@@ -3224,7 +3118,7 @@ namespace ssi
                         mb = MessageBox.Show("Successfully converted stream to anno. Load the anno?", "Success", MessageBoxButton.YesNo);
                         if (mb == MessageBoxResult.Yes)
                         {
-                            loadCSVAnnotation(result.Filename, dur, "continuous");
+                            loadAnnotation(result.Filepath);
                         }
                     }
                 }

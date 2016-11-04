@@ -5,91 +5,140 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Database Connection" Height="500" Width="660" Background="LightGray" ResizeMode="NoResize">
+        Title="Conntect Database" Height="500" Width="790" Background="LightGray" ResizeMode="NoResize">
     <Grid>
+
         <Grid.RowDefinitions>
-
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
 
-        <Label Content="Server:IP" Margin="10,0,521,378"></Label>
-        <TextBox x:FieldModifier="public" Margin="10,28,436,368" x:Name="db_server" Height="25" Focusable="True" />
-        <Label Content="Database Login" Margin="212,0,-212,0"></Label>
-        <TextBox x:FieldModifier="public" Margin="212,28,270,368" x:Name="db_login" Height="25" Width="150" Focusable="True" TextChanged="db_login_TextChanged" />
-        <Label Content="Database Password" Margin="379,0,150,373" />
-        <PasswordBox x:FieldModifier="public" Margin="378,28,104,368" x:Name="db_pass" Height="25" Width="150" Focusable="True" PasswordChanged="db_pass_PasswordChanged" />
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
 
-        <Label Content="Databases" Margin="10,53,-10,-23" Grid.RowSpan="2" />
-        <ListBox Name="DataBasResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,80,448,211" SelectionMode="Single" SelectionChanged="DataBasResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <Label Content="Sessions" Margin="10,220,540,171" />
-        <!--<ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,243,448,0" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" />-->
-        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="10,243,448,0">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
+            <StackPanel Orientation="Vertical" Margin="10">
+                <Label Content="Server:IP" Margin="-3,0,0,0"></Label>
+                <TextBox x:FieldModifier="public" x:Name="db_server" Height="25" Width="200" Focusable="True" VerticalContentAlignment="Center"/>
+            </StackPanel>
 
-                    <GridViewColumn Width="60" Header="Language">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Language" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
-                    <GridViewColumn Width="60" Header="Location">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Location" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
-                    <GridViewColumn Width="Auto" Header="Date">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Date" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
+            <StackPanel Orientation="Vertical" Margin="10">
+                <Label Content="Database Login" Margin="-3,0,0,0"></Label>
+                <TextBox x:FieldModifier="public" x:Name="db_login" Height="25" Width="200" Focusable="True" TextChanged="db_login_TextChanged" VerticalContentAlignment="Center" />
+            </StackPanel>
 
-                    <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
-                </GridView>
-            </ListView.View>
-        </ListView>
+            <StackPanel Orientation="Vertical" Margin="10">
+                <Label Content="Database Password"  Margin="-3,0,0,0"/>
+                <PasswordBox x:FieldModifier="public" x:Name="db_pass" Height="25" Width="200" Focusable="True" PasswordChanged="db_pass_PasswordChanged" VerticalContentAlignment="Center" />
+            </StackPanel>
 
-        <Label Content="Annotations" Margin="237,58,270,3" Grid.RowSpan="2" />
-        <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
+            <StackPanel Orientation="Vertical" Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="Autologin" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"  VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                    <Label Content="Auto connect"  />
+                </StackPanel>
+                <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25"/>
+            </StackPanel>
 
-        <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple" Margin="246,80,200,216">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="65" Header="AnnoType" DisplayMemberBinding="{Binding AnnoType}" />
+        </StackPanel>
 
-                    <GridViewColumn Width="60" Header="Role">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Role" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
-                    <GridViewColumn Width="60" Header="Annotator">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Annotator" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
+        <Grid Grid.Row="1" Grid.Column="0">
 
-                    <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <Label Content="Media" Margin="242,220,195,-2" Grid.RowSpan="2" />
-        <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" Margin="246,243,200,0" SelectionMode="Multiple" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <CheckBox Name="showonlymine"  Content="Show only mine" Grid.Column="0" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" Margin="473,186,43,212" />
-        <CheckBox Name="requireslogin"  Content="Server requires auth" Grid.Column="0" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" Margin="473,227,10,171" IsEnabled="False" />
-        <Label Content="Data Server Login" Margin="473,253,43,139" />
-        <TextBox x:FieldModifier="public" Margin="473,280,23,116" x:Name="server_login" Height="25" Focusable="True" IsEnabled="False" />
-        <Label Content="Data Server Password" Margin="473,312,23,77" />
-        <PasswordBox x:FieldModifier="public" Margin="473,334,23,67" x:Name="server_pass" Height="25" Focusable="True" IsEnabled="False" />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
-        <Button Name="Connect"  Content="Connect" Grid.Column="0" Click="Connect_Click" Margin="548,38,34,363" />
-        <Button Name="Ok"  Content="Ok" Grid.Column="0" Grid.Row="1" Click="Ok_Click"  Height="25"  Margin="539,2,55,3" />
-        <Button Name="Cancel" Content="Cancel" Grid.Row="1"  Click="Cancel_Click"   Height="25" RenderTransformOrigin="3.367,0.24" Margin="459,2,135,3" />
+            <DockPanel Grid.Column="0" Grid.Row="0" Margin="10">
+                <Label Content="Databases" DockPanel.Dock="Top" Margin="-3,0,0,0"/>
+                <ListBox Name="DataBasResultsBox" SelectionMode="Single" SelectionChanged="DataBasResultsBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+            </DockPanel>
 
-        <Button Name="DeleteAnnotation" Content="X" Grid.Column="0" Click="DeleteAnnotation_Click" Margin="454,80,169,320"  Visibility="Collapsed" />
+            <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
+                <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0"/>
+                <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Width="60" Header="Language">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Language" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="60" Header="Location">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Location" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Date">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Date" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
 
-        <CheckBox Name="Autologin" Margin="548,10,61,393" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked" />
+            <DockPanel Grid.Column="2" Grid.Row="0"  Margin="10">
+                <DockPanel HorizontalAlignment="Stretch" DockPanel.Dock="Top" Margin="-3,0,0,0">
+                    <Label Content="Annotations" />
+                    <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="X" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed" HorizontalAlignment="Right"/>
+                </DockPanel>
+                <StackPanel Orientation="Vertical" Margin="10" DockPanel.Dock="Bottom">
+                    <CheckBox Name="showonlymine" Content="Mine only" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" />
+                    <CheckBox Name="showonlyunfinished" Content="Unfinished only" />
+                </StackPanel>                
+                <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="65" Header="Scheme" DisplayMemberBinding="{Binding AnnoType}" />
+                            <GridViewColumn Width="60" Header="Role">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Role" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="60" Header="Annotator">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Annotator" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
 
-        <Label Content="Autologin" Margin="565,2,-10,383" />
+            <DockPanel Grid.Column="3" Grid.Row="0"  Margin="10">
+                <Label Content="Media"  DockPanel.Dock="Top" Margin="-3,0,0,0"/>
+                <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" SelectionMode="Multiple" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+            </DockPanel>
+
+        </Grid>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
+            <DockPanel Margin="10">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <Button Name="Ok"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click"/>
+                    <Separator Width="10"></Separator>
+                    <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click"/>
+                </StackPanel>
+                <CheckBox Name="requireslogin" Content="Server authentication:" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
+                <Separator Width="10"></Separator>
+                <Label Content="Username"/>
+                <TextBox x:FieldModifier="public" x:Name="server_login" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center"/>
+                <Separator Width="10"></Separator>
+                <Label Content="Password" />
+                <PasswordBox x:FieldModifier="public" x:Name="server_pass" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
+                <Separator Width="30"></Separator>
+            </DockPanel>
+        </StackPanel>
+        
     </Grid>
 </Window>

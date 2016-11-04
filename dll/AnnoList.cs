@@ -397,6 +397,7 @@ namespace ssi
             list.Lowborder = 0.0;
             list.Highborder = 1.0;
             list.sr = 1;
+            list.Filepath = filepath;
            
             list.AnnotationScheme = new AnnotationScheme();
             list.AnnotationScheme.LabelsAndColors = new List<LabelColorPair>();
@@ -598,7 +599,7 @@ namespace ssi
             }
             catch (Exception e)
             {
-                MessageBox.Show("Can't read annotation file. Is it used by another program?");
+                MessageBox.Show("Can't read annotation file.");
             }
 
             return list;
@@ -741,7 +742,7 @@ namespace ssi
 
         public AnnoList saveToFileNew(String _filename, String _delimiter = ";")
         {
-            this.Filepath = _filename;
+          
             Dictionary<string, string> LabelIds = new Dictionary<string, string>();
           
             try
@@ -752,7 +753,7 @@ namespace ssi
 
 
                 sw.WriteLine("    <info ftype=\""+ this.Ftype + "\" size=\"" + this.Count + "\" />");
-                sw.WriteLine("    <meta annotator=" + Properties.Settings.Default.Annotator +"/>");
+                sw.WriteLine("    <meta annotator=\"" + Properties.Settings.Default.Annotator + "\"/>");
                 if(this.AnnotationType == AnnoType.CONTINUOUS)
                 {
                     sw.WriteLine("    <scheme name=\"" + this.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.SR + "\" min=\"" + this.Lowborder+"\" max=\"" + this.Highborder + "\" mincolor=\"" + this.AnnotationScheme.mincolor + "\" maxcolor=\"" + this.AnnotationScheme.maxcolor + "\" />");
@@ -867,6 +868,7 @@ namespace ssi
 
                 HasChanged = false;
                 AnnoList newAnno = new AnnoList(_filename);
+                newAnno.Filepath = _filename;
                 return newAnno;
             }
             catch
