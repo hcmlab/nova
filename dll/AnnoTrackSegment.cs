@@ -11,7 +11,7 @@ namespace ssi
     {
         public const int RESIZE_OFFSET = 5;
         public const int MIN_WIDTH = 2;
-        public const string CONFBRUSH = "BorderBrush";
+        public const string CONFBRUSH = "HatchBrush";
         private PatternBrushes res = new PatternBrushes();
 
         public bool is_selected;

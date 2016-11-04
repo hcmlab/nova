@@ -87,13 +87,13 @@
 
                 <StatusBar Grid.Column="0" Grid.Row="0">
 
-                    <Button Name="annoNameLabel">#NoTier</Button>
+                    <Button Name="annoNameLabel" Background="Transparent" BorderBrush="Transparent">#NoTier</Button>
                    
                     <StatusBarItem HorizontalContentAlignment="Right">
                         <StackPanel Orientation="Horizontal" Width="82">
-                            <TextBlock Name="annoPositionLabel">00:00:00.00</TextBlock>
+                            <TextBlock Name="annoPositionLabel" VerticalAlignment="Center">00:00:00.00</TextBlock>
                             <Label></Label>
-                            <Button x:Name="CloseAnnotrackButton" Content="X" HorizontalAlignment="Right" />
+                            <Button x:Name="CloseAnnotrackButton" Content="X" HorizontalAlignment="Right" Background="Transparent" BorderBrush="Transparent"/>
                         </StackPanel>
                     </StatusBarItem>
                 </StatusBar>
