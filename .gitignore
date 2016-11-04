@@ -291,3 +291,4 @@ bin/MongoDB.Driver.dll
 bin/nova.exe.config
 bin/MongoDB.Driver.dll
 bin/MongoDB.Bson.dll
+*.dll
