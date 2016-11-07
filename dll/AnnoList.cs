@@ -43,6 +43,7 @@ namespace ssi
         public bool usesAnnoScheme = false;
         private string annotator = null;
         private string ftype = "ASCII";
+        private bool isclosed = false;
 
         private  AnnoType _Type = AnnoType.DISCRETE;
 
@@ -58,6 +59,12 @@ namespace ssi
             set { role = value; }
         }
 
+        public bool isClosed
+        {
+            get { return isclosed; }
+            set { isclosed = value; }
+        }
+
 
         public string Ftype
         {
@@ -71,6 +78,7 @@ namespace ssi
             get { return subject; }
             set { subject = value; }
         }
+
 
         public double SR
         {
@@ -494,7 +502,9 @@ namespace ssi
                                 double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
                                 double dur = stop - start;
                                 string label = "";
-                                LabelIds.TryGetValue(data[2], out label);
+               
+                                if (UInt32.Parse(data[2]) ==  unchecked( (uint)-1)) label = "GARBAGE";
+                                else   LabelIds.TryGetValue(data[2], out label);
                                 string color = "#000000";
 
                                 if (list.AnnotationScheme.LabelsAndColors.Find(x => x.Label == label) != null)
@@ -552,7 +562,8 @@ namespace ssi
                                 double dur = stop - start;
                                 string label = "";
                                 int index = binaryReader.ReadInt32();
-                                LabelIds.TryGetValue(index.ToString(), out label);
+                                if ((UInt32)(index) ==  unchecked( (uint)-1)) label = "GARBAGE";
+                                else LabelIds.TryGetValue(index.ToString(), out label);
                                 string color = "#000000";
 
                                 if (list.AnnotationScheme.LabelsAndColors.Find(x => x.Label == label) != null)
@@ -566,10 +577,6 @@ namespace ssi
 
                             else if (list.AnnotationType == AnnoType.FREE)
                             {
-                                //MessageBox.Show("Binary Free Annotations are not supported at the time");
-                                //break;
-
-
                                 start = binaryReader.ReadDouble();
                                 double stop = binaryReader.ReadDouble();
                                 double dur = stop - start;

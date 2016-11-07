@@ -73,7 +73,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("DataServerLogin")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string DataServerLogin {
             get {
                 return ((string)(this["DataServerLogin"]));
@@ -85,7 +85,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("DataServerPass")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string DataServerPass {
             get {
                 return ((string)(this["DataServerPass"]));

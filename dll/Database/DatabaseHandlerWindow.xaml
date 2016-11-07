@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Conntect Database" Height="500" Width="790" Background="LightGray" ResizeMode="NoResize">
+        Title="Conntect Database" Height="500" Width="790" Background="LightGray">
     <Grid>
 
         <Grid.RowDefinitions>
@@ -94,22 +94,31 @@
                 </DockPanel>
                 <StackPanel Orientation="Vertical" Margin="10" DockPanel.Dock="Bottom">
                     <CheckBox Name="showonlymine" Content="Mine only" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" />
-                    <CheckBox Name="showonlyunfinished" Content="Unfinished only" />
+                    <CheckBox Name="showonlyunfinished" Content="Unfinished only" Checked="showonlyunfinished_Checked" Unchecked="showonlyunfinished_Unchecked" />
                 </StackPanel>                
                 <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="65" Header="Scheme" DisplayMemberBinding="{Binding AnnoType}" />
-                            <GridViewColumn Width="60" Header="Role">
+                            <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding AnnoType}" />
+                            <GridViewColumn Width="Auto" Header="Role">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Role" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-                            <GridViewColumn Width="60" Header="Annotator">
+                            <GridViewColumn Width="Auto" Header="Annotator">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Annotator" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Finished">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <CheckBox Name="IsFinishedCheckbox" IsEnabled="{Binding IsOwner}" IsChecked="{Binding IsFinished}" Checked="IsFinishedCheckbox_Checked" Unchecked="IsFinishedCheckbox_Unchecked"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>                            
                         </GridView>
                     </ListView.View>
                 </ListView>

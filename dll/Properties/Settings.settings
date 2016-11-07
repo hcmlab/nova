@@ -15,10 +15,10 @@
       <Value Profile="(Default)">/path/to/your/files/</Value>
     </Setting>
     <Setting Name="DataServerLogin" Type="System.String" Scope="User">
-      <Value Profile="(Default)">DataServerLogin</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="DataServerPass" Type="System.String" Scope="User">
-      <Value Profile="(Default)">DataServerPass</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="DataServerConnectionType" Type="System.String" Scope="User">
       <Value Profile="(Default)">sftp</Value>

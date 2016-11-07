@@ -145,13 +145,13 @@ namespace ssi
         private void showonlymine_Checked(object sender, RoutedEventArgs e)
         {
             AnnoItems.Clear();
-            GetAnnotations(true);
+            GetAnnotations(true, showonlyunfinished.IsChecked == true);
         }
 
         private void showonlymine_Unchecked(object sender, RoutedEventArgs e)
         {
             AnnoItems.Clear();
-            GetAnnotations(false);
+            GetAnnotations(false, showonlyunfinished.IsChecked == true);
         }
 
         public int Authlevel()
@@ -313,7 +313,7 @@ namespace ssi
             return id;
         }
 
-        public async void GetAnnotations(bool onlyme = false)
+        public async void GetAnnotations(bool onlyme = false, bool onlyunfinished = false)
 
         {
             AnnotationResultBox.ItemsSource = null;
@@ -329,35 +329,39 @@ namespace ssi
             var builder = Builders<BsonDocument>.Filter;
 
             ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
-            //  string sessionid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", annos["annotator_id"].AsObjectId);
-            //   var filter = builder.Eq("session_id", sessionid);
-            //  var documents = annotations.Find(filter).ToList();
 
             var filter = builder.Eq("session_id", sessionid);
 
             using (var cursor = await annotations.FindAsync(filter))
             {
-                await cursor.ForEachAsync(d => addAnnotoList(d, onlyme));
+                await cursor.ForEachAsync(d => addAnnotoList(d, onlyme, onlyunfinished));
             }
             AnnotationResultBox.ItemsSource = AnnoItems;
         }
 
-        public void addAnnotoList(BsonDocument annos, bool onlyme)
+        public void addAnnotoList(BsonDocument annos, bool onlyme, bool onlyunfinished)
         {
             // AnnotationResultBox.ItemsSource = null;
-
+            ObjectId id = annos["_id"].AsObjectId;
             string roleid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Roles", "name", annos["role_id"].AsObjectId);
             string annotid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "AnnotationSchemes", "name", annos["scheme_id"].AsObjectId);
             string annotatid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "name", annos["annotator_id"].AsObjectId);
 
-            if (onlyme)
+            bool isfinished = false;
+            try
             {
-                if (Properties.Settings.Default.MongoDBUser == annotatid)
-                {
-                    AnnoItems.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
-                }
+                isfinished = annos["isFinished"].AsBoolean;
             }
-            else AnnoItems.Add(new DatabaseAnno() { Role = roleid, AnnoType = annotid, Annotator = annotatid });
+            catch(Exception ex) {}
+
+            if (!onlyme && !onlyunfinished ||
+                onlyme && !onlyunfinished && Properties.Settings.Default.MongoDBUser == annotatid ||
+                !onlyme && onlyunfinished && !isfinished ||
+                onlyme && onlyunfinished && !isfinished && Properties.Settings.Default.MongoDBUser == annotatid)
+            {
+                bool isOwner = authlevel > 2 || Properties.Settings.Default.MongoDBUser == annotatid;
+                AnnoItems.Add(new DatabaseAnno() { Id=id, Role = roleid, AnnoType = annotid, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner});                                               
+            }
         }
 
         public List<DatabaseMediaInfo> GetMediaFromDB(string db, string session)
@@ -485,7 +489,10 @@ namespace ssi
             {
                 for (int i = 0; i < AnnotationResultBox.SelectedItems.Count; i++)
                 {
-                    if (authlevel > 2 || Properties.Settings.Default.MongoDBUser == ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator) DeleteAnnotation.Visibility = Visibility.Visible;
+                    if (authlevel > 2 || Properties.Settings.Default.MongoDBUser == ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator)
+                    {
+                        DeleteAnnotation.Visibility = Visibility.Visible;
+                    }
                 }
             }
         }
@@ -512,6 +519,40 @@ namespace ssi
         {
             Autologin.IsChecked = false;
             Autologin.IsEnabled = false;
+        }
+
+        private void showonlyunfinished_Checked(object sender, RoutedEventArgs e)
+        {
+            AnnoItems.Clear();
+            GetAnnotations(showonlymine.IsChecked == true, true);
+        }
+
+        private void showonlyunfinished_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AnnoItems.Clear();
+            GetAnnotations(showonlymine.IsChecked == true, false);
+        }
+
+        private void ChangeFinishedState(ObjectId id, bool state)
+        {
+            var annos = database.GetCollection<BsonDocument>("Annotations");
+            var builder = Builders<BsonDocument>.Filter;
+
+            var filter = builder.Eq("_id", id);
+            var update = Builders<BsonDocument>.Update.Set("isFinished", state);
+            annos.UpdateOne(filter, update);
+        }
+
+        private void IsFinishedCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            DatabaseAnno anno = (DatabaseAnno) ((CheckBox)sender).DataContext;
+            ChangeFinishedState(anno.Id, true);
+        }
+
+        private void IsFinishedCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
+            ChangeFinishedState(anno.Id, false);
         }
     }
 }
