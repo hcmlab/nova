@@ -20,5 +20,5 @@
         </ControlTemplate>
     </UserControl.Resources>
 
-    <acl:RangeSlider x:Name="ui" Grid.Row="0"  RangeStart="0" RangeStop="100000" RangeStartSelected="0" RangeStopSelected="100000" MinRange="100" Template="{StaticResource rangeSliderTemplate}" Height="25"></acl:RangeSlider>
+    <acl:RangeSlider x:Name="ui" Grid.Row="0"  RangeStart="0" RangeStop="100000" RangeStartSelected="0" RangeStopSelected="100" MinRange="100" Template="{StaticResource rangeSliderTemplate}" Height="25"></acl:RangeSlider>
 </UserControl>

@@ -43,7 +43,6 @@ namespace ssi
         public bool usesAnnoScheme = false;
         private string annotator = null;
         private string ftype = "ASCII";
-        private bool isclosed = false;
 
         private  AnnoType _Type = AnnoType.DISCRETE;
 
@@ -57,12 +56,6 @@ namespace ssi
         {
             get { return role; }
             set { role = value; }
-        }
-
-        public bool isClosed
-        {
-            get { return isclosed; }
-            set { isclosed = value; }
         }
 
 
