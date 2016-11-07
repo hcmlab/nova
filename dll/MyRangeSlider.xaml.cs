@@ -111,6 +111,44 @@ namespace ssi
             }
         }
 
+
+        public void UpdateFixedRange(double duration)
+        {
+            if (_viewTime != null)
+            {
+                //seens to be a bug in avalon lib when mo.try to fix it by adjusting the value
+
+   
+                _viewTime.SelectionStart = _viewTime.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
+                _viewTime.SelectionStop = _viewTime.SelectionStart + duration;
+                ui.RangeStopSelected = ((long)_viewTime.SelectionStop * ui.RangeStop) / (long)_viewTime.TotalDuration;
+
+                if (_viewTime.SelectionStart < 0) _viewTime.SelectionStart = 0;
+                if (_viewTime.SelectionStop - _viewTime.SelectionStart < min)
+                {
+                    _viewTime.SelectionStop = _viewTime.SelectionStart + min;
+                }
+
+                if (followmedia)
+                {
+                    if (_viewTime.SelectionStop < ViewTime.CurrentPlayPosition)
+                    {
+                        if (_viewTime.TotalDuration > 0)
+                        {
+                            ui.RangeStartSelected = ((long)_viewTime.SelectionStart * ui.RangeStop) / (long)_viewTime.TotalDuration;
+                            ui.RangeStopSelected = ((long)_viewTime.SelectionStop * ui.RangeStop) / (long)_viewTime.TotalDuration;
+                        }
+                    }
+                }
+
+                if (OnTimeRangeChanged != null)
+                {
+                    OnTimeRangeChanged(_viewTime);
+                    OnTimeRangeChanged(_viewTime);
+                }
+            }
+        }
+
         public void MoveAndUpdate(bool moveRight, double moveWindowPercentage)
         {
             if (_viewTime == null)

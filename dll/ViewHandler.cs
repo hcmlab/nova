@@ -1022,8 +1022,9 @@ namespace ssi
                 setAnnoList(anno);
                 addAnno(anno, anno.AnnotationType, anno.SR, filename, anno.Lowborder, anno.Highborder);
             }
-
+     
             updateTimeRange(maxdur);
+            fixTimeRange(30);
         }
 
 
@@ -1145,6 +1146,7 @@ namespace ssi
 
             //Adjust the view
             updateTimeRange(maxdur);
+            fixTimeRange(30);
         }
 
         private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
@@ -1339,6 +1341,13 @@ namespace ssi
                 ViewHandler.Time.TotalDuration = duration;
                 if (!movemedialock) this.view.trackControl.timeTrackControl.rangeSlider.Update();
             }
+        }
+
+        private void fixTimeRange(double duration)
+        {
+          
+                if (!movemedialock) this.view.trackControl.timeTrackControl.rangeSlider.UpdateFixedRange(duration);
+            
         }
 
         private void loadMedia(string filename, bool is_video, string url = null)
@@ -2312,6 +2321,7 @@ namespace ssi
                 case ssi_file_type.ANNOTATION:
                     loadAnnotation(filename);
                     loaded = true;
+                   
                     break;
 
                 case ssi_file_type.STREAM:
