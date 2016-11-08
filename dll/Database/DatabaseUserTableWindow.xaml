@@ -9,15 +9,23 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Label Name="titlelabel"  Content="Hello" Margin="10,7,18,226" />
-        <ListBox Name="DataBaseResultsBox" Grid.Row="0" Grid.Column="0" Margin="5,41,5,5" SelectionMode="Single"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <Button Name="Ok"  Content="Ok" Grid.Row="1" Grid.Column="0" Click="Ok_Click" Margin="219,5,5,5" ></Button>
-        <Button Name="Cancel" Content="Cancel" Grid.Row="1" Grid.Column="0" Click="Cancel_Click" Visibility="Collapsed" Margin="151,5,78,5" ></Button>
-        <Button Name="Delete" Content="X" Grid.Row="1" Grid.Column="0" Click="Delete_Click" Margin="34,5,233,5" ></Button>
-        <Button Name="Add" Content="+" Grid.Row="1" Grid.Column="0" Click="Add_Click" Margin="5,5,263,5" ></Button>
-        <Button Name="Edit" Content="E" Grid.Row="1" Grid.Column="0" Click="Edit_Click" Margin="64,5,204,5" Visibility="Hidden"></Button>
+        <Label Name="titlelabel" Grid.Row="0" Content="Title" />
+        <ListBox Name="DataBaseResultsBox" Grid.Row="1" Margin="5,0,5,0" SelectionMode="Single"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+        <DockPanel Grid.Row="2" LastChildFill="True">
+            <StackPanel Orientation="Horizontal" Margin="5" DockPanel.Dock="Right">
+                <Button Name="Ok" Content="Ok" Width="25" Click="Ok_Click"></Button>
+                <Button Name="Cancel" Margin="5,0,0,0" Content="Cancel" Click="Cancel_Click" Visibility="Collapsed"></Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <Button Name="Delete" Width="25" Content="-" Click="Delete_Click"></Button>
+                <Button Name="Add" Margin="5,0,0,0" Width="25" Content="+" Click="Add_Click"></Button>
+                <Button Name="Edit" Margin="5,0,0,0" Content="Edit" Click="Edit_Click" Visibility="Hidden"></Button>
+            </StackPanel>
+
+        </DockPanel>
     </Grid>
 </Window>

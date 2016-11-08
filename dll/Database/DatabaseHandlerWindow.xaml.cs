@@ -443,6 +443,75 @@ namespace ssi
             }
         }
 
+
+        private ObjectId GetIdFromName(IMongoCollection<BsonDocument> collection, string name)
+        {
+            ObjectId id = new ObjectId();
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("name", name);
+            var database = collection.Find(filter).ToList();
+            if (database.Count > 0) id = database[0].GetValue(0).AsObjectId;
+
+            return id;
+        }
+
+        private void CopyAnnotation_Click(object sender, RoutedEventArgs e)
+        {
+            if (AnnotationResultBox.SelectedItem != null)
+            {
+                var sessions = database.GetCollection<BsonDocument>("Sessions");
+                var roles = database.GetCollection<BsonDocument>("Roles");
+                var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+                var annotations = database.GetCollection<BsonDocument>("Annotations");
+                var annotators = database.GetCollection<BsonDocument>("Annotators");
+
+                ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Role);
+                ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).AnnoType);
+                ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator);
+                ObjectId sessionid = GetIdFromName(sessions, Properties.Settings.Default.LastSessionId);
+
+                var builder = Builders<BsonDocument>.Filter;
+                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
+                var anno = annotations.Find(filter).Single();
+
+                List<string> annotator_names = new List<string>();
+                foreach (var document in annotators.Find(_ => true).ToList())
+                {
+                    annotator_names.Add(document["name"].ToString());
+                }
+                DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(annotator_names, false, "Select Annotator", "Annotator");
+                dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                dbw.ShowDialog();
+
+                if (dbw.DialogResult == true)
+                {
+                    string annotator_name = dbw.Result().ToString();
+                    ObjectId annotid_new = GetIdFromName(annotators, annotator_name);     
+                                   
+                    anno.Remove("_id");
+                    anno["annotator_id"] = annotid_new;
+                    try
+                    {
+                        anno["isFinished"] = false;
+                    }
+                    catch (Exception ex)
+                    { }
+
+                    UpdateOptions uo = new UpdateOptions();
+                    uo.IsUpsert = true;
+
+                    filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotid_new) & builder.Eq("session_id", sessionid);
+                    var result = annotations.ReplaceOne(filter, anno, uo);
+
+                    AnnoItems.Clear();
+                    GetAnnotations();
+                }
+
+               
+            }
+        }
+
+
         private void DeleteAnnotation_Click(object sender, RoutedEventArgs e)
         {
             if (AnnotationResultBox.SelectedItem != null)
@@ -453,31 +522,15 @@ namespace ssi
                 var annotations = database.GetCollection<BsonDocument>("Annotations");
                 var annotators = database.GetCollection<BsonDocument>("Annotators");
 
-                ObjectId roleid = new ObjectId();
+                ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Role);                
+                ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).AnnoType);                
+                ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator);                
+                ObjectId sessionid = GetIdFromName(sessions, Properties.Settings.Default.LastSessionId);
+
                 var builder = Builders<BsonDocument>.Filter;
-                var filtera = builder.Eq("name", ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Role);
-                var roledb = roles.Find(filtera).ToList();
-                if (roledb.Count > 0) roleid = roledb[0].GetValue(0).AsObjectId;
-
-                ObjectId annotid = new ObjectId(); ;
-                var filterb = builder.Eq("name", ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).AnnoType);
-                var annotdb = annotationschemes.Find(filterb).ToList();
-                if (annotdb.Count > 0) annotid = annotdb[0].GetValue(0).AsObjectId;
-
-                ObjectId annotatid = new ObjectId(); ;
-                var filterc = builder.Eq("name", ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator);
-                var annotatdb = annotators.Find(filterc).ToList();
-                if (annotatdb.Count > 0) annotatid = annotatdb[0].GetValue(0).AsObjectId;
-
-                ObjectId sessionid = new ObjectId(); ;
-                var filterd = builder.Eq("name", (Properties.Settings.Default.LastSessionId));
-                var sessiondb = sessions.Find(filterd).ToList();
-                if (sessiondb.Count > 0) sessionid = sessiondb[0].GetValue(0).AsObjectId;
-
                 var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
-                var anno = annotations.Find(filter).ToList();
-
                 var result = annotations.DeleteOne(filter);
+
                 AnnoItems.Clear();
                 GetAnnotations();
             }
@@ -492,6 +545,7 @@ namespace ssi
                     if (authlevel > 2 || Properties.Settings.Default.MongoDBUser == ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator)
                     {
                         DeleteAnnotation.Visibility = Visibility.Visible;
+                        CopyAnnotation.Visibility = Visibility.Visible;
                     }
                 }
             }
@@ -554,5 +608,7 @@ namespace ssi
             DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
             ChangeFinishedState(anno.Id, false);
         }
+
+
     }
 }

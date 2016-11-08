@@ -63,7 +63,7 @@
 
             <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
                 <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0"/>
-                <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged">
+                <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged" SelectionMode="Single">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -90,13 +90,16 @@
             <DockPanel Grid.Column="2" Grid.Row="0"  Margin="10">
                 <DockPanel HorizontalAlignment="Stretch" DockPanel.Dock="Top" Margin="-3,0,0,0">
                     <Label Content="Annotations" />
-                    <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="X" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed" HorizontalAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal"  HorizontalAlignment="Right">
+                        <Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed"/>
+                        <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="-" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed"/>
+                    </StackPanel>
                 </DockPanel>
                 <StackPanel Orientation="Vertical" Margin="10" DockPanel.Dock="Bottom">
                     <CheckBox Name="showonlymine" Content="Mine only" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" />
                     <CheckBox Name="showonlyunfinished" Content="Unfinished only" Checked="showonlyunfinished_Checked" Unchecked="showonlyunfinished_Unchecked" />
                 </StackPanel>                
-                <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple">
+                <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding AnnoType}" />
@@ -126,7 +129,7 @@
 
             <DockPanel Grid.Column="3" Grid.Row="0"  Margin="10">
                 <Label Content="Media"  DockPanel.Dock="Top" Margin="-3,0,0,0"/>
-                <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" SelectionMode="Multiple" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+                <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" SelectionMode="Extended" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
             </DockPanel>
 
         </Grid>
@@ -134,18 +137,16 @@
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
             <DockPanel Margin="10">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <Button Name="Ok"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click"/>
-                    <Separator Width="10"></Separator>
+                    <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click"/>
                     <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click"/>
                 </StackPanel>
-                <CheckBox Name="requireslogin" Content="Server authentication:" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
-                <Separator Width="10"></Separator>
-                <Label Content="Username"/>
-                <TextBox x:FieldModifier="public" x:Name="server_login" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center"/>
-                <Separator Width="10"></Separator>
-                <Label Content="Password" />
-                <PasswordBox x:FieldModifier="public" x:Name="server_pass" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
-                <Separator Width="30"></Separator>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="requireslogin" Content="Server authentication:" Margin="0,0,5,0" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
+                    <Label Content="Username"/>
+                    <TextBox x:FieldModifier="public" x:Name="server_login" Margin="0,0,5,0" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center"/>
+                    <Label Content="Password" />
+                    <PasswordBox x:FieldModifier="public" x:Name="server_pass" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
+                </StackPanel>
             </DockPanel>
         </StackPanel>
         
