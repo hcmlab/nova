@@ -79,6 +79,7 @@ namespace ssi
         private List<long> downloadsreceived = new List<long>();
         private List<long> downloadstotal = new List<long>();
         private List<string> filestoload = new List<string>();
+        private int fixedseconds = 30;
 
 
 
@@ -997,6 +998,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
+            if(maxdur > Properties.Settings.Default.DefaultZoominSeconds  && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
 
@@ -1024,7 +1026,7 @@ namespace ssi
             }
      
             updateTimeRange(maxdur);
-            fixTimeRange(30);
+            if(maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
 
@@ -1146,7 +1148,7 @@ namespace ssi
 
             //Adjust the view
             updateTimeRange(maxdur);
-            fixTimeRange(30);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
@@ -1179,6 +1181,7 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds  && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadAnvil(string filename)
@@ -1204,6 +1207,7 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadEvents(string filename)
@@ -1227,6 +1231,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadStream(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
@@ -1329,7 +1334,9 @@ namespace ssi
             else
             {
                 track.timeRangeChanged(ViewHandler.Time);
+
             }
+            if (duration > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             //updateTimeRange(duration);
             //track.timeRangeChanged(ViewHandler.Time);
         }
@@ -1369,6 +1376,7 @@ namespace ssi
                 if (media.GetLength() > 0)
                 {
                     updateTimeRange(media.GetLength());
+                    if (media.GetLength() > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
                     _timer.Stop();
                 }
             });
@@ -2505,6 +2513,7 @@ namespace ssi
                 Properties.Settings.Default.MongoDBIP = s.MongoServer();
                 Properties.Settings.Default.MongoDBUser = s.MongoUser();
                 Properties.Settings.Default.MongoDBPass = s.MongoPass();
+                Properties.Settings.Default.DefaultZoominSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.Save();
 
             }
@@ -2870,7 +2879,6 @@ namespace ssi
 
         private void mongodb_Functions(object sender, RoutedEventArgs e)
         {
-            System.Collections.IList annotations = null;
             DatabaseFunctions dbf = new DatabaseFunctions();
             dbf.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbf.ShowDialog();
@@ -2882,6 +2890,7 @@ namespace ssi
                     addAnno(dbf.Median(), AnnoType.CONTINUOUS, dbf.Median().SR, null, dbf.Median().Lowborder, dbf.Median().Highborder, null, "Median");
 
                     updateTimeRange(dbf.Median().Last().Stop);
+                    if (dbf.Median().Last().Stop > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
                 }
 
                 if (dbf.RMS() != null)
@@ -2889,6 +2898,8 @@ namespace ssi
                     addAnno(dbf.RMS(), AnnoType.CONTINUOUS, dbf.RMS().SR, null, dbf.RMS().Lowborder, dbf.RMS().Highborder, null, "RMS");
 
                     updateTimeRange(dbf.RMS().Last().Stop);
+                    if(dbf.RMS().Last().Stop > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+
                 }
             }
             this.view.mongodbmenu.IsEnabled = true;

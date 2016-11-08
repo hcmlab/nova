@@ -25,6 +25,7 @@ namespace ssi
             InitializeComponent();
             Certainty.Text = Properties.Settings.Default.UncertaintyLevel.ToString();
             Annotator.Text = Properties.Settings.Default.Annotator;
+            DefaultZoom.Text = Properties.Settings.Default.DefaultZoominSeconds.ToString();
             DBServer.Text = Properties.Settings.Default.MongoDBIP;
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPW.Password = Properties.Settings.Default.MongoDBPass;
@@ -39,6 +40,11 @@ namespace ssi
         public string AnnotatorName()
         {
             return Annotator.Text;
+        }
+
+        public string ZoomInseconds()
+        {
+            return DefaultZoom.Text;
         }
 
         public string MongoServer()
