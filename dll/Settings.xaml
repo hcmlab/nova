@@ -12,38 +12,47 @@
             <RowDefinition Height="368*"/>
         </Grid.RowDefinitions>
         <TabControl Grid.RowSpan="2">
-            <TabItem Header="Annotator">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="2,5">
-                    <Label Content="Annotator Name " Margin="0,0,0,288"/>
-                    <TextBox Name="Annotator" Margin="0,0,0,300" Width="91" HorizontalAlignment="Right" RenderTransformOrigin="-1.755,2.974"/>
-                </StackPanel>
+            <TabItem Header="General">
+
+                <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
+ 
+                    <Label Content="Annotator Name" DockPanel.Dock="Top" HorizontalAlignment="left"/>
+                    <TextBox Name="Annotator" DockPanel.Dock="Top"  Width="91" HorizontalAlignment="left"/>
+
+                
+                    <Label Content="Default zoom in seconds: (0 for max. duration)"  HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <TextBox Name="DefaultZoom" Width="91"  DockPanel.Dock="Top" HorizontalAlignment="left"  PreviewTextInput="NumberValidationTextBox"/>
+                    <Label Content="Correction certainty level:"   HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <TextBox Name="Certainty"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox"/>
+                    <Separator Visibility="Hidden"> </Separator>
+                </DockPanel>
+
+
+
+
             </TabItem>
 
-            <TabItem Header="Correction Mode" HorizontalAlignment="Right" Width="106">
+            <!--<TabItem Header="Correction Mode" HorizontalAlignment="Right" Width="106">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="2,5">
                     <Label Content="Acceptance Certainty Level: " Margin="0,0,0,288"/>
                     <TextBox Name="Certainty" Margin="0,0,0,300" Width="91" HorizontalAlignment="Right" RenderTransformOrigin="-1.755,2.974" PreviewTextInput="NumberValidationTextBox"/>
 
                 </StackPanel>
 
-
-
-
-
-
-            </TabItem>
+            </TabItem>-->
 
             <TabItem Header="Database">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="2,5">
-                    <Label Content=" Server: " Margin="0,0,0,288"/>
-                    <TextBox Name="DBServer" Margin="0,0,0,300" Width="136" HorizontalAlignment="Right" RenderTransformOrigin="-1.755,2.974" PreviewTextInput="NumberValidationTextBox"/>
-                    <Label Content="User: " Margin="0,0,0,288"/>
-                    <TextBox Name="DBUser" Margin="0,0,0,300" Width="91" HorizontalAlignment="Right" RenderTransformOrigin="-1.755,2.974" PreviewTextInput="NumberValidationTextBox"/>
-                    <Label Content="Password: " Margin="0,0,0,288"/>
-                    <PasswordBox Name="DBPW" Margin="0,0,0,300" Width="91" HorizontalAlignment="Right" RenderTransformOrigin="-1.755,2.974" PreviewTextInput="NumberValidationTextBox"/>
+                <DockPanel Grid.Column="1" Grid.Row="0" Margin="10"  HorizontalAlignment="left" DockPanel.Dock="Top" >
+                    <Label Content="MongoDB Server: " HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <TextBox Name="DBServer"  HorizontalAlignment="left" DockPanel.Dock="Top"  Width="110" />
+                    <Label Content="MongoDB User: " HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <TextBox Name="DBUser" HorizontalAlignment="left" DockPanel.Dock="Top"  Width="110"  RenderTransformOrigin="-1.755,2.974"/>
+                    <Label Content="MongoDB Password: " HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <PasswordBox Name="DBPW" HorizontalAlignment="left" DockPanel.Dock="Top"  Width="110"  RenderTransformOrigin="-1.755,2.974"/>
+                    <Separator Visibility="Hidden"></Separator>
 
-                </StackPanel>
-                
+                </DockPanel>
+
 
             </TabItem>
         </TabControl>

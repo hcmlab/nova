@@ -47,5 +47,8 @@
     <Setting Name="Annotator" Type="System.String" Scope="User">
       <Value Profile="(Default)">Unknown</Value>
     </Setting>
+    <Setting Name="DefaultZoominSeconds" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
