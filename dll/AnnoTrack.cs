@@ -347,6 +347,7 @@ namespace ssi
             }
             else
             {   //it has to be called twice, otherwise there are some weird effects.
+               
                 timeRangeChanged(ViewHandler.Time);
                 timeRangeChanged(ViewHandler.Time);
             }
@@ -503,10 +504,9 @@ namespace ssi
             el.SetValue(Canvas.LeftProperty, 0.0);
             this.Children.Add(el);
 
-            if (isDiscrete) timeRangeChanged(ViewHandler.Time);
+            timeRangeChanged(ViewHandler.Time);
             if (!isDiscrete)
             {
-                timeRangeChanged(ViewHandler.Time);
                 timeRangeChanged(ViewHandler.Time);
             }
         }
@@ -841,25 +841,22 @@ namespace ssi
         {
             this.Width = time.SelectionInPixel;
 
-          
+          //segments can happen in both, discrete and continuous annotations, so we check them in any case
                 foreach (AnnoTrackSegment s in segments)
                 {
-                    s.Visibility = Visibility.Hidden;
+                    s.Visibility = Visibility.Collapsed;
                     if (s.Item.Start >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
                     {
                         s.update();
-                    if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
-                    else if (CorrectMode == false) s.Visibility = Visibility.Visible;
-                    else s.Visibility = Visibility.Collapsed;
-                   // s.Visibility = Visibility.Visible;
+                        if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
+                        else if (CorrectMode == false) s.Visibility = Visibility.Visible;
                     }
                     else if (s.Item.Stop >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
                     {
-                        s.update2();
+                    s.update2();
                     if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
                     else if (CorrectMode == false) s.Visibility = Visibility.Visible;
-                    else s.Visibility = Visibility.Collapsed;
-                   // s.Visibility = Visibility.Visible;
+
                     }
                 }
             

@@ -191,10 +191,8 @@ namespace ssi
                 if(item.Confidence < Properties.Settings.Default.UncertaintyLevel)
                 {
 
-                  
                     VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
                     this.Background = vb;
-
                 }
                 Canvas.SetLeft(this, start);
             }
