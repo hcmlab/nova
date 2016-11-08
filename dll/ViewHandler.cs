@@ -3103,7 +3103,7 @@ namespace ssi
 
         private void convertocontanno_Click(object sender, RoutedEventArgs e)
         {
-            if (SignalTrack.SelectedSignal != null)
+            if (SignalTrack.SelectedSignal != null && !SignalTrack.SelectedSignal.IsAudio)
             {
                 Signal s = SignalTrack.SelectedSignal;
                 AnnoList al = new AnnoList();
@@ -3218,7 +3218,7 @@ namespace ssi
         private void convertosignal_Click(object sender, RoutedEventArgs e)
         {
             AnnoTrack at = AnnoTrack.GetSelectedTrack();
-            if (at.isDiscrete) MessageBox.Show("Selected a continious track to convert to ssi stream");
+            if (at.AnnoList.AnnotationType != AnnoType.CONTINUOUS) MessageBox.Show("Selected a continious track to convert to ssi stream");
             else
             {
                 double sr = 1000.0 / (at.AnnoList[0].Duration * 1000);
