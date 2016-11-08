@@ -332,11 +332,18 @@ namespace ssi
 
             var filter = builder.Eq("session_id", sessionid);
 
-            using (var cursor = await annotations.FindAsync(filter))
+            try
             {
-                await cursor.ForEachAsync(d => addAnnotoList(d, onlyme, onlyunfinished));
+                using (var cursor = await annotations.FindAsync(filter))
+                {
+                    await cursor.ForEachAsync(d => addAnnotoList(d, onlyme, onlyunfinished));
+                }
+                AnnotationResultBox.ItemsSource = AnnoItems;
             }
-            AnnotationResultBox.ItemsSource = AnnoItems;
+            catch (Exception ex){
+                MessageBox.Show("At least one Database Entry seems to be corrupt. Entries have not been loaded.");
+            }
+          
         }
 
         public void addAnnotoList(BsonDocument annos, bool onlyme, bool onlyunfinished)
