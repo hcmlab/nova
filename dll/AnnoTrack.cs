@@ -617,6 +617,11 @@ namespace ssi
 
         protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
         {
+
+            if (selected_track != this)
+            {
+                AnnoTrack.SelectTrack(this);
+            }
             base.OnMouseRightButtonDown(e);
             if(!CorrectMode)
             {
