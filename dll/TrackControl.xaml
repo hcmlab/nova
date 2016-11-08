@@ -72,23 +72,25 @@
                 Height="6"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Margin="0" ShowsPreview="True">
+                Margin="0" 
+                ShowsPreview="True">
             </GridSplitter>
 
             <Grid Grid.Column="0" Grid.Row="2">
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="29*" />
+                    <ColumnDefinition Width="18*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StatusBar Grid.Column="0" Grid.Row="0">
+                <StatusBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
 
                     <Button Name="annoNameLabel" Background="Transparent" BorderBrush="Transparent">#NoTier</Button>
-                   
+
                     <StatusBarItem HorizontalContentAlignment="Right">
                         <StackPanel Orientation="Horizontal" Width="82">
                             <TextBlock Name="annoPositionLabel" VerticalAlignment="Center">00:00:00.00</TextBlock>
@@ -98,7 +100,7 @@
                     </StatusBarItem>
                 </StatusBar>
 
-                <Border Grid.Column="0" Grid.Row="1" BorderThickness="0">
+                <Border Grid.Column="0" Grid.Row="1" BorderThickness="0" Grid.ColumnSpan="2">
                     <local:AnnoTrackControl
                         x:Name="annoTrackControl"
                         Width="Auto"
