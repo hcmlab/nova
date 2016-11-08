@@ -21,8 +21,8 @@
                 <Button Name="Cancel" Margin="5,0,0,0" Content="Cancel" Click="Cancel_Click" Visibility="Collapsed"></Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Name="Delete" Width="25" Content="-" Click="Delete_Click"></Button>
-                <Button Name="Add" Margin="5,0,0,0" Width="25" Content="+" Click="Add_Click"></Button>
+                <Button Name="Add"  Width="25" Content="+" Click="Add_Click"></Button>
+                <Button Name="Delete" Margin="5,0,0,0" Width="25" Content="-" Click="Delete_Click"></Button>
                 <Button Name="Edit" Margin="5,0,0,0" Content="Edit" Click="Edit_Click" Visibility="Hidden"></Button>
             </StackPanel>
 
