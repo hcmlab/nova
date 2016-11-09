@@ -61,15 +61,12 @@ namespace ssi
         static protected AnnoTrackSegment selected_segment = null;
         static protected int selected_zindex = 0;
         static protected int selected_zindex_max = 0;
-        static public HashSet<LabelColorPair> used_labels = new HashSet<LabelColorPair>();
-        static public int used_labels_last_index;
         static public double mouseDownPos;
         static public int closestindex = -1;
         static public int closestindexold = 0;
         public static bool continuousannomode = false;
         public static bool askforlabel = false;
-        public static string Defaultlabel = "";
-        public static string DefaultColor = "#000000";
+
         private static  bool correctmode = false;
 
         static public event AnnoTrackChangeEventHandler OnTrackChange;
@@ -183,8 +180,11 @@ namespace ssi
         public string TierId;
         private double borderlow = 0.0;
         private double borderhigh = 1.0;
-        public HashSet<LabelColorPair> track_used_labels;
-      
+        public HashSet<LabelColorPair> track_used_labels = new HashSet<LabelColorPair>();
+        public int track_used_labels_last_index;
+        public string Defaultlabel = "";
+        public string DefaultColor = "#000000";
+
 
         private double lastX;
         private int direction;
@@ -276,7 +276,7 @@ namespace ssi
                 item.Tier = TierId;
 
                 LabelColorPair l = new LabelColorPair(item.Label, item.Bg);
-                used_labels.Add(l);
+                track_used_labels.Add(l);
 
                 if (isDiscrete)
                 {
@@ -552,14 +552,14 @@ namespace ssi
                 closestindex = getClosestContinousIndex(closestposition);
                 closestindexold = closestindex;
 
-                AnnoTrackStatic.used_labels.Clear();
-                foreach (AnnoListItem item in AnnoTrack.GetSelectedTrack().AnnoList)
+               track_used_labels.Clear();
+                foreach (AnnoListItem item in this.AnnoList)
                 {
                     if (item.Label != "")
                     {
                         LabelColorPair l = new LabelColorPair(item.Label, item.Bg);
                         bool detected = false;
-                        foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
+                        foreach (LabelColorPair p in track_used_labels)
                         {
                             if (p.Label == l.Label)
                             {
@@ -569,15 +569,15 @@ namespace ssi
 
                         if (detected == false)
                         {
-                            AnnoTrackStatic.used_labels.Add(l);
+                            track_used_labels.Add(l);
                         }
                     }
                 }
 
                 if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
                 {
-                    AnnoListItem temp = new AnnoListItem(start, len, AnnoTrackStatic.Defaultlabel, AnnoTrackStatic.DefaultColor, TierId);
-                    temp.Bg = AnnoTrackStatic.DefaultColor;
+                    AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, this.DefaultColor, TierId);
+                    temp.Bg = this.DefaultColor;
                     anno_list.Add(temp);
                     AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                     annorightdirection = true;
@@ -637,7 +637,7 @@ namespace ssi
 
             if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
             {
-                AnnoListItem temp = new AnnoListItem(start, len, AnnoTrackStatic.Defaultlabel, "", TierId, AnnoTrackStatic.DefaultColor);
+                AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "", TierId, this.DefaultColor);
                 anno_list.Add(temp);
                 AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                 segment.Width = 1;
@@ -684,6 +684,7 @@ namespace ssi
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
+      
             base.OnMouseMove(e);
            
                 double dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
@@ -693,10 +694,18 @@ namespace ssi
 
                 if (isDiscrete || (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift)))
                 {
+
               
                     if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
+
                     {
-                        Point point = e.GetPosition(selected_segment);
+
+                    if (selected_track != this)
+                    {
+                        AnnoTrack.SelectTrack(this);
+                    }
+
+                    Point point = e.GetPosition(selected_segment);
 
                         if (selected_segment != null)
                         {

@@ -81,7 +81,7 @@ namespace ssi
             if (e.ClickCount == 2)
          
             {
-                AnnoTrackStatic.used_labels.Clear();
+                AnnoTrack.GetSelectedTrack().track_used_labels.Clear();
 
                 foreach (AnnoListItem item in AnnoTrack.GetSelectedTrack().AnnoList)
                 {
@@ -89,7 +89,7 @@ namespace ssi
                     {
                         LabelColorPair l = new LabelColorPair(item.Label, item.Bg);
                         bool detected = false;
-                        foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
+                        foreach (LabelColorPair p in AnnoTrack.GetSelectedTrack().track_used_labels)
                         {
                             if (p.Label == l.Label)
                             {
@@ -97,13 +97,13 @@ namespace ssi
                             }
                         }
 
-                        if (detected == false) AnnoTrackStatic.used_labels.Add(l);
+                        if (detected == false) AnnoTrack.GetSelectedTrack().track_used_labels.Add(l);
                     }
                 }
 
                 //  if (this.item.Label == "") this.Item.Label = "Anno";
 
-                LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", this.Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true);
+                LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", this.Item.Label, AnnoTrack.GetSelectedTrack().track_used_labels, 1, "", "", true);
                 inputBox.showSlider(true, this.Item.Confidence);
                 inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 inputBox.ShowDialog();
@@ -114,7 +114,7 @@ namespace ssi
                     this.item.Bg = inputBox.Color();
                     this.Item.Confidence = inputBox.ResultSlider();
 
-                    AnnoTrackStatic.used_labels.Clear();
+                    AnnoTrack.GetSelectedTrack().track_used_labels.Clear();
                     foreach (AnnoListItem a in track.AnnoList)
                     {
                         if (a.Label == this.item.Label) a.Bg = this.item.Bg;
@@ -123,7 +123,7 @@ namespace ssi
                         {
                             LabelColorPair l = new LabelColorPair(a.Label, a.Bg);
                             bool detected = false;
-                            foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
+                            foreach (LabelColorPair p in AnnoTrack.GetSelectedTrack().track_used_labels)
                             {
                                 if (p.Label == l.Label)
                                 {
@@ -131,11 +131,11 @@ namespace ssi
                                 }
                             }
 
-                            if (detected == false) AnnoTrackStatic.used_labels.Add(l);
+                            if (detected == false) AnnoTrack.GetSelectedTrack().track_used_labels.Add(l);
                         }
                     }
 
-                    track.track_used_labels = AnnoTrackStatic.used_labels;
+                    track.track_used_labels = AnnoTrack.GetSelectedTrack().track_used_labels;
                 }
             }
         }
