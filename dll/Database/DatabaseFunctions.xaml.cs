@@ -205,7 +205,7 @@ namespace ssi
                 foreach (var c in sessions)
                 {
                     //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString() });
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString(), OID = c["_id"].AsObjectId });
                 }
 
                 CollectionResultsBox.ItemsSource = items;
@@ -288,7 +288,7 @@ namespace ssi
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname });
+                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname, OID=anno["_id"].AsObjectId});
                 }
                 //else if (result.ElementCount == 0 && result2.ElementCount > 0 && annos["role_id"].AsObjectId == roleid)
                 //{
@@ -296,7 +296,7 @@ namespace ssi
                 //}
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
-                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname });
+                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
                 }
             }
 

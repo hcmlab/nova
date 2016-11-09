@@ -214,5 +214,17 @@ namespace ssi.Properties {
                 this["DefaultZoominSeconds"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.01")]
+        public double DefaultMinSegmentSize {
+            get {
+                return ((double)(this["DefaultMinSegmentSize"]));
+            }
+            set {
+                this["DefaultMinSegmentSize"] = value;
+            }
+        }
     }
 }

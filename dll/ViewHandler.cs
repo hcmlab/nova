@@ -79,7 +79,8 @@ namespace ssi
         private List<long> downloadsreceived = new List<long>();
         private List<long> downloadstotal = new List<long>();
         private List<string> filestoload = new List<string>();
-        private int fixedseconds = 30;
+    
+     
 
 
 
@@ -88,52 +89,6 @@ namespace ssi
             get { return databaseloaded; }
             set { databaseloaded = value; }
         }
-
-        //public bool AnnoSchemeLoaded
-        //{
-        //    get { return annoSchemeloaded; }
-        //    set
-        //    {
-        //        annoSchemeloaded = value;
-
-        //        view.annoListControl.editComboBox.Items.Clear();
-
-        //        if (AnnoTrack.GetSelectedTrack() != null && AnnoTrack.GetSelectedTrack().isDiscrete)
-        //        {
-        //            view.annoListControl.editButton.IsEnabled = true;
-        //            view.annoListControl.editComboBox.IsEnabled = true;
-        //            view.annoListControl.editTextBox.IsEnabled = true;
-
-        //            view.annoListControl.editComboBox.Items.Clear();
-
-        //            view.annoListControl.editComboBox.Visibility = Visibility.Visible;
-        //            view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
-
-        //            //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
-
-        //            if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && ( AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE|| AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.FREE))
-        //            {
-        //                foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
-        //                {
-        //                    view.annoListControl.editComboBox.Items.Add(lcp.Label);
-        //                }
-        //                view.annoListControl.editComboBox.SelectedIndex = 0;
-        //            }
-        //        }
-        //        else if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
-        //        {
-        //            view.annoListControl.editButton.IsEnabled = false;
-        //            view.annoListControl.editComboBox.IsEnabled = false;
-        //            view.annoListControl.editTextBox.IsEnabled = false;
-        //        }
-        //        else
-        //        {
-        //            view.annoListControl.editButton.IsEnabled = true;
-        //            view.annoListControl.editComboBox.IsEnabled = false;
-        //            view.annoListControl.editTextBox.IsEnabled = true;
-        //        }
-        //    }
-        //}
 
         public MenuItem LoadButton
         {
@@ -337,7 +292,12 @@ namespace ssi
             {
                 if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    saveAnno();
+                    if(DatabaseLoaded)
+                    {
+                        mongodbStore();
+                    }
+
+                    else saveAnno();
 
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
@@ -598,47 +558,18 @@ namespace ssi
             {
                 string csvfilepath = "";
 
-                MessageBoxResult mbx = MessageBox.Show("Save annotations to file ?", "Question", MessageBoxButton.YesNo);
+                MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
                 if (mbx == MessageBoxResult.Yes)
                 {
-                    //MessageBoxResult mbx2 = MessageBox.Show("Store discrete tiers in a single file?", "Question", MessageBoxButton.YesNo);
-                    //if (mbx2 == MessageBoxResult.Yes)
-                    //{
-                    //    //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
-                    //    string firstmediadir = "";
-                    //    if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
-                    //    else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
+                  
+                   if (DatabaseLoaded)
+                        {
+                            mongodbStore();
+                        }
+                    else
+                    {
 
-                    //    csvfilepath = ViewTools.SaveFileDialog("anno", ".csv", firstmediadir);
-
-                    //    //config will be the project config later, for now its the anno file containing all tiers.
-                    //    saveCSVAnno(anno_tracks, csvfilepath);
-                    //    foreach (AnnoTrack track in anno_tracks)
-                    //    {
-                    //        if (track.isDiscrete) track.AnnoList.HasChanged = false;
-                    //    }
-                    //}
-                    // else if (mbx2 == MessageBoxResult.No)
-                    //{
-                    //    foreach (AnnoTrack track in anno_tracks)
-                    //    {
-                    //        if (track.AnnoList.HasChanged && track.isDiscrete)
-                    //        {
-                    //            MessageBoxResult mbr = MessageBox.Show("Save changes on tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
-                    //            if (mbr == MessageBoxResult.Yes)
-                    //            {
-                    //                saveAnno(track.AnnoList, track.AnnoList.Filepath);
-                    //                track.AnnoList.HasChanged = false; ;
-                    //            }
-                    //        }
-                    //    }
-                    //}
-
-                    //Always handle continuous tracks seperatly
-
-
-                    //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
-
+                 
                     foreach (AnnoTrack track in anno_tracks)
                     {
                         if (track.AnnoList.HasChanged /*&& !track.isDiscrete*/)
@@ -651,6 +582,7 @@ namespace ssi
                                 track.AnnoList.HasChanged = false;
                             }
                         }
+                    }
                     }
                 }
             }
@@ -869,7 +801,17 @@ namespace ssi
                 DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
                 anno.Role = db.LoadRoles(Properties.Settings.Default.Database, null);
+                if (anno.Role == null)
+                {
+                    return;
+                }
+
                 string annoscheme = db.LoadAnnotationSchemes(Properties.Settings.Default.Database, null, isDiscrete);
+                if (annoscheme == null)
+                {
+                    return;
+                }
+
                 anno.AnnotationScheme = db.GetAnnotationScheme(annoscheme, isDiscrete);
                 if (anno.AnnotationScheme.type == "FREE") anno.AnnotationType = AnnoType.FREE;
                 else if (anno.AnnotationScheme.type == "DISCRETE") anno.AnnotationType = AnnoType.DISCRETE;
@@ -1893,6 +1835,9 @@ namespace ssi
         private void annoTrackGrid_MouseUp(object sender, MouseEventArgs e)
         {
             mouseDown = false;
+
+      
+
             if (AnnoTrack.askforlabel == true)
                 ShowLabelBox();
         }
@@ -2514,6 +2459,7 @@ namespace ssi
                 Properties.Settings.Default.MongoDBUser = s.MongoUser();
                 Properties.Settings.Default.MongoDBPass = s.MongoPass();
                 Properties.Settings.Default.DefaultZoominSeconds = double.Parse(s.ZoomInseconds());
+                Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.Save();
 
             }
@@ -2609,7 +2555,11 @@ namespace ssi
 
                     if (mb == MessageBoxResult.Yes)
                     {
-                        saveAnno();
+                        if (DatabaseLoaded)
+                        {
+                            mongodbStore();
+                        }
+                       else   saveAnno();
 
 
                         at.AnnoList.HasChanged = false;
@@ -2938,7 +2888,7 @@ namespace ssi
                     if (anno_tracks.Count > 0)
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
-                        db.StoretoDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
+                        db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
 
                         MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
                     }

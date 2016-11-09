@@ -26,9 +26,11 @@ namespace ssi
             Certainty.Text = Properties.Settings.Default.UncertaintyLevel.ToString();
             Annotator.Text = Properties.Settings.Default.Annotator;
             DefaultZoom.Text = Properties.Settings.Default.DefaultZoominSeconds.ToString();
+            Segmentmindur.Text = Properties.Settings.Default.DefaultMinSegmentSize.ToString();
             DBServer.Text = Properties.Settings.Default.MongoDBIP;
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPW.Password = Properties.Settings.Default.MongoDBPass;
+           
         }
 
 
@@ -46,6 +48,12 @@ namespace ssi
         {
             return DefaultZoom.Text;
         }
+
+        public string SegmentMinDur()
+        {
+            return Segmentmindur.Text;
+        }
+
 
         public string MongoServer()
         {
