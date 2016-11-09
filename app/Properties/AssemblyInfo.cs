@@ -6,11 +6,11 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("nova")]
-[assembly: AssemblyDescription("Novel Open Variable Annotator")]
+[assembly: AssemblyDescription("(NOn)Verbal Annotator")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("University Augsburg")]
 [assembly: AssemblyProduct("nova")]
-[assembly: AssemblyCopyright("Copyright © University Augsburg 2016")]
+[assembly: AssemblyCopyright("Copyright © University Augsburg")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
