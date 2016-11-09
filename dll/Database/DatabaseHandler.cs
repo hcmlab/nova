@@ -343,6 +343,12 @@ namespace ssi
                                     data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", index }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                                     break;
                                 }
+
+                                else  if (a.AnnoList[i].Label == "GARBAGE")
+                                    {
+                                        data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", -1 }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
+                                        break;
+                                    }
                             }
                         }
 
@@ -476,7 +482,7 @@ namespace ssi
                     }
                 
                 }
-                else if (al.AnnotationType == 0)
+                else if (al.AnnotationType == AnnoType.DISCRETE)
                 {
 
 
@@ -490,6 +496,9 @@ namespace ssi
                     {
                         al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString()));
                     }
+
+
+                    al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair("GARBAGE", "#FF000000"));
 
                     for (int i = 0; i < annotation.Count; i++)
                     {
@@ -505,6 +514,13 @@ namespace ssi
                                 break;
                             }
                         }
+
+                        if (annotation[i]["id"].AsInt32 == -1)
+                        {
+                            SchemeLabel = "GARBAGE";
+                            SchemeColor = "#FF000000";
+                        }
+
 
                         double start = double.Parse(annotation[i]["from"].ToString());
                         double stop = double.Parse(annotation[i]["to"].ToString());
