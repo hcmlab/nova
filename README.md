@@ -1,7 +1,7 @@
 # (NOn)Verbal Annotator
 NovA is a tool for annotating and analyzing behaviours in social interactions. It allows to load data recorded with the SSI Framework, as well as from external sources. It further makes use of SSI for semi-automated labeling of behaviours for example by automatically detecting specific gestures from a Kinect (or Kinect 2) Sensor or facial expressions from video.
 
-![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2016/07/nova.png)
+![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2016/11/nova.png)
 
 
 NovA has been completly reworked with more advanced annotation features. It now allows framewise labeling for a more precise coding experience, and continuous annotations for labeling e.g emotions or social attitudes (see picture below). The interface is more customizable than the last version and allows loading and labeling data of multiple persons.
@@ -9,7 +9,7 @@ NovA has been completly reworked with more advanced annotation features. It now 
 The Annotation format can easily be imported in other tools, like ELAN or Excel. NovA further supports the Import of Discrete Annotation files from ELAN and ANVIL for a seamless workflow. Annotations further can directly be transformed into SSI samplelists for training models.
 Additionally it's now possible to store/load annotations in a local or external MongoDB database for a cooperative workflow (basic support). 
 
-![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2016/07/cont.png)
+![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2016/11/cont.png)
 
 The new reworked version is now online for Download.
 The latest binaries can always be found [here](https://github.com/tobiasbaur/nova/releases) 

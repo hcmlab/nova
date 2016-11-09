@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Conntect Database" Height="500" Width="790" Background="LightGray">
+        Title="Load Session" Height="500" Width="790">
     <Grid>
 
         <Grid.RowDefinitions>
@@ -25,7 +25,7 @@
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10">
-                <Label Content="Database Login" Margin="-3,0,0,0"></Label>
+                <Label Content="Database Username" Margin="-3,0,0,0"></Label>
                 <TextBox x:FieldModifier="public" x:Name="db_login" Height="25" Width="200" Focusable="True" TextChanged="db_login_TextChanged" VerticalContentAlignment="Center" />
             </StackPanel>
 
@@ -141,7 +141,7 @@
                     <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox Name="requireslogin" Content="Server authentication:" Margin="0,0,5,0" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
+                    <CheckBox Name="requireslogin" Content="Server Authentication:" Margin="0,0,5,0" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
                     <Label Content="Username"/>
                     <TextBox x:FieldModifier="public" x:Name="server_login" Margin="0,0,5,0" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center"/>
                     <Label Content="Password" />

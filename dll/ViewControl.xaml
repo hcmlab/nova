@@ -44,9 +44,9 @@
             </MenuItem>
             <MenuItem Header="Database">
                 <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
-                <MenuItem Header="Load Session from MongoDB " Name="mongodbmenu2" />
-                <MenuItem Header="Store Session to MongoDB" Name="mongodbmenu" IsEnabled="False" />
-                <MenuItem Header="Show Downloaded Files" Name="mongodbmenushow" />
+                <MenuItem Header="Load Session" Name="mongodbmenu2" />
+                <MenuItem Header="Store Session" Name="mongodbmenu" IsEnabled="False" />
+                <MenuItem Header="Show Download Directory" Name="mongodbmenushow" />
                 <MenuItem Header="Change Download Directory" Name="mongodbchangefolder" />
                 <MenuItem Header="Admin: Database Functions" Name="mongodbfunctions" Visibility="Collapsed" />
                 <MenuItem Header="Admin: Manage Database" Visibility="Collapsed" Name="addmongodb" />
