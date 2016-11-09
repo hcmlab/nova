@@ -101,7 +101,7 @@
                     </StackPanel>
                 </DockPanel>
                 <StackPanel Orientation="Vertical" Margin="10" DockPanel.Dock="Bottom">
-                    <CheckBox Name="showonlymine" Content="Mine only" IsChecked="True" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" />
+                    <CheckBox Name="showonlymine" Content="Mine only" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" />
                     <CheckBox Name="showonlyunfinished" Content="Unfinished only" Checked="showonlyunfinished_Checked" Unchecked="showonlyunfinished_Unchecked" />
                 </StackPanel>                
                 <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended">
