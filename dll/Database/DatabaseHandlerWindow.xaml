@@ -37,9 +37,9 @@
             <StackPanel Orientation="Vertical" Margin="10">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="Autologin" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"  VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                    <Label Content="Auto connect"  />
+                    <Label Content="Remember"  />
                 </StackPanel>
-                <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25"/>
+                <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25" Width="100"/>
             </StackPanel>
 
         </StackPanel>
@@ -82,6 +82,11 @@
                                     <Binding Path="Date" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="OID">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="OID" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>                            
                         </GridView>
                     </ListView.View>
                 </ListView>
@@ -121,7 +126,12 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
-                            </GridViewColumn>                            
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="OID">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="OID" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>
@@ -129,25 +139,27 @@
 
             <DockPanel Grid.Column="3" Grid.Row="0"  Margin="10">
                 <Label Content="Media"  DockPanel.Dock="Top" Margin="-3,0,0,0"/>
+                <StackPanel Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,10,0,0">
+                    <CheckBox Name="requireslogin" Content="Server Authentication" Margin="0,0,5,5" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
+                    <DockPanel LastChildFill="True">
+                        <Label Content="Username" Width="70"/>
+                        <TextBox x:FieldModifier="public" x:Name="server_login" Margin="0,0,5,5" Height="25" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center"/>
+                    </DockPanel>
+                    <DockPanel LastChildFill="True">
+                        <Label Content="Password" Width="70"/>
+                        <PasswordBox x:FieldModifier="public" x:Name="server_pass" Margin="0,0,5,0" Height="25" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
+                    </DockPanel>
+                </StackPanel>
                 <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" SelectionMode="Extended" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
             </DockPanel>
 
         </Grid>
 
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
-            <DockPanel Margin="10">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click"/>
-                    <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <CheckBox Name="requireslogin" Content="Server Authentication:" Margin="0,0,5,0" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
-                    <Label Content="Username"/>
-                    <TextBox x:FieldModifier="public" x:Name="server_login" Margin="0,0,5,0" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center"/>
-                    <Label Content="Password" />
-                    <PasswordBox x:FieldModifier="public" x:Name="server_pass" Width="150" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
-                </StackPanel>
-            </DockPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+                <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click"/>
+                <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click"/>
+            </StackPanel>
         </StackPanel>
         
     </Grid>

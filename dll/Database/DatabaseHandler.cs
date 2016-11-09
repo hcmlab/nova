@@ -72,7 +72,7 @@ namespace ssi
 
         public string LoadRoles(string db, AnnoTrack tier)
         {
-            string role = "None";
+            string role = null;
             List<string> roles = new List<string>();
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -105,12 +105,13 @@ namespace ssi
             {
                 role = dbw.Result().ToString();
             }
+
             return role;
         }
 
         public string LoadAnnotationSchemes(string db, AnnoTrack tier, AnnoType type = AnnoType.DISCRETE)
         {
-            string annotype = "None";
+            string annotype = null;
             List<string> AnnotationSchemes = new List<string>();
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -199,7 +200,7 @@ namespace ssi
             }
             return Scheme;
         }
-        public void StoretoDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null, List<DatabaseMediaInfo> loadedDBmedia = null)
+        public void StoreToDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null, List<DatabaseMediaInfo> loadedDBmedia = null)
         {
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -226,7 +227,13 @@ namespace ssi
                 ObjectId roleid;
 
                 if (a.AnnoList.Role == null || a.AnnoList.Role == a.AnnoList.Name)
+                {
                     a.AnnoList.Role = LoadRoles(db, a);
+                    if (a.AnnoList.Role == null)
+                    {
+                        continue;
+                    }
+                }
 
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", a.AnnoList.Role);
@@ -281,7 +288,15 @@ namespace ssi
                 if (a.AnnoList.AnnotationScheme != null) annotype = a.AnnoList.AnnotationScheme.name;
 
 
-                if (annotype == null) annotype = LoadAnnotationSchemes(db, a);
+                if (annotype == null)
+                {
+                    annotype = LoadAnnotationSchemes(db, a);
+                }
+
+                if (annotype == null)
+                {
+                    continue;
+                }
                 var filtera = builder.Eq("name", annotype);
                 var annotdb = annotationschemes.Find(filtera).ToList();
                 annotid = annotdb[0].GetValue(0).AsObjectId;
@@ -605,6 +620,8 @@ namespace ssi
         public bool IsFinished { get; set;  }
 
         public bool IsOwner { get; set; }
+
+        public ObjectId OID { get; set; }
     }
 
     public class DatabaseSession
@@ -616,6 +633,8 @@ namespace ssi
         public string Location { get; set; }
 
         public string Date { get; set; }
+
+        public ObjectId OID { get; set; }
     }
 
     public class DatabaseMediaInfo

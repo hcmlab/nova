@@ -278,7 +278,7 @@ namespace ssi
                 foreach (var c in sessions)
                 {
                     //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString() });
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString(), OID = c["_id"].AsObjectId });
                 }
 
                 CollectionResultsBox.ItemsSource = items;
@@ -367,7 +367,7 @@ namespace ssi
                 onlyme && onlyunfinished && !isfinished && Properties.Settings.Default.MongoDBUser == annotatid)
             {
                 bool isOwner = authlevel > 2 || Properties.Settings.Default.MongoDBUser == annotatid;
-                AnnoItems.Add(new DatabaseAnno() { Id=id, Role = roleid, AnnoType = annotid, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner});                                               
+                AnnoItems.Add(new DatabaseAnno() { Id=id, Role = roleid, AnnoType = annotid, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner, OID= id });                                               
             }
         }
 

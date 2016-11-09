@@ -18,7 +18,7 @@
         <DockPanel Grid.Row="2" LastChildFill="True">
             <StackPanel Orientation="Horizontal" Margin="5" DockPanel.Dock="Right">
                 <Button Name="Ok" Content="Ok" Width="25" Click="Ok_Click"></Button>
-                <Button Name="Cancel" Margin="5,0,0,0" Content="Cancel" Click="Cancel_Click" Visibility="Collapsed"></Button>
+                <Button Name="Cancel" Margin="5,0,0,0" Content="Cancel" Click="Cancel_Click"></Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5">
                 <Button Name="Add"  Width="25" Content="+" Click="Add_Click"></Button>

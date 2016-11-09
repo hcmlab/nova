@@ -832,7 +832,7 @@ namespace ssi
                             {
                                 sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + 4294967295 + _delimiter + e.Confidence.ToString("n2"));
                             }
-                         
+                        
                         }
                     }
 

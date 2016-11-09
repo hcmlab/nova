@@ -24,6 +24,8 @@
                     <TextBox Name="DefaultZoom" Width="91"  DockPanel.Dock="Top" HorizontalAlignment="left"  PreviewTextInput="NumberValidationTextBox"/>
                     <Label Content="Correction certainty level:"   HorizontalAlignment="left" DockPanel.Dock="Top" />
                     <TextBox Name="Certainty"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox"/>
+                    <Label Content="Segment min duration in sec.:"   HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <TextBox Name="Segmentmindur"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox"/>
                     <Separator Visibility="Hidden"> </Separator>
                 </DockPanel>
 

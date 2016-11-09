@@ -184,6 +184,7 @@ namespace ssi
         public int track_used_labels_last_index;
         public string Defaultlabel = "";
         public string DefaultColor = "#000000";
+        double dx = 0;
 
 
         private double lastX;
@@ -464,16 +465,9 @@ namespace ssi
             {
                 for (int i = anno_list.Count; i < samples; i++)
                 {
-                    //if (i == 0)
-                    //{
-                    //    AnnoListItem ali = new AnnoListItem(i * sr, sr, median.ToString("F4"), "Range: " + borderlow + "-" + borderhigh, TierId);
-                    //    anno_list.Add(ali);
-                    //}
-                    //else
-                    //{
+       
                         AnnoListItem ali = new AnnoListItem(i * sr, sr, median.ToString("F4"), "", TierId);
                         anno_list.Add(ali);
-                 //   }
                 }
             }
 
@@ -617,7 +611,7 @@ namespace ssi
 
         protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
         {
-
+            dx = 0;
             if (selected_track != this)
             {
                 AnnoTrack.SelectTrack(this);
@@ -628,7 +622,7 @@ namespace ssi
 
            
             double start = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X);
-            double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X) + 0.5;
+           double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X) + Properties.Settings.Default.DefaultMinSegmentSize;
             //  double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X + AnnoTrackSegment.RESIZE_OFFSET);
             double len = stop - start;
             double closestposition = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X);
@@ -640,13 +634,16 @@ namespace ssi
                 AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "", TierId, this.DefaultColor);
                 anno_list.Add(temp);
                 AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
+
                 segment.Width = 1;
                 annorightdirection = true;
                 segments.Add(segment);
                 this.Children.Add(segment);
                 SelectSegment(segment);
                 this.select(true);
-            }
+                selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
+                selected_segment.Item.Stop = selected_segment.Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
+                }
 
             else if (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift) && stop < ViewHandler.Time.TotalDuration)
             {
@@ -682,12 +679,23 @@ namespace ssi
             return -1;
         }
 
+        protected override void OnMouseRightButtonUp(MouseButtonEventArgs e)
+        {
+
+            base.OnMouseRightButtonUp(e);
+
+            if (selected_segment!= null && selected_segment.Item.Duration < Properties.Settings.Default.DefaultMinSegmentSize)
+            {
+                selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
+                selected_segment.Item.Stop = selected_segment.Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
+            }
+        }
         protected override void OnMouseMove(MouseEventArgs e)
         {
       
             base.OnMouseMove(e);
            
-                double dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
+                dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
 
                 direction = (dx > 0) ? 1 : 0;
                 lastX = e.GetPosition(Application.Current.MainWindow).X;
@@ -723,8 +731,6 @@ namespace ssi
                                 FireOnMove(selected_segment.Item.Stop);
                                 ViewHandler.Time.CurrentPlayPosition = selected_segment.Item.Stop;
 
-                                Console.WriteLine(ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) + "   " + ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) + "   " + ViewHandler.Time.CurrentSelectPosition + "    " + annorightdirection);
-
                                 if (ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) >= ViewHandler.Time.CurrentSelectPosition - 1 && ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) >= ViewHandler.Time.CurrentSelectPosition - 1 && point.X < 0) annorightdirection = false;
                                 SelectSegment(selected_segment);
                                 this.select(true);
@@ -740,7 +746,6 @@ namespace ssi
                                 selected_segment.resize_left(delta);
                                 FireOnMove(selected_segment.Item.Start);
                                 ViewHandler.Time.CurrentPlayPosition = selected_segment.Item.Start;
-                                Console.WriteLine(ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) + "   " + ViewHandler.Time.PixelFromTime(selected_segment.Item.Stop) + "   " + ViewHandler.Time.CurrentSelectPosition + "   " + annorightdirection);
                                 if ((ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) > ViewHandler.Time.CurrentSelectPosition - 1)) annorightdirection = true;
                                 SelectSegment(selected_segment);
                                 this.select(true);
