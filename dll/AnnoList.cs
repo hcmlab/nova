@@ -450,6 +450,10 @@ namespace ssi
                         LabelColorPair lcp = new LabelColorPair(item.Attributes["name"].Value, color);
                         list.AnnotationScheme.LabelsAndColors.Add(lcp);
                     }
+
+                    LabelColorPair garbage = new LabelColorPair("GARBAGE", "#FF000000");
+                    list.AnnotationScheme.LabelsAndColors.Add(garbage);
+
                 }
 
                 else if (list.AnnotationType == AnnoType.FREE)
@@ -771,9 +775,12 @@ namespace ssi
                
                     foreach (LabelColorPair lp in this.AnnotationScheme.LabelsAndColors)
                     {
-                        sw.WriteLine("        <item name=\"" + lp.Label + "\" id=\"" +index + "\" color=\"" + lp.Color + "\" />");
-                        LabelIds.Add(lp.Label, index.ToString());
-                        index++;
+                        if(lp.Label != "GARBAGE")
+                        {
+                            sw.WriteLine("        <item name=\"" + lp.Label + "\" id=\"" +index + "\" color=\"" + lp.Color + "\" />");
+                            LabelIds.Add(lp.Label, index.ToString());
+                            index++;
+                        }
                     }
                     sw.WriteLine("    </scheme>");
                 }
@@ -815,8 +822,17 @@ namespace ssi
                   
                         foreach (AnnoListItem e in this)
                         {
-                            LabelIds.TryGetValue(e.Label, out index);
-                            sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + index + _delimiter + e.Confidence.ToString("n2"));
+                            if(e.Label != "GARBAGE")
+                            {
+                                LabelIds.TryGetValue(e.Label, out index);
+                                sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + index + _delimiter + e.Confidence.ToString("n2"));
+                            }
+
+                            else
+                            {
+                                sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + 4294967295 + _delimiter + e.Confidence.ToString("n2"));
+                            }
+                         
                         }
                     }
 
@@ -853,11 +869,15 @@ namespace ssi
                         string index = "";
                         foreach (AnnoListItem e in this)
                         {
-                            LabelIds.TryGetValue(e.Label, out index);
-                            int i = Int32.Parse(index);
+                            uint ind = unchecked((uint)-1);
+                            if (e.Label != "GARBAGE")
+                            {
+                                LabelIds.TryGetValue(e.Label, out index);
+                                ind = uint.Parse(index);
+                            }
                             bw.Write(e.Start);
                             bw.Write(e.Stop);
-                            bw.Write(i);
+                            bw.Write(ind);
                             bw.Write((float)e.Confidence);
                           
                         }
