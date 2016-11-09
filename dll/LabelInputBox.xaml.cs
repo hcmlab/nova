@@ -112,7 +112,7 @@ namespace ssi
                     if (this.ib_suggestions_comboBox.Items.Count > 0)
                     {
                         if (text != null && text != "") this.ib_suggestions_comboBox.SelectedIndex = this.ib_suggestions_comboBox.Items.IndexOf(text);
-                        else this.ib_suggestions_comboBox.SelectedIndex = AnnoTrackStatic.used_labels_last_index;
+                        else this.ib_suggestions_comboBox.SelectedIndex = AnnoTrack.GetSelectedTrack().track_used_labels_last_index;
                     }
                 }
                 else //todo: only other case now that uses colorpicker and not suggestion list. probably change this in the future to some more advanced logic
@@ -179,7 +179,7 @@ namespace ssi
                 if (e.AddedItems.Count > 0)
                 {
                     this.ib_labelText.Text = (string)e.AddedItems[0];
-                    AnnoTrackStatic.used_labels_last_index = this.ib_suggestions_comboBox.SelectedIndex;
+                    AnnoTrack.GetSelectedTrack().track_used_labels_last_index = this.ib_suggestions_comboBox.SelectedIndex;
                     if (suggestions != null)
                     {
                         int i = 0;
@@ -216,7 +216,7 @@ namespace ssi
             {
                 if (this.ib_labelText.Text != this.ib_suggestions_comboBox.SelectedItem.ToString())
                 {
-                    AnnoTrackStatic.used_labels_last_index = this.ib_suggestions_comboBox.Items.Count;
+                    AnnoTrack.GetSelectedTrack().track_used_labels_last_index = this.ib_suggestions_comboBox.Items.Count;
                 }
             }
 

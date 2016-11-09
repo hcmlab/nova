@@ -1642,8 +1642,8 @@ namespace ssi
                 {
                     if (lcp.Label == view.annoListControl.editComboBox.SelectedItem.ToString())
                     {
-                        AnnoTrack.Defaultlabel = lcp.Label;
-                        AnnoTrack.DefaultColor = lcp.Color;
+                        AnnoTrack.GetSelectedTrack().Defaultlabel = lcp.Label;
+                        AnnoTrack.GetSelectedTrack().DefaultColor = lcp.Color;
                         break;
                     }
                 }
@@ -1904,7 +1904,7 @@ namespace ssi
             {
                 if (AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
-                    AnnoTrackStatic.used_labels.Clear();
+                    AnnoTrack.GetSelectedTrack().track_used_labels.Clear();
 
                     if (AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme)
 
@@ -1913,7 +1913,7 @@ namespace ssi
                         {
                             foreach (LabelColorPair l in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                             {
-                                AnnoTrackStatic.used_labels.Add(l);
+                                AnnoTrack.GetSelectedTrack().track_used_labels.Add(l);
                             }
                         }
                     }
@@ -1925,7 +1925,7 @@ namespace ssi
                             {
                                 LabelColorPair l = new LabelColorPair(item.Label, item.Bg);
                                 bool detected = false;
-                                foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
+                                foreach (LabelColorPair p in AnnoTrack.GetSelectedTrack().track_used_labels)
                                 {
                                     if (p.Label == l.Label)
                                     {
@@ -1933,12 +1933,12 @@ namespace ssi
                                     }
                                 }
 
-                                if (detected == false) AnnoTrackStatic.used_labels.Add(l);
+                                if (detected == false) AnnoTrack.GetSelectedTrack().track_used_labels.Add(l);
                             }
                         }
                     }
 
-                    LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrackStatic.used_labels, 1, "", "", true, AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme);
+                    LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrack.GetSelectedTrack().track_used_labels, 1, "", "", true, AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme);
                     if(view.navigator.hideHighConf.IsChecked == true)
                     {
                         inputBox.showSlider(true,1.0);
@@ -1953,7 +1953,7 @@ namespace ssi
                         AnnoTrack.GetSelectedSegment().Item.Bg = inputBox.Color();
                         AnnoTrack.GetSelectedSegment().Item.Confidence = inputBox.ResultSlider();
 
-                        AnnoTrackStatic.used_labels.Clear();
+                        AnnoTrack.GetSelectedTrack().track_used_labels.Clear();
                         foreach (AnnoListItem a in AnnoTrack.GetSelectedTrack().AnnoList)
                         {
                             if (a.Label == AnnoTrack.GetSelectedSegment().Item.Label) a.Bg = AnnoTrack.GetSelectedSegment().Item.Bg;
@@ -1962,7 +1962,7 @@ namespace ssi
                             {
                                 LabelColorPair l = new LabelColorPair(a.Label, a.Bg);
                                 bool detected = false;
-                                foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
+                                foreach (LabelColorPair p in AnnoTrack.GetSelectedTrack().track_used_labels)
                                 {
                                     if (p.Label == l.Label)
                                     {
@@ -1970,13 +1970,13 @@ namespace ssi
                                     }
                                 }
 
-                                if (detected == false) AnnoTrackStatic.used_labels.Add(l);
+                                if (detected == false) AnnoTrack.GetSelectedTrack().track_used_labels.Add(l);
                             }
                         }
 
-                        AnnoTrack.GetSelectedTrack().track_used_labels = AnnoTrackStatic.used_labels;
-                        AnnoTrackStatic.Defaultlabel = inputBox.Result();
-                        AnnoTrackStatic.DefaultColor = inputBox.Color();
+                        AnnoTrack.GetSelectedTrack().track_used_labels = AnnoTrack.GetSelectedTrack().track_used_labels;
+                        AnnoTrack.GetSelectedTrack().Defaultlabel = inputBox.Result();
+                        AnnoTrack.GetSelectedTrack().DefaultColor = inputBox.Color();
                     }
                 }
             }
@@ -2060,14 +2060,14 @@ namespace ssi
                     {
                         if (AnnoTrack.GetSelectedTrack().isDiscrete)
                         {
-                            AnnoTrackStatic.used_labels.Clear();
+                            AnnoTrack.GetSelectedTrack().track_used_labels.Clear();
                             foreach (AnnoListItem item in AnnoTrack.GetSelectedTrack().AnnoList)
                             {
                                 if (item.Label != "")
                                 {
                                     LabelColorPair l = new LabelColorPair(item.Label, item.Bg);
                                     bool detected = false;
-                                    foreach (LabelColorPair p in AnnoTrackStatic.used_labels)
+                                    foreach (LabelColorPair p in AnnoTrack.GetSelectedTrack().track_used_labels)
                                     {
                                         if (p.Label == l.Label)
                                         {
@@ -2075,11 +2075,11 @@ namespace ssi
                                         }
                                     }
 
-                                    if (detected == false) AnnoTrackStatic.used_labels.Add(l);
+                                    if (detected == false) AnnoTrack.GetSelectedTrack().track_used_labels.Add(l);
                                 }
                             }
 
-                            LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", "Label", AnnoTrackStatic.used_labels, 1, "", "", true);
+                            LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", "Label", AnnoTrack.GetSelectedTrack().track_used_labels, 1, "", "", true);
                             inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                             inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                             inputBox.ShowDialog();
