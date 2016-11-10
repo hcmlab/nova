@@ -76,6 +76,8 @@ namespace ssi
             update();
         }
 
+   
+
         private void OnAnnoTrackSegmentMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
@@ -143,6 +145,9 @@ namespace ssi
         private void item_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             update();
+
+
+
         }
 
         public void rename(string label)
@@ -166,6 +171,12 @@ namespace ssi
             double time = ViewHandler.Time.TimeFromPixel(ViewHandler.Time.PixelFromTime(this.item.Start) + pixel);
             this.item.Start = time;
             update();
+
+            //if (this != null && this.Item.Duration < Properties.Settings.Default.DefaultMinSegmentSize)
+            //{
+            //    this.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
+            //    this.Item.Stop = AnnoTrack.GetSelectedSegment().Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
+            //}
         }
 
         public void resize_right(double pixel)
@@ -173,6 +184,12 @@ namespace ssi
             double time = ViewHandler.Time.TimeFromPixel(ViewHandler.Time.PixelFromTime(this.item.Stop) + pixel);
             this.item.Stop = time;
             update();
+
+            //if (this != null && this.Item.Duration < Properties.Settings.Default.DefaultMinSegmentSize)
+            //{
+            //    this.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
+            //    this.Item.Stop = AnnoTrack.GetSelectedSegment().Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
+            //}
         }
 
         public void update()
@@ -194,9 +211,15 @@ namespace ssi
                     VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
                     this.Background = vb;
                 }
+
+
+
+           
+
                 Canvas.SetLeft(this, start);
             }
         }
+
 
         public void update2()
         {
