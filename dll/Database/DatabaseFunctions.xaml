@@ -66,7 +66,7 @@
                     </GridViewColumn>
                     <GridViewColumn Width="60" Header="Annotator">
                         <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Annotator" />
+                            <Binding Path="AnnotatorFullname" />
                         </GridViewColumn.DisplayMemberBinding>
                     </GridViewColumn>
 

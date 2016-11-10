@@ -42,6 +42,7 @@ namespace ssi
         private AnnotationScheme scheme;
         public bool usesAnnoScheme = false;
         private string annotator = null;
+        private string annotatorfn = null;
         private string ftype = "ASCII";
 
         private  AnnoType _Type = AnnoType.DISCRETE;
@@ -106,6 +107,12 @@ namespace ssi
         {
             get { return annotator; }
             set { annotator = value; }
+        }
+
+        public string AnnotatorFullName
+        {
+            get { return annotatorfn; }
+            set { annotatorfn = value; }
         }
 
         public string Filepath
