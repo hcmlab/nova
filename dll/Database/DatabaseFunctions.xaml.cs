@@ -285,10 +285,11 @@ namespace ssi
                 var filterc = builder.Eq("_id", anno["annotator_id"]);
                 var annotatdb = database.GetCollection<BsonDocument>("Annotators").Find(filterc).Single();
                 string annotatorname = annotatdb.GetValue(1).ToString();
+                string annotatornamefull = annotatdb.GetValue(2).ToString();
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname, OID=anno["_id"].AsObjectId});
+                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID =anno["_id"].AsObjectId});
                 }
                 //else if (result.ElementCount == 0 && result2.ElementCount > 0 && annos["role_id"].AsObjectId == roleid)
                 //{
@@ -296,7 +297,7 @@ namespace ssi
                 //}
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
-                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
+                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
                 }
             }
 

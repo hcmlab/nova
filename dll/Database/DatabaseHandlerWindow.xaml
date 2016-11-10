@@ -82,7 +82,7 @@
                                     <Binding Path="Date" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="OID">
+                            <GridViewColumn Width="Auto" Header="OID" >
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="OID" />
                                 </GridViewColumn.DisplayMemberBinding>
@@ -115,7 +115,7 @@
                             </GridViewColumn>
                             <GridViewColumn Width="Auto" Header="Annotator">
                                 <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Annotator" />
+                                    <Binding Path="AnnotatorFullname" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
                             <GridViewColumn Width="Auto" Header="Finished">

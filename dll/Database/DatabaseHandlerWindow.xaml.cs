@@ -353,6 +353,7 @@ namespace ssi
             string roleid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Roles", "name", annos["role_id"].AsObjectId);
             string annotid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "AnnotationSchemes", "name", annos["scheme_id"].AsObjectId);
             string annotatid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "name", annos["annotator_id"].AsObjectId);
+            string annotatidfn = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "fullname", annos["annotator_id"].AsObjectId);
 
             bool isfinished = false;
             try
@@ -367,7 +368,7 @@ namespace ssi
                 onlyme && onlyunfinished && !isfinished && Properties.Settings.Default.MongoDBUser == annotatid)
             {
                 bool isOwner = authlevel > 2 || Properties.Settings.Default.MongoDBUser == annotatid;
-                AnnoItems.Add(new DatabaseAnno() { Id=id, Role = roleid, AnnoType = annotid, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner, OID= id });                                               
+                AnnoItems.Add(new DatabaseAnno() { Id=id, Role = roleid, AnnoType = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner, OID= id });                                               
             }
         }
 
@@ -484,7 +485,7 @@ namespace ssi
                 List<string> annotator_names = new List<string>();
                 foreach (var document in annotators.Find(_ => true).ToList())
                 {
-                    annotator_names.Add(document["name"].ToString());
+                    annotator_names.Add(document["fullname"].ToString());
                 }
                 DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(annotator_names, false, "Select Annotator", "Annotator");
                 dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
@@ -493,7 +494,8 @@ namespace ssi
                 if (dbw.DialogResult == true)
                 {
                     string annotator_name = dbw.Result().ToString();
-                    ObjectId annotid_new = GetIdFromName(annotators, annotator_name);     
+                    ObjectId annotid_new =  GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "fullname", annotator_name);
+                    //ObjectId annotid_new = GetObjectID(annotators, annotator_name);     
                                    
                     anno.Remove("_id");
                     anno["annotator_id"] = annotid_new;

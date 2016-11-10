@@ -260,16 +260,35 @@ namespace ssi
 
                 //We could choose here if we want to overwrite other peoples annotations. For now, we we might want to overwrite automatically created annotations and own annotations only
 
+
+
+
                 if (!(a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break;
-                if (a.AnnoList.Annotator == null) a.AnnoList.Annotator = dbuser;
+                if (a.AnnoList.Annotator == null && a.AnnoList.AnnotatorFullName != null)
+                {
+                    ObjectId annotatid = GetObjectID(database, "Annotators", "fullname", a.AnnoList.AnnotatorFullName);
+                    a.AnnoList.Annotator = FetchDBRef(database, "Annotators", "name", annotatid);
+                }
+                else if (a.AnnoList.Annotator == null && a.AnnoList.AnnotatorFullName == null)
+                {
+                    a.AnnoList.Annotator = dbuser;
+                }
+
+                if (a.AnnoList.AnnotatorFullName == null)
+                {
+                    ObjectId annotatid = GetObjectID(database, "Annotators", "name", a.AnnoList.Annotator);
+                    a.AnnoList.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid); 
+                }
+
+                  
 
                 BsonElement annotatorname = new BsonElement("name", a.AnnoList.Annotator);
+                BsonElement annotatornamefull = new BsonElement("fullname", a.AnnoList.AnnotatorFullName);
                 BsonElement annotatoremail = new BsonElement("email", "");
                 BsonElement annotatorexpertise = new BsonElement("expertise", "");
 
                 annotatordoc.Add(annotatorname);
-                annotatordoc.Add(annotatoremail);
-                annotatordoc.Add(annotatorexpertise);
+                annotatordoc.Add(annotatornamefull);
 
                 var filterannotator = builder.Eq("name", a.AnnoList.Annotator);
                 UpdateOptions uoa = new UpdateOptions();
@@ -431,14 +450,15 @@ namespace ssi
                 ObjectId annotid = GetObjectID(database, "AnnotationSchemes", "name", s.AnnoType);
                 string annotdb = FetchDBRef(database, "AnnotationSchemes", "name", annotid);
 
-                ObjectId annotatid = GetObjectID(database, "Annotators", "name", s.Annotator);
+                ObjectId annotatid = GetObjectID(database, "Annotators", "fullname", s.AnnotatorFullname);
                 string annotatdb = FetchDBRef(database, "Annotators", "name", annotatid);
+                string annotatdbfn = FetchDBRef(database, "Annotators", "fullname", annotatid);
                 al.Annotator = annotatdb;
+                al.AnnotatorFullName = annotatdbfn;
 
                 ObjectId sessionid = GetObjectID(database, "Sessions", "name", session);
                 string sessiondb = FetchDBRef(database, "Sessions", "name", sessionid);
-                al.Annotator = annotatdb;
-
+ 
                 var builder = Builders<BsonDocument>.Filter;
 
                 var filterscheme = builder.Eq("_id", annotid);
@@ -466,7 +486,7 @@ namespace ssi
                 }
 
                 al.Role = roledb;
-                al.Name = al.Role + " #" + annotdb + " #" + annotatdb;
+                al.Name = al.Role + " #" + annotdb + " #" + annotatdbfn;
 
                 al.AnnotationScheme = new AnnotationScheme();
                 al.AnnotationScheme.name = annosch["name"].ToString();
@@ -614,6 +634,7 @@ namespace ssi
         public string AnnoType { get; set; }
 
         public string Annotator { get; set; }
+        public string AnnotatorFullname { get; set; }
 
         public string Session { get; set; }
 

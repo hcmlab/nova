@@ -1045,6 +1045,8 @@ namespace ssi
                 }
 
                 annolist.Name = anno.Name;
+                annolist.Annotator = anno.Annotator;
+                annolist.AnnotatorFullName = anno.AnnotatorFullName;
                 annolist.Highborder = anno.Highborder;
                 annolist.Lowborder = anno.Lowborder;
                 annolist.AnnotationScheme = anno.AnnotationScheme;
@@ -2957,8 +2959,8 @@ namespace ssi
                             if (anno.Count > 0)
                             {
 
-                                anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.Annotator;
-                                anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.Annotator;
+                                anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
+                                anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
 
 
                                 if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
