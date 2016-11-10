@@ -79,10 +79,6 @@ namespace ssi
         private List<long> downloadsreceived = new List<long>();
         private List<long> downloadstotal = new List<long>();
         private List<string> filestoload = new List<string>();
-    
-     
-
-
 
         public bool DatabaseLoaded
         {
@@ -110,9 +106,11 @@ namespace ssi
 
             this.view.annoListControl.annoDataGrid.SelectionChanged += annoDataGrid_SelectionChanged;
             this.view.annoListControl.editButton.Click += editAnnoButton_Click;
+            this.view.annoListControl.editTextBox.KeyDown += editTextBox_KeyDown;
+            this.view.annoListControl.editTextBox.GotMouseCapture += editTextBox_focused;
+            this.view.annoListControl.editComboBox.SelectionChanged += editComboBox_selectionChanged;
             this.view.trackControl.CloseAnnotrackButton.Click += closeTier_Click;
             this.view.trackControl.annoNameLabel.Click += annoNameLabel_Click;
-
             this.view.navigator.newAnnoButton.Click += newAnnoButton_Click;
             this.view.navigator.newAnnoContButton.Click += newAnnoContButton_Click;
 
@@ -152,7 +150,6 @@ namespace ssi
             this.view.exportSampledAnnotations.Click += exportSampledAnnotationsButton_Click;
             this.view.annoListControl.editComboBox.SelectionChanged += changed_annoschemeselectionbox;
             this.view.navigator.hideHighConf.Click += check_lowconfonly;
-
 
             //AnnoTrack.OnTrackPlay += playTrackHandler;
             AnnoTrack.OnTrackChange += changeAnnoTrackHandler;
@@ -292,13 +289,11 @@ namespace ssi
             {
                 if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    if(DatabaseLoaded)
+                    if (DatabaseLoaded)
                     {
                         mongodbStore();
                     }
-
                     else saveAnno();
-
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
@@ -364,7 +359,6 @@ namespace ssi
                     keyDown = true;
                     // e.Handled = true;
                 }
-
                 else if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.A) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && !AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedSegment() != null)
@@ -373,8 +367,6 @@ namespace ssi
                     }
                     if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(true);
                     keyDown = true;
-
-
                 }
                 if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !keyDown*/)
                 {
@@ -561,28 +553,25 @@ namespace ssi
                 MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
                 if (mbx == MessageBoxResult.Yes)
                 {
-                  
-                   if (DatabaseLoaded)
-                        {
-                            mongodbStore();
-                        }
+                    if (DatabaseLoaded)
+                    {
+                        mongodbStore();
+                    }
                     else
                     {
-
-                 
-                    foreach (AnnoTrack track in anno_tracks)
-                    {
-                        if (track.AnnoList.HasChanged /*&& !track.isDiscrete*/)
+                        foreach (AnnoTrack track in anno_tracks)
                         {
-                            MessageBoxResult mbr = MessageBox.Show("Save changes on continous tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
-                            if (mbr == MessageBoxResult.Yes)
+                            if (track.AnnoList.HasChanged /*&& !track.isDiscrete*/)
                             {
-                                saveAnno(track.AnnoList, track.AnnoList.Filepath);
-                                /* if (!track.isDiscrete)*/
-                                track.AnnoList.HasChanged = false;
+                                MessageBoxResult mbr = MessageBox.Show("Save changes on continous tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
+                                if (mbr == MessageBoxResult.Yes)
+                                {
+                                    saveAnno(track.AnnoList, track.AnnoList.Filepath);
+                                    /* if (!track.isDiscrete)*/
+                                    track.AnnoList.HasChanged = false;
+                                }
                             }
                         }
-                    }
                     }
                 }
             }
@@ -727,6 +716,25 @@ namespace ssi
             if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(true);
         }
 
+        private void editComboBox_selectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AnnoTrack.GetSelectedSegment() != null && view.annoListControl.editComboBox.SelectedItem != null && view.annoListControl.editComboBox.Items.Count > 0 && AnnoTrack.GetSelectedSegment().Item != null)
+            {
+                AnnoTrackSegment a = AnnoTrack.GetSelectedSegment();
+
+                a.Item.Label = view.annoListControl.editComboBox.SelectedItem.ToString();
+                foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
+                {
+                    if (lcp.Label == a.Item.Label)
+                    {
+                        a.Item.Bg = lcp.Color;
+                        break;
+                    }
+                }
+                AnnoTrack.SelectSegment(a);
+            }
+        }
+
         private void annoDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ListView grid = (ListView)sender;
@@ -761,6 +769,8 @@ namespace ssi
                     {
                         AnnoTrack.SelectSegment(AnnoTrack.GetSelectedTrack().getSegment(a));
                         view.annoListControl.editComboBox.SelectedItem = item.Label;
+                        view.annoListControl.editTextBox.Text = item.Label;
+
                         break;
                     }
                 }
@@ -817,7 +827,6 @@ namespace ssi
                 else if (anno.AnnotationScheme.type == "DISCRETE") anno.AnnotationType = AnnoType.DISCRETE;
                 else if (anno.AnnotationScheme.type == "CONTINUOUS") anno.AnnotationType = AnnoType.CONTINUOUS;
 
-
                 if (anno.AnnotationScheme.type != "FREE") anno.usesAnnoScheme = true;
                 else anno.usesAnnoScheme = false;
                 anno.Name = anno.Role + " #" + anno.AnnotationScheme.name;
@@ -834,7 +843,6 @@ namespace ssi
             }
             else
             {
-
                 if (isDiscrete == AnnoType.CONTINUOUS)
                 {
                     if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null)
@@ -842,12 +850,9 @@ namespace ssi
                         background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.maxcolor), (Color)ColorConverter.ConvertFromString(anno.AnnotationScheme.mincolor), 90.0);
                         background.Opacity = 0.75;
                     }
-
-
                 }
                 addAnno(anno, isDiscrete, samplerate, null, borderlow, borderhigh, background);
             }
-
         }
 
         public void addAnno(AnnoList anno, AnnoType isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null, string annotator = null)
@@ -873,8 +878,6 @@ namespace ssi
             track.AnnoList.usesAnnoScheme = anno.usesAnnoScheme;
             track.AnnoList.AnnotationScheme = anno.AnnotationScheme;
 
-
-
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.timeRangeChanged;
 
             this.anno_tracks.Add(track);
@@ -888,9 +891,6 @@ namespace ssi
             {
                 track.Background = background;
                 track.BackgroundColor = background;
-
-
-
             }
 
             AnnoTrack.SelectTrack(track);
@@ -900,12 +900,10 @@ namespace ssi
                 {
                     background = new LinearGradientBrush((Color)ColorConverter.ConvertFromString(track.AnnoList.AnnotationScheme.mincolor), (Color)ColorConverter.ConvertFromString(track.AnnoList.AnnotationScheme.maxcolor), 90.0);
                     background.Opacity = 0.75;
-
                 }
                 else background = resultbrush("RedBlue");
                 track.ContiniousBrush = background;
                 track.Background = background;
-
             }
             if (track.AnnoList.AnnotationType == AnnoType.CONTINUOUS)
             {
@@ -940,10 +938,8 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if(maxdur > Properties.Settings.Default.DefaultZoominSeconds  && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
-
-
 
         //new File Format...
         private void loadAnnotation(string filename)
@@ -966,14 +962,10 @@ namespace ssi
                 setAnnoList(anno);
                 addAnno(anno, anno.AnnotationType, anno.SR, filename, anno.Lowborder, anno.Highborder);
             }
-     
+
             updateTimeRange(maxdur);
-            if(maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
-
-
-
-
 
         private void handleAnnotation(AnnoList anno, string filename)
         {
@@ -987,7 +979,6 @@ namespace ssi
             {
                 if (anno.AnnotationType != AnnoType.CONTINUOUS)
                 {
-
                     foreach (AnnoListItem ali in anno)
                     {
                         if (!TierIds.Contains(ali.Tier))
@@ -1010,7 +1001,6 @@ namespace ssi
                     TierIds.Add(tier);
                     maxdur = anno[anno.Count - 1].Stop;
                 }
-
             }
             else
             {
@@ -1073,12 +1063,10 @@ namespace ssi
                     background = resultbrush("RedBlue");
                     background.Opacity = 0.75;
                 }
-
                 else if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationType != AnnoType.CONTINUOUS)
                 {
                     annolist.AnnotationScheme.mincolor = anno.AnnotationScheme.mincolor;
                 }
-
 
                 if (annolist != null)
                 {
@@ -1125,7 +1113,7 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds  && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadAnvil(string filename)
@@ -1278,7 +1266,6 @@ namespace ssi
             else
             {
                 track.timeRangeChanged(ViewHandler.Time);
-
             }
             if (duration > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             //updateTimeRange(duration);
@@ -1296,9 +1283,7 @@ namespace ssi
 
         private void fixTimeRange(double duration)
         {
-          
-                if (!movemedialock) this.view.trackControl.timeTrackControl.rangeSlider.UpdateFixedRange(duration);
-            
+            if (!movemedialock) this.view.trackControl.timeTrackControl.rangeSlider.UpdateFixedRange(duration);
         }
 
         private void loadMedia(string filename, bool is_video, string url = null)
@@ -1522,22 +1507,18 @@ namespace ssi
             {
                 if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.CONTINUOUS)
                 {
-                    view.annoListControl.editButton.IsEnabled = false;
+                    view.annoListControl.editButton.Visibility = Visibility.Collapsed;
                     view.annoListControl.editComboBox.IsEnabled = false;
                     view.annoListControl.editTextBox.IsEnabled = false;
                 }
-                else
-                {
-                    view.annoListControl.editButton.IsEnabled = true;
-                    view.annoListControl.editComboBox.IsEnabled = true;
-                    view.annoListControl.editTextBox.IsEnabled = true;
-                }
-
+  
                 view.annoListControl.editComboBox.Items.Clear();
                 if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE)
                 {
                     view.annoListControl.editComboBox.Visibility = Visibility.Visible;
                     view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
+                    view.annoListControl.editTextBox.IsEnabled = false;
+                    view.annoListControl.editButton.Visibility = Visibility.Collapsed;
 
                     //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
 
@@ -1555,6 +1536,8 @@ namespace ssi
                 {
                     view.annoListControl.editTextBox.Visibility = Visibility.Visible;
                     view.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
+                    view.annoListControl.editButton.Visibility = Visibility.Visible;
+                    view.annoListControl.editTextBox.IsEnabled = true;
                 }
             }
 
@@ -1652,11 +1635,8 @@ namespace ssi
                 {
                     anno.saveToFile();
                 }
-
             }
         }
-
-
 
         public void saveCSVAnno(List<AnnoTrack> tracks, string filepath)
         {
@@ -1716,11 +1696,9 @@ namespace ssi
 
             foreach (AnnoTrack t in tracks)
             {
-               
-                    sw.WriteLine("\t\t<tier filepath=\"" + t.AnnoList.Filepath + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
-             
+                sw.WriteLine("\t\t<tier filepath=\"" + t.AnnoList.Filepath + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
             }
-  
+
             sw.WriteLine("\t</tiers>");
 
             sw.WriteLine("</novaproject>");
@@ -1758,7 +1736,6 @@ namespace ssi
                 }
             }
 
-
             foreach (XmlNode child in (doc.SelectNodes("//tier")))
             {
                 if (child.Attributes.Count > 0)
@@ -1772,7 +1749,6 @@ namespace ssi
                         loadAnnotation(child.Attributes[0].InnerText);
                     }
                 }
-
             }
         }
 
@@ -1838,9 +1814,6 @@ namespace ssi
         {
             mouseDown = false;
 
-  
-        
-
             if (AnnoTrack.askforlabel == true)
                 ShowLabelBox();
         }
@@ -1887,9 +1860,9 @@ namespace ssi
                     }
 
                     LabelInputBox inputBox = new LabelInputBox("Input", "Enter a label for your annotation", AnnoTrack.GetSelectedSegment().Item.Label, AnnoTrack.GetSelectedTrack().track_used_labels, 1, "", "", true, AnnoTrack.GetSelectedTrack().AnnoList.usesAnnoScheme);
-                    if(view.navigator.hideHighConf.IsChecked == true)
+                    if (view.navigator.hideHighConf.IsChecked == true)
                     {
-                        inputBox.showSlider(true,1.0);
+                        inputBox.showSlider(true, 1.0);
                     }
                     else inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                     inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -1930,15 +1903,11 @@ namespace ssi
             }
         }
 
-
-
         private void ShowLabelBoxCont()
 
         {
             if (AnnoTrack.GetSelectedTrack() != null)
             {
-
-
                 LabelInputBox inputBox = new LabelInputBox("Input", "Enter Confidence for selected Area", "", null, 1, "", "", false, true);
                 inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                 inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -1946,19 +1915,14 @@ namespace ssi
                 inputBox.Close();
                 if (inputBox.DialogResult == true)
                 {
-
                     foreach (AnnoListItem ali in AnnoTrack.GetSelectedTrack().AnnoList)
                     {
                         if (ali.Start >= AnnoTrack.GetSelectedSegment().Item.Start && ali.Stop <= AnnoTrack.GetSelectedSegment().Item.Stop)
                         {
                             ali.Confidence = inputBox.ResultSlider();
                         }
-
-
                     }
-
                 }
-
             }
         }
 
@@ -2160,8 +2124,6 @@ namespace ssi
                         ftype = ssi_file_type.ANNO;
                         break;
 
-
-
                     case "annotation":
                     case "annotation~":
                         ftype = ssi_file_type.ANNOTATION;
@@ -2273,11 +2235,10 @@ namespace ssi
                     loaded = true;
                     break;
 
-
                 case ssi_file_type.ANNOTATION:
                     loadAnnotation(filename);
                     loaded = true;
-                   
+
                     break;
 
                 case ssi_file_type.STREAM:
@@ -2395,6 +2356,26 @@ namespace ssi
             return br;
         }
 
+        private void editTextBox_focused(object sender, RoutedEventArgs e)
+        {
+            this.view.annoListControl.editTextBox.SelectAll();
+        }
+
+        private void editTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                foreach (AnnoListItem item in view.annoListControl.annoDataGrid.SelectedItems)
+                {
+                    if (view.annoListControl.editComboBox.Visibility == Visibility.Visible && view.annoListControl.editComboBox.Items.Count > 0)
+                    {
+                        item.Label = view.annoListControl.editComboBox.SelectedItem.ToString();
+                    }
+                    else item.Label = view.annoListControl.editTextBox.Text;
+                }
+            }
+        }
+
         private void editAnnoButton_Click(object sender, RoutedEventArgs e)
         {
             foreach (AnnoListItem item in view.annoListControl.annoDataGrid.SelectedItems)
@@ -2425,8 +2406,6 @@ namespace ssi
             }
         }
 
-
-
         public void addFiles()
         {
             string[] filenames = ViewTools.OpenFileDialog("Viewable files (*.stream,*.annotation;*.wav,*.avi,*.wmv)|*.stream;*.annotation;*.eaf;*.csv;*.wav;*.avi;*.wmv;*mp4;*mpg;*mkv;*vui|Signal files (*.stream)|*.stream|Annotation files (*.annotation;*.csv;*.anno;*.txt)|*annotation;*.anno;*csv;*txt|Wave files (*.wav)|*.wav|Video files(*.avi,*.wmv,*.mp4;*.mov)|*.avi;*.wmv;*.mp4;*.mov|All files (*.*)|*.*", true);
@@ -2454,7 +2433,7 @@ namespace ssi
             s.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             s.ShowDialog();
 
-            if(s.DialogResult == true)
+            if (s.DialogResult == true)
             {
                 Properties.Settings.Default.UncertaintyLevel = s.Uncertainty();
                 Properties.Settings.Default.Annotator = s.AnnotatorName();
@@ -2464,10 +2443,9 @@ namespace ssi
                 Properties.Settings.Default.DefaultZoominSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.Save();
-
             }
         }
-        
+
         private void saveProject_Click(object sender, RoutedEventArgs e)
         {
             saveProject();
@@ -2476,7 +2454,6 @@ namespace ssi
         private void newAnnoButton_Click(object sender, RoutedEventArgs e)
         {
             newAnno(AnnoType.FREE);
-
         }
 
         private void newAnnoContButton_Click(object sender, RoutedEventArgs e)
@@ -2563,8 +2540,7 @@ namespace ssi
                         {
                             mongodbStore();
                         }
-                       else   saveAnno();
-
+                        else saveAnno();
 
                         at.AnnoList.HasChanged = false;
                     }
@@ -2852,8 +2828,7 @@ namespace ssi
                     addAnno(dbf.RMS(), AnnoType.CONTINUOUS, dbf.RMS().SR, null, dbf.RMS().Lowborder, dbf.RMS().Highborder, null, "RMS");
 
                     updateTimeRange(dbf.RMS().Last().Stop);
-                    if(dbf.RMS().Last().Stop > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
-
+                    if (dbf.RMS().Last().Stop > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
                 }
             }
             this.view.mongodbmenu.IsEnabled = true;
@@ -2955,22 +2930,17 @@ namespace ssi
                         foreach (AnnoList anno in annos)
 
                         {
-
                             if (anno.Count > 0)
                             {
-
                                 anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
                                 anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
-
 
                                 if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
                                 else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
                                 else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
 
                                 handleAnnotation(anno, null);
-
                             }
-
                         }
 
                         view.ShadowBox.Visibility = Visibility.Collapsed;
@@ -3140,18 +3110,14 @@ namespace ssi
                 }
             }
         }
+
         private void exporttracktocsv_Click(object sender, RoutedEventArgs e)
         {
             if (AnnoTrack.GetSelectedTrack() != null)
             {
                 exportAnnotoCSV(AnnoTrack.GetSelectedTrack().AnnoList);
             }
-
-
         }
-
-
-
 
         private void convertosignal_Click(object sender, RoutedEventArgs e)
         {
@@ -3406,23 +3372,16 @@ namespace ssi
             }
         }
 
-
         private void check_lowconfonly(object sender, RoutedEventArgs e)
         {
             if (view.navigator.hideHighConf.IsChecked == true) AnnoTrack.CorrectMode = true;
             else AnnoTrack.CorrectMode = false;
 
-
             foreach (AnnoTrack a in anno_tracks)
             {
                 a.timeRangeChanged(time);
             }
-           
-        
-    
-
-
-    }
+        }
 
         private void exportSampledAnnotationsButton_Click(object sender, RoutedEventArgs e)
         {

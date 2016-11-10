@@ -156,5 +156,10 @@ namespace ssi
                 }
             }
         }
+
+        private void editTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+
+        }
     }
 }

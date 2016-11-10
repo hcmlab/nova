@@ -276,8 +276,16 @@ namespace ssi
 
                 if (a.AnnoList.AnnotatorFullName == null)
                 {
-                    ObjectId annotatid = GetObjectID(database, "Annotators", "name", a.AnnoList.Annotator);
-                    a.AnnoList.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid); 
+                    try
+                    {
+                        ObjectId annotatid = GetObjectID(database, "Annotators", "name", a.AnnoList.Annotator);
+                        a.AnnoList.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid);
+                    }
+                    catch
+                    {
+                        a.AnnoList.AnnotatorFullName = Properties.Settings.Default.Annotator;
+                    }
+                 
                 }
 
                   
