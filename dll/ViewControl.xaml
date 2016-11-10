@@ -25,7 +25,7 @@
                 <MenuItem Header="Clear" Name="clearMenu" />
             </MenuItem>
             <MenuItem Header="Tier" Name="tiermenu">
-                <MenuItem Header="Save Single Tier as" Name="savetiermenu" IsEnabled="False" />
+                <MenuItem Header="Save selected tier" Name="savetiermenu" IsEnabled="False" />
                 <MenuItem Header="Convert to discrete" Name="convertodiscretemenu" IsEnabled="False" />
                 <MenuItem Header="Convert to stream" Name="convertosignalemenu" IsEnabled="False" />
                 <MenuItem Header="Export" Name="export">

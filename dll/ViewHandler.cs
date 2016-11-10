@@ -1612,7 +1612,7 @@ namespace ssi
 
         public void saveAnno()
         {
-            saveAnno(this.current_anno, this.current_anno.SampleAnnoPath);
+            saveAnno(this.current_anno, this.current_anno.Filepath);
         }
 
         public void saveAnno(string filepath)
@@ -1836,7 +1836,8 @@ namespace ssi
         {
             mouseDown = false;
 
-      
+  
+        
 
             if (AnnoTrack.askforlabel == true)
                 ShowLabelBox();
@@ -2537,7 +2538,8 @@ namespace ssi
             if (AnnoTrack.GetSelectedTrack() != null)
             {
                 //if (AnnoTrack.GetSelectedTrack().isDiscrete)
-                saveAnnoAs();
+                //saveAnnoAs();
+                saveAnno();
                 //   else saveContinousAnnoAs();
             }
         }
@@ -2965,22 +2967,6 @@ namespace ssi
 
                                 handleAnnotation(anno, null);
 
-                                //double maxdur = 0;
-                                //foreach (AnnoListItem ali in anno)
-                                //{
-                                //    if (ali.Stop > maxdur)
-                                //    {
-                                //        maxdur = ali.Stop;
-                                //    }
-                                //}
-                                //if (anno != null)
-                                //{
-                                //    setAnnoList(anno);
-
-                                //    addAnno(anno, anno.AnnotationType, 1);
-                                //}
-
-                                //updateTimeRange(maxdur);
                             }
 
                         }
