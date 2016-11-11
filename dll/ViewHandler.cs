@@ -1008,6 +1008,9 @@ namespace ssi
             }
 
             //Create a new AnnoList per tierId and add it
+            if (TierIds.Count > 0)
+            {
+            }
             foreach (String tierid in TierIds)
             {
                 AnnoList annolist = new AnnoList();
@@ -1034,7 +1037,7 @@ namespace ssi
                     }
                 }
 
-                annolist.Name = anno.Name;
+                if (annolist.Name == null) annolist.Name = anno.Name;
                 annolist.Annotator = anno.Annotator;
                 annolist.AnnotatorFullName = anno.AnnotatorFullName;
                 annolist.Highborder = anno.Highborder;
@@ -1511,7 +1514,7 @@ namespace ssi
                     view.annoListControl.editComboBox.IsEnabled = false;
                     view.annoListControl.editTextBox.IsEnabled = false;
                 }
-  
+
                 view.annoListControl.editComboBox.Items.Clear();
                 if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE)
                 {
@@ -2579,9 +2582,9 @@ namespace ssi
             string ftpfilepath = "/" + folder + fileName;
             if (!File.Exists(localfilepath + fileName))
             {
+                Tamir.SharpSsh.Sftp sftp = new Tamir.SharpSsh.Sftp(ftphost, login, password);
                 try
                 {
-                    Tamir.SharpSsh.Sftp sftp = new Tamir.SharpSsh.Sftp(ftphost, login, password);
                     sftp.OnTransferStart += new FileTransferEvent(sshCp_OnTransferStart);
                     sftp.OnTransferProgress += new FileTransferEvent(sshCp_OnTransferProgress);
                     sftp.OnTransferEnd += new FileTransferEvent(sshCp_OnTransferEnd);
@@ -2600,6 +2603,13 @@ namespace ssi
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
+                    if (null != sftp && sftp.Connected)
+                    {
+                        sftp.Cancel();
+                    }
+                    MessageBox.Show("Can't login to Data Server. Not authorized. Continuing without media.");
+                    // throw e;
+                    return null;
                 }
             }
             else { Console.Write("File already exists..."); }
@@ -2964,7 +2974,8 @@ namespace ssi
                                             Properties.Settings.Default.DataServerConnectionType = "sftp";
 
                                             string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
-                                            if (!file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
+                                            if (file != null && !file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
+                                            if (file == null) break;
                                         }
                                         else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
                                         {

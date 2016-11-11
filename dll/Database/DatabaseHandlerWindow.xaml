@@ -21,7 +21,7 @@
 
             <StackPanel Orientation="Vertical" Margin="10">
                 <Label Content="Server:IP" Margin="-3,0,0,0"></Label>
-                <TextBox x:FieldModifier="public" x:Name="db_server" Height="25" Width="200" Focusable="True" VerticalContentAlignment="Center"/>
+                <TextBox x:FieldModifier="public" x:Name="db_server" Height="25" Width="200" Focusable="True" VerticalContentAlignment="Center" />
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10">
@@ -30,18 +30,17 @@
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10">
-                <Label Content="Database Password"  Margin="-3,0,0,0"/>
+                <Label Content="Database Password"  Margin="-3,0,0,0" />
                 <PasswordBox x:FieldModifier="public" x:Name="db_pass" Height="25" Width="200" Focusable="True" PasswordChanged="db_pass_PasswordChanged" VerticalContentAlignment="Center" />
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox Name="Autologin" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"  VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                    <Label Content="Remember"  />
+                    <CheckBox Name="Autologin" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"  VerticalAlignment="Center" VerticalContentAlignment="Center" />
+                    <Label Content="Remember" />
                 </StackPanel>
-                <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25" Width="100"/>
+                <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25" Width="100" />
             </StackPanel>
-
         </StackPanel>
 
         <Grid Grid.Row="1" Grid.Column="0">
@@ -57,12 +56,12 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0" Grid.Row="0" Margin="10">
-                <Label Content="Databases" DockPanel.Dock="Top" Margin="-3,0,0,0"/>
+                <Label Content="Databases" DockPanel.Dock="Top" Margin="-3,0,0,0" />
                 <ListBox Name="DataBasResultsBox" SelectionMode="Single" SelectionChanged="DataBasResultsBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
             </DockPanel>
 
             <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
-                <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0"/>
+                <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
                 <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged" SelectionMode="Single">
                     <ListView.View>
                         <GridView>
@@ -82,11 +81,11 @@
                                     <Binding Path="Date" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="OID" >
+                            <GridViewColumn Width="Auto" Header="OID">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="OID" />
                                 </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>                            
+                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>
@@ -96,14 +95,14 @@
                 <DockPanel HorizontalAlignment="Stretch" DockPanel.Dock="Top" Margin="-3,0,0,0">
                     <Label Content="Annotations" />
                     <StackPanel Orientation="Horizontal"  HorizontalAlignment="Right">
-                        <Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed"/>
-                        <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="-" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed"/>
+                        <Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" />
+                        <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="-" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed" />
                     </StackPanel>
                 </DockPanel>
                 <StackPanel Orientation="Vertical" Margin="10" DockPanel.Dock="Bottom">
                     <CheckBox Name="showonlymine" Content="Mine only" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" />
                     <CheckBox Name="showonlyunfinished" Content="Unfinished only" Checked="showonlyunfinished_Checked" Unchecked="showonlyunfinished_Unchecked" />
-                </StackPanel>                
+                </StackPanel>
                 <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended">
                     <ListView.View>
                         <GridView>
@@ -122,7 +121,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <CheckBox Name="IsFinishedCheckbox" IsEnabled="{Binding IsOwner}" IsChecked="{Binding IsFinished}" Checked="IsFinishedCheckbox_Checked" Unchecked="IsFinishedCheckbox_Unchecked"/>
+                                            <CheckBox Name="IsFinishedCheckbox" IsEnabled="{Binding IsOwner}" IsChecked="{Binding IsFinished}" Checked="IsFinishedCheckbox_Checked" Unchecked="IsFinishedCheckbox_Unchecked" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -138,29 +137,27 @@
             </DockPanel>
 
             <DockPanel Grid.Column="3" Grid.Row="0"  Margin="10">
-                <Label Content="Media"  DockPanel.Dock="Top" Margin="-3,0,0,0"/>
+                <Label Content="Media"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
                 <StackPanel Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,10,0,0">
                     <CheckBox Name="requireslogin" Content="Server Authentication" Margin="0,0,5,5" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
                     <DockPanel LastChildFill="True">
-                        <Label Content="Username" Width="70"/>
-                        <TextBox x:FieldModifier="public" x:Name="server_login" Margin="0,0,5,5" Height="25" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center"/>
+                        <Label Content="Username" Width="70" />
+                        <TextBox x:FieldModifier="public" x:Name="server_login" Margin="0,0,5,5" Height="25" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
                     </DockPanel>
                     <DockPanel LastChildFill="True">
-                        <Label Content="Password" Width="70"/>
+                        <Label Content="Password" Width="70" />
                         <PasswordBox x:FieldModifier="public" x:Name="server_pass" Margin="0,0,5,0" Height="25" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
                     </DockPanel>
                 </StackPanel>
                 <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" SelectionMode="Extended" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
             </DockPanel>
-
         </Grid>
 
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-                <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click"/>
-                <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click"/>
+                <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click" />
+                <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click" />
             </StackPanel>
         </StackPanel>
-        
     </Grid>
 </Window>

@@ -337,7 +337,6 @@ namespace ssi
             this.InvalidateVisual();
         }
 
-
         public void ExportToXPS(Uri path, Canvas surface)
         {
             if (path == null) return;
@@ -375,7 +374,6 @@ namespace ssi
                 96d,
                 PixelFormats.Pbgra32);
             renderBitmap.Render(surface);
-
 
             using (FileStream outStream = new FileStream(path.LocalPath, FileMode.Create))
             {

@@ -39,13 +39,12 @@
         </StackPanel>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
-            <CheckBox Name="followplaybox" Height="25" Margin="0,10,10,0" IsChecked="True" Content="Auto Scroll"/>
+            <CheckBox Name="followplaybox" Height="25" Margin="0,10,10,0" IsChecked="True" Content="Auto Scroll" />
             <CheckBox x:Name="askforlabels" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Force Label" />
             <CheckBox Name="hideHighConf" Height="25" Margin="0,10,10,0" Visibility="Visible">Correction Mode</CheckBox>
             <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Clear</Button>
         </StackPanel>
 
         <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="Statusbar" Margin="5,0,0,0" HorizontalContentAlignment="Left" BorderThickness="0" Content="" />
-        
     </Grid>
 </UserControl>

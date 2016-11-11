@@ -289,7 +289,7 @@ namespace ssi
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID =anno["_id"].AsObjectId});
+                    items.Add(new DatabaseAnno() { Role = rolename, AnnoType = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
                 }
                 //else if (result.ElementCount == 0 && result2.ElementCount > 0 && annos["role_id"].AsObjectId == roleid)
                 //{

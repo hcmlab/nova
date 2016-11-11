@@ -116,7 +116,7 @@ namespace ssi
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("AnnotationSchemes");
-   
+
             var sessions = collection.Find(_ => true).ToList();
 
             foreach (var document in sessions)
@@ -124,7 +124,6 @@ namespace ssi
                 if (document["isValid"].AsBoolean == true)
                 {
                     if ((type == AnnoType.DISCRETE || type == AnnoType.FREE) && (document["type"].ToString() == "FREE" || document["type"].ToString() == "DISCRETE")) AnnotationSchemes.Add(document["name"].ToString());
-                 
                     else if (type == AnnoType.CONTINUOUS && document["type"].ToString() == "CONTINUOUS") AnnotationSchemes.Add(document["name"].ToString());
                 }
             }
@@ -146,6 +145,7 @@ namespace ssi
             }
             return annotype;
         }
+
         public AnnotationScheme GetAnnotationScheme(string name, AnnoType isDiscrete)
         {
             mongo = new MongoClient(connectionstring);
@@ -190,15 +190,13 @@ namespace ssi
                     Scheme.LabelsAndColors.Add(lcp);
                 }
             }
-
-
             else if (Scheme.type == "FREE")
             {
                 if (annosch[0].TryGetElement("color", out value)) Scheme.mincolor = annosch[0]["color"].ToString();
-
             }
             return Scheme;
         }
+
         public void StoreToDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null, List<DatabaseMediaInfo> loadedDBmedia = null)
         {
             mongo = new MongoClient(connectionstring);
@@ -259,9 +257,6 @@ namespace ssi
 
                 //We could choose here if we want to overwrite other peoples annotations. For now, we we might want to overwrite automatically created annotations and own annotations only
 
-
-
-
                 if (!(a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break;
                 if (a.AnnoList.Annotator == null && a.AnnoList.AnnotatorFullName != null)
                 {
@@ -284,10 +279,7 @@ namespace ssi
                     {
                         a.AnnoList.AnnotatorFullName = Properties.Settings.Default.Annotator;
                     }
-                 
                 }
-
-                  
 
                 BsonElement annotatorname = new BsonElement("name", a.AnnoList.Annotator);
                 BsonElement annotatornamefull = new BsonElement("fullname", a.AnnoList.AnnotatorFullName);
@@ -313,7 +305,6 @@ namespace ssi
                 string annotype = null;
                 if (a.AnnoList.AnnotationScheme != null) annotype = a.AnnoList.AnnotationScheme.name;
 
-
                 if (annotype == null)
                 {
                     annotype = LoadAnnotationSchemes(db, a, a.AnnoList.AnnotationType);
@@ -329,7 +320,7 @@ namespace ssi
                 var annoschemetypedb = annotdb[0]["type"];
                 var update2 = Builders<BsonDocument>.Update.Set("isValid", true);
                 annotationschemes.UpdateOne(filter, update2);
-               
+
                 BsonElement user = new BsonElement("annotator_id", annotatoroID);
                 BsonElement role = new BsonElement("role_id", roleid);
                 BsonElement annot = new BsonElement("scheme_id", annotid);
@@ -370,8 +361,7 @@ namespace ssi
 
                 if (a != null)
                 {
-                
-                    if  (annoschemetypedb =="DISCRETE")
+                    if (annoschemetypedb == "DISCRETE")
                     {
                         BsonArray Labels = annotdb[0]["labels"].AsBsonArray;
                         int index = 0;
@@ -385,36 +375,27 @@ namespace ssi
                                     data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", index }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                                     break;
                                 }
-
-                                else  if (a.AnnoList[i].Label == "GARBAGE")
-                                    {
-                                        data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", -1 }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
-                                        break;
-                                    }
+                                else if (a.AnnoList[i].Label == "GARBAGE")
+                                {
+                                    data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", -1 }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
+                                    break;
+                                }
                             }
                         }
-
                     }
-
-                    else if (annoschemetypedb =="FREE")
+                    else if (annoschemetypedb == "FREE")
                     {
                         for (int i = 0; i < a.AnnoList.Count; i++)
                         {
-                            data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "name", a.AnnoList[i].Label }, { "conf", a.AnnoList[i].Confidence } } );
-                               
+                            data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "name", a.AnnoList[i].Label }, { "conf", a.AnnoList[i].Confidence } });
                         }
-
                     }
-
-
-
-                    else if  (annoschemetypedb == "CONTINUOUS")
+                    else if (annoschemetypedb == "CONTINUOUS")
                     {
                         for (int i = 0; i < a.AnnoList.Count; i++)
                         {
                             data.Add(new BsonDocument { { "score", a.AnnoList[i].Label }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                         }
-
                     }
 
                     document.Add("labels", data);
@@ -434,8 +415,6 @@ namespace ssi
                 var result = annotations.ReplaceOne(filter2, document, uo);
             }
         }
-
-     
 
         public List<AnnoList> LoadfromDatabase(System.Collections.IList collections, string db, string session, string dbuser)
         {
@@ -466,7 +445,7 @@ namespace ssi
 
                 ObjectId sessionid = GetObjectID(database, "Sessions", "name", session);
                 string sessiondb = FetchDBRef(database, "Sessions", "name", sessionid);
- 
+
                 var builder = Builders<BsonDocument>.Filter;
 
                 var filterscheme = builder.Eq("_id", annotid);
@@ -481,7 +460,6 @@ namespace ssi
                     al.AnnotationType = AnnoType.DISCRETE;
                     al.usesAnnoScheme = true;
                 }
-
                 else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == "FREE")
                 {
                     al.AnnotationType = AnnoType.FREE;
@@ -523,12 +501,9 @@ namespace ssi
 
                         al.Add(ali);
                     }
-                
                 }
                 else if (al.AnnotationType == AnnoType.DISCRETE)
                 {
-
-
                     al.AnnotationScheme.mincolor = annosch["color"].ToString();
 
                     al.AnnotationScheme.LabelsAndColors = new List<LabelColorPair>();
@@ -539,7 +514,6 @@ namespace ssi
                     {
                         al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString()));
                     }
-
 
                     al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair("GARBAGE", "#FF000000"));
 
@@ -564,7 +538,6 @@ namespace ssi
                             SchemeColor = "#FF000000";
                         }
 
-
                         double start = double.Parse(annotation[i]["from"].ToString());
                         double stop = double.Parse(annotation[i]["to"].ToString());
                         double duration = stop - start;
@@ -573,19 +546,14 @@ namespace ssi
 
                         AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, SchemeColor, double.Parse(confidence));
                         al.Add(ali);
-
-
                     }
                 }
-
                 else if (al.AnnotationType == AnnoType.FREE)
                 {
-
                     al.AnnotationScheme.mincolor = annosch["color"].ToString();
 
                     for (int i = 0; i < annotation.Count; i++)
                     {
-                       
                         double start = double.Parse(annotation[i]["from"].ToString());
                         double stop = double.Parse(annotation[i]["to"].ToString());
                         double duration = stop - start;
@@ -595,9 +563,8 @@ namespace ssi
                         AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, "#000000", double.Parse(confidence));
                         al.Add(ali);
                     }
-
                 }
-             
+
                 l.Add(al);
                 al = null;
             }
@@ -646,7 +613,7 @@ namespace ssi
 
         public string Session { get; set; }
 
-        public bool IsFinished { get; set;  }
+        public bool IsFinished { get; set; }
 
         public bool IsOwner { get; set; }
 

@@ -25,7 +25,6 @@
                 <Button Name="Delete" Margin="5,0,0,0" Width="25" Content="-" Click="Delete_Click"></Button>
                 <Button Name="Edit" Margin="5,0,0,0" Content="Edit" Click="Edit_Click" Visibility="Hidden"></Button>
             </StackPanel>
-
         </DockPanel>
     </Grid>
 </Window>
