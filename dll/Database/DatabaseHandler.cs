@@ -117,7 +117,6 @@ namespace ssi
             database = mongo.GetDatabase(db);
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("AnnotationSchemes");
    
-
             var sessions = collection.Find(_ => true).ToList();
 
             foreach (var document in sessions)
@@ -317,7 +316,7 @@ namespace ssi
 
                 if (annotype == null)
                 {
-                    annotype = LoadAnnotationSchemes(db, a);
+                    annotype = LoadAnnotationSchemes(db, a, a.AnnoList.AnnotationType);
                 }
 
                 if (annotype == null)

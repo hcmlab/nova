@@ -183,11 +183,17 @@ namespace ssi
 
                 d.Add(a);
                 d.Add(b);
-                d.Add(c);
-                d.Add(i2);
+               
+              
                 if (dbas.GetType().ToUpper() == "DISCRETE")
                 {
+                    d.Add(i2);
                     d.Add("labels", labels);
+                }
+
+                else if (dbas.GetType().ToUpper() == "FREE")
+                {
+                    d.Add(i2);
                 }
                 else
                 {
@@ -197,6 +203,7 @@ namespace ssi
                     d.Add(i);
                     d.Add(j);
                 }
+                d.Add(c);
 
                 var coll = database.GetCollection<BsonDocument>("AnnotationSchemes");
                 var filterup = builder.Eq("name", name);
