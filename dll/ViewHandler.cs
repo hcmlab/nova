@@ -2585,9 +2585,10 @@ namespace ssi
             string ftpfilepath = "/" + folder + fileName;
             if (!File.Exists(localfilepath + fileName))
             {
+                Tamir.SharpSsh.Sftp sftp = new Tamir.SharpSsh.Sftp(ftphost, login, password);
                 try
                 {
-                    Tamir.SharpSsh.Sftp sftp = new Tamir.SharpSsh.Sftp(ftphost, login, password);
+                  
                     sftp.OnTransferStart += new FileTransferEvent(sshCp_OnTransferStart);
                     sftp.OnTransferProgress += new FileTransferEvent(sshCp_OnTransferProgress);
                     sftp.OnTransferEnd += new FileTransferEvent(sshCp_OnTransferEnd);
@@ -2606,6 +2607,13 @@ namespace ssi
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
+                    if (null != sftp && sftp.Connected)
+                    {
+                        sftp.Cancel();
+                    }
+                    MessageBox.Show("Can't login to Data Server. Not authorized. Continuing without media.");
+                   // throw e;
+                    return null;
                 }
             }
             else { Console.Write("File already exists..."); }
@@ -2970,7 +2978,8 @@ namespace ssi
                                             Properties.Settings.Default.DataServerConnectionType = "sftp";
 
                                             string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
-                                            if (!file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
+                                             if (file!= null &&  !file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
+                                            if (file == null) break;
                                         }
                                         else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
                                         {
