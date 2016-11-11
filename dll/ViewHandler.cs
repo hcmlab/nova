@@ -1008,6 +1008,10 @@ namespace ssi
             }
 
             //Create a new AnnoList per tierId and add it
+            if(TierIds.Count > 0)
+            {
+
+            }
             foreach (String tierid in TierIds)
             {
                 AnnoList annolist = new AnnoList();
@@ -1034,7 +1038,9 @@ namespace ssi
                     }
                 }
 
-                annolist.Name = anno.Name;
+
+
+                if(annolist.Name == null)  annolist.Name = anno.Name;
                 annolist.Annotator = anno.Annotator;
                 annolist.AnnotatorFullName = anno.AnnotatorFullName;
                 annolist.Highborder = anno.Highborder;
