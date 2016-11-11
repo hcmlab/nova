@@ -117,7 +117,6 @@ namespace ssi
             database = mongo.GetDatabase(db);
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("AnnotationSchemes");
    
-
             var sessions = collection.Find(_ => true).ToList();
 
             foreach (var document in sessions)
@@ -317,7 +316,7 @@ namespace ssi
 
                 if (annotype == null)
                 {
-                    annotype = LoadAnnotationSchemes(db, a);
+                    annotype = LoadAnnotationSchemes(db, a, a.AnnoList.AnnotationType);
                 }
 
                 if (annotype == null)
@@ -327,6 +326,7 @@ namespace ssi
                 var filtera = builder.Eq("name", annotype);
                 var annotdb = annotationschemes.Find(filtera).ToList();
                 annotid = annotdb[0].GetValue(0).AsObjectId;
+                var annoschemetypedb = annotdb[0]["type"];
                 var update2 = Builders<BsonDocument>.Update.Set("isValid", true);
                 annotationschemes.UpdateOne(filter, update2);
                
@@ -371,7 +371,7 @@ namespace ssi
                 if (a != null)
                 {
                 
-                    if  (a.AnnoList.AnnotationType == AnnoType.DISCRETE)
+                    if  (annoschemetypedb =="DISCRETE")
                     {
                         BsonArray Labels = annotdb[0]["labels"].AsBsonArray;
                         int index = 0;
@@ -396,7 +396,7 @@ namespace ssi
 
                     }
 
-                    else if (a.AnnoList.AnnotationType == AnnoType.FREE)
+                    else if (annoschemetypedb =="FREE")
                     {
                         for (int i = 0; i < a.AnnoList.Count; i++)
                         {
@@ -408,7 +408,7 @@ namespace ssi
 
 
 
-                    else if  (a.AnnoList.AnnotationType == AnnoType.CONTINUOUS)
+                    else if  (annoschemetypedb == "CONTINUOUS")
                     {
                         for (int i = 0; i < a.AnnoList.Count; i++)
                         {
