@@ -96,7 +96,6 @@ namespace ssi
                     name = a.AnnoList.Name;
 
                     isdiscrete = a.AnnoList.AnnotationType;
-                  
 
                     if (a.isDiscrete)
                     {
@@ -183,14 +182,12 @@ namespace ssi
 
                 d.Add(a);
                 d.Add(b);
-               
-              
+
                 if (dbas.GetType().ToUpper() == "DISCRETE")
                 {
                     d.Add(i2);
                     d.Add("labels", labels);
                 }
-
                 else if (dbas.GetType().ToUpper() == "FREE")
                 {
                     d.Add(i2);
@@ -249,12 +246,10 @@ namespace ssi
                     if (detected == false) usedlabels.Add(item);
                 }
             }
-
             else if (isDiscete == AnnoType.FREE)
             {
                 col1 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.mincolor));
             }
-
             else if (isDiscete == AnnoType.CONTINUOUS)
             {
                 col2 = new SolidColorBrush((Color)ColorConverter.ConvertFromString(a.maxcolor));

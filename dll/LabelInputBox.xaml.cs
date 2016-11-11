@@ -55,7 +55,6 @@ namespace ssi
             this.ib_label.Content = info;
             this.ib_labelText.Text = text;
 
-       
             this.suggestions = _suggestions;
             this.hascolorpicker = _hascolorpicker;
 

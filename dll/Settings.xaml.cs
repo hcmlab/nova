@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Text.RegularExpressions;
 
 namespace ssi
 {
@@ -30,9 +20,7 @@ namespace ssi
             DBServer.Text = Properties.Settings.Default.MongoDBIP;
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPW.Password = Properties.Settings.Default.MongoDBPass;
-           
         }
-
 
         public double Uncertainty()
         {
@@ -53,7 +41,6 @@ namespace ssi
         {
             return Segmentmindur.Text;
         }
-
 
         public string MongoServer()
         {
@@ -81,7 +68,4 @@ namespace ssi
             DialogResult = true;
         }
     }
-
-
- 
 }

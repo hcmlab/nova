@@ -4,7 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-
 namespace ssi
 {
     public class AnnoTrackSegment : TextBlock
@@ -37,23 +36,21 @@ namespace ssi
         {
             this.track = track;
             this.item = item;
-          
+
             this.is_selected = false;
             this.is_resizeable_left = false;
             this.is_resizeable_right = false;
             this.is_moveable = false;
 
-   
             this.Inlines.Add(item.Label);
             this.FontSize = 12;
             this.TextWrapping = TextWrapping.Wrap;
             this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
             this.Foreground = Brushes.White;
             this.Opacity = 0.75;
-           
+
             this.TextAlignment = TextAlignment.Center;
             this.TextTrimming = TextTrimming.WordEllipsis;
-
 
             ToolTip tt = new ToolTip();
             tt.Background = Brushes.Black;
@@ -76,12 +73,10 @@ namespace ssi
             update();
         }
 
-   
-
         private void OnAnnoTrackSegmentMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
-         
+
             {
                 AnnoTrack.GetSelectedTrack().track_used_labels.Clear();
 
@@ -145,9 +140,6 @@ namespace ssi
         private void item_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             update();
-
-
-
         }
 
         public void rename(string label)
@@ -205,21 +197,15 @@ namespace ssi
                 this.Height = track.ActualHeight;
                 this.Width = len;
                 this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
-                if(item.Confidence < Properties.Settings.Default.UncertaintyLevel)
+                if (item.Confidence < Properties.Settings.Default.UncertaintyLevel)
                 {
-
                     VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
                     this.Background = vb;
                 }
 
-
-
-           
-
                 Canvas.SetLeft(this, start);
             }
         }
-
 
         public void update2()
         {
@@ -236,11 +222,9 @@ namespace ssi
                 this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
                 if (item.Confidence < Properties.Settings.Default.UncertaintyLevel)
                 {
-
                     var res = new PatternBrushes();
                     VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
                     this.Background = vb;
-
                 }
                 Canvas.SetLeft(this, start);
             }
@@ -258,11 +242,9 @@ namespace ssi
                 this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
                 if (item.Confidence < Properties.Settings.Default.UncertaintyLevel)
                 {
-
                     var res = new PatternBrushes();
                     VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
                     this.Background = vb;
-
                 }
                 //this.Opacity = 0.75;
             }

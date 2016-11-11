@@ -340,10 +340,10 @@ namespace ssi
                 }
                 AnnotationResultBox.ItemsSource = AnnoItems;
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 MessageBox.Show("At least one Database Entry seems to be corrupt. Entries have not been loaded.");
             }
-          
         }
 
         public void addAnnotoList(BsonDocument annos, bool onlyme, bool onlyunfinished)
@@ -360,7 +360,7 @@ namespace ssi
             {
                 isfinished = annos["isFinished"].AsBoolean;
             }
-            catch(Exception ex) {}
+            catch (Exception ex) { }
 
             if (!onlyme && !onlyunfinished ||
                 onlyme && !onlyunfinished && Properties.Settings.Default.MongoDBUser == annotatid ||
@@ -368,7 +368,7 @@ namespace ssi
                 onlyme && onlyunfinished && !isfinished && Properties.Settings.Default.MongoDBUser == annotatid)
             {
                 bool isOwner = authlevel > 2 || Properties.Settings.Default.MongoDBUser == annotatid;
-                AnnoItems.Add(new DatabaseAnno() { Id=id, Role = roleid, AnnoType = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner, OID= id });                                               
+                AnnoItems.Add(new DatabaseAnno() { Id = id, Role = roleid, AnnoType = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner, OID = id });
             }
         }
 
@@ -451,7 +451,6 @@ namespace ssi
             }
         }
 
-
         private ObjectId GetIdFromName(IMongoCollection<BsonDocument> collection, string name)
         {
             ObjectId id = new ObjectId();
@@ -494,9 +493,9 @@ namespace ssi
                 if (dbw.DialogResult == true)
                 {
                     string annotator_name = dbw.Result().ToString();
-                    ObjectId annotid_new =  GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "fullname", annotator_name);
-                    //ObjectId annotid_new = GetObjectID(annotators, annotator_name);     
-                                   
+                    ObjectId annotid_new = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "fullname", annotator_name);
+                    //ObjectId annotid_new = GetObjectID(annotators, annotator_name);
+
                     anno.Remove("_id");
                     anno["annotator_id"] = annotid_new;
                     try
@@ -515,11 +514,8 @@ namespace ssi
                     AnnoItems.Clear();
                     GetAnnotations();
                 }
-
-               
             }
         }
-
 
         private void DeleteAnnotation_Click(object sender, RoutedEventArgs e)
         {
@@ -531,9 +527,9 @@ namespace ssi
                 var annotations = database.GetCollection<BsonDocument>("Annotations");
                 var annotators = database.GetCollection<BsonDocument>("Annotators");
 
-                ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Role);                
-                ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).AnnoType);                
-                ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator);                
+                ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Role);
+                ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).AnnoType);
+                ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator);
                 ObjectId sessionid = GetIdFromName(sessions, Properties.Settings.Default.LastSessionId);
 
                 var builder = Builders<BsonDocument>.Filter;
@@ -608,7 +604,7 @@ namespace ssi
 
         private void IsFinishedCheckbox_Checked(object sender, RoutedEventArgs e)
         {
-            DatabaseAnno anno = (DatabaseAnno) ((CheckBox)sender).DataContext;
+            DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
             ChangeFinishedState(anno.Id, true);
         }
 
@@ -617,7 +613,5 @@ namespace ssi
             DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
             ChangeFinishedState(anno.Id, false);
         }
-
-
     }
 }

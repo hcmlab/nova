@@ -72,7 +72,7 @@
                 Height="6"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Margin="0" 
+                Margin="0"
                 ShowsPreview="True">
             </GridSplitter>
 
@@ -80,7 +80,7 @@
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="29*" />
-                    <ColumnDefinition Width="18*"/>
+                    <ColumnDefinition Width="18*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -95,7 +95,7 @@
                         <StackPanel Orientation="Horizontal" Width="82">
                             <TextBlock Name="annoPositionLabel" VerticalAlignment="Center">00:00:00.00</TextBlock>
                             <Label></Label>
-                            <Button x:Name="CloseAnnotrackButton" Content="X" HorizontalAlignment="Right" Background="Transparent" BorderBrush="Transparent"/>
+                            <Button x:Name="CloseAnnotrackButton" Content="X" HorizontalAlignment="Right" Background="Transparent" BorderBrush="Transparent" />
                         </StackPanel>
                     </StatusBarItem>
                 </StatusBar>

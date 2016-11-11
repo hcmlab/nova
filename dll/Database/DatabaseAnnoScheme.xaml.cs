@@ -37,7 +37,6 @@ namespace ssi
             else if (isDiscrete == AnnoType.FREE) scheme_type.SelectedIndex = 1;
             else if (isDiscrete == AnnoType.CONTINUOUS) scheme_type.SelectedIndex = 2;
 
-
             if (mincolor != null) scheme_colorpickermin.SelectedColor = (mincolor as SolidColorBrush).Color;
             if (maxcolor != null) scheme_colorpickermax.SelectedColor = (maxcolor as SolidColorBrush).Color;
             if (samplerate != null) scheme_fps.Text = samplerate;
@@ -173,10 +172,8 @@ namespace ssi
                 AddAnnotation.Visibility = Visibility.Visible;
                 DeleteAnnotation.Visibility = Visibility.Visible;
             }
-
             else if (scheme_type.SelectedIndex == 1)
             {
-
                 Colorlabel.Content = "Color";
                 MaxColorLabel.Visibility = Visibility.Hidden;
                 scheme_colorpickermax.Visibility = Visibility.Collapsed;
@@ -191,9 +188,7 @@ namespace ssi
                 AnnotationResultBox.Visibility = Visibility.Hidden;
                 AddAnnotation.Visibility = Visibility.Hidden;
                 DeleteAnnotation.Visibility = Visibility.Hidden;
-
             }
-
             else
             {
                 Colorlabel.Content = "Min Color";

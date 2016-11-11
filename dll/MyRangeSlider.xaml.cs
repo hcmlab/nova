@@ -111,14 +111,12 @@ namespace ssi
             }
         }
 
-
         public void UpdateFixedRange(double duration)
         {
             if (_viewTime != null)
             {
                 //seens to be a bug in avalon lib when mo.try to fix it by adjusting the value
 
-   
                 _viewTime.SelectionStart = _viewTime.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
                 _viewTime.SelectionStop = _viewTime.SelectionStart + duration;
                 ui.RangeStopSelected = ((long)_viewTime.SelectionStop * ui.RangeStop) / (long)_viewTime.TotalDuration;
