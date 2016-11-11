@@ -1518,6 +1518,7 @@ namespace ssi
                 view.annoListControl.editComboBox.Items.Clear();
                 if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE)
                 {
+                    view.annoListControl.editComboBox.IsEnabled = true;
                     view.annoListControl.editComboBox.Visibility = Visibility.Visible;
                     view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     view.annoListControl.editTextBox.IsEnabled = false;
@@ -1535,7 +1536,7 @@ namespace ssi
                         view.annoListControl.editComboBox.SelectedIndex = 0;
                     }
                 }
-                else
+                else if(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.FREE)
                 {
                     view.annoListControl.editTextBox.Visibility = Visibility.Visible;
                     view.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
