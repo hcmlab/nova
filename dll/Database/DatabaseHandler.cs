@@ -29,22 +29,19 @@ namespace ssi
             int auth = 0;
             try
             {
-                var adminDB = mongo.GetDatabase(db);
+                var adminDB = mongo.GetDatabase("admin");
                 var cmd = new BsonDocument("usersInfo", dbuser);
                 var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
                 var roles = (BsonArray)queryResult[0][0]["roles"];
 
                 for (int i = 0; i < roles.Count; i++)
                 {
-                    if (roles[i]["role"] != null)
-                    {
-                        if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                        else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "userAdmin" && auth < 3) auth = 3;
-                        else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && auth < 2) auth = 2;
-                        else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read" && auth < 1) auth = 1;
-                        else auth = 0;
-                    }
-                    else auth = 0;
+                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbAdminAnyDatabase"  && auth <= 4) { auth = 4; break; }
+                    else if ( roles[i]["role"].ToString() == "dbAdmin" && roles[i]["db"] == db && auth <= 3) { auth = 3; break; }
+                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db && auth <= 2) { auth = 2; break; }
+                    else if (roles[i]["role"].ToString() == "readAnyDatabase"  && auth <= 1) { auth = 1; break; }
+
+
                     //edit/add more roles if you want to change security levels
                 }
             }
@@ -58,7 +55,7 @@ namespace ssi
                 for (int i = 0; i < roles.Count; i++)
                 {
                     if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" && auth < 3) auth = 3;
+                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" && auth < 3) auth = 3;
                     else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" && auth < 2) auth = 2;
                     else if (roles[i]["role"].ToString() == "readAnyDatabase" && auth < 1) auth = 1;
                     else auth = 0;
@@ -90,7 +87,7 @@ namespace ssi
             //dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             //dbw.ShowDialog();
 
-            int auth = checkAuth(Properties.Settings.Default.MongoDBUser);
+            int auth = checkAuth(Properties.Settings.Default.MongoDBUser, db);
             bool hasauth = false;
             if (auth > 3) hasauth = true;
 
@@ -128,7 +125,7 @@ namespace ssi
                 }
             }
 
-            int auth = checkAuth(Properties.Settings.Default.MongoDBUser);
+            int auth = checkAuth(Properties.Settings.Default.MongoDBUser, db);
             bool hasauth = false;
             if (auth > 2) hasauth = true;
 

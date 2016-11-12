@@ -148,7 +148,7 @@ namespace ssi
                 for (int i = 0; i < roles.Count; i++)
                 {
                     if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "userAdmin" && auth < 3) auth = 3;
+                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" || roles[i]["role"].ToString() == "dbAdmin" && auth < 3) auth = 3;
                     else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && auth < 2) auth = 2;
                     else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read" && auth < 1) auth = 1;
                     else auth = 0;
@@ -166,7 +166,7 @@ namespace ssi
                 for (int i = 0; i < roles.Count; i++)
                 {
                     if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" && auth < 3) auth = 3;
+                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" && auth < 3) auth = 3;
                     else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" && auth < 2) auth = 2;
                     else if (roles[i]["role"].ToString() == "readAnyDatabase" && auth < 1) auth = 1;
                     else auth = 0;

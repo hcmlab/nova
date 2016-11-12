@@ -73,8 +73,10 @@ namespace ssi
                     SelectDatabase();
                     Autologin.IsEnabled = true;
                 }
-                else MessageBox.Show("You have no rights to access the database list");
+                else
+                { MessageBox.Show("You have no rights to access the database list");
                 authlevel = checkAuth(this.db_login.Text, Properties.Settings.Default.Database);
+                }
             }
             catch (MongoException e)
 
@@ -99,6 +101,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 localauthlevel = Math.Max(checkAuth(this.db_login.Text, "admin"), checkAuth(this.db_login.Text, Properties.Settings.Default.Database));
+                authlevel = localauthlevel;
                 if (localauthlevel > 1) GetSessions();
             }
         }
@@ -214,11 +217,11 @@ namespace ssi
 
                 for (int i = 0; i < roles.Count; i++)
                 {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db && auth <= 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "userAdmin" && roles[i]["db"] == db && auth <= 3) auth = 3;
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db && auth <= 2) auth = 2;
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db && auth <= 1) auth = 1;
-                    else if (auth == 0) auth = 0;
+                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db && auth <= 4) {  auth = 4; break; }
+                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" || roles[i]["role"].ToString() == "dbAdmin" && roles[i]["db"] == db && auth <= 3) { auth = 3; break; }
+                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db && auth <= 2) { auth = 2; break; }
+                    else if (roles[i]["role"].ToString() == "readAnyDatabase"  && auth <= 1) { auth = 1; break; }
+
 
                     //edit/add more roles if you want to change security levels
                 }
@@ -233,7 +236,7 @@ namespace ssi
                 for (int i = 0; i < roles.Count; i++)
                 {
                     if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" && auth < 3) auth = 3;
+                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" && auth < 3) auth = 3;
                     else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" && auth < 2) auth = 2;
                     else if (roles[i]["role"].ToString() == "readAnyDatabase" && auth < 1) auth = 1;
                     else auth = 0;
@@ -257,7 +260,7 @@ namespace ssi
 
         public void addDbtoList(string name)
         {
-            if (name != "admin" && name != "local" && checkAuth(Properties.Settings.Default.MongoDBUser, name) > 1)
+            if (name != "admin" && name != "local" && checkAuth(Properties.Settings.Default.MongoDBUser, name) >   1)
             {
                 DataBasResultsBox.Items.Add(name);
             }
@@ -613,5 +616,6 @@ namespace ssi
             DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
             ChangeFinishedState(anno.Id, false);
         }
+
     }
 }

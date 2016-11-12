@@ -2864,9 +2864,18 @@ namespace ssi
         private void mongodbAdd()
 
         {
-            DatabaseAdminWindow daw = new DatabaseAdminWindow();
-            daw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            daw.ShowDialog();
+            try
+            {
+                DatabaseAdminWindow daw = new DatabaseAdminWindow();
+                daw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                daw.ShowDialog();
+            }
+
+            catch(Exception ex)
+            {
+                MessageBox.Show("Noth authorized to add a new Session");
+            }
+           
         }
 
         private void mongodbStore()
@@ -2919,6 +2928,11 @@ namespace ssi
                 {
                     this.view.addmongodb.Visibility = Visibility.Visible;
                     this.view.mongodbfunctions.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    this.view.addmongodb.Visibility = Visibility.Collapsed;
+                    this.view.mongodbfunctions.Visibility = Visibility.Collapsed;
                 }
             }
 

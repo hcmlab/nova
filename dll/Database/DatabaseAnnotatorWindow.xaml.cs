@@ -35,15 +35,34 @@ namespace ssi
      
             connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP;
             mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(Properties.Settings.Default.Database);
-            var session = database.GetCollection<BsonDocument>("Sessions");
+            database = mongo.GetDatabase("admin");
+            var annotators = database.GetCollection<BsonDocument>("system.users");
 
-            List<BsonDocument> documents;
-            var builder = Builders<BsonDocument>.Filter;
-            var filter = builder.Eq("fullname", fullname);
-            documents = session.Find(filter).ToList();
+         
+                List<BsonDocument> documents;
+                var builder = Builders<BsonDocument>.Filter;
+                documents = annotators.Find(_ => true).ToList();
 
-            if (name != null) Namefield.Text = name;
+                NameCombo.Items.Add("");
+
+                foreach (BsonDocument b in documents)
+                {
+                    NameCombo.Items.Add(b["user"].ToString());
+                }
+            
+
+         
+           
+
+
+
+            if (name != null)
+            {
+                NameCombo.SelectedItem = name;
+                NameCombo.IsEnabled = false;
+                Namefield.IsEnabled = false;
+            }
+               
             if (fullname != null) FullNameField.Text = fullname;
             if (email != null) Emailfield.Text = email;
 
@@ -89,8 +108,20 @@ namespace ssi
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            this.DialogResult = false;
             this.Close();
+        }
+ 
+
+        private void NameCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Namefield.Clear();
+            PasswordField.Clear();
+        }
+
+        private void Namefield_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            NameCombo.SelectedIndex = 0;
         }
     }
 }
