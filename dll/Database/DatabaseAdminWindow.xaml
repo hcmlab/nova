@@ -21,9 +21,9 @@
 
         <Label Content="Select a Database first" Margin="10,58,649,335" />
         <ListBox Name="DataBasResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,80,646,265" SelectionMode="Single" SelectionChanged="DataBaseResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <Label Content="... and pick a Session" Margin="10,207,671,183" />
+        <Label Content="... and pick a Session" Margin="7,181,674,209" />
         <!--<ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="7,227,649,41" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" />-->
-        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="7,227,649,41">
+        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="7,210,649,58">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="50" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -47,13 +47,13 @@
             </ListView.View>
         </ListView>
 
-        <Label Content="Roles" Margin="384,192,350,204" />
-        <ComboBox Name="RolesResultBox" Grid.Row="0" Grid.Column="0" Margin="390,216,284,183"  SelectionChanged="RolesResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ComboBox>
-        <Label Content="Add or change Media" Margin="205,88,420,299" />
+        <Label Content="Roles" Margin="379,137,355,259" />
+        <ComboBox Name="RolesResultBox" Grid.Row="0" Grid.Column="0" Margin="385,161,289,238"  SelectionChanged="RolesResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ComboBox>
+        <Label Content="Add or change Media" Margin="205,78,420,309" />
         <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" Margin="205,116,458,41" SelectionMode="Single" Focusable="True"  SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" />
 
-        <Label Content="Mediatype" Margin="384,137,350,256" RenderTransformOrigin="3.858,-3.426" />
-        <ComboBox Name="MediatypeResultsBox" Grid.Row="0" Grid.Column="0" Margin="390,161,284,239"  SelectionChanged="MediatypeResultsBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" RenderTransformOrigin="0.544,0.499" />
+        <Label Content="Mediatype" Margin="379,82,355,311" RenderTransformOrigin="3.858,-3.426" />
+        <ComboBox Name="MediatypeResultsBox" Grid.Row="0" Grid.Column="0" Margin="385,106,289,294"  SelectionChanged="MediatypeResultsBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" RenderTransformOrigin="0.544,0.499" />
 
         <!--<CheckBox Name="showonlymine"  Content="Show only mine" Grid.Column="0" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" Margin="473,186,43,212" />
         <CheckBox Name="requireslogin"  Content="Server requires auth" Grid.Column="0" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" Margin="473,227,10,171" IsEnabled="False" />
@@ -68,22 +68,28 @@
         <Button Name="AddSession" Content="+" Grid.Column="0" Click="AddSession_Click" Margin="7,395,774,5"  Visibility="Collapsed" RenderTransformOrigin="0.073,-0.6" />
         <Button Name="AddRole" Content="+" Grid.Column="0" Click="AddRole_Click" Margin="546,216,239,184"   Visibility="Collapsed" RenderTransformOrigin="-0.823,0.973" />
         <Button Name="AddFiles" Content="+" Grid.Column="0" Click="AddFiles_Click" Margin="205,395,575,5"  Visibility="Collapsed" RenderTransformOrigin="-0.51,1.469" />
-        <Button Name="AddSubjects" Content="+" Grid.Column="0" Click="AddSubject_Click" Margin="546,271,238,129"   Visibility="Visible" RenderTransformOrigin="5.777,0.652" />
+        <Button Name="AddSubjects" Content="+" Grid.Column="0" Click="AddSubject_Click" Margin="541,216,243,184"   Visibility="Collapsed" RenderTransformOrigin="5.777,0.652" />
 
         <Button Name="AddMediaType" Content="+" Grid.Column="0" Click="AddMediaType_Click" Margin="546,161,238,239"   Visibility="Collapsed" RenderTransformOrigin="5.777,0.652" />
         <Button Name="DeleteMediaType" Content="x" Grid.Column="0" Click="DeleteMediaType_Click" Margin="592,161,192,239"   Visibility="Collapsed" RenderTransformOrigin="5.777,0.652" />
 
-        <Button Name="EditSubject" Content="E" Grid.Column="0" Click="EditSubject_Click" Margin="638,271,149,129"  Visibility="Visible" />
+        <Button Name="EditSubject" Content="E" Grid.Column="0" Click="EditSubject_Click" Margin="633,216,154,184"  Visibility="Collapsed" />
 
         <Button Name="DeleteDB" Content="X" Grid.Column="0" Click="DeleteDB_Click" Margin="56,171,728,229"  Visibility="Collapsed" RenderTransformOrigin="-0.167,2.353" />
         <Button Name="DeleteSession" Content="X" Grid.Column="0" Click="DeleteSession_Click" Margin="56,395,725,5" Visibility="Collapsed" RenderTransformOrigin="-1.293,4.267" />
         <Button Name="DeleteRole" Content="X" Grid.Column="0" Click="DeleteRole_Click" Margin="591,217,192,183"  Visibility="Collapsed" RenderTransformOrigin="0.991,2.599" />
         <Button Name="DeleteFiles" Content="X" Grid.Column="0" Click="DeleteFiles_Click" Margin="255,395,530,5"  Visibility="Collapsed" RenderTransformOrigin="0.677,1.201" />
-        <Button Name="DeleteSubject" Content="X" Grid.Column="0" Click="DeleteSubject_Click" Margin="592,271,192,129"  Visibility="Visible" RenderTransformOrigin="0.585,2.711" />
+        <Button Name="DeleteSubject" Content="X" Grid.Column="0" Click="DeleteSubject_Click" Margin="587,216,197,184"  Visibility="Collapsed" RenderTransformOrigin="0.585,2.711" />
         <Button Name="EditSession" Content="E" Grid.Column="0" Click="EditSession_Click" Margin="110,395,671,5" Visibility="Collapsed" RenderTransformOrigin="-1.293,4.267" />
         <CheckBox Name="Autologin" Margin="553,10,-20,398" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked" />
         <Label Content="AutoLogin" Margin="574,0,149,396" />
-        <Label Content="Subjects" Margin="384,248,316,150" />
-        <ComboBox x:Name="SubjectsResultBox" Grid.Row="0" Grid.Column="0" Margin="390,271,284,129" SelectionChanged="SubjectsResultBox_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        <Label Content="Subjects" Margin="379,193,321,205" />
+        <ComboBox x:Name="SubjectsResultBox" Grid.Row="0" Grid.Column="0" Margin="385,216,289,184" SelectionChanged="SubjectsResultBox_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        <Label Content="Annotators" Margin="390,252,333,144" />
+        <ListBox x:Name="AnnotatorsBox" Grid.Row="0" Grid.Column="0" Margin="390,281,263,41" SelectionMode="Single" Focusable="True"  SelectionChanged="Annotators_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        <Button Name="AddAnnotator" Content="+" Grid.Column="0" Click="AddAnnotator_Click" Margin="567,281,217,119"   Visibility="Collapsed" RenderTransformOrigin="5.777,0.652" />
+        <Button Name="DeleteAnnotator" Content="x" Grid.Column="0" Click="DeleteAnnotator_Click" Margin="618,281,166,119"   Visibility="Collapsed" RenderTransformOrigin="5.777,0.652" />
+
+        <Button Name="EditAnnotator" Content="E" Grid.Column="0" Click="EditAnnotator_Click" Margin="664,281,123,119"  Visibility="Collapsed" />
     </Grid>
 </Window>

@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -378,6 +379,25 @@ namespace ssi
             RolesResultBox.SelectedItem = selecteditem;
         }
 
+
+
+        public void GetAnnotators(string selecteditem = null)
+
+        {
+            AnnotatorsBox.Items.Clear();
+
+            List<string> Collections = new List<string>();
+            var roles = database.GetCollection<BsonDocument>("Annotators");
+
+            var documents = roles.Find(_ => true).ToList();
+
+            foreach (BsonDocument b in documents)
+            {
+               AnnotatorsBox.Items.Add(b["fullname"].ToString());
+            }
+            AnnotatorsBox.SelectedItem = selecteditem;
+        }
+
         public void GetSubjects(string selecteditem = null)
 
         {
@@ -483,11 +503,17 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 GetSessions();
+                GetAnnotators();
+
                 if (authlevel > 2)
                 {
                     AddSession.Visibility = Visibility.Visible;
                     DeleteSession.Visibility = Visibility.Visible;
                     EditSession.Visibility = Visibility.Visible;
+
+                    AddAnnotator.Visibility = Visibility.Visible;
+                    DeleteAnnotator.Visibility = Visibility.Visible;
+                    EditAnnotator.Visibility = Visibility.Visible;
                 }
             }
         }
@@ -500,6 +526,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 GetMedia();
+             
 
                 if (authlevel > 2)
                 {
@@ -962,6 +989,174 @@ namespace ssi
         {
             Autologin.IsChecked = false;
             Autologin.IsEnabled = false;
+        }
+
+        private void Annotators_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void EditAnnotator_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (AnnotatorsBox.SelectedItem != null)
+            {
+                var builder = Builders<BsonDocument>.Filter;
+                var filter = builder.Eq("fullname", AnnotatorsBox.SelectedValue);
+                var annotator = database.GetCollection<BsonDocument>("Annotators").Find(filter).Single();
+
+                if (annotator != null)
+                {
+                    string name = "";
+                    string fullname = "";
+                    string email = "";
+                    string expertise = "";
+                    BsonElement value;
+
+                    if (annotator.TryGetElement("name", out value)) name = annotator["name"].ToString();
+                    if (annotator.TryGetElement("fullname", out value))  fullname = annotator["fullname"].ToString();
+                    if (annotator.TryGetElement("email", out value)) email = annotator["email"].ToString();
+                    if (annotator.TryGetElement("expertise", out value)) expertise = annotator["expertise"].ToString();
+
+                    DatabaseAnnotatorWindow dbsw = new DatabaseAnnotatorWindow(name,fullname, email, expertise);
+                    dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                    dbsw.ShowDialog();
+
+                    if (dbsw.DialogResult == true)
+                    {
+                        var filterid = builder.Eq("_id", annotator["_id"].AsObjectId);
+
+                        var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.Name());
+                        database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updatename);
+
+                        var updatefullname = Builders<BsonDocument>.Update.Set("fullname", dbsw.Fullname());
+                        database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updatefullname);
+
+                        var updateemail = Builders<BsonDocument>.Update.Set("email", dbsw.Email());
+                        database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updateemail);
+
+                        var updateexpertise = Builders<BsonDocument>.Update.Set("expertise", dbsw.Expertise());
+                        database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updateexpertise);
+
+
+                        if(dbsw.Password() != "")
+                        {
+                            ChangeDBPassword(dbsw.Name(), dbsw.Password());
+                        }
+                    }
+                }
+                GetAnnotators();
+            }
+
+
+        }
+
+        private void DeleteAnnotator_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult mb = MessageBox.Show("Warning: Annotator will be deleted from the databse, are you sure to continue?", "Warning", MessageBoxButton.YesNo);
+            if (AnnotatorsBox.SelectedItem != null && mb == MessageBoxResult.Yes)
+            {
+
+
+                var builder = Builders<BsonDocument>.Filter;
+                var filter = builder.Eq("fullname", AnnotatorsBox.SelectedValue);
+                var result = database.GetCollection<BsonDocument>("Annotators").Find(filter).Single();
+                string user = result["name"].AsString;
+                var del = database.GetCollection<BsonDocument>("Annotators").DeleteOne(filter);
+
+                MessageBoxResult mb2 = MessageBox.Show("Do you also want to delete the user login from the database?", "Warning", MessageBoxButton.YesNo);
+                 if(mb2 == MessageBoxResult.Yes)
+                {
+                    DropUser(user);
+                }
+
+                GetAnnotators();
+            }
+        }
+
+
+        public void AddDBUser(string user, string password)
+        {
+            var database = mongo.GetDatabase("admin");
+            var createuser = new BsonDocument { { "createUser", user}, { "pwd", password }, { "roles", new BsonArray { new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } }, new BsonDocument { { "role", "readWrite" }, { "db", Properties.Settings.Default.Database } } } } };
+                try
+                {
+                    database.RunCommand<BsonDocument>(createuser);
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Annotator already exists in the database, no new user account was created.");
+                }
+        }
+
+
+        public void ChangeDBPassword(string user, string password)
+        {
+            var database = mongo.GetDatabase("admin");
+            // database.RunCommand<string>("use admin");
+
+            var changepw =   new BsonDocument { { "updateUser", user }, { "pwd", password } };
+           // var changepw = new BsonDocument { { "updateUser",  new BsonDocument { { user, password } } } };
+            try
+            {
+                database.RunCommand<BsonDocument>(changepw);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not change password.");
+            }
+        }
+
+        public void DropUser(string user)
+        {
+            var database = mongo.GetDatabase("admin");
+            // database.RunCommand<string>("use admin");
+
+            var dropuser = new BsonDocument { { "dropUser", user }};
+            // var changepw = new BsonDocument { { "updateUser",  new BsonDocument { { user, password } } } };
+            try
+            {
+                database.RunCommand<BsonDocument>(dropuser);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not delete user.");
+            }
+        }
+
+        private void AddAnnotator_Click(object sender, RoutedEventArgs e)
+        {
+
+            DatabaseAnnotatorWindow dbsw = new DatabaseAnnotatorWindow();
+            dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dbsw.ShowDialog();
+
+
+            if (dbsw.DialogResult == true)
+            {
+                BsonDocument annotator = new BsonDocument {
+                    {"name",  dbsw.Name()},
+                    {"fullname",  dbsw.Fullname()},
+                    {"email",  dbsw.Email()},
+                    {"expertise",  dbsw.Expertise()},
+                   
+                };
+
+
+                 var builder = Builders<BsonDocument>.Filter;
+                var filterannotator = builder.Eq("name", dbsw.Name());
+                UpdateOptions uoa = new UpdateOptions();
+                uoa.IsUpsert = true;
+                var result = database.GetCollection<BsonDocument>("Annotators").ReplaceOne(filterannotator, annotator, uoa);
+                if(result.ModifiedCount == 0)
+                {
+                    AddDBUser(dbsw.Name(), dbsw.Password());
+                } 
+
+                GetAnnotators(dbsw.Fullname());
+
+            }
+
         }
     }
 }

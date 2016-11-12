@@ -1511,6 +1511,8 @@ namespace ssi
                 if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.CONTINUOUS)
                 {
                     view.annoListControl.editButton.Visibility = Visibility.Collapsed;
+                    view.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
+                    view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     view.annoListControl.editComboBox.IsEnabled = false;
                     view.annoListControl.editTextBox.IsEnabled = false;
                 }
