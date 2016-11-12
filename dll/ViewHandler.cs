@@ -2895,9 +2895,10 @@ namespace ssi
                     }
                     else MessageBox.Show("No Annotation Tracks available");
                 }
-                catch
+                catch(Exception ex)
                 {
-                    MessageBox.Show("Could not connect to MongoDB Server");
+                    if(ex.Message.Contains("not auth"))  MessageBox.Show("Sorry, you are only allowed to read annotations, but not to write to the database");
+                    else MessageBox.Show("Could not connect to MongoDB Server");
                 }
             }
             else
@@ -2912,7 +2913,12 @@ namespace ssi
 
             System.Collections.IList annotations = null;
             List<DatabaseMediaInfo> ci = null;
+
             DatabaseHandlerWindow dbhw = new DatabaseHandlerWindow();
+            try
+            {
+
+         
             dbhw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbhw.ShowDialog();
 
@@ -3026,8 +3032,17 @@ namespace ssi
                 }
                 catch (TimeoutException e1)
                 {
+                       
                     MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
                 }
+            }
+
+            }
+            catch (Exception ex)
+            {
+                dbhw.Close();
+                MessageBox.Show("Oh Oh, I'm sorry but could you slow down a bit? Please try again");
+                //TODO investigate: pressing the arrow keys to fast crashes the databasehandler window, for now it's simply closed to avoid crash
             }
         }
 

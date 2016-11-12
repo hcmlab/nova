@@ -33,6 +33,7 @@ namespace ssi
 
             if (location != null) LocationField.Text = location;
             if (date != null) datepicker.SelectedDate = date.AsDateTime;
+            else datepicker.SelectedDate = DateTime.Now;
         }
 
         public string Name()

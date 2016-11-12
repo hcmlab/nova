@@ -23,11 +23,17 @@ namespace ssi
         private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
         private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
         private List<DatabaseAnno> AnnoItems = new List<DatabaseAnno>();
+        private CancellationTokenSource cts = new CancellationTokenSource();
+        DatabaseHandler dbh;
+
+
+
 
         public DatabaseHandlerWindow()
         {
             InitializeComponent();
 
+           
             this.db_server.Text = Properties.Settings.Default.MongoDBIP;
             this.db_login.Text = Properties.Settings.Default.MongoDBUser;
             this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
@@ -55,7 +61,7 @@ namespace ssi
             Properties.Settings.Default.Save();
 
             connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP;
-
+            dbh = new DatabaseHandler(connectionstring);
             try
             {
                 mongo = new MongoClient(connectionstring);
@@ -66,7 +72,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + ":" + mongo.Settings.Server.Port + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = checkAuth(this.db_login.Text, "admin");
+                authlevel = dbh.checkAuth(this.db_login.Text, "admin");
 
                 if (authlevel > 0)
                 {
@@ -75,7 +81,7 @@ namespace ssi
                 }
                 else
                 { MessageBox.Show("You have no rights to access the database list");
-                authlevel = checkAuth(this.db_login.Text, Properties.Settings.Default.Database);
+                authlevel = dbh.checkAuth(this.db_login.Text, Properties.Settings.Default.Database);
                 }
             }
             catch (MongoException e)
@@ -100,7 +106,7 @@ namespace ssi
                 Properties.Settings.Default.Database = DataBasResultsBox.SelectedItem.ToString();
                 Properties.Settings.Default.Save();
 
-                localauthlevel = Math.Max(checkAuth(this.db_login.Text, "admin"), checkAuth(this.db_login.Text, Properties.Settings.Default.Database));
+                localauthlevel = Math.Max(dbh.checkAuth(this.db_login.Text, "admin"), dbh.checkAuth(this.db_login.Text, Properties.Settings.Default.Database));
                 authlevel = localauthlevel;
                 if (localauthlevel > 1) GetSessions();
             }
@@ -110,11 +116,14 @@ namespace ssi
         {
             if (CollectionResultsBox.SelectedItem != null)
             {
+                cts.Cancel();
                 Properties.Settings.Default.LastSessionId = ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name;
                 Properties.Settings.Default.Save();
                 AnnoItems.Clear();
                 GetMedia();
                 GetAnnotations();
+                cts.Dispose();
+                cts = new CancellationTokenSource();
             }
         }
 
@@ -199,54 +208,7 @@ namespace ssi
             else return null;
         }
 
-        private int checkAuth(string dbuser, string db = "admin")
-        {
-            //4 = root
-            //3 = admin
-            //2 = write
-            //1 = read
-            //0 = notauthorized
 
-            int auth = 0;
-            try
-            {
-                var adminDB = mongo.GetDatabase("admin");
-                var cmd = new BsonDocument("usersInfo", dbuser);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-                var roles = (BsonArray)queryResult[0][0]["roles"];
-
-                for (int i = 0; i < roles.Count; i++)
-                {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db && auth <= 4) {  auth = 4; break; }
-                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" || roles[i]["role"].ToString() == "dbAdmin" && roles[i]["db"] == db && auth <= 3) { auth = 3; break; }
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db && auth <= 2) { auth = 2; break; }
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase"  && auth <= 1) { auth = 1; break; }
-
-
-                    //edit/add more roles if you want to change security levels
-                }
-            }
-            catch
-            {
-                var adminDB = mongo.GetDatabase("admin");
-                var cmd = new BsonDocument("usersInfo", dbuser);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-                var roles = (BsonArray)queryResult[0][0]["roles"];
-
-                for (int i = 0; i < roles.Count; i++)
-                {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" && auth < 3) auth = 3;
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" && auth < 2) auth = 2;
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" && auth < 1) auth = 1;
-                    else auth = 0;
-
-                    //edit/add more roles if you want to change security levels
-                }
-            }
-
-            return auth;
-        }
 
         public async void SelectDatabase()
         {
@@ -260,7 +222,7 @@ namespace ssi
 
         public void addDbtoList(string name)
         {
-            if (name != "admin" && name != "local" && checkAuth(Properties.Settings.Default.MongoDBUser, name) >   1)
+            if (name != "admin" && name != "local" && dbh.checkAuth(Properties.Settings.Default.MongoDBUser, name) >   1)
             {
                 DataBasResultsBox.Items.Add(name);
             }
@@ -280,7 +242,7 @@ namespace ssi
                 List<DatabaseSession> items = new List<DatabaseSession>();
                 foreach (var c in sessions)
                 {
-                    //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
+
                     items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString(), OID = c["_id"].AsObjectId });
                 }
 
@@ -319,6 +281,8 @@ namespace ssi
         public async void GetAnnotations(bool onlyme = false, bool onlyunfinished = false)
 
         {
+
+           
             AnnotationResultBox.ItemsSource = null;
             //  AnnotationResultBox.Items.Clear();
             List<DatabaseAnno> items = new List<DatabaseAnno>();
@@ -337,20 +301,28 @@ namespace ssi
 
             try
             {
+                
+                
                 using (var cursor = await annotations.FindAsync(filter))
                 {
-                    await cursor.ForEachAsync(d => addAnnotoList(d, onlyme, onlyunfinished));
+
+                    await cursor.ForEachAsync(d => addAnnotoList(d, onlyme, onlyunfinished), cts.Token);
+                   
                 }
                 AnnotationResultBox.ItemsSource = AnnoItems;
             }
             catch (Exception ex)
             {
+                if(!ex.Message.Contains("canceled"))
                 MessageBox.Show("At least one Database Entry seems to be corrupt. Entries have not been loaded.");
             }
         }
 
         public void addAnnotoList(BsonDocument annos, bool onlyme, bool onlyunfinished)
         {
+            if (cts.IsCancellationRequested == true)
+                return;
+
             // AnnotationResultBox.ItemsSource = null;
             ObjectId id = annos["_id"].AsObjectId;
             string roleid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Roles", "name", annos["role_id"].AsObjectId);
@@ -617,5 +589,24 @@ namespace ssi
             ChangeFinishedState(anno.Id, false);
         }
 
+        private void db_server_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            db_server.SelectAll();
+        }
+
+        private void db_login_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            db_login.SelectAll();
+        }
+
+        private void db_pass_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            db_pass.SelectAll();
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(e.Key == System.Windows.Input.Key.Return) ConnecttoDB(); 
+        }
     }
 }

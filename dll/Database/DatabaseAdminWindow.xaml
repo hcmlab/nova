@@ -5,12 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
            Title="Admin" Height="500" Width="830.576" Background="LightGray" ResizeMode="NoResize">
+    
+    
     <Grid>
         <Grid.RowDefinitions>
 
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="40"></RowDefinition>
         </Grid.RowDefinitions>
+
+        
 
         <Label Content="Server:IP" Margin="7,0,716,388" />
         <TextBox x:FieldModifier="public" Margin="10,33,646,368" x:Name="db_server" Focusable="True" />
@@ -21,9 +25,9 @@
 
         <Label Content="Select a Database first" Margin="10,58,649,335" />
         <ListBox Name="DataBasResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,80,646,265" SelectionMode="Single" SelectionChanged="DataBaseResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <Label Content="... and pick a Session" Margin="7,181,674,209" />
+        <Label Content="... and pick a Session" Margin="10,211,671,179" />
         <!--<ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="7,227,649,41" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" />-->
-        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="7,210,649,58">
+        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="7,252,649,41">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="50" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -48,12 +52,12 @@
         </ListView>
 
         <Label Content="Roles" Margin="379,137,355,259" />
-        <ComboBox Name="RolesResultBox" Grid.Row="0" Grid.Column="0" Margin="385,161,289,238"  SelectionChanged="RolesResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ComboBox>
+        <ComboBox Name="RolesResultBox" Grid.Row="0" Grid.Column="0" Margin="385,161,284,238"  SelectionChanged="RolesResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ComboBox>
         <Label Content="Add or change Media" Margin="205,78,420,309" />
         <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" Margin="205,116,458,41" SelectionMode="Single" Focusable="True"  SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" />
 
         <Label Content="Mediatype" Margin="379,82,355,311" RenderTransformOrigin="3.858,-3.426" />
-        <ComboBox Name="MediatypeResultsBox" Grid.Row="0" Grid.Column="0" Margin="385,106,289,294"  SelectionChanged="MediatypeResultsBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" RenderTransformOrigin="0.544,0.499" />
+        <ComboBox Name="MediatypeResultsBox" Grid.Row="0" Grid.Column="0" Margin="385,106,284,294"  SelectionChanged="MediatypeResultsBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" RenderTransformOrigin="0.544,0.499" />
 
         <!--<CheckBox Name="showonlymine"  Content="Show only mine" Grid.Column="0" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" Margin="473,186,43,212" />
         <CheckBox Name="requireslogin"  Content="Server requires auth" Grid.Column="0" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" Margin="473,227,10,171" IsEnabled="False" />
@@ -84,9 +88,9 @@
         <CheckBox Name="Autologin" Margin="553,10,-20,398" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked" />
         <Label Content="AutoLogin" Margin="574,0,149,396" />
         <Label Content="Subjects" Margin="379,193,321,205" />
-        <ComboBox x:Name="SubjectsResultBox" Grid.Row="0" Grid.Column="0" Margin="385,216,289,184" SelectionChanged="SubjectsResultBox_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
-        <Label Content="Annotators" Margin="390,252,333,144" />
-        <ListBox x:Name="AnnotatorsBox" Grid.Row="0" Grid.Column="0" Margin="390,281,263,41" SelectionMode="Single" Focusable="True"  SelectionChanged="Annotators_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        <ComboBox x:Name="SubjectsResultBox" Grid.Row="0" Grid.Column="0" Margin="385,216,284,184" SelectionChanged="SubjectsResultBox_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        <Label Content="Annotators" Margin="385,252,338,144" />
+        <ListBox x:Name="AnnotatorsBox" Grid.Row="0" Grid.Column="0" Margin="390,281,284,41" SelectionMode="Single" Focusable="True"  SelectionChanged="Annotators_SelectionChanged" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
         <Button Name="AddAnnotator" Content="+" Grid.Column="0" Click="AddAnnotator_Click" Margin="567,281,217,119"   Visibility="Collapsed" RenderTransformOrigin="5.777,0.652" />
         <Button Name="DeleteAnnotator" Content="x" Grid.Column="0" Click="DeleteAnnotator_Click" Margin="618,281,166,119"   Visibility="Collapsed" RenderTransformOrigin="5.777,0.652" />
 

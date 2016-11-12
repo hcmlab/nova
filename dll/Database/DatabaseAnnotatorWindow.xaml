@@ -50,8 +50,9 @@
             <ComboBoxItem>read</ComboBoxItem>
             <ComboBoxItem>readWrite</ComboBoxItem>
             <ComboBoxItem>dbAdmin</ComboBoxItem>
-           
-            
+            <ComboBoxItem>userAdmin</ComboBoxItem>
+
+
         </ComboBox>
 
         <Button Content="OK" Margin="295,299,10,10" Click="Button_Click"></Button>

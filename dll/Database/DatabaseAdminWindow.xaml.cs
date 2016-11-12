@@ -19,6 +19,7 @@ namespace ssi
         private string connectionstring = "mongodb://127.0.0.1:27017";
         private int authlevel = 0;
         private string lastrole = "";
+        DatabaseHandler dbh;
 
         public DatabaseAdminWindow()
         {
@@ -228,7 +229,7 @@ namespace ssi
             Properties.Settings.Default.Save();
 
             connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP;
-
+            dbh = new DatabaseHandler(connectionstring);
             try
             {
                 mongo = new MongoClient(connectionstring);
@@ -239,7 +240,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = checkAuth(this.db_login.Text, "admin");
+                authlevel = dbh.checkAuth(this.db_login.Text, "admin");
 
                 if (authlevel > 0)
                 {
@@ -279,54 +280,7 @@ namespace ssi
             this.Close();
         }
 
-        private int checkAuth(string dbuser, string db = "admin")
-        {
-            //4 = root
-            //3 = admin
-            //2 = write
-            //1 = read
-            //0 = notauthorized
-
-            int auth = 0;
-            try
-            {
-                var adminDB = mongo.GetDatabase("admin");
-                var cmd = new BsonDocument("usersInfo", dbuser);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-                var roles = (BsonArray)queryResult[0][0]["roles"];
-
-                for (int i = 0; i < roles.Count; i++)
-                {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db && auth <= 4) { auth = 4; break; }
-                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" || roles[i]["role"].ToString() == "dbAdmin" && roles[i]["db"] == db && auth <= 3) { auth = 3; break; }
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db && auth <= 2) { auth = 2; break; }
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db && auth <= 1) { auth = 1; break; }
-
-
-                    //edit/add more roles if you want to change security levels
-                }
-            }
-            catch
-            {
-                var adminDB = mongo.GetDatabase("admin");
-                var cmd = new BsonDocument("usersInfo", dbuser);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-                var roles = (BsonArray)queryResult[0][0]["roles"];
-
-                for (int i = 0; i < roles.Count; i++)
-                {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" && auth < 3) auth = 3;
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" && auth < 2) auth = 2;
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" && auth < 1) auth = 1;
-                    else auth = 0;
-
-                    //edit/add more roles if you want to change security levels
-                }
-            }
-
-            return auth;
-        }
+    
 
         public void GetDatabase()
         {
@@ -336,7 +290,7 @@ namespace ssi
             foreach (var c in databases)
             {
                 string db = c.GetElement(0).Value.ToString();
-                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && checkAuth(Properties.Settings.Default.MongoDBUser, db) > 2)
+                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && dbh.checkAuth(Properties.Settings.Default.MongoDBUser, db) > 2)
                     DataBasResultsBox.Items.Add(db);
                
             }
@@ -500,7 +454,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
              
-                authlevel = checkAuth(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.Database);
+                authlevel = dbh.checkAuth(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.Database);
                 if (authlevel > 2)
                 {
                     GetSessions();
@@ -532,9 +486,10 @@ namespace ssi
                     DeleteFiles.Visibility = Visibility.Visible;
                     AddSubjects.Visibility = Visibility.Visible;
                     DeleteSubject.Visibility = Visibility.Visible;
+                    EditSubject.Visibility = Visibility.Visible;
 
                     //Todo. enable when the meta field is ready
-                    //  EditSubject.Visibility = Visibility.Visible;
+
                 }
                 if (authlevel > 3)
                 {
@@ -559,14 +514,18 @@ namespace ssi
                 var filter = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
                 var subjectsresult = subjects.Find(filter).ToList();
 
-                var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
-                var mediadocuments = media.Find(filtermedia).ToList();
-
-                if (mediadocuments.Count > 0)
+                if(MediaResultBox.SelectedItem != null)
                 {
-                    var update = Builders<BsonDocument>.Update.Set("subject_id", subjectsresult[0].GetValue(0).AsObjectId);
-                    media.UpdateOne(filtermedia, update);
+                    var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
+                    var mediadocuments = media.Find(filtermedia).ToList();
+
+                    if (mediadocuments.Count > 0)
+                    {
+                        var update = Builders<BsonDocument>.Update.Set("subject_id", subjectsresult[0].GetValue(0).AsObjectId);
+                        media.UpdateOne(filtermedia, update);
+                    }
                 }
+              
             }
         }
 
@@ -734,6 +693,10 @@ namespace ssi
 
         private void EditSubject_Click(object sender, RoutedEventArgs e)
         {
+            if(SubjectsResultBox.SelectedValue != null)
+            {
+
+           
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", SubjectsResultBox.SelectedValue.ToString());
             var session = database.GetCollection<BsonDocument>("Subjects").Find(filter).ToList();
@@ -760,6 +723,7 @@ namespace ssi
                 }
 
                 GetSubjects(dbsw.Name());
+            }
             }
         }
 
@@ -1040,6 +1004,8 @@ namespace ssi
 
                             revokeRolesfromUser(name, "readWrite", Properties.Settings.Default.Database);
                             revokeRolesfromUser(name, "dbAdmin", Properties.Settings.Default.Database);
+                            revokeRolesfromUser(name, "readWrite", "admin");
+                            revokeRolesfromUser(name, "userAdminAnyDatabase", "admin");
 
                             if (role == "read") grandRolestoUser(name, "read", Properties.Settings.Default.Database);
                             else if (role == "readWrite") grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
@@ -1047,8 +1013,15 @@ namespace ssi
                             {
                                 grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
                                 grandRolestoUser(name, "dbAdmin", Properties.Settings.Default.Database);
+
+                            }
+                            else if (role == "userAdmin")
+                            {
+                                grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
+                                grandRolestoUser(name, "dbAdmin", Properties.Settings.Default.Database);
                                 grandRolestoUser(name, "readWrite", "admin");
-                                grandRolestoUser(name, "userAdmin", "admin");
+                                grandRolestoUser(name, "userAdminAnyDatabase", "admin");
+
 
                             }
 
@@ -1228,17 +1201,27 @@ namespace ssi
                         {
                             revokeRolesfromUser(name, "readWrite", Properties.Settings.Default.Database);
                             revokeRolesfromUser(name, "dbAdmin", Properties.Settings.Default.Database);
+                            revokeRolesfromUser(name, "readWrite", "admin");
+                            revokeRolesfromUser(name, "userAdminAnyDatabase", "admin");
 
                             if (role =="read") grandRolestoUser(name, "read", Properties.Settings.Default.Database);
                             else  if (role == "readWrite") grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
                             else if (role == "dbAdmin") {
                                 grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
                                 grandRolestoUser(name, "dbAdmin", Properties.Settings.Default.Database);
+                              
+                            }
+                            else if (role == "userAdmin")
+                            {
+                                grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
+                                grandRolestoUser(name, "dbAdmin", Properties.Settings.Default.Database);
                                 grandRolestoUser(name, "readWrite", "admin");
-                                grandRolestoUser(name, "userAdmin", "admin");
+                                grandRolestoUser(name, "userAdminAnyDatabase", "admin");
+
 
                             }
-                    }
+
+                        }
 
                 }
                 }

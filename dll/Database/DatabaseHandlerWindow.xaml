@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Load Session" Height="500" Width="790">
+        Title="Load Session" Height="500" Width="790" KeyDown="Window_KeyDown">
     <Grid>
 
         <Grid.RowDefinitions>
@@ -21,17 +21,17 @@
 
             <StackPanel Orientation="Vertical" Margin="10">
                 <Label Content="Server:IP" Margin="-3,0,0,0"></Label>
-                <TextBox x:FieldModifier="public" x:Name="db_server" Height="25" Width="200" Focusable="True" VerticalContentAlignment="Center" />
+                <TextBox x:FieldModifier="public" x:Name="db_server" Height="25" GotMouseCapture="db_server_GotMouseCapture" Width="200" Focusable="True" VerticalContentAlignment="Center" />
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10">
                 <Label Content="Database Username" Margin="-3,0,0,0"></Label>
-                <TextBox x:FieldModifier="public" x:Name="db_login" Height="25" Width="200" Focusable="True" TextChanged="db_login_TextChanged" VerticalContentAlignment="Center" />
+                <TextBox x:FieldModifier="public" x:Name="db_login" Height="25" Width="200" GotMouseCapture="db_login_GotMouseCapture"  Focusable="True" TextChanged="db_login_TextChanged" VerticalContentAlignment="Center" />
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10">
                 <Label Content="Database Password"  Margin="-3,0,0,0" />
-                <PasswordBox x:FieldModifier="public" x:Name="db_pass" Height="25" Width="200" Focusable="True"  PasswordChanged="db_pass_PasswordChanged" VerticalContentAlignment="Center" />
+                <PasswordBox x:FieldModifier="public" x:Name="db_pass" Height="25" Width="200"  GotMouseCapture="db_pass_GotMouseCapture" Focusable="True"  PasswordChanged="db_pass_PasswordChanged" VerticalContentAlignment="Center" />
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10">
@@ -62,7 +62,7 @@
 
             <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
                 <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged" SelectionMode="Single">
+                <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged" SelectionMode="Single" >
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
