@@ -167,6 +167,9 @@
     <Compile Include="AnnoTrackSegment.cs" />
     <Compile Include="ContinuousColorTheme.cs" />
     <Compile Include="Cursor.cs" />
+    <Compile Include="Database\DatabaseAnnotatorWindow.xaml.cs">
+      <DependentUpon>DatabaseAnnotatorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseAdminWindow.xaml.cs">
       <DependentUpon>DatabaseAdminWindow.xaml</DependentUpon>
     </Compile>
@@ -289,6 +292,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Database\DatabaseAnnotatorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Database\DatabaseAdminWindow.xaml">
       <SubType>Designer</SubType>
