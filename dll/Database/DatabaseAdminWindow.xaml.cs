@@ -19,6 +19,7 @@ namespace ssi
         private string connectionstring = "mongodb://127.0.0.1:27017";
         private int authlevel = 0;
         private string lastrole = "";
+        DatabaseHandler dbh;
 
         public DatabaseAdminWindow()
         {
@@ -228,7 +229,7 @@ namespace ssi
             Properties.Settings.Default.Save();
 
             connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP;
-
+            dbh = new DatabaseHandler(connectionstring);
             try
             {
                 mongo = new MongoClient(connectionstring);
@@ -239,7 +240,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = checkAuth(this.db_login.Text, "admin");
+                authlevel = dbh.checkAuth(this.db_login.Text, "admin");
 
                 if (authlevel > 0)
                 {
@@ -279,57 +280,7 @@ namespace ssi
             this.Close();
         }
 
-        private int checkAuth(string dbuser, string db = "admin")
-        {
-            //4 = root
-            //3 = admin
-            //2 = write
-            //1 = read
-            //0 = notauthorized
-
-            int auth = 0;
-            try
-            {
-                var adminDB = mongo.GetDatabase(db);
-                var cmd = new BsonDocument("usersInfo", dbuser);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-                var roles = (BsonArray)queryResult[0][0]["roles"];
-
-                for (int i = 0; i < roles.Count; i++)
-                {
-                    if (roles[i]["role"] != null)
-                    {
-                        if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                        else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "userAdmin" && auth < 3) auth = 3;
-                        else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && auth < 2) auth = 2;
-                        else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read" && auth < 1) auth = 1;
-                        else auth = 0;
-                    }
-                    else auth = 0;
-                    //edit/add more roles if you want to change security levels
-                }
-            }
-            catch
-            {
-                var adminDB = mongo.GetDatabase("admin");
-                var cmd = new BsonDocument("usersInfo", dbuser);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-                var roles = (BsonArray)queryResult[0][0]["roles"];
-
-                for (int i = 0; i < roles.Count; i++)
-                {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "userAdminAnyDatabase" && auth < 3) auth = 3;
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" && auth < 2) auth = 2;
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" && auth < 1) auth = 1;
-                    else auth = 0;
-
-                    //edit/add more roles if you want to change security levels
-                }
-            }
-
-            return auth;
-        }
+    
 
         public void GetDatabase()
         {
@@ -338,8 +289,10 @@ namespace ssi
             var databases = mongo.ListDatabasesAsync().Result.ToListAsync().Result;
             foreach (var c in databases)
             {
-                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local")
-                    DataBasResultsBox.Items.Add(c.GetElement(0).Value.ToString());
+                string db = c.GetElement(0).Value.ToString();
+                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && dbh.checkAuth(Properties.Settings.Default.MongoDBUser, db) > 2)
+                    DataBasResultsBox.Items.Add(db);
+               
             }
         }
 
@@ -379,8 +332,6 @@ namespace ssi
             RolesResultBox.SelectedItem = selecteditem;
         }
 
-
-
         public void GetAnnotators(string selecteditem = null)
 
         {
@@ -393,7 +344,7 @@ namespace ssi
 
             foreach (BsonDocument b in documents)
             {
-               AnnotatorsBox.Items.Add(b["fullname"].ToString());
+                AnnotatorsBox.Items.Add(b["fullname"].ToString());
             }
             AnnotatorsBox.SelectedItem = selecteditem;
         }
@@ -502,11 +453,13 @@ namespace ssi
                 Properties.Settings.Default.Database = DataBasResultsBox.SelectedItem.ToString();
                 Properties.Settings.Default.Save();
 
-                GetSessions();
-                GetAnnotators();
-
+             
+                authlevel = dbh.checkAuth(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.Database);
                 if (authlevel > 2)
                 {
+                    GetSessions();
+                    GetAnnotators();
+
                     AddSession.Visibility = Visibility.Visible;
                     DeleteSession.Visibility = Visibility.Visible;
                     EditSession.Visibility = Visibility.Visible;
@@ -526,22 +479,22 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 GetMedia();
-             
 
                 if (authlevel > 2)
                 {
                     AddFiles.Visibility = Visibility.Visible;
                     DeleteFiles.Visibility = Visibility.Visible;
+                    AddSubjects.Visibility = Visibility.Visible;
+                    DeleteSubject.Visibility = Visibility.Visible;
+                    EditSubject.Visibility = Visibility.Visible;
 
                     //Todo. enable when the meta field is ready
-                    //  EditSubject.Visibility = Visibility.Visible;
+
                 }
                 if (authlevel > 3)
                 {
                     AddRole.Visibility = Visibility.Visible;
                     DeleteRole.Visibility = Visibility.Visible;
-                    AddSubjects.Visibility = Visibility.Visible;
-                    DeleteSubject.Visibility = Visibility.Visible;
                     AddMediaType.Visibility = Visibility.Visible;
                     DeleteMediaType.Visibility = Visibility.Visible;
                 }
@@ -561,14 +514,18 @@ namespace ssi
                 var filter = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
                 var subjectsresult = subjects.Find(filter).ToList();
 
-                var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
-                var mediadocuments = media.Find(filtermedia).ToList();
-
-                if (mediadocuments.Count > 0)
+                if(MediaResultBox.SelectedItem != null)
                 {
-                    var update = Builders<BsonDocument>.Update.Set("subject_id", subjectsresult[0].GetValue(0).AsObjectId);
-                    media.UpdateOne(filtermedia, update);
+                    var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
+                    var mediadocuments = media.Find(filtermedia).ToList();
+
+                    if (mediadocuments.Count > 0)
+                    {
+                        var update = Builders<BsonDocument>.Update.Set("subject_id", subjectsresult[0].GetValue(0).AsObjectId);
+                        media.UpdateOne(filtermedia, update);
+                    }
                 }
+              
             }
         }
 
@@ -736,6 +693,10 @@ namespace ssi
 
         private void EditSubject_Click(object sender, RoutedEventArgs e)
         {
+            if(SubjectsResultBox.SelectedValue != null)
+            {
+
+           
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", SubjectsResultBox.SelectedValue.ToString());
             var session = database.GetCollection<BsonDocument>("Subjects").Find(filter).ToList();
@@ -762,6 +723,7 @@ namespace ssi
                 }
 
                 GetSubjects(dbsw.Name());
+            }
             }
         }
 
@@ -993,12 +955,10 @@ namespace ssi
 
         private void Annotators_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
         }
 
         private void EditAnnotator_Click(object sender, RoutedEventArgs e)
         {
-
             if (AnnotatorsBox.SelectedItem != null)
             {
                 var builder = Builders<BsonDocument>.Filter;
@@ -1014,89 +974,172 @@ namespace ssi
                     BsonElement value;
 
                     if (annotator.TryGetElement("name", out value)) name = annotator["name"].ToString();
-                    if (annotator.TryGetElement("fullname", out value))  fullname = annotator["fullname"].ToString();
+                    if (annotator.TryGetElement("fullname", out value)) fullname = annotator["fullname"].ToString();
                     if (annotator.TryGetElement("email", out value)) email = annotator["email"].ToString();
                     if (annotator.TryGetElement("expertise", out value)) expertise = annotator["expertise"].ToString();
 
-                    DatabaseAnnotatorWindow dbsw = new DatabaseAnnotatorWindow(name,fullname, email, expertise);
-                    dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                    dbsw.ShowDialog();
-
-                    if (dbsw.DialogResult == true)
+                    try
                     {
-                        var filterid = builder.Eq("_id", annotator["_id"].AsObjectId);
+                        DatabaseAnnotatorWindow dbsw = new DatabaseAnnotatorWindow(name, fullname, email, expertise);
+                        dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                        dbsw.ShowDialog();
 
-                        var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.Name());
-                        database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updatename);
-
-                        var updatefullname = Builders<BsonDocument>.Update.Set("fullname", dbsw.Fullname());
-                        database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updatefullname);
-
-                        var updateemail = Builders<BsonDocument>.Update.Set("email", dbsw.Email());
-                        database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updateemail);
-
-                        var updateexpertise = Builders<BsonDocument>.Update.Set("expertise", dbsw.Expertise());
-                        database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updateexpertise);
-
-
-                        if(dbsw.Password() != "")
+                        if (dbsw.DialogResult == true)
                         {
-                            ChangeDBPassword(dbsw.Name(), dbsw.Password());
+                            var filterid = builder.Eq("_id", annotator["_id"].AsObjectId);
+
+                            var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.NameCombo.SelectionBoxItem.ToString());
+                            database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updatename);
+
+                            var updatefullname = Builders<BsonDocument>.Update.Set("fullname", dbsw.Fullname());
+                            database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updatefullname);
+
+                            var updateemail = Builders<BsonDocument>.Update.Set("email", dbsw.Email());
+                            database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updateemail);
+
+                            var updateexpertise = Builders<BsonDocument>.Update.Set("expertise", dbsw.Expertise());
+                            database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updateexpertise);
+
+                            string role = dbsw.RoleBox.SelectionBoxItem.ToString();
+
+                            revokeRolesfromUser(name, "readWrite", Properties.Settings.Default.Database);
+                            revokeRolesfromUser(name, "dbAdmin", Properties.Settings.Default.Database);
+                            revokeRolesfromUser(name, "readWrite", "admin");
+                            revokeRolesfromUser(name, "userAdminAnyDatabase", "admin");
+
+                            if (role == "read") grandRolestoUser(name, "read", Properties.Settings.Default.Database);
+                            else if (role == "readWrite") grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
+                            else if (role == "dbAdmin")
+                            {
+                                grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
+                                grandRolestoUser(name, "dbAdmin", Properties.Settings.Default.Database);
+
+                            }
+                            else if (role == "userAdmin")
+                            {
+                                grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
+                                grandRolestoUser(name, "dbAdmin", Properties.Settings.Default.Database);
+                                grandRolestoUser(name, "readWrite", "admin");
+                                grandRolestoUser(name, "userAdminAnyDatabase", "admin");
+
+
+                            }
+
+                            if (dbsw.Password() != "")
+                            {
+                                ChangeDBPassword(dbsw.Name(), dbsw.Password());
+                            }
                         }
-                    }
-                }
+                    
                 GetAnnotators();
+                }
+                  
+
+                   catch (Exception ex)
+                {
+
+                    MessageBox.Show("Not authorized on admin database to change users");
+
+                }
             }
-
-
+            }
         }
 
         private void DeleteAnnotator_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult mb = MessageBox.Show("Warning: Annotator will be deleted from the databse, are you sure to continue?", "Warning", MessageBoxButton.YesNo);
-            if (AnnotatorsBox.SelectedItem != null && mb == MessageBoxResult.Yes)
+            try
             {
 
-
+           
+            MessageBoxResult mb = MessageBox.Show("Warning: Annotator will be deleted from the database, are you sure to continue?", "Warning", MessageBoxButton.YesNo);
+            if (AnnotatorsBox.SelectedItem != null && mb == MessageBoxResult.Yes)
+            {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("fullname", AnnotatorsBox.SelectedValue);
                 var result = database.GetCollection<BsonDocument>("Annotators").Find(filter).Single();
                 string user = result["name"].AsString;
                 var del = database.GetCollection<BsonDocument>("Annotators").DeleteOne(filter);
 
-                MessageBoxResult mb2 = MessageBox.Show("Do you also want to delete the user login from the database?", "Warning", MessageBoxButton.YesNo);
-                 if(mb2 == MessageBoxResult.Yes)
+
+
+                revokeRolesfromUser(user, "read", Properties.Settings.Default.Database);
+                revokeRolesfromUser(user, "readWrite", Properties.Settings.Default.Database);
+                revokeRolesfromUser(user, "dbAdmin", Properties.Settings.Default.Database);
+
+                MessageBoxResult mb2 = MessageBox.Show("Do you also want to delete the user login from the database? ", "Warning", MessageBoxButton.YesNo);
+                if (mb2 == MessageBoxResult.Yes)
                 {
                     DropUser(user);
                 }
 
                 GetAnnotators();
+                }
+            }
+            catch(Exception ex )
+            {
+
+                MessageBox.Show("Not authorized to delete users");
+            }
+            
+        }
+
+        private void AddDBUser(string user, string password, string role)
+        {
+            var  admindatabase = mongo.GetDatabase("admin");
+            var createuser = new BsonDocument { { "createUser", user }, { "pwd", password }, { "roles", new BsonArray { new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } }, new BsonDocument { { "role", role }, { "db", Properties.Settings.Default.Database } } } } };
+            try
+            {
+                admindatabase.RunCommand<BsonDocument>(createuser);
+            }
+            catch (Exception ex)
+            {
+                grandRolestoUser(user, role, Properties.Settings.Default.Database);
             }
         }
 
 
-        public void AddDBUser(string user, string password)
+        private void grandRolestoUser(string user, string role, string db)
         {
-            var database = mongo.GetDatabase("admin");
-            var createuser = new BsonDocument { { "createUser", user}, { "pwd", password }, { "roles", new BsonArray { new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } }, new BsonDocument { { "role", "readWrite" }, { "db", Properties.Settings.Default.Database } } } } };
-                try
-                {
-                    database.RunCommand<BsonDocument>(createuser);
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show("Annotator already exists in the database, no new user account was created.");
-                }
+            try
+            {
+                var admindatabase = mongo.GetDatabase("admin");
+                // var updateroles = new BsonDocument { { "updateUser", user }, { "pwd", password }, { "roles", new BsonArray { new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } }, new BsonDocument { { "role", "readWrite" }, { "db", Properties.Settings.Default.Database } } } } };
+                var updateroles = new BsonDocument { { "grantRolesToUser", user }, { "roles", new BsonArray { { new BsonDocument { { "role", role }, { "db", db } } } } } };
+                admindatabase.RunCommand<BsonDocument>(updateroles);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Annotator already exists in the database, no new user account was created.");
+            }
+
         }
 
 
-        public void ChangeDBPassword(string user, string password)
+        private void revokeRolesfromUser(string user, string role, string db)
+        {
+            try
+            {
+                var admindatabase = mongo.GetDatabase("admin");
+                var updateroles = new BsonDocument { { "revokeRolesFromUser", user }, { "roles", new BsonArray { { new BsonDocument { { "role", role }, { "db", db } } } } } };
+                admindatabase.RunCommand<BsonDocument>(updateroles);
+            }
+
+            catch (Exception ex)
+            {
+
+            }
+
+        }
+
+
+
+        private void ChangeDBPassword(string user, string password)
         {
             var database = mongo.GetDatabase("admin");
             // database.RunCommand<string>("use admin");
 
-            var changepw =   new BsonDocument { { "updateUser", user }, { "pwd", password } };
-           // var changepw = new BsonDocument { { "updateUser",  new BsonDocument { { user, password } } } };
+            var changepw = new BsonDocument { { "updateUser", user }, { "pwd", password } };
+            // var changepw = new BsonDocument { { "updateUser",  new BsonDocument { { user, password } } } };
             try
             {
                 database.RunCommand<BsonDocument>(changepw);
@@ -1107,56 +1150,99 @@ namespace ssi
             }
         }
 
-        public void DropUser(string user)
+        private void DropUser(string user)
         {
-            var database = mongo.GetDatabase("admin");
-            // database.RunCommand<string>("use admin");
+            int auth = dbh.checkAuth(user, "admin");
 
-            var dropuser = new BsonDocument { { "dropUser", user }};
-            // var changepw = new BsonDocument { { "updateUser",  new BsonDocument { { user, password } } } };
-            try
+            if(user != Properties.Settings.Default.MongoDBUser && auth < 4)
             {
-                database.RunCommand<BsonDocument>(dropuser);
+                var database = mongo.GetDatabase("admin");
+
+                var dropuser = new BsonDocument { { "dropUser", user } };
+
+                try
+                {
+                    database.RunCommand<BsonDocument>(dropuser);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not delete user.");
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Could not delete user.");
-            }
+
+            else MessageBox.Show("You can not delete yourself or superusers");
+        
         }
 
         private void AddAnnotator_Click(object sender, RoutedEventArgs e)
         {
 
-            DatabaseAnnotatorWindow dbsw = new DatabaseAnnotatorWindow();
+            try
+            {
+                DatabaseAnnotatorWindow dbsw = new DatabaseAnnotatorWindow();
             dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbsw.ShowDialog();
 
-
             if (dbsw.DialogResult == true)
             {
+                string name = dbsw.Name();
+                if (dbsw.Name() == "") name = dbsw.NameCombo.SelectedItem.ToString();
+
                 BsonDocument annotator = new BsonDocument {
-                    {"name",  dbsw.Name()},
+                    {"name",  name},
                     {"fullname",  dbsw.Fullname()},
                     {"email",  dbsw.Email()},
                     {"expertise",  dbsw.Expertise()},
-                   
                 };
 
+               
 
-                 var builder = Builders<BsonDocument>.Filter;
-                var filterannotator = builder.Eq("name", dbsw.Name());
+                var builder = Builders<BsonDocument>.Filter;
+                var filterannotator = builder.Eq("name",name);
                 UpdateOptions uoa = new UpdateOptions();
                 uoa.IsUpsert = true;
                 var result = database.GetCollection<BsonDocument>("Annotators").ReplaceOne(filterannotator, annotator, uoa);
-                if(result.ModifiedCount == 0)
+                if (result.ModifiedCount == 0)
                 {
-                    AddDBUser(dbsw.Name(), dbsw.Password());
-                } 
+                    string role = dbsw.RoleBox.SelectionBoxItem.ToString();
+                    if (dbsw.Name() != "" && dbsw.Password() != "") AddDBUser(name, dbsw.Password(), role);
+                    else
+                        {
+                            revokeRolesfromUser(name, "readWrite", Properties.Settings.Default.Database);
+                            revokeRolesfromUser(name, "dbAdmin", Properties.Settings.Default.Database);
+                            revokeRolesfromUser(name, "readWrite", "admin");
+                            revokeRolesfromUser(name, "userAdminAnyDatabase", "admin");
+
+                            if (role =="read") grandRolestoUser(name, "read", Properties.Settings.Default.Database);
+                            else  if (role == "readWrite") grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
+                            else if (role == "dbAdmin") {
+                                grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
+                                grandRolestoUser(name, "dbAdmin", Properties.Settings.Default.Database);
+                              
+                            }
+                            else if (role == "userAdmin")
+                            {
+                                grandRolestoUser(name, "readWrite", Properties.Settings.Default.Database);
+                                grandRolestoUser(name, "dbAdmin", Properties.Settings.Default.Database);
+                                grandRolestoUser(name, "readWrite", "admin");
+                                grandRolestoUser(name, "userAdminAnyDatabase", "admin");
+
+
+                            }
+
+                        }
+
+                }
+                }
 
                 GetAnnotators(dbsw.Fullname());
-
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Not authorized to add users");
+                }
+            
             }
-
-        }
+        
     }
 }

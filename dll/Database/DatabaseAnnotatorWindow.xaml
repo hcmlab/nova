@@ -18,13 +18,17 @@
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Label Content="MongoDB Login:" Margin="10,0,54,303"></Label>
-        <TextBox Name="Namefield" Text="" Margin="10,43,228,255"></TextBox>
+        <Label Content="Existing MongoDB Login:" Margin="10,3,50,293"/>
+       
+        <ComboBox Name="NameCombo"  Margin="10,43,228,255" SelectionChanged="NameCombo_SelectionChanged"></ComboBox>
 
-        <Label Content="MongoDB Password:" Margin="195,0,-131,303" Grid.ColumnSpan="2"></Label>
-        <PasswordBox Name="PasswordField" Password="" Margin="195,43,43,255"></PasswordBox>
+        <Label Content="New MongoDB Login:" Margin="228,0,-164,293" Grid.ColumnSpan="2"></Label>
+        <TextBox Name="Namefield" Text="" Margin="218,46,20,252" PreviewKeyDown="Namefield_PreviewKeyDown"></TextBox>
 
-        <Label Content="Full Name (Shown in the Database):" Margin="10,84,41,213"></Label>
+        <Label Content="MongoDB Password:" Margin="228,84,-164,219" Grid.ColumnSpan="2"></Label>
+        <PasswordBox Name="PasswordField" Password="" Margin="218,114,20,184"></PasswordBox>
+
+        <Label Content="Full Name (Shown in the Database):" Margin="10,84,0,213" HorizontalAlignment="Left" Width="334"></Label>
         <TextBox Name="FullNameField" Text="" Margin="10,114,228,188"></TextBox>
 
         <Label Content="Email:" Margin="10,157,308,143"></Label>
@@ -38,6 +42,17 @@
             <ComboBoxItem>3</ComboBoxItem>
             <ComboBoxItem>4</ComboBoxItem>
             <ComboBoxItem>5</ComboBoxItem>
+        </ComboBox>
+
+
+        <Label Content="Role:" Margin="218,160,100,139"></Label>
+        <ComboBox Name="RoleBox" Margin="218,195,20,106" SelectedIndex="1">
+            <ComboBoxItem>read</ComboBoxItem>
+            <ComboBoxItem>readWrite</ComboBoxItem>
+            <ComboBoxItem>dbAdmin</ComboBoxItem>
+            <ComboBoxItem>userAdmin</ComboBoxItem>
+
+
         </ComboBox>
 
         <Button Content="OK" Margin="295,299,10,10" Click="Button_Click"></Button>
