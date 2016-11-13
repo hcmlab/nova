@@ -2873,7 +2873,7 @@ namespace ssi
 
             catch(Exception ex)
             {
-                MessageBox.Show("Noth authorized to add a new Session");
+                MessageBox.Show("Not authorized to add a new Session");
             }
            
         }

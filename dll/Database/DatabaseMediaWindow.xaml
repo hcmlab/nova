@@ -8,7 +8,7 @@
         Title="Media" Height="348.344" Width="356.291" Background="LightGray">
     <Grid>
         <Label Margin="10,-2,221,287" RenderTransformOrigin="-1.002,-0.947">Connetion Type</Label>
-        <ComboBox Name="Connectiontype"   Visibility="Visible" Margin="10,30,117,256"  SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="0">
+        <ComboBox Name="Connectiontype"   Visibility="Visible" Margin="10,30,117,256"  SelectionChanged="ComboBox_SelectionChanged">
             <ComboBoxItem>sftp</ComboBoxItem>
             <ComboBoxItem>ftp</ComboBoxItem>
             <ComboBoxItem>http</ComboBoxItem>
