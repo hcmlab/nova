@@ -1061,6 +1061,7 @@ namespace ssi
                 var del = database.GetCollection<BsonDocument>("Annotators").DeleteOne(filter);
 
 
+
                 revokeRolesfromUser(user, "read", Properties.Settings.Default.Database);
                 revokeRolesfromUser(user, "readWrite", Properties.Settings.Default.Database);
                 revokeRolesfromUser(user, "dbAdmin", Properties.Settings.Default.Database);
@@ -1151,18 +1152,26 @@ namespace ssi
 
         private void DropUser(string user)
         {
-            var database = mongo.GetDatabase("admin");
-          
-            var dropuser = new BsonDocument { { "dropUser", user } };
+            int auth = dbh.checkAuth(user, "admin");
 
-            try
+            if(user != Properties.Settings.Default.MongoDBUser && auth < 4)
             {
-                database.RunCommand<BsonDocument>(dropuser);
+                var database = mongo.GetDatabase("admin");
+
+                var dropuser = new BsonDocument { { "dropUser", user } };
+
+                try
+                {
+                    database.RunCommand<BsonDocument>(dropuser);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not delete user.");
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Could not delete user.");
-            }
+
+            else MessageBox.Show("You can not delete yourself or superusers");
+        
         }
 
         private void AddAnnotator_Click(object sender, RoutedEventArgs e)

@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 
 namespace ssi
 {
@@ -54,6 +55,27 @@ namespace ssi
 
             return auth;
         }
+
+
+
+        //public void sendmail(string adressto, string subject, string body)
+        //{
+        //    //dummy code, need some logic but hey, automated notifications
+        //    MailMessage objeto_mail = new MailMessage();
+        //    SmtpClient client = new SmtpClient();
+        //    client.Port = 25;
+        //    client.Host = "smtp.internal.mycompany.com";
+        //    client.Timeout = 10000;
+        //    client.DeliveryMethod = SmtpDeliveryMethod.Network;
+        //    client.UseDefaultCredentials = false;
+        //    client.Credentials = new System.Net.NetworkCredential("user", "Password");
+        //    objeto_mail.From = new MailAddress("from@server.com");
+        //    objeto_mail.To.Add(new MailAddress(adressto));
+        //    objeto_mail.Subject = subject;
+        //    objeto_mail.Body = body;
+        //    client.Send(objeto_mail);
+        //}
+
 
         public string LoadRoles(string db, AnnoTrack tier)
         {
