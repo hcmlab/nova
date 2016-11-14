@@ -40,6 +40,7 @@ namespace ssi
             this.server_login.Text = Properties.Settings.Default.DataServerLogin;
             this.server_pass.Password = Properties.Settings.Default.DataServerPass;
             Autologin.IsEnabled = false;
+           
 
             if (Properties.Settings.Default.Autologin == true)
             {
@@ -51,6 +52,7 @@ namespace ssi
             {
                 ConnecttoDB();
             }
+            showonlymine.IsChecked = true;
         }
 
         private void ConnecttoDB()
@@ -121,7 +123,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
                 AnnoItems.Clear();
                 GetMedia();
-                GetAnnotations();
+                GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
                 cts.Dispose();
                 cts = new CancellationTokenSource();
             }
@@ -487,7 +489,7 @@ namespace ssi
                     var result = annotations.ReplaceOne(filter, anno, uo);
 
                     AnnoItems.Clear();
-                    GetAnnotations();
+                    GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
                 }
             }
         }
@@ -512,7 +514,7 @@ namespace ssi
                 var result = annotations.DeleteOne(filter);
 
                 AnnoItems.Clear();
-                GetAnnotations();
+                GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
             }
         }
 
