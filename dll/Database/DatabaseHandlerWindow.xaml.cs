@@ -159,13 +159,13 @@ namespace ssi
         private void showonlymine_Checked(object sender, RoutedEventArgs e)
         {
             AnnoItems.Clear();
-            GetAnnotations(true, showonlyunfinished.IsChecked == true);
+           if(AnnotationResultBox.SelectedItem != null)   GetAnnotations(true, showonlyunfinished.IsChecked == true);
         }
 
         private void showonlymine_Unchecked(object sender, RoutedEventArgs e)
         {
             AnnoItems.Clear();
-            GetAnnotations(false, showonlyunfinished.IsChecked == true);
+            if (AnnotationResultBox.SelectedItem != null) GetAnnotations(false, showonlyunfinished.IsChecked == true);
         }
 
         public int Authlevel()
