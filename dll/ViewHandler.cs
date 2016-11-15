@@ -823,6 +823,7 @@ namespace ssi
                 }
 
                 anno.AnnotationScheme = db.GetAnnotationScheme(annoscheme, isDiscrete);
+                anno.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair("GARBAGE", "#FF000000"));
                 if (anno.AnnotationScheme.type == "FREE") anno.AnnotationType = AnnoType.FREE;
                 else if (anno.AnnotationScheme.type == "DISCRETE") anno.AnnotationType = AnnoType.DISCRETE;
                 else if (anno.AnnotationScheme.type == "CONTINUOUS") anno.AnnotationType = AnnoType.CONTINUOUS;
