@@ -71,6 +71,8 @@ namespace ssi
         {
             if (_viewTime != null)
             {
+               
+
                 //seens to be a bug in avalon lib when mo.try to fix it by adjusting the value
 
                 if (ui.RangeStartSelected > ui.RangeStop) ui.RangeStartSelected = ui.RangeStop;
@@ -102,6 +104,8 @@ namespace ssi
                         }
                     }
                 }
+
+               
 
                 if (OnTimeRangeChanged != null)
                 {

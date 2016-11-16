@@ -33,7 +33,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StatusBar Grid.Column="0" Grid.Row="0" Margin="0">
+                <StatusBar Grid.Column="0" Grid.Row="0" Margin="0" Background="Transparent">
 
                     <TextBlock Name="signalNameLabel" TextTrimming="WordEllipsis"></TextBlock>
                     <Separator />
@@ -87,7 +87,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StatusBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
+                <StatusBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Background="Transparent">
 
                     <Button Name="annoNameLabel" Background="Transparent" BorderBrush="Transparent">#NoTier</Button>
 
@@ -105,7 +105,7 @@
                         x:Name="annoTrackControl"
                         Width="Auto"
                         Height="Auto"
-                        Background="WhiteSmoke"
+                        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" />
                 </Border>

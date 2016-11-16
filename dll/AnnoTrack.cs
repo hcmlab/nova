@@ -758,26 +758,11 @@ namespace ssi
                     {
                         double test = point.X * (selected_segment.Item.Duration / selected_segment.ActualWidth);
 
-                        double minwidth = 1;
-                        // resize segment left
-                        if (selected_segment.is_resizeable_left)
-                        {
-                            double delta = point.X;
-                            if (selected_segment.Item.Duration - test >= Properties.Settings.Default.DefaultMinSegmentSize)
-                            {
-                                selected_segment.resize_left(delta);
-                                SelectSegment(selected_segment);
-                                this.select(true);
-                                FireOnMove(selected_segment.Item.Start);
-                            }
-                            else
-                            {
-                                selected_segment.Item.Start = selected_segment.Item.Stop - Properties.Settings.Default.DefaultMinSegmentSize;
-                                selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
-                            }
-                        }
+              
+                     
+                       
                         // resize segment right
-                        else if (selected_segment.is_resizeable_right)
+                        if (selected_segment.is_resizeable_right)
                         {
                             double delta = point.X - selected_segment.ActualWidth;
                             if (test >= Properties.Settings.Default.DefaultMinSegmentSize)
@@ -794,6 +779,24 @@ namespace ssi
                                 selected_segment.Item.Stop = selected_segment.Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
                             }
                         }
+                        // resize segment left
+                        else if (selected_segment.is_resizeable_left)
+                        {
+                            double delta = point.X;
+                            if (selected_segment.Item.Duration - test >= Properties.Settings.Default.DefaultMinSegmentSize)
+                            {
+                                selected_segment.resize_left(delta);
+                                SelectSegment(selected_segment);
+                                this.select(true);
+                                FireOnMove(selected_segment.Item.Start);
+                            }
+                            else
+                            {
+                                selected_segment.Item.Start = selected_segment.Item.Stop - Properties.Settings.Default.DefaultMinSegmentSize;
+                                selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
+                            }
+                        }
+
                         // move segment
                         else if (selected_segment.is_moveable)
                         {
