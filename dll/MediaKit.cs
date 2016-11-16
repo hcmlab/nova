@@ -34,8 +34,9 @@ namespace ssi
         public MediaKit(string filepath, double pos_in_seconds)
         {
             this.LoadedBehavior = WPFMediaKit.DirectShow.MediaPlayers.MediaState.Manual;
-            this.UnloadedBehavior = WPFMediaKit.DirectShow.MediaPlayers.MediaState.Manual;
+            this.UnloadedBehavior = WPFMediaKit.DirectShow.MediaPlayers.MediaState.Close;
 
+   
             this.BeginInit();
             this.Source = new Uri(filepath);
             this.EndInit();
