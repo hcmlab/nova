@@ -2911,6 +2911,10 @@ namespace ssi
         private void mongodbLoad()
         {
             clear();
+         
+            if (loadedDBmedia != null) loadedDBmedia.Clear();
+            if (filestoload != null)  filestoload.Clear();
+
 
             System.Collections.IList annotations = null;
             List<DatabaseMediaInfo> ci = null;
