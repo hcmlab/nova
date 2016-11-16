@@ -51,7 +51,7 @@
       <Value Profile="(Default)">30</Value>
     </Setting>
     <Setting Name="DefaultMinSegmentSize" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0.01</Value>
+      <Value Profile="(Default)">0.1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

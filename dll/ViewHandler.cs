@@ -223,6 +223,51 @@ namespace ssi
                     e.Handled = true;
                 }
 
+                if (e.KeyboardDevice.IsKeyDown(Key.D0) || e.KeyboardDevice.IsKeyDown(Key.NumPad0))
+                {
+                    if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE || AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.FREE)
+                    {
+                        string label = "GARBAGE";
+                        if (AnnoTrack.GetSelectedSegment() != null)
+                        {
+                            AnnoTrack.GetSelectedSegment().Item.Label = label;
+                            AnnoTrack.GetSelectedSegment().Item.Bg = "#FF000000";
+                        }
+                    }
+                    e.Handled = true;
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.D1) || e.KeyboardDevice.IsKeyDown(Key.D2) || e.KeyboardDevice.IsKeyDown(Key.D3) || e.KeyboardDevice.IsKeyDown(Key.D4) ||
+                    e.KeyboardDevice.IsKeyDown(Key.D5) || e.KeyboardDevice.IsKeyDown(Key.D6) || e.KeyboardDevice.IsKeyDown(Key.D7) || e.KeyboardDevice.IsKeyDown(Key.D8) || e.KeyboardDevice.IsKeyDown(Key.D9) ||
+                    e.KeyboardDevice.IsKeyDown(Key.NumPad1) || e.KeyboardDevice.IsKeyDown(Key.NumPad2) || e.KeyboardDevice.IsKeyDown(Key.NumPad3) || e.KeyboardDevice.IsKeyDown(Key.NumPad4) || e.KeyboardDevice.IsKeyDown(Key.NumPad5) ||
+                      e.KeyboardDevice.IsKeyDown(Key.NumPad6) || e.KeyboardDevice.IsKeyDown(Key.NumPad7) || e.KeyboardDevice.IsKeyDown(Key.NumPad8) || e.KeyboardDevice.IsKeyDown(Key.NumPad9))
+                {
+                    int index = 0;
+                    if (e.Key - Key.D1 < 10) index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.D1);
+                    else index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.NumPad1);
+
+
+
+
+                    if (index >= 0 && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE)
+                    {
+                        string label = AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.ElementAt(index).Label;
+                        if (AnnoTrack.GetSelectedSegment() != null)
+                        {
+                            AnnoTrack.GetSelectedSegment().Item.Label = label;
+                            foreach (LabelColorPair lp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
+                            {
+                                if (label == lp.Label)
+                                {
+                                    AnnoTrack.GetSelectedSegment().Item.Bg = lp.Color;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    e.Handled = true;
+                }
+
                 if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
                     if (AnnoTrack.GetSelectedSegment() != null && AnnoTrack.GetSelectedTrack().isDiscrete && keyDown == false /*&& AnnoTrack.GetSelectedSegment() == null*/)
@@ -1539,7 +1584,7 @@ namespace ssi
                         view.annoListControl.editComboBox.SelectedIndex = 0;
                     }
                 }
-                else if(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.FREE)
+                else if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.FREE)
                 {
                     view.annoListControl.editTextBox.Visibility = Visibility.Visible;
                     view.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
@@ -2871,12 +2916,10 @@ namespace ssi
                 daw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 daw.ShowDialog();
             }
-
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("Not authorized to add a new Session");
             }
-           
         }
 
         private void mongodbStore()
@@ -2896,9 +2939,9 @@ namespace ssi
                     }
                     else MessageBox.Show("No Annotation Tracks available");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    if(ex.Message.Contains("not auth"))  MessageBox.Show("Sorry, you are only allowed to read annotations, but not to write to the database");
+                    if (ex.Message.Contains("not auth")) MessageBox.Show("Sorry, you are only allowed to read annotations, but not to write to the database");
                     else MessageBox.Show("Could not connect to MongoDB Server");
                 }
             }
@@ -2911,10 +2954,9 @@ namespace ssi
         private void mongodbLoad()
         {
             clear();
-         
-            if (loadedDBmedia != null) loadedDBmedia.Clear();
-            if (filestoload != null)  filestoload.Clear();
 
+            if (loadedDBmedia != null) loadedDBmedia.Clear();
+            if (filestoload != null) filestoload.Clear();
 
             System.Collections.IList annotations = null;
             List<DatabaseMediaInfo> ci = null;
@@ -2922,126 +2964,122 @@ namespace ssi
             DatabaseHandlerWindow dbhw = new DatabaseHandlerWindow();
             try
             {
+                dbhw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dbhw.ShowDialog();
 
-         
-            dbhw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            dbhw.ShowDialog();
-
-            if (dbhw.DialogResult == true)
-            {
-                annotations = dbhw.Annotations();
-                loadedDBmedia = dbhw.Media();
-                ci = dbhw.MediaConnectionInfo();
-                this.view.mongodbmenu.IsEnabled = true;
-
-                //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
-                if (dbhw.Authlevel() > 2)
+                if (dbhw.DialogResult == true)
                 {
-                    this.view.addmongodb.Visibility = Visibility.Visible;
-                    this.view.mongodbfunctions.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    this.view.addmongodb.Visibility = Visibility.Collapsed;
-                    this.view.mongodbfunctions.Visibility = Visibility.Collapsed;
-                }
-            }
+                    annotations = dbhw.Annotations();
+                    loadedDBmedia = dbhw.Media();
+                    ci = dbhw.MediaConnectionInfo();
+                    this.view.mongodbmenu.IsEnabled = true;
 
-            string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
-            DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
-
-            this.view.mongodbmenu.IsEnabled = true;
-            this.view.mongodbfunctions.IsEnabled = true;
-
-            if (annotations != null)
-            {
-                Action EmptyDelegate = delegate () { };
-                this.view.ShadowBox.Visibility = Visibility.Visible;
-                view.UpdateLayout();
-                view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-
-                List<AnnoList> annos = db.LoadfromDatabase(annotations, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
-                try
-                {
-                    if (annos != null)
+                    //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
+                    if (dbhw.Authlevel() > 2)
                     {
-                        foreach (AnnoList anno in annos)
+                        this.view.addmongodb.Visibility = Visibility.Visible;
+                        this.view.mongodbfunctions.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        this.view.addmongodb.Visibility = Visibility.Collapsed;
+                        this.view.mongodbfunctions.Visibility = Visibility.Collapsed;
+                    }
+                }
 
+                string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
+                DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
+
+                this.view.mongodbmenu.IsEnabled = true;
+                this.view.mongodbfunctions.IsEnabled = true;
+
+                if (annotations != null)
+                {
+                    Action EmptyDelegate = delegate () { };
+                    this.view.ShadowBox.Visibility = Visibility.Visible;
+                    view.UpdateLayout();
+                    view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+                    List<AnnoList> annos = db.LoadfromDatabase(annotations, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+                    try
+                    {
+                        if (annos != null)
                         {
-                            if (anno.Count > 0)
+                            foreach (AnnoList anno in annos)
+
                             {
-                                anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
-                                anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
-
-                                if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
-                                else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
-                                else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
-
-                                handleAnnotation(anno, null);
-                            }
-                        }
-
-                        view.ShadowBox.Visibility = Visibility.Collapsed;
-
-                        //handle media
-
-                        if (loadedDBmedia.Count > 0)
-                        {
-                            for (int i = 0; i < loadedDBmedia.Count; i++)
-                            {
-                                foreach (DatabaseMediaInfo c in ci)
-
+                                if (anno.Count > 0)
                                 {
-                                    Properties.Settings.Default.DataServerConnectionType = c.connection;
+                                    anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
+                                    anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
 
-                                    if (c.filename == loadedDBmedia[i].filename.ToString())
+                                    if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
+                                    else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
+                                    else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
+
+                                    handleAnnotation(anno, null);
+                                }
+                            }
+
+                            view.ShadowBox.Visibility = Visibility.Collapsed;
+
+                            //handle media
+
+                            if (loadedDBmedia.Count > 0)
+                            {
+                                for (int i = 0; i < loadedDBmedia.Count; i++)
+                                {
+                                    foreach (DatabaseMediaInfo c in ci)
 
                                     {
-                                        if (c.connection == "sftp")
-                                        {
-                                            Properties.Settings.Default.DataServerConnectionType = "sftp";
+                                        Properties.Settings.Default.DataServerConnectionType = c.connection;
 
-                                            string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
-                                            if (file != null && !file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
-                                            if (file == null) break;
-                                        }
-                                        else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
-                                        {
-                                            Properties.Settings.Default.DataServerConnectionType = "http";
-                                            httpGet(c.filepath, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename);
-                                        }
-                                        else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "true")
-                                        {
-                                            Properties.Settings.Default.DataServerConnectionType = "http";
+                                        if (c.filename == loadedDBmedia[i].filename.ToString())
 
-                                            //This has not been tested and probably needs rework.
-                                            httpPost(c.filepath, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+                                        {
+                                            if (c.connection == "sftp")
+                                            {
+                                                Properties.Settings.Default.DataServerConnectionType = "sftp";
+
+                                                string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
+                                                if (file != null && !file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
+                                                if (file == null) break;
+                                            }
+                                            else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
+                                            {
+                                                Properties.Settings.Default.DataServerConnectionType = "http";
+                                                httpGet(c.filepath, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename);
+                                            }
+                                            else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "true")
+                                            {
+                                                Properties.Settings.Default.DataServerConnectionType = "http";
+
+                                                //This has not been tested and probably needs rework.
+                                                httpPost(c.filepath, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            if (Properties.Settings.Default.DataServerConnectionType == "sftp")
-                            {
-                                string[] files2 = new string[filestoload.Count];
-                                for (int i = 0; i < filestoload.Count; i++)
+                                if (Properties.Settings.Default.DataServerConnectionType == "sftp")
                                 {
-                                    files2[i] = filestoload[i];
+                                    string[] files2 = new string[filestoload.Count];
+                                    for (int i = 0; i < filestoload.Count; i++)
+                                    {
+                                        files2[i] = filestoload[i];
+                                    }
+                                    if (files2.Length > 0) LoadFiles(files2);
+                                    filestoload.Clear();
                                 }
-                                if (files2.Length > 0) LoadFiles(files2);
-                                filestoload.Clear();
                             }
                         }
+                        DatabaseLoaded = true;
                     }
-                    DatabaseLoaded = true;
+                    catch (TimeoutException e1)
+                    {
+                        MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
+                    }
                 }
-                catch (TimeoutException e1)
-                {
-                       
-                    MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
-                }
-            }
-
             }
             catch (Exception ex)
             {
