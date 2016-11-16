@@ -868,14 +868,14 @@ namespace ssi
                 if (s.Item.Start >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
                 {
                     s.update();
-                    if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
-                    else if (CorrectMode == false) s.Visibility = Visibility.Visible;
+                    //if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel /*&& CorrectMode == true*/) s.Visibility = Visibility.Visible;
+                    s.Visibility = Visibility.Visible;
                 }
                 else if (s.Item.Stop >= time.SelectionStart && s.Item.Start <= time.SelectionStop)
                 {
                     s.update2();
-                    if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
-                    else if (CorrectMode == false) s.Visibility = Visibility.Visible;
+                    //if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel /*&& CorrectMode == true*/) s.Visibility = Visibility.Visible;
+                     s.Visibility = Visibility.Visible;
                 }
             }
 

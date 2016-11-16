@@ -160,5 +160,29 @@ namespace ssi
         private void editTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
         }
+
+        private void MenuItemSetConfidenceZeroClick(object sender, RoutedEventArgs e)
+        {
+            if (annoDataGrid.SelectedItems.Count != 0)
+            {       
+                foreach (AnnoListItem s in annoDataGrid.SelectedItems)
+                {
+                    s.Confidence = 0.0;
+                }
+              
+            }
+        }
+
+        private void MenuItemSetConfidenceOneClick(object sender, RoutedEventArgs e)
+        {
+            if (annoDataGrid.SelectedItems.Count != 0)
+            {
+                foreach (AnnoListItem s in annoDataGrid.SelectedItems)
+                {
+                    s.Confidence = 1.0;
+                }
+
+            }
+        }
     }
 }

@@ -40,7 +40,7 @@ namespace ssi
             this.server_login.Text = Properties.Settings.Default.DataServerLogin;
             this.server_pass.Password = Properties.Settings.Default.DataServerPass;
             Autologin.IsEnabled = false;
-           
+            allfiles.Clear();
 
             if (Properties.Settings.Default.Autologin == true)
             {
@@ -116,6 +116,7 @@ namespace ssi
 
         private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            allfiles.Clear();
             if (CollectionResultsBox.SelectedItem != null)
             {
                 cts.Cancel();
@@ -131,6 +132,7 @@ namespace ssi
 
         private void GetMedia()
         {
+            files.Clear();
             MediaResultBox.Items.Clear();
             ci = GetMediaFromDB(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
 
