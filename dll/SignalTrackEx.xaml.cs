@@ -190,5 +190,21 @@ namespace ssi
                 }
             }
         }
+
+        private void AutoScaleCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (track != null)
+            {
+                track.AutoScaling = true;
+            }
+        }
+
+        private void AutoScaleCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (track != null)
+            {
+                track.AutoScaling = false;
+            }
+        }
     }
 }

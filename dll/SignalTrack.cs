@@ -63,6 +63,7 @@ namespace ssi
         private double render_width;
         private bool is_selected = false;
         private bool resample = false;
+        private bool auto_scaling = false;
         private int zoomLevel = 0;
         private int zoomOffset = 0;
         public int brushOffset = 0;
@@ -83,6 +84,15 @@ namespace ssi
             set
             {
                 b = value;
+            }
+        }
+
+        public bool AutoScaling
+        {
+            get { return auto_scaling; }
+            set
+            {
+                auto_scaling = value;
             }
         }
 
@@ -308,6 +318,11 @@ namespace ssi
                 if (resampled == null || resampled.number != len || resample)
                 {
                     resampled = new Signal(this.signal, len, signal_from_in_sec, signal_to_in_sec);
+                    if (!auto_scaling)
+                    {
+                        resampled.min = signal.min;
+                        resampled.max = signal.max;
+                    }
                     resample = false;
                 }
 

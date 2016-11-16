@@ -86,18 +86,18 @@
             {
                 return ((time - selectionStart) / (selectionStop - selectionStart)) * selectionInPixel;
             }
-            else if (time < selectionStart)
-            {
-                double range = 1.0;
-                if (selectionStop - selectionStart < 1.0) range = 1.0;
-                else range = selectionStop - selectionStart;
+            //else if (time < selectionStart)
+            //{
+            //    double range = 1.0;
+            //    if (selectionStop - selectionStart < 1.0) range = 1.0;
+            //    else range = selectionStop - selectionStart;
 
-                double range2 = 1.0;
-                if (((selectionStart - time) < 1.0)) range2 = 1.0;
-                else range2 = selectionStart - time;
+            //    double range2 = 1.0;
+            //    if (((selectionStart - time) < 1.0)) range2 = 1.0;
+            //    else range2 = selectionStart - time;
 
-                return (range2 / range) * selectionInPixel;
-            }
+            //    return (range2 / range) * selectionInPixel;
+            //}
             else
             {
                 return 0;
