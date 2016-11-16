@@ -33,6 +33,8 @@
                         <MenuItem Header="Copy Meta Only" Click="MenuItemCopyMetaOnlyClick" />
                         <MenuItem Header="Copy Meta Numbers Only" Click="MenuItemCopyMetaNumbersOnlyClick" />
                         <MenuItem Header="Copy Meta Strings Only" Click="MenuItemCopyMetaStringsOnlyClick" />
+                        <MenuItem Header="Set Confidence to 0" Click="MenuItemSetConfidenceZeroClick" />
+                        <MenuItem Header="Set Confidence to 1" Click="MenuItemSetConfidenceOneClick" />
                     </ContextMenu>
                 </ListView.ContextMenu>
                 <ListView.View>

@@ -232,6 +232,8 @@ namespace ssi
                         {
                             AnnoTrack.GetSelectedSegment().Item.Label = label;
                             AnnoTrack.GetSelectedSegment().Item.Bg = "#FF000000";
+                            AnnoTrack.GetSelectedSegment().Item.Confidence = 1.0;
+                          //  if (AnnoTrack.CorrectMode) AnnoTrack.GetSelectedSegment().Visibility = Visibility.Collapsed;
                         }
                     }
                     e.Handled = true;
@@ -260,6 +262,9 @@ namespace ssi
                                 if (label == lp.Label)
                                 {
                                     AnnoTrack.GetSelectedSegment().Item.Bg = lp.Color;
+                                    AnnoTrack.GetSelectedSegment().Item.Confidence = 1.0;
+                                   // if (AnnoTrack.CorrectMode) AnnoTrack.GetSelectedSegment().Visibility = Visibility.Collapsed;
+
                                     break;
                                 }
                             }
