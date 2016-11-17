@@ -1,18 +1,42 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace ssi
-{
+{   
     public class MyList<LISTITEM> : ObservableCollection<LISTITEM>
     {
+        private IComparer<LISTITEM> comparer = null;
+
         public MyList()
         {
             this.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(SSIMUIList_CollectionChanged);
         }
 
+        public MyList(IComparer<LISTITEM> comparer)
+            : this()
+        {            
+            this.comparer = comparer;
+        }
+
         ~MyList()
         {
             this.CollectionChanged -= new System.Collections.Specialized.NotifyCollectionChangedEventHandler(SSIMUIList_CollectionChanged);
+        }
+
+        public void AddSorted(LISTITEM item)
+        {
+            if (comparer == null)
+            {
+                Add(item);
+            }
+            else
+            {
+                int i = 0;
+                while (i < Count && comparer.Compare(this[i], item) < 0)
+                    i++;
+                Insert(i, item);
+            }            
         }
 
         private void SSIMUIList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

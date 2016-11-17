@@ -3,6 +3,13 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Media;
+using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace ssi
 {
@@ -11,6 +18,9 @@ namespace ssi
     /// </summary>
     public partial class AnnoListControl : UserControl
     {
+        private GridViewColumnHeader listViewSortCol = null;
+        private SortAdorner listViewSortAdorner = null;
+
         public AnnoListControl()
         {
             InitializeComponent();
@@ -184,5 +194,32 @@ namespace ssi
 
             }
         }
+
+        private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
+        {
+            /*
+            GridViewColumnHeader column = (sender as GridViewColumnHeader);
+            if (column.Tag != null)
+            {
+                string sortBy = column.Tag.ToString();
+                if (listViewSortCol != null)
+                {
+                    AdornerLayer.GetAdornerLayer(listViewSortCol).Remove(listViewSortAdorner);
+                    annoDataGrid.Items.SortDescriptions.Clear();
+                }
+
+                ListSortDirection newDir = ListSortDirection.Ascending;
+                if (listViewSortCol == column && listViewSortAdorner.Direction == newDir)
+                    newDir = ListSortDirection.Descending;
+
+                listViewSortCol = column;
+                listViewSortAdorner = new SortAdorner(listViewSortCol, newDir);
+                AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
+
+                annoDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, newDir));                
+            }     
+            */
+        }
+
     }
 }

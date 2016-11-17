@@ -563,7 +563,7 @@ namespace ssi
                     {
                         AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "",TierId, this.DefaultColor, 1.0);
                         temp.Bg = this.DefaultColor;
-                        anno_list.Add(temp);
+                        anno_list.AddSorted(temp);
                         AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                         annorightdirection = true;
                         segments.Add(segment);
@@ -621,7 +621,7 @@ namespace ssi
                 if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
                 {
                     AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "", TierId, this.DefaultColor);
-                    anno_list.Add(temp);
+                    anno_list.AddSorted(temp);
                     AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
 
                     segment.Width = 1;

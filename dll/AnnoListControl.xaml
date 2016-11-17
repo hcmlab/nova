@@ -39,12 +39,20 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="70" Header="Label" DisplayMemberBinding="{Binding Label}" />
+                        
+                        <GridViewColumn Width="70" DisplayMemberBinding="{Binding Label}">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Tag="Label" Click="GridViewColumnHeader_Click">Label</GridViewColumnHeader>
+                            </GridViewColumn.Header>
+                        </GridViewColumn>
 
-                        <GridViewColumn Width="Auto" Header="From[s]">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Start" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Tag="From" Click="GridViewColumnHeader_Click">From[s]</GridViewColumnHeader>
+                            </GridViewColumn.Header>
                         </GridViewColumn>
                         <GridViewColumn Width="Auto" Header="To[s]">
                             <GridViewColumn.DisplayMemberBinding>

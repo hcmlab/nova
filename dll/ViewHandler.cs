@@ -631,6 +631,7 @@ namespace ssi
             Stop();
             saveAll();
             DatabaseLoaded = false;
+            if(Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             this.view.trackControl.signalNameLabel.Text = "";
             this.view.trackControl.signalNameLabel.ToolTip = "";
             this.view.trackControl.signalBytesLabel.Text = "";
@@ -1014,7 +1015,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count == 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void handleAnnotation(AnnoList anno, string filename)
@@ -2937,6 +2938,7 @@ namespace ssi
                     if (anno_tracks.Count > 0)
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
+
                         db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
 
                         MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
@@ -3012,8 +3014,7 @@ namespace ssi
                             foreach (AnnoList anno in annos)
 
                             {
-                                if (anno.Count > 0)
-                                {
+                               
                                     anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
                                     anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
 
@@ -3022,7 +3023,7 @@ namespace ssi
                                     else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
 
                                     handleAnnotation(anno, null);
-                                }
+                                
                             }
 
                             view.ShadowBox.Visibility = Visibility.Collapsed;

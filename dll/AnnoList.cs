@@ -141,6 +141,7 @@ namespace ssi
         }
 
         public AnnoList()
+            : base()
         {
         }
 
@@ -236,7 +237,7 @@ namespace ssi
                     var state_attr = e.Attribute("state");
                     if (state_attr.Value.ToString() == "COMPLETED")
                     {
-                        list.Add(new AnnoListItem(start, duration, label, meta));
+                        list.AddSorted(new AnnoListItem(start, duration, label, meta));
                     }
                 }
             }
@@ -299,7 +300,7 @@ namespace ssi
                         AnnoListItem e = new AnnoListItem(start, duration, label, meta, tier, "#000000", confidence);
 
                         if (filter == null || tier == filter)
-                            list.Add(e);
+                            list.AddSorted(e);
                     }
                     else if (type == "continuous")
                     {
@@ -336,13 +337,13 @@ namespace ssi
                                 list.Highborder = double.Parse(data[4]);
                             }
                             AnnoListItem e = new AnnoListItem(start, samplerate, label, "Range: " + list.Lowborder + "-" + list.Highborder, tier);
-                            list.Add(e);
+                            list.AddSorted(e);
                         }
                         else
                         {
                             AnnoListItem e = new AnnoListItem(start, samplerate, label, "", tier);
                             if (filter == null || tier == filter)
-                                list.Add(e);
+                                list.AddSorted(e);
                         }
                     }
                     else if (type == "legacy")
@@ -373,7 +374,7 @@ namespace ssi
                         }
                         AnnoListItem e = new AnnoListItem(start, duration, label, "", tier);
                         if (filter == null || tier == filter)
-                            list.Add(e);
+                            list.AddSorted(e);
                     }
                 }
                 sr.Close(); ;
@@ -498,7 +499,7 @@ namespace ssi
 
                                 double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
                                 AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
-                                list.Add(e);
+                                list.AddSorted(e);
                             }
                             else if (list.AnnotationType == AnnoType.FREE)
                             {
@@ -510,7 +511,7 @@ namespace ssi
 
                                 double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
                                 AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
-                                list.Add(e);
+                                list.AddSorted(e);
                             }
                         }
                         sr.Close();
@@ -548,7 +549,7 @@ namespace ssi
                                 }
                                 double confidence = Math.Round(binaryReader.ReadSingle(), 3, MidpointRounding.AwayFromZero);
                                 AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
-                                list.Add(e);
+                                list.AddSorted(e);
                             }
                             else if (list.AnnotationType == AnnoType.FREE)
                             {
@@ -562,7 +563,7 @@ namespace ssi
 
                                 double confidence = Math.Round(binaryReader.ReadSingle(), 3, MidpointRounding.AwayFromZero);
                                 AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
-                                list.Add(e);
+                                list.AddSorted(e);
                             }
                         }
 
@@ -629,7 +630,7 @@ namespace ssi
                         end = double.Parse(endtmp, CultureInfo.InvariantCulture) / 1000;
                         label = alignable_annotation.FirstChild.InnerText;
                         duration = end - start;
-                        list[i].Add(new AnnoListItem(start, duration, label, "", tierid));
+                        list[i].AddSorted(new AnnoListItem(start, duration, label, "", tierid));
                         list[i].Name = tierid;
                         //The tier is used as metainformation as well. Might be changed if thats relevant in the future
                     }
@@ -675,7 +676,7 @@ namespace ssi
                             meta = meta + ";" + annotation.ChildNodes[i].Attributes[0].Value.ToString();
                         }
                         //  string tierid = annotrack.InnerText;
-                        list[index].Add(new AnnoListItem(start, duration, label, meta, tierid));
+                        list[index].AddSorted(new AnnoListItem(start, duration, label, meta, tierid));
                         list[index].Name = tierid;
                     }
                     catch

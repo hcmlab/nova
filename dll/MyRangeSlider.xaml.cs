@@ -119,6 +119,8 @@ namespace ssi
         {
             if (_viewTime != null)
             {
+                _viewTime.SelectionStart = 0;
+                ui.RangeStartSelected = 0;
                 //seens to be a bug in avalon lib when mo.try to fix it by adjusting the value
 
                 _viewTime.SelectionStart = _viewTime.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
