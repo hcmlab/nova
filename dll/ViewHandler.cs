@@ -631,6 +631,7 @@ namespace ssi
             Stop();
             saveAll();
             DatabaseLoaded = false;
+            if(Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             this.view.trackControl.signalNameLabel.Text = "";
             this.view.trackControl.signalNameLabel.ToolTip = "";
             this.view.trackControl.signalBytesLabel.Text = "";
@@ -1014,7 +1015,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count == 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void handleAnnotation(AnnoList anno, string filename)
@@ -1536,6 +1537,7 @@ namespace ssi
 
             try
             {
+
                 media_list.play(item, loop);
                 this.view.navigator.playButton.Content = "II";
             }
@@ -1605,6 +1607,9 @@ namespace ssi
             // this.view.annoNameLabel.Text = track.AnnoList.Filename;
             // this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             // setAnnoList(track.AnnoList);
+            Stop();
+            if(!IsPlaying()) Play();
+
 
             foreach (AnnoListItem item in view.annoListControl.annoDataGrid.Items)
             {
@@ -1808,12 +1813,19 @@ namespace ssi
             }
         }
 
+   
+
         private void annoTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (this.view.navigator.askforlabels.IsChecked == true) AnnoTrack.askforlabel = true;
             else AnnoTrack.askforlabel = false;
 
-            if (e.RightButton == MouseButtonState.Pressed) mouseDown = true;
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                mouseDown = true;
+                AnnoTrack.GetSelectedTrack().rightMouseButtonDown(e);
+            }
+                
 
             if (AnnoTrack.GetSelectedTrack() != null)
             {
@@ -2073,6 +2085,7 @@ namespace ssi
         {
             //  this.view.trackControl.signalTrackControl.MouseDown += signalTrackGrid_MouseDown;
             this.view.trackControl.trackGrid.MouseDown += signalTrackGrid_MouseDown;
+    
             this.view.trackControl.annoTrackControl.MouseDown += annoTrackGrid_MouseDown;
             this.view.trackControl.annoTrackControl.MouseMove += annoTrackGrid_MouseMove;
             this.view.trackControl.annoTrackControl.MouseRightButtonUp += annoTrackGrid_MouseUp;
@@ -2084,6 +2097,8 @@ namespace ssi
             cursorLayer.Add(annoCursor);
 
             signalCursor.OnCursorChange += onCursorChange;
+            signalCursor.MouseDown += annoTrackGrid_MouseDown;
+            annoCursor.MouseDown += annoTrackGrid_MouseDown;
         }
 
         private void viewControl_Drop(object sender, DragEventArgs e)
@@ -2937,6 +2952,7 @@ namespace ssi
                     if (anno_tracks.Count > 0)
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
+
                         db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
 
                         MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
@@ -3012,8 +3028,7 @@ namespace ssi
                             foreach (AnnoList anno in annos)
 
                             {
-                                if (anno.Count > 0)
-                                {
+                               
                                     anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
                                     anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
 
@@ -3022,7 +3037,7 @@ namespace ssi
                                     else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
 
                                     handleAnnotation(anno, null);
-                                }
+                                
                             }
 
                             view.ShadowBox.Visibility = Visibility.Collapsed;

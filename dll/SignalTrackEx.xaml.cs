@@ -15,8 +15,8 @@ namespace ssi
 
     public partial class SignalTrackEx : UserControl, INotifyPropertyChanged
     {
-        private Color color1;
-        private Color color2;
+        private Color fg_color;
+        private Color bg_color;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -24,16 +24,16 @@ namespace ssi
         {
             get
             {
-                return this.color1;
+                return this.fg_color;
             }
 
             set
             {
-                this.color1 = value;
+                this.fg_color = value;
                 if (track != null)
                 {
-                    track.changeColour(new SolidColorBrush(color1));
-                    track.SignalColor = new SolidColorBrush(color1);
+                    track.changeColor(new SolidColorBrush(fg_color));
+                    track.SignalColor = new SolidColorBrush(fg_color);
                 }
                 this.RaisePropertyChanged("SignalColor");
             }
@@ -43,15 +43,15 @@ namespace ssi
         {
             get
             {
-                return this.color2;
+                return this.bg_color;
             }
 
             set
             {
-                this.color2 = value;
+                this.bg_color = value;
                 if (track != null)
                 {
-                    track.BackgroundColor = new SolidColorBrush(color2);
+                    track.BackgroundColor = new SolidColorBrush(bg_color);
                     track.select(false);
                 }
                 this.RaisePropertyChanged("BackColor");

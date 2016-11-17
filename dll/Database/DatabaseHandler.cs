@@ -548,7 +548,7 @@ namespace ssi
                         string confidence = annotation[i]["conf"].ToString();
 
                         AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, SchemeColor, double.Parse(confidence));
-                        al.Add(ali);
+                        al.AddSorted(ali);
                     }
                 }
                 else if (al.AnnotationType == AnnoType.FREE)
@@ -564,7 +564,7 @@ namespace ssi
                         string confidence = annotation[i]["conf"].ToString();
 
                         AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, "#000000", double.Parse(confidence));
-                        al.Add(ali);
+                        al.AddSorted(ali);
                     }
                 }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ssi
 {
@@ -105,6 +106,34 @@ namespace ssi
             tier = _tier;
             bg = _bg;
             confidence = _confidence;
+        }
+
+        public class AnnoListItemComparer : IComparer<AnnoListItem>
+        {
+            int IComparer<AnnoListItem>.Compare(AnnoListItem a, AnnoListItem b)
+            {
+                if (a.start < b.start)
+                {
+                    return -1;
+                }
+                else if (a.start > b.start)
+                {
+                    return 1;
+                }
+                else
+                {
+                    if (a.duration < b.duration)
+                    {
+                        return -1;
+                    }
+                    else if (a.duration < b.duration)
+                    {
+                        return 1;
+                    }
+                }
+
+                return 0;
+            }            
         }
     }
 }

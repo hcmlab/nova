@@ -7,6 +7,7 @@ namespace ssi
         public bool HasChanged { get; set; }
 
         public MyEventList()
+            : base(new AnnoListItem.AnnoListItemComparer())
         {
             foreach (AnnoListItem item in Items)
             {
