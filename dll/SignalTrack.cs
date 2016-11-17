@@ -93,6 +93,7 @@ namespace ssi
             set
             {
                 auto_scaling = value;
+                InvalidateVisual();
             }
         }
 
@@ -110,10 +111,10 @@ namespace ssi
         {
             zoomOffset = 0;
             zoomLevel = 0;
-            this.InvalidateVisual();
+            InvalidateVisual();
         }
 
-        public void changeColour(Brush color)
+        public void changeColor(Brush color)
         {
             SignalColor = (SolidColorBrush)color;
             p = new Pen(SignalColor, 1.0);
@@ -125,7 +126,7 @@ namespace ssi
         {
             zoomLevel += level;
             zoomOffset += offset;
-            this.InvalidateVisual();
+            InvalidateVisual();
         }
 
         private void OnSignalTrackMouseWheel(object sender, MouseWheelEventArgs e)

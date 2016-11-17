@@ -20,7 +20,7 @@
 
         <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5">
 
-            <ListView Name="annoDataGrid">
+            <ListView Name="annoDataGrid" >
                 <ListView.ContextMenu>
                     <ContextMenu Name="InvoiceDetailsList" StaysOpen="true">
                         <ContextMenu.BitmapEffect>
