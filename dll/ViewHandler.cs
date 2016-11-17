@@ -1537,6 +1537,7 @@ namespace ssi
 
             try
             {
+
                 media_list.play(item, loop);
                 this.view.navigator.playButton.Content = "II";
             }
@@ -1606,6 +1607,9 @@ namespace ssi
             // this.view.annoNameLabel.Text = track.AnnoList.Filename;
             // this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             // setAnnoList(track.AnnoList);
+            Stop();
+            if(!IsPlaying()) Play();
+
 
             foreach (AnnoListItem item in view.annoListControl.annoDataGrid.Items)
             {
