@@ -1607,8 +1607,13 @@ namespace ssi
             // this.view.annoNameLabel.Text = track.AnnoList.Filename;
             // this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             // setAnnoList(track.AnnoList);
-            Stop();
-            if(!IsPlaying()) Play();
+
+            if(IsPlaying())
+            {
+                Stop();
+                Play();
+            }
+          
 
 
             foreach (AnnoListItem item in view.annoListControl.annoDataGrid.Items)
