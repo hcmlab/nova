@@ -1809,12 +1809,19 @@ namespace ssi
             }
         }
 
+   
+
         private void annoTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (this.view.navigator.askforlabels.IsChecked == true) AnnoTrack.askforlabel = true;
             else AnnoTrack.askforlabel = false;
 
-            if (e.RightButton == MouseButtonState.Pressed) mouseDown = true;
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                mouseDown = true;
+                AnnoTrack.GetSelectedTrack().rightMouseButtonDown(e);
+            }
+                
 
             if (AnnoTrack.GetSelectedTrack() != null)
             {
@@ -2074,6 +2081,7 @@ namespace ssi
         {
             //  this.view.trackControl.signalTrackControl.MouseDown += signalTrackGrid_MouseDown;
             this.view.trackControl.trackGrid.MouseDown += signalTrackGrid_MouseDown;
+    
             this.view.trackControl.annoTrackControl.MouseDown += annoTrackGrid_MouseDown;
             this.view.trackControl.annoTrackControl.MouseMove += annoTrackGrid_MouseMove;
             this.view.trackControl.annoTrackControl.MouseRightButtonUp += annoTrackGrid_MouseUp;
@@ -2085,6 +2093,8 @@ namespace ssi
             cursorLayer.Add(annoCursor);
 
             signalCursor.OnCursorChange += onCursorChange;
+            signalCursor.MouseDown += annoTrackGrid_MouseDown;
+            annoCursor.MouseDown += annoTrackGrid_MouseDown;
         }
 
         private void viewControl_Drop(object sender, DragEventArgs e)

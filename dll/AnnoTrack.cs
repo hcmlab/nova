@@ -600,8 +600,10 @@ namespace ssi
             }
         }
 
-        protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
+
+        public void rightMouseButtonDown(MouseButtonEventArgs e)
         {
+
             dx = 0;
             if (selected_track != this)
             {
@@ -652,6 +654,7 @@ namespace ssi
                     this.select(true);
                 }
             }
+
         }
 
         public int getClosestContinousIndex(double nearestitem)
