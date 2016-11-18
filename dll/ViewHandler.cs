@@ -1833,8 +1833,20 @@ namespace ssi
 
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                mouseDown = true;
-                AnnoTrack.GetSelectedTrack().rightMouseButtonDown(e);
+                if(AnnoTrack.GetSelectedTrack() != null && (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType != AnnoType.CONTINUOUS || mouseDown == false))
+                {
+                    foreach(AnnoTrack a in anno_tracks)
+                    {
+                        if (a.IsMouseOver)
+                        {
+                            AnnoTrack.SelectTrack(a);
+                            break;
+                        }
+                    }
+                }
+
+            if (AnnoTrack.GetSelectedTrack() != null)    AnnoTrack.GetSelectedTrack().rightMouseButtonDown(e);
+              mouseDown = true;
             }
                 
 

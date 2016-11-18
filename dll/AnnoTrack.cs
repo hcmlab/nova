@@ -607,10 +607,10 @@ namespace ssi
         {
 
             dx = 0;
-            if (selected_track != this)
-            {
-                AnnoTrack.SelectTrack(this);
-            }
+            UnselectSegment();
+            this.select(true);
+
+
             base.OnMouseRightButtonDown(e);
             if (!CorrectMode)
             {
@@ -671,17 +671,6 @@ namespace ssi
             return -1;
         }
 
-        //protected override void OnMouseRightButtonUp(MouseButtonEventArgs e)
-        //{
-        //    base.OnMouseRightButtonUp(e);
-
-        //    if (selected_segment!= null && selected_segment.Item.Duration < Properties.Settings.Default.DefaultMinSegmentSize)
-        //    {
-        //        selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
-        //        selected_segment.Item.Stop = selected_segment.Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
-        //    }
-        //}
-
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
             base.OnMouseUp(e);
@@ -696,7 +685,6 @@ namespace ssi
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-
             dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
 
             direction = (dx > 0) ? 1 : 0;
@@ -707,11 +695,7 @@ namespace ssi
                 if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
 
                 {
-                    if (selected_track != this)
-                    {
-                        AnnoTrack.SelectTrack(this);
-                    }
-
+                  
                     Point point = e.GetPosition(selected_segment);
 
                     if (selected_segment != null)
