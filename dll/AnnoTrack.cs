@@ -577,14 +577,16 @@ namespace ssi
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-
+            UnselectSegment();
+            this.select(true);
+          
             // change track
             if (selected_track != this)
             {
                 AnnoTrack.SelectTrack(this);
             }
 
-            UnselectSegment();
+       
             if (isDiscrete || (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift)))
             {
                 // check for segment selection

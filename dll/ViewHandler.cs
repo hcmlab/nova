@@ -789,6 +789,7 @@ namespace ssi
         {
             ListView grid = (ListView)sender;
 
+        
             if (grid.SelectedIndex >= 0 && grid.SelectedIndex < grid.Items.Count)
             {
                 AnnoListItem item = current_anno[grid.SelectedIndex];
@@ -813,6 +814,7 @@ namespace ssi
                     this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
                 }
 
+               
                 foreach (AnnoListItem a in AnnoTrack.GetSelectedTrack().AnnoList)
                 {
                     if (a.Start == item.Start && a.Stop == item.Stop && item.Label == a.Label)
@@ -1552,14 +1554,16 @@ namespace ssi
         private void changeAnnoTrackHandler(AnnoTrack track, EventArgs e)
         {
             this.view.trackControl.annoNameLabel.Content = "#" + track.TierId;
-
+           
             //  this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             setAnnoList(track.AnnoList);
+            current_anno = track.AnnoList;
 
             view.annoListControl.editComboBox.Items.Clear();
 
             if (AnnoTrack.GetSelectedTrack() != null)
             {
+               
                 if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.CONTINUOUS)
                 {
                     view.annoListControl.editButton.Visibility = Visibility.Collapsed;
@@ -1608,7 +1612,9 @@ namespace ssi
             // this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             // setAnnoList(track.AnnoList);
 
-            if(IsPlaying())
+          
+
+            if (IsPlaying())
             {
                 Stop();
                 Play();
