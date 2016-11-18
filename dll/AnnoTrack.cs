@@ -607,6 +607,7 @@ namespace ssi
         {
 
             dx = 0;
+          
             UnselectSegment();
             this.select(true);
 

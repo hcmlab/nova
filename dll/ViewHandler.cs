@@ -1832,12 +1832,15 @@ namespace ssi
 
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                if(AnnoTrack.GetSelectedTrack() != null && (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType != AnnoType.CONTINUOUS || mouseDown == false))
+                if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(false);
+
+                if (AnnoTrack.GetSelectedTrack() != null && (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType != AnnoType.CONTINUOUS || mouseDown == false))
                 {
                     foreach(AnnoTrack a in anno_tracks)
                     {
                         if (a.IsMouseOver)
                         {
+                            AnnoTrack.SelectSegment(null);
                             AnnoTrack.SelectTrack(a);
                             break;
                         }
