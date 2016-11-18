@@ -597,14 +597,13 @@ namespace ssi
 
             if (anno_tracks.Count > 0 && anytrackchanged)
             {
-                string csvfilepath = "";
-
+              
                 MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
                 if (mbx == MessageBoxResult.Yes)
                 {
                     if (DatabaseLoaded)
                     {
-                        mongodbStore();
+                                mongodbStore();
                     }
                     else
                     {
@@ -789,6 +788,7 @@ namespace ssi
         {
             ListView grid = (ListView)sender;
 
+        
             if (grid.SelectedIndex >= 0 && grid.SelectedIndex < grid.Items.Count)
             {
                 AnnoListItem item = current_anno[grid.SelectedIndex];
@@ -813,6 +813,7 @@ namespace ssi
                     this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
                 }
 
+               
                 foreach (AnnoListItem a in AnnoTrack.GetSelectedTrack().AnnoList)
                 {
                     if (a.Start == item.Start && a.Stop == item.Stop && item.Label == a.Label)
@@ -1552,14 +1553,16 @@ namespace ssi
         private void changeAnnoTrackHandler(AnnoTrack track, EventArgs e)
         {
             this.view.trackControl.annoNameLabel.Content = "#" + track.TierId;
-
+           
             //  this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             setAnnoList(track.AnnoList);
+            current_anno = track.AnnoList;
 
             view.annoListControl.editComboBox.Items.Clear();
 
             if (AnnoTrack.GetSelectedTrack() != null)
             {
+               
                 if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.CONTINUOUS)
                 {
                     view.annoListControl.editButton.Visibility = Visibility.Collapsed;
@@ -1608,7 +1611,9 @@ namespace ssi
             // this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             // setAnnoList(track.AnnoList);
 
-            if(IsPlaying())
+          
+
+            if (IsPlaying())
             {
                 Stop();
                 Play();
@@ -1827,8 +1832,23 @@ namespace ssi
 
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                mouseDown = true;
-                AnnoTrack.GetSelectedTrack().rightMouseButtonDown(e);
+                if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(false);
+
+                if (AnnoTrack.GetSelectedTrack() != null && (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType != AnnoType.CONTINUOUS || mouseDown == false))
+                {
+                    foreach(AnnoTrack a in anno_tracks)
+                    {
+                        if (a.IsMouseOver)
+                        {
+                            AnnoTrack.SelectSegment(null);
+                            AnnoTrack.SelectTrack(a);
+                            break;
+                        }
+                    }
+                }
+
+            if (AnnoTrack.GetSelectedTrack() != null)    AnnoTrack.GetSelectedTrack().rightMouseButtonDown(e);
+              mouseDown = true;
             }
                 
 
@@ -2950,19 +2970,33 @@ namespace ssi
         {
             if (DatabaseLoaded)
             {
+
+                bool anytrackchanged = false;
+                foreach (AnnoTrack track in anno_tracks)
+                {
+                    if (track.AnnoList.HasChanged) anytrackchanged = true;
+                   
+                }
+
+
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
 
                 try
                 {
-                    if (anno_tracks.Count > 0)
+                    if (anno_tracks.Count > 0 && anytrackchanged)
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
                         db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
+                        foreach (AnnoTrack track in anno_tracks)
+                        {
+                           track.AnnoList.HasChanged = false;
+                        }
 
                         MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
                     }
-                    else MessageBox.Show("No Annotation Tracks available");
+                    else if (anno_tracks.Count == 0) MessageBox.Show("No Annotation Tracks available");
+                    else if (!anytrackchanged) MessageBox.Show("The latest changes are already saved in the database!");
                 }
                 catch (Exception ex)
                 {

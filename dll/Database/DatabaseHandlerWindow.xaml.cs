@@ -23,6 +23,7 @@ namespace ssi
         private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
         private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
         private List<DatabaseAnno> AnnoItems = new List<DatabaseAnno>();
+        private List<ObjectId> AnnotationMediaIDS = new List<ObjectId>();
         private CancellationTokenSource cts = new CancellationTokenSource();
         DatabaseHandler dbh;
 
@@ -127,6 +128,8 @@ namespace ssi
                 GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
                 cts.Dispose();
                 cts = new CancellationTokenSource();
+
+
             }
         }
 
@@ -135,6 +138,17 @@ namespace ssi
             files.Clear();
             MediaResultBox.Items.Clear();
             ci = GetMediaFromDB(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+
+
+            var colllection = database.GetCollection<BsonDocument>("Annotations");
+            var media = database.GetCollection<BsonDocument>("Media");
+
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.Database), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("session_id", sessionid);
+            var selectedmedialist = media.Find(filter).ToList();
+
 
             foreach (DatabaseMediaInfo c in ci)
             {
@@ -333,21 +347,24 @@ namespace ssi
             string annotid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "AnnotationSchemes", "name", annos["scheme_id"].AsObjectId);
             string annotatid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "name", annos["annotator_id"].AsObjectId);
             string annotatidfn = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.Database), "Annotators", "fullname", annos["annotator_id"].AsObjectId);
+          
 
             bool isfinished = false;
             try
             {
                 isfinished = annos["isFinished"].AsBoolean;
+               
             }
             catch (Exception ex) { }
-
+            DateTime date = annos["date"].ToUniversalTime();
+            ;
             if (!onlyme && !onlyunfinished ||
                 onlyme && !onlyunfinished && Properties.Settings.Default.MongoDBUser == annotatid ||
                 !onlyme && onlyunfinished && !isfinished ||
                 onlyme && onlyunfinished && !isfinished && Properties.Settings.Default.MongoDBUser == annotatid)
             {
                 bool isOwner = authlevel > 2 || Properties.Settings.Default.MongoDBUser == annotatid;
-                AnnoItems.Add(new DatabaseAnno() { Id = id, Role = roleid, AnnoType = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner, OID = id });
+                AnnoItems.Add(new DatabaseAnno() { Id = id, Role = roleid, AnnoType = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner, Date = date.ToShortDateString() + " " + date.ToShortTimeString(),  OID = id });
             }
         }
 
@@ -522,6 +539,8 @@ namespace ssi
 
         private void AnnotationResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
+            
             if (AnnotationResultBox.SelectedValue != null)
             {
                 for (int i = 0; i < AnnotationResultBox.SelectedItems.Count; i++)
@@ -532,6 +551,42 @@ namespace ssi
                         CopyAnnotation.Visibility = Visibility.Visible;
                     }
                 }
+
+
+                MediaResultBox.SelectedItems.Clear();
+                for (int i = 0;  i < AnnotationResultBox.SelectedItems.Count; i++)
+                {
+
+               
+                    var sessions = database.GetCollection<BsonDocument>("Sessions");
+                    var roles = database.GetCollection<BsonDocument>("Roles");
+                    var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+                    var annotations = database.GetCollection<BsonDocument>("Annotations");
+                    var annotators = database.GetCollection<BsonDocument>("Annotators");
+                    ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).Role);
+                    ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).AnnoType);
+                    ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).Annotator);
+                    ObjectId sessionid = GetIdFromName(sessions, Properties.Settings.Default.LastSessionId);
+
+                    var builder = Builders<BsonDocument>.Filter;
+                    var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
+
+                    var annotation = annotations.Find(filter).Single();
+
+                    BsonElement value;
+                    if(annotation.TryGetElement("media", out value))
+                    { 
+                      
+
+                        foreach (BsonDocument doc in annotation["media"].AsBsonArray)
+                        {
+                          string name =  FetchDBRef(database, "Media", "name", doc["media_id"].AsObjectId);
+
+                          MediaResultBox.SelectedItems.Add(name);
+                        }
+                    }
+                }
+
             }
         }
 
