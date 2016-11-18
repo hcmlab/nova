@@ -2995,7 +2995,7 @@ namespace ssi
 
                         MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
                     }
-                    else if (anno_tracks.Count == 0) MessageBox.Show("No Annotation Tracks available");
+                    else if (anno_tracks.Count == 0) MessageBox.Show("No annotation tiers available");
                     else if (!anytrackchanged) MessageBox.Show("The latest changes are already saved in the database!");
                 }
                 catch (Exception ex)
