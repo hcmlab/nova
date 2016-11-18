@@ -597,14 +597,13 @@ namespace ssi
 
             if (anno_tracks.Count > 0 && anytrackchanged)
             {
-                string csvfilepath = "";
-
+              
                 MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
                 if (mbx == MessageBoxResult.Yes)
                 {
                     if (DatabaseLoaded)
                     {
-                        mongodbStore();
+                                mongodbStore();
                     }
                     else
                     {
@@ -2968,15 +2967,28 @@ namespace ssi
         {
             if (DatabaseLoaded)
             {
+
+                bool anytrackchanged = false;
+                foreach (AnnoTrack track in anno_tracks)
+                {
+                    if (track.AnnoList.HasChanged) anytrackchanged = true;
+                   
+                }
+
+
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
 
                 try
                 {
-                    if (anno_tracks.Count > 0)
+                    if (anno_tracks.Count > 0 && anytrackchanged)
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
                         db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
+                        foreach (AnnoTrack track in anno_tracks)
+                        {
+                           track.AnnoList.HasChanged = false;
+                        }
 
                         MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
                     }
