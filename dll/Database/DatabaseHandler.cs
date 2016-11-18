@@ -620,6 +620,8 @@ namespace ssi
 
         public bool IsOwner { get; set; }
 
+        public string Date { get; set; }
+
         public ObjectId OID { get; set; }
     }
 

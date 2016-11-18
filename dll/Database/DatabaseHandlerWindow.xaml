@@ -126,6 +126,11 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Date">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Date" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
                             <GridViewColumn Width="Auto" Header="OID">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="OID" />
