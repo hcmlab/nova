@@ -120,14 +120,16 @@ namespace ssi
             allfiles.Clear();
             if (CollectionResultsBox.SelectedItem != null)
             {
-                cts.Cancel();
+                
                 Properties.Settings.Default.LastSessionId = ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name;
                 Properties.Settings.Default.Save();
                 AnnoItems.Clear();
                 GetMedia();
-                GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
+                cts.Cancel();
                 cts.Dispose();
                 cts = new CancellationTokenSource();
+                GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
+               
 
 
             }
@@ -319,12 +321,12 @@ namespace ssi
 
             try
             {
-                
+                CancellationToken ct = cts.Token;
                 
                 using (var cursor = await annotations.FindAsync(filter))
                 {
 
-                    await cursor.ForEachAsync(d => addAnnotoList(d, onlyme, onlyunfinished), cts.Token);
+                    await cursor.ForEachAsync(d => addAnnotoList(d, onlyme, onlyunfinished), ct);
                    
                 }
                 AnnotationResultBox.ItemsSource = AnnoItems;
@@ -338,8 +340,7 @@ namespace ssi
 
         public void addAnnotoList(BsonDocument annos, bool onlyme, bool onlyunfinished)
         {
-            if (cts.IsCancellationRequested == true)
-                return;
+
 
             // AnnotationResultBox.ItemsSource = null;
             ObjectId id = annos["_id"].AsObjectId;

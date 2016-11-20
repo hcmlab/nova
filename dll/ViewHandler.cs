@@ -140,6 +140,8 @@ namespace ssi
             this.view.savetiermenu.Click += saveAnnoAsButton_Click;
             this.view.convertocontannoemenu.Click += convertocontanno_Click;
             this.view.mongodbmenu.Click += mongodb_Store;
+            this.view.mongodbmenufinished.Click += mongodb_Store_Finished;
+            
             this.view.mongodbmenu2.Click += mongodb_Load;
             this.view.mongodbmenushow.Click += mongodb_Show;
             this.view.addmongodb.Click += mongodb_Add;
@@ -2823,6 +2825,8 @@ namespace ssi
             if (files2.Length > 0) LoadFiles(files2);
             filestoload.Clear();
             downloads.Clear();
+                tokenSource.Dispose();
+                tokenSource = new CancellationTokenSource();
             }
 
         }
@@ -3033,6 +3037,13 @@ namespace ssi
             mongodbStore();
         }
 
+        private void mongodb_Store_Finished(object sender, RoutedEventArgs e)
+        {
+            mongodbStore(true);
+        }
+
+
+       
         private void mongodb_Load(object sender, RoutedEventArgs e)
         {
             mongodbLoad();
@@ -3099,7 +3110,7 @@ namespace ssi
             }
         }
 
-        private void mongodbStore()
+        private void mongodbStore(bool isfinsihed = false)
         {
             if (DatabaseLoaded)
             {
@@ -3113,11 +3124,11 @@ namespace ssi
 
                 try
                 {
-                    if (anno_tracks.Count > 0 && anytrackchanged)
+                    if (anno_tracks.Count > 0 && (anytrackchanged || isfinsihed))
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
-                        db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
+                        db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia, isfinsihed);
                         foreach (AnnoTrack track in anno_tracks)
                         {
                             track.AnnoList.HasChanged = false;
@@ -3162,6 +3173,7 @@ namespace ssi
                     loadedDBmedia = dbhw.Media();
                     ci = dbhw.MediaConnectionInfo();
                     this.view.mongodbmenu.IsEnabled = true;
+                    this.view.mongodbmenufinished.IsEnabled = true;
 
                     //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
                     if (dbhw.Authlevel() > 2)
@@ -3179,7 +3191,6 @@ namespace ssi
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
                 DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
-                this.view.mongodbmenu.IsEnabled = true;
                 this.view.mongodbfunctions.IsEnabled = true;
 
                 if (annotations != null)
