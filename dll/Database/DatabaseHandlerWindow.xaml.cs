@@ -667,5 +667,22 @@ namespace ssi
         {
             if(e.Key == System.Windows.Input.Key.Return) ConnecttoDB(); 
         }
+
+        private void db_server_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+        {
+            db_server.SelectAll();
+        }
+
+        private void db_login_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+        {
+            db_login.SelectAll();
+        }
+
+        private void db_pass_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+        {
+            db_pass.SelectAll();
+        }
+
+      
     }
 }
