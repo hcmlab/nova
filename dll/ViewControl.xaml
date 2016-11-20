@@ -4,7 +4,8 @@
     xmlns:local="clr-namespace:ssi"
     Width="Auto"
     Height="Auto"
-    Loaded="ControlLoaded">
+    Loaded="ControlLoaded"
+             >
 
     <Grid>
         <Grid.RowDefinitions>
@@ -132,15 +133,18 @@
                 <local:NavigatorControl x:Name="navigator" Loaded="navigator_Loaded"></local:NavigatorControl>
             </Border>
 
-            <Grid Name="ShadowBox" Grid.RowSpan="2" Grid.ColumnSpan ="4" Visibility="Collapsed">
+            <Grid Name="ShadowBox" Grid.Row="0" Grid.RowSpan="5" Grid.ColumnSpan ="4" Visibility="Collapsed">
                 <Border Background="Black" Opacity=".95" />
                 <Grid Name="Loadingbox" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="299*" />
                         <ColumnDefinition Width="177*" />
                     </Grid.ColumnDefinitions>
-
-                    <TextBlock Name="tb"  Text="Loading Data..." HorizontalAlignment="Center" Foreground="White" FontSize="30" Margin="139,51,141,-51" Grid.ColumnSpan="2" />
+                    <StackPanel>
+                        <TextBlock Name="tb"  Text="Loading Data..." HorizontalAlignment="Center" Foreground="White" FontSize="30" Grid.ColumnSpan="2" />
+                        <Button Name="cancel" Visibility="Collapsed" VerticalAlignment="Bottom" Background="Transparent" Content="Cancel" HorizontalAlignment="Center" Foreground="White" FontSize="30" Grid.ColumnSpan="2" />
+                    </StackPanel>
+                   
                 </Grid>
             </Grid>
         </Grid>

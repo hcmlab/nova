@@ -213,7 +213,7 @@ namespace ssi
         {
             if (this.ib_suggestions_comboBox.SelectedItem != null)
             {
-                if (this.ib_labelText.Text != this.ib_suggestions_comboBox.SelectedItem.ToString())
+                if (this.ib_labelText.Text != this.ib_suggestions_comboBox.SelectedItem.ToString() && AnnoTrack.GetSelectedTrack() != null)
                 {
                     AnnoTrack.GetSelectedTrack().track_used_labels_last_index = this.ib_suggestions_comboBox.Items.Count;
                 }

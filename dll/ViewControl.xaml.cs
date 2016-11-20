@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace ssi
@@ -16,7 +15,6 @@ namespace ssi
         {
             InitializeComponent();
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
-            this.Dispatcher.ShutdownStarted += ControlUnloaded;
         }
 
         private void ControlLoaded(object sender, RoutedEventArgs e)
@@ -28,13 +26,6 @@ namespace ssi
                 {
                     OnHandlerLoaded(this.handler);
                 }
-            }
-        }
-
-        private void ControlUnloaded(object sender, EventArgs e)
-        {
-            if (this.handler != null)
-            {
             }
         }
 
