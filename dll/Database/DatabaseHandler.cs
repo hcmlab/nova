@@ -200,7 +200,7 @@ namespace ssi
             return Scheme;
         }
 
-        public void StoreToDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null, List<DatabaseMediaInfo> loadedDBmedia = null)
+        public void StoreToDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null, List<DatabaseMediaInfo> loadedDBmedia = null, bool isfin = false)
         {
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
@@ -328,6 +328,7 @@ namespace ssi
                 BsonElement role = new BsonElement("role_id", roleid);
                 BsonElement annot = new BsonElement("scheme_id", annotid);
                 BsonElement sessionid = new BsonElement("session_id", sessionID);
+                BsonElement isfinished = new BsonElement("isFinished", isfin);
                 BsonElement date = new BsonElement("date", new BsonDateTime(DateTime.Now));
                 BsonDocument document = new BsonDocument();
 
@@ -360,6 +361,7 @@ namespace ssi
                 document.Add(role);
                 document.Add(annot);
                 document.Add(date);
+                document.Add(isfinished);
                 document.Add("media", media);
 
                 if (a != null)
