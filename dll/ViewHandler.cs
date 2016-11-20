@@ -9,6 +9,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -79,11 +81,20 @@ namespace ssi
         private List<long> downloadsreceived = new List<long>();
         private List<long> downloadstotal = new List<long>();
         private List<string> filestoload = new List<string>();
+        private List<DownloadStatus> downloads = new List<DownloadStatus>();
+        private CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         public bool DatabaseLoaded
         {
             get { return databaseloaded; }
             set { databaseloaded = value; }
+        }
+
+        public class DownloadStatus
+        {
+            public string File;
+            public string percent;
+            public bool active;
         }
 
         public MenuItem LoadButton
@@ -103,7 +114,7 @@ namespace ssi
 
             this.view.videoControl.RemoveMedia += new EventHandler<MediaRemoveEventArgs>(removeMedia);
             this.view.trackControl.signalTrackControl.RemoveSignal += new EventHandler<SignalRemoveEventArgs>(removeSignal);
-
+            this.view.cancel.Click += cancel_click;
             this.view.annoListControl.annoDataGrid.SelectionChanged += annoDataGrid_SelectionChanged;
             this.view.annoListControl.editButton.Click += editAnnoButton_Click;
             this.view.annoListControl.editTextBox.KeyDown += editTextBox_KeyDown;
@@ -112,7 +123,6 @@ namespace ssi
             this.view.trackControl.CloseAnnotrackButton.Click += closeTier_Click;
             this.view.trackControl.annoNameLabel.Click += annoNameLabel_Click;
             this.view.navigator.newAnnoButton.Click += newAnnoButton_Click;
-            this.view.navigator.newAnnoContButton.Click += newAnnoContButton_Click;
 
             this.view.clearMenu.Click += clearButton_Click;
             this.view.saveMenu.Click += saveButton_Click;
@@ -150,6 +160,7 @@ namespace ssi
             this.view.exportSampledAnnotations.Click += exportSampledAnnotationsButton_Click;
             this.view.annoListControl.editComboBox.SelectionChanged += changed_annoschemeselectionbox;
             this.view.navigator.hideHighConf.Click += check_lowconfonly;
+            this.view.Dispatcher.ShutdownStarted += ControlUnloaded;
 
             //AnnoTrack.OnTrackPlay += playTrackHandler;
             AnnoTrack.OnTrackChange += changeAnnoTrackHandler;
@@ -233,7 +244,6 @@ namespace ssi
                             AnnoTrack.GetSelectedSegment().Item.Label = label;
                             AnnoTrack.GetSelectedSegment().Item.Bg = "#FF000000";
                             AnnoTrack.GetSelectedSegment().Item.Confidence = 1.0;
-                        
                         }
                     }
                     e.Handled = true;
@@ -245,11 +255,8 @@ namespace ssi
                       e.KeyboardDevice.IsKeyDown(Key.NumPad6) || e.KeyboardDevice.IsKeyDown(Key.NumPad7) || e.KeyboardDevice.IsKeyDown(Key.NumPad8) || e.KeyboardDevice.IsKeyDown(Key.NumPad9))
                 {
                     int index = 0;
-                    if (e.Key - Key.D1 < 10) index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.D1);
+                    if (e.Key - Key.D1 < 10 && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count > 0) index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.D1);
                     else index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.NumPad1);
-
-
-
 
                     if (index >= 0 && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE)
                     {
@@ -597,13 +604,12 @@ namespace ssi
 
             if (anno_tracks.Count > 0 && anytrackchanged)
             {
-              
                 MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
                 if (mbx == MessageBoxResult.Yes)
                 {
                     if (DatabaseLoaded)
                     {
-                                mongodbStore();
+                        mongodbStore();
                     }
                     else
                     {
@@ -630,7 +636,7 @@ namespace ssi
             Stop();
             saveAll();
             DatabaseLoaded = false;
-            if(Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             this.view.trackControl.signalNameLabel.Text = "";
             this.view.trackControl.signalNameLabel.ToolTip = "";
             this.view.trackControl.signalBytesLabel.Text = "";
@@ -788,7 +794,6 @@ namespace ssi
         {
             ListView grid = (ListView)sender;
 
-        
             if (grid.SelectedIndex >= 0 && grid.SelectedIndex < grid.Items.Count)
             {
                 AnnoListItem item = current_anno[grid.SelectedIndex];
@@ -813,7 +818,6 @@ namespace ssi
                     this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
                 }
 
-               
                 foreach (AnnoListItem a in AnnoTrack.GetSelectedTrack().AnnoList)
                 {
                     if (a.Start == item.Start && a.Stop == item.Stop && item.Label == a.Label)
@@ -1538,7 +1542,6 @@ namespace ssi
 
             try
             {
-
                 media_list.play(item, loop);
                 this.view.navigator.playButton.Content = "II";
             }
@@ -1553,7 +1556,7 @@ namespace ssi
         private void changeAnnoTrackHandler(AnnoTrack track, EventArgs e)
         {
             this.view.trackControl.annoNameLabel.Content = "#" + track.TierId;
-           
+
             //  this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             setAnnoList(track.AnnoList);
             current_anno = track.AnnoList;
@@ -1562,7 +1565,6 @@ namespace ssi
 
             if (AnnoTrack.GetSelectedTrack() != null)
             {
-               
                 if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.CONTINUOUS)
                 {
                     view.annoListControl.editButton.Visibility = Visibility.Collapsed;
@@ -1611,15 +1613,11 @@ namespace ssi
             // this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             // setAnnoList(track.AnnoList);
 
-          
-
             if (IsPlaying())
             {
                 Stop();
                 Play();
             }
-          
-
 
             foreach (AnnoListItem item in view.annoListControl.annoDataGrid.Items)
             {
@@ -1823,8 +1821,6 @@ namespace ssi
             }
         }
 
-   
-
         private void annoTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (this.view.navigator.askforlabels.IsChecked == true) AnnoTrack.askforlabel = true;
@@ -1836,7 +1832,7 @@ namespace ssi
 
                 if (AnnoTrack.GetSelectedTrack() != null && (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType != AnnoType.CONTINUOUS || mouseDown == false))
                 {
-                    foreach(AnnoTrack a in anno_tracks)
+                    foreach (AnnoTrack a in anno_tracks)
                     {
                         if (a.IsMouseOver)
                         {
@@ -1847,10 +1843,9 @@ namespace ssi
                     }
                 }
 
-            if (AnnoTrack.GetSelectedTrack() != null)    AnnoTrack.GetSelectedTrack().rightMouseButtonDown(e);
-              mouseDown = true;
+                if (AnnoTrack.GetSelectedTrack() != null) AnnoTrack.GetSelectedTrack().rightMouseButtonDown(e);
+                mouseDown = true;
             }
-                
 
             if (AnnoTrack.GetSelectedTrack() != null)
             {
@@ -2110,7 +2105,7 @@ namespace ssi
         {
             //  this.view.trackControl.signalTrackControl.MouseDown += signalTrackGrid_MouseDown;
             this.view.trackControl.trackGrid.MouseDown += signalTrackGrid_MouseDown;
-    
+
             this.view.trackControl.annoTrackControl.MouseDown += annoTrackGrid_MouseDown;
             this.view.trackControl.annoTrackControl.MouseMove += annoTrackGrid_MouseMove;
             this.view.trackControl.annoTrackControl.MouseRightButtonUp += annoTrackGrid_MouseUp;
@@ -2204,6 +2199,7 @@ namespace ssi
                     case "png":
                     case "jpeg":
                     case "gif":
+                    case "webm":
 
                         ftype = ssi_file_type.VIDEO;
                         break;
@@ -2472,6 +2468,12 @@ namespace ssi
             }
         }
 
+        private void cancel_click(object sender, RoutedEventArgs e)
+        {
+            tokenSource.Cancel();
+            //MessageBox.Show("yesa");
+        }
+
         private void editAnnoButton_Click(object sender, RoutedEventArgs e)
         {
             foreach (AnnoListItem item in view.annoListControl.annoDataGrid.SelectedItems)
@@ -2549,7 +2551,71 @@ namespace ssi
 
         private void newAnnoButton_Click(object sender, RoutedEventArgs e)
         {
-            newAnno(AnnoType.FREE);
+            if (Time.TotalDuration > 0)
+            {
+                NewTierWindow ntw = new NewTierWindow();
+                ntw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                ntw.ShowDialog();
+
+                if (ntw.DialogResult == true)
+                {
+                    AnnoType at = ntw.Result();
+
+                    if (at == AnnoType.FREE) newAnno(AnnoType.FREE);
+                    else if (at == AnnoType.DISCRETE)
+                    {
+                        //todo some logic to get annoscheme
+                        newAnno(AnnoType.DISCRETE);
+                    }
+                    else if (at == AnnoType.CONTINUOUS)
+                    {
+                        List<String> list = ContinuousColorTheme.List;
+                        HashSet<LabelColorPair> h = new HashSet<LabelColorPair>();
+
+                        foreach (String i in list)
+                        {
+                            LabelColorPair l = new LabelColorPair(i, "");
+                            h.Add(l);
+                        }
+
+                        //TODO
+
+                        string defaultsr = "25";
+
+                        //check if a video is loaded, and if so use it's sample rate as default
+                        foreach (IMedia m in media_list.Medias)
+                        {
+                            if (m.IsVideo())
+                            {
+                                defaultsr = (m.GetSampleRate()).ToString();
+                                break;
+                            }
+                        }
+
+                        if (DatabaseLoaded)
+                        {
+                            newAnno(AnnoType.CONTINUOUS, 0, 0, 1, resultbrush("RedBlue"));
+                        }
+                        else
+                        {
+                            LabelInputBox inputBox = new LabelInputBox("New Continous Tier", "Enter Samplerate in fps, Min and Max Value", "0", h, 3, "1", defaultsr);
+                            h.Clear();
+                            inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                            inputBox.ShowDialog();
+                            inputBox.Close();
+                            if (inputBox.DialogResult == true)
+                            {
+                                double samplerate;
+                                if (double.TryParse(inputBox.Result3(), out samplerate))
+                                {
+                                    newAnno(AnnoType.CONTINUOUS, (1000.0 / samplerate) / 1000, double.Parse(inputBox.Result()), double.Parse(inputBox.Result2()), resultbrush(inputBox.SelectedItem()));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else MessageBox.Show("There is nothing to annotate! Please load at least one media file first.", "No media loaded!", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void newAnnoContButton_Click(object sender, RoutedEventArgs e)
@@ -2666,32 +2732,55 @@ namespace ssi
             removeTier();
         }
 
-        private string DownloadFileSFTP(string ftphost, string folder, string db, string sessionid, string fileName, string login, string password)
+        private async Task DownloadFileSFTP(string ftphost, string folder, string db, string sessionid, string fileName, string login, string password)
         {
-            ;
+            bool iscanceled = false;
             string localfilepath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\";
             lastdlfile = fileName;
 
             string ftpfilepath = "/" + folder + fileName;
+            string localpath = localfilepath + fileName;
+
+            if (!localpath.EndsWith(".stream~")) filestoload.Add(localpath);
+            numberofparalleldownloads++;
+
             if (!File.Exists(localfilepath + fileName))
             {
-                Tamir.SharpSsh.Sftp sftp = new Tamir.SharpSsh.Sftp(ftphost, login, password);
+                DownloadStatus dl = new DownloadStatus();
+                dl.File = localpath;
+                dl.percent = "100.00";
+                dl.active = true;
+
+                downloads.Add(dl);
+
+                Sftp sftp = new Sftp(ftphost, login, password);
                 try
                 {
-                    sftp.OnTransferStart += new FileTransferEvent(sshCp_OnTransferStart);
+                    //sftp.OnTransferStart += new FileTransferEvent(sshCp_OnTransferStart);
                     sftp.OnTransferProgress += new FileTransferEvent(sshCp_OnTransferProgress);
-                    sftp.OnTransferEnd += new FileTransferEvent(sshCp_OnTransferEnd);
-
-                    Console.Write("Connecting...");
+                    //sftp.OnTransferEnd += new FileTransferEvent(sshCp_OnTransferEnd);
+                    await view.Dispatcher.BeginInvoke(new Action<string>(SFTPConnect), DispatcherPriority.Normal, "");
+                    Console.WriteLine("Connecting...");
                     sftp.Connect();
                     Console.WriteLine("OK");
 
                     Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid);
-                    Console.Write("Downloading...");
-                    sftp.Get(ftpfilepath, localfilepath);
+                    CancellationToken token = tokenSource.Token;
 
-                    Console.Write("Disconnecting...");
-                    sftp.Close();
+                    await Task.Run(() =>
+                    {
+                        if (sftp.Connected)
+                        {
+                            token.Register(() => { sftp.Cancel(); iscanceled = true; if (!localpath.EndsWith(".stream~")) filestoload.Remove(localpath); Thread.Sleep(200); SFTPcancelDownload(localpath); return; });
+                            if (!iscanceled)
+                            {
+                                Console.WriteLine("Downloading...");
+                                sftp.Get(ftpfilepath, localfilepath);
+                                Console.WriteLine("Disconnecting...");
+                                sftp.Close();
+                            }
+                        }
+                    }, token);
                 }
                 catch (Exception e)
                 {
@@ -2701,47 +2790,91 @@ namespace ssi
                         sftp.Cancel();
                     }
                     MessageBox.Show("Can't login to Data Server. Not authorized. Continuing without media.");
-                    // throw e;
-                    return null;
                 }
             }
-            else { Console.Write("File already exists..."); }
+            else { Console.WriteLine("File " + fileName + " already exists, skipping download"); }
 
-            return (localfilepath + fileName);
+            if (!iscanceled) await view.Dispatcher.BeginInvoke(new Action<string>(SFTPUpdateUIonTransferEnd), DispatcherPriority.Normal, "");
         }
 
-        private void sshCp_OnTransferStart(string src, string dst, int transferredBytes, int totalBytes, string message)
+        private void SFTPcancelDownload(string localpath)
         {
-            Action EmptyDelegate = delegate () { };
-            this.view.navigator.Statusbar.Content = "Starting Download of " + lastdlfile;
-            this.view.navigator.Statusbar.UpdateLayout();
-            this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+            foreach (DownloadStatus d in downloads)
+            {
+                if (d.File == localpath && d.active == true)
+                {
+                    File.Delete(localpath);
+                    break;
+                }
+            }
 
-            Action EmptyDelegate2 = delegate () { };
+            this.view.ShadowBox.Visibility = Visibility.Collapsed;
+            this.view.cancel.Visibility = Visibility.Collapsed;
+            numberofparalleldownloads--;
+
+            if (numberofparalleldownloads <= 0)
+            {
+                string[] files2 = new string[filestoload.Count];
+            for (int i = 0; i < filestoload.Count; i++)
+            {
+                files2[i] = filestoload[i];
+            }
+
+            if (files2.Length > 0) LoadFiles(files2);
+            filestoload.Clear();
+            downloads.Clear();
+            }
+
+        }
+
+        private void SFTPConnect(string text)
+        {
+            this.view.tb.Text = "Connecting to Server...";
             this.view.ShadowBox.Visibility = Visibility.Visible;
-            view.UpdateLayout();
-            view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate2);
+            this.view.cancel.Visibility = Visibility.Visible;
+        }
+
+        private void SFTPUpdateUIonTransferEnd(string text)
+        {
+            numberofparalleldownloads--;
+            if (numberofparalleldownloads <= 0)
+            {
+                this.view.ShadowBox.Visibility = Visibility.Collapsed;
+                this.view.cancel.Visibility = Visibility.Collapsed;
+                numberofparalleldownloads = 0;
+                string[] files2 = new string[filestoload.Count];
+                for (int i = 0; i < filestoload.Count; i++)
+                {
+                    files2[i] = filestoload[i];
+                }
+
+                if (files2.Length > 0) LoadFiles(files2);
+                filestoload.Clear();
+                downloads.Clear();
+            }
         }
 
         private void sshCp_OnTransferProgress(string src, string dst, int transferredBytes, int totalBytes, string message)
         {
-            Action EmptyDelegate = delegate () { };
             double percent = ((double)transferredBytes / (double)totalBytes) * 100.0;
-
-            this.view.navigator.Statusbar.Content = "Downloading " + lastdlfile + "  (" + percent.ToString("F3") + "%)" + message;
-            this.view.navigator.Statusbar.UpdateLayout();
-            this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-            this.view.tb.Text = "Downloading " + lastdlfile + "  (" + percent.ToString("F2") + "%)";
+            string param = dst + "#" + percent.ToString("F2");
+            view.Dispatcher.BeginInvoke(new Action<string>(SFTPUpdateUIonTransfer), DispatcherPriority.Normal, param);
         }
 
-        private void sshCp_OnTransferEnd(string src, string dst, int transferredBytes, int totalBytes, string message)
+        private void SFTPUpdateUIonTransfer(string text)
         {
-            Action EmptyDelegate = delegate () { };
-            this.view.navigator.Statusbar.Content = "© 2016 HCM-Lab, Augsburg University";
-            this.view.navigator.Statusbar.UpdateLayout();
-            this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-            this.view.tb.Text = "Loading Data";
-            this.view.ShadowBox.Visibility = Visibility.Collapsed;
+            string[] split = text.Split('#');
+            this.view.tb.Text = "";
+            foreach (DownloadStatus d in downloads)
+            {
+                if (d.File == split[0])
+                {
+                    d.percent = split[1];
+                }
+                int pos = d.File.LastIndexOf("\\") + 1;
+                if (d.percent != "100.00") this.view.tb.Text = this.view.tb.Text + "Downloading " + d.File.Substring(pos, d.File.Length - pos) + "  (" + d.percent + "%)\n";
+                else d.active = false;
+            }
         }
 
         private void httpPost(string URL, string filename, string db, string login, string password, string sessionid = "Default")
@@ -2970,14 +3103,11 @@ namespace ssi
         {
             if (DatabaseLoaded)
             {
-
                 bool anytrackchanged = false;
                 foreach (AnnoTrack track in anno_tracks)
                 {
                     if (track.AnnoList.HasChanged) anytrackchanged = true;
-                   
                 }
-
 
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
 
@@ -2990,12 +3120,12 @@ namespace ssi
                         db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
                         foreach (AnnoTrack track in anno_tracks)
                         {
-                           track.AnnoList.HasChanged = false;
+                            track.AnnoList.HasChanged = false;
                         }
 
                         MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
                     }
-                    else if (anno_tracks.Count == 0) MessageBox.Show("No Annotation Tracks available");
+                    else if (anno_tracks.Count == 0) MessageBox.Show("No annotation tiers available");
                     else if (!anytrackchanged) MessageBox.Show("The latest changes are already saved in the database!");
                 }
                 catch (Exception ex)
@@ -3067,16 +3197,14 @@ namespace ssi
                             foreach (AnnoList anno in annos)
 
                             {
-                               
-                                    anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
-                                    anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
+                                anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
+                                anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
 
-                                    if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
-                                    else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
-                                    else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
+                                if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
+                                else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
+                                else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
 
-                                    handleAnnotation(anno, null);
-                                
+                                handleAnnotation(anno, null);
                             }
 
                             view.ShadowBox.Visibility = Visibility.Collapsed;
@@ -3098,10 +3226,7 @@ namespace ssi
                                             if (c.connection == "sftp")
                                             {
                                                 Properties.Settings.Default.DataServerConnectionType = "sftp";
-
-                                                string file = DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
-                                                if (file != null && !file.EndsWith("stream~") && !file.EndsWith("stream%7E")) filestoload.Add(file);
-                                                if (file == null) break;
+                                                DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
                                             }
                                             else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
                                             {
@@ -3111,23 +3236,11 @@ namespace ssi
                                             else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "true")
                                             {
                                                 Properties.Settings.Default.DataServerConnectionType = "http";
-
                                                 //This has not been tested and probably needs rework.
                                                 httpPost(c.filepath, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
                                             }
                                         }
                                     }
-                                }
-
-                                if (Properties.Settings.Default.DataServerConnectionType == "sftp")
-                                {
-                                    string[] files2 = new string[filestoload.Count];
-                                    for (int i = 0; i < filestoload.Count; i++)
-                                    {
-                                        files2[i] = filestoload[i];
-                                    }
-                                    if (files2.Length > 0) LoadFiles(files2);
-                                    filestoload.Clear();
                                 }
                             }
                         }
@@ -3142,7 +3255,7 @@ namespace ssi
             catch (Exception ex)
             {
                 dbhw.Close();
-                MessageBox.Show("Oh Oh, I'm sorry but could you slow down a bit? Please try again");
+                MessageBox.Show("Oh Oh, Something went wrong");
                 //TODO investigate: pressing the arrow keys to fast crashes the databasehandler window, for now it's simply closed to avoid crash
             }
         }
@@ -3626,6 +3739,11 @@ namespace ssi
             {
                 MessageBox.Show("Could not create Sampled Annotations Data File!", "Warning", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void ControlUnloaded(object sender, EventArgs e)
+        {
+            tokenSource.Cancel();
         }
     }
 }

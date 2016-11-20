@@ -8,7 +8,7 @@ namespace ssi
 {
     public class AnnoTrackSegment : TextBlock
     {
-        public const int RESIZE_OFFSET = 5;
+        public const int RESIZE_OFFSET = 3;
         public const int MIN_WIDTH = 2;
         public const string CONFBRUSH = "HatchBrush";
         private PatternBrushes res = new PatternBrushes();
@@ -296,6 +296,7 @@ namespace ssi
 
         public void checkResizeable(Point point)
         {
+
             if (point.X > 0 && point.X < RESIZE_OFFSET)
             {
                 if (this.is_resizeable_left == false)

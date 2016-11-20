@@ -746,7 +746,7 @@ namespace ssi
 
                     if (e.LeftButton == MouseButtonState.Pressed)
                     {
-                        double test = point.X * (selected_segment.Item.Duration / selected_segment.ActualWidth);
+                        double segmentwidth = point.X * (selected_segment.Item.Duration / selected_segment.ActualWidth);
 
               
                      
@@ -755,7 +755,7 @@ namespace ssi
                         if (selected_segment.is_resizeable_right)
                         {
                             double delta = point.X - selected_segment.ActualWidth;
-                            if (test >= Properties.Settings.Default.DefaultMinSegmentSize)
+                            if (segmentwidth >= Properties.Settings.Default.DefaultMinSegmentSize)
                             {
                                 if (point.X > ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop)) delta = ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop) - selected_segment.ActualWidth;
                                 selected_segment.resize_right(delta);
@@ -773,7 +773,7 @@ namespace ssi
                         else if (selected_segment.is_resizeable_left)
                         {
                             double delta = point.X;
-                            if (selected_segment.Item.Duration - test >= Properties.Settings.Default.DefaultMinSegmentSize)
+                            if (selected_segment.Item.Duration - segmentwidth >= Properties.Settings.Default.DefaultMinSegmentSize)
                             {
                                 selected_segment.resize_left(delta);
                                 SelectSegment(selected_segment);

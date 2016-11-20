@@ -25,8 +25,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Column="0" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Left">
-            <Button Name="newAnnoButton" Width="120" Height="25" Margin="5" VerticalAlignment="Center">New Discrete Tier</Button>
-            <Button Name="newAnnoContButton" Width="120" Height="25" Margin="5" VerticalAlignment="Center">New Continuous Tier</Button>
+            <Button Name="newAnnoButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center">New  Tier</Button>
+            <Button Name="newAnnoContButton" Width="120" Height="25" Margin="5" Visibility="Collapsed" VerticalAlignment="Center">New Continuous Tier</Button>
         </StackPanel>
 
         <StackPanel Grid.Column="1" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Center">

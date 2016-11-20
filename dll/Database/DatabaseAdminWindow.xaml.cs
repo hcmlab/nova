@@ -1027,7 +1027,7 @@ namespace ssi
 
                             if (dbsw.Password() != "")
                             {
-                                ChangeDBPassword(dbsw.Name(), dbsw.Password());
+                                ChangeDBPassword(dbsw.NameCombo.SelectionBoxItem.ToString(), dbsw.Password());
                             }
                         }
                     
