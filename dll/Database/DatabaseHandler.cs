@@ -14,6 +14,9 @@ namespace ssi
         private MongoClient mongo;
         private string connectionstring = "mongodb://127.0.0.1:27017";
 
+        private string GARBAGELABEL = "GARBAGE";
+        private string GARBAGECOLOR = "#FF000000";
+
         public DatabaseHandler(string constr)
         {
             this.connectionstring = constr;
@@ -258,36 +261,57 @@ namespace ssi
 
                 BsonDocument annotatordoc = new BsonDocument();
 
-                //We could choose here if we want to overwrite other peoples annotations. For now, we we might want to overwrite automatically created annotations and own annotations only
+                //We could choose here if we want to overwrite other peoples annotations. For now, we we might 
+                //want to overwrite automatically created annotations and own annotations only. Here are two examples to e.g. let an admin allow to change existing annotations or a user called "system
 
-                if (!(a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break;
-                if (a.AnnoList.Annotator == null && a.AnnoList.AnnotatorFullName != null)
+                // if(checkAuth(dbuser) > 3)
+                if (dbuser == "system")
                 {
-                    ObjectId annotatid = GetObjectID(database, "Annotators", "fullname", a.AnnoList.AnnotatorFullName);
-                    a.AnnoList.Annotator = FetchDBRef(database, "Annotators", "name", annotatid);
-                }
-                else if (a.AnnoList.Annotator == null && a.AnnoList.AnnotatorFullName == null)
-                {
-                    a.AnnoList.Annotator = dbuser;
+
+                    if (a.AnnoList.Annotator == null && a.AnnoList.AnnotatorFullName != null)
+                    {
+                        ObjectId annotatid = GetObjectID(database, "Annotators", "fullname", a.AnnoList.AnnotatorFullName);
+                        a.AnnoList.Annotator = FetchDBRef(database, "Annotators", "name", annotatid);
+                    }
+                    else if (a.AnnoList.Annotator == null && a.AnnoList.AnnotatorFullName == null)
+                    {
+                        a.AnnoList.Annotator = dbuser;
+                    }
+
+                    if (a.AnnoList.AnnotatorFullName == null)
+                    {
+                        try
+                        {
+                            ObjectId annotatid = GetObjectID(database, "Annotators", "name", a.AnnoList.Annotator);
+                            a.AnnoList.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid);
+                        }
+                        catch
+                        {
+                            a.AnnoList.AnnotatorFullName = Properties.Settings.Default.Annotator;
+                        }
+                    }
                 }
 
-                if (a.AnnoList.AnnotatorFullName == null)
+                else if (!(a.AnnoList.AnnotatorFullName == "RMS" || a.AnnoList.AnnotatorFullName == "Median"))
                 {
                     try
                     {
-                        ObjectId annotatid = GetObjectID(database, "Annotators", "name", a.AnnoList.Annotator);
+                        a.AnnoList.Annotator = dbuser;
+                        ObjectId annotatid = GetObjectID(database, "Annotators", "name", dbuser);
                         a.AnnoList.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid);
                     }
                     catch
                     {
                         a.AnnoList.AnnotatorFullName = Properties.Settings.Default.Annotator;
                     }
+
                 }
+                else a.AnnoList.Annotator = a.AnnoList.AnnotatorFullName;
+
+                //  if (!(a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break; //?? Not called at the moment
 
                 BsonElement annotatorname = new BsonElement("name", a.AnnoList.Annotator);
                 BsonElement annotatornamefull = new BsonElement("fullname", a.AnnoList.AnnotatorFullName);
-                BsonElement annotatoremail = new BsonElement("email", "");
-                BsonElement annotatorexpertise = new BsonElement("expertise", "");
 
                 annotatordoc.Add(annotatorname);
                 annotatordoc.Add(annotatornamefull);
@@ -380,7 +404,7 @@ namespace ssi
                                     data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", index }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                                     break;
                                 }
-                                else if (a.AnnoList[i].Label == "GARBAGE")
+                                else if (a.AnnoList[i].Label == GARBAGELABEL)
                                 {
                                     data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", -1 }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                                     break;
@@ -517,30 +541,40 @@ namespace ssi
 
                     for (int j = 0; j < schemelabels.Count; j++)
                     {
-                        al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString()));
+                        //in case flag is set, if not ignore isValid
+                        try
+                        {
+                            if (schemelabels[j]["isValid"].AsBoolean == true) al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString()));
+                        }
+                        catch
+                        {
+                            al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString()));
+                        }
                     }
 
-                    al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair("GARBAGE", "#FF000000"));
+                    al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(GARBAGELABEL, GARBAGECOLOR));
 
                     for (int i = 0; i < annotation.Count; i++)
                     {
                         string SchemeLabel = "";
                         string SchemeColor = "#000000";
-
+                        bool idfound = false;
                         for (int j = 0; j < schemelabels.Count; j++)
                         {
                             if (annotation[i]["id"].AsInt32 == schemelabels[j]["id"].AsInt32)
                             {
                                 SchemeLabel = schemelabels[j]["name"].ToString();
                                 SchemeColor = schemelabels[j]["color"].ToString();
+                                idfound = true;
                                 break;
                             }
                         }
 
-                        if (annotation[i]["id"].AsInt32 == -1)
+
+                        if (annotation[i]["id"].AsInt32 == -1 || idfound == false)
                         {
-                            SchemeLabel = "GARBAGE";
-                            SchemeColor = "#FF000000";
+                            SchemeLabel = GARBAGELABEL;
+                            SchemeColor = GARBAGECOLOR;
                         }
 
                         double start = double.Parse(annotation[i]["from"].ToString());
