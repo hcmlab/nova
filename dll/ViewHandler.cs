@@ -1117,6 +1117,7 @@ namespace ssi
                 annolist.AnnotationScheme.name = anno.AnnotationScheme.name;
                 annolist.Role = anno.Role;
                 annolist.SR = anno.SR;
+                annolist.HasChanged = true;
                 annolist.AnnotationType = anno.AnnotationType;
                 annolist.Filepath = anno.Filepath;
                 annolist.SampleAnnoPath = anno.SampleAnnoPath;
@@ -3166,7 +3167,7 @@ namespace ssi
                 bool anytrackchanged = false;
                 foreach (AnnoTrack track in anno_tracks)
                 {
-                    if (track.AnnoList.HasChanged) anytrackchanged = true;
+                    if (track.AnnoList.HasChanged== true) anytrackchanged = true;
                 }
 
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
@@ -3186,7 +3187,7 @@ namespace ssi
                         MessageBox.Show("Annotation Tracks have been stored in the database for session " + Properties.Settings.Default.LastSessionId);
                     }
                     else if (anno_tracks.Count == 0) MessageBox.Show("No annotation tiers available");
-                    else if (!anytrackchanged) MessageBox.Show("The latest changes are already saved in the database!");
+                    else if (!anytrackchanged && !isfinsihed) MessageBox.Show("The latest changes are already saved in the database!");
                 }
                 catch (Exception ex)
                 {
@@ -3265,7 +3266,6 @@ namespace ssi
                                 if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
                                 else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
                                 else if (anno.AnnotationType == AnnoType.FREE) anno.usesAnnoScheme = false;
-
                                 handleAnnotation(anno, null);
                             }
 
