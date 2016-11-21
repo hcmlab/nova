@@ -255,8 +255,8 @@ namespace ssi
                       e.KeyboardDevice.IsKeyDown(Key.NumPad6) || e.KeyboardDevice.IsKeyDown(Key.NumPad7) || e.KeyboardDevice.IsKeyDown(Key.NumPad8) || e.KeyboardDevice.IsKeyDown(Key.NumPad9))
                 {
                     int index = 0;
-                    if (e.Key - Key.D1 < 10 && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count > 0) index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.D1);
-                    else index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.NumPad1);
+                    if (e.Key - Key.D1 < 10 && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count > 0) index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.D1);
+                    else if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null) index = Math.Min(AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors.Count - 1, e.Key - Key.NumPad1);
 
                     if (index >= 0 && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE)
                     {
@@ -264,12 +264,16 @@ namespace ssi
                         if (AnnoTrack.GetSelectedSegment() != null)
                         {
                             AnnoTrack.GetSelectedSegment().Item.Label = label;
+                            AnnoTrack.GetSelectedTrack().Defaultlabel = label;
+
+                          
                             foreach (LabelColorPair lp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                             {
                                 if (label == lp.Label)
                                 {
                                     AnnoTrack.GetSelectedSegment().Item.Bg = lp.Color;
                                     AnnoTrack.GetSelectedSegment().Item.Confidence = 1.0;
+                                    AnnoTrack.GetSelectedTrack().DefaultColor = lp.Color;
 
                                     break;
                                 }
@@ -773,21 +777,20 @@ namespace ssi
 
         private void editComboBox_selectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //if (AnnoTrack.GetSelectedSegment() != null && view.annoListControl.editComboBox.SelectedItem != null && view.annoListControl.editComboBox.Items.Count > 0 && AnnoTrack.GetSelectedSegment().Item != null)
-            //{
-            //    AnnoTrackSegment a = AnnoTrack.GetSelectedSegment();
+            if (view.annoListControl.editComboBox.SelectedItem != null && view.annoListControl.editComboBox.Items.Count > 0)
+           {
 
-            //    a.Item.Label = view.annoListControl.editComboBox.SelectedItem.ToString();
-            //    foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
-            //    {
-            //        if (lcp.Label == a.Item.Label)
-            //        {
-            //            a.Item.Bg = lcp.Color;
-            //            break;
-            //        }
-            //    }
-            //    AnnoTrack.SelectSegment(a);
-            //}
+                //AnnoTrack.GetSelectedTrack().Defaultlabel = view.annoListControl.editComboBox.SelectedValue.ToString();
+                //foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
+                //{
+                //    if (lcp.Label == AnnoTrack.GetSelectedTrack().Defaultlabel)
+                //    {
+                //        AnnoTrack.GetSelectedTrack().DefaultColor = lcp.Color;
+                //        break;
+                //    }
+                //}
+                  
+            }
         }
 
         private void annoDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -798,6 +801,16 @@ namespace ssi
             {
                 AnnoListItem item = (AnnoListItem) grid.SelectedItem;
                 view.annoListControl.editComboBox.SelectedItem = item.Label;
+
+                //if (AnnoTrack.GetSelectedTrack() != null) AnnoTrack.GetSelectedTrack().Defaultlabel = view.annoListControl.editComboBox.SelectedValue.ToString();
+                //foreach(LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
+                //{
+                //    if (lcp.Label == AnnoTrack.GetSelectedTrack().Defaultlabel)
+                //    {
+                //        AnnoTrack.GetSelectedTrack().DefaultColor = lcp.Color;
+                //        break;
+                //    }
+                //}
                 movemedialock = true;
 
                 //  signalCursor.X = ViewHandler.Time.PixelFromTime(item.Start);
@@ -1583,16 +1596,23 @@ namespace ssi
                     view.annoListControl.editTextBox.IsEnabled = false;
                     view.annoListControl.editButton.Visibility = Visibility.Visible;
 
-                    //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
-
                     if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors != null && AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.DISCRETE)
                     {
+                   
+                        if (AnnoTrack.GetSelectedTrack().Defaultlabel == "") AnnoTrack.GetSelectedTrack().DefaultColor = AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors[0].Color;
+                        if ( AnnoTrack.GetSelectedTrack().Defaultlabel == "") AnnoTrack.GetSelectedTrack().Defaultlabel = AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors[0].Label;
+                      
+
                         foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
                         {
+
                             view.annoListControl.editComboBox.Items.Add(lcp.Label);
                         }
 
                         view.annoListControl.editComboBox.SelectedIndex = 0;
+
+
+                      
                     }
                 }
                 else if (AnnoTrack.GetSelectedTrack().AnnoList.AnnotationType == AnnoType.FREE)
@@ -1612,6 +1632,7 @@ namespace ssi
             // this.view.annoNameLabel.Text = track.AnnoList.Filename;
             // this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             // setAnnoList(track.AnnoList);
+
 
             if (IsPlaying())
             {
@@ -3191,6 +3212,8 @@ namespace ssi
                     loadedDBmedia = dbhw.Media();
                     ci = dbhw.MediaConnectionInfo();
                     this.view.mongodbmenu.IsEnabled = true;
+                    this.view.mongodbmenu.IsEnabled = true;
+
 
                     //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
                     if (dbhw.Authlevel() > 2)
