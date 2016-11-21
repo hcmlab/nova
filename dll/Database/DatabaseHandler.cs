@@ -526,18 +526,20 @@ namespace ssi
                     {
                         string SchemeLabel = "";
                         string SchemeColor = "#000000";
-
+                        bool idfound = false;
                         for (int j = 0; j < schemelabels.Count; j++)
                         {
                             if (annotation[i]["id"].AsInt32 == schemelabels[j]["id"].AsInt32)
                             {
                                 SchemeLabel = schemelabels[j]["name"].ToString();
                                 SchemeColor = schemelabels[j]["color"].ToString();
+                                idfound = true;
                                 break;
                             }
                         }
 
-                        if (annotation[i]["id"].AsInt32 == -1)
+
+                        if (annotation[i]["id"].AsInt32 == -1 || idfound == false)
                         {
                             SchemeLabel = "GARBAGE";
                             SchemeColor = "#FF000000";
