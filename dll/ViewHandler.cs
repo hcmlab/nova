@@ -140,8 +140,6 @@ namespace ssi
             this.view.savetiermenu.Click += saveAnnoAsButton_Click;
             this.view.convertocontannoemenu.Click += convertocontanno_Click;
             this.view.mongodbmenu.Click += mongodb_Store;
-            this.view.mongodbmenufinished.Click += mongodb_Store_Finished;
-            
             this.view.mongodbmenu2.Click += mongodb_Load;
             this.view.mongodbmenushow.Click += mongodb_Show;
             this.view.addmongodb.Click += mongodb_Add;
@@ -775,21 +773,21 @@ namespace ssi
 
         private void editComboBox_selectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (AnnoTrack.GetSelectedSegment() != null && view.annoListControl.editComboBox.SelectedItem != null && view.annoListControl.editComboBox.Items.Count > 0 && AnnoTrack.GetSelectedSegment().Item != null)
-            {
-                AnnoTrackSegment a = AnnoTrack.GetSelectedSegment();
+            //if (AnnoTrack.GetSelectedSegment() != null && view.annoListControl.editComboBox.SelectedItem != null && view.annoListControl.editComboBox.Items.Count > 0 && AnnoTrack.GetSelectedSegment().Item != null)
+            //{
+            //    AnnoTrackSegment a = AnnoTrack.GetSelectedSegment();
 
-                a.Item.Label = view.annoListControl.editComboBox.SelectedItem.ToString();
-                foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
-                {
-                    if (lcp.Label == a.Item.Label)
-                    {
-                        a.Item.Bg = lcp.Color;
-                        break;
-                    }
-                }
-                AnnoTrack.SelectSegment(a);
-            }
+            //    a.Item.Label = view.annoListControl.editComboBox.SelectedItem.ToString();
+            //    foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
+            //    {
+            //        if (lcp.Label == a.Item.Label)
+            //        {
+            //            a.Item.Bg = lcp.Color;
+            //            break;
+            //        }
+            //    }
+            //    AnnoTrack.SelectSegment(a);
+            //}
         }
 
         private void annoDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -798,7 +796,7 @@ namespace ssi
 
             if (grid.SelectedIndex >= 0 && grid.SelectedIndex < grid.Items.Count)
             {
-                AnnoListItem item = current_anno[grid.SelectedIndex];
+                AnnoListItem item = (AnnoListItem) grid.SelectedItem;
                 view.annoListControl.editComboBox.SelectedItem = item.Label;
                 movemedialock = true;
 
@@ -1583,7 +1581,7 @@ namespace ssi
                     view.annoListControl.editComboBox.Visibility = Visibility.Visible;
                     view.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     view.annoListControl.editTextBox.IsEnabled = false;
-                    view.annoListControl.editButton.Visibility = Visibility.Collapsed;
+                    view.annoListControl.editButton.Visibility = Visibility.Visible;
 
                     //    if(!AnnoTrack.GetSelectedTrack().AnnoList.isDiscrete) view.annoListControl.editComboBox.Visibility = Visibility.Visible;
 
@@ -1634,18 +1632,7 @@ namespace ssi
 
         private void changed_annoschemeselectionbox(Object sender, EventArgs e)
         {
-            if (view.annoListControl.editComboBox.SelectedItem != null)
-            {
-                foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
-                {
-                    if (lcp.Label == view.annoListControl.editComboBox.SelectedItem.ToString())
-                    {
-                        AnnoTrack.GetSelectedTrack().Defaultlabel = lcp.Label;
-                        AnnoTrack.GetSelectedTrack().DefaultColor = lcp.Color;
-                        break;
-                    }
-                }
-            }
+           
         }
 
         private void changeSignalTrackHandler(ISignalTrack track, EventArgs e)
@@ -2750,9 +2737,8 @@ namespace ssi
             {
                 DownloadStatus dl = new DownloadStatus();
                 dl.File = localpath;
-                dl.percent = "100.00";
+                dl.percent = "0.00";
                 dl.active = true;
-
                 downloads.Add(dl);
 
                 Sftp sftp = new Sftp(ftphost, login, password);
@@ -2773,13 +2759,22 @@ namespace ssi
                     {
                         if (sftp.Connected)
                         {
-                            token.Register(() => { sftp.Cancel(); iscanceled = true; if (!localpath.EndsWith(".stream~")) filestoload.Remove(localpath); Thread.Sleep(200); SFTPcancelDownload(localpath); return; });
+                            token.Register(() => { sftp.Cancel(); iscanceled = true; while (sftp.Connected) Thread.Sleep(100);  SFTPcancelDownload(localpath); return; });
                             if (!iscanceled)
                             {
-                                Console.WriteLine("Downloading...");
-                                sftp.Get(ftpfilepath, localfilepath);
-                                Console.WriteLine("Disconnecting...");
-                                sftp.Close();
+                                try
+                                {
+                                    Console.WriteLine("Downloading...");
+                                    sftp.Get(ftpfilepath, localfilepath);
+                                    Console.WriteLine("Disconnecting...");
+                                    sftp.Close();
+                                }
+                               catch
+                                {
+                                    Console.WriteLine("Disconnecting on cancel..");
+                                    sftp.Cancel();
+                                    sftp.Close();
+                                }
                             }
                         }
                     }, token);
@@ -2801,30 +2796,50 @@ namespace ssi
 
         private void SFTPcancelDownload(string localpath)
         {
+            //MessageBox.Show(localpath);
             foreach (DownloadStatus d in downloads)
             {
-                if (d.File == localpath && d.active == true)
+                if (d.active == true && d.File == localpath)
                 {
+                   
+                    try
+                    {
+                        if (localpath.EndsWith("~"))
+                        {
+                            File.Delete(localpath.Trim('~'));
+                        }
+                        
+                    }
+                     catch { }
                     File.Delete(localpath);
+                    if (!localpath.EndsWith(".stream~")) filestoload.Remove(localpath);
+                 
+                    numberofparalleldownloads--;
                     break;
                 }
+               
             }
 
             this.view.ShadowBox.Visibility = Visibility.Collapsed;
             this.view.cancel.Visibility = Visibility.Collapsed;
-            numberofparalleldownloads--;
+         
 
             if (numberofparalleldownloads <= 0)
             {
-                string[] files2 = new string[filestoload.Count];
-            for (int i = 0; i < filestoload.Count; i++)
-            {
-                files2[i] = filestoload[i];
-            }
+                    string[] files2 = new string[filestoload.Count];
+                for (int i = 0; i < filestoload.Count; i++)
+                {
+                    files2[i] = filestoload[i];
+                }
 
-            if (files2.Length > 0) LoadFiles(files2);
-            filestoload.Clear();
-            downloads.Clear();
+                try
+                    {
+                        if (files2.Length > 0) LoadFiles(files2);
+                    }
+                    catch { }
+         
+                filestoload.Clear();
+                downloads.Clear();
                 tokenSource.Dispose();
                 tokenSource = new CancellationTokenSource();
             }
@@ -2875,9 +2890,10 @@ namespace ssi
                 {
                     d.percent = split[1];
                 }
+
                 int pos = d.File.LastIndexOf("\\") + 1;
                 if (d.percent != "100.00") this.view.tb.Text = this.view.tb.Text + "Downloading " + d.File.Substring(pos, d.File.Length - pos) + "  (" + d.percent + "%)\n";
-                else d.active = false;
+                if(d.percent == "100.00")   d.active = false;
             }
         }
 
@@ -3037,13 +3053,6 @@ namespace ssi
             mongodbStore();
         }
 
-        private void mongodb_Store_Finished(object sender, RoutedEventArgs e)
-        {
-            mongodbStore(true);
-        }
-
-
-       
         private void mongodb_Load(object sender, RoutedEventArgs e)
         {
             mongodbLoad();
@@ -3110,7 +3119,7 @@ namespace ssi
             }
         }
 
-        private void mongodbStore(bool isfinsihed = false)
+        private void mongodbStore()
         {
             if (DatabaseLoaded)
             {
@@ -3124,11 +3133,11 @@ namespace ssi
 
                 try
                 {
-                    if (anno_tracks.Count > 0 && (anytrackchanged || isfinsihed))
+                    if (anno_tracks.Count > 0 && anytrackchanged)
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
-                        db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia, isfinsihed);
+                        db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia);
                         foreach (AnnoTrack track in anno_tracks)
                         {
                             track.AnnoList.HasChanged = false;
@@ -3173,7 +3182,6 @@ namespace ssi
                     loadedDBmedia = dbhw.Media();
                     ci = dbhw.MediaConnectionInfo();
                     this.view.mongodbmenu.IsEnabled = true;
-                    this.view.mongodbmenufinished.IsEnabled = true;
 
                     //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
                     if (dbhw.Authlevel() > 2)
@@ -3191,6 +3199,7 @@ namespace ssi
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
                 DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
+                this.view.mongodbmenu.IsEnabled = true;
                 this.view.mongodbfunctions.IsEnabled = true;
 
                 if (annotations != null)

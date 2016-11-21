@@ -8,7 +8,7 @@ namespace ssi
 {
     public class AnnoTrackSegment : TextBlock
     {
-        public const int RESIZE_OFFSET = 3;
+        public const int RESIZE_OFFSET = 4;
         public const int MIN_WIDTH = 2;
         public const string CONFBRUSH = "HatchBrush";
         private PatternBrushes res = new PatternBrushes();

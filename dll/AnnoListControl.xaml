@@ -46,13 +46,10 @@
                             </GridViewColumn.Header>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="Auto">
+                        <GridViewColumn Width="Auto" Header="From[s]">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Start" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>
-                            <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="From" Click="GridViewColumnHeader_Click">From[s]</GridViewColumnHeader>
-                            </GridViewColumn.Header>
                         </GridViewColumn>
                         <GridViewColumn Width="Auto" Header="To[s]">
                             <GridViewColumn.DisplayMemberBinding>

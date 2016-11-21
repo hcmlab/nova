@@ -197,28 +197,38 @@ namespace ssi
 
         private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
         {
-            /*
             GridViewColumnHeader column = (sender as GridViewColumnHeader);
             if (column.Tag != null)
-            {
+            {                
                 string sortBy = column.Tag.ToString();
-                if (listViewSortCol != null)
+                if (sortBy == "Label")
                 {
-                    AdornerLayer.GetAdornerLayer(listViewSortCol).Remove(listViewSortAdorner);
-                    annoDataGrid.Items.SortDescriptions.Clear();
-                }
 
-                ListSortDirection newDir = ListSortDirection.Ascending;
-                if (listViewSortCol == column && listViewSortAdorner.Direction == newDir)
-                    newDir = ListSortDirection.Descending;
+                    if (listViewSortCol != null)
+                    {
+                        AdornerLayer.GetAdornerLayer(listViewSortCol).Remove(listViewSortAdorner);
+                        annoDataGrid.Items.SortDescriptions.Clear();
+                    }
 
-                listViewSortCol = column;
-                listViewSortAdorner = new SortAdorner(listViewSortCol, newDir);
-                AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
-
-                annoDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, newDir));                
+                    if (listViewSortCol == null)
+                    {
+                        listViewSortCol = column;
+                        listViewSortAdorner = new SortAdorner(listViewSortCol, ListSortDirection.Ascending);
+                        AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
+                        annoDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Ascending));
+                    }
+                    else if (listViewSortAdorner.Direction == ListSortDirection.Ascending)
+                    {
+                        listViewSortAdorner = new SortAdorner(listViewSortCol, ListSortDirection.Descending);
+                        AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
+                        annoDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Descending));
+                    }
+                    else
+                    {
+                        listViewSortCol = null;
+                    }
+                }               
             }     
-            */
         }
 
     }
