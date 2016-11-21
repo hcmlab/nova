@@ -2812,7 +2812,16 @@ namespace ssi
                     }
                      catch { }
                     File.Delete(localpath);
-                    if (!localpath.EndsWith(".stream~")) filestoload.Remove(localpath);
+                    if (!localpath.EndsWith(".stream~"))
+                    {
+                        filestoload.Remove(localpath);
+                       
+                    }
+                    else
+                    {
+                     
+                        filestoload.Remove(localpath.Trim('~'));
+                    }
                  
                     numberofparalleldownloads--;
                     break;
