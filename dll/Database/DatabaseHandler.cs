@@ -14,6 +14,9 @@ namespace ssi
         private MongoClient mongo;
         private string connectionstring = "mongodb://127.0.0.1:27017";
 
+        private string GARBAGELABEL = "GARBAGE";
+        private string GARBAGECOLOR = "#FF000000";
+
         public DatabaseHandler(string constr)
         {
             this.connectionstring = constr;
@@ -380,7 +383,7 @@ namespace ssi
                                     data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", index }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                                     break;
                                 }
-                                else if (a.AnnoList[i].Label == "GARBAGE")
+                                else if (a.AnnoList[i].Label == GARBAGELABEL)
                                 {
                                     data.Add(new BsonDocument { { "from", a.AnnoList[i].Start }, { "to", a.AnnoList[i].Stop }, { "id", -1 }, { "conf", a.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                                     break;
@@ -517,10 +520,11 @@ namespace ssi
 
                     for (int j = 0; j < schemelabels.Count; j++)
                     {
+                        if(schemelabels[j]["name"].AsBoolean)
                         al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString()));
                     }
 
-                    al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair("GARBAGE", "#FF000000"));
+                    al.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair(GARBAGELABEL, GARBAGECOLOR));
 
                     for (int i = 0; i < annotation.Count; i++)
                     {
@@ -541,8 +545,8 @@ namespace ssi
 
                         if (annotation[i]["id"].AsInt32 == -1 || idfound == false)
                         {
-                            SchemeLabel = "GARBAGE";
-                            SchemeColor = "#FF000000";
+                            SchemeLabel = GARBAGELABEL;
+                            SchemeColor = GARBAGECOLOR;
                         }
 
                         double start = double.Parse(annotation[i]["from"].ToString());
