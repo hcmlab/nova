@@ -122,6 +122,7 @@
     <Reference Include="Org.Mentalis.Security">
       <HintPath>..\dll\Org.Mentalis.Security.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework.Classic" />
     <Reference Include="PropertyTools.Wpf, Version=0.0.0.0, Culture=neutral, PublicKeyToken=ea0c9f2b460934d0, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dll\PropertyTools.Wpf.dll</HintPath>
