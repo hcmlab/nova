@@ -189,11 +189,27 @@ namespace ssi
                 string SchemeColor = "#000000";
                 for (int j = 0; j < schemelabels.Count; j++)
                 {
-                    SchemeLabel = schemelabels[j]["name"].ToString();
-                    SchemeColor = schemelabels[j]["color"].ToString();
-                    LabelColorPair lcp = new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString());
+                    try
+                    {
+                        if (schemelabels[j]["isValid"].AsBoolean == true)
+                        {
+                            SchemeLabel = schemelabels[j]["name"].ToString();
+                            SchemeColor = schemelabels[j]["color"].ToString();
+                            LabelColorPair lcp = new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString());
 
-                    Scheme.LabelsAndColors.Add(lcp);
+                            Scheme.LabelsAndColors.Add(lcp);
+                        }
+
+                    }
+                    catch
+                    {
+                        SchemeLabel = schemelabels[j]["name"].ToString();
+                        SchemeColor = schemelabels[j]["color"].ToString();
+                        LabelColorPair lcp = new LabelColorPair(schemelabels[j]["name"].ToString(), schemelabels[j]["color"].ToString());
+
+                        Scheme.LabelsAndColors.Add(lcp);
+                    }
+                  
                 }
             }
             else if (Scheme.type == "FREE")
