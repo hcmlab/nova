@@ -5,7 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:local="clr-namespace:ssi"
-             xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf" xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="ssi.SignalTrackEx"
+             xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"  
+             xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic" 
+             x:Class="ssi.SignalTrackEx"
              mc:Ignorable="d"
              Height="Auto" Width="Auto">
 
