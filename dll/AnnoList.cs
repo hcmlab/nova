@@ -383,7 +383,7 @@ namespace ssi
             }
             catch (Exception e)
             {
-                MessageBox.Show("Can't read annotation file.");
+                MessageBox.Show("An exception occured while reading annotation from '" + filepath + "'");
             }
 
             return list;
@@ -487,8 +487,7 @@ namespace ssi
                                 double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
                                 double dur = stop - start;
                                 string label = "";
-
-                                if (UInt32.Parse(data[2]) == unchecked((uint)-1)) label = "GARBAGE";
+                                if (int.Parse(data[2]) < 0) label = "GARBAGE";
                                 else LabelIds.TryGetValue(data[2], out label);
                                 string color = "#000000";
 
@@ -539,7 +538,7 @@ namespace ssi
                                 double dur = stop - start;
                                 string label = "";
                                 int index = binaryReader.ReadInt32();
-                                if ((UInt32)(index) == unchecked((uint)-1)) label = "GARBAGE";
+                                if (index < 0) label = "GARBAGE";
                                 else LabelIds.TryGetValue(index.ToString(), out label);
                                 string color = "#000000";
 
@@ -570,14 +569,17 @@ namespace ssi
                         binaryReader.Close();
                     }
                 }
-                else MessageBox.Show("Annotation Data was not found. Loaded as AnnotationScheme");
+                else
+                {
+                    MessageBox.Show("No annotation data was not found, load scheme only from '" + filepath + "'");
+                }
 
                 list.loaded = true;
                 list.HasChanged = false;
             }
             catch (Exception e)
             {
-                MessageBox.Show("Can't read annotation file.");
+                MessageBox.Show("An exception occured while reading annotation from '" + filepath + "'");
             }
 
             return list;
