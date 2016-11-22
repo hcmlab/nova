@@ -590,12 +590,12 @@ namespace ssi
                     configfilepath = ViewTools.SaveFileDialog("project", ".nova", firstmediadir, 5);
                     if (configfilepath != null)
                     {
-                        saveConfig(anno_tracks, media_list, signal_tracks, configfilepath);
+                        saveProjectTracks(anno_tracks, media_list, signal_tracks, configfilepath);
                     }
                 }
                 else
                 {
-                    saveConfig(anno_tracks, media_list, signal_tracks, configfilepath);
+                    saveProjectTracks(anno_tracks, media_list, signal_tracks, configfilepath);
                 }
             }
         }
@@ -1014,8 +1014,13 @@ namespace ssi
 
         //new File Format...
         private void loadAnnotation(string filename)
-
         {
+            if (!File.Exists(filename))
+            {
+                ViewTools.ShowErrorMessage("Annotation file not found '" + filename + "'");
+                return;
+            }
+
             AnnoList anno = AnnoList.LoadfromFileNew(filename);
             anno.Filepath = filename;
             anno.SampleAnnoPath = filename;
@@ -1160,6 +1165,12 @@ namespace ssi
 
         private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
         {
+            if (!File.Exists(filename))
+            {
+                ViewTools.ShowErrorMessage("Annotation file not found '" + filename + "'");
+                return;
+            }
+
             //Temp list that contains all annotations from file
             AnnoList anno = AnnoList.LoadfromFile(filename, samplerate, type, filter);
             handleAnnotation(anno, filename);
@@ -1243,6 +1254,12 @@ namespace ssi
 
         private void loadStream(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
         {
+            if (!File.Exists(filename))
+            {
+                ViewTools.ShowErrorMessage("Stream file not found '" + filename + "'");
+                return;
+            }
+
             Signal signal = Signal.LoadStreamFile(filename);
             if (signal != null && signal.loaded)
             {
@@ -1318,6 +1335,12 @@ namespace ssi
 
         private void loadWav(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
         {
+            if (!File.Exists(filename))
+            {
+                ViewTools.ShowErrorMessage("Wav file not found '" + filename + "'");
+                return;
+            }
+
             Signal signal = Signal.LoadWaveFile(filename);
             if (signal != null && signal.loaded)
             {
@@ -1363,6 +1386,12 @@ namespace ssi
 
         private void loadMedia(string filename, bool is_video, string url = null)
         {
+            if (!File.Exists(filename))
+            {
+                ViewTools.ShowErrorMessage("Media file not found '" + filename + "'");
+                return;
+            }
+
             double pos = ViewHandler.Time.TimeFromPixel(signalCursor.X);
             IMedia media = media_list.addMedia(filename, pos, url);
             this.view.videoControl.addMedia(media, is_video);
@@ -1748,10 +1777,12 @@ namespace ssi
                     Console.Write("Error writing file!");
                 }
             }
-        }
+        }        
 
-        public void saveConfig(List<AnnoTrack> tracks, MediaList ml, List<ISignalTrack> signal_tracks, string filepath)
+        public void saveProjectTracks(List<AnnoTrack> tracks, MediaList ml, List<ISignalTrack> signal_tracks, string filepath)
         {
+            string workdir = Path.GetDirectoryName(filepath);            
+
             StreamWriter sw = new StreamWriter(filepath, false, System.Text.Encoding.Default);
             sw.WriteLine("<novaproject version=\"1\">");
 
@@ -1760,7 +1791,7 @@ namespace ssi
             {
                 foreach (IMedia t in ml.Medias)
                 {
-                    sw.WriteLine("\t\t<media>" + t.GetFilepath() + "</media>");
+                    sw.WriteLine("\t\t<media>" + ViewTools.GetRelativePath(t.GetFilepath(), workdir) + "</media>");
                 }
             }
             sw.WriteLine("\t</medias>");
@@ -1769,7 +1800,7 @@ namespace ssi
             {
                 foreach (SignalTrack st in signal_tracks)
                 {
-                    sw.WriteLine("\t\t<signal bg=\"" + st.Background + "\" fg=\"" + st.SignalColor + "\">" + st.getSignal().Filepath + "</signal>");
+                    sw.WriteLine("\t\t<signal bg=\"" + st.Background + "\" fg=\"" + st.SignalColor + "\">" + ViewTools.GetRelativePath(st.getSignal().Filepath, workdir) + "</signal>");
                 }
             }
 
@@ -1778,7 +1809,7 @@ namespace ssi
 
             foreach (AnnoTrack t in tracks)
             {
-                sw.WriteLine("\t\t<tier filepath=\"" + t.AnnoList.Filepath + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
+                sw.WriteLine("\t\t<tier filepath=\"" + ViewTools.GetRelativePath(t.AnnoList.Filepath, workdir) + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
             }
 
             sw.WriteLine("\t</tiers>");
@@ -1787,10 +1818,10 @@ namespace ssi
             sw.Close();
         }
 
-        public void loadConfig(string filepath)
+        public void loadProject(string filepath)
         {
-            //try
-            //{
+            string workdir = Path.GetDirectoryName(filepath);
+
             XmlDocument doc = new XmlDocument();
             doc.Load(filepath);
             foreach (XmlNode node in doc.SelectNodes("//media"))
@@ -1801,7 +1832,7 @@ namespace ssi
                     isvideo = false;
                     // loadWav(node.InnerText);
                 }
-                loadMedia(node.InnerText, isvideo);
+                loadMedia(ViewTools.GetAbsolutePath(node.InnerText, workdir), isvideo);
             }
 
             foreach (XmlNode node in doc.SelectNodes("//signal"))
@@ -1810,11 +1841,11 @@ namespace ssi
                 string foreground = node.Attributes[1].LastChild.Value;
                 if (node.InnerText.Contains("wav"))
                 {
-                    loadWav(node.InnerText);
+                    loadWav(ViewTools.GetAbsolutePath(node.InnerText, workdir));
                 }
                 else
                 {
-                    loadStream(node.InnerText, foreground, background);
+                    loadStream(ViewTools.GetAbsolutePath(node.InnerText, workdir), foreground, background);
                 }
             }
 
@@ -1824,11 +1855,11 @@ namespace ssi
                 {
                     if (child.Attributes[0].InnerText.Contains("csv"))
                     {
-                        loadCSVAnnotation(child.Attributes[1].InnerText, 1, "semicolon", child.Attributes[2].InnerText);
+                        loadCSVAnnotation(ViewTools.GetAbsolutePath(child.Attributes[1].InnerText, workdir), 1, "semicolon", child.Attributes[2].InnerText);
                     }
                     else if (child.Attributes[0].InnerText.Contains("annotation"))
                     {
-                        loadAnnotation(child.Attributes[0].InnerText);
+                        loadAnnotation(ViewTools.GetAbsolutePath(child.Attributes[0].InnerText, workdir));
                     }
                 }
             }
@@ -2181,6 +2212,11 @@ namespace ssi
 
         public bool loadFromFile(string filename, string url = null)
         {
+            if (filename.EndsWith("~"))
+            { 
+                return true;
+            }
+
             Action EmptyDelegate = delegate () { };
             this.view.ShadowBox.Visibility = Visibility.Visible;
             view.UpdateLayout();
@@ -2230,12 +2266,10 @@ namespace ssi
                         break;
 
                     case "annotation":
-                    case "annotation~":
                         ftype = ssi_file_type.ANNOTATION;
                         break;
 
                     case "stream":
-                    case "stream~":
                         ftype = ssi_file_type.STREAM;
                         break;
 
@@ -2372,7 +2406,7 @@ namespace ssi
                     break;
 
                 case ssi_file_type.PROJECT:
-                    loadConfig(filename);
+                    loadProject(filename);
                     loaded = true;
                     break;
 
