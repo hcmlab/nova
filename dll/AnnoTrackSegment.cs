@@ -8,7 +8,6 @@ namespace ssi
 {
     public class AnnoTrackSegment : TextBlock
     {
-        public const int RESIZE_OFFSET = 4;
         public const int MIN_WIDTH = 2;
         public const string CONFBRUSH = "HatchBrush";
         private PatternBrushes res = new PatternBrushes();
@@ -297,20 +296,22 @@ namespace ssi
         public void checkResizeable(Point point)
         {
 
-            if (point.X > 0 && point.X < RESIZE_OFFSET)
-            {
-                if (this.is_resizeable_left == false)
-                {
-                    this.resizeableLeft(true);
-                }
-            }
-            else if (point.X > this.ActualWidth - RESIZE_OFFSET && point.X < this.ActualWidth)
+            if (point.X > this.ActualWidth - RESIZE_OFFSET && point.X < this.ActualWidth)
             {
                 if (this.is_resizeable_right == false)
                 {
                     this.resizeableRight(true);
                 }
             }
+
+            else if (point.X > 0 && point.X < RESIZE_OFFSET)
+            {
+                if (this.is_resizeable_left == false)
+                {
+                    this.resizeableLeft(true);
+                }
+            }
+          
             else if (point.X > this.ActualWidth / 2 - RESIZE_OFFSET && point.X < this.ActualWidth / 2 + RESIZE_OFFSET)
             {
                 if (this.is_moveable == false)
@@ -318,18 +319,22 @@ namespace ssi
                     this.movable(true);
                 }
             }
-            else if (this.is_resizeable_left)
+            else
             {
-                this.resizeableLeft(false);
+                  if (this.is_resizeable_left)
+                {
+                    this.resizeableLeft(false);
+                }
+                 if (this.is_resizeable_right)
+                {
+                    this.resizeableRight(false);
+                }
+                 if (this.is_moveable)
+                {
+                    this.movable(false);
+                }
             }
-            else if (this.is_resizeable_right)
-            {
-                this.resizeableRight(false);
-            }
-            else if (this.is_moveable)
-            {
-                this.movable(false);
-            }
+           
         }
     }
 }

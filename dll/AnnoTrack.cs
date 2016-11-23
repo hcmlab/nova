@@ -574,19 +574,20 @@ namespace ssi
             }
         }
 
-        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+
+        public void leftMouseButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
             UnselectSegment();
             this.select(true);
-          
+
             // change track
             if (selected_track != this)
             {
                 AnnoTrack.SelectTrack(this);
             }
 
-       
+
             if (isDiscrete || (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift)))
             {
                 // check for segment selection
@@ -600,6 +601,11 @@ namespace ssi
                     }
                 }
             }
+        }
+
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
+            leftMouseButtonDown(e);
         }
 
 
@@ -683,9 +689,10 @@ namespace ssi
             }
         }
 
-        protected override void OnMouseMove(MouseEventArgs e)
+
+        public void mouseMove(MouseEventArgs e)
         {
-            base.OnMouseMove(e);
+
             dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
 
             direction = (dx > 0) ? 1 : 0;
@@ -696,7 +703,7 @@ namespace ssi
                 if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
 
                 {
-                  
+
                     Point point = e.GetPosition(selected_segment);
 
                     if (selected_segment != null)
@@ -748,9 +755,9 @@ namespace ssi
                     {
                         double segmentwidth = point.X * (selected_segment.Item.Duration / selected_segment.ActualWidth);
 
-              
-                     
-                       
+
+
+
                         // resize segment right
                         if (selected_segment.is_resizeable_right)
                         {
@@ -848,6 +855,14 @@ namespace ssi
                     }
                 }
             }
+
+        }
+
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            mouseMove(e);
         }
 
         public void timeRangeChanged(ViewTime time)

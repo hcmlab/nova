@@ -119,7 +119,6 @@ namespace ssi
             this.view.annoListControl.editButton.Click += editAnnoButton_Click;
             this.view.annoListControl.editTextBox.KeyDown += editTextBox_KeyDown;
             this.view.annoListControl.editTextBox.GotMouseCapture += editTextBox_focused;
-            this.view.annoListControl.editComboBox.SelectionChanged += editComboBox_selectionChanged;
             this.view.trackControl.CloseAnnotrackButton.Click += closeTier_Click;
             this.view.trackControl.annoNameLabel.Click += annoNameLabel_Click;
             this.view.navigator.newAnnoButton.Click += newAnnoButton_Click;
@@ -777,23 +776,6 @@ namespace ssi
             if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(true);
         }
 
-        private void editComboBox_selectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (view.annoListControl.editComboBox.SelectedItem != null && view.annoListControl.editComboBox.Items.Count > 0)
-           {
-
-                //AnnoTrack.GetSelectedTrack().Defaultlabel = view.annoListControl.editComboBox.SelectedValue.ToString();
-                //foreach (LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
-                //{
-                //    if (lcp.Label == AnnoTrack.GetSelectedTrack().Defaultlabel)
-                //    {
-                //        AnnoTrack.GetSelectedTrack().DefaultColor = lcp.Color;
-                //        break;
-                //    }
-                //}
-                  
-            }
-        }
 
         private void annoDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -804,18 +786,7 @@ namespace ssi
                 AnnoListItem item = (AnnoListItem) grid.SelectedItem;
                 view.annoListControl.editComboBox.SelectedItem = item.Label;
 
-                //if (AnnoTrack.GetSelectedTrack() != null) AnnoTrack.GetSelectedTrack().Defaultlabel = view.annoListControl.editComboBox.SelectedValue.ToString();
-                //foreach(LabelColorPair lcp in AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.LabelsAndColors)
-                //{
-                //    if (lcp.Label == AnnoTrack.GetSelectedTrack().Defaultlabel)
-                //    {
-                //        AnnoTrack.GetSelectedTrack().DefaultColor = lcp.Color;
-                //        break;
-                //    }
-                //}
                 movemedialock = true;
-
-                //  signalCursor.X = ViewHandler.Time.PixelFromTime(item.Start);
                 Time.CurrentPlayPosition = item.Start;
                 Time.CurrentPlayPositionPrecise = item.Start;
 
@@ -929,7 +900,6 @@ namespace ssi
         public void addAnno(AnnoList anno, AnnoType isdiscrete, double samplerate = 1, string filepath = null, double borderlow = 0.0, double borderhigh = 1.0, Brush background = null, string annotator = null)
         {
             string TierId;
-            //if (anno.Count > 0) samplerate = anno[0].Duration;
             if (anno.Name != null) TierId = anno.Name;
             else if (this.anno_tracks.Count == 0) TierId = "Default";
             else
@@ -984,7 +954,6 @@ namespace ssi
             }
 
             track.timeRangeChanged(ViewHandler.Time);
-            //  track.timeRangeChanged(ViewHandler.Time);
         }
 
         private void loadAnno(string filename)
@@ -1870,6 +1839,17 @@ namespace ssi
             if (this.view.navigator.askforlabels.IsChecked == true) AnnoTrack.askforlabel = true;
             else AnnoTrack.askforlabel = false;
 
+
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (AnnoTrack.GetSelectedSegment() != null)
+                {
+                    AnnoTrack.GetSelectedSegment().is_moveable = true;
+                    AnnoTrack.GetSelectedTrack().leftMouseButtonDown(e);
+                   
+                }
+            }
+
             if (e.RightButton == MouseButtonState.Pressed)
             {
                 if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(false);
@@ -2518,7 +2498,7 @@ namespace ssi
         private void cancel_click(object sender, RoutedEventArgs e)
         {
             tokenSource.Cancel();
-            //MessageBox.Show("yesa");
+          
         }
 
         private void editAnnoButton_Click(object sender, RoutedEventArgs e)
@@ -2539,7 +2519,7 @@ namespace ssi
                 }
                 else item.Label = view.annoListControl.editTextBox.Text;
             }
-            //view.annoListControl.annoDataGrid.editLabel(label);
+          
         }
 
         public void saveAnnoAs()
@@ -3017,12 +2997,6 @@ namespace ssi
                 fileName = fileName + "~";
             }
 
-            ////Treat ~ in browser format special
-            //if (fileName.EndsWith("%7E"))
-            //{
-            //    fileName = fileName.Remove(fileName.Length - 3);
-            //    fileName = fileName + "~";
-            //}
 
             string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
 
@@ -3163,7 +3137,7 @@ namespace ssi
                 }
             }
             this.view.mongodbmenu.IsEnabled = true;
-            //  AnnoSchemeLoaded = true;
+          
         }
 
         private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)
@@ -3351,8 +3325,7 @@ namespace ssi
             catch (Exception ex)
             {
                 dbhw.Close();
-                MessageBox.Show("Oh Oh, Something went wrong");
-                //TODO investigate: pressing the arrow keys to fast crashes the databasehandler window, for now it's simply closed to avoid crash
+                MessageBox.Show("Something went wrong");
             }
         }
 
