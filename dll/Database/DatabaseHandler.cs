@@ -219,10 +219,11 @@ namespace ssi
             return Scheme;
         }
 
-        public void StoreToDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null, List<DatabaseMediaInfo> loadedDBmedia = null, bool isfin = false)
+        public string StoreToDatabase(string db, string session, string dbuser, List<AnnoTrack> anno_tracks = null, List<DatabaseMediaInfo> loadedDBmedia = null, bool isfin = false)
         {
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
+            string annotator = null;
 
             BsonArray labels = new BsonArray();
             mongo = new MongoClient(connectionstring);
@@ -323,6 +324,8 @@ namespace ssi
 
                 }
                 else a.AnnoList.Annotator = a.AnnoList.AnnotatorFullName;
+
+                annotator = a.AnnoList.AnnotatorFullName;
 
                 //  if (!(a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break; //?? Not called at the moment
 
@@ -459,6 +462,8 @@ namespace ssi
                 uo.IsUpsert = true;
                 var result = annotations.ReplaceOne(filter2, document, uo);
             }
+
+            return annotator;
         }
 
         public List<AnnoList> LoadfromDatabase(System.Collections.IList collections, string db, string session, string dbuser)
