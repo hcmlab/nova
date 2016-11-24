@@ -297,36 +297,29 @@ namespace ssi
         public void checkResizeable(Point point)
         {
 
-            if(this.ActualWidth > 3 * RESIZE_OFFSET)
-            {
-
-           
-
-            if (point.X >= this.ActualWidth - RESIZE_OFFSET && point.X <= this.ActualWidth + 1.0)
+            if (point.X > this.ActualWidth - RESIZE_OFFSET && point.X < this.ActualWidth)
             {
                 if (this.is_resizeable_right == false)
                 {
                     this.resizeableRight(true);
-                    }
+                }
             }
 
-            else if (point.X >= 0 && point.X <= RESIZE_OFFSET)
+            else if (point.X > 0 && point.X < RESIZE_OFFSET)
             {
                 if (this.is_resizeable_left == false)
                 {
                     this.resizeableLeft(true);
-   
-                    }
+                }
             }
           
             else if (point.X > this.ActualWidth / 2 - RESIZE_OFFSET && point.X < this.ActualWidth / 2 + RESIZE_OFFSET)
             {
-                    if (this.is_moveable == false)
-                    {
-                        this.movable(true);
-
-                    }
+                if (this.is_moveable == false)
+                {
+                    this.movable(true);
                 }
+            }
             else
             {
                   if (this.is_resizeable_left)
@@ -342,56 +335,7 @@ namespace ssi
                     this.movable(false);
                 }
             }
-            }
-
-            else
-            {
-
-                if (point.X >= (this.ActualWidth - 2.0))
-                {
-                    if (this.is_resizeable_right == false)
-                    {
-                        this.resizeableRight(true);
-                    }
-
-                   
-                }
-
-                else if (point.X >= 0 && point.X <= 1.0)
-                {
-                    if (this.is_resizeable_left == false)
-                    {
-                        this.resizeableLeft(true);
-                    }
-                   
-                }
-
-                else if (point.X > this.ActualWidth / 2 - 2.0 && point.X < this.ActualWidth / 2 + 2.0)
-                {
-                    if (this.is_moveable == false)
-                    {
-                        this.movable(true);
-                    }
-                    
-                }
-                else
-                {
-                    if (this.is_moveable)
-                    {
-                        this.movable(false);
-                    }
-                    if (this.is_resizeable_left)
-                    {
-                        this.resizeableLeft(false);
-                    }
-                    if (this.is_resizeable_right)
-                    {
-                        this.resizeableRight(false);
-                    }
-                   
-                }
-
-            }
+           
         }
     }
 }

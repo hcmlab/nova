@@ -797,7 +797,6 @@ namespace ssi
                         // move segment
                         else if (selected_segment.is_moveable)
                         {
-                            double dur = selected_segment.Item.Duration;
                             double pos = GetLeft(selected_segment);
                             double delta = point.X - selected_segment.ActualWidth / 2;
                             if (pos + delta >= 0 && pos + selected_segment.ActualWidth + delta <= this.Width)
@@ -806,8 +805,6 @@ namespace ssi
                                 SelectSegment(selected_segment);
                                 this.select(true);
                                 FireOnMove(selected_segment.Item.Start + (selected_segment.Item.Stop - selected_segment.Item.Start) * 0.5);
-                                selected_segment.Item.Duration = dur;
-                                selected_segment.Item.Stop = selected_segment.Item.Start + dur;
                             }
                         }
                     }
