@@ -575,6 +575,97 @@ namespace ssi
         }
 
 
+        public void newAnnocopy(double start, double stop, string label, string color)
+        {
+            if (!CorrectMode)
+            {
+
+                if (stop < start)
+                {
+                    double temp = start;
+                    start = stop;
+                    stop = temp;
+                }
+                //  double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X + AnnoTrackSegment.RESIZE_OFFSET);
+                double len = stop - start;
+
+                double closestposition = start;
+                closestindex = getClosestContinousIndex(closestposition);
+                closestindexold = closestindex;
+
+                track_used_labels.Clear();
+                foreach (AnnoListItem item in this.AnnoList)
+                {
+                    if (item.Label != "")
+                    {
+                        LabelColorPair l = new LabelColorPair(item.Label, item.Bg);
+                        bool detected = false;
+                        foreach (LabelColorPair p in track_used_labels)
+                        {
+                            if (p.Label == l.Label)
+                            {
+                                detected = true;
+                            }
+                        }
+
+                        if (detected == false)
+                        {
+                            track_used_labels.Add(l);
+                        }
+                    }
+                }
+
+                if (this.AnnoList.AnnotationType == AnnoType.DISCRETE)
+                {
+                    label = this.Defaultlabel;
+                    color = this.DefaultColor;
+                }
+
+                else if (this.AnnoList.AnnotationType == AnnoType.CONTINUOUS)
+                {
+                    label = "";
+                    Color c = new Color();
+                    c.R = 0;
+                    c.G = 0;
+                    c.B = 128;
+                    c.A = 128;
+                    color = c.ToString();
+                }
+
+
+                if (stop < ViewHandler.Time.TotalDuration)
+                {
+                    AnnoListItem temp = new AnnoListItem(start, len, label, "", TierId, color, 1.0);
+                    temp.Bg = this.DefaultColor;
+
+                    bool alreadyinlist = false;
+                    foreach (AnnoListItem ali in this.AnnoList)
+                    {
+                        if (ali.Start == temp.Start && ali.Stop == temp.Stop)
+                        {
+                            alreadyinlist = true;
+                            break;
+
+                        }
+
+                    }
+
+                    if (!alreadyinlist)
+                    {
+
+
+                        if (this.AnnoList.AnnotationType != AnnoType.CONTINUOUS) anno_list.AddSorted(temp);
+                        AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
+                        annorightdirection = true;
+                        segments.Add(segment);
+                        this.Children.Add(segment);
+                        SelectSegment(segment);
+                    }
+                }
+            } 
+        }
+
+
         public void leftMouseButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
@@ -785,7 +876,7 @@ namespace ssi
                                 selected_segment.resize_left(delta);
                                 SelectSegment(selected_segment);
                                 this.select(true);
-                                FireOnMove(selected_segment.Item.Start);
+                                if (selected_segment != null) FireOnMove(selected_segment.Item.Start);
                             }
                             else
                             {

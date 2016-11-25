@@ -331,6 +331,7 @@ namespace ssi
                     e.Handled = true;
                 }
 
+
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !keyDown)
                 {
                     if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
@@ -340,6 +341,93 @@ namespace ssi
                     keyDown = true;
                     e.Handled = true;
                 }
+
+
+                if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
+                {
+                   for(int i = 0; i < anno_tracks.Count; i++)
+                    {
+                        if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i +1 < anno_tracks.Count)
+                        {
+                            AnnoTrack.SelectTrack(anno_tracks[i + 1]);
+                            AnnoTrack.SelectSegment(null);
+                            break;
+                        }
+
+                    }
+                    e.Handled = true;
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Up))
+                {
+                    for (int i = 0; i < anno_tracks.Count; i++)
+                    {
+                        if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i > 0)
+                        {
+                            AnnoTrack.SelectTrack(anno_tracks[i - 1]);
+                            AnnoTrack.SelectSegment(null);
+                            break;
+                        }
+
+                    }
+                    e.Handled = true;
+                }
+
+
+
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Down))
+                {
+                    if(AnnoTrack.GetSelectedSegment() != null)
+                    {
+                        AnnoListItem temp = AnnoTrack.GetSelectedSegment().Item;
+                   
+
+
+                    for (int i = 0; i < anno_tracks.Count; i++)
+                    {
+                        if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i + 1 < anno_tracks.Count)
+                        {
+          
+                            AnnoTrack.SelectTrack(anno_tracks[i+1]);
+                         
+                            if (!AnnoTrack.GetSelectedTrack().AnnoList.Contains(temp))  AnnoTrack.GetSelectedTrack().newAnnocopy(temp.Start, temp.Stop, temp.Label, temp.Bg);
+                                AnnoTrack.SelectSegment(null);
+                                break;
+                        }
+
+                    }
+                    }
+                    e.Handled = true;
+
+                    
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Up))
+                {
+                    if (AnnoTrack.GetSelectedSegment() != null)
+                    {
+               
+                        AnnoListItem temp = AnnoTrack.GetSelectedSegment().Item;
+
+                        for (int i = 0; i < anno_tracks.Count; i++)
+                        {
+                            if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i > 0)
+                            {
+                                 AnnoTrack.SelectTrack(anno_tracks[i-1]);
+                                AnnoTrack.SelectSegment(null);
+                                if (!AnnoTrack.GetSelectedTrack().AnnoList.Contains(temp)) AnnoTrack.GetSelectedTrack().newAnnocopy(temp.Start, temp.Stop, temp.Label, temp.Bg);
+                                break;
+
+
+                            }
+
+                        }
+                    }
+                    e.Handled = true;
+
+                }
+
+
             }
         }
 
@@ -2008,7 +2096,7 @@ namespace ssi
         {
             if (AnnoTrack.GetSelectedTrack() != null)
             {
-                LabelInputBox inputBox = new LabelInputBox("Input", "Enter Confidence for selected Area", "", null, 1, "", "", false, true);
+                LabelInputBox inputBox = new LabelInputBox("Input", "Enter Confidence for selected Area", "", null, 1, "", "", false, false);
                 inputBox.showSlider(true, AnnoTrack.GetSelectedSegment().Item.Confidence);
                 inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 inputBox.ShowDialog();
@@ -2019,9 +2107,39 @@ namespace ssi
                     {
                         if (ali.Start >= AnnoTrack.GetSelectedSegment().Item.Start && ali.Stop <= AnnoTrack.GetSelectedSegment().Item.Stop)
                         {
+                            if(inputBox.Result() != "")
+                            {
+                                double valueasdouble;
+                                if (double.TryParse(inputBox.Result(), out valueasdouble))
+                                {
+                                    if (valueasdouble >= AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.minborder && valueasdouble <= AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.maxborder)
+                                        ali.Label = inputBox.Result();
+                                    else
+                                    {
+                                        MessageBox.Show("Value must be within range of " + AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.minborder + " and " + AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.maxborder);
+                                        break;
+                                    }
+
+                                }
+
+                                else
+                                {
+                                    MessageBox.Show("Value must be a number within the range of " + AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.minborder + " and " + AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.maxborder);
+                                    break;
+                                }
+
+                               
+                            }
+
+                        
                             ali.Confidence = inputBox.ResultSlider();
                         }
                     }
+
+                    AnnoTrack.GetSelectedTrack().timeRangeChanged(time);
+                    AnnoTrack.GetSelectedTrack().timeRangeChanged(time);
+
+
                 }
             }
         }
