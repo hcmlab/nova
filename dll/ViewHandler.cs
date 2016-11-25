@@ -83,7 +83,7 @@ namespace ssi
         private List<string> filestoload = new List<string>();
         private List<DownloadStatus> downloads = new List<DownloadStatus>();
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
-        private AnnoTrackSegment temp_segment;
+        public AnnoTrackSegment temp_segment;
 
         public bool DatabaseLoaded
         {
@@ -376,7 +376,7 @@ namespace ssi
 
 
 
-                if (e.KeyboardDevice.IsKeyDown(Key.C) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                if (e.KeyboardDevice.IsKeyDown(Key.C) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
 
                     if (AnnoTrack.GetSelectedSegment() != null)
@@ -390,7 +390,7 @@ namespace ssi
                 }
 
 
-                if (e.KeyboardDevice.IsKeyDown(Key.V) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl)  &&  AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
 
                     if (AnnoTrack.GetSelectedTrack() != null)
@@ -402,6 +402,24 @@ namespace ssi
                     e.Handled = true;
                 }
 
+
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.Z))
+                {
+                    if (AnnoTrack.GetSelectedTrack() != null)
+                    {
+
+                        AnnoTrack.GetSelectedTrack().UnDoObject.Undo(1);
+                    }
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.Y))
+                {
+                    if (AnnoTrack.GetSelectedTrack() != null)
+                    {
+
+                        AnnoTrack.GetSelectedTrack().UnDoObject.Redo(1);
+                    }
+                }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Down))
                 {

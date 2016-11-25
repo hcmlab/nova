@@ -236,6 +236,8 @@ namespace ssi
             if (flag)
             {
                 this.Background = SystemColors.HotTrackBrush;
+
+
             }
             else
             {
