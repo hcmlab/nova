@@ -83,6 +83,7 @@ namespace ssi
         private List<string> filestoload = new List<string>();
         private List<DownloadStatus> downloads = new List<DownloadStatus>();
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private AnnoTrackSegment temp_segment;
 
         public bool DatabaseLoaded
         {
@@ -375,6 +376,33 @@ namespace ssi
 
 
 
+                if (e.KeyboardDevice.IsKeyDown(Key.C) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                {
+
+                    if (AnnoTrack.GetSelectedSegment() != null)
+                    {
+                        temp_segment = AnnoTrack.GetSelectedSegment();
+                        AnnoTrack.GetSelectedSegment().select(false);
+
+                    }
+
+                    e.Handled = true;
+                }
+
+
+                if (e.KeyboardDevice.IsKeyDown(Key.V) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                {
+
+                    if (AnnoTrack.GetSelectedTrack() != null)
+                    {
+                        double start = Time.TimeFromPixel(annoCursor.X);
+                        AnnoTrack.GetSelectedTrack().newAnnocopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Bg);
+                    }
+
+                    e.Handled = true;
+                }
+
+
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Down))
                 {
                     if(AnnoTrack.GetSelectedSegment() != null)
@@ -507,6 +535,12 @@ namespace ssi
                     keyDown = true;
                     // e.Handled = true;
                 }
+
+
+
+
+
+
                 else if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.A) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && !AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedSegment() != null)

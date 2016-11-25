@@ -653,7 +653,6 @@ namespace ssi
                     if (!alreadyinlist)
                     {
 
-
                         if (this.AnnoList.AnnotationType != AnnoType.CONTINUOUS) anno_list.AddSorted(temp);
                         AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                         annorightdirection = true;
