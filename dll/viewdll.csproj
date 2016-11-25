@@ -269,6 +269,7 @@
     <Compile Include="SkeletonPainter.xaml.cs">
       <DependentUpon>SkeletonPainter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UndoRedo.cs" />
     <Compile Include="ViewControl.xaml.cs" />
     <Compile Include="ViewHandler.cs" />
     <Compile Include="ViewTime.cs" />

@@ -58,6 +58,7 @@ namespace ssi
     {
         static protected AnnoTrack selected_track = null;
         static protected AnnoTrackSegment selected_segment = null;
+
         static protected int selected_zindex = 0;
         static protected int selected_zindex_max = 0;
         static public double mouseDownPos;
@@ -65,6 +66,7 @@ namespace ssi
         static public int closestindexold = 0;
         public static bool continuousannomode = false;
         public static bool askforlabel = false;
+        public static AnnoTrackSegment objectContainer = null;
 
         private static bool correctmode = false;
 
@@ -122,6 +124,11 @@ namespace ssi
             if (s != null)
             {
                 s.select(true);
+
+                if (objectContainer == null)
+                {
+                    objectContainer = s;
+                }
                 selected_segment = s;
                 selected_zindex = Panel.GetZIndex(selected_segment);
                 Panel.SetZIndex(selected_segment, selected_zindex_max + 1);
@@ -167,6 +174,22 @@ namespace ssi
 
     public class AnnoTrack : AnnoTrackStatic, ITrack
     {
+        #region Properties
+
+        private UnDoRedo _UnDoObject;
+
+        public UnDoRedo UnDoObject
+        {
+            get { return _UnDoObject; }
+            set
+            {
+                _UnDoObject = value;
+                //  UnDoObject.adornerevent += new EventHandler(UnDoObject_adornerevent);
+            }
+        }
+
+        #endregion Properties
+
         private List<AnnoTrackSegment> segments = new List<AnnoTrackSegment>();
         private List<Line> lines = new List<Line>();
         private List<Line> markers = new List<Line>();
@@ -190,6 +213,11 @@ namespace ssi
         private double lastX;
         private int direction;
         private bool annorightdirection = true;
+
+        private double _PreviouWidth = 0;
+        private double _PreviouHeight = 0;
+        private Point _PreviouMargin;
+        bool isMouseAlreadydown = false;
 
         public AnnoList AnnoList
         {
@@ -227,6 +255,9 @@ namespace ssi
             this.TierId = tierid;
             this.borderlow = borderl;
             this.borderhigh = borderh;
+
+            UnDoObject = new UnDoRedo();
+            UnDoObject.Container = this;
 
             double median = (borderlow + borderhigh) / 2;
             double range = borderhigh - borderlow;
@@ -428,6 +459,13 @@ namespace ssi
 
         public void remSegment(AnnoTrackSegment s)
         {
+            ChangeRepresentationObject RememberDelete = UnDoObject.MakeChangeRepresentationObjectForDelete((FrameworkElement)s);
+            UnDoObject.InsertObjectforUndoRedo(RememberDelete);
+            deleteSegment(s);
+        }
+
+        public void deleteSegment(AnnoTrackSegment s)
+        {
             anno_list.Remove(s.Item);
             s.Track.Children.Remove(s);
             s.Track.segments.Remove(s);
@@ -530,6 +568,7 @@ namespace ssi
                         start = stop;
                         stop = temp;
                     }
+
                     //  double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X + AnnoTrackSegment.RESIZE_OFFSET);
                     double len = stop - start;
 
@@ -561,10 +600,14 @@ namespace ssi
 
                     if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
                     {
-                        AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "",TierId, this.DefaultColor, 1.0);
+                        AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "", TierId, this.DefaultColor, 1.0);
                         temp.Bg = this.DefaultColor;
                         anno_list.AddSorted(temp);
                         AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
+
+                        ChangeRepresentationObject ChangeRepresentationObjectforInsert = UnDoObject.MakeChangeRepresentationObjectForInsert(segment);
+                        UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectforInsert);
+
                         annorightdirection = true;
                         segments.Add(segment);
                         this.Children.Add(segment);
@@ -574,12 +617,10 @@ namespace ssi
             }
         }
 
-
         public void newAnnocopy(double start, double stop, string label, string color)
         {
             if (!CorrectMode)
             {
-
                 if (stop < start)
                 {
                     double temp = start;
@@ -620,7 +661,6 @@ namespace ssi
                     label = this.Defaultlabel;
                     color = this.DefaultColor;
                 }
-
                 else if (this.AnnoList.AnnotationType == AnnoType.CONTINUOUS)
                 {
                     label = "";
@@ -631,7 +671,6 @@ namespace ssi
                     c.A = 128;
                     color = c.ToString();
                 }
-
 
                 if (stop < ViewHandler.Time.TotalDuration)
                 {
@@ -645,26 +684,23 @@ namespace ssi
                         {
                             alreadyinlist = true;
                             break;
-
                         }
-
                     }
 
                     if (!alreadyinlist)
                     {
-
-
                         if (this.AnnoList.AnnotationType != AnnoType.CONTINUOUS) anno_list.AddSorted(temp);
                         AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                         annorightdirection = true;
+                        ChangeRepresentationObject ChangeRepresentationObjectforInsert = UnDoObject.MakeChangeRepresentationObjectForInsert(segment);
+                        UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectforInsert);
                         segments.Add(segment);
                         this.Children.Add(segment);
                         SelectSegment(segment);
                     }
                 }
-            } 
+            }
         }
-
 
         public void leftMouseButtonDown(MouseButtonEventArgs e)
         {
@@ -677,7 +713,6 @@ namespace ssi
             {
                 AnnoTrack.SelectTrack(this);
             }
-
 
             if (isDiscrete || (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift)))
             {
@@ -697,21 +732,30 @@ namespace ssi
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             leftMouseButtonDown(e);
-        }
 
+            if (selected_segment != null)
+            {
+                _PreviouWidth = selected_segment.Width;
+                _PreviouHeight = selected_segment.Height;
+                _PreviouMargin = new Point(((FrameworkElement)selected_segment).Margin.Left, ((FrameworkElement)selected_segment).Margin.Top);
+
+                //ChangeRepresentationObject ChangeRepresentationObjectOfResize = UnDoObject.MakeChangeRepresentationObjectForResize(_PreviouMargin, _PreviouWidth, _PreviouHeight, (FrameworkElement)selected_segment, selected_segment.is_resizeable_right, selected_segment.is_resizeable_left, selected_segment.is_moveable);
+                //UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfResize);
+            }
+        }
 
         public void rightMouseButtonDown(MouseButtonEventArgs e)
         {
-
             dx = 0;
-          
+
             UnselectSegment();
             this.select(true);
-
 
             base.OnMouseRightButtonDown(e);
             if (!CorrectMode)
             {
+               
+
                 double start = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X);
                 double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X) + Properties.Settings.Default.DefaultMinSegmentSize;
                 //  double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X + AnnoTrackSegment.RESIZE_OFFSET);
@@ -728,7 +772,10 @@ namespace ssi
 
                     segment.Width = 1;
                     annorightdirection = true;
+                    ChangeRepresentationObject ChangeRepresentationObjectforInsert = UnDoObject.MakeChangeRepresentationObjectForInsert(segment);
+                    UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectforInsert);
                     segments.Add(segment);
+
                     this.Children.Add(segment);
                     SelectSegment(segment);
                     this.select(true);
@@ -754,7 +801,6 @@ namespace ssi
                     this.select(true);
                 }
             }
-
         }
 
         public int getClosestContinousIndex(double nearestitem)
@@ -771,6 +817,7 @@ namespace ssi
 
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
+            isMouseAlreadydown = false;
             base.OnMouseUp(e);
 
             if (selected_segment != null && selected_segment.Item.Duration < Properties.Settings.Default.DefaultMinSegmentSize)
@@ -780,10 +827,8 @@ namespace ssi
             }
         }
 
-
         public void mouseMove(MouseEventArgs e)
         {
-
             dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
 
             direction = (dx > 0) ? 1 : 0;
@@ -794,7 +839,6 @@ namespace ssi
                 if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
 
                 {
-
                     Point point = e.GetPosition(selected_segment);
 
                     if (selected_segment != null)
@@ -846,9 +890,6 @@ namespace ssi
                     {
                         double segmentwidth = point.X * (selected_segment.Item.Duration / selected_segment.ActualWidth);
 
-
-
-
                         // resize segment right
                         if (selected_segment.is_resizeable_right)
                         {
@@ -856,8 +897,10 @@ namespace ssi
                             if (segmentwidth >= Properties.Settings.Default.DefaultMinSegmentSize)
                             {
                                 if (point.X > ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop)) delta = ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop) - selected_segment.ActualWidth;
+
                                 selected_segment.resize_right(delta);
                                 SelectSegment(selected_segment);
+
                                 this.select(true);
                                 FireOnMove(selected_segment.Item.Stop);
                             }
@@ -892,6 +935,18 @@ namespace ssi
                             double delta = point.X - selected_segment.ActualWidth / 2;
                             if (pos + delta >= 0 && pos + selected_segment.ActualWidth + delta <= this.Width)
                             {
+                                //if (isMouseAlreadydown == false)
+                                //{
+
+                                //    _PreviouWidth = selected_segment.Width;
+                                //    _PreviouHeight = selected_segment.Height;
+                                //    _PreviouMargin = new Point(selected_segment.Margin.Left, (selected_segment).Margin.Top);
+
+                                //    ChangeRepresentationObject ChangeRepresentationObjectOfMove =  UnDoObject.MakeChangeRepresentationObjectForMove(_PreviouMargin, (FrameworkElement)selected_segment);
+                                //  UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfMove);
+                                //  isMouseAlreadydown = true;  
+     
+                                //}
                                 selected_segment.move(delta);
                                 SelectSegment(selected_segment);
                                 this.select(true);
@@ -901,6 +956,10 @@ namespace ssi
                     }
                     else
                     {
+
+                      
+                         isMouseAlreadydown = false;
+                       
                         // check if use can resize/move
                         selected_segment.checkResizeable(point);
                     }
@@ -946,9 +1005,7 @@ namespace ssi
                     }
                 }
             }
-
         }
-
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -974,7 +1031,7 @@ namespace ssi
                 {
                     s.update2();
                     //if (s.Item.Confidence < Properties.Settings.Default.UncertaintyLevel /*&& CorrectMode == true*/) s.Visibility = Visibility.Visible;
-                     s.Visibility = Visibility.Visible;
+                    s.Visibility = Visibility.Visible;
                 }
             }
 
