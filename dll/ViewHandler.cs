@@ -390,13 +390,27 @@ namespace ssi
                 }
 
 
+                if (e.KeyboardDevice.IsKeyDown(Key.X) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                {
+
+                    if (AnnoTrack.GetSelectedSegment() != null)
+                    {
+                        temp_segment = AnnoTrack.GetSelectedSegment();
+                        AnnoTrack.OnKeyDownHandler(sender, e);
+                    }
+
+                    e.Handled = true;
+                }
+
+
+
                 if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl)  &&  AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
 
                     if (AnnoTrack.GetSelectedTrack() != null)
                     {
                         double start = Time.TimeFromPixel(annoCursor.X);
-                        AnnoTrack.GetSelectedTrack().newAnnocopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Bg);
+                        AnnoTrack.GetSelectedTrack().newAnnocopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Bg, temp_segment.Item.Confidence);
                     }
 
                     e.Handled = true;
