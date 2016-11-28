@@ -152,7 +152,7 @@ namespace ssi
 
         static public void OnKeyDownHandler(object sender, KeyEventArgs e)
         {
-            if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
+            if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back) || (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.X)))
             {
                 if (selected_segment != null && selected_track != null/* && GetSelectedTrack().isDiscrete*/)
                 {
@@ -617,7 +617,7 @@ namespace ssi
             }
         }
 
-        public void newAnnocopy(double start, double stop, string label, string color)
+        public void newAnnocopy(double start, double stop, string label, string color, double confidence = 1.0)
         {
             if (!CorrectMode)
             {
@@ -674,7 +674,7 @@ namespace ssi
 
                 if (stop < ViewHandler.Time.TotalDuration)
                 {
-                    AnnoListItem temp = new AnnoListItem(start, len, label, "", TierId, color, 1.0);
+                    AnnoListItem temp = new AnnoListItem(start, len, label, "", TierId, color, confidence);
                     temp.Bg = this.DefaultColor;
 
                     bool alreadyinlist = false;
