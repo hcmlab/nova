@@ -738,9 +738,6 @@ namespace ssi
                 _PreviouWidth = selected_segment.Width;
                 _PreviouHeight = selected_segment.Height;
                 _PreviouMargin = new Point(((FrameworkElement)selected_segment).Margin.Left, ((FrameworkElement)selected_segment).Margin.Top);
-
-                //ChangeRepresentationObject ChangeRepresentationObjectOfResize = UnDoObject.MakeChangeRepresentationObjectForResize(_PreviouMargin, _PreviouWidth, _PreviouHeight, (FrameworkElement)selected_segment, selected_segment.is_resizeable_right, selected_segment.is_resizeable_left, selected_segment.is_moveable);
-                //UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfResize);
             }
         }
 
@@ -894,6 +891,16 @@ namespace ssi
                         if (selected_segment.is_resizeable_right)
                         {
                             double delta = point.X - selected_segment.ActualWidth;
+
+                            if (isMouseAlreadydown == false)
+                            {
+                               // Console.WriteLine("ResizeRight");
+                               //TODO: Logic for Redo
+                                isMouseAlreadydown = true;
+
+                            }
+
+
                             if (segmentwidth >= Properties.Settings.Default.DefaultMinSegmentSize)
                             {
                                 if (point.X > ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop)) delta = ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop) - selected_segment.ActualWidth;
@@ -913,6 +920,17 @@ namespace ssi
                         // resize segment left
                         else if (selected_segment.is_resizeable_left)
                         {
+
+                            if (isMouseAlreadydown == false)
+                            {
+                                //TODO: Logic for Redo
+                                //  Console.WriteLine("ResizeLeft");
+
+                                isMouseAlreadydown = true;
+
+                            }
+
+
                             double delta = point.X;
                             if (selected_segment.Item.Duration - segmentwidth >= Properties.Settings.Default.DefaultMinSegmentSize)
                             {
@@ -935,18 +953,17 @@ namespace ssi
                             double delta = point.X - selected_segment.ActualWidth / 2;
                             if (pos + delta >= 0 && pos + selected_segment.ActualWidth + delta <= this.Width)
                             {
-                                //if (isMouseAlreadydown == false)
-                                //{
+                                if (isMouseAlreadydown == false)
+                                {
+                                    // Console.WriteLine("Move");
+                                  //TODO: Logic for Redo
+                                  //  _PreviouMargin = new Point(Canvas.GetLeft(selected_segment),0);
 
-                                //    _PreviouWidth = selected_segment.Width;
-                                //    _PreviouHeight = selected_segment.Height;
-                                //    _PreviouMargin = new Point(selected_segment.Margin.Left, (selected_segment).Margin.Top);
-
-                                //    ChangeRepresentationObject ChangeRepresentationObjectOfMove =  UnDoObject.MakeChangeRepresentationObjectForMove(_PreviouMargin, (FrameworkElement)selected_segment);
-                                //  UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfMove);
-                                //  isMouseAlreadydown = true;  
+                                  //  ChangeRepresentationObject ChangeRepresentationObjectOfMove =  UnDoObject.MakeChangeRepresentationObjectForMove(_PreviouMargin, (FrameworkElement)selected_segment, selected_segment.Width, selected_segment.Item.Duration);
+                                  //UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfMove);
+                                 isMouseAlreadydown = true;  
      
-                                //}
+                                }
                                 selected_segment.move(delta);
                                 SelectSegment(selected_segment);
                                 this.select(true);
@@ -956,9 +973,7 @@ namespace ssi
                     }
                     else
                     {
-
-                      
-                         isMouseAlreadydown = false;
+                        isMouseAlreadydown = false;
                        
                         // check if use can resize/move
                         selected_segment.checkResizeable(point);

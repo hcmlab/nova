@@ -28,7 +28,7 @@ namespace ssi
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (Connectiontype.SelectedIndex == 2)
+            if (Connectiontype.SelectedIndex == 2 && requiresAuth.IsChecked == false)
             {
                 ServerLabel.Visibility = Visibility.Collapsed;
                 ServerTextfield.Visibility = Visibility.Collapsed;
@@ -36,6 +36,16 @@ namespace ssi
                 FolderTextfield.Visibility = Visibility.Collapsed;
                 InputDescription.Content = "URLs, seperated by lines";
             }
+
+            else if (Connectiontype.SelectedIndex == 2 && requiresAuth.IsChecked == true)
+            {
+                ServerLabel.Visibility = Visibility.Visible;
+                ServerTextfield.Visibility = Visibility.Visible;
+                FolderLabel.Visibility = Visibility.Collapsed;
+                FolderTextfield.Visibility = Visibility.Collapsed;
+                InputDescription.Content = "URLs, seperated by lines";
+            }
+
             else if (Connectiontype.SelectedIndex == 0 || Connectiontype.SelectedIndex == 1)
             {
                 ServerLabel.Visibility = Visibility.Visible;

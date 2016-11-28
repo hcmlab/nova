@@ -86,7 +86,9 @@ namespace ssi
 
                     if (connection == "sftp") url = "sftp://" + ip + folder + "/" + filename;
                     if (connection == "ftp") url = "ftp://" + ip + folder + "/" + filename;
-                    if (connection == "http") url = filenames[i];
+
+                    if (connection == "http" && auth == false) url = filenames[i];
+                    else if (connection == "http" && auth == true) url = ip;
 
                     BsonDocument b = new BsonDocument
                     {

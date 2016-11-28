@@ -480,7 +480,7 @@ namespace ssi
             }
             catch (Exception e)
             {
-                ViewTools.ShowErrorMessage(e.ToString());
+                ViewTools.ShowErrorMessage(filepath + ": " + e.ToString());
                 return null;
             }
 

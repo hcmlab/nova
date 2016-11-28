@@ -142,7 +142,7 @@
                         <ColumnDefinition Width="177*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Name="tb"  Text="Loading Data..." HorizontalAlignment="Center" Foreground="White" FontSize="30" Grid.ColumnSpan="2" />
+                        <TextBlock Name="ShadowBoxText"  Text="Loading Data..." HorizontalAlignment="Center" Foreground="White" FontSize="30" Grid.ColumnSpan="2" />
                         <Button Name="cancel" Visibility="Collapsed" VerticalAlignment="Bottom" Background="Transparent" Content="Cancel" HorizontalAlignment="Center" Foreground="White" FontSize="30" Grid.ColumnSpan="2" />
                     </StackPanel>
                    

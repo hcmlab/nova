@@ -1904,7 +1904,10 @@ namespace ssi
             {
                 foreach (IMedia t in ml.Medias)
                 {
-                    sw.WriteLine("\t\t<media>" + ViewTools.GetRelativePath(t.GetFilepath(), workdir) + "</media>");
+                    if (t.GetFilepath() != null)
+                    {
+                        sw.WriteLine("\t\t<media>" + ViewTools.GetRelativePath(t.GetFilepath(), workdir) + "</media>");
+                    }
                 }
             }
             sw.WriteLine("\t</medias>");
@@ -1913,7 +1916,10 @@ namespace ssi
             {
                 foreach (SignalTrack st in signal_tracks)
                 {
-                    sw.WriteLine("\t\t<signal bg=\"" + st.Background + "\" fg=\"" + st.SignalColor + "\">" + ViewTools.GetRelativePath(st.getSignal().Filepath, workdir) + "</signal>");
+                    if (st.getSignal().Filepath != null)
+                    {
+                        sw.WriteLine("\t\t<signal bg=\"" + st.Background + "\" fg=\"" + st.SignalColor + "\">" + ViewTools.GetRelativePath(st.getSignal().Filepath, workdir) + "</signal>");
+                    }
                 }
             }
 
@@ -1922,7 +1928,10 @@ namespace ssi
 
             foreach (AnnoTrack t in tracks)
             {
-                sw.WriteLine("\t\t<tier filepath=\"" + ViewTools.GetRelativePath(t.AnnoList.Filepath, workdir) + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
+                if (t.AnnoList.Filepath!=null)
+                {
+                    sw.WriteLine("\t\t<tier filepath=\"" + ViewTools.GetRelativePath(t.AnnoList.Filepath, workdir) + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
+                }
             }
 
             sw.WriteLine("\t</tiers>");
@@ -1936,45 +1945,52 @@ namespace ssi
             string workdir = Path.GetDirectoryName(filepath);
 
             XmlDocument doc = new XmlDocument();
-            doc.Load(filepath);
-            foreach (XmlNode node in doc.SelectNodes("//media"))
+            try
             {
-                bool isvideo = true;
-                if (node.InnerText.Contains("wav"))
+                doc.Load(filepath);
+                foreach (XmlNode node in doc.SelectNodes("//media"))
                 {
-                    isvideo = false;
-                    // loadWav(node.InnerText);
-                }
-                loadMedia(ViewTools.GetAbsolutePath(node.InnerText, workdir), isvideo);
-            }
-
-            foreach (XmlNode node in doc.SelectNodes("//signal"))
-            {
-                string background = node.Attributes[0].LastChild.Value;
-                string foreground = node.Attributes[1].LastChild.Value;
-                if (node.InnerText.Contains("wav"))
-                {
-                    loadWav(ViewTools.GetAbsolutePath(node.InnerText, workdir));
-                }
-                else
-                {
-                    loadStream(ViewTools.GetAbsolutePath(node.InnerText, workdir), foreground, background);
-                }
-            }
-
-            foreach (XmlNode child in (doc.SelectNodes("//tier")))
-            {
-                if (child.Attributes.Count > 0)
-                {
-                    if (child.Attributes[0].InnerText.Contains("csv"))
+                    bool isvideo = true;
+                    if (node.InnerText.Contains("wav"))
                     {
-                        loadCSVAnnotation(ViewTools.GetAbsolutePath(child.Attributes[1].InnerText, workdir), 1, "semicolon", child.Attributes[2].InnerText);
+                        isvideo = false;
+                        // loadWav(node.InnerText);
                     }
-                    else if (child.Attributes[0].InnerText.Contains("annotation"))
+                    loadMedia(ViewTools.GetAbsolutePath(node.InnerText, workdir), isvideo);
+                }
+
+                foreach (XmlNode node in doc.SelectNodes("//signal"))
+                {
+                    string background = node.Attributes[0].LastChild.Value;
+                    string foreground = node.Attributes[1].LastChild.Value;
+                    if (node.InnerText.Contains("wav"))
                     {
-                        loadAnnotation(ViewTools.GetAbsolutePath(child.Attributes[0].InnerText, workdir));
+                        loadWav(ViewTools.GetAbsolutePath(node.InnerText, workdir));
+                    }
+                    else
+                    {
+                        loadStream(ViewTools.GetAbsolutePath(node.InnerText, workdir), foreground, background);
                     }
                 }
+
+                foreach (XmlNode child in (doc.SelectNodes("//tier")))
+                {
+                    if (child.Attributes.Count > 0)
+                    {
+                        if (child.Attributes[0].InnerText.Contains("csv"))
+                        {
+                            loadCSVAnnotation(ViewTools.GetAbsolutePath(child.Attributes[1].InnerText, workdir), 1, "semicolon", child.Attributes[2].InnerText);
+                        }
+                        else if (child.Attributes[0].InnerText.Contains("annotation"))
+                        {
+                            loadAnnotation(ViewTools.GetAbsolutePath(child.Attributes[0].InnerText, workdir));
+                        }
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                ViewTools.ShowErrorMessage(e.ToString());
             }
         }
 
@@ -2322,9 +2338,7 @@ namespace ssi
                 string[] filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 if (filenames != null)
                 {
-                    this.view.Cursor = Cursors.Wait;
                     LoadFiles(filenames);
-                    this.view.Cursor = Cursors.Arrow;
                 }
             }
         }
@@ -2358,12 +2372,14 @@ namespace ssi
 
         public bool loadFromFile(string filename, string url = null)
         {
-            if (filename.EndsWith("~"))
+            if (filename == null || filename.EndsWith("~"))
             {
-                return true;
+                return false;
             }
 
+            this.view.Cursor = Cursors.Wait;
             Action EmptyDelegate = delegate () { };
+            this.view.ShadowBoxText.Text = "Loading '" + filename + "'";
             this.view.ShadowBox.Visibility = Visibility.Visible;
             view.UpdateLayout();
             view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
@@ -2405,11 +2421,7 @@ namespace ssi
 
                     case "wav":
                         ftype = ssi_file_type.AUDIO;
-                        break;
-
-                    case "anno":
-                        ftype = ssi_file_type.ANNO;
-                        break;
+                        break;                   
 
                     case "annotation":
                         ftype = ssi_file_type.ANNOTATION;
@@ -2417,6 +2429,10 @@ namespace ssi
 
                     case "stream":
                         ftype = ssi_file_type.STREAM;
+                        break;
+
+                    case "anno":
+                        ftype = ssi_file_type.ANNO;
                         break;
 
                     case "events":
@@ -2435,14 +2451,8 @@ namespace ssi
                         ftype = ssi_file_type.ANVIL;
                         break;
 
-                    case "nova":
-                    case "vui":
+                    case "nova":                    
                         ftype = ssi_file_type.PROJECT;
-                        break;
-
-                    case "zip":
-                    case "rar":
-                        ftype = ssi_file_type.IGNORE;
                         break;
                 }
             }
@@ -2513,12 +2523,7 @@ namespace ssi
                     loadWav(filename);
                     loadMedia(filename, false);
                     loaded = true;
-                    break;
-
-                case ssi_file_type.ANNO:
-                    loadAnno(filename);
-                    loaded = true;
-                    break;
+                    break;               
 
                 case ssi_file_type.ANNOTATION:
                     loadAnnotation(filename);
@@ -2556,15 +2561,14 @@ namespace ssi
                     loaded = true;
                     break;
 
-                case ssi_file_type.IGNORE:
-                    break;
-
-                default:
-                    MessageBox.Show("File Format not supported");
-
+                default:                    
                     break;
             }
+
+
             this.view.ShadowBox.Visibility = Visibility.Collapsed;
+            this.view.Cursor = Cursors.Arrow;
+
             return loaded;
         }
 
@@ -3052,7 +3056,7 @@ namespace ssi
 
         private void SFTPConnect(string text)
         {
-            this.view.tb.Text = "Connecting to Server...";
+            this.view.ShadowBoxText.Text = "Connecting to Server...";
             this.view.ShadowBox.Visibility = Visibility.Visible;
             this.view.cancel.Visibility = Visibility.Visible;
         }
@@ -3087,7 +3091,7 @@ namespace ssi
         private void SFTPUpdateUIonTransfer(string text)
         {
             string[] split = text.Split('#');
-            this.view.tb.Text = "";
+            this.view.ShadowBoxText.Text = "";
             foreach (DownloadStatus d in downloads)
             {
                 if (d.File == split[0])
@@ -3096,53 +3100,104 @@ namespace ssi
                 }
 
                 int pos = d.File.LastIndexOf("\\") + 1;
-                if (d.percent != "100.00") this.view.tb.Text = this.view.tb.Text + "Downloading " + d.File.Substring(pos, d.File.Length - pos) + "  (" + d.percent + "%)\n";
+                if (d.percent != "100.00") this.view.ShadowBoxText.Text = this.view.ShadowBoxText.Text + "Downloading " + d.File.Substring(pos, d.File.Length - pos) + "  (" + d.percent + "%)\n";
                 if (d.percent == "100.00") d.active = false;
             }
         }
 
-        private void httpPost(string URL, string filename, string db, string login, string password, string sessionid = "Default")
+        private async Task httpPost(string URL, string filename, string db, string login, string password, string sessionid = "Default")
         {
-            string fileName = URL.Substring(URL.LastIndexOf("/") + 1, (URL.Length - URL.LastIndexOf("/") - 1));
-            string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
+          
 
-            if (!File.Exists(Properties.Settings.Default.DataPath + "\\" + sessionid + "\\" + fileName))
+            string fileName = filename;
+            if (fileName.EndsWith(".stream%7E"))
+            {
+                fileName = fileName.Remove(fileName.Length - 3);
+                fileName = fileName + "~";
+            }
+
+            // string fileName = URL.Substring(URL.LastIndexOf("/") + 1, (URL.Length - URL.LastIndexOf("/") - 1));
+            string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + filename;
+            numberofparalleldownloads++;
+
+            if (!localpath.EndsWith(".stream~")) filestoload.Add(localpath);
+
+            if (!File.Exists(localpath))
             {
                 try
                 {
+                    Action EmptyDelegate = delegate () { };
+                    this.view.ShadowBoxText.Text = "Downloading '" + filename + "'";
+                    this.view.ShadowBox.Visibility = Visibility.Visible;
+                    view.UpdateLayout();
+                    view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                     // Create a new WebClient instance.
 
                     WebClient client = new WebClient();
 
-                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
-                    //  client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadFileCompleted);
-                    Mouse.SetCursor(System.Windows.Input.Cursors.Hand);
+                    //  client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                    //  Mouse.SetCursor(System.Windows.Input.Cursors.Hand);
 
-                    // Concatenate the domain with the Web resource filename.
-                    Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", fileName, URL);
-                    // Download the Web resource and save it into the current filesystem folder.
-                    Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + sessionid);
+                    client.UploadValuesCompleted += client_DownloadFileCompleted;
+                    Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", filename, URL);
+                    Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid);
 
-                    var values = new NameValueCollection();
-                    values["username"] = login;
-                    values["password"] = password;
-                    values["session_id"] = sessionid;
-                    values["filename"] = filename;
+                    CancellationToken token = tokenSource.Token;
 
-                    var response = client.UploadValues(URL, values);
-                    var responseString = Encoding.Default.GetString(response);
+                    await Task.Run(() =>
+                    {
+                      
+                        string resultString = Regex.Match(sessionid, @"\d+").Value;
+                        int sid = Int32.Parse(resultString);
+                        var values = new NameValueCollection();
+                        values.Add("username", login);
+                        values.Add("password", password);
+                        values.Add("session_id", sid.ToString());
+                        values.Add("filename", filename);
 
-                    Console.WriteLine(responseString);
+                        byte[] response = client.UploadValues(URL, values);
+                       
+                        File.WriteAllBytes(localpath, response);
 
-                    /*
-                     *  Todo, something with the response
-                     */
+                        //view.Dispatcher.BeginInvoke(new Action<string>(httpPostfinished), DispatcherPriority.Normal, "");
+                      
+                    }, token);
 
-                    client.DownloadFile(URL, "Data\\" + sessionid + "\\" + fileName);
+
+
+                  
+
                 }
-                catch { MessageBox.Show("Url not found"); }
+                catch (Exception ex)
+
+                { MessageBox.Show("Credentials or URL are wrong.");
+                }
             }
-            loadFromFile(localpath);
+            await view.Dispatcher.BeginInvoke(new Action<string>(httpPostfinished), DispatcherPriority.Normal, "");
+        }
+
+        private void httpPostfinished(string param)
+        {
+            numberofparalleldownloads--;
+            if (numberofparalleldownloads <= 0)
+            {
+                Action EmptyDelegate = delegate () { };
+                this.view.ShadowBoxText.UpdateLayout();
+                this.view.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                this.view.ShadowBoxText.Text = "Loading Data";
+                this.view.ShadowBox.Visibility = Visibility.Collapsed;
+                this.view.ShadowBox.UpdateLayout();
+                downloadsreceived.Clear();
+                downloadstotal.Clear();
+                string[] files = new string[filestoload.Count];
+                for (int i = 0; i < filestoload.Count; i++)
+                {
+                    files[i] = filestoload[i];
+                }
+                LoadFiles(files);
+                filestoload.Clear();
+            }
+
         }
 
         private void httpGet(string URL, string db, string sessionid = "Default", string filename = "")
@@ -3193,9 +3248,9 @@ namespace ssi
                 this.view.navigator.Statusbar.Content = "© 2016 HCM-Lab, Augsburg University";
                 this.view.navigator.Statusbar.UpdateLayout();
                 this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-                this.view.tb.UpdateLayout();
-                this.view.tb.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-                this.view.tb.Text = "Loading Data";
+                this.view.ShadowBoxText.UpdateLayout();
+                this.view.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                this.view.ShadowBoxText.Text = "Loading Data";
                 this.view.ShadowBox.Visibility = Visibility.Collapsed;
                 this.view.ShadowBox.UpdateLayout();
                 downloadsreceived.Clear();
@@ -3238,7 +3293,7 @@ namespace ssi
                 this.view.navigator.Statusbar.UpdateLayout();
                 this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 this.view.ShadowBox.Visibility = Visibility.Visible;
-                this.view.tb.Text = "Downloading Files... Total progress: " + "  (" + percent.ToString("F2") + "%)";
+                this.view.ShadowBoxText.Text = "Downloading Files... Total progress: " + "  (" + percent.ToString("F2") + "%)";
             }
             catch (Exception e1)
             {
@@ -3457,11 +3512,28 @@ namespace ssi
                                             {
                                                 Properties.Settings.Default.DataServerConnectionType = "http";
                                                 //This has not been tested and probably needs rework.
-                                                httpPost(c.filepath, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+                                                httpPost(c.filepath, c.filename, Properties.Settings.Default.Database, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.LastSessionId);
                                             }
                                         }
                                     }
                                 }
+
+
+                                //if (Properties.Settings.Default.DataServerConnectionType == "http" && ci[0].requiresauth == "true")
+                                //{
+                                //    downloadsreceived.Clear();
+                                //    downloadstotal.Clear();
+                                //    string[] files = new string[filestoload.Count];
+                                //    for (int i = 0; i < filestoload.Count; i++)
+                                //    {
+                                //        files[i] = filestoload[i];
+                                //    }
+                                //    LoadFiles(files);
+                                //    filestoload.Clear();
+                                //    this.view.ShadowBox.Visibility = Visibility.Collapsed;
+                                //    this.view.ShadowBoxText.Text = "";
+
+                                //}
                             }
                         }
                         DatabaseLoaded = true;
