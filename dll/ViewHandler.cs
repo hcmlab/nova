@@ -1081,6 +1081,7 @@ namespace ssi
                 track.AnnoList.AnnotationScheme.maxcolor = new SolidColorBrush(((LinearGradientBrush)track.ContiniousBrush).GradientStops[1].Color).ToString();
             }
 
+          
             track.timeRangeChanged(ViewHandler.Time);
         }
 
@@ -1123,13 +1124,10 @@ namespace ssi
             anno.SampleAnnoPath = filename;
             double maxdur = 0;
 
-            foreach (AnnoListItem ali in anno)
-            {
-                if (ali.Stop > maxdur)
-                {
-                    maxdur = ali.Stop;
-                }
-            }
+          
+            maxdur = anno[anno.Count - 1].Stop;
+         
+
             if (anno != null)
             {
                 setAnnoList(anno);
@@ -1219,7 +1217,7 @@ namespace ssi
                 annolist.AnnotationScheme.name = anno.AnnotationScheme.name;
                 annolist.Role = anno.Role;
                 annolist.SR = anno.SR;
-                annolist.HasChanged = true;
+                annolist.HasChanged = false;
                 annolist.AnnotationType = anno.AnnotationType;
                 annolist.Filepath = anno.Filepath;
                 annolist.SampleAnnoPath = anno.SampleAnnoPath;
@@ -3359,16 +3357,16 @@ namespace ssi
             if (DatabaseLoaded)
             {
                 bool anytrackchanged = false;
-                //foreach (AnnoTrack track in anno_tracks)
-                //{
-                //    if (track.AnnoList.HasChanged== true) anytrackchanged = true;
-                //}
+                foreach (AnnoTrack track in anno_tracks)
+                {
+                    if (track.AnnoList.HasChanged == true) anytrackchanged = true;
+                }
 
                 string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
 
                 try
                 {
-                    if (anno_tracks.Count > 0)
+                    if (anno_tracks.Count > 0 && (anytrackchanged ||isfinsihed))
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
@@ -3499,21 +3497,6 @@ namespace ssi
                                     }
                                 }
 
-                                //if (Properties.Settings.Default.DataServerConnectionType == "http" && ci[0].requiresauth == "true")
-                                //{
-                                //    downloadsreceived.Clear();
-                                //    downloadstotal.Clear();
-                                //    string[] files = new string[filestoload.Count];
-                                //    for (int i = 0; i < filestoload.Count; i++)
-                                //    {
-                                //        files[i] = filestoload[i];
-                                //    }
-                                //    LoadFiles(files);
-                                //    filestoload.Clear();
-                                //    this.view.ShadowBox.Visibility = Visibility.Collapsed;
-                                //    this.view.ShadowBoxText.Text = "";
-
-                                //}
                             }
                         }
                         DatabaseLoaded = true;
