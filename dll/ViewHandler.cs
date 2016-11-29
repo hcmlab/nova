@@ -429,9 +429,9 @@ namespace ssi
                             if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i + 1 < anno_tracks.Count)
                             {
                                 AnnoTrack.SelectTrack(anno_tracks[i + 1]);
-
+                                 AnnoTrack.SelectSegment(null);
                                 if (!AnnoTrack.GetSelectedTrack().AnnoList.Contains(temp)) AnnoTrack.GetSelectedTrack().newAnnocopy(temp.Start, temp.Stop, temp.Label, temp.Bg);
-                                AnnoTrack.SelectSegment(null);
+                              
                                 break;
                             }
                         }
@@ -465,7 +465,18 @@ namespace ssi
         {
             if (!this.view.annoListControl.editTextBox.IsFocused)
             {
-                if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+
+
+                if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                {
+                    if (DatabaseLoaded)
+                    {
+                        mongodbStore(true);
+                    }
+                    else saveAnnoAs();
+                }
+
+               else  if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
                     if (DatabaseLoaded)
                     {
@@ -473,6 +484,7 @@ namespace ssi
                     }
                     else saveAnno();
                 }
+               
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
                     if (AnnoTrack.GetSelectedSegment() == null && Mouse.DirectlyOver == AnnoTrack.GetSelectedTrack())
@@ -3366,7 +3378,9 @@ namespace ssi
                             track.AnnoList.HasChanged = false;
                         }
 
+                        if(!isfinsihed)
                         MessageBox.Show("Annotation Tracks for Annotator " + annotator + " in session " + Properties.Settings.Default.LastSessionId + " have been stored in the database");
+                        else MessageBox.Show("Annotation Tracks for Annotator " + annotator + " in session " + Properties.Settings.Default.LastSessionId + " have been stored in the database and have been marked as finished");
                     }
                     else if (anno_tracks.Count == 0) MessageBox.Show("No annotation tiers available");
                 }
