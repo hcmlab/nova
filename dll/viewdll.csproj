@@ -163,6 +163,9 @@
       <DependentUpon>AnnoListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="AnnoListItem.cs" />
+    <Compile Include="AnnoSchemeEditor.xaml.cs">
+      <DependentUpon>AnnoSchemeEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AnnoTrack.cs" />
     <Compile Include="AnnoTrackControl.xaml.cs" />
     <Compile Include="AnnoTrackSegment.cs" />
@@ -292,6 +295,10 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AnnoSchemeEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="AnnoTrackControl.xaml">
       <Generator>MSBuild:Compile</Generator>

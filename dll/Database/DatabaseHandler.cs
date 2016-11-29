@@ -522,7 +522,7 @@ namespace ssi
                 }
 
                 al.Role = roledb;
-                al.Name = al.Role + " #" + annotdb + " #" + annotatdbfn;
+                al.Name = "#" +al.Role + " #" + annotdb + " #" + annotatdbfn;
 
                 al.AnnotationScheme = new AnnotationScheme();
                 al.AnnotationScheme.name = annosch["name"].ToString();

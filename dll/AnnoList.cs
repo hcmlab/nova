@@ -427,6 +427,9 @@ namespace ssi
                 else if (scheme.Attributes["mincolor"] != null) list.AnnotationScheme.mincolor = scheme.Attributes["mincolor"].Value;
                 if (scheme.Attributes["maxcolor"] != null) list.AnnotationScheme.maxcolor = scheme.Attributes["maxcolor"].Value;
 
+                list.Name = "#" + list.Role + " #" + scheme.Attributes["name"].Value + " #" + list.Annotator;
+
+
                 if (type == "DISCRETE") list.AnnotationType = AnnoType.DISCRETE;
                 else if (type == "CONTINUOUS") list.AnnotationType = AnnoType.CONTINUOUS;
                 else list.AnnotationType = AnnoType.FREE;
@@ -706,7 +709,9 @@ namespace ssi
         {
             if (filepath == null || filepath.Split('.')[1] == "eaf" || filepath.Split('.')[1] == "anvil" || filepath.Split('.')[1] == "anno" || filepath.Split('.')[1] == "csv")
             {
-                filepath = ViewTools.SaveFileDialog(this.Name, ".annotation", Path.GetDirectoryName(this.Filepath));
+                if (this.Annotator == null) this.Annotator = this.AnnotatorFullName;
+                filepath = ViewTools.SaveFileDialog(this.AnnotationScheme.name + "." + this.Role + "." + this.Annotator, ".annotation", Path.GetDirectoryName(this.Filepath));
+   
                 if (filepath != null)
                 {
                     filename = filepath.Split('.')[0];
