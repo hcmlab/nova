@@ -157,7 +157,7 @@ namespace ssi
             foreach (DatabaseMediaInfo c in ci)
             {
                 files.Add(c);
-                if (!c.filepath.Contains(".stream~") && !c.filepath.Contains(".stream%7E"))
+                if (!c.filename.Contains(".stream~") && !c.filename.Contains(".stream%7E"))
                 {
                     MediaResultBox.Items.Add(c.filename);
                 }

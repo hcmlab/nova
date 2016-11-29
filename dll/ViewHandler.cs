@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -115,7 +114,7 @@ namespace ssi
 
             this.view.videoControl.RemoveMedia += new EventHandler<MediaRemoveEventArgs>(removeMedia);
             this.view.trackControl.signalTrackControl.RemoveSignal += new EventHandler<SignalRemoveEventArgs>(removeSignal);
-            this.view.cancel.Click += cancel_click;
+            this.view.ShadowBoxCancel.Click += cancel_click;
             this.view.annoListControl.annoDataGrid.SelectionChanged += annoDataGrid_SelectionChanged;
             this.view.annoListControl.editButton.Click += editAnnoButton_Click;
             this.view.annoListControl.editTextBox.KeyDown += editTextBox_KeyDown;
@@ -332,7 +331,6 @@ namespace ssi
                     e.Handled = true;
                 }
 
-
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !keyDown)
                 {
                     if (AnnoTrack.GetSelectedTrack() != null && !AnnoTrack.GetSelectedTrack().isDiscrete)
@@ -343,18 +341,16 @@ namespace ssi
                     e.Handled = true;
                 }
 
-
                 if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
                 {
-                   for(int i = 0; i < anno_tracks.Count; i++)
+                    for (int i = 0; i < anno_tracks.Count; i++)
                     {
-                        if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i +1 < anno_tracks.Count)
+                        if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i + 1 < anno_tracks.Count)
                         {
                             AnnoTrack.SelectTrack(anno_tracks[i + 1]);
                             AnnoTrack.SelectSegment(null);
                             break;
                         }
-
                     }
                     e.Handled = true;
                 }
@@ -369,30 +365,23 @@ namespace ssi
                             AnnoTrack.SelectSegment(null);
                             break;
                         }
-
                     }
                     e.Handled = true;
                 }
 
-
-
                 if (e.KeyboardDevice.IsKeyDown(Key.C) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
-
                     if (AnnoTrack.GetSelectedSegment() != null)
                     {
                         temp_segment = AnnoTrack.GetSelectedSegment();
                         AnnoTrack.GetSelectedSegment().select(false);
-
                     }
 
                     e.Handled = true;
                 }
 
-
                 if (e.KeyboardDevice.IsKeyDown(Key.X) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
-
                     if (AnnoTrack.GetSelectedSegment() != null)
                     {
                         temp_segment = AnnoTrack.GetSelectedSegment();
@@ -402,11 +391,8 @@ namespace ssi
                     e.Handled = true;
                 }
 
-
-
-                if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl)  &&  AnnoTrack.GetSelectedTrack().isDiscrete)
+                if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
-
                     if (AnnoTrack.GetSelectedTrack() != null)
                     {
                         double start = Time.TimeFromPixel(annoCursor.X);
@@ -416,12 +402,10 @@ namespace ssi
                     e.Handled = true;
                 }
 
-
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.Z))
                 {
                     if (AnnoTrack.GetSelectedTrack() != null)
                     {
-
                         AnnoTrack.GetSelectedTrack().UnDoObject.Undo(1);
                     }
                 }
@@ -430,64 +414,50 @@ namespace ssi
                 {
                     if (AnnoTrack.GetSelectedTrack() != null)
                     {
-
                         AnnoTrack.GetSelectedTrack().UnDoObject.Redo(1);
                     }
                 }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Down))
                 {
-                    if(AnnoTrack.GetSelectedSegment() != null)
+                    if (AnnoTrack.GetSelectedSegment() != null)
                     {
                         AnnoListItem temp = AnnoTrack.GetSelectedSegment().Item;
-                   
 
-
-                    for (int i = 0; i < anno_tracks.Count; i++)
-                    {
-                        if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i + 1 < anno_tracks.Count)
+                        for (int i = 0; i < anno_tracks.Count; i++)
                         {
-          
-                            AnnoTrack.SelectTrack(anno_tracks[i+1]);
-                         
-                            if (!AnnoTrack.GetSelectedTrack().AnnoList.Contains(temp))  AnnoTrack.GetSelectedTrack().newAnnocopy(temp.Start, temp.Stop, temp.Label, temp.Bg);
+                            if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i + 1 < anno_tracks.Count)
+                            {
+                                AnnoTrack.SelectTrack(anno_tracks[i + 1]);
+
+                                if (!AnnoTrack.GetSelectedTrack().AnnoList.Contains(temp)) AnnoTrack.GetSelectedTrack().newAnnocopy(temp.Start, temp.Stop, temp.Label, temp.Bg);
                                 AnnoTrack.SelectSegment(null);
                                 break;
+                            }
                         }
-
-                    }
                     }
                     e.Handled = true;
-
-                    
                 }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Up))
                 {
                     if (AnnoTrack.GetSelectedSegment() != null)
                     {
-               
                         AnnoListItem temp = AnnoTrack.GetSelectedSegment().Item;
 
                         for (int i = 0; i < anno_tracks.Count; i++)
                         {
                             if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i > 0)
                             {
-                                 AnnoTrack.SelectTrack(anno_tracks[i-1]);
+                                AnnoTrack.SelectTrack(anno_tracks[i - 1]);
                                 AnnoTrack.SelectSegment(null);
                                 if (!AnnoTrack.GetSelectedTrack().AnnoList.Contains(temp)) AnnoTrack.GetSelectedTrack().newAnnocopy(temp.Start, temp.Stop, temp.Label, temp.Bg);
                                 break;
-
-
                             }
-
                         }
                     }
                     e.Handled = true;
-
                 }
-
-
             }
         }
 
@@ -567,12 +537,6 @@ namespace ssi
                     keyDown = true;
                     // e.Handled = true;
                 }
-
-
-
-
-
-
                 else if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.A) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && !AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedSegment() != null)
@@ -1904,7 +1868,10 @@ namespace ssi
             {
                 foreach (IMedia t in ml.Medias)
                 {
-                    sw.WriteLine("\t\t<media>" + ViewTools.GetRelativePath(t.GetFilepath(), workdir) + "</media>");
+                    if (t.GetFilepath() != null)
+                    {
+                        sw.WriteLine("\t\t<media>" + ViewTools.GetRelativePath(t.GetFilepath(), workdir) + "</media>");
+                    }
                 }
             }
             sw.WriteLine("\t</medias>");
@@ -1913,7 +1880,10 @@ namespace ssi
             {
                 foreach (SignalTrack st in signal_tracks)
                 {
-                    sw.WriteLine("\t\t<signal bg=\"" + st.Background + "\" fg=\"" + st.SignalColor + "\">" + ViewTools.GetRelativePath(st.getSignal().Filepath, workdir) + "</signal>");
+                    if (st.getSignal().Filepath != null)
+                    {
+                        sw.WriteLine("\t\t<signal bg=\"" + st.Background + "\" fg=\"" + st.SignalColor + "\">" + ViewTools.GetRelativePath(st.getSignal().Filepath, workdir) + "</signal>");
+                    }
                 }
             }
 
@@ -1922,7 +1892,10 @@ namespace ssi
 
             foreach (AnnoTrack t in tracks)
             {
-                sw.WriteLine("\t\t<tier filepath=\"" + ViewTools.GetRelativePath(t.AnnoList.Filepath, workdir) + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
+                if (t.AnnoList.Filepath != null)
+                {
+                    sw.WriteLine("\t\t<tier filepath=\"" + ViewTools.GetRelativePath(t.AnnoList.Filepath, workdir) + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
+                }
             }
 
             sw.WriteLine("\t</tiers>");
@@ -1936,45 +1909,52 @@ namespace ssi
             string workdir = Path.GetDirectoryName(filepath);
 
             XmlDocument doc = new XmlDocument();
-            doc.Load(filepath);
-            foreach (XmlNode node in doc.SelectNodes("//media"))
+            try
             {
-                bool isvideo = true;
-                if (node.InnerText.Contains("wav"))
+                doc.Load(filepath);
+                foreach (XmlNode node in doc.SelectNodes("//media"))
                 {
-                    isvideo = false;
-                    // loadWav(node.InnerText);
-                }
-                loadMedia(ViewTools.GetAbsolutePath(node.InnerText, workdir), isvideo);
-            }
-
-            foreach (XmlNode node in doc.SelectNodes("//signal"))
-            {
-                string background = node.Attributes[0].LastChild.Value;
-                string foreground = node.Attributes[1].LastChild.Value;
-                if (node.InnerText.Contains("wav"))
-                {
-                    loadWav(ViewTools.GetAbsolutePath(node.InnerText, workdir));
-                }
-                else
-                {
-                    loadStream(ViewTools.GetAbsolutePath(node.InnerText, workdir), foreground, background);
-                }
-            }
-
-            foreach (XmlNode child in (doc.SelectNodes("//tier")))
-            {
-                if (child.Attributes.Count > 0)
-                {
-                    if (child.Attributes[0].InnerText.Contains("csv"))
+                    bool isvideo = true;
+                    if (node.InnerText.Contains("wav"))
                     {
-                        loadCSVAnnotation(ViewTools.GetAbsolutePath(child.Attributes[1].InnerText, workdir), 1, "semicolon", child.Attributes[2].InnerText);
+                        isvideo = false;
+                        // loadWav(node.InnerText);
                     }
-                    else if (child.Attributes[0].InnerText.Contains("annotation"))
+                    loadMedia(ViewTools.GetAbsolutePath(node.InnerText, workdir), isvideo);
+                }
+
+                foreach (XmlNode node in doc.SelectNodes("//signal"))
+                {
+                    string background = node.Attributes[0].LastChild.Value;
+                    string foreground = node.Attributes[1].LastChild.Value;
+                    if (node.InnerText.Contains("wav"))
                     {
-                        loadAnnotation(ViewTools.GetAbsolutePath(child.Attributes[0].InnerText, workdir));
+                        loadWav(ViewTools.GetAbsolutePath(node.InnerText, workdir));
+                    }
+                    else
+                    {
+                        loadStream(ViewTools.GetAbsolutePath(node.InnerText, workdir), foreground, background);
                     }
                 }
+
+                foreach (XmlNode child in (doc.SelectNodes("//tier")))
+                {
+                    if (child.Attributes.Count > 0)
+                    {
+                        if (child.Attributes[0].InnerText.Contains("csv"))
+                        {
+                            loadCSVAnnotation(ViewTools.GetAbsolutePath(child.Attributes[1].InnerText, workdir), 1, "semicolon", child.Attributes[2].InnerText);
+                        }
+                        else if (child.Attributes[0].InnerText.Contains("annotation"))
+                        {
+                            loadAnnotation(ViewTools.GetAbsolutePath(child.Attributes[0].InnerText, workdir));
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ViewTools.ShowErrorMessage(e.ToString());
             }
         }
 
@@ -2173,7 +2153,7 @@ namespace ssi
                     {
                         if (ali.Start >= AnnoTrack.GetSelectedSegment().Item.Start && ali.Stop <= AnnoTrack.GetSelectedSegment().Item.Stop)
                         {
-                            if(inputBox.Result() != "")
+                            if (inputBox.Result() != "")
                             {
                                 double valueasdouble;
                                 if (double.TryParse(inputBox.Result(), out valueasdouble))
@@ -2185,27 +2165,20 @@ namespace ssi
                                         MessageBox.Show("Value must be within range of " + AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.minborder + " and " + AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.maxborder);
                                         break;
                                     }
-
                                 }
-
                                 else
                                 {
                                     MessageBox.Show("Value must be a number within the range of " + AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.minborder + " and " + AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.maxborder);
                                     break;
                                 }
-
-                               
                             }
 
-                        
                             ali.Confidence = inputBox.ResultSlider();
                         }
                     }
 
                     AnnoTrack.GetSelectedTrack().timeRangeChanged(time);
                     AnnoTrack.GetSelectedTrack().timeRangeChanged(time);
-
-
                 }
             }
         }
@@ -2322,9 +2295,7 @@ namespace ssi
                 string[] filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 if (filenames != null)
                 {
-                    this.view.Cursor = Cursors.Wait;
                     LoadFiles(filenames);
-                    this.view.Cursor = Cursors.Arrow;
                 }
             }
         }
@@ -2351,19 +2322,20 @@ namespace ssi
                     {
                         loadFromFile(filename);
                     }
-
                 }
             }
         }
 
         public bool loadFromFile(string filename, string url = null)
         {
-            if (filename.EndsWith("~"))
+            if (filename == null || filename.EndsWith("~"))
             {
-                return true;
+                return false;
             }
 
+            this.view.Cursor = Cursors.Wait;
             Action EmptyDelegate = delegate () { };
+            this.view.ShadowBoxText.Text = "Loading '" + filename + "'";
             this.view.ShadowBox.Visibility = Visibility.Visible;
             view.UpdateLayout();
             view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
@@ -2407,16 +2379,16 @@ namespace ssi
                         ftype = ssi_file_type.AUDIO;
                         break;
 
-                    case "anno":
-                        ftype = ssi_file_type.ANNO;
-                        break;
-
                     case "annotation":
                         ftype = ssi_file_type.ANNOTATION;
                         break;
 
                     case "stream":
                         ftype = ssi_file_type.STREAM;
+                        break;
+
+                    case "anno":
+                        ftype = ssi_file_type.ANNO;
                         break;
 
                     case "events":
@@ -2436,13 +2408,7 @@ namespace ssi
                         break;
 
                     case "nova":
-                    case "vui":
                         ftype = ssi_file_type.PROJECT;
-                        break;
-
-                    case "zip":
-                    case "rar":
-                        ftype = ssi_file_type.IGNORE;
                         break;
                 }
             }
@@ -2515,11 +2481,6 @@ namespace ssi
                     loaded = true;
                     break;
 
-                case ssi_file_type.ANNO:
-                    loadAnno(filename);
-                    loaded = true;
-                    break;
-
                 case ssi_file_type.ANNOTATION:
                     loadAnnotation(filename);
                     loaded = true;
@@ -2556,15 +2517,13 @@ namespace ssi
                     loaded = true;
                     break;
 
-                case ssi_file_type.IGNORE:
-                    break;
-
                 default:
-                    MessageBox.Show("File Format not supported");
-
                     break;
             }
+
             this.view.ShadowBox.Visibility = Visibility.Collapsed;
+            this.view.Cursor = Cursors.Arrow;
+
             return loaded;
         }
 
@@ -2946,9 +2905,7 @@ namespace ssi
                 Sftp sftp = new Sftp(ftphost, login, password);
                 try
                 {
-                    //sftp.OnTransferStart += new FileTransferEvent(sshCp_OnTransferStart);
                     sftp.OnTransferProgress += new FileTransferEvent(sshCp_OnTransferProgress);
-                    //sftp.OnTransferEnd += new FileTransferEvent(sshCp_OnTransferEnd);
                     await view.Dispatcher.BeginInvoke(new Action<string>(SFTPConnect), DispatcherPriority.Normal, "");
                     Console.WriteLine("Connecting...");
                     sftp.Connect();
@@ -2961,7 +2918,7 @@ namespace ssi
                     {
                         if (sftp.Connected)
                         {
-                            token.Register(() => { sftp.Cancel(); iscanceled = true; while (sftp.Connected) Thread.Sleep(100); SFTPcancelDownload(localpath); return; });
+                            token.Register(() => { sftp.Cancel(); iscanceled = true; while (sftp.Connected) Thread.Sleep(100); CanceledDownload(localpath); return; });
                             if (!iscanceled)
                             {
                                 try
@@ -2996,9 +2953,8 @@ namespace ssi
             if (!iscanceled) await view.Dispatcher.BeginInvoke(new Action<string>(SFTPUpdateUIonTransferEnd), DispatcherPriority.Normal, "");
         }
 
-        private void SFTPcancelDownload(string localpath)
+        private void CanceledDownload(string localpath)
         {
-            //MessageBox.Show(localpath);
             foreach (DownloadStatus d in downloads)
             {
                 if (d.active == true && d.File == localpath)
@@ -3027,7 +2983,7 @@ namespace ssi
             }
 
             this.view.ShadowBox.Visibility = Visibility.Collapsed;
-            this.view.cancel.Visibility = Visibility.Collapsed;
+            this.view.ShadowBoxCancel.Visibility = Visibility.Collapsed;
 
             if (numberofparalleldownloads <= 0)
             {
@@ -3052,9 +3008,9 @@ namespace ssi
 
         private void SFTPConnect(string text)
         {
-            this.view.tb.Text = "Connecting to Server...";
+            this.view.ShadowBoxText.Text = "Connecting to Server...";
             this.view.ShadowBox.Visibility = Visibility.Visible;
-            this.view.cancel.Visibility = Visibility.Visible;
+            this.view.ShadowBoxCancel.Visibility = Visibility.Visible;
         }
 
         private void SFTPUpdateUIonTransferEnd(string text)
@@ -3063,7 +3019,7 @@ namespace ssi
             if (numberofparalleldownloads <= 0)
             {
                 this.view.ShadowBox.Visibility = Visibility.Collapsed;
-                this.view.cancel.Visibility = Visibility.Collapsed;
+                this.view.ShadowBoxCancel.Visibility = Visibility.Collapsed;
                 numberofparalleldownloads = 0;
                 string[] files2 = new string[filestoload.Count];
                 for (int i = 0; i < filestoload.Count; i++)
@@ -3081,13 +3037,13 @@ namespace ssi
         {
             double percent = ((double)transferredBytes / (double)totalBytes) * 100.0;
             string param = dst + "#" + percent.ToString("F2");
-            view.Dispatcher.BeginInvoke(new Action<string>(SFTPUpdateUIonTransfer), DispatcherPriority.Normal, param);
+            view.Dispatcher.BeginInvoke(new Action<string>(UpdateUIonTransfer), DispatcherPriority.Normal, param);
         }
 
-        private void SFTPUpdateUIonTransfer(string text)
+        private void UpdateUIonTransfer(string text)
         {
             string[] split = text.Split('#');
-            this.view.tb.Text = "";
+            this.view.ShadowBoxText.Text = "";
             foreach (DownloadStatus d in downloads)
             {
                 if (d.File == split[0])
@@ -3096,53 +3052,119 @@ namespace ssi
                 }
 
                 int pos = d.File.LastIndexOf("\\") + 1;
-                if (d.percent != "100.00") this.view.tb.Text = this.view.tb.Text + "Downloading " + d.File.Substring(pos, d.File.Length - pos) + "  (" + d.percent + "%)\n";
-                if (d.percent == "100.00") d.active = false;
+                if (double.Parse(d.percent) < 99.0) this.view.ShadowBoxText.Text = this.view.ShadowBoxText.Text + "Downloading " + d.File.Substring(pos, d.File.Length - pos) + "  (" + d.percent + "%)\n";
+                else d.active = false;
             }
         }
 
-        private void httpPost(string URL, string filename, string db, string login, string password, string sessionid = "Default")
+        private async Task httpPost(string URL, string filename, string db, string login, string password, string sessionid = "Default")
         {
-            string fileName = URL.Substring(URL.LastIndexOf("/") + 1, (URL.Length - URL.LastIndexOf("/") - 1));
-            string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + fileName;
-
-            if (!File.Exists(Properties.Settings.Default.DataPath + "\\" + sessionid + "\\" + fileName))
+            string fileName = filename;
+            if (fileName.EndsWith(".stream%7E"))
             {
+                fileName = fileName.Remove(fileName.Length - 3);
+                fileName = fileName + "~";
+            }
+
+            string localpath = Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid + "\\" + filename;
+            numberofparalleldownloads++;
+
+            if (!localpath.EndsWith(".stream~")) filestoload.Add(localpath);
+
+            if (!File.Exists(localpath))
+            {
+                DownloadStatus dl = new DownloadStatus();
+                dl.File = localpath;
+                dl.percent = "0.00";
+                dl.active = true;
+                downloads.Add(dl);
+
                 try
                 {
+                    Action EmptyDelegate = delegate () { };
+                    this.view.ShadowBoxText.Text = "Downloading '" + filename + "'";
+                    this.view.ShadowBox.Visibility = Visibility.Visible;
+                    this.view.ShadowBoxCancel.Visibility = Visibility.Visible;
+                    view.UpdateLayout();
+                    view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                     // Create a new WebClient instance.
 
                     WebClient client = new WebClient();
 
-                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
-                    //  client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadFileCompleted);
-                    Mouse.SetCursor(System.Windows.Input.Cursors.Hand);
+                    client.UploadProgressChanged += (s, e) =>
+                    {
+                        double percent = ((double)e.BytesReceived / (double)e.TotalBytesToReceive) * 100.0;
+                        string param = localpath + "#" + percent.ToString("F2");
+                        view.Dispatcher.BeginInvoke(new Action<string>(UpdateUIonTransfer), DispatcherPriority.Normal, param);
+                    };
 
-                    // Concatenate the domain with the Web resource filename.
-                    Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", fileName, URL);
-                    // Download the Web resource and save it into the current filesystem folder.
-                    Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + sessionid);
+                    client.UploadValuesCompleted += (s, e) =>
+                    {
+                        try
+                        {
+                            byte[] response = e.Result;
+                            File.WriteAllBytes(localpath, response);
+                            view.Dispatcher.BeginInvoke(new Action<string>(httpPostfinished), DispatcherPriority.Normal, "");
+                        }
+                        catch (Exception ex)
+                        {
+                            //Could happen when we cancel the download.
+                        }
+                    };
 
-                    var values = new NameValueCollection();
-                    values["username"] = login;
-                    values["password"] = password;
-                    values["session_id"] = sessionid;
-                    values["filename"] = filename;
+                    Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", filename, URL);
+                    Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + db + "\\" + sessionid);
 
-                    var response = client.UploadValues(URL, values);
-                    var responseString = Encoding.Default.GetString(response);
+                    CancellationToken token = tokenSource.Token;
 
-                    Console.WriteLine(responseString);
+                    await Task.Run(() =>
+                    {
+                        token.Register(() => { client.CancelAsync(); CanceledDownload(localpath); return; });
+                        string resultString = Regex.Match(sessionid, @"\d+").Value;
+                        //Here we assume that the session is stored as simple ID. (as it is done in the Noxi Database). If the SessionID really is a string, this step is not needed.
+                        int sid = Int32.Parse(resultString);
+                        var values = new NameValueCollection();
+                        values.Add("username", login);
+                        values.Add("password", password);
+                        values.Add("session_id", sid.ToString());
+                        values.Add("filename", filename);
 
-                    /*
-                     *  Todo, something with the response
-                     */
-
-                    client.DownloadFile(URL, "Data\\" + sessionid + "\\" + fileName);
+                        Uri url = new Uri(URL);
+                        client.UploadValuesAsync(url, values);
+                    }, token);
                 }
-                catch { MessageBox.Show("Url not found"); }
+                catch (Exception ex)
+
+                {
+                    MessageBox.Show("Credentials or URL are wrong.");
+                }
             }
-            loadFromFile(localpath);
+            else await view.Dispatcher.BeginInvoke(new Action<string>(httpPostfinished), DispatcherPriority.Normal, "");
+        }
+
+        private void httpPostfinished(string param)
+        {
+            numberofparalleldownloads--;
+            if (numberofparalleldownloads <= 0)
+            {
+                Action EmptyDelegate = delegate () { };
+                this.view.ShadowBoxText.UpdateLayout();
+                this.view.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                this.view.ShadowBoxText.Text = "Loading Data";
+                this.view.ShadowBox.Visibility = Visibility.Collapsed;
+                this.view.ShadowBoxCancel.Visibility = Visibility.Collapsed;
+                this.view.ShadowBox.UpdateLayout();
+
+                string[] files = new string[filestoload.Count];
+                for (int i = 0; i < filestoload.Count; i++)
+                {
+                    files[i] = filestoload[i];
+                }
+
+                filestoload.Clear();
+                downloads.Clear();
+                LoadFiles(files);
+            }
         }
 
         private void httpGet(string URL, string db, string sessionid = "Default", string filename = "")
@@ -3193,9 +3215,9 @@ namespace ssi
                 this.view.navigator.Statusbar.Content = "© 2016 HCM-Lab, Augsburg University";
                 this.view.navigator.Statusbar.UpdateLayout();
                 this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-                this.view.tb.UpdateLayout();
-                this.view.tb.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-                this.view.tb.Text = "Loading Data";
+                this.view.ShadowBoxText.UpdateLayout();
+                this.view.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                this.view.ShadowBoxText.Text = "Loading Data";
                 this.view.ShadowBox.Visibility = Visibility.Collapsed;
                 this.view.ShadowBox.UpdateLayout();
                 downloadsreceived.Clear();
@@ -3238,7 +3260,7 @@ namespace ssi
                 this.view.navigator.Statusbar.UpdateLayout();
                 this.view.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 this.view.ShadowBox.Visibility = Visibility.Visible;
-                this.view.tb.Text = "Downloading Files... Total progress: " + "  (" + percent.ToString("F2") + "%)";
+                this.view.ShadowBoxText.Text = "Downloading Files... Total progress: " + "  (" + percent.ToString("F2") + "%)";
             }
             catch (Exception e1)
             {
@@ -3457,11 +3479,27 @@ namespace ssi
                                             {
                                                 Properties.Settings.Default.DataServerConnectionType = "http";
                                                 //This has not been tested and probably needs rework.
-                                                httpPost(c.filepath, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId);
+                                                httpPost(c.filepath, c.filename, Properties.Settings.Default.Database, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.LastSessionId);
                                             }
                                         }
                                     }
                                 }
+
+                                //if (Properties.Settings.Default.DataServerConnectionType == "http" && ci[0].requiresauth == "true")
+                                //{
+                                //    downloadsreceived.Clear();
+                                //    downloadstotal.Clear();
+                                //    string[] files = new string[filestoload.Count];
+                                //    for (int i = 0; i < filestoload.Count; i++)
+                                //    {
+                                //        files[i] = filestoload[i];
+                                //    }
+                                //    LoadFiles(files);
+                                //    filestoload.Clear();
+                                //    this.view.ShadowBox.Visibility = Visibility.Collapsed;
+                                //    this.view.ShadowBoxText.Text = "";
+
+                                //}
                             }
                         }
                         DatabaseLoaded = true;
