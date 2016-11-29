@@ -999,7 +999,7 @@ namespace ssi
 
                 if (anno.AnnotationScheme.type != "FREE") anno.usesAnnoScheme = true;
                 else anno.usesAnnoScheme = false;
-                anno.Name = anno.Role + " #" + anno.AnnotationScheme.name;
+                anno.Name = "#" + anno.Role + " #" + anno.AnnotationScheme.name + " #" + anno.Annotator;
 
                 if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null)
                 {
@@ -1043,7 +1043,8 @@ namespace ssi
             track.AnnoList.Lowborder = borderlow;
             track.AnnoList.Highborder = borderhigh;
             track.AnnoList.AnnotationType = isdiscrete;
-            track.AnnoList.Annotator = annotator;
+            if (annotator == null) track.AnnoList.Annotator = anno.Annotator;
+            else track.AnnoList.Annotator = annotator;
             track.AnnoList.usesAnnoScheme = anno.usesAnnoScheme;
             track.AnnoList.AnnotationScheme = anno.AnnotationScheme;
             track.AnnoList.HasChanged = false;
@@ -1193,15 +1194,15 @@ namespace ssi
                 {
                     foreach (AnnoListItem ali in anno)
                     {
-                        if (ali.Tier == tierid)
+                        if (ali.Tier == "#" +tierid)
                         {
-                            annolist.Name = tierid;
+                            annolist.Name = "#" + tierid;
                             //check if trackid is already used
                             foreach (AnnoTrack a in anno_tracks)
                             {
-                                if (a.AnnoList.Name == tierid)
+                                if (a.AnnoList.Name == "#" + tierid)
                                 {
-                                    annolist.Name = tierid + tiercount.ToString();
+                                    annolist.Name = "#" +tierid + tiercount.ToString();
                                     break;
                                 }
                             }
@@ -1698,7 +1699,7 @@ namespace ssi
 
         private void changeAnnoTrackHandler(AnnoTrack track, EventArgs e)
         {
-            this.view.trackControl.annoNameLabel.Content = "#" + track.TierId;
+            this.view.trackControl.annoNameLabel.Content = track.AnnoList.Name;
 
             //  this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
             setAnnoList(track.AnnoList);
@@ -2568,7 +2569,7 @@ namespace ssi
                 inputBox.Close();
                 if (inputBox.DialogResult == true)
                 {
-                    this.view.trackControl.annoNameLabel.Content = "#" + inputBox.Result();
+                    this.view.trackControl.annoNameLabel.Content = inputBox.Result();
                     AnnoTrack.GetSelectedTrack().TierId = inputBox.Result();
                     AnnoTrack.GetSelectedTrack().AnnoList.Name = AnnoTrack.GetSelectedTrack().TierId;
 
@@ -2662,7 +2663,8 @@ namespace ssi
         {
             if (this.current_anno != null)
             {
-                string filename = ViewTools.SaveFileDialog(this.current_anno.Name, ".annotation");
+                if (this.current_anno.AnnotatorFullName == null) this.current_anno.AnnotatorFullName = this.current_anno.Annotator;
+                string filename = ViewTools.SaveFileDialog(this.current_anno.AnnotationScheme.name + "."+ this.current_anno.Role + "." + this.current_anno.Annotator, ".annotation");
                 saveAnno(filename);
             }
         }
@@ -2725,10 +2727,24 @@ namespace ssi
                     AnnoType at = ntw.Result();
 
                     if (at == AnnoType.FREE) newAnno(AnnoType.FREE);
+
+
                     else if (at == AnnoType.DISCRETE)
                     {
                         //todo some logic to get annoscheme
-                        newAnno(AnnoType.DISCRETE);
+
+                        AnnoSchemeEditor ase = new AnnoSchemeEditor();
+                        ase.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                        ase.ShowDialog();
+
+                        if(ase.DialogResult == true)
+                        {
+                            AnnoList al = ase.GetAnnoList();
+                            addAnno(al,AnnoType.DISCRETE);
+                        }
+                    
+
+                      
                     }
                     else if (at == AnnoType.CONTINUOUS)
                     {
@@ -3455,8 +3471,8 @@ namespace ssi
                             foreach (AnnoList anno in annos)
 
                             {
-                                anno.Filepath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
-                                anno.SampleAnnoPath = anno.Role + "_" + anno.AnnotationScheme.name + "_" + anno.AnnotatorFullName;
+                                anno.Filepath = anno.Role + "." + anno.AnnotationScheme.name + "." + anno.AnnotatorFullName;
+                                anno.SampleAnnoPath = anno.Role + "." + anno.AnnotationScheme.name + "." + anno.AnnotatorFullName;
 
                                 if (anno.AnnotationType == AnnoType.CONTINUOUS) anno.usesAnnoScheme = true;
                                 else if (anno.AnnotationType == AnnoType.DISCRETE) anno.usesAnnoScheme = true;
