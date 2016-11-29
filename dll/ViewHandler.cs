@@ -1046,6 +1046,7 @@ namespace ssi
             track.AnnoList.Annotator = annotator;
             track.AnnoList.usesAnnoScheme = anno.usesAnnoScheme;
             track.AnnoList.AnnotationScheme = anno.AnnotationScheme;
+            track.AnnoList.HasChanged = false;
 
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.timeRangeChanged;
 
@@ -1135,7 +1136,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count == 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void handleAnnotation(AnnoList anno, string filename)
@@ -1150,6 +1151,8 @@ namespace ssi
             {
                 if (anno.AnnotationType != AnnoType.CONTINUOUS)
                 {
+                    //legacy code for multitier files, probably remove this in the future
+
                     foreach (AnnoListItem ali in anno)
                     {
                         if (!TierIds.Contains(ali.Tier))
