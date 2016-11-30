@@ -891,13 +891,14 @@ namespace ssi
                         if (selected_segment.is_resizeable_right)
                         {
                             double delta = point.X - selected_segment.ActualWidth;
+                            double pos = GetLeft(selected_segment);
 
                             if (isMouseAlreadydown == false)
                             {
-                               // Console.WriteLine("ResizeRight");
-                               //TODO: Logic for Redo
-                                isMouseAlreadydown = true;
 
+                                ChangeRepresentationObject ChangeRepresentationObjectOfResize = UnDoObject.MakeChangeRepresentationObjectForResize(pos, (FrameworkElement)selected_segment);
+                                UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfResize);
+                                isMouseAlreadydown = true;
                             }
 
 
@@ -920,12 +921,11 @@ namespace ssi
                         // resize segment left
                         else if (selected_segment.is_resizeable_left)
                         {
-
+                            double pos = GetLeft(selected_segment);
                             if (isMouseAlreadydown == false)
                             {
-                                //TODO: Logic for Redo
-                                //  Console.WriteLine("ResizeLeft");
-
+                                ChangeRepresentationObject ChangeRepresentationObjectOfResize = UnDoObject.MakeChangeRepresentationObjectForResize(pos, (FrameworkElement)selected_segment);
+                                UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfResize);
                                 isMouseAlreadydown = true;
 
                             }
@@ -955,12 +955,10 @@ namespace ssi
                             {
                                 if (isMouseAlreadydown == false)
                                 {
-                                    // Console.WriteLine("Move");
-                                  //TODO: Logic for Redo
-                                  //  _PreviouMargin = new Point(Canvas.GetLeft(selected_segment),0);
+               
 
-                                  //  ChangeRepresentationObject ChangeRepresentationObjectOfMove =  UnDoObject.MakeChangeRepresentationObjectForMove(_PreviouMargin, (FrameworkElement)selected_segment, selected_segment.Width, selected_segment.Item.Duration);
-                                  //UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfMove);
+                                 ChangeRepresentationObject ChangeRepresentationObjectOfMove =  UnDoObject.MakeChangeRepresentationObjectForMove(pos, (FrameworkElement)selected_segment);
+                                 UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfMove);
                                  isMouseAlreadydown = true;  
      
                                 }

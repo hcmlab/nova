@@ -52,57 +52,27 @@ namespace ssi
                     ((AnnoTrack)Container).deleteSegment((AnnoTrackSegment)Undostruct.UiElement);
                     this.RedoPushInUnDoForInsert(Undostruct.UiElement);
                 }
-                //else if (Undostruct.Action == ActionType.Resize)
-                //{
-                //    if (_UndoActionsCollection.Count != 0)
-                //    {
-                //        Point previousMarginOfSelectedObject = new Point(((FrameworkElement)Undostruct.UiElement).Margin.Left, ((FrameworkElement)Undostruct.UiElement).Margin.Top);
-                //        this.RedoPushInUnDoForResize(previousMarginOfSelectedObject, Undostruct.UiElement.Width, Undostruct.UiElement.Height, Undostruct.UiElement);
-                //        Undostruct.UiElement.Margin = new Thickness(Undostruct.Margin.X, Undostruct.Margin.Y, 0, 0);
-                //        Undostruct.UiElement.Height = Undostruct.height;
-                //        Undostruct.UiElement.Width = Undostruct.Width;
+                else if (Undostruct.Action == ActionType.Resize)
+                {
+                        this.RedoPushInUnDoForResize(Canvas.GetLeft(Undostruct.UiElement), Undostruct.UiElement);
+                        Canvas.SetLeft(Undostruct.UiElement, Undostruct.Margin.X);
+                        Undostruct.UiElement.Width = Undostruct.Width;
+                        ((AnnoTrackSegment)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
+                        ((AnnoTrackSegment)Undostruct.UiElement).Item.Start = Undostruct.Start;
+                        ((AnnoTrackSegment)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
+                       
 
-                //       if(Undostruct.isresizeright)
-                //        {
-                //            ((AnnoTrackSegment)Undostruct.UiElement).resize_right(Undostruct.Margin.X - Undostruct.Width);
-                //        }
-
-                //        if (Undostruct.isresizeleft)
-                //        {
-                //            ((AnnoTrackSegment)Undostruct.UiElement).resize_left(Undostruct.Margin.X + Undostruct.Width);
-                //        }
-
-                //        if (Undostruct.ismoved)
-                //        {
-                //            ((AnnoTrackSegment)Undostruct.UiElement).move(Undostruct.Margin.X + Undostruct.Width);
-                //        }
-
-                //    }
-                //}
-                //else if (Undostruct.Action == ActionType.Move)
-                //{
-
-                //    AnnoListItem ali = ((AnnoTrackSegment)Undostruct.UiElement).Item;
-                //    ((AnnoTrack)Container).deleteSegment((AnnoTrackSegment)Undostruct.UiElement);
-                //    ((AnnoTrack)Container).AnnoList.AddSorted(ali);
-                //    AnnoTrackSegment at = ((AnnoTrack)Container).addSegment(ali);
-
-
-                //    Point previousMarginOfSelectedObject = new Point(((FrameworkElement)Undostruct.UiElement).Margin.Left, ((FrameworkElement)Undostruct.UiElement).Margin.Top);
-                //    this.RedoPushInUnDoForMove(previousMarginOfSelectedObject, Undostruct.UiElement);
-
-                //}
-
+                }
+    
                 else if (Undostruct.Action == ActionType.Move)
                 {
-                  
-                    Point previousMarginOfSelectedObject = new Point((Canvas.GetLeft((FrameworkElement)Undostruct.UiElement)), 0);
-                    Canvas.SetLeft(Undostruct.UiElement,Undostruct.Margin.X);     
+                    this.RedoPushInUnDoForMove(Canvas.GetLeft(Undostruct.UiElement), Undostruct.UiElement);
+                    Canvas.SetLeft(Undostruct.UiElement,Undostruct.Margin.X);
                     Undostruct.UiElement.Width = Undostruct.Width;
-
-
-                   // ((AnnoTrackSegment)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
-                    this.RedoPushInUnDoForMove(previousMarginOfSelectedObject, Undostruct.UiElement, Undostruct.Width, Undostruct.Duration);
+                    ((AnnoTrackSegment)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
+                    ((AnnoTrackSegment)Undostruct.UiElement).Item.Start = Undostruct.Start;
+                    ((AnnoTrackSegment)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
+                   
                 }
             }
 
@@ -135,37 +105,28 @@ namespace ssi
                     ChangeRepresentationObject ChangeRepresentationObjectForInsert = this.MakeChangeRepresentationObjectForInsert(at);
                     _UndoActionsCollection.Push(ChangeRepresentationObjectForInsert);
                 }
-                //else if (Undostruct.Action == ActionType.Resize)
-                //{
-                //    Point previousMarginOfSelectedObject = new Point(((FrameworkElement)Undostruct.UiElement).Margin.Left, ((FrameworkElement)Undostruct.UiElement).Margin.Top);
-                //    ChangeRepresentationObject ChangeRepresentationObjectforResize = this.MakeChangeRepresentationObjectForResize(previousMarginOfSelectedObject, Undostruct.UiElement.Width, Undostruct.UiElement.Height, Undostruct.UiElement,false,false,false);
-                //    _UndoActionsCollection.Push(ChangeRepresentationObjectforResize);
+                else if (Undostruct.Action == ActionType.Resize)
+                {
+                    Canvas.SetLeft(Undostruct.UiElement, Undostruct.Margin.X);
+                    Undostruct.UiElement.Width = Undostruct.Width;
+                    Undostruct.Start = ((AnnoTrackSegment)Undostruct.UiElement).Item.Start;
+                    Undostruct.Stop = ((AnnoTrackSegment)Undostruct.UiElement).Item.Stop;
+                    Undostruct.Duration = ((AnnoTrackSegment)Undostruct.UiElement).Item.Duration;
 
-                //    Undostruct.UiElement.Margin = new Thickness(Undostruct.Margin.X, Undostruct.Margin.Y, 0, 0);
-                //    Undostruct.UiElement.Height = Undostruct.height;
-                //    Undostruct.UiElement.Width = Undostruct.Width;
+                    ChangeRepresentationObject ChangeRepresentationObjectForResize = this.MakeChangeRepresentationObjectForResize(Undostruct.Margin.X, Undostruct.UiElement);
+                    _UndoActionsCollection.Push(ChangeRepresentationObjectForResize);
 
-                //}
+                }
                 else if (Undostruct.Action == ActionType.Move)
                 {
 
-                    Point previousMarginOfSelectedObject = new Point((Canvas.GetLeft((FrameworkElement)Undostruct.UiElement)), 0);
-
-
-                   
                     Canvas.SetLeft(Undostruct.UiElement, Undostruct.Margin.X);
                     Undostruct.UiElement.Width = Undostruct.Width;
-                    // ((AnnoTrackSegment)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
+                    Undostruct.Start = ((AnnoTrackSegment)Undostruct.UiElement).Item.Start;
+                    Undostruct.Stop = ((AnnoTrackSegment)Undostruct.UiElement).Item.Stop;
+                    Undostruct.Duration = ((AnnoTrackSegment)Undostruct.UiElement).Item.Duration;
 
-
-                    AnnoListItem ali = ((AnnoTrackSegment)Undostruct.UiElement).Item;
-                    ((AnnoTrack)Container).deleteSegment((AnnoTrackSegment)Undostruct.UiElement);
-                    ((AnnoTrack)Container).AnnoList.AddSorted(ali);
-                    AnnoTrackSegment at = ((AnnoTrack)Container).addSegment(ali);
-                  
-
-
-                    ChangeRepresentationObject ChangeRepresentationObjectForMove = this.MakeChangeRepresentationObjectForMove(previousMarginOfSelectedObject, Undostruct.UiElement, Undostruct.Width, Undostruct.Duration);
+                    ChangeRepresentationObject ChangeRepresentationObjectForMove = this.MakeChangeRepresentationObjectForMove(Undostruct.Margin.X, Undostruct.UiElement);
                     _UndoActionsCollection.Push(ChangeRepresentationObjectForMove);
                 }
             }
@@ -205,27 +166,28 @@ namespace ssi
             return dataobject;
         }
 
-        public ChangeRepresentationObject MakeChangeRepresentationObjectForMove(Point margin, FrameworkElement UIelement, double Width, double duration)
+        public ChangeRepresentationObject MakeChangeRepresentationObjectForMove(double pos, FrameworkElement UIelement)
         {
             ChangeRepresentationObject MoveStruct = new ChangeRepresentationObject();
             MoveStruct.Action = ActionType.Move;
-            MoveStruct.Margin = margin;
-            MoveStruct.Width = Width;
-            MoveStruct.Duration = duration;
+            MoveStruct.Margin.X = pos;
+            MoveStruct.Width = UIelement.Width;
+            MoveStruct.Start = ((AnnoTrackSegment)UIelement).Item.Start;
+            MoveStruct.Stop = ((AnnoTrackSegment)UIelement).Item.Stop;
+            MoveStruct.Duration = ((AnnoTrackSegment) UIelement).Item.Duration;
             MoveStruct.UiElement = UIelement;
             return MoveStruct;
         }
 
-        public ChangeRepresentationObject MakeChangeRepresentationObjectForResize(Point margin, double width, double height, FrameworkElement UIelement, bool isresizeright, bool isresizeleft, bool ismoved)
+        public ChangeRepresentationObject MakeChangeRepresentationObjectForResize(double pos, FrameworkElement UIelement)
         {
             ChangeRepresentationObject ResizeStruct = new ChangeRepresentationObject();
             ResizeStruct.Action = ActionType.Resize;
-            ResizeStruct.Margin = margin;
-            ResizeStruct.Width = width;
-            ResizeStruct.isresizeright = isresizeright;
-            ResizeStruct.isresizeleft = isresizeleft;
-            ResizeStruct.ismoved = ismoved;
-
+            ResizeStruct.Margin.X = pos;
+            ResizeStruct.Width = UIelement.Width;
+            ResizeStruct.Start = ((AnnoTrackSegment)UIelement).Item.Start;
+            ResizeStruct.Stop = ((AnnoTrackSegment)UIelement).Item.Stop;
+            ResizeStruct.Duration = ((AnnoTrackSegment)UIelement).Item.Duration;
             ResizeStruct.UiElement = UIelement;
             return ResizeStruct;
         }
@@ -255,23 +217,29 @@ namespace ssi
             _RedoActionsCollection.Push(dataobject);
         }
 
-        public void RedoPushInUnDoForMove(Point margin, FrameworkElement UIelement, double Width, double Duration)
+        public void RedoPushInUnDoForMove(double pos, FrameworkElement UIelement)
         {
             ChangeRepresentationObject MoveStruct = new ChangeRepresentationObject();
             MoveStruct.Action = ActionType.Move;
-            MoveStruct.Margin = margin;
-            MoveStruct.Width = Width;
+            MoveStruct.Margin.X = pos;
+            MoveStruct.Width = UIelement.Width;
+            MoveStruct.Start = ((AnnoTrackSegment)UIelement).Item.Start;
+            MoveStruct.Stop = ((AnnoTrackSegment)UIelement).Item.Stop;
+            MoveStruct.Duration = ((AnnoTrackSegment)UIelement).Item.Duration;
             MoveStruct.UiElement = UIelement;
             _RedoActionsCollection.Push(MoveStruct);
         }
 
-        public void RedoPushInUnDoForResize(Point margin, double width, double height, FrameworkElement UIelement, double Width)
+        public void RedoPushInUnDoForResize(double pos, FrameworkElement UIelement)
         {
             ChangeRepresentationObject ResizeStruct = new ChangeRepresentationObject();
-            ResizeStruct.Margin = margin;
-            ResizeStruct.Width = Width;
-            ResizeStruct.UiElement = UIelement;
             ResizeStruct.Action = ActionType.Resize;
+            ResizeStruct.Margin.X = pos;
+            ResizeStruct.Width = UIelement.Width;
+            ResizeStruct.Start = ((AnnoTrackSegment)UIelement).Item.Start;
+            ResizeStruct.Stop = ((AnnoTrackSegment)UIelement).Item.Stop;
+            ResizeStruct.Duration = ((AnnoTrackSegment)UIelement).Item.Duration;
+            ResizeStruct.UiElement = UIelement;
             _RedoActionsCollection.Push(ResizeStruct);
         }
 
@@ -321,11 +289,10 @@ namespace ssi
     public class ChangeRepresentationObject
     {
         public ActionType Action;
-        public bool isresizeright;
-        public bool isresizeleft;
-        public bool ismoved;
         public Point Margin;
         public double Width;
+        public double Start;
+        public double Stop;
         public double Duration;
         public FrameworkElement UiElement;
     }
