@@ -1194,13 +1194,13 @@ namespace ssi
                 {
                     foreach (AnnoListItem ali in anno)
                     {
-                        if (ali.Tier == "#" +tierid)
+                        if (ali.Tier == tierid)
                         {
                             annolist.Name = "#" + tierid;
                             //check if trackid is already used
                             foreach (AnnoTrack a in anno_tracks)
                             {
-                                if (a.AnnoList.Name == "#" + tierid)
+                                if (a.AnnoList.Name ==  tierid)
                                 {
                                     annolist.Name = "#" +tierid + tiercount.ToString();
                                     break;
