@@ -297,8 +297,8 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="AnnoSchemeEditor.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="AnnoTrackControl.xaml">
       <Generator>MSBuild:Compile</Generator>
