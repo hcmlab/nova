@@ -14,6 +14,7 @@ namespace ssi
     public partial class AnnoSchemeEditor : Window
     {
         private List<AnnotationSchemeSegment> items;
+        private List<AnnotationSchemeSegment> schemes;
         private HashSet<LabelColorPair> usedlabels;
         private AnnoList list;
 
@@ -23,6 +24,7 @@ namespace ssi
             scheme_colorpickermin.SelectedColor = Colors.Blue;
 
             items = new List<AnnotationSchemeSegment>();
+            schemes = new List<AnnotationSchemeSegment>();
             list = new AnnoList();
             list.AnnotationScheme = new AnnotationScheme();
             list.AnnotationScheme.LabelsAndColors = new List<LabelColorPair>();
@@ -57,12 +59,19 @@ namespace ssi
             LabelInputBox l = new LabelInputBox("Add new Label", "Add new label", "", null, 1, "", "", true);
             l.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             l.ShowDialog();
+            items = new List<AnnotationSchemeSegment>();
 
             if (l.DialogResult == true)
             {
-                items.Add(new AnnotationSchemeSegment() { Label = l.Result(), BindingColor = (Color)ColorConverter.ConvertFromString(l.Color()) });
-                AnnotationResultBox.ItemsSource = items;
+                schemes.Add(new AnnotationSchemeSegment() { Label = l.Result(), BindingColor = (Color)ColorConverter.ConvertFromString(l.Color()) });
             }
+
+
+            foreach(var item in schemes)
+            {
+                items.Add(item);
+            }
+            AnnotationResultBox.ItemsSource = items;
         }
 
         private void DeleteAnnotation_Click(object sender, RoutedEventArgs e)
@@ -71,6 +80,17 @@ namespace ssi
             if (items.CanRemove)
             {
                 items.Remove(AnnotationResultBox.SelectedItem);
+            }
+
+            schemes.Clear();
+
+            foreach(var item in AnnotationResultBox.Items)
+            {
+                AnnotationSchemeSegment s = new AnnotationSchemeSegment();
+                s.Label = ((AnnotationSchemeSegment)item).Label;
+                s.BindingColor = ((AnnotationSchemeSegment)item).BindingColor;
+                schemes.Add(s);
+
             }
         }
 
@@ -144,7 +164,7 @@ namespace ssi
                         if (scheme.Attributes["color"] != null) list.AnnotationScheme.mincolor = scheme.Attributes["color"].Value;
                         else list.AnnotationScheme.mincolor = Colors.LightYellow.ToString();
 
-
+                        items = new List<AnnotationSchemeSegment>();
 
                         if (type == "DISCRETE") list.AnnotationType = AnnoType.DISCRETE;
                         else return;
@@ -161,10 +181,20 @@ namespace ssi
                                 string color = "#000000";
                                 if (item.Attributes["color"] != null) color = item.Attributes["color"].Value;
 
-                                items.Add(new AnnotationSchemeSegment() { Label = item.Attributes["name"].Value, BindingColor = (Color)ColorConverter.ConvertFromString(color) });
+                                AnnotationSchemeSegment s = new AnnotationSchemeSegment();
+                                s.Label = item.Attributes["name"].Value;
+                                s.BindingColor = (Color)ColorConverter.ConvertFromString(color);
+
+                            if (!schemes.Contains(s))  schemes.Add(s);
                             }
 
+
+                            foreach (var item in schemes)
+                            {
+                                items.Add(item);
+                            }
                             AnnotationResultBox.ItemsSource = items;
+
                             this.scheme_name.Text = list.Name;
                             this.scheme_colorpickermin.SelectedColor = (Color)ColorConverter.ConvertFromString(list.AnnotationScheme.mincolor); 
 

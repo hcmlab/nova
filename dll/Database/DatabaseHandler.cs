@@ -129,7 +129,8 @@ namespace ssi
             {
                 if (document["isValid"].AsBoolean == true)
                 {
-                    if ((type == AnnoType.DISCRETE || type == AnnoType.FREE) && (document["type"].ToString() == "FREE" || document["type"].ToString() == "DISCRETE")) AnnotationSchemes.Add(document["name"].ToString());
+                    if ((type == AnnoType.DISCRETE && document["type"].ToString() == "DISCRETE")) AnnotationSchemes.Add(document["name"].ToString());
+                    else if  (type == AnnoType.FREE && (document["type"].ToString() == "FREE")) AnnotationSchemes.Add(document["name"].ToString());
                     else if (type == AnnoType.CONTINUOUS && document["type"].ToString() == "CONTINUOUS") AnnotationSchemes.Add(document["name"].ToString());
                 }
             }
