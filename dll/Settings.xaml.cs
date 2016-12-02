@@ -17,6 +17,7 @@ namespace ssi
             Annotator.Text = Properties.Settings.Default.Annotator;
             DefaultZoom.Text = Properties.Settings.Default.DefaultZoominSeconds.ToString();
             Segmentmindur.Text = Properties.Settings.Default.DefaultMinSegmentSize.ToString();
+            Samplerate.Text = Properties.Settings.Default.DefaultDiscreteSampleRate.ToString();
             DBServer.Text = Properties.Settings.Default.MongoDBIP;
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPW.Password = Properties.Settings.Default.MongoDBPass;
@@ -57,11 +58,23 @@ namespace ssi
             return DBPW.Password;
         }
 
+        public string SampleRate()
+        {
+            return Samplerate.Text;
+        }
+
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("^[.][0-9]+$|^[0-9]*[.]{0,1}[0-9]*$");
             e.Handled = !regex.IsMatch((sender as TextBox).Text.Insert((sender as TextBox).SelectionStart, e.Text));
         }
+
+        private void IntNumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("^[0-9]+$|^[0-9]*$");
+            e.Handled = !regex.IsMatch((sender as TextBox).Text.Insert((sender as TextBox).SelectionStart, e.Text));
+        }
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {

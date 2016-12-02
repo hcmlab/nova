@@ -15,14 +15,14 @@
         </Grid.RowDefinitions>
 
         <Label Content="Scheme Name" Margin="257,109,303,284"/>
-        <TextBox x:FieldModifier="public" Margin="257,147,247,252" x:Name="scheme_name" Focusable="True" />
+        <TextBox x:FieldModifier="public" Margin="351,109,153,290" x:Name="scheme_name" Focusable="True" />
 
         <Border CornerRadius="10" BorderThickness="1" BorderBrush="Black" Background="DarkGray" Margin="47,10,47,339" AllowDrop="True" Drop="Label_Drop">
             <Label FontSize="16"  Content="Drag Existing Scheme File Here" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="-1" />
         </Border>
-        <Label Name="Colorlabel" Content="Background Color" Margin="257,184,248,157" />
+        <Label Name="Colorlabel" Content="Background Color" Margin="227,152,278,189" />
 
-        <p:ColorPicker Name="scheme_colorpickermin"   IsEnabled="true" Margin="257,215,347,189" RenderTransformOrigin="1.3,3.75" />
+        <p:ColorPicker Name="scheme_colorpickermin"   IsEnabled="true" Margin="351,152,260,241" RenderTransformOrigin="1.3,3.75" />
 
         <Label Name="labelslabel" Content="Labels" Margin="16,102,578,287" RenderTransformOrigin="0.5,0.5" >
             <Label.RenderTransform>
@@ -39,12 +39,24 @@
         <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Single" Margin="11,147,435,55">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="130" Header="Label" DisplayMemberBinding="{Binding Label}" />
-
-                    <GridViewColumn Width="60" Header="Color">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Color" />
-                        </GridViewColumn.DisplayMemberBinding>
+                    <GridViewColumn Width="140" Header="Label">
+                        <GridViewColumn.CellTemplate>
+                        <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <p:TextBoxEx Text="{Binding Label}" IsEnabled="true" Width="70" Height="20" Margin="5,0,0,0" PreviewTextInput="TextBoxEx_PreviewTextInput"  TextChanged="TextBoxEx_TextChanged" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                            
+                    </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="Auto" Header="Color">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <p:ColorPicker SelectedColor="{Binding BindingColor}" IsEnabled="true" Width="40" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
                     <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
@@ -55,7 +67,7 @@
         <Button Name="Ok"  Content="Ok" Grid.Column="0" Grid.Row="1" Click="Ok_Click"  Height="25"  Margin="347,5,247,10" RenderTransformOrigin="-2.815,0.936" />
         <Button Name="Cancel" Content="Cancel" Grid.Row="1"  Click="Cancel_Click"   Height="25" RenderTransformOrigin="3.367,0.24" Margin="227,5,367,10" />
 
-        <Button Name="DeleteAnnotation" Content="X" Grid.Column="0" Click="DeleteAnnotation_Click" Margin="47,390,576,10"  Visibility="Visible" RenderTransformOrigin="-5.119,7.505" />
-        <Button Name="AddAnnotation" Content="+" Grid.Column="0" Click="AddAnnotation_Click" Margin="11,390,612,10"  Visibility="Visible" RenderTransformOrigin="-1.08,-0.519" />
+        <Button Name="DeleteAnnotation" Content="-" Grid.Column="0" Click="DeleteAnnotation_Click" Margin="47,390,576,10" Background="Transparent" BorderThickness="0" Visibility="Visible" RenderTransformOrigin="-5.119,7.505" />
+        <Button Name="AddAnnotation" Content="+" Grid.Column="0" Click="AddAnnotation_Click" Margin="11,390,612,10" Background="Transparent" BorderThickness="0" Visibility="Visible" RenderTransformOrigin="-1.08,-0.519" />
     </Grid>
 </Window>

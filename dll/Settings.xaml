@@ -25,6 +25,8 @@
                     <TextBox Name="Certainty"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
                     <Label Content="Segment min duration in sec.:"   HorizontalAlignment="left" DockPanel.Dock="Top" />
                     <TextBox Name="Segmentmindur"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Content="Discrete SampleRate in Hz (0 for none):"   HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <TextBox Name="Samplerate"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="IntNumberValidationTextBox" />
                     <Separator Visibility="Hidden"> </Separator>
                 </DockPanel>
             </TabItem>
