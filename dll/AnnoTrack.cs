@@ -754,6 +754,7 @@ namespace ssi
                     {
                         SelectSegment(s);
                         this.select(true);
+                        break;
                     }
                 }
             }
@@ -763,12 +764,6 @@ namespace ssi
         {
             leftMouseButtonDown(e);
 
-            if (selected_segment != null)
-            {
-                _PreviouWidth = selected_segment.Width;
-                _PreviouHeight = selected_segment.Height;
-                _PreviouMargin = new Point(((FrameworkElement)selected_segment).Margin.Left, ((FrameworkElement)selected_segment).Margin.Top);
-            }
         }
 
         public void rightMouseButtonDown(MouseButtonEventArgs e)
@@ -966,6 +961,7 @@ namespace ssi
                                 ChangeRepresentationObject ChangeRepresentationObjectOfResize = UnDoObject.MakeChangeRepresentationObjectForResize(pos, (FrameworkElement)selected_segment);
                                 UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfResize);
                                 isMouseAlreadydown = true;
+                                SelectSegment(selected_segment);
                             }
 
                             double minsr = 0;
@@ -983,7 +979,6 @@ namespace ssi
                                 selected_segment.resize_right(delta);
 
                                 SelectSegment(selected_segment);
-
                                 this.select(true);
                                 FireOnMove(selected_segment.Item.Stop);
                             }
@@ -1001,6 +996,7 @@ namespace ssi
                                 {
                                     int round = (int)(selected_segment.Item.Stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
                                     selected_segment.Item.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                                    SelectSegment(selected_segment);
                                 }
                             }
                         }
@@ -1035,6 +1031,7 @@ namespace ssi
                             {
                                 selected_segment.Item.Start = selected_segment.Item.Stop - Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
                                 selected_segment.Item.Duration = Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
+                                SelectSegment(selected_segment);
                             }
 
                             if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
@@ -1043,6 +1040,7 @@ namespace ssi
                                 {
                                     int round = (int)(selected_segment.Item.Start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
                                     selected_segment.Item.Start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                                    SelectSegment(selected_segment);
                                 }
                             }
                         }
@@ -1059,6 +1057,7 @@ namespace ssi
                                     ChangeRepresentationObject ChangeRepresentationObjectOfMove = UnDoObject.MakeChangeRepresentationObjectForMove(pos, (FrameworkElement)selected_segment);
                                     UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfMove);
                                     isMouseAlreadydown = true;
+                                   
                                 }
                                 selected_segment.move(delta);
                                 SelectSegment(selected_segment);
@@ -1079,6 +1078,7 @@ namespace ssi
                                     int round = (int)(selected_segment.Item.Stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
                                     selected_segment.Item.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
                                 }
+                                SelectSegment(selected_segment);
                             }
                         }
                     }

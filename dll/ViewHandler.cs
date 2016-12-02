@@ -726,15 +726,13 @@ namespace ssi
             saveAll();
             string configfilepath = "";
 
-            MessageBoxResult mbx = MessageBox.Show("Save project to file " + configfilepath.ToString() + "?", "Question", MessageBoxButton.YesNo);
-            if (mbx == MessageBoxResult.Yes)
-            {
                 if (configfilepath == "")
                 {
                     //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
                     string firstmediadir = "";
                     if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
                     else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
+
 
                     configfilepath = ViewTools.SaveFileDialog("project", ".nova", firstmediadir, 5);
                     if (configfilepath != null)
@@ -745,8 +743,7 @@ namespace ssi
                 else
                 {
                     saveProjectTracks(anno_tracks, media_list, signal_tracks, configfilepath);
-                }
-            }
+                } 
         }
 
         public void saveAll()
@@ -759,37 +756,48 @@ namespace ssi
 
             if (anno_tracks.Count > 0 && anytrackchanged)
             {
-                MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
-                if (mbx == MessageBoxResult.Yes)
-                {
-                    if (DatabaseLoaded)
-                    {
-                        mongodbStore();
-                    }
-                    else
-                    {
+                
+                    //if (DatabaseLoaded)
+                    //{
+                    ////    mongodbStore();
+                    //}
+
+
+                    //else
+                   // {
                         foreach (AnnoTrack track in anno_tracks)
                         {
                             if (track.AnnoList.HasChanged /*&& !track.isDiscrete*/)
                             {
-                                MessageBoxResult mbr = MessageBox.Show("Save changes on continous tier " + track.TierId + "?", "Question", MessageBoxButton.YesNo);
-                                if (mbr == MessageBoxResult.Yes)
-                                {
                                     saveAnno(track.AnnoList, track.AnnoList.Filepath);
                                     /* if (!track.isDiscrete)*/
                                     track.AnnoList.HasChanged = false;
-                                }
                             }
                         }
-                    }
-                }
+                   // }
             }
         }
 
         public void clear()
         {
             Stop();
-            saveAll();
+
+            bool anytrackchanged = false;
+            foreach (AnnoTrack track in anno_tracks)
+            {
+                if (track.AnnoList.HasChanged) anytrackchanged = true;
+            }
+
+            if (anno_tracks.Count > 0 && anytrackchanged)
+            {
+                MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
+                if (mbx == MessageBoxResult.Yes)
+                {
+                    saveAll();
+                }
+            }
+
+
             DatabaseLoaded = false;
             if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             this.view.trackControl.signalNameLabel.Text = "";
@@ -805,6 +813,7 @@ namespace ssi
             this.view.trackControl.annoNameLabel.Content = "#NoTier";
             this.view.trackControl.annoPositionLabel.Text = "00:00:00";
             this.view.navigator.playButton.IsEnabled = false;
+            this.view.navigator.Statusbar.Content = "";
 
             this.signalCursor.X = 0;
             setAnnoList(null);
@@ -2730,7 +2739,15 @@ namespace ssi
 
         private void saveProject_Click(object sender, RoutedEventArgs e)
         {
-            saveProject();
+            if (DatabaseLoaded)
+            {
+                MessageBox.Show("Storing a project file is meant for working with annotation files, not the database.");
+            }
+            else if (anno_tracks.Count == 0)
+            {
+                MessageBox.Show("No annotations have been loaded.");
+            }
+            else saveProject();
         }
 
         private void newAnnoButton_Click(object sender, RoutedEventArgs e)
@@ -2746,19 +2763,31 @@ namespace ssi
                     AnnoType at = ntw.Result();
 
                     if (at == AnnoType.FREE) newAnno(AnnoType.FREE);
+
+
                     else if (at == AnnoType.DISCRETE)
                     {
                         //todo some logic to get annoscheme
 
-                        AnnoSchemeEditor ase = new AnnoSchemeEditor();
-                        ase.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                        ase.ShowDialog();
-
-                        if (ase.DialogResult == true)
+                        if(DatabaseLoaded)
                         {
-                            AnnoList al = ase.GetAnnoList();
-                            addAnno(al, AnnoType.DISCRETE);
+                            newAnno(AnnoType.DISCRETE);
                         }
+
+                        else
+                        {
+                            AnnoSchemeEditor ase = new AnnoSchemeEditor();
+                            ase.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                            ase.ShowDialog();
+
+                            if (ase.DialogResult == true)
+                            {
+                                AnnoList al = ase.GetAnnoList();
+                                al.Filepath = al.Name;
+                                addAnno(al, AnnoType.DISCRETE);
+                            }
+                        }
+                     
                     }
                     else if (at == AnnoType.CONTINUOUS)
                     {
@@ -3478,6 +3507,7 @@ namespace ssi
                     view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
                     List<AnnoList> annos = db.LoadfromDatabase(annotations, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+                    this.view.navigator.Statusbar.Content = "Database Session: " + (Properties.Settings.Default.LastSessionId).Replace('_','-');
                     try
                     {
                         if (annos != null)

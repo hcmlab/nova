@@ -45,6 +45,6 @@
             <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Clear</Button>
         </StackPanel>
 
-        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="Statusbar" Margin="5,0,0,0" HorizontalContentAlignment="Left" BorderThickness="0" Content="" />
+        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Content="" Name="Statusbar" Margin="5,0,0,0" HorizontalContentAlignment="Left" BorderThickness="0" />
     </Grid>
 </UserControl>

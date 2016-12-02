@@ -9,7 +9,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -17,18 +17,18 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0">
-            <Label>Discrete Labels</Label>
+        <StackPanel Grid.Row="1">
+            <Label>Discrete without Scheme</Label>
             <Separator Height="20" Visibility="Hidden"></Separator>
-            <Button Height="25" Width="120" Content="New Discrete Tier" Click="Button_Click"></Button>
+            <Button Height="25" Width="120" Content="New Tier no Scheme" Click="Button_Click"></Button>
            
         </StackPanel>
 
-        <!--<StackPanel Grid.Row="1">
+        <StackPanel Grid.Row="0">
             <Label>Discrete with Scheme</Label>
             <Separator Height="20" Visibility="Hidden"></Separator>
             <Button Height="25" Width="120" Content="New Discrete Tier" Click="Button_Click_1"></Button>
-        </StackPanel>-->
+        </StackPanel>
 
         <StackPanel Grid.Row="2">
             <Label>Continuous Values</Label>
@@ -36,8 +36,11 @@
             <Button Height="25" Width="120" Content="New Continuous Tier" Click="Button_Click_2"></Button>
         </StackPanel>
 
-        <Image x:Name="continuous_png" Grid.Row="2" Grid.Column="1" Margin="5,0,5,0" Source="Resources/continuous.png" Stretch="Uniform"/>
         <Image x:Name="discrete_png" Grid.Row="0" Grid.Column="1"  Margin="5,0,5,0" Source="Resources/discrete.png" Stretch="Uniform"/>
+     
+        <Image x:Name="free_png" Grid.Row="1" Grid.Column="1"  Margin="5,0,5,0" Source="Resources/free.png" Stretch="Uniform"/>
+        <Image x:Name="continuous_png" Grid.Row="2" Grid.Column="1" Margin="5,0,5,0" Source="Resources/continuous.png" Stretch="Uniform"/>
+
 
     </Grid>
 </Window>

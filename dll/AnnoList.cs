@@ -427,7 +427,12 @@ namespace ssi
                 else if (scheme.Attributes["mincolor"] != null) list.AnnotationScheme.mincolor = scheme.Attributes["mincolor"].Value;
                 if (scheme.Attributes["maxcolor"] != null) list.AnnotationScheme.maxcolor = scheme.Attributes["maxcolor"].Value;
 
-                list.Name = "#" + list.Role + " #" + scheme.Attributes["name"].Value + " #" + list.Annotator;
+                string role = "";
+                if (list.Role != null) role = "#" + list.Role + " "; ;
+                string annotator = "";
+                if (list.Annotator != null) annotator = " #" + list.Annotator;
+
+                list.Name = role + "#" + scheme.Attributes["name"].Value + annotator;
 
 
                 if (type == "DISCRETE") list.AnnotationType = AnnoType.DISCRETE;
@@ -709,9 +714,14 @@ namespace ssi
         {
             if (filepath == null || filepath.Split('.')[1] == "eaf" || filepath.Split('.')[1] == "anvil" || filepath.Split('.')[1] == "anno" || filepath.Split('.')[1] == "csv")
             {
-                if (this.Annotator == null) this.Annotator = this.AnnotatorFullName;
-                filepath = ViewTools.SaveFileDialog(this.AnnotationScheme.name + "." + this.Role + "." + this.Annotator, ".annotation", Path.GetDirectoryName(this.Filepath));
-   
+                if(this.AnnotatorFullName != null )
+                {
+                    if (this.Annotator == null) this.Annotator = this.AnnotatorFullName;
+                    if(this.annotator != null)
+                    filepath = ViewTools.SaveFileDialog(this.AnnotationScheme.name + "." + this.Role + "." + this.Annotator, ".annotation", Path.GetDirectoryName(this.Filepath));
+                }
+                else filepath = ViewTools.SaveFileDialog(this.Name, ".annotation", Path.GetDirectoryName(this.Filepath));
+
                 if (filepath != null)
                 {
                     filename = filepath.Split('.')[0];
