@@ -226,5 +226,17 @@ namespace ssi.Properties {
                 this["DefaultMinSegmentSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
+        public double DefaultDiscreteSampleRate {
+            get {
+                return ((double)(this["DefaultDiscreteSampleRate"]));
+            }
+            set {
+                this["DefaultDiscreteSampleRate"] = value;
+            }
+        }
     }
 }

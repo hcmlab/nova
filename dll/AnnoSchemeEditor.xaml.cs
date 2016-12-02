@@ -13,8 +13,7 @@ namespace ssi
     /// </summary>
     public partial class AnnoSchemeEditor : Window
     {
-        private List<LabelColorPair> items;
-        private List<LabelColorPair> labelcolors;
+        private List<AnnotationSchemeSegment> items;
         private HashSet<LabelColorPair> usedlabels;
         private AnnoList list;
 
@@ -23,6 +22,7 @@ namespace ssi
             InitializeComponent();
             scheme_colorpickermin.SelectedColor = Colors.Blue;
 
+            items = new List<AnnotationSchemeSegment>();
             list = new AnnoList();
             list.AnnotationScheme = new AnnotationScheme();
             list.AnnotationScheme.LabelsAndColors = new List<LabelColorPair>();
@@ -34,17 +34,14 @@ namespace ssi
 
             this.usedlabels = _usedlabels;
 
-            labelcolors = new List<LabelColorPair>();
-
             if (name != null) scheme_name.Text = name;
 
             if (usedlabels != null)
             {
-                items = new List<LabelColorPair>();
+                
                 foreach (LabelColorPair lp in usedlabels)
                 {
-                    items.Add(new LabelColorPair(lp.Label, lp.Color) { Label = lp.Label, Color = lp.Color });
-                    labelcolors.Add(new LabelColorPair(lp.Label, lp.Color));
+                    items.Add(new AnnotationSchemeSegment() { Label = lp.Label, BindingColor = (Color)ColorConverter.ConvertFromString(lp.Color)});
                 }
 
                 AnnotationResultBox.ItemsSource = items;
@@ -63,18 +60,7 @@ namespace ssi
 
             if (l.DialogResult == true)
             {
-                items = new List<LabelColorPair>();
-                string label = l.Result();
-                string color = l.Color();
-                LabelColorPair lcp = new LabelColorPair(label, color);
-
-                labelcolors.Add(lcp);
-
-                foreach (LabelColorPair lp in labelcolors)
-                {
-                    items.Add(new LabelColorPair(label, color) { Label = lp.Label, Color = lp.Color });
-                }
-
+                items.Add(new AnnotationSchemeSegment() { Label = l.Result(), BindingColor = (Color)ColorConverter.ConvertFromString(l.Color()) });
                 AnnotationResultBox.ItemsSource = items;
             }
         }
@@ -84,21 +70,13 @@ namespace ssi
             IEditableCollectionView items = AnnotationResultBox.Items; //Cast to interface
             if (items.CanRemove)
             {
-                foreach (LabelColorPair lp in labelcolors)
-                {
-                    string selection = ((LabelColorPair)AnnotationResultBox.SelectedItem).Label;
-                    if (lp.Label == selection)
-                    {
-                        labelcolors.Remove(lp);
-                        break;
-                    }
-                }
                 items.Remove(AnnotationResultBox.SelectedItem);
             }
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
+
             DialogResult = true;
         }
 
@@ -110,18 +88,21 @@ namespace ssi
 
         public AnnoList GetAnnoList()
         {
+            foreach(AnnotationSchemeSegment a in AnnotationResultBox.Items)
+            {
+                LabelColorPair lcp = new LabelColorPair(a.Label, "#" + a.BindingColor.R.ToString("X2") + a.BindingColor.G.ToString("X2") + a.BindingColor.B.ToString("X2"));
+                list.AnnotationScheme.LabelsAndColors.Add(lcp);
+            }
+
+            LabelColorPair garbage = new LabelColorPair("GARBAGE", "#FF000000");
+            list.AnnotationScheme.LabelsAndColors.Add(garbage);
+
+            list.AnnotationScheme.mincolor = scheme_colorpickermin.SelectedColor.ToString();
+            list.Name = this.scheme_name.Text;
             return list;
         }
 
-        public List<LabelColorPair> GetLabelColorPairs()
-        {
-            return labelcolors;
-        }
 
-        public string GetColorMin()
-        {
-            return scheme_colorpickermin.SelectedColor.ToString();
-        }
 
         private void Label_Drop(object sender, DragEventArgs e)
         {
@@ -161,8 +142,9 @@ namespace ssi
                         string type = "FREE";
                         if (scheme.Attributes["type"] != null) type = scheme.Attributes["type"].Value;
                         if (scheme.Attributes["color"] != null) list.AnnotationScheme.mincolor = scheme.Attributes["color"].Value;
-                        else if (scheme.Attributes["mincolor"] != null) list.AnnotationScheme.mincolor = scheme.Attributes["mincolor"].Value;
-                        if (scheme.Attributes["maxcolor"] != null) list.AnnotationScheme.maxcolor = scheme.Attributes["maxcolor"].Value;
+                        else list.AnnotationScheme.mincolor = Colors.LightYellow.ToString();
+
+
 
                         if (type == "DISCRETE") list.AnnotationType = AnnoType.DISCRETE;
                         else return;
@@ -171,7 +153,7 @@ namespace ssi
                         if (list.AnnotationType == AnnoType.DISCRETE)
                         {
                             list.usesAnnoScheme = true;
-                            items = new List<LabelColorPair>();
+                          
                             foreach (XmlNode item in scheme)
                             {
                                 LabelIds.Add(item.Attributes["id"].Value, item.Attributes["name"].Value);
@@ -179,18 +161,15 @@ namespace ssi
                                 string color = "#000000";
                                 if (item.Attributes["color"] != null) color = item.Attributes["color"].Value;
 
-                                string label = item.Attributes["name"].Value;
-                                LabelColorPair lcp = new LabelColorPair(label, color);
-                                list.AnnotationScheme.LabelsAndColors.Add(lcp);
-                                items.Add(new LabelColorPair(label, color) { Label = item.Attributes["name"].Value, Color = color });
+                                items.Add(new AnnotationSchemeSegment() { Label = item.Attributes["name"].Value, BindingColor = (Color)ColorConverter.ConvertFromString(color) });
                             }
 
                             AnnotationResultBox.ItemsSource = items;
                             this.scheme_name.Text = list.Name;
-                            this.scheme_colorpickermin.SelectedColor = Colors.LightYellow;
+                            this.scheme_colorpickermin.SelectedColor = (Color)ColorConverter.ConvertFromString(list.AnnotationScheme.mincolor); 
 
-                            LabelColorPair garbage = new LabelColorPair("GARBAGE", "#FF000000");
-                            list.AnnotationScheme.LabelsAndColors.Add(garbage);
+
+
                         }
                     }
                     catch (Exception ex)
@@ -200,5 +179,25 @@ namespace ssi
                 }
             }
         }
+
+        private void TextBoxEx_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+         Console.WriteLine(e.Source.ToString());
+        }
+
+        private void TextBoxEx_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            Console.WriteLine(e.Source.ToString());
+        }
+    }
+
+    public class AnnotationSchemeSegment
+    {
+        public string Label { get; set; }
+
+        public Color BindingColor { get; set; }
+
+
     }
 }

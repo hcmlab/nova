@@ -217,7 +217,7 @@ namespace ssi
         private double _PreviouWidth = 0;
         private double _PreviouHeight = 0;
         private Point _PreviouMargin;
-        bool isMouseAlreadydown = false;
+        private bool isMouseAlreadydown = false;
 
         public AnnoList AnnoList
         {
@@ -562,6 +562,21 @@ namespace ssi
                     double start = ViewHandler.Time.TimeFromPixel(ViewHandler.Time.CurrentSelectPosition);
                     double stop = ViewHandler.Time.CurrentPlayPosition;
 
+                    if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                    {
+                        if (start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                        {
+                            int round = (int)(start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate));
+                            start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                        }
+
+                        if (stop % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                        {
+                            int round = (int)(stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate));
+                            stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                        }
+                    }
+
                     if (stop < start)
                     {
                         double temp = start;
@@ -627,6 +642,21 @@ namespace ssi
                     start = stop;
                     stop = temp;
                 }
+                if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                {
+                    if (start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                    {
+                        int round = (int)(start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate));
+                        start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                    }
+
+                    if (stop % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                    {
+                        int round = (int)(stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate));
+                        stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                    }
+                }
+
                 //  double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X + AnnoTrackSegment.RESIZE_OFFSET);
                 double len = stop - start;
 
@@ -751,10 +781,24 @@ namespace ssi
             base.OnMouseRightButtonDown(e);
             if (!CorrectMode)
             {
-               
-
                 double start = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X);
-                double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X) + Properties.Settings.Default.DefaultMinSegmentSize;
+
+                if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                {
+                    if (start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                    {
+                        int round = (int)(start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                        start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                    }
+                }
+
+                double minsr = 0;
+                if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                {
+                    int factor = (int)(Properties.Settings.Default.DefaultMinSegmentSize / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate));
+                    minsr = (factor + 1) * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                }
+                double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X) + Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
                 //  double stop = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X + AnnoTrackSegment.RESIZE_OFFSET);
                 double len = stop - start;
                 double closestposition = ViewHandler.Time.TimeFromPixel(e.GetPosition(this).X);
@@ -776,8 +820,9 @@ namespace ssi
                     this.Children.Add(segment);
                     SelectSegment(segment);
                     this.select(true);
-                    selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
-                    selected_segment.Item.Stop = selected_segment.Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
+
+                    selected_segment.Item.Duration = Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
+                    selected_segment.Item.Stop = selected_segment.Item.Start + selected_segment.Item.Duration;
                 }
                 else if (!isDiscrete && Keyboard.IsKeyDown(Key.LeftShift) && stop < ViewHandler.Time.TotalDuration)
                 {
@@ -817,10 +862,32 @@ namespace ssi
             isMouseAlreadydown = false;
             base.OnMouseUp(e);
 
-            if (selected_segment != null && selected_segment.Item.Duration < Properties.Settings.Default.DefaultMinSegmentSize)
+
+            double minsr = 0;
+
+            if(Properties.Settings.Default.DefaultMinSegmentSize != 0 && Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+            { 
+            int factor = (int)(Properties.Settings.Default.DefaultMinSegmentSize / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+            minsr = (factor) * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+            }
+
+            if (selected_segment != null && selected_segment.Item.Duration < Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr))
             {
-                selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
-                selected_segment.Item.Stop = selected_segment.Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
+                if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0 && Properties.Settings.Default.DefaultMinSegmentSize != 0)
+                {
+                    int factor = (int)(Properties.Settings.Default.DefaultMinSegmentSize / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                    int round = (int)(selected_segment.Item.Start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                    selected_segment.Item.Start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                    selected_segment.Item.Duration = Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
+                    selected_segment.Item.Stop = selected_segment.Item.Start + selected_segment.Item.Duration;
+                }
+                else
+                {
+                    selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
+                    selected_segment.Item.Stop = selected_segment.Item.Start + selected_segment.Item.Duration;
+                }
+
+               
             }
         }
 
@@ -869,6 +936,7 @@ namespace ssi
                             selected_segment.resize_left(delta);
                             FireOnMove(selected_segment.Item.Start);
                             ViewHandler.Time.CurrentPlayPosition = selected_segment.Item.Start;
+
                             if ((ViewHandler.Time.PixelFromTime(selected_segment.Item.Start) > ViewHandler.Time.CurrentSelectPosition - 1)) annorightdirection = true;
                             SelectSegment(selected_segment);
                             this.select(true);
@@ -895,18 +963,25 @@ namespace ssi
 
                             if (isMouseAlreadydown == false)
                             {
-
                                 ChangeRepresentationObject ChangeRepresentationObjectOfResize = UnDoObject.MakeChangeRepresentationObjectForResize(pos, (FrameworkElement)selected_segment);
                                 UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfResize);
                                 isMouseAlreadydown = true;
                             }
 
+                            double minsr = 0;
 
-                            if (segmentwidth >= Properties.Settings.Default.DefaultMinSegmentSize)
+                            if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                            {
+                                int factor = (int)(Properties.Settings.Default.DefaultMinSegmentSize / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                minsr = (factor) * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                            }
+
+                            if (segmentwidth >= Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr))
                             {
                                 if (point.X > ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop)) delta = ViewHandler.Time.PixelFromTime(ViewHandler.Time.SelectionStop) - selected_segment.ActualWidth;
 
                                 selected_segment.resize_right(delta);
+
                                 SelectSegment(selected_segment);
 
                                 this.select(true);
@@ -914,8 +989,19 @@ namespace ssi
                             }
                             else
                             {
-                                selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
-                                selected_segment.Item.Stop = selected_segment.Item.Start + Properties.Settings.Default.DefaultMinSegmentSize;
+                                selected_segment.Item.Duration = Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
+                                selected_segment.Item.Stop = selected_segment.Item.Start + selected_segment.Item.Duration;
+                                SelectSegment(selected_segment);
+                                this.select(true);
+                            }
+
+                            if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                            {
+                                if (selected_segment.Item.Stop % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                                {
+                                    int round = (int)(selected_segment.Item.Stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                    selected_segment.Item.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                                }
                             }
                         }
                         // resize segment left
@@ -927,12 +1013,18 @@ namespace ssi
                                 ChangeRepresentationObject ChangeRepresentationObjectOfResize = UnDoObject.MakeChangeRepresentationObjectForResize(pos, (FrameworkElement)selected_segment);
                                 UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfResize);
                                 isMouseAlreadydown = true;
-
                             }
 
-
                             double delta = point.X;
-                            if (selected_segment.Item.Duration - segmentwidth >= Properties.Settings.Default.DefaultMinSegmentSize)
+
+                            double minsr = 0;
+                            if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                            {
+                                int factor = (int)(Properties.Settings.Default.DefaultMinSegmentSize / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate));
+                                minsr = (factor + 1) * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                            }
+
+                            if (selected_segment.Item.Duration - segmentwidth >= Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr))
                             {
                                 selected_segment.resize_left(delta);
                                 SelectSegment(selected_segment);
@@ -941,8 +1033,17 @@ namespace ssi
                             }
                             else
                             {
-                                selected_segment.Item.Start = selected_segment.Item.Stop - Properties.Settings.Default.DefaultMinSegmentSize;
-                                selected_segment.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
+                                selected_segment.Item.Start = selected_segment.Item.Stop - Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
+                                selected_segment.Item.Duration = Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
+                            }
+
+                            if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                            {
+                                if (selected_segment.Item.Start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                                {
+                                    int round = (int)(selected_segment.Item.Start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                    selected_segment.Item.Start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                                }
                             }
                         }
 
@@ -955,24 +1056,36 @@ namespace ssi
                             {
                                 if (isMouseAlreadydown == false)
                                 {
-               
-
-                                 ChangeRepresentationObject ChangeRepresentationObjectOfMove =  UnDoObject.MakeChangeRepresentationObjectForMove(pos, (FrameworkElement)selected_segment);
-                                 UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfMove);
-                                 isMouseAlreadydown = true;  
-     
+                                    ChangeRepresentationObject ChangeRepresentationObjectOfMove = UnDoObject.MakeChangeRepresentationObjectForMove(pos, (FrameworkElement)selected_segment);
+                                    UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectOfMove);
+                                    isMouseAlreadydown = true;
                                 }
                                 selected_segment.move(delta);
                                 SelectSegment(selected_segment);
-                                this.select(true);
+
                                 FireOnMove(selected_segment.Item.Start + (selected_segment.Item.Stop - selected_segment.Item.Start) * 0.5);
+                            }
+
+                            if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                            {
+                                if (selected_segment.Item.Start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                                {
+                                    int round = (int)(selected_segment.Item.Start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                    selected_segment.Item.Start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                                }
+
+                                if (selected_segment.Item.Stop % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                                {
+                                    int round = (int)(selected_segment.Item.Stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                    selected_segment.Item.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                                }
                             }
                         }
                     }
                     else
                     {
                         isMouseAlreadydown = false;
-                       
+
                         // check if use can resize/move
                         selected_segment.checkResizeable(point);
                     }

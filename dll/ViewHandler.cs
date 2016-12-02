@@ -396,7 +396,7 @@ namespace ssi
                     if (AnnoTrack.GetSelectedTrack() != null)
                     {
                         double start = Time.TimeFromPixel(annoCursor.X);
-                        AnnoTrack.GetSelectedTrack().newAnnocopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Bg, temp_segment.Item.Confidence);
+                      if(temp_segment != null)  AnnoTrack.GetSelectedTrack().newAnnocopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Bg, temp_segment.Item.Confidence);
                     }
 
                     e.Handled = true;
@@ -429,9 +429,9 @@ namespace ssi
                             if (anno_tracks[i] == AnnoTrack.GetSelectedTrack() && i + 1 < anno_tracks.Count)
                             {
                                 AnnoTrack.SelectTrack(anno_tracks[i + 1]);
-                                 AnnoTrack.SelectSegment(null);
+                                AnnoTrack.SelectSegment(null);
                                 if (!AnnoTrack.GetSelectedTrack().AnnoList.Contains(temp)) AnnoTrack.GetSelectedTrack().newAnnocopy(temp.Start, temp.Stop, temp.Label, temp.Bg);
-                              
+
                                 break;
                             }
                         }
@@ -465,8 +465,6 @@ namespace ssi
         {
             if (!this.view.annoListControl.editTextBox.IsFocused)
             {
-
-
                 if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                 {
                     if (DatabaseLoaded)
@@ -475,8 +473,7 @@ namespace ssi
                     }
                     else saveAnnoAs();
                 }
-
-               else  if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                else if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
                     if (DatabaseLoaded)
                     {
@@ -484,7 +481,6 @@ namespace ssi
                     }
                     else saveAnno();
                 }
-               
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
                     if (AnnoTrack.GetSelectedSegment() == null && Mouse.DirectlyOver == AnnoTrack.GetSelectedTrack())
@@ -494,6 +490,31 @@ namespace ssi
                     else
                     {
                         AnnoTrack.OnKeyDownHandler(sender, e);
+                    }
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.R) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))         
+               {
+                    if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0 && AnnoTrack.GetSelectedTrack().AnnoList.SR != Properties.Settings.Default.DefaultDiscreteSampleRate)
+                    {
+                        foreach (AnnoListItem ali in AnnoTrack.GetSelectedTrack().AnnoList)
+                        {
+                            if (ali.Start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                            {
+                                int round = (int)(ali.Start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                ali.Start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                            }
+
+                            if (ali.Stop % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                            {
+                                int round = (int)(ali.Stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                ali.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                            }
+
+
+                            ali.Duration = ali.Stop - ali.Start;
+                        }
+                        AnnoTrack.GetSelectedTrack().AnnoList.SR = Properties.Settings.Default.DefaultDiscreteSampleRate;
                     }
                 }
 
@@ -1083,7 +1104,6 @@ namespace ssi
                 track.AnnoList.AnnotationScheme.maxcolor = new SolidColorBrush(((LinearGradientBrush)track.ContiniousBrush).GradientStops[1].Color).ToString();
             }
 
-          
             track.timeRangeChanged(ViewHandler.Time);
         }
 
@@ -1126,9 +1146,7 @@ namespace ssi
             anno.SampleAnnoPath = filename;
             double maxdur = 0;
 
-          
             maxdur = anno[anno.Count - 1].Stop;
-         
 
             if (anno != null)
             {
@@ -1196,13 +1214,13 @@ namespace ssi
                     {
                         if (ali.Tier == tierid)
                         {
-                            annolist.Name = "#" + tierid;
+                            annolist.Name = tierid;
                             //check if trackid is already used
                             foreach (AnnoTrack a in anno_tracks)
                             {
-                                if (a.AnnoList.Name ==  tierid)
+                                if (a.AnnoList.Name == tierid)
                                 {
-                                    annolist.Name = "#" +tierid + tiercount.ToString();
+                                    annolist.Name = tierid + tiercount.ToString();
                                     break;
                                 }
                             }
@@ -2664,7 +2682,7 @@ namespace ssi
             if (this.current_anno != null)
             {
                 if (this.current_anno.AnnotatorFullName == null) this.current_anno.AnnotatorFullName = this.current_anno.Annotator;
-                string filename = ViewTools.SaveFileDialog(this.current_anno.AnnotationScheme.name + "."+ this.current_anno.Role + "." + this.current_anno.Annotator, ".annotation");
+                string filename = ViewTools.SaveFileDialog(this.current_anno.AnnotationScheme.name + "." + this.current_anno.Role + "." + this.current_anno.Annotator, ".annotation");
                 saveAnno(filename);
             }
         }
@@ -2705,6 +2723,7 @@ namespace ssi
                 Properties.Settings.Default.MongoDBPass = s.MongoPass();
                 Properties.Settings.Default.DefaultZoominSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
+                Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());
                 Properties.Settings.Default.Save();
             }
         }
@@ -2727,8 +2746,6 @@ namespace ssi
                     AnnoType at = ntw.Result();
 
                     if (at == AnnoType.FREE) newAnno(AnnoType.FREE);
-
-
                     else if (at == AnnoType.DISCRETE)
                     {
                         //todo some logic to get annoscheme
@@ -2737,14 +2754,11 @@ namespace ssi
                         ase.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                         ase.ShowDialog();
 
-                        if(ase.DialogResult == true)
+                        if (ase.DialogResult == true)
                         {
                             AnnoList al = ase.GetAnnoList();
-                            addAnno(al,AnnoType.DISCRETE);
+                            addAnno(al, AnnoType.DISCRETE);
                         }
-                    
-
-                      
                     }
                     else if (at == AnnoType.CONTINUOUS)
                     {
@@ -3385,7 +3399,7 @@ namespace ssi
 
                 try
                 {
-                    if (anno_tracks.Count > 0 && (anytrackchanged ||isfinsihed))
+                    if (anno_tracks.Count > 0 && (anytrackchanged || isfinsihed))
                     {
                         DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
@@ -3395,8 +3409,8 @@ namespace ssi
                             track.AnnoList.HasChanged = false;
                         }
 
-                        if(!isfinsihed)
-                        MessageBox.Show("Annotation Tracks for Annotator " + annotator + " in session " + Properties.Settings.Default.LastSessionId + " have been stored in the database");
+                        if (!isfinsihed)
+                            MessageBox.Show("Annotation Tracks for Annotator " + annotator + " in session " + Properties.Settings.Default.LastSessionId + " have been stored in the database");
                         else MessageBox.Show("Annotation Tracks for Annotator " + annotator + " in session " + Properties.Settings.Default.LastSessionId + " have been stored in the database and have been marked as finished");
                     }
                     else if (anno_tracks.Count == 0) MessageBox.Show("No annotation tiers available");
@@ -3515,7 +3529,6 @@ namespace ssi
                                         }
                                     }
                                 }
-
                             }
                         }
                         DatabaseLoaded = true;

@@ -5,7 +5,7 @@
     xmlns:view="clr-namespace:ssi;assembly=ssiview"
     xmlns:local="clr-namespace:ssi"
     xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-      Title="(NOn)Verbal Annotator | v0.9.9.2.7| HCM-Lab, Augsburg University | http://openssi.net" WindowState="Maximized" Height="Auto" Width="Auto" AllowDrop="True" AllowsTransparency="False" Icon="ui.ico">
+      Title="(NOn)Verbal Annotator | v0.9.9.2.8 | HCM-Lab, Augsburg University | http://openssi.net" WindowState="Maximized" Height="Auto" Width="Auto" AllowDrop="True" AllowsTransparency="False" Icon="ui.ico">
 
     <Grid>
 
