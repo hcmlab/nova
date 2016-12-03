@@ -2767,8 +2767,7 @@ namespace ssi
 
                     else if (at == AnnoType.DISCRETE)
                     {
-                        //todo some logic to get annoscheme
-
+                       
                         if(DatabaseLoaded)
                         {
                             newAnno(AnnoType.DISCRETE);
@@ -3388,15 +3387,27 @@ namespace ssi
 
         private void mongodb_ChangeFolder(object sender, RoutedEventArgs e)
         {
-            LabelInputBox inputBox = new LabelInputBox("Database Folder", "Choose path for local files", Properties.Settings.Default.DataPath, null);
-            inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            inputBox.ShowDialog();
-            inputBox.Close();
+            //LabelInputBox inputBox = new LabelInputBox("Database Folder", "Choose path for local files", Properties.Settings.Default.DataPath, null);
+            //inputBox.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //inputBox.ShowDialog();
+            //inputBox.Close();
 
-            if (inputBox.DialogResult == true)
+            //if (inputBox.DialogResult == true)
+            //{
+            //    Properties.Settings.Default.DataPath = inputBox.Result();
+            //}
+
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.SelectedPath = Properties.Settings.Default.DataPath;
+            dialog.ShowNewFolderButton = true;
+            dialog.Description = "Select the folder where you want to store the media of your databases in.";
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK)
             {
-                Properties.Settings.Default.DataPath = inputBox.Result();
+                Properties.Settings.Default.DataPath = dialog.SelectedPath;
             }
+
         }
 
         private void mongodbAdd()
