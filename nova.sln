@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nova", "nova", "{FAD6FC5E-5E59-47C5-AE83-EB6223CA2FFB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "viewdll", "dll\viewdll.csproj", "{0D4444F4-F82F-4084-AD46-85F627E5BECB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nova_metro", "app_metro\nova_metro.csproj", "{E8FB2606-74AD-4850-8972-984C5A355304}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nova", "app\nova.csproj", "{063059ED-B5FC-4E64-9AF2-F546D26B8317}"
 EndProject
@@ -15,55 +13,32 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Debug|x64.ActiveCfg = Debug|x64
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Debug|x64.Build.0 = Debug|x64
-		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Debug|x86.ActiveCfg = Debug|x86
-		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Debug|x86.Build.0 = Debug|x86
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Release|x64.ActiveCfg = Release|x64
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Release|x64.Build.0 = Release|x64
-		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Release|x86.ActiveCfg = Release|x86
-		{0D4444F4-F82F-4084-AD46-85F627E5BECB}.Release|x86.Build.0 = Release|x86
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Debug|x64.ActiveCfg = Debug|x64
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Debug|x64.Build.0 = Debug|x64
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Debug|x86.ActiveCfg = Debug|x86
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Debug|x86.Build.0 = Debug|x86
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Release|x64.ActiveCfg = Release|x64
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Release|x64.Build.0 = Release|x64
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Release|x86.ActiveCfg = Release|x86
-		{E8FB2606-74AD-4850-8972-984C5A355304}.Release|x86.Build.0 = Release|x86
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Debug|x64.ActiveCfg = Debug|x64
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Debug|x64.Build.0 = Debug|x64
-		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Debug|x86.ActiveCfg = Debug|x86
-		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Debug|x86.Build.0 = Debug|x86
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|Any CPU.Build.0 = Release|Any CPU
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|x64.ActiveCfg = Release|x64
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|x64.Build.0 = Release|x64
-		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|x86.ActiveCfg = Release|x86
-		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB} = {FAD6FC5E-5E59-47C5-AE83-EB6223CA2FFB}
-		{E8FB2606-74AD-4850-8972-984C5A355304} = {FAD6FC5E-5E59-47C5-AE83-EB6223CA2FFB}
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317} = {FAD6FC5E-5E59-47C5-AE83-EB6223CA2FFB}
 	EndGlobalSection
 EndGlobal

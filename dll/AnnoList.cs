@@ -297,7 +297,7 @@ namespace ssi
                             }
                         }
 
-                        AnnoListItem e = new AnnoListItem(start, duration, label, meta, tier, "#000000", confidence);
+                        AnnoListItem e = new AnnoListItem(start, duration, label, meta, "#000000", confidence);
 
                         if (filter == null || tier == filter)
                             list.AddSorted(e);
@@ -485,7 +485,7 @@ namespace ssi
                             {
                                 string value = data[0];
                                 double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.SR) / 1000.0, value, "", list.Name, "#000000", confidence);
+                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.SR) / 1000.0, value, "", "#000000", confidence);
                                 list.Add(e);
                                 start = start + (1000.0 / list.SR) / 1000.0;
                             }
@@ -505,7 +505,7 @@ namespace ssi
                                 }
 
                                 double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
                                 list.AddSorted(e);
                             }
                             else if (list.AnnotationType == AnnoType.FREE)
@@ -514,10 +514,13 @@ namespace ssi
                                 double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
                                 double dur = stop - start;
                                 string label = data[2];
-                                string color = "#000000";
-
                                 double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                string color = "#000000";
+                                if (data.Length > 4)
+                                {
+                                    color = data[4];
+                                }
+                                AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
                                 list.AddSorted(e);
                             }
                         }
@@ -535,7 +538,7 @@ namespace ssi
                             {
                                 string value = binaryReader.ReadSingle().ToString();
                                 double confidence = (double)binaryReader.ReadSingle();
-                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.SR) / 1000.0, value, "", list.Name, "#000000", confidence);
+                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.SR) / 1000.0, value, "", "#000000", confidence);
                                 list.Add(e);
                                 start = start + (1000.0 / list.SR) / 1000.0;
                             }
@@ -555,7 +558,7 @@ namespace ssi
                                     color = list.AnnotationScheme.LabelsAndColors.Find(x => x.Label == label).Color;
                                 }
                                 double confidence = Math.Round(binaryReader.ReadSingle(), 3, MidpointRounding.AwayFromZero);
-                                AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
                                 list.AddSorted(e);
                             }
                             else if (list.AnnotationType == AnnoType.FREE)
@@ -568,8 +571,15 @@ namespace ssi
                                 string label = System.Text.Encoding.Default.GetString(labelasbytes);
                                 string color = "#000000";
 
+                                /*
+                                int stringlength2 = (int)binaryReader.ReadUInt32();
+                                byte[] colorasbytes = (binaryReader.ReadBytes(stringlength2));
+                                string color = System.Text.Encoding.Default.GetString(colorasbytes);
+                                */
+
+
                                 double confidence = Math.Round(binaryReader.ReadSingle(), 3, MidpointRounding.AwayFromZero);
-                                AnnoListItem e = new AnnoListItem(start, dur, label, "", list.Name, color, confidence);
+                                AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
                                 list.AddSorted(e);
                             }
                         }
@@ -579,7 +589,7 @@ namespace ssi
                 }
                 else
                 {
-                    MessageBox.Show("No annotation data was not found, load scheme only from '" + filepath + "'");
+                    MessageBox.Show("Annotation data was not found, load scheme only from '" + filepath + "'");
                 }
 
                 list.loaded = true;
@@ -792,7 +802,7 @@ namespace ssi
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + e.Label + _delimiter + e.Confidence.ToString("n2"));
+                            sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + e.Label + _delimiter + e.Confidence.ToString("n2") + _delimiter + e.Bg.ToString());
                         }
                     }
                     else if (this.AnnotationType == AnnoType.DISCRETE)
@@ -833,9 +843,12 @@ namespace ssi
                             bw.Write(e.Start);
                             bw.Write(e.Stop);
                             bw.Write((uint)e.Label.Length);
-                            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(e.Label);
-                            bw.Write(bytes);
+                            byte[] label = System.Text.Encoding.UTF8.GetBytes(e.Label);
+                            bw.Write(label);
                             bw.Write((float)e.Confidence);
+                            //bw.Write((uint)e.Bg.Length);
+                            //byte[] color = System.Text.Encoding.UTF8.GetBytes(e.Bg);
+                            //bw.Write(color);
                         }
                     }
                     else if (this.AnnotationType == AnnoType.DISCRETE)

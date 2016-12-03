@@ -548,7 +548,7 @@ namespace ssi
                         double start = i * ((1000.0 / al.SR) / 1000.0);
                         double dur = (1000.0 / al.SR) / 1000.0;
 
-                        AnnoListItem ali = new AnnoListItem(start, dur, label, "", al.Name, "#000000", double.Parse(confidence));
+                        AnnoListItem ali = new AnnoListItem(start, dur, label, "", "#000000", double.Parse(confidence));
 
                         al.Add(ali);
                     }
@@ -605,7 +605,7 @@ namespace ssi
                         string label = SchemeLabel;
                         string confidence = annotation[i]["conf"].ToString();
 
-                        AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, SchemeColor, double.Parse(confidence));
+                        AnnoListItem ali = new AnnoListItem(start, duration, label, "", SchemeColor, double.Parse(confidence));
                         al.AddSorted(ali);
                     }
                 }
@@ -621,7 +621,7 @@ namespace ssi
                         string label = annotation[i]["name"].ToString();
                         string confidence = annotation[i]["conf"].ToString();
 
-                        AnnoListItem ali = new AnnoListItem(start, duration, label, "", al.Name, "#000000", double.Parse(confidence));
+                        AnnoListItem ali = new AnnoListItem(start, duration, label, "", "#000000", double.Parse(confidence));
                         al.AddSorted(ali);
                     }
                 }

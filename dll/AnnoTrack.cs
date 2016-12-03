@@ -615,7 +615,7 @@ namespace ssi
 
                     if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
                     {
-                        AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "", TierId, this.DefaultColor, 1.0);
+                        AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "", this.DefaultColor, 1.0);
                         temp.Bg = this.DefaultColor;
                         anno_list.AddSorted(temp);
                         AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
@@ -704,7 +704,7 @@ namespace ssi
 
                 if (stop < ViewHandler.Time.TotalDuration)
                 {
-                    AnnoListItem temp = new AnnoListItem(start, len, label, "", TierId, color, confidence);
+                    AnnoListItem temp = new AnnoListItem(start, len, label, "", color, confidence);
                     temp.Bg = this.DefaultColor;
 
                     bool alreadyinlist = false;
@@ -802,7 +802,7 @@ namespace ssi
 
                 if (isDiscrete && stop < ViewHandler.Time.TotalDuration)
                 {
-                    AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "", TierId, this.DefaultColor);
+                    AnnoListItem temp = new AnnoListItem(start, len, this.Defaultlabel, "", this.DefaultColor);
                     anno_list.AddSorted(temp);
                     AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
 
@@ -827,7 +827,7 @@ namespace ssi
                     c.B = 128;
                     c.A = 128;
 
-                    AnnoListItem temp = new AnnoListItem(start, len, "", "", TierId, c.ToString());
+                    AnnoListItem temp = new AnnoListItem(start, len, "", "", c.ToString());
                     anno_markers.Add(temp);
                     AnnoTrackSegment segment = new AnnoTrackSegment(temp, this);
                     segment.Width = 1;

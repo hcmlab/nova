@@ -97,13 +97,12 @@ namespace ssi
             }
         }
 
-        public AnnoListItem(double _start, double _duration, String _label, String _meta = "", String _tier = "", String _bg = "#000000", double _confidence = 1.0)
+        public AnnoListItem(double _start, double _duration, String _label, String _meta = "", String _bg = "#000000", double _confidence = 1.0)
         {
             start = _start;
             duration = Math.Max(0, _duration);
             label = _label;
             meta = _meta;
-            tier = _tier;
             bg = _bg;
             confidence = _confidence;
         }
