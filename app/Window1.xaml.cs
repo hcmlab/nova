@@ -22,6 +22,7 @@ namespace ssi
             CultureInfo ci = new CultureInfo("en-GB");
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
         private void viewHandlerLoaded(ViewHandler handler)
