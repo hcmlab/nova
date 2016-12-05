@@ -42,6 +42,7 @@ namespace ssi
         private string annotator = null;
         private string annotatorfn = null;
         private string ftype = "ASCII";
+        private string defaultcolor = "#FF000000";
 
         private AnnoType _Type = AnnoType.DISCRETE;
 
@@ -515,10 +516,18 @@ namespace ssi
                                 double dur = stop - start;
                                 string label = data[2];
                                 double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
-                                string color = "#000000";
+                                string color = "#FF000000";
                                 if (data.Length > 4)
                                 {
-                                    color = data[4];
+                                 string[] metapairs = data[4].Split('=');
+                                    for(int i=0; i< metapairs.Length;i++)
+                                    {
+                                        if(metapairs[i].Contains("color"))
+                                        {
+                                            color = metapairs[i + 1];
+                                            break;
+                                        }
+                                    }  
                                 }
                                 AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
                                 list.AddSorted(e);
@@ -802,7 +811,10 @@ namespace ssi
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + e.Label + _delimiter + e.Confidence.ToString("n2") + _delimiter + e.Bg.ToString());
+                            if(e.Bg == defaultcolor)
+                            sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + e.Label + _delimiter + e.Confidence.ToString("n2"));
+                            else
+                            sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + e.Label + _delimiter + e.Confidence.ToString("n2") + _delimiter + "color=" + e.Bg.ToString());
                         }
                     }
                     else if (this.AnnotationType == AnnoType.DISCRETE)
@@ -818,7 +830,7 @@ namespace ssi
                             }
                             else
                             {
-                                sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + 4294967295 + _delimiter + e.Confidence.ToString("n2"));
+                                sw.WriteLine(e.Start.ToString("n2") + _delimiter + e.Stop.ToString("n2") + _delimiter + -1 + _delimiter + e.Confidence.ToString("n2"));
                             }
                         }
                     }

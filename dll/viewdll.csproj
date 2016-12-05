@@ -109,9 +109,6 @@
     <Reference Include="MongoDB.Driver.Core">
       <HintPath>.\MongoDB.Driver.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MongoDB.Driver.GridFS">
-      <HintPath>.\MongoDB.Driver.GridFS.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationFramework.Classic" />
     <Reference Include="PropertyTools.Wpf">
       <HintPath>.\PropertyTools.Wpf.dll</HintPath>
@@ -124,6 +121,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Printing" />
     <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Windows.Controls.DataVisualization.Toolkit">
+      <HintPath>.\System.Windows.Controls.DataVisualization.Toolkit.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
@@ -257,6 +257,9 @@
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Signal.cs" />
+    <Compile Include="SignalStatsWindow.xaml.cs">
+      <DependentUpon>SignalStatsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SignalTrack.cs" />
     <Compile Include="SignalTrackEx.xaml.cs">
       <DependentUpon>SignalTrackEx.xaml</DependentUpon>
@@ -408,6 +411,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SignalStatsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

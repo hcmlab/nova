@@ -6,11 +6,22 @@
         private double currentPlayPosition = 0;
         private double currentSelectPosition = 0;
         private double currentPlayPositionPrecise = 0;
+        public event TimeRangeChanged OnTimeRangeChanged;
 
         public double TotalDuration
         {
             get { return totalDuration; }
             set { totalDuration = value; }
+        }
+
+
+        public void timeRangeChanged(ViewTime time)
+        {
+            if (OnTimeRangeChanged != null)
+            {
+                OnTimeRangeChanged(time);   
+            }
+           
         }
 
         public double CurrentPlayPosition

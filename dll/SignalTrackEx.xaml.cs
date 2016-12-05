@@ -17,6 +17,7 @@ namespace ssi
     {
         private Color fg_color;
         private Color bg_color;
+        bool isAudio = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -79,6 +80,7 @@ namespace ssi
             this.SignalColor = Color.FromArgb(255, 0, 0, 0);
             this.Brush = Brushes.Blue;
             this.DataContext = this;
+        
             InitializeComponent();
         }
 
@@ -101,6 +103,8 @@ namespace ssi
 
             this.grid.Children.Add(track);
             this.track = track;
+            this.isAudio = track.getSignal().IsAudio;
+            if (this.isAudio) StatsButton.Visibility = Visibility.Collapsed;
         }
 
         public void RemoveTrack(SignalTrack track)
@@ -205,6 +209,22 @@ namespace ssi
             {
                 track.AutoScaling = false;
             }
+        }
+
+        private void StatsButton_Click(object sender, RoutedEventArgs e)
+        {
+            SignalStatsWindow ssw = new SignalStatsWindow(track.getSignal(), track.getSignal().ShowDim);
+            ViewHandler.Time.OnTimeRangeChanged += ssw.timeRangeChanged;
+            ssw.Topmost = true;
+            ssw.WindowStartupLocation = WindowStartupLocation.Manual;
+            ssw.Show();
+
+            if(ssw.DialogResult == false)
+            {
+                ViewHandler.Time.OnTimeRangeChanged -= ssw.timeRangeChanged;
+            }
+            
+
         }
     }
 }

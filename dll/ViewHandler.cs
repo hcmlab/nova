@@ -176,6 +176,7 @@ namespace ssi
 
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += this.view.trackControl.timeTrackControl.timeTrack.timeRangeChanged;
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += this.view.trackControl.timeTrackControl.timeTrackSelection.timeRangeChanged;
+            this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += Time.timeRangeChanged;
             this.view.trackControl.timeTrackControl.rangeSlider.Update();
 
             this.media_list.OnMediaPlay += mediaPlayHandler;
@@ -212,6 +213,7 @@ namespace ssi
         private void Dispatcher_ShutdownStarted(object sender, EventArgs e)
         {
             clear();
+           
         }
 
         public void OnKeyUp(object sender, KeyEventArgs e)
@@ -1478,6 +1480,7 @@ namespace ssi
         {
             ISignalTrack track = this.view.trackControl.signalTrackControl.addSignalTrack(signal, color, background);
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.timeRangeChanged;
+           
             this.signals.Add(signal);
             this.signal_tracks.Add(track);
 

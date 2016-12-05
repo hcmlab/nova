@@ -103,6 +103,8 @@ namespace ssi
 
         public AnnoList GetAnnoList()
         {
+            list.AnnotationScheme.LabelsAndColors.Clear();
+
             foreach (AnnotationSchemeSegment a in AnnotationResultBox.Items)
             {
                 LabelColorPair lcp = new LabelColorPair(a.Label, "#" + a.BindingColor.R.ToString("X2") + a.BindingColor.G.ToString("X2") + a.BindingColor.B.ToString("X2"));
@@ -123,6 +125,16 @@ namespace ssi
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
+                IEditableCollectionView itemstoremove = AnnotationResultBox.Items;
+                for(int i=0; i<AnnotationResultBox.Items.Count;i++)
+                {
+                    if (itemstoremove.CanRemove) itemstoremove.Remove(AnnotationResultBox.Items[i]);
+                }
+
+                AnnotationResultBox.ItemsSource = null;
+                items = new List<AnnotationSchemeSegment>();
+
+
                 string[] filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 if (filenames != null && filenames[0].EndsWith(".annotation"))
                 {
@@ -137,7 +149,7 @@ namespace ssi
                                 AnnotationSchemeSegment ass = new AnnotationSchemeSegment();
                                 ass.Label = item.Label;
                                 ass.BindingColor = (Color)ColorConverter.ConvertFromString(item.Color);
-                                if (!schemes.Contains(ass)) schemes.Add(ass);
+                                if (!schemes.Contains(ass) && ass.Label != "GARBAGE") schemes.Add(ass);
                             }
                         }
                         else if (list.AnnotationType == AnnoType.FREE)
@@ -176,7 +188,7 @@ namespace ssi
                         AnnotationResultBox.ItemsSource = items;
 
                         this.scheme_name.Text = list.Name;
-                        this.scheme_colorpickermin.SelectedColor = (Color)ColorConverter.ConvertFromString(list.AnnotationScheme.mincolor);
+                        if(list.AnnotationScheme.mincolor!= null) this.scheme_colorpickermin.SelectedColor = (Color)ColorConverter.ConvertFromString(list.AnnotationScheme.mincolor);
                     }
                     catch (Exception ex)
                     {

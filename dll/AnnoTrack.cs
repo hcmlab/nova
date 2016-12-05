@@ -936,6 +936,23 @@ namespace ssi
                             SelectSegment(selected_segment);
                             this.select(true);
                         }
+
+
+                        if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
+                        {
+                            if (selected_segment.Item.Start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                            {
+                                int round = (int)(selected_segment.Item.Start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                selected_segment.Item.Start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                            }
+
+                            if (selected_segment.Item.Stop % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                            {
+                                int round = (int)(selected_segment.Item.Stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                                selected_segment.Item.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                            }
+                            SelectSegment(selected_segment);
+                        }
                     }
                 }
 
