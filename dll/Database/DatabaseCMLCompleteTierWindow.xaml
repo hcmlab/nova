@@ -1,0 +1,65 @@
+﻿<Window x:Class="ssi.DatabaseCMLCompleteTierWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ssi"
+             Title="Complete Tier"
+             Height="200" Width="300" WindowStyle="ToolWindow">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0"
+               Grid.Column="0" 
+               HorizontalAlignment="Right"
+               ToolTip="Number of frames that will be added to the left and the right of the center frame">Context</Label>
+        <TextBox Name="ContextTextBox" 
+                 Grid.Row="0" 
+                 Grid.Column="1" 
+                 Margin="5" 
+                 VerticalAlignment="Center">0</TextBox>
+
+        <Label Grid.Row="1"
+               Grid.Column="0"
+               HorizontalAlignment="Right"
+               ToolTip="Select the tier you would like to complete">Tier</Label>
+        <ListBox Name="TierListBox" 
+                 Grid.Row="1" 
+                 Grid.Column="1"
+                 SelectionMode="Single" 
+                 Margin="5"></ListBox>
+        
+        <Label Grid.Row="2"
+               Grid.Column="0"
+               HorizontalAlignment="Right"
+               ToolTip="Select the stream with the features">Stream</Label>
+        <ListBox Name="StreamListBox"                 
+                 Grid.Row="2" 
+                 Grid.Column="1"
+                 SelectionMode="Single"
+                 Margin="5"></ListBox>
+
+        <StackPanel Grid.Row="3"
+                    Grid.Column="0" 
+                    Grid.ColumnSpan="2"
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right">
+            <Button Name="ApplyButton"
+                    Margin="5"
+                    Click="ApplyButton_Click">Apply</Button>
+            <Button Name="FinishedButton"
+                    Margin="5"
+                    Click="FinishedButton_Click">Finished</Button>
+        </StackPanel>
+        
+    </Grid>
+</Window>

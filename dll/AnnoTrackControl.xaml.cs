@@ -11,14 +11,6 @@ namespace ssi
     {
         public double currenttime = 0;
 
-        // True if a drag is in progress.
-        private bool DragInProgress = false;
-
-        // The drag's last point.
-        private Point LastPoint;
-
-        private UIElement track;
-
         public AnnoTrackControl()
         {
             InitializeComponent();

@@ -75,7 +75,7 @@ namespace ssi
         public bool databaseloaded = false;
         private ViewControl view;
         private String annofilepath = "";
-        private List<DatabaseMediaInfo> loadedDBmedia = null;
+        public List<DatabaseMediaInfo> loadedDBmedia = null;
         private int numberofparalleldownloads = 0;
         private List<long> downloadsreceived = new List<long>();
         private List<long> downloadstotal = new List<long>();
@@ -95,6 +95,24 @@ namespace ssi
             public string File;
             public string percent;
             public bool active;
+        }
+
+        public List<AnnoTrack> AnnoTracks
+        {
+            get { return anno_tracks; }
+        }
+
+        public AnnoTrack getAnnoTrackFromName(string name)
+        {
+            foreach(AnnoTrack anno in anno_tracks)
+            {
+                if (anno.AnnoList.Name == name)
+                {
+                    return anno;
+                }
+            }
+
+            return null;
         }
 
         public MenuItem LoadButton
@@ -137,12 +155,14 @@ namespace ssi
             this.view.exporttracktocsv.Click += exporttracktocsv_Click;
             // this.view.calculatepraat.Click += calculatepraat_Click;
             this.view.savetiermenu.Click += saveAnnoAsButton_Click;
-            this.view.convertocontannoemenu.Click += convertocontanno_Click;
+            this.view.convertocontannoemenu.Click += convertToContinuousAnnotation_Click;
             this.view.mongodbmenu.Click += mongodb_Store;
             this.view.mongodbmenufinished.Click += mongodb_Store_Finished;
-
             this.view.mongodbmenu2.Click += mongodb_Load;
             this.view.mongodbmenushow.Click += mongodb_Show;
+            this.view.mongodbCMLCompleteLearning.Click += mongodbCMLCompleteLearning_Click;
+            this.view.mongodbCMLTrainandLabel.Click += mongodbCMLTrainandLabel_Click;
+            this.view.mongodbCMLextract.Click += mongodbCMLExtract_Click;
             this.view.addmongodb.Click += mongodb_Add;
             this.view.mongodbfunctions.Click += mongodb_Functions;
             this.view.mongodbchangefolder.Click += mongodb_ChangeFolder;
@@ -213,7 +233,6 @@ namespace ssi
         private void Dispatcher_ShutdownStarted(object sender, EventArgs e)
         {
             clear();
-           
         }
 
         public void OnKeyUp(object sender, KeyEventArgs e)
@@ -398,7 +417,7 @@ namespace ssi
                     if (AnnoTrack.GetSelectedTrack() != null)
                     {
                         double start = Time.TimeFromPixel(annoCursor.X);
-                      if(temp_segment != null)  AnnoTrack.GetSelectedTrack().newAnnocopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Bg, temp_segment.Item.Confidence);
+                        if (temp_segment != null) AnnoTrack.GetSelectedTrack().newAnnocopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Bg, temp_segment.Item.Confidence);
                     }
 
                     e.Handled = true;
@@ -495,8 +514,8 @@ namespace ssi
                     }
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.R) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))         
-               {
+                if (e.KeyboardDevice.IsKeyDown(Key.R) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                {
                     if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0 && AnnoTrack.GetSelectedTrack().AnnoList.SR != Properties.Settings.Default.DefaultDiscreteSampleRate)
                     {
                         foreach (AnnoListItem ali in AnnoTrack.GetSelectedTrack().AnnoList)
@@ -513,11 +532,23 @@ namespace ssi
                                 ali.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
                             }
 
-
                             ali.Duration = ali.Stop - ali.Start;
                         }
                         AnnoTrack.GetSelectedTrack().AnnoList.SR = Properties.Settings.Default.DefaultDiscreteSampleRate;
                     }
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.R) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.F5))
+                {
+                    AnnoTrack track = AnnoTrack.GetSelectedTrack();
+                    if (track != null)
+                    {
+                        if (DatabaseLoaded)
+                            reloadAnnoDB(track);
+                        else
+                            reloadAnno(track.AnnoList.Filepath);
+                    }
+                    e.Handled = true;
                 }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.E) && !keyDown)
@@ -558,7 +589,7 @@ namespace ssi
                     }
                 }
 
-                if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.A) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedSegment() == null)
                     {
@@ -572,7 +603,7 @@ namespace ssi
                     keyDown = true;
                     // e.Handled = true;
                 }
-                else if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.A) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && !AnnoTrack.GetSelectedTrack().isDiscrete)
+                else if ((e.KeyboardDevice.IsKeyDown(Key.W) || e.KeyboardDevice.IsKeyDown(Key.Return) && !keyDown && AnnoTrack.GetSelectedTrack() != null) && !AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedSegment() != null)
                     {
@@ -728,24 +759,23 @@ namespace ssi
             saveAll();
             string configfilepath = "";
 
-                if (configfilepath == "")
-                {
-                    //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
-                    string firstmediadir = "";
-                    if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
-                    else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
+            if (configfilepath == "")
+            {
+                //If no (new format) anno file was loaded, get directory of first media element, else from first signal, else default last folder is picked.
+                string firstmediadir = "";
+                if (media_list.Medias.Count > 0) firstmediadir = media_list.Medias[0].GetFolderepath();
+                else if (signals.Count > 0) firstmediadir = signals[0].Folderpath;
 
-
-                    configfilepath = ViewTools.SaveFileDialog("project", ".nova", firstmediadir, 5);
-                    if (configfilepath != null)
-                    {
-                        saveProjectTracks(anno_tracks, media_list, signal_tracks, configfilepath);
-                    }
-                }
-                else
+                configfilepath = ViewTools.SaveFileDialog("project", ".nova", firstmediadir, 5);
+                if (configfilepath != null)
                 {
                     saveProjectTracks(anno_tracks, media_list, signal_tracks, configfilepath);
-                } 
+                }
+            }
+            else
+            {
+                saveProjectTracks(anno_tracks, media_list, signal_tracks, configfilepath);
+            }
         }
 
         public void saveAll()
@@ -758,25 +788,29 @@ namespace ssi
 
             if (anno_tracks.Count > 0 && anytrackchanged)
             {
-                
-                    //if (DatabaseLoaded)
-                    //{
-                    ////    mongodbStore();
-                    //}
+                //if (DatabaseLoaded)
+                //{
+                ////    mongodbStore();
+                //}
 
-
-                    //else
-                   // {
-                        foreach (AnnoTrack track in anno_tracks)
+                //else
+                // {
+                foreach (AnnoTrack track in anno_tracks)
+                {
+                    if (track.AnnoList.HasChanged /*&& !track.isDiscrete*/)
+                    {
+                        if (track.AnnoList.FromDB)
                         {
-                            if (track.AnnoList.HasChanged /*&& !track.isDiscrete*/)
-                            {
-                                    saveAnno(track.AnnoList, track.AnnoList.Filepath);
-                                    /* if (!track.isDiscrete)*/
-                                    track.AnnoList.HasChanged = false;
-                            }
+
                         }
-                   // }
+                        else
+                        {
+                            saveAnno(track.AnnoList, track.AnnoList.Filepath);
+                            track.AnnoList.HasChanged = false;
+                        }
+                    }
+                }
+                // }
             }
         }
 
@@ -798,7 +832,6 @@ namespace ssi
                     saveAll();
                 }
             }
-
 
             DatabaseLoaded = false;
             if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
@@ -1118,29 +1151,94 @@ namespace ssi
             track.timeRangeChanged(ViewHandler.Time);
         }
 
-        private void loadAnno(string filename)
+        private void reloadAnno(string filename)
 
         {
-            AnnoList anno = AnnoList.LoadfromFile(filename);
-            anno.SampleAnnoPath = filename;
+            if (!File.Exists(filename))
+            {
+                ViewTools.ShowErrorMessage("Annotation file not found '" + filename + "'");
+                return;
+            }
+
+            AnnoList anno = AnnoList.LoadfromFileNew(filename);
             anno.Filepath = filename;
+            anno.SampleAnnoPath = filename;
             double maxdur = 0;
 
-            foreach (AnnoListItem ali in anno)
-            {
-                if (ali.Stop > maxdur)
-                {
-                    maxdur = ali.Stop;
-                }
-            }
-            if (anno != null)
+            maxdur = anno[anno.Count - 1].Stop;
+
+            if (anno != null && AnnoTrack.GetSelectedTrack() != null)
             {
                 setAnnoList(anno);
-                addAnno(anno, anno.AnnotationType, 1, filename);
+                AnnoTrack.GetSelectedTrack().Children.Clear();
+                AnnoTrack.GetSelectedTrack().AnnoList.Clear();
+                AnnoTrack.GetSelectedTrack().segments.Clear();
+
+                AnnoTrack.GetSelectedTrack().AnnoList = anno;
+
+                foreach (AnnoListItem item in anno)
+                {
+                    AnnoTrack.GetSelectedTrack().addSegment(item);
+                }
+
+                AnnoTrack.GetSelectedTrack().timeRangeChanged(ViewHandler.Time);
             }
 
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+        }
+
+        public void reloadAnnoDB(AnnoTrack tier)
+
+        {
+
+            Action EmptyDelegate = delegate () { };
+            this.view.ShadowBoxText.Text = "Reloading Annotation";
+            this.view.ShadowBox.Visibility = Visibility.Visible;
+            view.UpdateLayout();
+            view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+            DatabaseAnno s = new DatabaseAnno();
+            s.Role = AnnoTrack.GetSelectedTrack().AnnoList.Role;
+            s.AnnoType = AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.name;
+            s.AnnotatorFullname = AnnoTrack.GetSelectedTrack().AnnoList.AnnotatorFullName;
+            s.Annotator = AnnoTrack.GetSelectedTrack().AnnoList.Annotator;
+
+            List<DatabaseAnno> list = new List<DatabaseAnno>();
+            List<AnnoTrack> tracks = new List<AnnoTrack>();
+            list.Add(s);
+            tracks.Add(AnnoTrack.GetSelectedTrack());
+
+            string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
+            DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
+
+           // db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, tracks, loadedDBmedia, false);
+
+
+            List<AnnoList> annos = db.LoadFromDatabase(list, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            double maxdur = 0;
+
+            if(annos[0].Count > 0)   maxdur = annos[0][annos[0].Count - 1].Stop;
+
+            if (annos[0] != null && AnnoTrack.GetSelectedTrack() != null)
+            {
+                setAnnoList(annos[0]);
+                tier.Children.Clear();
+                tier.AnnoList.Clear();
+                tier.segments.Clear();
+                tier.AnnoList = annos[0];
+
+                foreach (AnnoListItem item in annos[0])
+                {
+                    tier.addSegment(item);
+                }
+
+                tier.timeRangeChanged(ViewHandler.Time);
+            }
+
+            updateTimeRange(maxdur);
+            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            this.view.ShadowBox.Visibility = Visibility.Collapsed;
         }
 
         //new File Format...
@@ -1257,6 +1355,7 @@ namespace ssi
                 annolist.usesAnnoScheme = anno.usesAnnoScheme;
                 annolist.AnnotationScheme.minborder = anno.AnnotationScheme.minborder;
                 annolist.AnnotationScheme.maxborder = anno.AnnotationScheme.maxborder;
+                annolist.FromDB = anno.FromDB;
 
                 Brush background = null;
                 if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null && anno.AnnotationType == AnnoType.CONTINUOUS)
@@ -1480,7 +1579,7 @@ namespace ssi
         {
             ISignalTrack track = this.view.trackControl.signalTrackControl.addSignalTrack(signal, color, background);
             this.view.trackControl.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.timeRangeChanged;
-           
+
             this.signals.Add(signal);
             this.signal_tracks.Add(track);
 
@@ -2349,22 +2448,25 @@ namespace ssi
             int i = 0;
             foreach (string filename in filenames)
             {
-                FileAttributes attr = File.GetAttributes(filename);
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                if (File.Exists(filename))
                 {
-                    string[] subfilenames = Directory.GetFiles(filename);
-                    LoadFiles(subfilenames);
-                }
-                else
-                {
-                    if (url != null)
+                    FileAttributes attr = File.GetAttributes(filename);
+                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                     {
-                        loadFromFile(filename, url[i]);
-                        i++;
+                        string[] subfilenames = Directory.GetFiles(filename);
+                        LoadFiles(subfilenames);
                     }
                     else
                     {
-                        loadFromFile(filename);
+                        if (url != null)
+                        {
+                            loadFromFile(filename, url[i]);
+                            i++;
+                        }
+                        else
+                        {
+                            loadFromFile(filename);
+                        }
                     }
                 }
             }
@@ -2766,16 +2868,12 @@ namespace ssi
                     AnnoType at = ntw.Result();
 
                     if (at == AnnoType.FREE) newAnno(AnnoType.FREE);
-
-
                     else if (at == AnnoType.DISCRETE)
                     {
-                       
-                        if(DatabaseLoaded)
+                        if (DatabaseLoaded)
                         {
                             newAnno(AnnoType.DISCRETE);
                         }
-
                         else
                         {
                             AnnoSchemeEditor ase = new AnnoSchemeEditor();
@@ -2789,7 +2887,6 @@ namespace ssi
                                 addAnno(al, AnnoType.DISCRETE);
                             }
                         }
-                     
                     }
                     else if (at == AnnoType.CONTINUOUS)
                     {
@@ -3410,8 +3507,44 @@ namespace ssi
             {
                 Properties.Settings.Default.DataPath = dialog.SelectedPath;
             }
+        }
+
+        private void mongodbCMLCompleteLearning_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLCompleteTierWindow window = new DatabaseCMLCompleteTierWindow(this);
+            window.Show();
+        }
+
+        private void mongodbCMLTrainandLabel_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLTrainWindow window = new DatabaseCMLTrainWindow(this);
+            window.Show();
+        }
+
+
+
+        private void mongodbCMLExtract_Click(object sender, RoutedEventArgs e)
+        {
+            //TODO More logic here in the future
+
+            string arguments = " -overwrite -log cml_extract.log " +  "\"" + Properties.Settings.Default.DataPath + "\\" + Properties.Settings.Default.Database + "\" " + " expert;novice close";
+
+
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            //   startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            startInfo.FileName = "cmltrain.exe";
+            startInfo.Arguments = "--extract" + arguments;
+            process.StartInfo = startInfo;
+            process.Start();
+            process.WaitForExit();
+
+
+
 
         }
+
+
 
         private void mongodbAdd()
 
@@ -3428,46 +3561,52 @@ namespace ssi
             }
         }
 
-        private void mongodbStore(bool isfinsihed = false)
-        {
+        private void mongodbStore(bool isfinished = false)
+        {          
             if (DatabaseLoaded)
             {
-                bool anytrackchanged = false;
+                string message = "";
+
+                string login = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
+
                 foreach (AnnoTrack track in anno_tracks)
                 {
-                    if (track.AnnoList.HasChanged == true) anytrackchanged = true;
-                }
-
-                string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
-
-                try
-                {
-                    if (anno_tracks.Count > 0 && (anytrackchanged || isfinsihed))
+                    if (track.AnnoList.FromDB && (track.AnnoList.HasChanged || isfinished))
                     {
-                        DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
-
-                        string annotator = db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, anno_tracks, loadedDBmedia, isfinsihed);
-                        foreach (AnnoTrack track in anno_tracks)
+                        try
                         {
-                            track.AnnoList.HasChanged = false;
-                        }
+                            DatabaseHandler db = new DatabaseHandler("mongodb://" + login + Properties.Settings.Default.MongoDBIP);
 
-                        if (!isfinsihed)
-                            MessageBox.Show("Annotation Tracks for Annotator " + annotator + " in session " + Properties.Settings.Default.LastSessionId + " have been stored in the database");
-                        else MessageBox.Show("Annotation Tracks for Annotator " + annotator + " in session " + Properties.Settings.Default.LastSessionId + " have been stored in the database and have been marked as finished");
+                            string annotator = db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, track, loadedDBmedia, isfinished);
+                            if (annotator != null)
+                            {
+                                track.AnnoList.HasChanged = false;
+                                if(annotator != null) message += "\r\n" + track.AnnoList.Name;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ex.Message.Contains("not auth"))
+                            {
+                                MessageBox.Show("Sorry, you don't have write access to the database", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Could not store tier '" + track.AnnoList.Name + "' to database", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
                     }
-                    else if (anno_tracks.Count == 0) MessageBox.Show("No annotation tiers available");
                 }
-                catch (Exception ex)
+
+                if (!string.IsNullOrEmpty(message))
                 {
-                    if (ex.Message.Contains("not auth")) MessageBox.Show("Sorry, you are only allowed to read annotations, but not to write to the database");
-                    else MessageBox.Show("Could not connect to MongoDB Server");
+                    MessageBox.Show("The following tiers have been stored to the database: " + message, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             else
             {
-                MessageBox.Show("Load a session from Database first");
-            }
+                MessageBox.Show("Load a database session first", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }            
         }
 
         private void mongodbLoad()
@@ -3493,17 +3632,25 @@ namespace ssi
                     ci = dbhw.MediaConnectionInfo();
                     this.view.mongodbmenu.IsEnabled = true;
                     this.view.mongodbmenufinished.IsEnabled = true;
+                    this.view.mongodbCMLCompleteLearning.IsEnabled = true;
+                    this.view.mongodbCMLTrainandLabel.IsEnabled = true;
+                    this.view.mongodbCMLextract.IsEnabled = true;
+                    
 
                     //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
                     if (dbhw.Authlevel() > 2)
                     {
                         this.view.addmongodb.Visibility = Visibility.Visible;
                         this.view.mongodbfunctions.Visibility = Visibility.Visible;
+                        this.view.mongodbCMLTrainandLabel.Visibility = Visibility.Visible;
+                       
                     }
                     else
                     {
                         this.view.addmongodb.Visibility = Visibility.Collapsed;
                         this.view.mongodbfunctions.Visibility = Visibility.Collapsed;
+                        this.view.mongodbCMLTrainandLabel.Visibility = Visibility.Collapsed;
+                       
                     }
                 }
 
@@ -3520,8 +3667,8 @@ namespace ssi
                     view.UpdateLayout();
                     view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
-                    List<AnnoList> annos = db.LoadfromDatabase(annotations, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
-                    this.view.navigator.Statusbar.Content = "Database Session: " + (Properties.Settings.Default.LastSessionId).Replace('_','-');
+                    List<AnnoList> annos = db.LoadFromDatabase(annotations, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+                    this.view.navigator.Statusbar.Content = "Database Session: " + (Properties.Settings.Default.LastSessionId).Replace('_', '-');
                     try
                     {
                         if (annos != null)
@@ -3596,7 +3743,7 @@ namespace ssi
             Process.Start(Properties.Settings.Default.DataPath);
         }
 
-        private void convertocontanno_Click(object sender, RoutedEventArgs e)
+        private void convertToContinuousAnnotation_Click(object sender, RoutedEventArgs e)
         {
             if (SignalTrack.SelectedSignal != null && !SignalTrack.SelectedSignal.IsAudio)
             {

@@ -10,7 +10,6 @@ namespace ssi
     {
         private ViewTime _viewTime = null;
         private bool _followmedia = false;
-        private bool _movetoanno = false;
 
         public ViewTime ViewTime
         {

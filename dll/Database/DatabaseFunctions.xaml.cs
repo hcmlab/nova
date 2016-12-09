@@ -362,7 +362,7 @@ namespace ssi
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
             DatabaseHandler db = new DatabaseHandler(connectionstring);
-            List<AnnoList> al = db.LoadfromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> al = db.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
             AnnoList merge = new AnnoList();
             double[] array = new double[al[0].Count];
             foreach (AnnoList a in al)
@@ -390,7 +390,7 @@ namespace ssi
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
             DatabaseHandler db = new DatabaseHandler(connectionstring);
-            List<AnnoList> al = db.LoadfromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> al = db.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
 
             AnnoList merge = new AnnoList();
             double[] array = new double[al[0].Count];
@@ -446,7 +446,7 @@ namespace ssi
 
             if (AnnotationResultBox.SelectedItems.Count == 2)
             {
-                List<AnnoList> al = db.LoadfromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+                List<AnnoList> al = db.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
 
                 double sum_sq = 0;
                 double mse;

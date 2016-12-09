@@ -190,7 +190,7 @@ namespace ssi
 
         #endregion Properties
 
-        private List<AnnoTrackSegment> segments = new List<AnnoTrackSegment>();
+        public List<AnnoTrackSegment> segments = new List<AnnoTrackSegment>();
         private List<Line> lines = new List<Line>();
         private List<Line> markers = new List<Line>();
         private AnnoList anno_list = null;
@@ -214,9 +214,7 @@ namespace ssi
         private int direction;
         private bool annorightdirection = true;
 
-        private double _PreviouWidth = 0;
-        private double _PreviouHeight = 0;
-        private Point _PreviouMargin;
+   
         private bool isMouseAlreadydown = false;
 
         public AnnoList AnnoList

@@ -153,9 +153,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\WPFMediaKit.dll</HintPath>
     </Reference>
-    <Reference Include="WriteableBitmapEx, Version=0.9.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\WriteableBitmapEx.dll</HintPath>
+    <Reference Include="WriteableBitmapEx.Wpf">
+      <HintPath>.\WriteableBitmapEx.Wpf.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +180,12 @@
     <Compile Include="Database\DatabaseAnnoScheme.xaml.cs">
       <DependentUpon>DatabaseAnnoScheme.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseCMLTrainWindow.xaml.cs">
+      <DependentUpon>DatabaseCMLTrainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseCMLCompleteTierWindow.xaml.cs">
+      <DependentUpon>DatabaseCMLCompleteTierWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseDBMeta.xaml.cs">
       <DependentUpon>DatabaseDBMeta.xaml</DependentUpon>
     </Compile>
@@ -203,8 +208,8 @@
     <Compile Include="Database\DataBaseSessionWindow.xaml.cs">
       <DependentUpon>DataBaseSessionWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Database\DatabaseUserTableWindow.xaml.cs">
-      <DependentUpon>DatabaseUserTableWindow.xaml</DependentUpon>
+    <Compile Include="Database\DatabaseSelectionWindow.xaml.cs">
+      <DependentUpon>DatabaseSelectionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ExportSamplesControl.xaml.cs">
       <DependentUpon>ExportSamplesControl.xaml</DependentUpon>
@@ -322,6 +327,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Database\DatabaseCMLTrainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Database\DatabaseCMLCompleteTierWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Database\DatabaseDBMeta.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -350,7 +363,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Database\DatabaseUserTableWindow.xaml">
+    <Page Include="Database\DatabaseSelectionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

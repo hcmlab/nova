@@ -159,9 +159,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dll\WPFMediaKit.dll</HintPath>
     </Reference>
-    <Reference Include="WriteableBitmapEx, Version=0.9.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dll\WriteableBitmapEx.dll</HintPath>
+    <Reference Include="WriteableBitmapEx.Wpf">
+      <HintPath>..\dll\WriteableBitmapEx.Wpf.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

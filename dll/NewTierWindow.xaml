@@ -5,42 +5,41 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Select the type of new tier" Height="300" Width="480">
-    <Grid>
+        Title="Tier Selection" Height="340" Width="480" ResizeMode="NoResize"
+        WindowStyle="ToolWindow">
+    <Grid Margin="5,0,5,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
+        <StackPanel Grid.Row="0">
+            <Label>Discrete scheme with fixed labels</Label>
+            <Separator Height="10" Visibility="Hidden"></Separator>
+            <Button Height="25" Width="120" Content="New Discrete Tier" Click="Button_Click_1"></Button>
+        </StackPanel>        
+        
         <StackPanel Grid.Row="1">
-            <Label>Discrete without Scheme</Label>
-            <Separator Height="20" Visibility="Hidden"></Separator>
+            <Label>Discrete scheme with free labels</Label>
+            <Separator Height="10" Visibility="Hidden"></Separator>
             <Button Height="25" Width="120" Content="New Tier no Scheme" Click="Button_Click"></Button>
-           
         </StackPanel>
 
-        <StackPanel Grid.Row="0">
-            <Label>Discrete with Scheme</Label>
-            <Separator Height="20" Visibility="Hidden"></Separator>
-            <Button Height="25" Width="120" Content="New Discrete Tier" Click="Button_Click_1"></Button>
-        </StackPanel>
 
         <StackPanel Grid.Row="2">
-            <Label>Continuous Values</Label>
-            <Separator Height="20" Visibility="Hidden"></Separator>
+            <Label>Scheme with continuous values</Label>
+            <Separator Height="10" Visibility="Hidden"></Separator>
             <Button Height="25" Width="120" Content="New Continuous Tier" Click="Button_Click_2"></Button>
         </StackPanel>
 
-        <Image x:Name="discrete_png" Grid.Row="0" Grid.Column="1"  Margin="5,0,5,0" Source="Resources/discrete.png" Stretch="Uniform"/>
-     
-        <Image x:Name="free_png" Grid.Row="1" Grid.Column="1"  Margin="5,0,5,0" Source="Resources/free.png" Stretch="Uniform"/>
-        <Image x:Name="continuous_png" Grid.Row="2" Grid.Column="1" Margin="5,0,5,0" Source="Resources/continuous.png" Stretch="Uniform"/>
-
+        <Image x:Name="discrete_png" Grid.Row="0" Grid.Column="1" Margin="5" Width="280" Height="90" Source="Resources/discrete.png"/>
+        <Image x:Name="free_png" Grid.Row="1" Grid.Column="1" Margin="5" Width="280" Height="90" Source="Resources/free.png"/>
+        <Image x:Name="continuous_png" Grid.Row="2" Grid.Column="1" Margin="5" Width="280" Height="90" Source="Resources/continuous.png"/>
 
     </Grid>
 </Window>

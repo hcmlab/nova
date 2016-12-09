@@ -27,6 +27,7 @@ namespace ssi
         }
 
         private bool loaded = false;
+        private bool fromDB = false;
         private String name = null;
         private String filename = null;
         private String filepath = null;
@@ -50,6 +51,12 @@ namespace ssi
         {
             get { return loaded; }
             set { loaded = value; }
+        }
+
+        public bool FromDB
+        {
+            get { return fromDB; }
+            set { fromDB = value; }
         }
 
         public string Role
