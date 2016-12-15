@@ -101,24 +101,5 @@ namespace ssi
             this.Close();
         }
 
-        public void zoomOut(double factor, double width, double height)
-        {
-  
-            this.Width = width / factor;
-            this.Height = height / factor;
-            //this.HorizontalAlignment = HorizontalAlignment.Center;
-            this.VerticalAlignment = VerticalAlignment.Center;
-            this.Stretch = System.Windows.Media.Stretch.Uniform;
-        }
-
-        public void zoomIn(double factor, double width, double height)
-        {
-            this.Width = width * factor;
-            this.Height = height * factor;
-            this.HorizontalAlignment = HorizontalAlignment.Center;
-            this.VerticalAlignment = VerticalAlignment.Center;
-           // this.Stretch = System.Windows.Media.Stretch.None;
-
-        }
     }
 }

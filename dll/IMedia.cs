@@ -31,9 +31,5 @@ namespace ssi
         string GetFilepath();
 
         string GetFolderepath();
-
-        void zoomIn(double factor, double width, double height);
-
-        void zoomOut(double factor, double width, double height);
     }
 }

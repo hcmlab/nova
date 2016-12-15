@@ -87,20 +87,5 @@ namespace ssi
             this.media.SetVolume(this.volumeSlider.Value);
         }
 
-
-        private void zoomIn_Click(object sender, RoutedEventArgs e)
-        {
-            zoomfactor = zoomfactor + 0.25;
-
-            media.zoomIn(zoomfactor, this.ActualWidth, this.ActualHeight);
-        }
-
-        private void zoomOut_Click(object sender, RoutedEventArgs e)
-        {
-           if(zoomfactor >= 1) zoomfactor = zoomfactor - 0.25;
-            media.zoomIn(zoomfactor, this.ActualWidth, this.ActualHeight);
-        }
-
-
     }
 }

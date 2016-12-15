@@ -76,18 +76,5 @@ namespace ssi
             this.Close();
         }
 
-        public void zoomOut(double factor, double width, double height)
-        {
-            this.Width = this.ActualWidth / factor;
-            this.Height = this.ActualHeight / factor;
-            this.Stretch = System.Windows.Media.Stretch.Fill;
-        }
-
-        public void zoomIn(double factor, double width, double height)
-        {
-            this.Width = this.ActualWidth * factor;
-            this.Height = this.ActualHeight * factor;
-            this.Stretch = System.Windows.Media.Stretch.Fill;
-        }
     }
 }
