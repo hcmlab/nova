@@ -77,7 +77,7 @@ namespace ssi
         private WriteableBitmap writeableBmp;
         private Signal signal;
         private uint dim = 0;
-        private double sr = 0;
+        private double sr = 25;
         private int joints = 0;
         private int jointvalues = 0;
         private int numskeletons = 1;

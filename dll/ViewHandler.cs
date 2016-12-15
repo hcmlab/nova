@@ -69,9 +69,11 @@ namespace ssi
         private bool mouseDown = false;
         private bool keyDown = false;
         private bool movemedialock = false;
-        private double skelfps;
+        private double skelfps = 25;
         private double lasttimepos = 0;
         private string lastdlfile = null;
+        private bool visualizeskel = false;
+        private bool visualizepoints = false;
         public bool databaseloaded = false;
         private ViewControl view;
         private String annofilepath = "";
@@ -246,12 +248,7 @@ namespace ssi
             {
                 if (e.KeyboardDevice.IsKeyDown(Key.Space))
                 {
-                    bool is_playing = IsPlaying();
-                    if (!is_playing)
-                    {
-                        Play();
-                    }
-                    else { Stop(); }
+                    handlePlay();
 
                     e.Handled = true;
                 }
@@ -390,7 +387,7 @@ namespace ssi
                     e.Handled = true;
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.C) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                if (e.KeyboardDevice.IsKeyDown(Key.C) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack() != null && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedSegment() != null)
                     {
@@ -401,7 +398,7 @@ namespace ssi
                     e.Handled = true;
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.X) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                if (e.KeyboardDevice.IsKeyDown(Key.X) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack() != null && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedSegment() != null)
                     {
@@ -412,7 +409,7 @@ namespace ssi
                     e.Handled = true;
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack().isDiscrete)
+                if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack() != null  && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedTrack() != null)
                     {
@@ -856,7 +853,8 @@ namespace ssi
             this.view.trackControl.annoTrackControl.clear();
             this.view.trackControl.signalTrackControl.clear();
             this.view.videoControl.clear();
-            this.view.skeletonControl.clear();
+            this.view.pointcontrol.clear();
+            innomediaplaymode = false;
 
             this.signal_tracks.Clear();
             this.signals.Clear();
@@ -864,6 +862,14 @@ namespace ssi
             this.annos.Clear();
             this.media_list.clear();
             annofilepath = "";
+            visualizepoints = false;
+            visualizeskel = false;
+
+            while (this.view.videoskel.ColumnDefinitions.Count > 1)
+            {
+                this.view.videoskel.ColumnDefinitions.RemoveAt(this.view.videoskel.ColumnDefinitions.Count-1);
+            }
+
 
             if (this.view.videoskel.ColumnDefinitions.Count > 1)
             {
@@ -889,49 +895,70 @@ namespace ssi
             {
                 fps = skelfps;
             }
-
-            if (innomediaplaymode)
+            EventHandler ev = new EventHandler(delegate (object sender, EventArgs a)
             {
-                lasttimepos = ViewHandler.Time.CurrentPlayPosition;
-                this.view.navigator.playButton.Content = "II";
-                // Play();
-                _timerp.Interval = TimeSpan.FromMilliseconds(fps);
-                _timerp.Tick += new EventHandler(delegate (object sender, EventArgs a)
+                if (!movemedialock)
                 {
-                    if (!movemedialock)
+                    double time = (ViewHandler.Time.CurrentPlayPositionPrecise + (1000.0 / fps) / 1000.0);
+                    ViewHandler.Time.CurrentPlayPositionPrecise = time;
+                    // if (media_list.Medias.Count == 0)
+                    if (visualizeskel || visualizepoints)
                     {
-                        ViewHandler.Time.CurrentPlayPositionPrecise = (ViewHandler.Time.CurrentPlayPositionPrecise + (fps / 1000.0));
-                        if (media_list.Medias.Count == 0)
+                        signalCursor.X = ViewHandler.Time.PixelFromTime(ViewHandler.Time.CurrentPlayPositionPrecise);
 
+                        if (Time.CurrentPlayPositionPrecise >= Time.SelectionStop && this.view.navigator.followplaybox.IsChecked == true)
                         {
-                            signalCursor.X = ViewHandler.Time.PixelFromTime(ViewHandler.Time.CurrentPlayPositionPrecise);
+                            double factor = (((Time.CurrentPlayPositionPrecise - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
 
-                            if (Time.CurrentPlayPositionPrecise >= Time.SelectionStop && this.view.navigator.followplaybox.IsChecked == true)
-                            {
-                                double factor = (((Time.CurrentPlayPositionPrecise - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
-
-                                this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
-                                this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
-                            }
-                            else if (this.view.navigator.followplaybox.IsChecked == false) this.view.trackControl.timeTrackControl.rangeSlider.followmedia = false;
+                            this.view.trackControl.timeTrackControl.rangeSlider.followmedia = true;
+                            this.view.trackControl.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
                         }
+                        else if (this.view.navigator.followplaybox.IsChecked == false) this.view.trackControl.timeTrackControl.rangeSlider.followmedia = false;
+
                         //hm additional syncstep..
-                        if (lasttimepos != ViewHandler.Time.CurrentPlayPosition)
+                        if (lasttimepos < ViewHandler.Time.CurrentPlayPosition)
                         {
                             lasttimepos = ViewHandler.Time.CurrentPlayPosition;
                             ViewHandler.Time.CurrentPlayPositionPrecise = lasttimepos;
                         }
                         if (AnnoTrack.GetSelectedSegment() != null) AnnoTrack.GetSelectedSegment().select(true);
                     }
+                }
 
-                    if (!innomediaplaymode) _timerp.Stop();
-                });
+                if (!innomediaplaymode)
+                {
+                    if (_timerp != null)
+                    {
+                        _timerp.Stop();
+                        _timerp = null;
+                    }
+
+                }
+            });
+
+
+            if (innomediaplaymode)
+            {
+               // lasttimepos = ViewHandler.Time.CurrentPlayPosition;
+                this.view.navigator.playButton.Content = "II";
+                // Play();
+                _timerp = new DispatcherTimer();
+                _timerp.Interval = TimeSpan.FromMilliseconds(1000.0/fps);
+                _timerp.Tick += ev;
                 _timerp.Start();
             }
+
             else
             {
-                _timerp.Stop();
+                if(_timerp != null)
+                {
+                    _timerp.Stop();
+                    _timerp.Tick -= ev;
+                }
+              
             }
+
+       
         }
 
         private void mediaPlayHandler(MediaList videos, MediaPlayEventArgs e)
@@ -944,7 +971,7 @@ namespace ssi
 
                 Time.CurrentPlayPosition = e.pos;
 
-                signalCursor.X = pos;
+                if(!visualizeskel && !visualizepoints)       signalCursor.X = pos;
                 //   Console.WriteLine("5 " + signalCursor.X);
                 //if (ViewHandler.Time.TimeFromPixel(signalCursor.X) > Time.SelectionStop || signalCursor.X <= 1 ) signalCursor.X = ViewHandler.Time.PixelFromTime(Time.SelectionStart);
                 // Console.WriteLine(signalCursor.X + "_____" + Time.SelectionStart);
@@ -1488,12 +1515,37 @@ namespace ssi
             }
 
             Signal signal = Signal.LoadStreamFile(filename);
+            signalCursor.signalLoaded = true;
+            annoCursor.signalLoaded = true;
             if (signal != null && signal.loaded)
             {
                 addSignal(signal, color, background);
 
                 //if signal is SSI Skeleton...
-                if (signal.meta_name == "skeleton")
+                //if (signal.meta_name == "skeleton")
+                //{
+                //    if (this.view.videoskel.ColumnDefinitions.Count < 2 && media_list.Medias.Count > 0 && !visualizeskel)
+                //    {
+                //        ColumnDefinition column = new ColumnDefinition();
+                //        column.Width = new GridLength(1, GridUnitType.Star);
+                //        this.view.videoskel.ColumnDefinitions.Add(column);
+                //    }
+                //    else if (this.view.videoskel.ColumnDefinitions.Count < 2 )
+                //    {
+                //        ColumnDefinition columvideo = this.view.videoskel.ColumnDefinitions[0];
+                //        columvideo.Width = new GridLength(0, GridUnitType.Pixel);
+
+                //        ColumnDefinition column = new ColumnDefinition();
+                //        column.Width = new GridLength(1, GridUnitType.Star);
+                //        this.view.videoskel.ColumnDefinitions.Add(column);
+                //    }
+                //    this.view.pointcontrol.addPoints(signal);
+                //    visualizeskel = true;
+                //    this.view.navigator.playButton.IsEnabled = true;
+
+                //}
+
+                if (signal.meta_name == "face" || signal.meta_name == "skeleton")
                 {
                     if (this.view.videoskel.ColumnDefinitions.Count < 2 && media_list.Medias.Count > 0)
                     {
@@ -1510,8 +1562,9 @@ namespace ssi
                         column.Width = new GridLength(1, GridUnitType.Star);
                         this.view.videoskel.ColumnDefinitions.Add(column);
                     }
-                    this.view.skeletonControl.addSkeleton(signal);
-                    nomediaPlayHandler(signal);
+                    this.view.pointcontrol.addPoints(signal);
+                    visualizepoints = true;
+                    this.view.navigator.playButton.IsEnabled = true;
                 }
             }
         }
@@ -1681,10 +1734,18 @@ namespace ssi
 
         private void playButton_Click(object sender, RoutedEventArgs e)
         {
+            handlePlay();
+        }
+
+
+        private void handlePlay()
+        {
+
             if ((string)this.view.navigator.playButton.Content == "II")
             {
+              
+             //   nomediaPlayHandler(null);
                 innomediaplaymode = false;
-                nomediaPlayHandler(null);
                 this.view.navigator.playButton.Content = ">";
             }
             else
@@ -1711,6 +1772,7 @@ namespace ssi
                     Play();
                 }
             }
+
         }
 
         private void fastforward_Click(object sender, RoutedEventArgs e)
@@ -2629,6 +2691,13 @@ namespace ssi
 
                 case ssi_file_type.ANNOTATION:
                     loadAnnotation(filename);
+                    loaded = true;
+
+                    break;
+
+                case ssi_file_type.ANNO:
+
+                    loadCSVAnnotation(filename, 1, "legacy");
                     loaded = true;
 
                     break;

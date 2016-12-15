@@ -114,6 +114,9 @@
       <HintPath>.\PropertyTools.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="ReachFramework" />
+    <Reference Include="RibbonControlsLibrary">
+      <HintPath>.\RibbonControlsLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -148,6 +151,9 @@
     </Reference>
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WPFExtensions">
+      <HintPath>.\WPFExtensions.dll</HintPath>
     </Reference>
     <Reference Include="WPFMediaKit, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -243,6 +249,12 @@
     <Compile Include="NavigatorControl.xaml.cs">
       <DependentUpon>NavigatorControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PointControl.xaml.cs">
+      <DependentUpon>PointControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PointsPainter.xaml.cs">
+      <DependentUpon>PointsPainter.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -271,7 +283,6 @@
     </Compile>
     <Compile Include="SignalTrackControl.xaml.cs" />
     <Compile Include="SingleInstance.cs" />
-    <Compile Include="SkeletonControl.cs" />
     <Compile Include="SortAdorner.cs" />
     <Compile Include="TimeTrack.cs" />
     <Compile Include="TimeTrackControl.xaml.cs" />
@@ -417,6 +428,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="PointControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PointsPainter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="SelectionBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -438,10 +457,6 @@
     <Page Include="SignalTrackControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="SkeletonControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

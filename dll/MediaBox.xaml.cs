@@ -10,6 +10,9 @@ namespace ssi
     {
         private IMedia media = null;
         private bool is_video;
+        private double zoomfactor = 1.0;
+        private double offsetY = 0.0;
+        private double offsetX = 0.0;
 
         public MediaBox(IMedia media, bool is_video)
         {
@@ -23,6 +26,8 @@ namespace ssi
             this.nameLabel.Text = filename;
             this.nameLabel.ToolTip = filepath;
             this.is_video = is_video;
+            Grid.SetColumn(media.GetView(), 0);
+            Grid.SetRow(media.GetView(), 0);
             if (is_video)
             {
                 /* VideoDrawing aVideoDrawing = new VideoDrawing();
@@ -32,15 +37,17 @@ namespace ssi
                  Image imgVideoPlayer = new Image();
                  DrawingImage di = new DrawingImage(aVideoDrawing);
                  imgVideoPlayer.Source = di; */
+                zoombox.Visibility = Visibility.Visible;
+               this.MediaDropBox.Children.Add(media.GetView());
 
-                Grid.SetColumn(media.GetView(), 0);
-                Grid.SetRow(media.GetView(), 0);
-                this.mediaBoxGrid.Children.Add(media.GetView());
+              //  this.mediaBoxGrid.Children.Add(media.GetView());
+
 
                 /*Grid.SetColumn(imgVideoPlayer, 0);
                 Grid.SetRow(imgVideoPlayer, 0);
                 this.mediaBoxGrid.Children.Add(imgVideoPlayer);*/
             }
+            else this.mediaBoxGrid.Children.Add(media.GetView());
         }
 
         public IMedia mediaelement
@@ -59,7 +66,7 @@ namespace ssi
         {
             media.Stop();
             media.Clear();
-            this.mediaBoxGrid.Children.Remove(media.GetView());
+            this.MediaDropBox.Children.Remove(media.GetView());
         }
 
         private void volumeCheck_Checked(object sender, RoutedEventArgs e)
@@ -79,5 +86,21 @@ namespace ssi
         {
             this.media.SetVolume(this.volumeSlider.Value);
         }
+
+
+        private void zoomIn_Click(object sender, RoutedEventArgs e)
+        {
+            zoomfactor = zoomfactor + 0.25;
+
+            media.zoomIn(zoomfactor, this.ActualWidth, this.ActualHeight);
+        }
+
+        private void zoomOut_Click(object sender, RoutedEventArgs e)
+        {
+           if(zoomfactor >= 1) zoomfactor = zoomfactor - 0.25;
+            media.zoomIn(zoomfactor, this.ActualWidth, this.ActualHeight);
+        }
+
+
     }
 }
