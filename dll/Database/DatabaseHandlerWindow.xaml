@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Load Session" Height="500" Width="790" KeyDown="Window_KeyDown">
+        Title="Load Session" Height="700" Width="1000" KeyDown="Window_KeyDown">
     <Grid>
 
         <Grid.RowDefinitions>
@@ -37,7 +37,7 @@
             <StackPanel Orientation="Vertical" Margin="10">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="Autologin" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"  VerticalAlignment="Center" VerticalContentAlignment="Center" />
-                    <Label Content="Remember" />
+                    <Label Content="Auto-Connect" />
                 </StackPanel>
                 <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25" Width="100" />
             </StackPanel>
@@ -62,7 +62,7 @@
 
             <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
                 <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged" SelectionMode="Single" >
+                <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged" SelectionMode="Single">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -127,6 +127,16 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Locked">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <CheckBox Name="IsLockedCheckBox" IsEnabled="{Binding IsOwner}" IsChecked="{Binding IsLocked}" Checked="IsLockedCheckBox_Checked" Unchecked="IsLockedCheckBox_Unchecked" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
                             <GridViewColumn Width="Auto" Header="Date">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Date" />

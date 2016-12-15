@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-           Title="Admin" Height="500" Width="830.576" Background="LightGray" ResizeMode="NoResize">
-    
+        Title="Admin" Height="500" Width="830.576" Background="LightGray" WindowStyle="ToolWindow">
     
     <Grid>
         <Grid.RowDefinitions>

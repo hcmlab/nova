@@ -10,6 +10,7 @@ namespace ssi
     {
         private string filepath;
         private string dbId;
+        private MediaFile inputFile;
 
         public string GetFilepath()
         {
@@ -45,6 +46,16 @@ namespace ssi
             this.Volume = 1.0;
             this.Pause();
             this.filepath = filepath;
+
+            inputFile = new MediaFile { Filename = this.filepath };
+            //using (var engine = new Engine())
+            //{
+            //    engine.GetMetadata(inputFile);
+            //}
+
+            //string[] split = inputFile.Metadata.VideoData.FrameSize.Split('x');
+            //int w = int.Parse(split[0]);
+            //int h = int.Parse(split[1]);
         }
 
         public void Move(double to_in_seconds)
@@ -64,7 +75,7 @@ namespace ssi
 
         public double GetSampleRate()
         {
-            var inputFile = new MediaFile { Filename = this.filepath };
+
             using (var engine = new Engine())
             {
                 engine.GetMetadata(inputFile);
@@ -90,22 +101,5 @@ namespace ssi
             this.Close();
         }
 
-        public void zoomOut(double factor, double width, double height)
-        {
-            this.Width = width / factor;
-            this.Height = height / factor;
-            this.HorizontalAlignment = HorizontalAlignment.Center;
-            this.VerticalAlignment = VerticalAlignment.Center;
-            //    this.Stretch = System.Windows.Media.Stretch.Fill;
-        }
-
-        public void zoomIn(double factor, double width, double height)
-        {
-            this.Width = width * factor;
-            this.Height = height * factor;
-            this.HorizontalAlignment = HorizontalAlignment.Center;
-            this.VerticalAlignment = VerticalAlignment.Center;
-            //  this.Stretch = System.Windows.Media.Stretch.Fill;
-        }
     }
 }

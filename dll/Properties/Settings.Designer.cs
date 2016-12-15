@@ -238,5 +238,113 @@ namespace ssi.Properties {
                 this["DefaultDiscreteSampleRate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool OnlyMine {
+            get {
+                return ((bool)(this["OnlyMine"]));
+            }
+            set {
+                this["OnlyMine"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OnlyFinished {
+            get {
+                return ((bool)(this["OnlyFinished"]));
+            }
+            set {
+                this["OnlyFinished"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int CMLContext {
+            get {
+                return ((int)(this["CMLContext"]));
+            }
+            set {
+                this["CMLContext"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("null")]
+        public string CMLDefaultAnnotator {
+            get {
+                return ((string)(this["CMLDefaultAnnotator"]));
+            }
+            set {
+                this["CMLDefaultAnnotator"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("null")]
+        public string CMLDefaultScheme {
+            get {
+                return ((string)(this["CMLDefaultScheme"]));
+            }
+            set {
+                this["CMLDefaultScheme"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("null")]
+        public string CMLDefaultRoles {
+            get {
+                return ((string)(this["CMLDefaultRoles"]));
+            }
+            set {
+                this["CMLDefaultRoles"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CMLSetConf {
+            get {
+                return ((bool)(this["CMLSetConf"]));
+            }
+            set {
+                this["CMLSetConf"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool CMLRemove {
+            get {
+                return ((bool)(this["CMLRemove"]));
+            }
+            set {
+                this["CMLRemove"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool CMLFill {
+            get {
+                return ((bool)(this["CMLFill"]));
+            }
+            set {
+                this["CMLFill"] = value;
+            }
+        }
     }
 }

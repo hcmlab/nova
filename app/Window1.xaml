@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:view="clr-namespace:ssi;assembly=ssiview"
     xmlns:local="clr-namespace:ssi"
-    Title="(NOn)Verbal Annotator | v0.9.9.3.0 | HCM-Lab, Augsburg University | http://openssi.net" WindowState="Maximized" Height="Auto" Width="Auto" AllowDrop="True" AllowsTransparency="False" Icon="ui.ico">
+    Title="(NOn)Verbal Annotator | v0.9.9.4.0 | HCM-Lab, Augsburg University | http://openssi.net" WindowState="Maximized" Height="Auto" Width="Auto" AllowDrop="True" AllowsTransparency="False" Icon="ui.ico">
 
     <Grid>
 

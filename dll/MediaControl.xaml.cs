@@ -14,6 +14,10 @@ namespace ssi
     {
         private readonly IMedia _media;
 
+    
+
+
+
         public MediaRemoveEventArgs(IMedia media)
         {
             _media = media;
@@ -28,6 +32,7 @@ namespace ssi
     public partial class MediaControl : UserControl
     {
         public event EventHandler<MediaRemoveEventArgs> RemoveMedia;
+ 
 
         protected virtual void OnRemoveMedia(IMedia media)
         {
@@ -75,8 +80,6 @@ namespace ssi
 
             MediaBox media_box = new MediaBox(media, is_video);
             media_box.CloseButton.Click += removeMedia;
-            media_box.zoomIn.Click += zoomIn;
-            media_box.zoomOut.Click += zoomOut;
             Grid.SetColumn(media_box, 0);
             Grid.SetRow(media_box, grid.RowDefinitions.Count - 1);
             grid.Children.Add(media_box);
@@ -89,23 +92,11 @@ namespace ssi
             media.RemoveMediaBox(media.mediaelement);
             grid.Children.Remove(media);
             grid.RowDefinitions[Grid.GetRow(media)].Height = new GridLength(0);
-            if (grid.RowDefinitions.Count > Grid.GetRow(media) + 1) grid.RowDefinitions[Grid.GetRow(media) + 1].Height = new GridLength(0);
+            if (grid.RowDefinitions.Count > Grid.GetRow(media) + 1) grid.RowDefinitions[Grid.GetRow(media)].Height = new GridLength(0);
             OnRemoveMedia(media.mediaelement);
         }
 
-        public void zoomIn(object sender, RoutedEventArgs e)
-        {
-            MediaBox media = GetAncestorOfType<MediaBox>(sender as Button);
-            Grid grid = media.isvideo ? this.videoGrid : this.audioGrid;
-            media.mediaelement.zoomIn(1.5, this.ActualWidth, this.ActualHeight);
-        }
 
-        public void zoomOut(object sender, RoutedEventArgs e)
-        {
-            MediaBox media = GetAncestorOfType<MediaBox>(sender as Button);
-            Grid grid = media.isvideo ? this.videoGrid : this.audioGrid;
-            media.mediaelement.zoomOut(1.5, this.ActualWidth, this.ActualHeight);
-        }
 
         public static T GetAncestorOfType<T>(FrameworkElement child) where T : FrameworkElement
         {

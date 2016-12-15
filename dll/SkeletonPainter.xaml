@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:ssi"
    xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
+    xmlns:Controls="clr-namespace:WPFExtensions.Controls;assembly=WPFExtensions"
     Height="Auto" Width="Auto">
 
     <UserControl.Resources>
@@ -27,7 +28,16 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Image Name="ImageViewport" RenderOptions.BitmapScalingMode="HighQuality" Grid.Row="0" Grid.Column="0"  Margin="2" />
+
+        <DockPanel>
+            <Controls:ZoomControl>
+                <Grid Name="MediaDropBox" Width="Auto"
+                              Height="Auto" >
+                    <Image Name="ImageViewport" RenderOptions.BitmapScalingMode="HighQuality" Grid.Row="0" Grid.Column="0"  Margin="2" />
+                </Grid>
+            </Controls:ZoomControl>
+        </DockPanel>
+
 
         <Grid Grid.Column="0" Grid.Row="1" Margin="0">
 

@@ -77,7 +77,7 @@ namespace ssi
         private WriteableBitmap writeableBmp;
         private Signal signal;
         private uint dim = 0;
-        private double sr = 0;
+        private double sr = 25;
         private int joints = 0;
         private int jointvalues = 0;
         private int numskeletons = 1;
@@ -99,6 +99,8 @@ namespace ssi
             this.SignalColor = Color.FromArgb(255, 0, 255, 0);
             this.HeadColor = Color.FromArgb(255, 255, 255, 0);
             this.Brush = Brushes.Green;
+           
+         
             this.DataContext = this;
 
             if (s != null)
@@ -210,11 +212,13 @@ namespace ssi
                     }
                 }
 
+                int pen_thickness = 5;
+
                 if (signal.meta_type == "ssi")
 
                 {
                     //head
-                    writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[21].X, (int)points[21].Y, this.HeadColor);
+                    writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[21].X, (int)points[21].Y, colhead);
                     writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[22].X, (int)points[22].Y, colhead);
                     writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[24].X, (int)points[24].Y, colhead);
                     writeableBmp.DrawLine((int)points[22].X, (int)points[22].Y, (int)points[24].X, (int)points[24].Y, colhead);

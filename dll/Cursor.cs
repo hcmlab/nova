@@ -9,6 +9,7 @@ namespace ssi
     public class Cursor : Adorner
     {
         private double x_pos = 0;
+        private bool signal_loaded = false;
 
         public OnCursorChangeEvent OnCursorChange;
 
@@ -26,6 +27,15 @@ namespace ssi
             }
         }
 
+        public bool signalLoaded
+        {
+            get { return signal_loaded; }
+            set
+            {
+                signal_loaded = value;
+            }
+        }
+
         private Pen pen = null;
 
         public Cursor(FrameworkElement adornedElement, SolidColorBrush color, double size)
@@ -36,7 +46,9 @@ namespace ssi
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            drawingContext.DrawLine(pen, new Point(x_pos, 0), new Point(x_pos, ((FrameworkElement)this.AdornedElement).ActualHeight));
+            int toppixel = 20;
+            if (signal_loaded) toppixel = 40;
+            drawingContext.DrawLine(pen, new Point(x_pos, toppixel), new Point(x_pos, ((FrameworkElement)this.AdornedElement).ActualHeight - 40));
         }
     }
 }

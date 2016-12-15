@@ -27,6 +27,7 @@ namespace ssi
         }
 
         private bool loaded = false;
+        private bool fromDB = false;
         private String name = null;
         private String filename = null;
         private String filepath = null;
@@ -50,6 +51,12 @@ namespace ssi
         {
             get { return loaded; }
             set { loaded = value; }
+        }
+
+        public bool FromDB
+        {
+            get { return fromDB; }
+            set { fromDB = value; }
         }
 
         public string Role
@@ -173,9 +180,9 @@ namespace ssi
 
                     var sender_attr = e.Attribute("sender");
                     var event_attr = e.Attribute("event");
-                    label = (event_attr == null ? "" : event_attr.Value)
-                            + "@"
-                            + (sender_attr == null ? "" : sender_attr.Value);
+                    label = (event_attr == null ? "" : event_attr.Value);
+                            //+ "@"
+                            //+ (sender_attr == null ? "" : sender_attr.Value);
                     var from_attr = e.Attribute("from");
                     if (from_attr != null)
                     {
@@ -229,14 +236,19 @@ namespace ssi
                             }
                             break;
 
+
                         case Type.STRING:
+                            if(e.Value != "") label = e.Value;
+
+                            break;
+
                         case Type.TUPLE:
                             meta = e.Value == null ? "" : e.Value;
                             break;
                     }
 
                     var state_attr = e.Attribute("state");
-                    if (state_attr.Value.ToString() == "COMPLETED")
+                    if (state_attr.Value.ToString().ToUpper() == "COMPLETED")
                     {
                         list.AddSorted(new AnnoListItem(start, duration, label, meta));
                     }

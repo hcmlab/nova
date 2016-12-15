@@ -53,7 +53,8 @@ namespace ssi
             {
                 ConnecttoDB();
             }
-            showonlymine.IsChecked = true;
+            showonlymine.IsChecked = Properties.Settings.Default.OnlyMine;
+            showonlyunfinished.IsChecked = Properties.Settings.Default.OnlyFinished;
         }
 
         private void ConnecttoDB()
@@ -178,12 +179,19 @@ namespace ssi
 
         private void showonlymine_Checked(object sender, RoutedEventArgs e)
         {
+            Properties.Settings.Default.OnlyMine = true;
+            Properties.Settings.Default.Save();
+
+
             AnnoItems.Clear();
            if(DataBasResultsBox.SelectedItem != null)   GetAnnotations(true, showonlyunfinished.IsChecked == true);
         }
 
         private void showonlymine_Unchecked(object sender, RoutedEventArgs e)
         {
+            Properties.Settings.Default.OnlyMine = false;
+            Properties.Settings.Default.Save();
+
             AnnoItems.Clear();
             if (DataBasResultsBox.SelectedItem != null) GetAnnotations(false, showonlyunfinished.IsChecked == true);
         }
@@ -240,6 +248,7 @@ namespace ssi
             {
                 await cursor.ForEachAsync(d => addDbtoList(d["name"].ToString()));
             }
+            DataBasResultsBox.SelectedIndex = 0;
         }
 
         public void addDbtoList(string name)
@@ -353,12 +362,21 @@ namespace ssi
           
 
             bool isfinished = false;
+           
             try
             {
                 isfinished = annos["isFinished"].AsBoolean;
                
             }
             catch (Exception ex) { }
+            bool islocked = false;
+            try
+            {
+                islocked = annos["isLocked"].AsBoolean;
+
+            }
+            catch (Exception ex) { }
+
             DateTime date = annos["date"].ToUniversalTime();
             ;
             if (!onlyme && !onlyunfinished ||
@@ -367,7 +385,7 @@ namespace ssi
                 onlyme && onlyunfinished && !isfinished && Properties.Settings.Default.MongoDBUser == annotatid)
             {
                 bool isOwner = authlevel > 2 || Properties.Settings.Default.MongoDBUser == annotatid;
-                AnnoItems.Add(new DatabaseAnno() { Id = id, Role = roleid, AnnoType = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsOwner = isOwner, Date = date.ToShortDateString() + " " + date.ToShortTimeString(),  OID = id });
+                AnnoItems.Add(new DatabaseAnno() { Id = id, Role = roleid, AnnoType = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsLocked = islocked, IsOwner = isOwner, Date = date.ToShortDateString() + " " + date.ToShortTimeString(),  OID = id });
             }
         }
 
@@ -478,7 +496,7 @@ namespace ssi
                     annotator_names.Add(document["fullname"].ToString());
                 }
 
-                DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(annotator_names, false, "Select Annotator", "Annotator");
+                DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(annotator_names, false, "Select Annotator", "Annotator");
                 dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
                 dbw.ShowDialog();
 
@@ -508,7 +526,14 @@ namespace ssi
                     catch (Exception ex)
                     { }
 
-                    UpdateOptions uo = new UpdateOptions();
+                        try
+                        {
+                            anno["isLocked"] = false;
+                        }
+                        catch (Exception ex)
+                        { }
+
+                        UpdateOptions uo = new UpdateOptions();
                     uo.IsUpsert = true;
 
                     filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotid_new) & builder.Eq("session_id", sessionid);
@@ -688,7 +713,21 @@ namespace ssi
 
                     var builder = Builders<BsonDocument>.Filter;
                     var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
-                    var result = annotations.DeleteOne(filter);
+
+                    var result = annotations.Find(filter).Single();
+
+
+                    bool islocked = false;
+                    try
+                    {
+                        islocked = result["isLocked"].AsBoolean;
+
+                    }
+                    catch (Exception ex) { }
+
+
+                    if (!islocked) annotations.DeleteOne(filter);
+                    else MessageBox.Show("Annotaion is locked and therefore can't be deleted");
                 }
                 AnnoItems.Clear();
                 GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
@@ -775,12 +814,17 @@ namespace ssi
 
         private void showonlyunfinished_Checked(object sender, RoutedEventArgs e)
         {
+            Properties.Settings.Default.OnlyFinished = true;
+            Properties.Settings.Default.Save();
+
             AnnoItems.Clear();
             GetAnnotations(showonlymine.IsChecked == true, true);
         }
 
         private void showonlyunfinished_Unchecked(object sender, RoutedEventArgs e)
         {
+            Properties.Settings.Default.OnlyFinished = false;
+            Properties.Settings.Default.Save();
             AnnoItems.Clear();
             GetAnnotations(showonlymine.IsChecked == true, false);
         }
@@ -795,14 +839,34 @@ namespace ssi
             annos.UpdateOne(filter, update);
         }
 
+
+
+        private void ChangeLockedState(ObjectId id, bool state)
+        {
+            var annos = database.GetCollection<BsonDocument>("Annotations");
+            var builder = Builders<BsonDocument>.Filter;
+
+            var filter = builder.Eq("_id", id);
+            var update = Builders<BsonDocument>.Update.Set("isLocked", state);
+            annos.UpdateOne(filter, update);
+        }
+
+
         private void IsFinishedCheckbox_Checked(object sender, RoutedEventArgs e)
         {
+            //Properties.Settings.Default.OnlyFinished = true;
+            //Properties.Settings.Default.Save();
+
             DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
             ChangeFinishedState(anno.Id, true);
         }
 
         private void IsFinishedCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
+
+            //Properties.Settings.Default.OnlyFinished = false;
+            //Properties.Settings.Default.Save();
+
             DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
             ChangeFinishedState(anno.Id, false);
         }
@@ -842,6 +906,17 @@ namespace ssi
             db_pass.SelectAll();
         }
 
-      
+        private void IsLockedCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
+            ChangeLockedState(anno.Id, false);
+
+        }
+
+        private void IsLockedCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
+            ChangeLockedState(anno.Id, true);
+        }
     }
 }

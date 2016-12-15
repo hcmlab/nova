@@ -116,7 +116,9 @@ namespace ssi
                 }
                 else //todo: only other case now that uses colorpicker and not suggestion list. probably change this in the future to some more advanced logic
                 {
-                    color1 = Colors.Black; // ((SolidColorBrush)(AnnoTrack.GetSelectedTrack().BackgroundColor)).Color;
+                    SolidColorBrush b = AnnoTrack.GetSelectedTrack().BackgroundColor as SolidColorBrush;
+                    if (b != null) color1 = (Color)b.Color;
+                    else color1 = Colors.Black;
                     this.sColor = color1;
                 }
             }
