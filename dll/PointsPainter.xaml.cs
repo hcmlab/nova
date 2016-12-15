@@ -17,6 +17,8 @@ namespace ssi
         private double zoomfactor = 1.0;
         private double offsetY = 0.0;
         private double offsetX = 0.0;
+        private int renderwidth = 640;
+        private int renderheight = 360;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -90,7 +92,7 @@ namespace ssi
                 this.sr = signal.rate;
 
 
-                writeableBmp = new WriteableBitmap(640, 360, 96.0, 96.0, PixelFormats.Bgra32, null);
+                writeableBmp = new WriteableBitmap(renderwidth, renderheight, 96.0, 96.0, PixelFormats.Bgra32, null);
                 writeableBmp.Clear(this.BackColor);
                 this.ImageViewport.Source = writeableBmp;
 
@@ -113,36 +115,28 @@ namespace ssi
             double pos = ViewHandler.Time.CurrentPlayPositionPrecise;
             int actualdim = 3;
             int index = (int)((int)(pos * sr) * signal.dim);
-         //   Console.WriteLine(index);
             if (pos >= ViewHandler.Time.TotalDuration) index = (int)ViewHandler.Time.TotalDuration;
 
             Color col = this.SignalColor;
- 
-          //  writeableBmp.Clear(this.BackColor);
-       
-            double width = 640;
-            double height = 360;
+            double width = renderwidth;
+            double height = renderheight;
        
          
             writeableBmp.Lock();
             writeableBmp.Clear(this.BackColor);
 
- 
-           
-            //double left = signal.data[index + 458 * actualdim] * 1000;
-            //double right = signal.data[index + 674 * actualdim] * 1000;
-            //double top = signal.data[index + 28 * actualdim] * 1000;
-            //double bottom = signal.data[index + 4 * actualdim] * 1000;
-
-            if (index < signal.data.Length)
+          //add some logic here  
+          //  if(signal.meta_type == "kinect2")
             {
-                for (int i = 0; i < signal.dim; i = i + 3)
+                if (index < signal.data.Length)
                 {
-
-                    double X = (signal.data[index + i * actualdim]) * zoomfactor * height + (width/2) + offsetX;
-                    double Y = height - (signal.data[index + i * actualdim + 1]) * zoomfactor * width   -height/2 + offsetY;
-                    double Z = signal.data[index + i * actualdim + 2] * 100 ;
-                    writeableBmp.DrawLineAa((int)X, (int)Y, (int)X + 1, (int)Y, getColor((int)Z));
+                    for (int i = 0; i < signal.dim; i = i + 3)
+                    {
+                        double X = (signal.data[index + i * actualdim]) * zoomfactor * height + (width/2) + offsetX;
+                        double Y = height - (signal.data[index + i * actualdim + 1]) * zoomfactor * width   -height/2 + offsetY;
+                        double Z = signal.data[index + i * actualdim + 2] * 100 ;
+                        writeableBmp.DrawLineAa((int)X, (int)Y, (int)X + 1, (int)Y, this.SignalColor);
+                    }
                 }
             }
             writeableBmp.Unlock();

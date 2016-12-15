@@ -249,8 +249,8 @@
     <Compile Include="NavigatorControl.xaml.cs">
       <DependentUpon>NavigatorControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PointControl.xaml.cs">
-      <DependentUpon>PointControl.xaml</DependentUpon>
+    <Compile Include="SignalVisualizerControl.xaml.cs">
+      <DependentUpon>SignalVisualizerControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="PointsPainter.xaml.cs">
       <DependentUpon>PointsPainter.xaml</DependentUpon>
@@ -428,7 +428,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PointControl.xaml">
+    <Page Include="SignalVisualizerControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

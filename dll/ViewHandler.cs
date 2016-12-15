@@ -854,6 +854,7 @@ namespace ssi
             this.view.trackControl.signalTrackControl.clear();
             this.view.videoControl.clear();
             this.view.pointcontrol.clear();
+           
             innomediaplaymode = false;
 
             this.signal_tracks.Clear();
@@ -861,6 +862,8 @@ namespace ssi
             this.anno_tracks.Clear();
             this.annos.Clear();
             this.media_list.clear();
+            this.view.videoskel.Children.OfType<GridSplitter>().ToList().ForEach(b => this.view.videoskel.Children.Remove(b));
+            // this.view.videoskel.Children.Remove);
             annofilepath = "";
             visualizepoints = false;
             visualizeskel = false;
@@ -1549,6 +1552,25 @@ namespace ssi
                 {
                     if (this.view.videoskel.ColumnDefinitions.Count < 2 && media_list.Medias.Count > 0)
                     {
+
+
+                        ColumnDefinition split_column = new ColumnDefinition();
+                        split_column.Width = new GridLength(1, GridUnitType.Auto);
+                        this.view.videoskel.ColumnDefinitions.Add(split_column);
+                        GridSplitter splitter = new GridSplitter();
+                        splitter.ResizeDirection = GridResizeDirection.Columns;
+                        splitter.Width = 3;
+                        splitter.HorizontalAlignment = HorizontalAlignment.Stretch;
+                        splitter.VerticalAlignment = VerticalAlignment.Stretch;
+                        Grid.SetRowSpan(splitter, 1);
+                        //Grid.SetColumn(splitter, 0);
+                        Grid.SetColumn(splitter, this.view.videoskel.ColumnDefinitions.Count - 1);
+
+
+                        this.view.videoskel.Children.Add(splitter);
+
+
+
                         ColumnDefinition column = new ColumnDefinition();
                         column.Width = new GridLength(1, GridUnitType.Star);
                         this.view.videoskel.ColumnDefinitions.Add(column);

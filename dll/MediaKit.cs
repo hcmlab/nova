@@ -75,7 +75,12 @@ namespace ssi
 
         public double GetSampleRate()
         {
-          
+
+            using (var engine = new Engine())
+            {
+                engine.GetMetadata(inputFile);
+            }
+
             if (this.HasVideo && inputFile.Metadata.VideoData != null)
                 return inputFile.Metadata.VideoData.Fps;
             else return 25.0;

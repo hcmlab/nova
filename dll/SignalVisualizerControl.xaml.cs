@@ -10,11 +10,11 @@ namespace ssi
     /// </summary>
     ///
 
-    public partial class PointControl : UserControl
+    public partial class SignalVisualizerControl : UserControl
     {
         public event EventHandler<MediaRemoveEventArgs> RemoveMedia;
 
-        public PointControl()
+        public SignalVisualizerControl()
         {
             InitializeComponent();
         }
