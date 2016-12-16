@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nova", "app\nova.csproj", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "updater", "updater\updater.csproj", "{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "update", "update", "{9DC00E2A-8317-4876-B985-E3AEE8BDBF66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,5 +52,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0D4444F4-F82F-4084-AD46-85F627E5BECB} = {FAD6FC5E-5E59-47C5-AE83-EB6223CA2FFB}
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317} = {FAD6FC5E-5E59-47C5-AE83-EB6223CA2FFB}
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A} = {9DC00E2A-8317-4876-B985-E3AEE8BDBF66}
 	EndGlobalSection
 EndGlobal
