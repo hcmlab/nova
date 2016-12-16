@@ -24,7 +24,7 @@ namespace ssi
 {
     public class ViewHandler
     {
-        public static string BuildVersion = "0.9.9.4.1";
+        public static string BuildVersion = "0.9.9.4.2";
 
         private static ViewTime time = null;
 
