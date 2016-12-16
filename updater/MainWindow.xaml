@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:updater"
         mc:Ignorable="d"
-        Title="Updating NOVA ..." Height="350" Width="525" Background="DarkGray">
+        Title="Updating NOVA ..." Height="200" Width="400" Background="DarkGray">
     <Grid>
         <StackPanel>
-            <Label Name="labelDownloaded" HorizontalAlignment="Center">Updating</Label>
+            <Label Name="labelDownloaded" HorizontalAlignment="Center">...</Label>
 
             <ProgressBar Name="progressBar" Height="20"></ProgressBar>
             <Label Name="labelPerc" HorizontalAlignment="Center"></Label>
