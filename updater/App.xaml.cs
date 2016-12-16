@@ -18,13 +18,14 @@ namespace updater
         {
             // Application is running
             // Process command line args
-            string version = "";;
-             version = e.Args[0];
+            string version = "";
+            if(e.Args.Length > 0)
+            version = e.Args[0];
     
 
             // Create main application window, starting minimized if specified
             MainWindow mainWindow = new MainWindow(version);
-          //  mainWindow.Show();
+            mainWindow.Show();
         }
 
     }

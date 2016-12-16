@@ -5,8 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:updater"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="350" Width="525" Background="DarkGray">
     <Grid>
+        <StackPanel>
+            <Label Name="labelDownloaded" HorizontalAlignment="Center">Updating</Label>
+
+            <ProgressBar Name="progressBar" Height="20"></ProgressBar>
+            <Label Name="labelPerc" HorizontalAlignment="Center"></Label>
+            <Label Name="labelSpeed" HorizontalAlignment="Center"></Label>
+        </StackPanel>
         
     </Grid>
 </Window>

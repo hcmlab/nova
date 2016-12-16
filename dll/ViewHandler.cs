@@ -3878,14 +3878,14 @@ namespace ssi
                         string url = "https://github.com/hcmlab/nova/blob/master/bin/updater.exe?raw=true";
 
                         WebClient Client = new WebClient();
-                        Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "\\updater.exe");
+                        Client.DownloadFile(url, "updater.exe");
 
                         System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
-                        updateProcess.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "updater.exe";
+                        updateProcess.StartInfo.FileName = "updater.exe";
                         updateProcess.StartInfo.Arguments = LatestGitVersion;
                         updateProcess.Start();
-                        System.Environment.Exit(0);
 
+                        System.Environment.Exit(0);
 
 
 
