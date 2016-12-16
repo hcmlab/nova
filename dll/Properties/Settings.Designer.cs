@@ -346,5 +346,17 @@ namespace ssi.Properties {
                 this["CMLFill"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool CheckUpdateonStartup {
+            get {
+                return ((bool)(this["CheckUpdateonStartup"]));
+            }
+            set {
+                this["CheckUpdateonStartup"] = value;
+            }
+        }
     }
 }

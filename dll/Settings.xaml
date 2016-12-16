@@ -27,6 +27,9 @@
                     <TextBox Name="Segmentmindur"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
                     <Label Content="Discrete SampleRate in Hz (0 for none):"   HorizontalAlignment="left" DockPanel.Dock="Top" />
                     <TextBox Name="Samplerate"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="IntNumberValidationTextBox" />
+                    <Label Content="Check for Updates on Startup:"   HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <CheckBox Name="UpdatesCheckbox"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left"/>
+
                     <Separator Visibility="Hidden"> </Separator>
                 </DockPanel>
             </TabItem>

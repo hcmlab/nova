@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nova", "nova", "{FAD6FC5E-5E59-47C5-AE83-EB6223CA2FFB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "viewdll", "dll\viewdll.csproj", "{0D4444F4-F82F-4084-AD46-85F627E5BECB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nova", "app\nova.csproj", "{063059ED-B5FC-4E64-9AF2-F546D26B8317}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "updater", "updater\updater.csproj", "{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,14 @@ Global
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|Any CPU.Build.0 = Release|Any CPU
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|x64.ActiveCfg = Release|x64
 		{063059ED-B5FC-4E64-9AF2-F546D26B8317}.Release|x64.Build.0 = Release|x64
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}.Debug|x64.Build.0 = Debug|Any CPU
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}.Release|x64.ActiveCfg = Release|Any CPU
+		{B45A0B04-EF3C-48AB-8E21-3AA80124BC3A}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
