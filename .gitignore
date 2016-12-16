@@ -315,3 +315,5 @@ bin/Squirrel.dll
 bin/RibbonControlsLibrary.dll
 bin/Octokit.dll
 bin/Splat.dll
+bin/zh-Hant/System.Windows.Interactivity.resources.dll
+bin/zh-Hans/System.Windows.Interactivity.resources.dll
