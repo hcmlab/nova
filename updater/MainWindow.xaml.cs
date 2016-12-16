@@ -33,8 +33,6 @@ namespace updater
         public MainWindow(string version)
         {
             InitializeComponent();
-
-
             update(version);
 
         }
@@ -44,11 +42,7 @@ namespace updater
         {
 
             string url = "https://github.com/hcmlab/nova/releases/download/" + version + "/nova.exe";
-
-
             DownloadFile(url, "nova.exe");
-
-
 
         }
 
@@ -60,10 +54,8 @@ namespace updater
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
 
-                // The variable that will be holding the url address (making sure it starts with http://)
-           //    Uri URL =// urlAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? new Uri(urlAddress) : new Uri("https://" + urlAddress);
 
-                    Uri URL = new Uri(urlAddress);
+                Uri URL = new Uri(urlAddress);
                 // Start the stopwatch which we will be using to calculate the download speed
                 sw.Start();
 
@@ -104,24 +96,15 @@ namespace updater
             // Reset the stopwatch.
             sw.Reset();
 
-
-
-
             System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
             updateProcess.StartInfo.FileName = "nova.exe";
             updateProcess.Start();
 
 
-            //System.Diagnostics.Process deleteupdater = new System.Diagnostics.Process();
-            //deleteupdater.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\nova.exe";
-            //deleteupdater.StartInfo.Arguments = "/ C choice / C Y / N / D Y / T 3 & Del " + AppDomain.CurrentDomain.BaseDirectory + "\\updater.exe";
-            //deleteupdater.Start();
-
-
             ProcessStartInfo Info = new ProcessStartInfo();
             Info.Arguments = "/C choice /C Y /N /D Y /T 3 & Del " + "updater.exe";
-            //Info.WindowStyle = ProcessWindowStyle.Hidden;
-            //Info.CreateNoWindow = true;
+            Info.WindowStyle = ProcessWindowStyle.Hidden;
+            Info.CreateNoWindow = true;
             Info.FileName = "cmd.exe";
             Process.Start(Info);
 
