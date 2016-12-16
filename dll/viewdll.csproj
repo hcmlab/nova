@@ -109,6 +109,9 @@
     <Reference Include="MongoDB.Driver.Core">
       <HintPath>.\MongoDB.Driver.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Octokit">
+      <HintPath>.\Octokit.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Classic" />
     <Reference Include="PropertyTools.Wpf">
       <HintPath>.\PropertyTools.Wpf.dll</HintPath>
@@ -514,6 +517,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\dragdrop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="Octokit.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

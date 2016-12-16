@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Octokit;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -23,6 +24,8 @@ namespace ssi
 {
     public class ViewHandler
     {
+        public static string BuildVersion = "0.9.9.3.1";
+
         private static ViewTime time = null;
 
         private enum ssi_file_type
@@ -43,6 +46,9 @@ namespace ssi
         }
 
         private static readonly string[] SSI_FILE_TYPE_NAME = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "annotation" };
+
+    
+
 
         public static ViewTime Time
         {
@@ -168,6 +174,7 @@ namespace ssi
             this.view.addmongodb.Click += mongodb_Add;
             this.view.mongodbfunctions.Click += mongodb_Functions;
             this.view.mongodbchangefolder.Click += mongodb_ChangeFolder;
+            this.view.update.Click += update_Click;
 
             this.view.tiermenu.MouseEnter += tierMenu_Click;
             this.view.help.Click += helpMenu_Click;
@@ -220,6 +227,12 @@ namespace ssi
             };
 
             initCursor();
+
+            if(Properties.Settings.Default.CheckUpdateonStartup)
+            {
+                checkforUpdates(true);
+            }
+
         }
 
         protected void removeMedia(object sender, MediaRemoveEventArgs e)
@@ -2929,6 +2942,7 @@ namespace ssi
                 Properties.Settings.Default.DefaultZoominSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());
+                Properties.Settings.Default.CheckUpdateonStartup = s.CheckforUpdatesonStartup();
                 Properties.Settings.Default.Save();
             }
         }
@@ -3832,6 +3846,113 @@ namespace ssi
         {
             Directory.CreateDirectory(Properties.Settings.Default.DataPath);
             Process.Start(Properties.Settings.Default.DataPath);
+        }
+
+
+        private async void checkforUpdates(bool silent=false)
+        {
+            try
+            {
+                var client = new GitHubClient(new ProductHeaderValue("nova"));
+                var releases = await client.Repository.Release.GetAll("hcmlab", "nova");
+                var latest = releases[0];
+                string LatestGitVersion = latest.TagName;
+                var result = compareVersion(LatestGitVersion, BuildVersion);
+
+                if (result == 0 && !silent)
+                {
+                    MessageBox.Show("You already have the latest version of NOVA. (Build: " + LatestGitVersion + ")");
+                }
+
+                else if (result > 0)
+                {
+                    MessageBoxResult mb = MessageBox.Show("Your build version is " + BuildVersion + ". The latest version is  " + LatestGitVersion + ". Do you want to update nova to the latest version? \n\n Release Notes:\n\n " + latest.Body, "Update available!", MessageBoxButton.YesNo);
+                    if (mb == MessageBoxResult.Yes)
+                    {
+                        //  string url = "https://github.com/hcmlab/nova/releases/download/" + latest + "//nova.exe";
+                       // System.Diagnostics.Process.Start("https://github.com/hcmlab/nova/releases/latest");
+
+
+
+
+                        string url = "https://github.com/hcmlab/nova/blob/master/bin/updater.exe?raw=true";
+
+                        WebClient Client = new WebClient();
+                        Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "\\updater.exe");
+
+                        System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
+                        updateProcess.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "updater.exe";
+                        updateProcess.StartInfo.Arguments = LatestGitVersion;
+                        updateProcess.Start();
+                        System.Environment.Exit(0);
+
+
+
+
+
+
+                    }
+                }
+
+                else if (result < 0 && !silent)
+                {
+                    MessageBox.Show("The version you are running (" + BuildVersion + ") is more recent than the latest offical release (" + LatestGitVersion + ")");
+                }
+            }
+
+            catch
+            {
+
+            }
+
+        }
+
+
+        private  void update_Click(object sender, RoutedEventArgs e)
+        {
+
+            checkforUpdates();
+
+     
+
+
+
+
+            //WebClient Client = new WebClient();
+
+
+
+            //Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "\\nova_temp.exe");
+
+            //System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
+            //updateProcess.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "nova.exe";
+            //updateProcess.StartInfo.Arguments = AppDomain.CurrentDomain.BaseDirectory;
+            //updateProcess.Start();
+            //Process.GetCurrentProcess().Kill();
+
+            //
+
+
+        }
+
+        public int compareVersion(string Version1, string Version2)
+        {
+            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"([\d]+)");
+            System.Text.RegularExpressions.MatchCollection m1 = regex.Matches(Version1);
+            System.Text.RegularExpressions.MatchCollection m2 = regex.Matches(Version2);
+            int min = Math.Min(m1.Count, m2.Count);
+            for (int i = 0; i < min; i++)
+            {
+                if (Convert.ToInt32(m1[i].Value) > Convert.ToInt32(m2[i].Value))
+                {
+                    return 1;
+                }
+                if (Convert.ToInt32(m1[i].Value) < Convert.ToInt32(m2[i].Value))
+                {
+                    return -1;
+                }
+            }
+            return 0;
         }
 
         private void convertToContinuousAnnotation_Click(object sender, RoutedEventArgs e)

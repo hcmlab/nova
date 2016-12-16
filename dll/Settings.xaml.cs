@@ -21,6 +21,7 @@ namespace ssi
             DBServer.Text = Properties.Settings.Default.MongoDBIP;
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPW.Password = Properties.Settings.Default.MongoDBPass;
+            UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateonStartup;
         }
 
         public double Uncertainty()
@@ -61,6 +62,11 @@ namespace ssi
         public string SampleRate()
         {
             return Samplerate.Text;
+        }
+
+        public bool CheckforUpdatesonStartup()
+        {
+            return (UpdatesCheckbox.IsChecked == true);
         }
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)

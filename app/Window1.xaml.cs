@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Net;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
@@ -23,6 +26,14 @@ namespace ssi
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            this.Title = "(NOn)Verbal Annotator | v"+ ViewHandler.BuildVersion +" | HCM-Lab, Augsburg University | http://openssi.net";
+
+
+
+
+
+
+
         }
 
         private void viewHandlerLoaded(ViewHandler handler)
