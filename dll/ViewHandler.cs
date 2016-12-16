@@ -3876,7 +3876,7 @@ namespace ssi
 
 
                         string url = "https://github.com/hcmlab/nova/blob/master/bin/updater.exe?raw=true";
-
+                        
                         WebClient Client = new WebClient();
                         Client.DownloadFile(url, "updater.exe");
 
