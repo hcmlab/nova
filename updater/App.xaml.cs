@@ -25,6 +25,7 @@ namespace updater
 
             // Create main application window, starting minimized if specified
             MainWindow mainWindow = new MainWindow(version);
+            mainWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             mainWindow.Show();
         }
 
