@@ -1,19 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ssi
 {
@@ -22,7 +9,7 @@ namespace ssi
     /// </summary>
     public partial class DatabaseCMLCompleteTierWindow : Window
     {
-        ViewHandler handler;
+        private ViewHandler handler;
 
         public DatabaseCMLCompleteTierWindow(ViewHandler handler)
         {
@@ -33,8 +20,9 @@ namespace ssi
 
             foreach (AnnoTrack tier in handler.AnnoTracks)
             {
-                if (tier.AnnoList.FromDB)
+                if (tier.AnnoList.FromDB && tier.AnnoList.AnnotationScheme.name == "voiceactivity")
                 {
+
                     TierListBox.Items.Add(tier.AnnoList.Name);
                 }
             }
@@ -42,25 +30,33 @@ namespace ssi
             StreamListBox.SelectedIndex = 0;
             TierListBox.SelectedIndex = 0;
 
+            ContextTextBox.Text = Properties.Settings.Default.CMLContext.ToString();
+            TierListBox.SelectedItem = Properties.Settings.Default.CMLDefaultScheme;
+
+            ConfidenceCheckBox.IsChecked = Properties.Settings.Default.CMLSetConf;
+            FillGapCheckBox.IsChecked = Properties.Settings.Default.CMLFill;
+            RemoveLabelCheckBox.IsChecked = Properties.Settings.Default.CMLRemove;
         }
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
             if (TierListBox.SelectedItem != null)
             {
-                string tierName = (string)TierListBox.SelectedItem;
-                AnnoTrack tier = handler.getAnnoTrackFromName(tierName);
-                if (tier != null)
+                foreach (var tierName in TierListBox.SelectedItems)
                 {
-                    if (StreamListBox.SelectedItem != null)
+                    AnnoTrack tier = handler.getAnnoTrackFromName(tierName.ToString());
+                    if (tier != null)
                     {
-                        string stream = (string)StreamListBox.SelectedItem;
-                        int context = 0;
-                        if (int.TryParse(ContextTextBox.Text, out context))
+                        if (StreamListBox.SelectedItem != null)
                         {
-                            DatabaseHandler db = new DatabaseHandler("mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP);
-                            db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, tier, handler.loadedDBmedia, false);
-                            completeTier(context, tier, stream);
+                            string stream = (string)StreamListBox.SelectedItem;
+                            int context = 0;
+                            if (int.TryParse(ContextTextBox.Text, out context))
+                            {
+                                DatabaseHandler db = new DatabaseHandler("mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP);
+                                db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, tier, handler.loadedDBmedia, false);
+                                completeTier(context, tier, stream);
+                            }
                         }
                     }
                 }
@@ -72,9 +68,8 @@ namespace ssi
             Close();
         }
 
-        void completeTier(int context, AnnoTrack tier, string stream)
+        private void completeTier(int context, AnnoTrack tier, string stream)
         {
-
             Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + Properties.Settings.Default.Database + "\\models");
 
             string username = Properties.Settings.Default.MongoDBUser;
@@ -89,6 +84,21 @@ namespace ssi
             string role = tier.AnnoList.Role;
             string scheme = tier.AnnoList.AnnotationScheme.name;
             string annotator = tier.AnnoList.Annotator;
+            double confidence = -1.0;
+            if (ConfidenceTextBox.IsEnabled)
+            {
+                double.TryParse(ConfidenceTextBox.Text, out confidence);
+            }
+            double minGap = 0.0;
+            if (FillGapTextBox.IsEnabled)
+            {
+                double.TryParse(FillGapTextBox.Text, out minGap);
+            }
+            double minDur = 0.0;
+            if (RemoveLabelTextBox.IsEnabled)
+            {
+                double.TryParse(RemoveLabelTextBox.Text, out minDur);
+            }
 
             bool isTrained = false;
             bool isForward = false;
@@ -98,6 +108,9 @@ namespace ssi
                     " -username " + username +
                     " -password " + password +
                     " -filter " + session +
+                    " -confidence " + confidence +
+                    " -mingap " + minGap +
+                    " -mindur " + minDur +
                     " -log cml.log " +
                     "\"" + datapath + "\\" + database + "\" " +
                     ip + " " +
@@ -111,7 +124,7 @@ namespace ssi
             {
                 Process process = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo();
-             //   startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                //   startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 startInfo.FileName = "cmltrain.exe";
                 startInfo.Arguments = "--train" + arguments;
                 process.StartInfo = startInfo;
@@ -130,9 +143,9 @@ namespace ssi
             {
                 Process process = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo();
-               // startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                // startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 startInfo.FileName = "cmltrain.exe";
-                startInfo.Arguments = "--forward" + arguments;                
+                startInfo.Arguments = "--forward" + arguments;
                 process.StartInfo = startInfo;
                 process.Start();
                 process.WaitForExit();
@@ -152,5 +165,46 @@ namespace ssi
             }
         }
 
+        private void ConfidenceCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.CMLSetConf = true;
+            Properties.Settings.Default.Save();
+            ConfidenceTextBox.IsEnabled = true;
+        }
+
+        private void ConfidenceCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.CMLSetConf = false;
+            Properties.Settings.Default.Save();
+            ConfidenceTextBox.IsEnabled = false;
+        }
+
+        private void FillGapCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.CMLFill = true;
+            Properties.Settings.Default.Save();
+            FillGapTextBox.IsEnabled = true;
+        }
+
+        private void FillGapCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.CMLFill = false;
+            Properties.Settings.Default.Save();
+            FillGapTextBox.IsEnabled = false;
+        }
+
+        private void RemoveLabelCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.CMLRemove = true;
+            Properties.Settings.Default.Save();
+            RemoveLabelTextBox.IsEnabled = true;
+        }
+
+        private void RemoveLabelCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.CMLRemove = false;
+            Properties.Settings.Default.Save();
+            RemoveLabelTextBox.IsEnabled = false;
+        }
     }
 }

@@ -5,10 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ssi"
              Title="Complete Tier"
-             Height="200" Width="300" WindowStyle="ToolWindow">
+             Height="400" Width="300" WindowStyle="ToolWindow">
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -35,7 +36,7 @@
         <ListBox Name="TierListBox" 
                  Grid.Row="1" 
                  Grid.Column="1"
-                 SelectionMode="Single" 
+                 SelectionMode="Extended" 
                  Margin="5"></ListBox>
         
         <Label Grid.Row="2"
@@ -47,8 +48,56 @@
                  Grid.Column="1"
                  SelectionMode="Single"
                  Margin="5"></ListBox>
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
 
-        <StackPanel Grid.Row="3"
+            <DockPanel       
+                LastChildFill="True"
+                VerticalAlignment="Center">
+                <CheckBox Name="ConfidenceCheckBox" 
+                          DockPanel.Dock="Left"
+                          VerticalAlignment="Center"
+                          Checked="ConfidenceCheckBox_Checked"
+                          Unchecked="ConfidenceCheckBox_Unchecked"></CheckBox>
+                <Label>Set confidence to</Label>
+                <TextBox Name="ConfidenceTextBox"
+                         DockPanel.Dock="Right"                  
+                         IsEnabled="False"
+                         VerticalAlignment="Center">0.0</TextBox>
+            </DockPanel>
+
+            <DockPanel         
+                LastChildFill="True"
+                VerticalAlignment="Center">
+                <CheckBox Name="FillGapCheckBox" 
+                          DockPanel.Dock="Left"
+                          VerticalAlignment="Center"
+                          Checked="FillGapCheckBox_Checked"
+                          Unchecked="FillGapCheckBox_Unchecked"></CheckBox>
+                <Label>Fill gaps smaller than</Label>
+                <TextBox Name="FillGapTextBox"
+                         DockPanel.Dock="Right"                 
+                         IsEnabled="False"
+                         VerticalAlignment="Center">0.5</TextBox>
+            </DockPanel>
+
+            <DockPanel
+                LastChildFill="True"
+                VerticalAlignment="Center">
+                <CheckBox Name="RemoveLabelCheckBox" 
+                              DockPanel.Dock="Left"
+                              VerticalAlignment="Center"
+                              Checked="RemoveLabelCheckBox_Checked"
+                              Unchecked="RemoveLabelCheckBox_Unchecked"></CheckBox>
+                <Label>Remove if smaller than</Label>
+                <TextBox Name="RemoveLabelTextBox"
+                         DockPanel.Dock="Right"                  
+                         IsEnabled="False"
+                         VerticalAlignment="Center">0.15</TextBox>
+            </DockPanel>
+
+        </StackPanel>
+   
+        <StackPanel Grid.Row="4"
                     Grid.Column="0" 
                     Grid.ColumnSpan="2"
                     Orientation="Horizontal" 

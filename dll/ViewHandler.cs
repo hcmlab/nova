@@ -1242,28 +1242,24 @@ namespace ssi
             view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
             DatabaseAnno s = new DatabaseAnno();
-            s.Role = AnnoTrack.GetSelectedTrack().AnnoList.Role;
-            s.AnnoType = AnnoTrack.GetSelectedTrack().AnnoList.AnnotationScheme.name;
-            s.AnnotatorFullname = AnnoTrack.GetSelectedTrack().AnnoList.AnnotatorFullName;
-            s.Annotator = AnnoTrack.GetSelectedTrack().AnnoList.Annotator;
+            s.Role = tier.AnnoList.Role;
+            s.AnnoType = tier.AnnoList.AnnotationScheme.name;
+            s.AnnotatorFullname = tier.AnnoList.AnnotatorFullName;
+            s.Annotator = tier.AnnoList.Annotator;
 
             List<DatabaseAnno> list = new List<DatabaseAnno>();
-            List<AnnoTrack> tracks = new List<AnnoTrack>();
             list.Add(s);
-            tracks.Add(AnnoTrack.GetSelectedTrack());
+
 
             string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
             DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
-
-           // db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, tracks, loadedDBmedia, false);
-
 
             List<AnnoList> annos = db.LoadFromDatabase(list, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
             double maxdur = 0;
 
             if(annos[0].Count > 0)   maxdur = annos[0][annos[0].Count - 1].Stop;
 
-            if (annos[0] != null && AnnoTrack.GetSelectedTrack() != null)
+            if (annos[0] != null && tier != null)
             {
                 setAnnoList(annos[0]);
                 tier.Children.Clear();
