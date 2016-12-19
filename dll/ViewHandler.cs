@@ -1,4 +1,5 @@
-﻿using Octokit;
+﻿using MongoDB.Bson;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -24,7 +25,7 @@ namespace ssi
 {
     public class ViewHandler
     {
-        public static string BuildVersion = "0.9.9.4.2";
+        public static string BuildVersion = "0.9.9.4.3";
 
         private static ViewTime time = null;
 
@@ -46,9 +47,6 @@ namespace ssi
         }
 
         private static readonly string[] SSI_FILE_TYPE_NAME = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "annotation" };
-
-    
-
 
         public static ViewTime Time
         {
@@ -112,7 +110,7 @@ namespace ssi
 
         public AnnoTrack getAnnoTrackFromName(string name)
         {
-            foreach(AnnoTrack anno in anno_tracks)
+            foreach (AnnoTrack anno in anno_tracks)
             {
                 if (anno.AnnoList.Name == name)
                 {
@@ -228,11 +226,10 @@ namespace ssi
 
             initCursor();
 
-            if(Properties.Settings.Default.CheckUpdateonStartup)
+            if (Properties.Settings.Default.CheckUpdateonStartup)
             {
                 checkforUpdates(true);
             }
-
         }
 
         protected void removeMedia(object sender, MediaRemoveEventArgs e)
@@ -262,6 +259,18 @@ namespace ssi
                 if (e.KeyboardDevice.IsKeyDown(Key.Space))
                 {
                     handlePlay();
+
+                    e.Handled = true;
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.L))
+                {
+                    if (AnnoTrack.GetSelectedTrack() != null && Properties.Settings.Default.CMLDefaultStream != null)
+                    {
+                        DatabaseHandler db = new DatabaseHandler("mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.MongoDBIP);
+                        db.StoreToDatabase(Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, AnnoTrack.GetSelectedTrack(), loadedDBmedia, false);
+                        completeTier(Properties.Settings.Default.CMLContext, AnnoTrack.GetSelectedTrack(), Properties.Settings.Default.CMLDefaultStream, Properties.Settings.Default.CMLDefaultConf, Properties.Settings.Default.CMLDefaultGap, Properties.Settings.Default.CMLDefaultMinDur);
+                    }
 
                     e.Handled = true;
                 }
@@ -422,7 +431,7 @@ namespace ssi
                     e.Handled = true;
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack() != null  && AnnoTrack.GetSelectedTrack().isDiscrete)
+                if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTrack.GetSelectedTrack() != null && AnnoTrack.GetSelectedTrack().isDiscrete)
                 {
                     if (AnnoTrack.GetSelectedTrack() != null)
                     {
@@ -811,7 +820,6 @@ namespace ssi
                     {
                         if (track.AnnoList.FromDB)
                         {
-
                         }
                         else
                         {
@@ -867,7 +875,7 @@ namespace ssi
             this.view.trackControl.signalTrackControl.clear();
             this.view.videoControl.clear();
             this.view.pointcontrol.clear();
-           
+
             innomediaplaymode = false;
 
             this.signal_tracks.Clear();
@@ -883,9 +891,8 @@ namespace ssi
 
             while (this.view.videoskel.ColumnDefinitions.Count > 1)
             {
-                this.view.videoskel.ColumnDefinitions.RemoveAt(this.view.videoskel.ColumnDefinitions.Count-1);
+                this.view.videoskel.ColumnDefinitions.RemoveAt(this.view.videoskel.ColumnDefinitions.Count - 1);
             }
-
 
             if (this.view.videoskel.ColumnDefinitions.Count > 1)
             {
@@ -948,33 +955,27 @@ namespace ssi
                         _timerp.Stop();
                         _timerp = null;
                     }
-
                 }
             });
 
-
             if (innomediaplaymode)
             {
-               // lasttimepos = ViewHandler.Time.CurrentPlayPosition;
+                // lasttimepos = ViewHandler.Time.CurrentPlayPosition;
                 this.view.navigator.playButton.Content = "II";
                 // Play();
                 _timerp = new DispatcherTimer();
-                _timerp.Interval = TimeSpan.FromMilliseconds(1000.0/fps);
+                _timerp.Interval = TimeSpan.FromMilliseconds(1000.0 / fps);
                 _timerp.Tick += ev;
                 _timerp.Start();
             }
-
             else
             {
-                if(_timerp != null)
+                if (_timerp != null)
                 {
                     _timerp.Stop();
                     _timerp.Tick -= ev;
                 }
-              
             }
-
-       
         }
 
         private void mediaPlayHandler(MediaList videos, MediaPlayEventArgs e)
@@ -987,7 +988,7 @@ namespace ssi
 
                 Time.CurrentPlayPosition = e.pos;
 
-                if(!visualizeskel && !visualizepoints)       signalCursor.X = pos;
+                if (!visualizeskel && !visualizepoints) signalCursor.X = pos;
                 //   Console.WriteLine("5 " + signalCursor.X);
                 //if (ViewHandler.Time.TimeFromPixel(signalCursor.X) > Time.SelectionStop || signalCursor.X <= 1 ) signalCursor.X = ViewHandler.Time.PixelFromTime(Time.SelectionStart);
                 // Console.WriteLine(signalCursor.X + "_____" + Time.SelectionStart);
@@ -1107,7 +1108,11 @@ namespace ssi
 
                 if (anno.AnnotationScheme.type != "FREE") anno.usesAnnoScheme = true;
                 else anno.usesAnnoScheme = false;
-                anno.Name = "#" + anno.Role + " #" + anno.AnnotationScheme.name + " #" + anno.Annotator;
+
+                ObjectId annotatid = db.GetObjectID(db.GetDatabase(), "Annotators", "name", Properties.Settings.Default.MongoDBUser);
+                string AnnotatorFullName = db.FetchDBRef(db.GetDatabase(), "Annotators", "fullname", annotatid);
+
+                anno.Name = "#" + anno.Role + " #" + anno.AnnotationScheme.name + " #" + AnnotatorFullName;
 
                 if (anno.AnnotationScheme != null && anno.AnnotationScheme.mincolor != null && anno.AnnotationScheme.maxcolor != null)
                 {
@@ -1231,10 +1236,9 @@ namespace ssi
             if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
-        public void reloadAnnoDB(AnnoTrack tier)
+        private void reloadAnnoDB(AnnoTrack tier)
 
         {
-
             Action EmptyDelegate = delegate () { };
             this.view.ShadowBoxText.Text = "Reloading Annotation";
             this.view.ShadowBox.Visibility = Visibility.Visible;
@@ -1250,14 +1254,13 @@ namespace ssi
             List<DatabaseAnno> list = new List<DatabaseAnno>();
             list.Add(s);
 
-
             string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
             DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.MongoDBIP);
 
             List<AnnoList> annos = db.LoadFromDatabase(list, Properties.Settings.Default.Database, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
             double maxdur = 0;
 
-            if(annos[0].Count > 0)   maxdur = annos[0][annos[0].Count - 1].Stop;
+            if (annos[0].Count > 0) maxdur = annos[0][annos[0].Count - 1].Stop;
 
             if (annos[0] != null && tier != null)
             {
@@ -1273,11 +1276,132 @@ namespace ssi
                 }
 
                 tier.timeRangeChanged(ViewHandler.Time);
+                tier.TierId = tier.AnnoList.Name;
+                this.view.trackControl.annoNameLabel.Content = tier.AnnoList.Name;
             }
 
             updateTimeRange(maxdur);
             if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             this.view.ShadowBox.Visibility = Visibility.Collapsed;
+        }
+
+        public string completeTier(int context, AnnoTrack tier, string stream, double confidence = -1.0, double minGap = 0.0, double minDur = 0.0)
+        {
+            string result = "";
+            Directory.CreateDirectory(Properties.Settings.Default.DataPath + "\\" + Properties.Settings.Default.Database + "\\models");
+
+            string username = Properties.Settings.Default.MongoDBUser;
+            string password = Properties.Settings.Default.MongoDBPass;
+            string session = Properties.Settings.Default.LastSessionId;
+            string datapath = Properties.Settings.Default.DataPath;
+            string ipport = Properties.Settings.Default.MongoDBIP;
+            string[] split = ipport.Split(':');
+            string ip = split[0];
+            string port = split[1];
+            string database = Properties.Settings.Default.Database;
+            string role = tier.AnnoList.Role;
+            string scheme = tier.AnnoList.AnnotationScheme.name;
+            string annotator = tier.AnnoList.Annotator;
+
+            bool isTrained = false;
+            bool isForward = false;
+
+    try
+            {
+
+           
+
+            {
+                string arguments = " -cooperative "
+            + "-context " + context +
+            " -username " + username +
+            " -password " + password +
+            " -filter " + session +
+            " -log cml.log " +
+            "\"" + datapath + "\\" + database + "\" " +
+            ip + " " +
+            port + " " +
+            database + " " +
+            role + " " +
+            scheme + " " +
+            annotator + " " +
+            "\"" + stream + "\"";
+
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                startInfo.FileName = "cmltrain.exe";
+                startInfo.Arguments = "--train" + arguments;
+                result += startInfo.Arguments + "\n-------------------------------------------\r\n";
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
+                result += File.ReadAllText("cml.log");
+
+                if (process.ExitCode == 0)
+                {
+                    isTrained = true;
+                }
+                else
+                {
+                    return result;
+                }
+            }
+            {
+
+                string arguments = " -cooperative "
+                        + "-context " + context +
+                        " -username " + username +
+                        " -password " + password +
+                        " -filter " + session +
+                        " -confidence " + confidence +
+                        " -mingap " + minGap +
+                        " -mindur " + minDur +
+                        " -log cml.log " +
+                        "\"" + datapath + "\\" + database + "\" " +
+                        ip + " " +
+                        port + " " +
+                        database + " " +
+                        role + " " +
+                        scheme + " " +
+                        annotator + " " +
+                        "\"" + stream + "\"";
+
+
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                startInfo.FileName = "cmltrain.exe";
+                startInfo.Arguments = "--forward" + arguments;
+                result += startInfo.Arguments + "\n-------------------------------------------\r\n";
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
+                result += File.ReadAllText("cml.log");
+
+                if (process.ExitCode == 0)
+                {
+                    isForward = true;
+                }
+                else
+                {
+                    return result;
+                }
+            }
+
+            if (isTrained && isForward)
+            {
+                reloadAnnoDB(tier);
+            }
+
+            }
+
+            catch
+            {
+                MessageBox.Show("Cooperative Machine Learning System not found. This will be integrated in the public release soon.");
+            }
+
+            return result;
         }
 
         //new File Format...
@@ -1561,8 +1685,6 @@ namespace ssi
                 {
                     if (this.view.videoskel.ColumnDefinitions.Count < 2 && media_list.Medias.Count > 0)
                     {
-
-
                         ColumnDefinition split_column = new ColumnDefinition();
                         split_column.Width = new GridLength(1, GridUnitType.Auto);
                         this.view.videoskel.ColumnDefinitions.Add(split_column);
@@ -1575,10 +1697,7 @@ namespace ssi
                         //Grid.SetColumn(splitter, 0);
                         Grid.SetColumn(splitter, this.view.videoskel.ColumnDefinitions.Count - 1);
 
-
                         this.view.videoskel.Children.Add(splitter);
-
-
 
                         ColumnDefinition column = new ColumnDefinition();
                         column.Width = new GridLength(1, GridUnitType.Star);
@@ -1768,14 +1887,11 @@ namespace ssi
             handlePlay();
         }
 
-
         private void handlePlay()
         {
-
             if ((string)this.view.navigator.playButton.Content == "II")
             {
-              
-             //   nomediaPlayHandler(null);
+                //   nomediaPlayHandler(null);
                 innomediaplaymode = false;
                 this.view.navigator.playButton.Content = ">";
             }
@@ -1803,7 +1919,6 @@ namespace ssi
                     Play();
                 }
             }
-
         }
 
         private void fastforward_Click(object sender, RoutedEventArgs e)
@@ -2611,6 +2726,7 @@ namespace ssi
                         break;
 
                     case "csv":
+                    case "anno":
                         ftype = ssi_file_type.CSV;
                         break;
 
@@ -2624,10 +2740,6 @@ namespace ssi
 
                     case "stream":
                         ftype = ssi_file_type.STREAM;
-                        break;
-
-                    case "anno":
-                        ftype = ssi_file_type.ANNO;
                         break;
 
                     case "events":
@@ -2664,12 +2776,14 @@ namespace ssi
                     //Read first line, check if format is an annotation, else interpret it as external csv
                     //Read second line to check for sample rate (only relevant for continous files)
                     string csvanno = "^([0-9]+.[0-9]+|[0-9]+);([0-9]+.[0-9]+|[0-9]+);.*";
+                    string legacyanno = "^([0-9]+.[0-9]+|[0-9]+) ([0-9]+.[0-9]+|[0-9]+) .*";
                     string csvcont = "^([0-9]+.[0-9]+|[0-9]+;)(.)[^;]*";
                     string csvcontnew = "^((-?)[0-9]+.[0-9]+|[0-9]+;)+([0-9]+|[0-9]+;)(.)[^;];\\#.*";
 
                     string type = "";
 
                     Regex reg = new Regex(csvanno);
+                    Regex reglegacy = new Regex(legacyanno);
                     Regex regcont = new Regex(csvcont);
                     Regex regcontnew = new Regex(csvcontnew);
                     StreamReader sr = new StreamReader(filename, System.Text.Encoding.Default);
@@ -2680,6 +2794,7 @@ namespace ssi
                     {
                         bool iscontinouswithtier = regcontnew.IsMatch(line);
                         if (reg.IsMatch(line) && !iscontinouswithtier) type = "semicolon";
+                        else if (reglegacy.IsMatch(line) && !iscontinouswithtier) type = "legacy";
                         else if ((regcont.IsMatch(line) || iscontinouswithtier))
                         {
                             string[] data = line.Split(';');
@@ -2702,7 +2817,7 @@ namespace ssi
                     }
                     else type = "semicolon";
 
-                    if (type == "continuous" || type == "semicolon")
+                    if (type == "continuous" || type == "semicolon" || type == "legacy")
                     {
                         loadCSVAnnotation(filename, samplerate, type);
                     }
@@ -2722,13 +2837,6 @@ namespace ssi
 
                 case ssi_file_type.ANNOTATION:
                     loadAnnotation(filename);
-                    loaded = true;
-
-                    break;
-
-                case ssi_file_type.ANNO:
-
-                    loadCSVAnnotation(filename, 1, "legacy");
                     loaded = true;
 
                     break;
@@ -3622,14 +3730,11 @@ namespace ssi
             window.Show();
         }
 
-
-
         private void mongodbCMLExtract_Click(object sender, RoutedEventArgs e)
         {
             //TODO More logic here in the future
 
-            string arguments = " -overwrite -log cml_extract.log " +  "\"" + Properties.Settings.Default.DataPath + "\\" + Properties.Settings.Default.Database + "\" " + " expert;novice close";
-
+            string arguments = " -overwrite -log cml_extract.log " + "\"" + Properties.Settings.Default.DataPath + "\\" + Properties.Settings.Default.Database + "\" " + " expert;novice close";
 
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -3639,13 +3744,7 @@ namespace ssi
             process.StartInfo = startInfo;
             process.Start();
             process.WaitForExit();
-
-
-
-
         }
-
-
 
         private void mongodbAdd()
 
@@ -3663,7 +3762,7 @@ namespace ssi
         }
 
         private void mongodbStore(bool isfinished = false)
-        {          
+        {
             if (DatabaseLoaded)
             {
                 string message = "";
@@ -3682,7 +3781,7 @@ namespace ssi
                             if (annotator != null)
                             {
                                 track.AnnoList.HasChanged = false;
-                                if(annotator != null) message += "\r\n" + track.AnnoList.Name;
+                                if (annotator != null) message += "\r\n" + track.AnnoList.Name;
                             }
                         }
                         catch (Exception ex)
@@ -3707,7 +3806,7 @@ namespace ssi
             else
             {
                 MessageBox.Show("Load a database session first", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }            
+            }
         }
 
         private void mongodbLoad()
@@ -3736,7 +3835,6 @@ namespace ssi
                     this.view.mongodbCMLCompleteLearning.IsEnabled = true;
                     this.view.mongodbCMLTrainandLabel.IsEnabled = true;
                     this.view.mongodbCMLextract.IsEnabled = true;
-                    
 
                     //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
                     if (dbhw.Authlevel() > 2)
@@ -3744,14 +3842,12 @@ namespace ssi
                         this.view.addmongodb.Visibility = Visibility.Visible;
                         this.view.mongodbfunctions.Visibility = Visibility.Visible;
                         this.view.mongodbCMLTrainandLabel.Visibility = Visibility.Visible;
-                       
                     }
                     else
                     {
                         this.view.addmongodb.Visibility = Visibility.Collapsed;
                         this.view.mongodbfunctions.Visibility = Visibility.Collapsed;
                         this.view.mongodbCMLTrainandLabel.Visibility = Visibility.Collapsed;
-                       
                     }
                 }
 
@@ -3844,8 +3940,7 @@ namespace ssi
             Process.Start(Properties.Settings.Default.DataPath);
         }
 
-
-        private async void checkforUpdates(bool silent=false)
+        private async void checkforUpdates(bool silent = false)
         {
             try
             {
@@ -3859,20 +3954,16 @@ namespace ssi
                 {
                     MessageBox.Show("You already have the latest version of NOVA. (Build: " + LatestGitVersion + ")");
                 }
-
                 else if (result > 0)
                 {
                     MessageBoxResult mb = MessageBox.Show("Your build version is " + BuildVersion + ". The latest version is  " + LatestGitVersion + ". Do you want to update nova to the latest version? \n\n Release Notes:\n\n " + latest.Body, "Update available!", MessageBoxButton.YesNo);
                     if (mb == MessageBoxResult.Yes)
                     {
                         //  string url = "https://github.com/hcmlab/nova/releases/download/" + latest + "//nova.exe";
-                       // System.Diagnostics.Process.Start("https://github.com/hcmlab/nova/releases/latest");
-
-
-
+                        // System.Diagnostics.Process.Start("https://github.com/hcmlab/nova/releases/latest");
 
                         string url = "https://github.com/hcmlab/nova/blob/master/bin/updater.exe?raw=true";
-                        
+
                         WebClient Client = new WebClient();
                         Client.DownloadFile(url, "updater.exe");
 
@@ -3882,41 +3973,23 @@ namespace ssi
                         updateProcess.Start();
 
                         System.Environment.Exit(0);
-
-
-
-
-
                     }
                 }
-
                 else if (result < 0 && !silent)
                 {
                     MessageBox.Show("The version you are running (" + BuildVersion + ") is more recent than the latest offical release (" + LatestGitVersion + ")");
                 }
             }
-
             catch
             {
-
             }
-
         }
 
-
-        private  void update_Click(object sender, RoutedEventArgs e)
+        private void update_Click(object sender, RoutedEventArgs e)
         {
-
             checkforUpdates();
 
-     
-
-
-
-
             //WebClient Client = new WebClient();
-
-
 
             //Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "\\nova_temp.exe");
 
@@ -3927,8 +4000,6 @@ namespace ssi
             //Process.GetCurrentProcess().Kill();
 
             //
-
-
         }
 
         public int compareVersion(string Version1, string Version2)

@@ -358,5 +358,53 @@ namespace ssi.Properties {
                 this["CheckUpdateonStartup"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("null")]
+        public string CMLDefaultStream {
+            get {
+                return ((string)(this["CMLDefaultStream"]));
+            }
+            set {
+                this["CMLDefaultStream"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double CMLDefaultConf {
+            get {
+                return ((double)(this["CMLDefaultConf"]));
+            }
+            set {
+                this["CMLDefaultConf"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.5")]
+        public double CMLDefaultGap {
+            get {
+                return ((double)(this["CMLDefaultGap"]));
+            }
+            set {
+                this["CMLDefaultGap"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.15")]
+        public double CMLDefaultMinDur {
+            get {
+                return ((double)(this["CMLDefaultMinDur"]));
+            }
+            set {
+                this["CMLDefaultMinDur"] = value;
+            }
+        }
     }
 }

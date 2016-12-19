@@ -48,7 +48,7 @@
                 <MenuItem Header="Load Session" Name="mongodbmenu2" />
                 <MenuItem Header="Store Session" Name="mongodbmenu" IsEnabled="False" />
                 <MenuItem Header="Store Session and mark as finished" Name="mongodbmenufinished" IsEnabled="False" />
-                <MenuItem Header="Cooperative Learning" Visibility="Collapsed">
+                <MenuItem Header="Cooperative Learning" Visibility="Visible">
                     <MenuItem Header="Complete Session" Name="mongodbCMLCompleteLearning" IsEnabled="False" />
                     <MenuItem Header="Extract MFCCS for all Sessions" Name="mongodbCMLextract" IsEnabled="False"></MenuItem>
                     <MenuItem Header="Train and Label Multiple Sessions" Name="mongodbCMLTrainandLabel"  Visibility="Collapsed"    IsEnabled="False" />

@@ -354,7 +354,7 @@ namespace ssi
                         }
                         else
                         {
-                            AnnoListItem e = new AnnoListItem(start, samplerate, label, "", tier);
+                            AnnoListItem e = new AnnoListItem(start, samplerate, label, "", "#000000", 1);
                             if (filter == null || tier == filter)
                                 list.AddSorted(e);
                         }
@@ -385,7 +385,7 @@ namespace ssi
                         {
                             label += " " + data[i];
                         }
-                        AnnoListItem e = new AnnoListItem(start, duration, label, "", tier);
+                        AnnoListItem e = new AnnoListItem(start, duration, label, "", "#000000", 1);
                         if (filter == null || tier == filter)
                             list.AddSorted(e);
                     }

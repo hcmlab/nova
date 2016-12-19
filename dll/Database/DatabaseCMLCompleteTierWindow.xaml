@@ -5,8 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ssi"
              Title="Complete Tier"
-             Height="400" Width="300" WindowStyle="ToolWindow">
+             Height="400" Width="500">
     <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
@@ -14,10 +19,7 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
+
 
         <Label Grid.Row="0"
                Grid.Column="0" 
@@ -46,7 +48,7 @@
         <ListBox Name="StreamListBox"                 
                  Grid.Row="2" 
                  Grid.Column="1"
-                 SelectionMode="Single"
+                 SelectionMode="Single" SelectionChanged="StreamListBox_SelectionChanged"
                  Margin="5"></ListBox>
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
 
@@ -109,6 +111,34 @@
                     Margin="5"
                     Click="FinishedButton_Click">Finished</Button>
         </StackPanel>
-        
+        <GridSplitter ResizeDirection="Columns" 
+                      Grid.Row="0" 
+                      Grid.RowSpan="9" 
+                      Grid.Column="4" 
+                      Grid.ColumnSpan="1" 
+                      Height="Auto"
+                      Width="3"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Margin="0">
+        </GridSplitter>
+
+        <TextBox Name="logTextBox" 
+                 Grid.Row="0" 
+                 Grid.RowSpan="4" 
+                 Grid.Column="3" 
+                 Margin="5"
+                 HorizontalScrollBarVisibility="Auto"
+                 VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+                 >
+        </TextBox>
+
+        <Button Name="CopyButton"
+                Grid.Row="5"
+                Grid.Column="3"
+                Margin="5"
+                HorizontalAlignment="Right"
+                Width="50"
+                Click="CopyButton_Click">Copy</Button>
     </Grid>
 </Window>
