@@ -461,11 +461,12 @@ namespace ssi
             UpdateOptions uo = new UpdateOptions();
             uo.IsUpsert = true;
 
-            var checklock = annotations.Find(filter2).Single();
+          
 
             bool islocked = false;
             try
             {
+                var checklock = annotations.Find(filter2).Single();
                 islocked = checklock["isLocked"].AsBoolean;
 
             }
@@ -483,6 +484,13 @@ namespace ssi
 
             return annotator;
         }
+
+        public IMongoDatabase GetDatabase()
+        {
+            return database;
+        }
+
+
 
         public List<AnnoList> LoadFromDatabase(System.Collections.IList collections, string db, string session, string dbuser)
         {
@@ -650,6 +658,11 @@ namespace ssi
 
             return l;
         }
+
+
+
+
+
 
         public string FetchDBRef(IMongoDatabase database, string collection, string attribute, ObjectId reference)
         {

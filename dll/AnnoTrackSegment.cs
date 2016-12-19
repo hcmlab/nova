@@ -45,7 +45,7 @@ namespace ssi
             this.Inlines.Add(item.Label);
             this.FontSize = 12;
             this.TextWrapping = TextWrapping.Wrap;
-            this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
+           if(item.Bg != "" && item.Bg != null) this.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(item.Bg));
             this.Foreground = Brushes.White;
             this.Opacity = 0.75;
 

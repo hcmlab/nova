@@ -62,6 +62,12 @@ namespace ssi
                     FillGapCheckBox.IsChecked = Properties.Settings.Default.CMLFill;
                     RemoveLabelCheckBox.IsChecked = Properties.Settings.Default.CMLRemove;
 
+                    ConfidenceTextBox.Text = Properties.Settings.Default.CMLDefaultConf.ToString();
+                    FillGapTextBox.Text = Properties.Settings.Default.CMLDefaultGap.ToString();
+                    RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
+
+
+
                     string[] roles = Properties.Settings.Default.CMLDefaultRoles.Split(';');
                     for(int i=0; i< roles.Length;i++)
                     {
@@ -242,8 +248,11 @@ namespace ssi
         {
             if (TierListBox.SelectedItem != null && StreamListBox.SelectedItem != null)
             {
+
                 process(true, false, false);
+
             }
+
         }
 
         private void TrainButton_Click(object sender, RoutedEventArgs e)
@@ -323,8 +332,17 @@ namespace ssi
             {
                 double.TryParse(RemoveLabelTextBox.Text, out minDur);
             }
+            Properties.Settings.Default.CMLDefaultGap = minGap;
+            Properties.Settings.Default.CMLDefaultConf = confidence;
+            Properties.Settings.Default.CMLDefaultMinDur = minDur;
+            Properties.Settings.Default.Save();
+
 
             logTextBox.Text = "";
+            try
+            {
+
+           
 
             if (extract)
             //EXTRACT MISSING FEATURES
@@ -442,7 +460,15 @@ namespace ssi
                     return;
                 }
                 logTextBox.AppendText(File.ReadAllText("cml.log"));
+
             }
+            }
+
+            catch
+            {
+                MessageBox.Show("Cooperative Machine Learning System not found. This will be integrated in the public release soon.");
+            }
+        
         }
 
         private void TierListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
