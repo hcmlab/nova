@@ -25,7 +25,7 @@ namespace ssi
 {
     public class ViewHandler
     {
-        public static string BuildVersion = "0.9.9.4.3";
+        public static string BuildVersion = "0.9.9.4.2";
 
         private static ViewTime time = null;
 
@@ -3951,7 +3951,7 @@ namespace ssi
               
                 var result = compareVersion(LatestGitVersion, BuildVersion);
 
-                if ((result == 0  || latest.Assets.Count == 0) && !silent)
+                if ((result == 0  || latest.Assets.Count == 0)&& !silent)
                 {
                     MessageBox.Show("You already have the latest version of NOVA. (Build: " + LatestGitVersion + ")");
                 }
@@ -3965,10 +3965,10 @@ namespace ssi
                         string url = "https://github.com/hcmlab/nova/blob/master/bin/updater.exe?raw=true";
 
                         WebClient Client = new WebClient();
-                        Client.DownloadFile(url, "updater.exe");
+                        Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory +"updater.exe");
 
                         System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
-                        updateProcess.StartInfo.FileName = "updater.exe";
+                        updateProcess.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "updater.exe";
                         updateProcess.StartInfo.Arguments = LatestGitVersion;
                         updateProcess.Start();
 
