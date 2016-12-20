@@ -49,6 +49,9 @@
                     <TextBox Name="DBUser" HorizontalAlignment="left" DockPanel.Dock="Top"  Width="110"  RenderTransformOrigin="-1.755,2.974" />
                     <Label Content="MongoDB Password: " HorizontalAlignment="left" DockPanel.Dock="Top" />
                     <PasswordBox Name="DBPW" HorizontalAlignment="left" DockPanel.Dock="Top"  Width="110"  RenderTransformOrigin="-1.755,2.974" />
+                    <Label Content="Ask before overwritting existing annotation"   HorizontalAlignment="left" DockPanel.Dock="Top" />
+                    <CheckBox Name="Overwritedbcheckbox"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left"/>
+
                     <Separator Visibility="Hidden"></Separator>
                 </DockPanel>
             </TabItem>

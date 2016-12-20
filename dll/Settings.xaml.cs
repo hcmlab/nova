@@ -22,6 +22,7 @@ namespace ssi
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPW.Password = Properties.Settings.Default.MongoDBPass;
             UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateonStartup;
+            Overwritedbcheckbox.IsChecked = Properties.Settings.Default.DBAskbeforeoverwrite;
         }
 
         public double Uncertainty()
@@ -67,6 +68,11 @@ namespace ssi
         public bool CheckforUpdatesonStartup()
         {
             return (UpdatesCheckbox.IsChecked == true);
+        }
+
+        public bool DBaskforOverwrite()
+        {
+            return (Overwritedbcheckbox.IsChecked == true);
         }
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
