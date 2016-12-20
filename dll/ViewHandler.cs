@@ -25,7 +25,7 @@ namespace ssi
 {
     public class ViewHandler
     {
-        public static string BuildVersion = "0.9.9.4.3";
+        public static string BuildVersion = "0.9.9.4.2";
 
         private static ViewTime time = null;
 
@@ -1233,7 +1233,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+           // if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void reloadAnnoDB(AnnoTrack tier)
@@ -1427,7 +1427,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (this.annos.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void handleAnnotation(AnnoList anno, string filename)
@@ -1550,7 +1550,7 @@ namespace ssi
 
             //Adjust the view
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (this.annos.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
@@ -1589,7 +1589,7 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (this.annos.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadAnvil(string filename)
@@ -1615,7 +1615,7 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (this.annos.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadEvents(string filename)
@@ -1639,7 +1639,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (this.annos.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
         private void loadStream(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
@@ -1796,7 +1796,7 @@ namespace ssi
             {
                 track.timeRangeChanged(ViewHandler.Time);
             }
-            if (duration > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (this.signal_tracks.Count == 1 &&  duration > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             //updateTimeRange(duration);
             //track.timeRangeChanged(ViewHandler.Time);
         }
@@ -1840,7 +1840,7 @@ namespace ssi
                 if (media.GetLength() > 0)
                 {
                     updateTimeRange(media.GetLength());
-                    if (media.GetLength() > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+                    if (this.media_list.Medias.Count == 1 && media.GetLength() > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
                     _timer.Stop();
                 }
             });
@@ -3951,7 +3951,7 @@ namespace ssi
               
                 var result = compareVersion(LatestGitVersion, BuildVersion);
 
-                if ((result == 0  || latest.Assets.Count == 0) && !silent)
+                if ((result == 0  || latest.Assets.Count == 0)&& !silent)
                 {
                     MessageBox.Show("You already have the latest version of NOVA. (Build: " + LatestGitVersion + ")");
                 }
@@ -3965,10 +3965,10 @@ namespace ssi
                         string url = "https://github.com/hcmlab/nova/blob/master/bin/updater.exe?raw=true";
 
                         WebClient Client = new WebClient();
-                        Client.DownloadFile(url, "updater.exe");
+                        Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory +"updater.exe");
 
                         System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
-                        updateProcess.StartInfo.FileName = "updater.exe";
+                        updateProcess.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "updater.exe";
                         updateProcess.StartInfo.Arguments = LatestGitVersion;
                         updateProcess.Start();
 
