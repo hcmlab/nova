@@ -98,5 +98,8 @@
     <Setting Name="CMLDefaultMinDur" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0.15</Value>
     </Setting>
+    <Setting Name="DBAskbeforeoverwrite" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

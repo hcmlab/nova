@@ -25,7 +25,7 @@ namespace ssi
 {
     public class ViewHandler
     {
-        public static string BuildVersion = "0.9.9.4.4";
+        public static string BuildVersion = "0.9.9.4.5";
 
         private static ViewTime time = null;
 
@@ -3047,6 +3047,7 @@ namespace ssi
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());
                 Properties.Settings.Default.CheckUpdateonStartup = s.CheckforUpdatesonStartup();
+                Properties.Settings.Default.DBAskbeforeoverwrite = s.DBaskforOverwrite();
                 Properties.Settings.Default.Save();
             }
         }

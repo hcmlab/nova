@@ -406,5 +406,17 @@ namespace ssi.Properties {
                 this["CMLDefaultMinDur"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DBAskbeforeoverwrite {
+            get {
+                return ((bool)(this["DBAskbeforeoverwrite"]));
+            }
+            set {
+                this["DBAskbeforeoverwrite"] = value;
+            }
+        }
     }
 }

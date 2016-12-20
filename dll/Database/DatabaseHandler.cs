@@ -226,6 +226,7 @@ namespace ssi
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(db);
             string annotator = null;
+            string originalannotator = annoTrack.AnnoList.Annotator;
 
             BsonArray labels = new BsonArray();
             mongo = new MongoClient(connectionstring);
@@ -458,6 +459,8 @@ namespace ssi
                 annoid = res[0].GetElement(0).Value.AsObjectId;
             }
 
+
+
             UpdateOptions uo = new UpdateOptions();
             uo.IsUpsert = true;
 
@@ -474,6 +477,21 @@ namespace ssi
 
             if (!islocked)
             {
+                var check = annotations.Find(filter2).ToList();
+                if (check.Count > 0 && Properties.Settings.Default.DBAskbeforeoverwrite && originalannotator != Properties.Settings.Default.MongoDBUser)
+                {
+                   MessageBoxResult mbres =  MessageBox.Show("Annotation #" + annoTrack.AnnoList.Role+ " #" + annoTrack.AnnoList.AnnotationScheme.name + " #" +
+                       annoTrack.AnnoList.AnnotatorFullName + " already exists, do you want to overwrite it?", "Attention", MessageBoxButton.YesNo);
+
+                    if (mbres == MessageBoxResult.Yes)
+                    {
+                        annotations.ReplaceOne(filter2, document, uo);
+                    }
+                    else return null;
+
+
+                }
+
                 var result = annotations.ReplaceOne(filter2, document, uo);
             }
             else {
