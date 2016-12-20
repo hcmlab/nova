@@ -1281,7 +1281,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+           // if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
             this.view.ShadowBox.Visibility = Visibility.Collapsed;
         }
 
@@ -3948,9 +3948,10 @@ namespace ssi
                 var releases = await client.Repository.Release.GetAll("hcmlab", "nova");
                 var latest = releases[0];
                 string LatestGitVersion = latest.TagName;
+              
                 var result = compareVersion(LatestGitVersion, BuildVersion);
 
-                if (result == 0 && !silent)
+                if ((result == 0  || latest.Assets.Count == 0) && !silent)
                 {
                     MessageBox.Show("You already have the latest version of NOVA. (Build: " + LatestGitVersion + ")");
                 }
@@ -3959,8 +3960,7 @@ namespace ssi
                     MessageBoxResult mb = MessageBox.Show("Your build version is " + BuildVersion + ". The latest version is  " + LatestGitVersion + ". Do you want to update nova to the latest version? \n\n Release Notes:\n\n " + latest.Body, "Update available!", MessageBoxButton.YesNo);
                     if (mb == MessageBoxResult.Yes)
                     {
-                        //  string url = "https://github.com/hcmlab/nova/releases/download/" + latest + "//nova.exe";
-                        // System.Diagnostics.Process.Start("https://github.com/hcmlab/nova/releases/latest");
+
 
                         string url = "https://github.com/hcmlab/nova/blob/master/bin/updater.exe?raw=true";
 
