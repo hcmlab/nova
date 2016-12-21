@@ -1418,7 +1418,7 @@ namespace ssi
             anno.SampleAnnoPath = filename;
             double maxdur = 0;
 
-            maxdur = anno[anno.Count - 1].Stop;
+            if(anno.Count  > 0)  maxdur = anno[anno.Count - 1].Stop;
 
             if (anno != null)
             {
@@ -2136,7 +2136,7 @@ namespace ssi
 
         public void saveAnno()
         {
-            saveAnno(this.current_anno, this.current_anno.Filepath);
+          if(this.current_anno != null)   saveAnno(this.current_anno, this.current_anno.Filepath);
         }
 
         public void saveAnno(string filepath)

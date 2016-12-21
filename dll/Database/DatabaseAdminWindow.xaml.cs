@@ -854,7 +854,7 @@ namespace ssi
                     collection.InsertOne(mediatype);
                     GetMediaType(l.Result() + "#" + l.Result2());
                 }
-                else MessageBox.Show("Role already exists!");
+                else MessageBox.Show("Mediatype already exists!");
             }
         }
 
