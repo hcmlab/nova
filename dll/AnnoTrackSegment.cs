@@ -70,6 +70,10 @@ namespace ssi
 
             MouseLeftButtonDown += new MouseButtonEventHandler(OnAnnoTrackSegmentMouseDown);
 
+
+            this.Height = track.ActualHeight * 0.5;
+
+
             update();
         }
 

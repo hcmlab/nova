@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ssi"
-             Title="Train"
+             Title="Session Transfer"
              Height="800" 
              Width="600" 
              WindowStartupLocation="CenterScreen">
@@ -40,7 +40,7 @@
         <Label Grid.Row="1"
                Grid.Column="0"
                HorizontalAlignment="Right"
-               ToolTip="Select the tier you would like to complete">Tier</Label>
+               ToolTip="Select the tier you would like to complete">Scheme</Label>
         <ListBox Name="TierListBox" SelectionChanged="TierListBox_SelectionChanged"
                  Grid.Row="1" 
                  Grid.Column="1"
