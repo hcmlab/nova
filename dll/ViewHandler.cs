@@ -922,7 +922,7 @@ namespace ssi
             {
                 if (!movemedialock)
                 {
-                    double time = (ViewHandler.Time.CurrentPlayPositionPrecise + (1000.0 / fps) / 1000.0);
+                    double time = (ViewHandler.Time.CurrentPlayPositionPrecise + (1 / fps));
                     ViewHandler.Time.CurrentPlayPositionPrecise = time;
                     // if (media_list.Medias.Count == 0)
                     if (visualizeskel || visualizepoints)
@@ -1490,11 +1490,8 @@ namespace ssi
                             //check if trackid is already used
                             foreach (AnnoTrack a in anno_tracks)
                             {
-                                if (a.AnnoList.Name == tierid)
-                                {
                                     annolist.Name = tierid + tiercount.ToString();
                                     break;
-                                }
                             }
                             ali.Tier = annolist.Name;
                             annolist.Add(ali);
@@ -2212,7 +2209,7 @@ namespace ssi
             string workdir = Path.GetDirectoryName(filepath);
 
             StreamWriter sw = new StreamWriter(filepath, false, System.Text.Encoding.Default);
-            sw.WriteLine("<novaproject version=\"1\">");
+            sw.WriteLine("<nova version=\"1\">");
 
             sw.WriteLine("\t<medias>");
             if (ml != null)
@@ -2226,6 +2223,7 @@ namespace ssi
                 }
             }
             sw.WriteLine("\t</medias>");
+
             sw.WriteLine("\t<signals>");
             if (signal_tracks != null)
             {
@@ -2237,18 +2235,16 @@ namespace ssi
                     }
                 }
             }
-
             sw.WriteLine("\t</signals>");
-            sw.WriteLine("\t<tiers>");
 
+            sw.WriteLine("\t<tiers>");
             foreach (AnnoTrack t in tracks)
             {
                 if (t.AnnoList.Filepath != null)
                 {
-                    sw.WriteLine("\t\t<tier filepath=\"" + ViewTools.GetRelativePath(t.AnnoList.Filepath, workdir) + "\" name=\"" + t.AnnoList.Name + "\">" + "</tier>");
+                    sw.WriteLine("\t\t<tier name=\"" + t.AnnoList.Name + "\">" + ViewTools.GetRelativePath(t.AnnoList.Filepath, workdir) + "</tier>");
                 }
             }
-
             sw.WriteLine("\t</tiers>");
 
             sw.WriteLine("</novaproject>");
@@ -2266,41 +2262,37 @@ namespace ssi
                 foreach (XmlNode node in doc.SelectNodes("//media"))
                 {
                     bool isvideo = true;
-                    if (node.InnerText.Contains("wav"))
+                    string path = node.InnerText;
+                    if (Path.GetExtension(path) == ".wav")
                     {
                         isvideo = false;
-                        // loadWav(node.InnerText);
                     }
-                    loadMedia(ViewTools.GetAbsolutePath(node.InnerText, workdir), isvideo);
+                    loadMedia(ViewTools.GetAbsolutePath(path, workdir), isvideo);
                 }
 
                 foreach (XmlNode node in doc.SelectNodes("//signal"))
                 {
-                    string background = node.Attributes[0].LastChild.Value;
-                    string foreground = node.Attributes[1].LastChild.Value;
-                    if (node.InnerText.Contains("wav"))
+                    string background = node.Attributes["bg"].LastChild.Value;
+                    string foreground = node.Attributes["fg"].LastChild.Value;
+                    string path = node.InnerText;                    
+                    if (Path.GetExtension(path) == ".wav")
                     {
-                        loadWav(ViewTools.GetAbsolutePath(node.InnerText, workdir));
+                        loadWav(ViewTools.GetAbsolutePath(path, workdir), foreground, background);
                     }
                     else
                     {
-                        loadStream(ViewTools.GetAbsolutePath(node.InnerText, workdir), foreground, background);
+                        loadStream(ViewTools.GetAbsolutePath(path, workdir), foreground, background);
                     }
                 }
 
-                foreach (XmlNode child in (doc.SelectNodes("//tier")))
+                foreach (XmlNode node in (doc.SelectNodes("//tier")))
                 {
-                    if (child.Attributes.Count > 0)
+                    string path = node.InnerText;
+                    if (path == "")
                     {
-                        if (child.Attributes[0].InnerText.Contains("csv"))
-                        {
-                            loadCSVAnnotation(ViewTools.GetAbsolutePath(child.Attributes[1].InnerText, workdir), 1, "semicolon", child.Attributes[2].InnerText);
-                        }
-                        else if (child.Attributes[0].InnerText.Contains("annotation"))
-                        {
-                            loadAnnotation(ViewTools.GetAbsolutePath(child.Attributes[0].InnerText, workdir));
-                        }
+                        path = node.Attributes["filepath"].LastChild.Value;
                     }
+                    loadFromFile(ViewTools.GetAbsolutePath(path, workdir));                    
                 }
             }
             catch (Exception e)
