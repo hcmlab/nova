@@ -25,7 +25,7 @@ namespace ssi
 {
     public class ViewHandler
     {
-        public static string BuildVersion = "0.9.9.4.5";
+        public static string BuildVersion = "0.9.9.4.6";
 
         private static ViewTime time = null;
 
@@ -1100,6 +1100,7 @@ namespace ssi
                     return;
                 }
 
+                anno.FromDB = true;
                 anno.AnnotationScheme = db.GetAnnotationScheme(annoscheme, isDiscrete);
                 anno.AnnotationScheme.LabelsAndColors.Add(new LabelColorPair("GARBAGE", "#FF000000"));
                 if (anno.AnnotationScheme.type == "FREE") anno.AnnotationType = AnnoType.FREE;
