@@ -1,0 +1,40 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:local="clr-namespace:ssi"
+             xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"  
+             xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic" 
+             x:Class="ssi.SignalTrackEx"
+             mc:Ignorable="d"
+             Height="Auto" Width="Auto">
+
+    <Grid x:Name="grid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal" Background="Transparent" Grid.ColumnSpan="2" Margin="1,0,19,0">
+            <Button x:Name="ResetButton" Click="ResetButton_Click" Width="20" Background="{x:Null}" BorderBrush="{x:Null}" Content="o"/>
+            <Button x:Name="ZoomInButton" Click="ZoomInButton_Click" Width="20" Background="{x:Null}" BorderBrush="{x:Null}" Content="+"/>
+            <Button x:Name="ZoomOutButton" Click="ZoomOutButton_Click" Width="20" Background="{x:Null}" BorderBrush="{x:Null}" Content="-"/>
+            <Button x:Name="MoveUpButton" Click="MoveUpButton_Click" Width="20" Background="{x:Null}" BorderBrush="{x:Null}" Content="△"/>
+            <Button x:Name="MoveDownButton" Click="MoveDownButton_Click" Width="20" Background="{x:Null}" BorderBrush="{x:Null}" Content="▽"/>
+            <Button x:Name="StatsButton" Click="StatsButton_Click" Width="20" Background="{x:Null}" BorderBrush="{x:Null}" Content="s"/>
+            <p:ColorPicker SelectedColor="{Binding SignalColor}" IsEnabled="true" Width="40" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+            <p:ColorPicker SelectedColor="{Binding BackColor}" IsEnabled="true" Width="40" Height="20" Background="{x:Null}" BorderBrush="{x:Null}"/>
+            <ComboBox x:Name="DimComboBox" Width="Auto" Height="20" Background="{x:Null}" BorderBrush="{x:Null}" SelectionChanged="DimComboBox_SelectionChanged"/>
+            <CheckBox x:Name="AutoScaleCheckBox" Width="Auto" VerticalAlignment="Center" Margin="5,0,0,0" Unchecked="AutoScaleCheckBox_Unchecked" Checked="AutoScaleCheckBox_Checked" Content="Scale"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Background="Transparent">
+            <Button x:Name="CloseButton" Height="20"  Width="20" Background="Transparent" BorderBrush="Transparent" ToolTip="Close" Content="X"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

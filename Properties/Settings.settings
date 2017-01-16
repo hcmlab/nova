@@ -1,0 +1,105 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ssi.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="MongoDBUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MongoDBUser</Value>
+    </Setting>
+    <Setting Name="MongoDBPass" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MongoDBPass</Value>
+    </Setting>
+    <Setting Name="DataServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">sftp.server.yeah</Value>
+    </Setting>
+    <Setting Name="DataServerFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/path/to/your/files/</Value>
+    </Setting>
+    <Setting Name="DataServerLogin" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="DataServerPass" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="DataServerConnectionType" Type="System.String" Scope="User">
+      <Value Profile="(Default)">sftp</Value>
+    </Setting>
+    <Setting Name="Filenames" Type="System.String" Scope="User">
+      <Value Profile="(Default)">file1.mp4;file2.stream;file2.stream~</Value>
+    </Setting>
+    <Setting Name="LastSessionId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">SessionID</Value>
+    </Setting>
+    <Setting Name="DatabaseAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">127.0.0.1:27017</Value>
+    </Setting>
+    <Setting Name="DatabaseName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">database</Value>
+    </Setting>
+    <Setting Name="DatabaseDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Data</Value>
+    </Setting>
+    <Setting Name="DatabaseAutoLogin" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="UncertaintyLevel" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.7</Value>
+    </Setting>
+    <Setting Name="Annotator" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Unknown</Value>
+    </Setting>
+    <Setting Name="DefaultZoominSeconds" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="DefaultMinSegmentSize" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.1</Value>
+    </Setting>
+    <Setting Name="DefaultDiscreteSampleRate" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">25</Value>
+    </Setting>
+    <Setting Name="DatabaseShowOnlyMine" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="DatabaseShowOnlyFinished" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="CMLContext" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="CMLDefaultAnnotator" Type="System.String" Scope="User">
+      <Value Profile="(Default)">null</Value>
+    </Setting>
+    <Setting Name="CMLDefaultScheme" Type="System.String" Scope="User">
+      <Value Profile="(Default)">null</Value>
+    </Setting>
+    <Setting Name="CMLDefaultRole" Type="System.String" Scope="User">
+      <Value Profile="(Default)">null</Value>
+    </Setting>
+    <Setting Name="CMLSetConf" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="CMLRemove" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CMLFill" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CheckUpdateOnStart" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CMLDefaultStream" Type="System.String" Scope="User">
+      <Value Profile="(Default)">null</Value>
+    </Setting>
+    <Setting Name="CMLDefaultConf" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="CMLDefaultGap" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.5</Value>
+    </Setting>
+    <Setting Name="CMLDefaultMinDur" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.15</Value>
+    </Setting>
+    <Setting Name="DatabaseAskBeforeOverwrite" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
