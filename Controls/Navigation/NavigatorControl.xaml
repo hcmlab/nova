@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="ssi.NavigatorControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Height="Auto" Width="Auto" Visibility="Visible">
+
+    <Grid Grid.Row="0">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Column="0" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Left">
+            <Button Name="newAnnoButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center">New  Tier</Button>
+            <Button Name="newAnnoContButton" Width="120" Height="25" Margin="5" Visibility="Collapsed" VerticalAlignment="Center">New Continuous Tier</Button>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Center">
+            <Button Name="jumpFrontButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">|&lt;</Button>
+            <Button Name="fastBackwardButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">&lt;&lt;</Button>
+            <Button Name="playButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="False">></Button>
+            <Button Name="fastForwardButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">>></Button>
+            <Button Name="jumpEndButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">&gt;|</Button>
+            <CheckBox x:Name="followAnnoCheckBox" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Follow Annotation" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
+            <CheckBox Name="followplaybox" Height="25" Margin="0,10,10,0" IsChecked="True" Content="Auto Scroll" />
+            <CheckBox x:Name="askforlabels" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Force Label" />
+            <CheckBox Name="correctionModeCheckBox" Height="25" Margin="0,10,10,0" Visibility="Visible">Correction Mode</CheckBox>
+            <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Clear</Button>
+        </StackPanel>
+
+        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Content="" Name="Statusbar" Margin="5,0,0,0" HorizontalContentAlignment="Left" BorderThickness="0" />
+    </Grid>
+</UserControl>

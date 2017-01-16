@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="ssi.AnnoTierControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Height="Auto" Width="Auto">
+
+    <Grid Name="annoTrackGrid"
+        VerticalAlignment="Stretch"
+        HorizontalAlignment="Stretch"
+        Width="Auto"
+        Height="Auto">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+    </Grid>
+</UserControl>

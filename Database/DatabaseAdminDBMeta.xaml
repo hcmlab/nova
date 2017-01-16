@@ -1,0 +1,20 @@
+﻿<Window x:Class="ssi.DatabaseAdminDBMeta"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        mc:Ignorable="d"
+        Title="DatabaseDBMeta" Height="300" Width="300" Background="DarkGray">
+    <Grid>
+
+        <Label Content="Name:" Margin="10,0,166,238"></Label>
+        <TextBox Name="Namefield" Text=" " Margin="10,24,166,217"></TextBox>
+
+        <Label Content="Description:" Margin="10,52,166,186"></Label>
+        <TextBox Name="Descriptionfield" Text=" " Margin="10,78,108,115"></TextBox>
+
+        <Label Content="Keywords:" Margin="10,154,166,84"></Label>
+        <TextBox Name="Keywords" Text=" " Margin="10,183,108,60"></TextBox>
+    </Grid>
+</Window>
