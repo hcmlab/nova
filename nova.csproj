@@ -65,6 +65,10 @@
     <Reference Include="Octokit">
       <HintPath>References\Octokit.dll</HintPath>
     </Reference>
+    <Reference Include="Org.Mentalis.Security, Version=1.0.13.715, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\Org.Mentalis.Security.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Classic" />
     <Reference Include="PropertyTools.Wpf">
       <HintPath>References\PropertyTools.Wpf.dll</HintPath>
