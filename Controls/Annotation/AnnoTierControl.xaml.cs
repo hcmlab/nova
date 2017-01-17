@@ -46,30 +46,34 @@ namespace ssi
             RowDefinition row = new RowDefinition();
             row.Height = new GridLength(1, GridUnitType.Star);
             this.annoTrackGrid.RowDefinitions.Add(row);
+            if (anno.Scheme.Type == AnnoScheme.TYPE.FREE)
+            {
+                anno.Scheme.MinOrBackColor = selectColor(this.annoTrackGrid.RowDefinitions.Count - 1);
+                anno.Scheme.MaxOrForeColor = Colors.Black;
+            }
             AnnoTier tier = new AnnoTier(anno);
 
             Grid.SetColumn(tier, 0);
             Grid.SetRow(tier, this.annoTrackGrid.RowDefinitions.Count - 1);
-            tier.BackgroundBrush = selectColor(this.annoTrackGrid.RowDefinitions.Count - 1); ;
-            tier.Background = tier.BackgroundBrush;
+          
             this.annoTrackGrid.Children.Add(tier);
 
             return tier;
         }
 
-        //Default Color Scheme, make changeable in the config
-        private Brush selectColor(int index)
+        //Default Color Scheme
+        private Color selectColor(int index)
         {
             index = index / 2;
-            if (index % 8 == 0) return Brushes.Khaki;
-            else if (index % 8 == 1) return Brushes.SkyBlue;
-            else if (index % 8 == 2) return Brushes.YellowGreen;
-            else if (index % 8 == 3) return Brushes.Tomato;
-            else if (index % 8 == 4) return Brushes.RosyBrown;
-            else if (index % 8 == 5) return Brushes.Goldenrod;
-            else if (index % 8 == 6) return Brushes.LightSeaGreen;
-            else if (index % 8 == 7) return Brushes.LightGray;
-            else return Brushes.AliceBlue;
+            if (index % 8 == 0) return Colors.Khaki;
+            else if (index % 8 == 1) return Colors.SkyBlue;
+            else if (index % 8 == 2) return Colors.YellowGreen;
+            else if (index % 8 == 3) return Colors.Tomato;
+            else if (index % 8 == 4) return Colors.RosyBrown;
+            else if (index % 8 == 5) return Colors.Goldenrod;
+            else if (index % 8 == 6) return Colors.LightSeaGreen;
+            else if (index % 8 == 7) return Colors.LightGray;
+            else return Colors.AliceBlue;
         }
     }
 }
