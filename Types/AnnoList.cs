@@ -12,7 +12,7 @@ namespace ssi
             STRING,
         }
 
-        private bool fromDB = false;
+        private bool loadedFromDB = false;
         private string name = null;
         private string filePath = null;
         private string fileName = null;
@@ -20,13 +20,13 @@ namespace ssi
         private string subject = null;
         private AnnoScheme scheme;
         private string annotator = null;
-        private string annotatorfn = null;
+        private string annotatorFullName = null;
         private string fileType = "ASCII";
 
         public bool FromDB
         {
-            get { return fromDB; }
-            set { fromDB = value; }
+            get { return loadedFromDB; }
+            set { loadedFromDB = value; }
         }
 
         public string Role
@@ -60,8 +60,8 @@ namespace ssi
 
         public string AnnotatorFullName
         {
-            get { return annotatorfn; }
-            set { annotatorfn = value; }
+            get { return annotatorFullName; }
+            set { annotatorFullName = value; }
         }
 
         public string FilePath
