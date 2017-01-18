@@ -39,17 +39,7 @@ namespace ssi
 
             ui.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(OnMouseDoubleClick);
             ui.PreviewMouseUp += (sender, args) => Update();
-            ;
             ui.PreviewMouseMove += (sender, args) => MouseMove();
-
-            //OnTimeRangeChanged += time =>
-            //{
-            //if (_viewTime != null && ui != null) {
-            // ui.RangeStop = (long)_viewTime.TotalDuration;
-            //   ui.RangeStopSelected = (long)_viewTime.TotalDuration;
-            //   ui.MinRange = Math.Max(2l, (long)_viewTime.TotalDuration / 1000l);
-            // }
-            // };
         }
 
         private void OnMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -58,7 +48,6 @@ namespace ssi
         }
 
         public new void MouseMove()
-
         {
             if (Mouse.LeftButton == MouseButtonState.Pressed)
             {
@@ -71,7 +60,6 @@ namespace ssi
             if (_viewTime != null)
             {
                
-
                 //seens to be a bug in avalon lib.try to fix it by adjusting the value
 
                 if (ui.RangeStartSelected > ui.RangeStop) ui.RangeStartSelected = ui.RangeStop;
@@ -103,8 +91,6 @@ namespace ssi
                         }
                     }
                 }
-
-               
 
                 if (OnTimeRangeChanged != null)
                 {

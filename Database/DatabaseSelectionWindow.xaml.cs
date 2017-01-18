@@ -93,7 +93,7 @@ namespace ssi
 
                 if (annoTier != null)
                 {
-                    name = annoTier.AnnoList.Name;
+                    name = annoTier.AnnoList.Scheme.Name;
 
                     schemeType = annoTier.AnnoList.Scheme.Type;
 

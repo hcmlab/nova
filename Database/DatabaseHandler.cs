@@ -103,7 +103,7 @@ namespace ssi
             if (auth > 3) hasauth = true;
 
             string name = "New track";
-            if (tier != null) name = tier.AnnoList.Name;
+            if (tier != null) name = tier.AnnoList.Scheme.Name;
 
             DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(roles, hasauth, "Tier: " + name + ". Who is annotated? ", "Roles");
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
@@ -142,7 +142,7 @@ namespace ssi
             if (auth > 2) hasauth = true;
 
             string name = "New Track";
-            if (tier != null) name = tier.AnnoList.Name;
+            if (tier != null) name = tier.AnnoList.Scheme.Name;
 
             DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(AnnotationSchemes, hasauth, "Tier: " + name + ". What is annotated? ", "AnnotationSchemes", type, true, tier);
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
@@ -250,7 +250,7 @@ namespace ssi
 
             ObjectId roleid;
 
-            if (annoTrack.AnnoList.Role == null || annoTrack.AnnoList.Role == annoTrack.AnnoList.Name)
+            if (annoTrack.AnnoList.Role == null || annoTrack.AnnoList.Role == annoTrack.AnnoList.Scheme.Name)
             {
                 annoTrack.AnnoList.Role = LoadRoles(db, annoTrack);
                 if (annoTrack.AnnoList.Role == null)
@@ -271,7 +271,7 @@ namespace ssi
             else
             {
                 BsonDocument b = new BsonDocument();
-                BsonElement n = new BsonElement("name", annoTrack.AnnoList.Name);
+                BsonElement n = new BsonElement("name", annoTrack.AnnoList.Scheme.Name);
                 BsonElement m = new BsonElement("isValid", true);
 
                 b.Add(n);
@@ -567,8 +567,6 @@ namespace ssi
                 }
 
                 annoList.Role = roledb;
-                annoList.Name = "#" +annoList.Role + " #" + annotdb + " #" + annotatdbfn;
-
                 annoList.Scheme.Name = annosch["name"].ToString();
                 var annotation = documents[0]["labels"].AsBsonArray;
                 if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)

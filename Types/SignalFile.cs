@@ -574,7 +574,7 @@ namespace ssi
             {
                 annoListItem = new AnnoListItem(i * dur, dur, data[i * dim + ShowDim].ToString(), "", annoList.Scheme.MaxOrForeColor);
                 annoList.Add(annoListItem);
-                annoList.Name = annoListItem.Tier;
+                annoList.Scheme.Name = Name;
             }
 
             return annoList;

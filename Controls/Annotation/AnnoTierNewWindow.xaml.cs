@@ -19,7 +19,7 @@ namespace ssi
     /// </summary>
     public partial class AnnoTierNewWindow : Window
     {
-        AnnoScheme.TYPE at = AnnoScheme.TYPE.FREE;
+        AnnoScheme.TYPE annotype = AnnoScheme.TYPE.FREE;
         public AnnoTierNewWindow()
         {
             InitializeComponent();
@@ -28,25 +28,25 @@ namespace ssi
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            at = AnnoScheme.TYPE.FREE;
+            annotype = AnnoScheme.TYPE.FREE;
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            at = AnnoScheme.TYPE.DISCRETE;
+            annotype = AnnoScheme.TYPE.DISCRETE;
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            at = AnnoScheme.TYPE.CONTINUOUS;
+            annotype = AnnoScheme.TYPE.CONTINUOUS;
         }
 
 
         public AnnoScheme.TYPE Result()
         {
-            return at;
+            return annotype;
         }
 
     }

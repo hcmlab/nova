@@ -29,15 +29,15 @@ namespace ssi
                 sw.WriteLine("    <meta annotator=\"" + Properties.Settings.Default.Annotator + "\"/>");
                 if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Name + "\" type=\"FREE\" color=\"" + this.Scheme.MinOrBackColor + "\"/>");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"FREE\" color=\"" + this.Scheme.MinOrBackColor + "\"/>");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Name + "\" type=\"DISCRETE\"  color=\"" + this.Scheme.MinOrBackColor + "\">");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"DISCRETE\"  color=\"" + this.Scheme.MinOrBackColor + "\">");
                     int index = 0;
 
                     foreach (AnnoScheme.Label lp in this.Scheme.Labels)
@@ -167,7 +167,7 @@ namespace ssi
         {
             if (filePath == null || filePath.Split('.')[1] != "csv")
             {
-                filePath = FileTools.SaveFileDialog(Name, ".csv", "Annotation (*.csv)|*.csv", Directory);
+                filePath = FileTools.SaveFileDialog(Scheme.Name, ".csv", "Annotation (*.csv)|*.csv", Directory);
             }
 
             if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -246,7 +246,7 @@ namespace ssi
                 XmlNode scheme = annotation.SelectSingleNode("scheme");
                 if (scheme.Attributes["name"] != null)
                 {
-                    list.Name = scheme.Attributes["name"].Value;
+                    list.Scheme.Name = scheme.Attributes["name"].Value;
                 }
                 string type = "FREE";
                 if (scheme.Attributes["type"] != null)
@@ -259,7 +259,6 @@ namespace ssi
                 string annotator = "";
                 if (list.Annotator != null) annotator = " #" + list.Annotator;
 
-                list.Name = role + "#" + scheme.Attributes["name"].Value + annotator;
 
                 if (type == AnnoScheme.TYPE.DISCRETE.ToString())
                 {
@@ -743,7 +742,7 @@ namespace ssi
                         label = alignable_annotation.FirstChild.InnerText;
                         duration = end - start;
                         list[i].AddSorted(new AnnoListItem(start, duration, label, "", Colors.Black));
-                        list[i].Name = tierid;
+                        list[i].Scheme.Name = tierid;
                         //The tier is used as metainformation as well. Might be changed if thats relevant in the future
                     }
                     i++;
@@ -791,7 +790,7 @@ namespace ssi
                         }
                         //  string tierid = annotrack.InnerText;
                         list[index].AddSorted(new AnnoListItem(start, duration, label, meta, Colors.Black));
-                        list[index].Name = tierid;
+                        list[index].Scheme.Name = tierid;
                     }
                     catch
                     {

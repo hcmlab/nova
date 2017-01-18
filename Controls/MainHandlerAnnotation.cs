@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,126 +12,25 @@ namespace ssi
         private void handleAnnotation(AnnoList annoList, string filename)
         {
             double maxdur = 0;
-            //Get all tier ids that haven't been added before
-            //(This is where in the future tiers will be read from the config)
-            List<String> TierIds = new List<String>();
-
             if (annoList.Count > 0)
             {
-                if (annoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS)
-                {
-                    //legacy code for multitier files, probably remove this in the future
-
-                    foreach (AnnoListItem ali in annoList)
-                    {
-                        if (!TierIds.Contains(ali.Tier))
-                        {
-                            TierIds.Add(ali.Tier);
-                        }
-
-                        //While doing this anyway, we find the latest time to adjust the view according to the latest annotation
-                        if (ali.Stop > maxdur)
-                        {
-                            maxdur = ali.Stop;
-                        }
-                    }
-                }
-                else
-                {
-                    string tier = "";
-                    if (annoList[0].Tier != null) tier = annoList[0].Tier;
-                    else tier = annoList.Name;
-                    TierIds.Add(tier);
-                    maxdur = annoList[annoList.Count - 1].Stop;
-                }
+                maxdur = annoList[annoList.Count - 1].Stop;
             }
-            else
+
+            annoList.HasChanged = false;
+
+
+            if (annoList.Scheme == null)
             {
-                TierIds.Add(annoList.Name);
+                annoList.Scheme = new AnnoScheme();
             }
-
-            foreach (string tierid in TierIds)
-            {
-                AnnoList newAnnoList = new AnnoList();
-
-                if (annoList.Count > 0)
-                {
-                    foreach (AnnoListItem annoListItem in annoList)
-                    {
-
-                        newAnnoList.Name = tierid;
-                        //check if trackid is already used
-                        foreach (AnnoTier a in annoTiers)
-                        {
-                            if (a.AnnoList.Name == tierid)
-                            {
-                                newAnnoList.Name = tierid + tiercount.ToString();
-                                break;
-                            }
-                        }
-                        annoListItem.Tier = newAnnoList.Name;
-                        newAnnoList.Add(annoListItem);
-                    }
-                }
-
-                if (newAnnoList.Name == null) newAnnoList.Name = annoList.Name;
-                newAnnoList.Annotator = annoList.Annotator;
-                newAnnoList.AnnotatorFullName = annoList.AnnotatorFullName;
-                newAnnoList.Scheme = annoList.Scheme;
-                newAnnoList.Scheme.Name = annoList.Scheme.Name;
-                newAnnoList.Role = annoList.Role;
-                newAnnoList.HasChanged = false;
-                newAnnoList.Scheme.Type = annoList.Scheme.Type;
-                newAnnoList.FilePath = annoList.FilePath;
-                newAnnoList.Scheme.MinScore = annoList.Scheme.MinScore;
-                newAnnoList.Scheme.MaxScore = annoList.Scheme.MaxScore;
-                newAnnoList.LoadedFromDB = annoList.LoadedFromDB;
-
-                if (annoList.Scheme != null && annoList.Scheme.MinOrBackColor != null && annoList.Scheme.MaxOrForeColor != null && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-                {
-                    newAnnoList.Scheme.MinOrBackColor = annoList.Scheme.MinOrBackColor;
-                    newAnnoList.Scheme.MaxOrForeColor = annoList.Scheme.MaxOrForeColor;
-                }
-
-                if (annoList.Scheme == null && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-                {
-                    annoList.Scheme = new AnnoScheme();
-                }
-                else if (annoList.Scheme != null && annoList.Scheme.MinOrBackColor != null && annoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS)
-                {
-                    newAnnoList.Scheme.MinOrBackColor = annoList.Scheme.MinOrBackColor;
-                }
-
-                if (newAnnoList != null)
-                {
-                    setAnnoList(newAnnoList);
-                    addAnnoTier(newAnnoList);
-                    newAnnoList.HasChanged = false;
-                    tiercount++;
-                }
-            }
+ 
+                setAnnoList(annoList);
+                addAnnoTier(annoList);
 
             updateTimeRange(maxdur);
             if (this.annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
-
-        public void saveAnnoAs()
-        {
-            if (AnnoTierStatic.Selected.AnnoList != null)
-            {
-                string filename = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.FileName, ".annotation", "Annotation(*.annotation)|*.annotation", AnnoTierStatic.Selected.AnnoList.Directory);
-                saveAnno(filename);
-            }
-        }
-
-        private void saveAnno_Click(object sender, RoutedEventArgs e)
-        {
-            if (AnnoTierStatic.Selected != null)
-            {
-                saveAnno();
-            }
-        }
-            
 
         private void removeAnnoTier()
         {
@@ -152,7 +47,7 @@ namespace ssi
                     {
                         if (DatabaseLoaded)
                         {
-                            mongodbStore();
+                            databaseStore();
                         }
                         else saveAnno();
 
@@ -179,121 +74,26 @@ namespace ssi
             }
         }
 
-
-        private void annoTrackGrid_MouseUp(object sender, MouseEventArgs e)
-        {
-            mouseDown = false;
-
-            if (AnnoTier.askForLabel == true)
-                ShowLabelBox();
-        }
-
-        private void ShowLabelBox()
-        {
-            if (AnnoTierStatic.Selected == null || AnnoTierStatic.Label == null)
-            {
-                return;
-            }
-
-            AnnoTierNewLabelWindow dialog = new AnnoTierNewLabelWindow(AnnoTierStatic.Selected.AnnoList.Scheme, AnnoTierStatic.Label.Item);
-            dialog.ShowDialog();
-
-            if (dialog.DialogResult == false)
-            {
-                return;
-            }
-
-            AnnoTierStatic.Label.Item.Color = dialog.Result.Color;
-            AnnoTierStatic.Label.Item.Confidence = dialog.Result.Confidence;
-            AnnoTierStatic.Label.Item.Label = dialog.Result.Label;
-
-            AnnoTierStatic.Selected.DefaultColor = dialog.Result.Color;
-            AnnoTierStatic.Selected.DefaultLabel = dialog.Result.Label;
-
-            if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
-            {
-                if (dialog.Result.Color != AnnoTierStatic.Selected.AnnoList.Scheme.MaxOrForeColor)
-                {
-                    foreach (AnnoListItem item in AnnoTierStatic.Selected.AnnoList)
-                    {
-                        if (item.Label == dialog.Result.Label)
-                        {
-                            item.Color = dialog.Result.Color;
-                        }
-                    }
-                }
-            }
-
-        }
-
-
-        private void annoTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (control.navigator.askforlabels.IsChecked == true) AnnoTier.askForLabel = true;
-            else AnnoTier.askForLabel = false;
-
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                if (AnnoTierStatic.Label != null)
-                {
-                    AnnoTierStatic.Label.isMoveable = true;
-                    AnnoTierStatic.Selected.LeftMouseButtonDown(e);
-                }
-            }
-
-            if (e.RightButton == MouseButtonState.Pressed)
-            {
-                if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(false);
-
-                if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS || mouseDown == false))
-                {
-                    foreach (AnnoTier a in annoTiers)
-                    {
-                        if (a.IsMouseOver)
-                        {
-                            AnnoTier.SelectLabel(null);
-                            AnnoTier.SelectTier(a);
-                            break;
-                        }
-                    }
-                }
-
-                if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.RightMouseButtonDown(e);
-                mouseDown = true;
-            }
-
-            if (AnnoTierStatic.Selected != null)
-            {
-                if (AnnoTierStatic.Selected.isDiscreteOrFree || (!AnnoTierStatic.Selected.isDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
-                {
-                    double pos = e.GetPosition(control.trackGrid).X;
-                    annoCursor.X = pos;
-                    Time.CurrentSelectPosition = pos;
-
-                    annoCursor.Visibility = Visibility.Visible;
-                    double time = Time.TimeFromPixel(pos);
-                    control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
-                }
-                else
-                {
-                    annoCursor.X = 0;
-                    double time = Time.TimeFromPixel(0);
-                    annoCursor.Visibility = Visibility.Hidden;
-                    control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
-                }
-            }
-        }
-
-
         private void setAnnoList(AnnoList anno)
         {
             control.annoListControl.annoDataGrid.ItemsSource = anno;
         }
 
+        private string buildAnnoNameLabel(AnnoList AnnoList)
+        {
+
+            string annoNameLabel = "";
+            if (AnnoList.Scheme.Name != null && AnnoList.Scheme.Name != "") annoNameLabel += "#" + AnnoList.Scheme.Name + " ";
+            else annoNameLabel += "#NewTier ";
+            if (AnnoList.Role != null && AnnoList.Role != "") annoNameLabel += "#" + AnnoList.Role + " ";
+            if (AnnoList.AnnotatorFullName != null && AnnoList.AnnotatorFullName != "") annoNameLabel += "#" + AnnoList.AnnotatorFullName;
+
+            return annoNameLabel;
+        }
 
         private void changeAnnoTierHandler(AnnoTier tier, EventArgs e)
         {
-            control.annoNameLabel.Content = "#" + tier.AnnoList.Scheme.Name + " #" + tier.AnnoList.Role + " #" + tier.AnnoList.AnnotatorFullName;
+            control.annoNameLabel.Content = buildAnnoNameLabel(tier.AnnoList);
             setAnnoList(tier.AnnoList);
             control.annoListControl.editComboBox.Items.Clear();
 
@@ -342,9 +142,6 @@ namespace ssi
 
         private void changeAnnoTierSegmentHandler(AnnoTierLabel segment, EventArgs e)
         {
-            // this.view.annoNameLabel.Text = track.AnnoList.Filename;
-            // this.view.annoNameLabel.ToolTip = track.AnnoList.Filepath;
-            // setAnnoList(track.AnnoList);
 
             if (IsPlaying())
             {
@@ -363,6 +160,42 @@ namespace ssi
             }
         }
 
+        private void ShowLabelBox()
+        {
+            if (AnnoTierStatic.Selected == null || AnnoTierStatic.Label == null)
+            {
+                return;
+            }
+
+            AnnoTierNewLabelWindow dialog = new AnnoTierNewLabelWindow(AnnoTierStatic.Selected.AnnoList.Scheme, AnnoTierStatic.Label.Item);
+            dialog.ShowDialog();
+
+            if (dialog.DialogResult == false)
+            {
+                return;
+            }
+
+            AnnoTierStatic.Label.Item.Color = dialog.Result.Color;
+            AnnoTierStatic.Label.Item.Confidence = dialog.Result.Confidence;
+            AnnoTierStatic.Label.Item.Label = dialog.Result.Label;
+
+            AnnoTierStatic.Selected.DefaultColor = dialog.Result.Color;
+            AnnoTierStatic.Selected.DefaultLabel = dialog.Result.Label;
+
+            if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+            {
+                if (dialog.Result.Color != AnnoTierStatic.Selected.AnnoList.Scheme.MaxOrForeColor)
+                {
+                    foreach (AnnoListItem item in AnnoTierStatic.Selected.AnnoList)
+                    {
+                        if (item.Label == dialog.Result.Label)
+                        {
+                            item.Color = dialog.Result.Color;
+                        }
+                    }
+                }
+            }
+        }
 
         private void ShowLabelBoxCont()
         {
@@ -400,96 +233,6 @@ namespace ssi
                     AnnoTierStatic.Selected.TimeRangeChanged(timeline);
                     AnnoTierStatic.Selected.TimeRangeChanged(timeline);
                 }
-            }
-        }
-
-        private void annoTrackGrid_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                double pos = e.GetPosition(control.trackGrid).X;
-                annoCursor.X = pos;
-                Time.CurrentSelectPosition = pos;
-                double time = Time.TimeFromPixel(pos);
-                control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
-            }
-            if ((e.RightButton == MouseButtonState.Pressed || e.LeftButton == MouseButtonState.Pressed) && control.navigator.followAnnoCheckBox.IsChecked == true)
-            {
-                if (mediaList.Medias.Count > 0)
-                {
-                    mediaList.move(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
-                    moveCursorTo(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
-                    Stop();
-                }
-            }
-
-            if (e.RightButton == MouseButtonState.Released && mouseDown == true)
-            {
-                mouseDown = false;
-
-                if (control.navigator.followAnnoCheckBox.IsChecked == true)
-                {
-                    bool is_playing = IsPlaying();
-
-                    if (!is_playing)
-                    {
-                        Play();
-                    }
-                }
-                if (control.navigator.askforlabels.IsChecked == true)
-                {
-                    if (AnnoTierStatic.Selected != null)
-                    {
-                        if (AnnoTierStatic.Selected.isDiscreteOrFree)
-                        {
-                            ShowLabelBox();
-                        }
-                    }
-                }
-            }
-        }
-
-
-        private void annoList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ListView grid = (ListView)sender;
-
-            if (grid.SelectedIndex >= 0 && grid.SelectedIndex < grid.Items.Count)
-            {
-                AnnoListItem item = (AnnoListItem)grid.SelectedItem;
-                control.annoListControl.editComboBox.SelectedItem = item.Label;
-
-                movemedialock = true;
-                Time.CurrentPlayPosition = item.Start;
-                Time.CurrentPlayPositionPrecise = item.Start;
-
-                mediaList.move(item.Start);
-                moveCursorTo(item.Start);
-
-                if (item.Start >= timeline.SelectionStop)
-                {
-                    float factor = (float)(((item.Start - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
-                    control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
-                }
-                else if (item.Stop <= timeline.SelectionStart)
-                {
-                    float factor = (float)(((Time.SelectionStart - item.Start)) / (Time.SelectionStop - Time.SelectionStart));
-                    control.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
-                }
-
-                foreach (AnnoListItem a in AnnoTierStatic.Selected.AnnoList)
-                {
-                    if (a.Start == item.Start && a.Stop == item.Stop && item.Label == a.Label)
-                    {
-                        AnnoTier.SelectLabel(AnnoTierStatic.Selected.getSegment(a));
-                        control.annoListControl.editComboBox.SelectedItem = item.Label;
-                        control.annoListControl.editTextBox.Text = item.Label;
-
-                        break;
-                    }
-                }
-
-                movemedialock = false;
             }
         }
 
@@ -553,6 +296,162 @@ namespace ssi
 
 
 
+        #region EVENTHANDLERS
+
+        private void annoTrackGrid_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                double pos = e.GetPosition(control.trackGrid).X;
+                annoCursor.X = pos;
+                Time.CurrentSelectPosition = pos;
+                double time = Time.TimeFromPixel(pos);
+                control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
+            }
+            if ((e.RightButton == MouseButtonState.Pressed || e.LeftButton == MouseButtonState.Pressed) && control.navigator.followAnnoCheckBox.IsChecked == true)
+            {
+                if (mediaList.Medias.Count > 0)
+                {
+                    mediaList.move(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
+                    moveCursorTo(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
+                    Stop();
+                }
+            }
+
+            if (e.RightButton == MouseButtonState.Released && mouseDown == true)
+            {
+                mouseDown = false;
+
+                if (control.navigator.followAnnoCheckBox.IsChecked == true)
+                {
+                    bool is_playing = IsPlaying();
+
+                    if (!is_playing)
+                    {
+                        Play();
+                    }
+                }
+                if (control.navigator.askforlabels.IsChecked == true)
+                {
+                    if (AnnoTierStatic.Selected != null)
+                    {
+                        if (AnnoTierStatic.Selected.isDiscreteOrFree)
+                        {
+                            ShowLabelBox();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void annoTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (control.navigator.askforlabels.IsChecked == true) AnnoTier.askForLabel = true;
+            else AnnoTier.askForLabel = false;
+
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (AnnoTierStatic.Label != null)
+                {
+                    AnnoTierStatic.Label.isMoveable = true;
+                    AnnoTierStatic.Selected.LeftMouseButtonDown(e);
+                }
+            }
+
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(false);
+
+                if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS || mouseDown == false))
+                {
+                    foreach (AnnoTier a in annoTiers)
+                    {
+                        if (a.IsMouseOver)
+                        {
+                            AnnoTier.SelectLabel(null);
+                            AnnoTier.SelectTier(a);
+                            break;
+                        }
+                    }
+                }
+
+                if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.RightMouseButtonDown(e);
+                mouseDown = true;
+            }
+
+            if (AnnoTierStatic.Selected != null)
+            {
+                if (AnnoTierStatic.Selected.isDiscreteOrFree || (!AnnoTierStatic.Selected.isDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
+                {
+                    double pos = e.GetPosition(control.trackGrid).X;
+                    annoCursor.X = pos;
+                    Time.CurrentSelectPosition = pos;
+
+                    annoCursor.Visibility = Visibility.Visible;
+                    double time = Time.TimeFromPixel(pos);
+                    control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
+                }
+                else
+                {
+                    annoCursor.X = 0;
+                    double time = Time.TimeFromPixel(0);
+                    annoCursor.Visibility = Visibility.Hidden;
+                    control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
+                }
+            }
+        }
+
+        private void annoTrackGrid_MouseUp(object sender, MouseEventArgs e)
+        {
+            mouseDown = false;
+
+            if (AnnoTier.askForLabel == true)
+                ShowLabelBox();
+        }
+
+        private void annoList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListView grid = (ListView)sender;
+
+            if (grid.SelectedIndex >= 0 && grid.SelectedIndex < grid.Items.Count)
+            {
+                AnnoListItem item = (AnnoListItem)grid.SelectedItem;
+                control.annoListControl.editComboBox.SelectedItem = item.Label;
+
+                movemedialock = true;
+                Time.CurrentPlayPosition = item.Start;
+                Time.CurrentPlayPositionPrecise = item.Start;
+
+                mediaList.move(item.Start);
+                moveCursorTo(item.Start);
+
+                if (item.Start >= timeline.SelectionStop)
+                {
+                    float factor = (float)(((item.Start - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
+                    control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+                }
+                else if (item.Stop <= timeline.SelectionStart)
+                {
+                    float factor = (float)(((Time.SelectionStart - item.Start)) / (Time.SelectionStop - Time.SelectionStart));
+                    control.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
+                }
+
+                foreach (AnnoListItem a in AnnoTierStatic.Selected.AnnoList)
+                {
+                    if (a.Start == item.Start && a.Stop == item.Stop && item.Label == a.Label)
+                    {
+                        AnnoTier.SelectLabel(AnnoTierStatic.Selected.getSegment(a));
+                        control.annoListControl.editComboBox.SelectedItem = item.Label;
+                        control.annoListControl.editTextBox.Text = item.Label;
+
+                        break;
+                    }
+                }
+
+                movemedialock = false;
+            }
+        }
+
         private void closeAnnoTier_Click(object sender, RoutedEventArgs e)
         {
             removeAnnoTier();
@@ -598,5 +497,6 @@ namespace ssi
             }
         }
 
+        #endregion EVENTHANDLERS
     }
 }

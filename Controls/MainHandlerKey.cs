@@ -274,7 +274,7 @@ namespace ssi
                 {
                     if (DatabaseLoaded)
                     {
-                        mongodbStore(true);
+                        databaseStore(true);
                     }
                     else saveAnnoAs();
                 }
@@ -282,17 +282,13 @@ namespace ssi
                 {
                     if (DatabaseLoaded)
                     {
-                        mongodbStore();
+                        databaseStore();
                     }
                     else saveAnno();
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
-                    if (AnnoTierStatic.Label == null && Mouse.DirectlyOver == AnnoTierStatic.Selected)
-                    {
-                        removeAnnoTier();
-                    }
-                    else
+                    if (AnnoTierStatic.Label != null) 
                     {
                         AnnoTier.OnKeyDownHandler(sender, e);
                     }
@@ -328,7 +324,7 @@ namespace ssi
                     if (track != null)
                     {
                         if (DatabaseLoaded)
-                            databaseReloadAnno(track);
+                            databaseReload(track);
                         else
                             reloadAnnoTier(track.AnnoList.FilePath);
                     }

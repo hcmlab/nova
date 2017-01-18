@@ -106,7 +106,7 @@ namespace ssi
         {
             foreach (AnnoTier anno in annoTiers)
             {
-                if (anno.AnnoList.Name == name)
+                if (anno.AnnoList.Scheme.Name == name)
                 {
                     return anno;
                 }
@@ -163,7 +163,7 @@ namespace ssi
             control.exportAnnoContinuousToDiscreteMenu.Click += exportAnnoContinuousToDiscrete_Click;
             control.exportAnnoToSignalMenu.Click += exportAnnoToSignal_Click;
             control.exportAnnoDiscreteToContinuouMenu.Click += exportAnnoDiscreteToContinuous_Click;
-            control.exportAnnoToFrameWiseMenu.Click += exportAnnoToFrameWiseMenu_Click;                           
+            control.exportAnnoToFrameWiseMenu.Click += ExportAnnoToFrameWiseMenu_Click;                           
                   
             control.databaseSaveSessionMenu.Click += databaseSaveSession_Click;
             control.databaseSaveSessionAndMarkAsFinishedMenu.Click += databaseSaveSessionAndMarkAsFinished_Click;
@@ -198,7 +198,7 @@ namespace ssi
             control.timeTrackControl.rangeSlider.OnTimeRangeChanged += control.timeTrackControl.timeTrack.TimeRangeChanged;
             control.timeTrackControl.rangeSlider.OnTimeRangeChanged += control.timeTrackControl.timeTrackSelection.TimeRangeChanged;
             control.timeTrackControl.rangeSlider.OnTimeRangeChanged += Time.TimelineChanged;
-            control.timeTrackControl.rangeSlider.Update();
+            control.timeTrackControl.rangeSlider.Update();            
 
             mediaList.OnMediaPlay += mediaPlayHandler;
 

@@ -12,6 +12,8 @@ namespace ssi
 {
     public partial class MainHandler
     {
+
+        #region CURSOR
         private void initCursor()
         {
             control.trackGrid.MouseDown += signalTrackGrid_MouseDown;
@@ -56,115 +58,95 @@ namespace ssi
             control.signalPositionLabel.Text = FileTools.FormatSeconds(time);
         }
 
-        private void noMediaPlayHandler(Signal s = null)
+        #endregion CURSOR
+
+        #region EVENTHANDLERS
+
+
+        private void navigatorCorrectionMode_Click(object sender, RoutedEventArgs e)
         {
-            control.navigator.playButton.IsEnabled = true;
-            double fps;
-            if (s != null)
-            {
-                fps = s.rate;
-                skelfps = fps;
-            }
-            else
-            {
-                fps = skelfps;
-            }
-            EventHandler ev = new EventHandler(delegate (object sender, EventArgs a)
-            {
-                if (!movemedialock)
-                {
-                    double time = (MainHandler.Time.CurrentPlayPositionPrecise + (1000.0 / fps) / 1000.0);
-                    MainHandler.Time.CurrentPlayPositionPrecise = time;
-                    // if (media_list.Medias.Count == 0)
-                    if (visualizeskel || visualizepoints)
-                    {
-                        signalCursor.X = MainHandler.Time.PixelFromTime(MainHandler.Time.CurrentPlayPositionPrecise);
+            if (control.navigator.correctionModeCheckBox.IsChecked == true) AnnoTier.CorrectMode = true;
+            else AnnoTier.CorrectMode = false;
 
-                        if (Time.CurrentPlayPositionPrecise >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true)
-                        {
-                            double factor = (((Time.CurrentPlayPositionPrecise - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
-
-                            control.timeTrackControl.rangeSlider.followmedia = true;
-                            control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
-                        }
-                        else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
-
-                        //hm additional syncstep..
-                        if (lasttimepos < MainHandler.Time.CurrentPlayPosition)
-                        {
-                            lasttimepos = MainHandler.Time.CurrentPlayPosition;
-                            MainHandler.Time.CurrentPlayPositionPrecise = lasttimepos;
-                        }
-                        if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
-                    }
-                }
-
-                if (!innomediaplaymode)
-                {
-                    if (_timerp != null)
-                    {
-                        _timerp.Stop();
-                        _timerp = null;
-                    }
-                }
-            });
-
-            if (innomediaplaymode)
+            foreach (AnnoTier a in annoTiers)
             {
-                // lasttimepos = ViewHandler.Time.CurrentPlayPosition;
-                control.navigator.playButton.Content = "II";
-                // Play();
-                _timerp = new DispatcherTimer();
-                _timerp.Interval = TimeSpan.FromMilliseconds(1000.0 / fps);
-                _timerp.Tick += ev;
-                _timerp.Start();
-            }
-            else
-            {
-                if (_timerp != null)
-                {
-                    _timerp.Stop();
-                    _timerp.Tick -= ev;
-                }
+                a.TimeRangeChanged(timeline);
             }
         }
 
-        private void mediaPlayHandler(MediaList videos, MediaPlayEventArgs e)
+        private void navigatorNewAnno_Click(object sender, RoutedEventArgs e)
         {
-            if (movemedialock == false)
+            if (Time.TotalDuration > 0)
             {
-                double pos = MainHandler.Time.PixelFromTime(e.pos);
+                AnnoTierNewWindow dialog = new AnnoTierNewWindow();
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dialog.ShowDialog();
 
-                if (Time.SelectionStop - Time.SelectionStart < 1) Time.SelectionStart = Time.SelectionStop - 1;
-
-                Time.CurrentPlayPosition = e.pos;
-
-                if (!visualizeskel && !visualizepoints) signalCursor.X = pos;
-                //   Console.WriteLine("5 " + signalCursor.X);
-                //if (ViewHandler.Time.TimeFromPixel(signalCursor.X) > Time.SelectionStop || signalCursor.X <= 1 ) signalCursor.X = ViewHandler.Time.PixelFromTime(Time.SelectionStart);
-                // Console.WriteLine(signalCursor.X + "_____" + Time.SelectionStart);
-
-                double time = Time.TimeFromPixel(pos);
-                control.signalPositionLabel.Text = FileTools.FormatSeconds(e.pos);
-                control.annoTrackControl.currenttime = Time.TimeFromPixel(pos);
-
-                if (e.pos > MainHandler.timeline.TotalDuration - 0.5)
+                if (dialog.DialogResult == true)
                 {
-                    Stop();
+                    AnnoScheme.TYPE annoType = dialog.Result();
+
+                    if (DatabaseLoaded)
+                    {
+                        databaseAddNewAnnotation(annoType);
+                    }
+                    else
+                    {
+                        if (annoType == AnnoScheme.TYPE.FREE)
+                        {
+                            AnnoScheme annoScheme = new AnnoScheme() { Type = AnnoScheme.TYPE.FREE, MinOrBackColor = Colors.Transparent, MaxOrForeColor = Colors.Black };
+                            AnnoList annoList = new AnnoList() { Scheme = annoScheme };
+                            addAnnoTier(annoList);
+                        }
+                        else if (annoType == AnnoScheme.TYPE.DISCRETE)
+                        {
+                            AnnoSchemeEditor ase = new AnnoSchemeEditor();
+                            ase.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                            ase.ShowDialog();
+
+                            if (ase.DialogResult == true)
+                            {
+                                AnnoList al = ase.GetAnnoList();
+                                al.FilePath = al.Scheme.Name;
+                                addAnnoTier(al);
+                            }
+                        }
+                        else if (annoType == AnnoScheme.TYPE.CONTINUOUS)
+                        {
+                            double defaultSr = 25.0;
+
+                            foreach (IMedia m in mediaList.Medias)
+                            {
+                                if (m.IsVideo())
+                                {
+                                    defaultSr = m.GetSampleRate();
+                                    break;
+                                }
+                            }
+
+                            AnnoTierNewContinuousSchemeWindow.Input input = new AnnoTierNewContinuousSchemeWindow.Input() { SampleRate = defaultSr, MinScore = 0.0, MaxScore = 1.0, MinColor = Colors.LightBlue, MaxColor = Colors.Red };
+                            AnnoTierNewContinuousSchemeWindow dialog2 = new AnnoTierNewContinuousSchemeWindow(input);
+                            dialog2.ShowDialog();
+                            if (dialog2.DialogResult == true)
+                            {
+                                AnnoScheme annoScheme = dialog2.Result;
+                                AnnoList annoList = new AnnoList() { Scheme = annoScheme };
+                                addAnnoTier(annoList);
+                            }
+                        }
+                    }
                 }
             }
-
-            if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true && !movemedialock)
+            else
             {
-                double factor = (((Time.CurrentPlayPosition - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
-
-                control.timeTrackControl.rangeSlider.followmedia = true;
-                control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+                MessageTools.Warning("Nothing to annotate, load some data first.");
             }
-            else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
-            if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
         }
 
+        private void navigatorClearSession_Click(object sender, RoutedEventArgs e)
+        {
+            clearSession();
+        }
 
         private void navigatorFollowAnno_Unchecked(object sender, RoutedEventArgs e)
         {
@@ -199,41 +181,6 @@ namespace ssi
         {
             handlePlay();
         }
-
-        private void handlePlay()
-        {
-            if ((string)control.navigator.playButton.Content == "II")
-            {
-                //   nomediaPlayHandler(null);
-                innomediaplaymode = false;
-                control.navigator.playButton.Content = ">";
-            }
-            else
-            {
-                innomediaplaymode = true;
-                noMediaPlayHandler(null);
-                control.navigator.playButton.Content = "II";
-            }
-
-            infastbackward = false;
-            infastforward = false;
-
-            control.navigator.fastForwardButton.Content = ">>";
-            control.navigator.fastBackwardButton.Content = "<<";
-
-            if (mediaList.Medias.Count > 0)
-            {
-                if (IsPlaying())
-                {
-                    Stop();
-                }
-                else
-                {
-                    Play();
-                }
-            }
-        }
-
         private void navigatorFastForward_Click(object sender, RoutedEventArgs e)
         {
             int updateinms = 300;
@@ -296,142 +243,6 @@ namespace ssi
             }
         }
 
-        public void Stop()
-        {
-            if (IsPlaying())
-            {
-                mediaList.stop();
-                control.navigator.playButton.Content = ">";
-            }
-        }
-
-        public bool IsPlaying()
-        {
-            return mediaList.IsPlaying;
-        }
-
-        public void Play()
-        {
-            Stop();
-
-            double pos = 0;
-            AnnoListItem item = null;
-            bool loop = false;
-
-            AnnoTierLabel selected = AnnoTierStatic.Label;
-            if (selected != null)
-            {
-                item = selected.Item;
-                signalCursor.X = Time.PixelFromTime(item.Start);
-                loop = true;
-            }
-            else
-            {
-                pos = signalCursor.X;
-                double from = MainHandler.Time.TimeFromPixel(pos);
-                double to = MainHandler.timeline.TotalDuration;
-                item = new AnnoListItem(from, to, "");
-                signalCursor.X = pos;
-            }
-
-            try
-            {
-                mediaList.play(item, loop);
-                control.navigator.playButton.Content = "II";
-            }
-            catch (Exception e)
-            {
-                System.Console.WriteLine(e.ToString());
-            }
-
-            //
-        }
-
-        private void navigatorCorrectionMode_Click(object sender, RoutedEventArgs e)
-        {
-            if (control.navigator.correctionModeCheckBox.IsChecked == true) AnnoTier.CorrectMode = true;
-            else AnnoTier.CorrectMode = false;
-
-            foreach (AnnoTier a in annoTiers)
-            {
-                a.TimeRangeChanged(timeline);
-            }
-        }
-
-
-        private void navigatorNewAnno_Click(object sender, RoutedEventArgs e)
-        {
-            if (Time.TotalDuration > 0)
-            {
-                AnnoTierNewWindow dialog = new AnnoTierNewWindow();
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dialog.ShowDialog();
-
-                if (dialog.DialogResult == true)
-                {
-                    AnnoScheme.TYPE annoType = dialog.Result();
-
-                    if (DatabaseLoaded)
-                    {
-                        databaseNewAnno(annoType);
-                    }
-                    else
-                    {
-                        if (annoType == AnnoScheme.TYPE.FREE)
-                        {
-                            AnnoScheme annoScheme = new AnnoScheme() { Type = AnnoScheme.TYPE.FREE, MinOrBackColor = Colors.LightBlue, MaxOrForeColor = Colors.Orange };
-                            AnnoList annoList = new AnnoList() { Scheme = annoScheme };
-                            addAnnoTier(annoList);
-                        }
-                        else if (annoType == AnnoScheme.TYPE.DISCRETE)
-                        {
-                            AnnoSchemeEditor ase = new AnnoSchemeEditor();
-                            ase.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                            ase.ShowDialog();
-
-                            if (ase.DialogResult == true)
-                            {
-                                AnnoList al = ase.GetAnnoList();
-                                al.FilePath = al.Name;
-                                addAnnoTier(al);
-                            }
-                        }
-                        else if (annoType == AnnoScheme.TYPE.CONTINUOUS)
-                        {
-                            double defaultSr = 25.0;
-
-                            foreach (IMedia m in mediaList.Medias)
-                            {
-                                if (m.IsVideo())
-                                {
-                                    defaultSr = m.GetSampleRate();
-                                    break;
-                                }
-                            }
-
-                            AnnoTierNewContinuousSchemeWindow.Input input = new AnnoTierNewContinuousSchemeWindow.Input() { SampleRate = defaultSr, MinScore = 0.0, MaxScore = 1.0, MinColor = Colors.LightBlue, MaxColor = Colors.Red };
-                            AnnoTierNewContinuousSchemeWindow dialog2 = new AnnoTierNewContinuousSchemeWindow(input);
-                            dialog2.ShowDialog();
-                            if (dialog2.DialogResult == true)
-                            {
-                                AnnoScheme annoScheme = dialog2.Result;
-                                AnnoList annoList = new AnnoList() { Scheme = annoScheme };
-                                addAnnoTier(annoList);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                MessageTools.Warning("Nothing to annotate, load some data first.");
-            }
-        }
-
-        private void navigatorClearSession_Click(object sender, RoutedEventArgs e)
-        {
-            clearSession();
-        }
-
+        #endregion EVENTHANDLERS
     }
 }

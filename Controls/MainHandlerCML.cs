@@ -113,7 +113,7 @@ namespace ssi
 
                 if (isTrained && isForward)
                 {
-                    databaseReloadAnno(tier);
+                    databaseReload(tier);
                 }
 
             }

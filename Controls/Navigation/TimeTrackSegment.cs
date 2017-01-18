@@ -18,8 +18,7 @@ namespace ssi
         private bool isSelection = false;
         private List<Line> markers = new List<Line>();
         private double time = 0;
-        private double drawingoffset = 5;
-        private int markerspersegment = 10;
+        private int markersPerSegment = 10;
         private Unit unit = TimeTrackSegment.Unit.CLOCK;
 
         public void setUnit(Unit unit)
@@ -37,6 +36,15 @@ namespace ssi
             }
         }
 
+        public void SetVisibility(System.Windows.Visibility visibility)
+        {
+            for (int i = 0; i < markers.Count; i++)
+            {
+                markers[i].Visibility = visibility;
+            }
+            Visibility = visibility;
+        }
+
         public TimeTrackSegment(TimeTrack track, bool isSelection)
         {
             this.track = track;
@@ -45,7 +53,7 @@ namespace ssi
 
             if (isSelection)
             {
-                for (int i = 0; i < markerspersegment; i++)
+                for (int i = 0; i < markersPerSegment; i++)
                 {
                     Line l = new Line();
                     markers.Add(l);
@@ -56,31 +64,24 @@ namespace ssi
 
         private void setMarkers(double pos, double labelwidth)
         {
-            for (int i = 0; i < markerspersegment; i++)
+            for (int i = 0; i < markersPerSegment; i++)
             {
-                markers[i].X1 = pos * track.Width + (i * labelwidth / markerspersegment) - drawingoffset;
+                markers[i].X1 = pos * track.Width + (i * labelwidth / markersPerSegment);
                 markers[i].X2 = markers[i].X1;
-                markers[i].Y1 = this.ActualHeight / 3;
+                markers[i].Y1 = i == 0 ? ActualHeight : ActualHeight / 6;
                 markers[i].Y2 = 0;
-                markers[i].Stroke = new SolidColorBrush(Colors.DarkGray);
-                markers[i].StrokeThickness = 1;
-
-                //The Middle marker is a bit longer to be better seen
-                if (i == 0) markers[i].Y1 = markers[i].Y1 + 10;
+                markers[i].Stroke = i == 0 ? new SolidColorBrush(Colors.Black) : new SolidColorBrush(Colors.DarkGray);
+                markers[i].StrokeThickness = 1;                
             }
         }
 
-        public void setPos(double pos, uint n_ticks)
+        public void SetPosition(double pos, int nSegments)
         {
-            double length = track.Width / n_ticks;
+            double length = track.Width / nSegments;
 
-            Canvas.SetLeft(this, pos * track.Width - ActualWidth / 2 - drawingoffset);
+            Canvas.SetLeft(this, pos * track.Width + 3);
             time = track.SecondsFrom + (track.SecondsTo - track.SecondsFrom) * pos;
             setUnit(unit);
-
-            if (pos == 0) this.Text = "";
-            if (track.Width - pos * track.Width < 100)
-                this.Text = "";
 
             if (isSelection)
             {

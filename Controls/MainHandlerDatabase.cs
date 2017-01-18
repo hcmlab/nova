@@ -25,72 +25,26 @@ namespace ssi
     public partial class MainHandler
     {
 
-        private void databaseReloadAnno(AnnoTier tier)
+        #region EVENTHANDLERS
+
+        private void databaseSaveSession_Click(object sender, RoutedEventArgs e)
         {
-            Action EmptyDelegate = delegate () { };
-            control.ShadowBoxText.Text = "Reloading Annotation";
-            control.ShadowBox.Visibility = Visibility.Visible;
-            control.UpdateLayout();
-            control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-
-            DatabaseAnno s = new DatabaseAnno();
-            s.Role = tier.AnnoList.Role;
-            s.AnnoScheme = tier.AnnoList.Scheme.Name;
-            s.AnnotatorFullname = tier.AnnoList.AnnotatorFullName;
-            s.Annotator = tier.AnnoList.Annotator;
-
-            List<DatabaseAnno> list = new List<DatabaseAnno>();
-            list.Add(s);
-
-            string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
-            DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.DatabaseAddress);
-
-            List<AnnoList> annos = db.LoadFromDatabase(list, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
-            double maxdur = 0;
-
-            if (annos[0].Count > 0) maxdur = annos[0][annos[0].Count - 1].Stop;
-
-            if (annos[0] != null && tier != null)
-            {
-                setAnnoList(annos[0]);
-                tier.Children.Clear();
-                tier.AnnoList.Clear();
-                tier.segments.Clear();
-                tier.AnnoList = annos[0];
-
-                foreach (AnnoListItem item in annos[0])
-                {
-                    tier.addSegment(item);
-                }
-
-                tier.TimeRangeChanged(MainHandler.Time);
-                tier.Name = tier.AnnoList.Name;
-                control.annoNameLabel.Content = "#" + tier.AnnoList.Scheme.Name + " #" + tier.AnnoList.Role + " #" + tier.AnnoList.AnnotatorFullName;
-            }
-
-            updateTimeRange(maxdur);
-            // if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
-            control.ShadowBox.Visibility = Visibility.Collapsed;
+            databaseStore();
         }
 
         private void databaseSaveSessionAndMarkAsFinished_Click(object sender, RoutedEventArgs e)
         {
-            mongodbStore(true);
-        }
-
-        private void databaseSaveSession_Click(object sender, RoutedEventArgs e)
-        {
-            mongodbStore();
+            databaseStore(true);
         }
 
         private void databaseLoadSession_Click(object sender, RoutedEventArgs e)
         {
-            mongodbLoad();
+            databaseLoad();
         }
 
         private void databaseManage_Click(object sender, RoutedEventArgs e)
         {
-            mongodbAdd();
+            databaseAdd();
         }
 
         private void databaseChangeDownloadDirectory_Click(object sender, RoutedEventArgs e)
@@ -135,7 +89,12 @@ namespace ssi
             process.WaitForExit();
         }
 
-        private void mongodbAdd()
+        #endregion EVENTHANDLERS
+
+
+        #region DATABASELOGIC
+
+        private void databaseAdd()
 
         {
             try
@@ -150,7 +109,7 @@ namespace ssi
             }
         }
 
-        private void mongodbStore(bool isfinished = false)
+        private void databaseStore(bool isfinished = false)
         {
             if (DatabaseLoaded)
             {
@@ -170,7 +129,7 @@ namespace ssi
                             if (annotator != null)
                             {
                                 track.AnnoList.HasChanged = false;
-                                if (annotator != null) message += "\r\n" + track.AnnoList.Name;
+                                if (annotator != null) message += "\r\n" + track.AnnoList.Scheme.Name;
                             }
                         }
                         catch (Exception ex)
@@ -181,7 +140,7 @@ namespace ssi
                             }
                             else
                             {
-                                MessageBox.Show("Could not store tier '" + track.AnnoList.Name + "' to database", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show("Could not store tier '" + track.AnnoList.Scheme.Name + "' to database", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             }
                         }
                     }
@@ -198,7 +157,7 @@ namespace ssi
             }
         }
 
-        private void mongodbLoad()
+        private void databaseLoad()
         {
             clearSession();
 
@@ -259,7 +218,7 @@ namespace ssi
                             foreach (AnnoList annoList in annoLists)
 
                             {
-                                annoList.FilePath = annoList.Role + "." + annoList.Scheme.Name + "." + annoList.AnnotatorFullName;
+                                //annoList.FilePath = annoList.Role + "." + annoList.Scheme.Name + "." + annoList.AnnotatorFullName;
                                 handleAnnotation(annoList, null);
                             }
 
@@ -282,7 +241,7 @@ namespace ssi
                                             if (c.connection == "sftp")
                                             {
                                                 Properties.Settings.Default.DataServerConnectionType = "sftp";
-                                                DownloadFileSFTP(c.ip, c.folder, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
+                                                SFTPDownloadFiles(c.ip, c.folder, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
                                             }
                                             else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
                                             {
@@ -315,14 +274,53 @@ namespace ssi
             }
         }
 
-        private void databaseShowDownloadDirectory_Click(object sender, RoutedEventArgs e)
+        private void databaseReload(AnnoTier tier)
         {
-            Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory);
-            Process.Start(Properties.Settings.Default.DatabaseDirectory);
+            Action EmptyDelegate = delegate () { };
+            control.ShadowBoxText.Text = "Reloading Annotation";
+            control.ShadowBox.Visibility = Visibility.Visible;
+            control.UpdateLayout();
+            control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+            DatabaseAnno s = new DatabaseAnno();
+            s.Role = tier.AnnoList.Role;
+            s.AnnoScheme = tier.AnnoList.Scheme.Name;
+            s.AnnotatorFullname = tier.AnnoList.AnnotatorFullName;
+            s.Annotator = tier.AnnoList.Annotator;
+
+            List<DatabaseAnno> list = new List<DatabaseAnno>();
+            list.Add(s);
+
+            string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
+            DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.DatabaseAddress);
+
+            List<AnnoList> annos = db.LoadFromDatabase(list, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            double maxdur = 0;
+
+            if (annos[0].Count > 0) maxdur = annos[0][annos[0].Count - 1].Stop;
+
+            if (annos[0] != null && tier != null)
+            {
+                setAnnoList(annos[0]);
+                tier.Children.Clear();
+                tier.AnnoList.Clear();
+                tier.segments.Clear();
+                tier.AnnoList = annos[0];
+
+                foreach (AnnoListItem item in annos[0])
+                {
+                    tier.addSegment(item);
+                }
+
+                tier.TimeRangeChanged(MainHandler.Time);
+            }
+
+            updateTimeRange(maxdur);
+            // if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            control.ShadowBox.Visibility = Visibility.Collapsed;
         }
 
-
-        public void databaseNewAnno(AnnoScheme.TYPE annoType)
+        public void databaseAddNewAnnotation(AnnoScheme.TYPE annoType)
         {
             AnnoList annoList = new AnnoList();
             annoList.LoadedFromDB = true;
@@ -345,14 +343,20 @@ namespace ssi
             annoList.Scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
 
             ObjectId annotatid = db.GetObjectID(db.GetDatabase(), "Annotators", "name", Properties.Settings.Default.MongoDBUser);
-            string AnnotatorFullName = db.FetchDBRef(db.GetDatabase(), "Annotators", "fullname", annotatid);
-
-            annoList.Name = "#" + annoList.Role + " #" + annoList.Scheme.Name + " #" + AnnotatorFullName;
-
+            annoList.Annotator = Properties.Settings.Default.MongoDBUser;
+            annoList.AnnotatorFullName = db.FetchDBRef(db.GetDatabase(), "Annotators", "fullname", annotatid);
             addAnnoTier(annoList);
             control.annoListControl.editComboBox.SelectedIndex = 0;
         }
 
+        private void databaseShowDownloadDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory);
+            Process.Start(Properties.Settings.Default.DatabaseDirectory);
+        }
+
+
+        #endregion DATABASELOGIC
 
 
     }

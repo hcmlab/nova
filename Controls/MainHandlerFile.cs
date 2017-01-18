@@ -411,6 +411,16 @@ namespace ssi
             }
         }
 
+        public void saveAnnoAs()
+        {
+            if (AnnoTierStatic.Selected.AnnoList != null)
+            {
+                string filename = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.FileName, ".annotation", "Annotation(*.annotation)|*.annotation", AnnoTierStatic.Selected.AnnoList.Directory);
+                saveAnno(filename);
+            }
+        }
+
+
         private void saveProject_Click(object sender, RoutedEventArgs e)
         {
             if (DatabaseLoaded)
@@ -478,7 +488,7 @@ namespace ssi
             {
                 if (t.AnnoList.FilePath != null)
                 {
-                    sw.WriteLine("\t\t<tier name=\"" + t.AnnoList.Name + "\">" + FileTools.GetRelativePath(t.AnnoList.FilePath, workdir) + "</tier>");
+                    sw.WriteLine("\t\t<tier name=\"" + t.AnnoList.Scheme.Name + "\">" + FileTools.GetRelativePath(t.AnnoList.FilePath, workdir) + "</tier>");
                 }
             }
             sw.WriteLine("\t</tiers>");
@@ -538,6 +548,14 @@ namespace ssi
         }
 
 
+
+        private void saveAnno_Click(object sender, RoutedEventArgs e)
+        {
+            if (AnnoTierStatic.Selected != null)
+            {
+                saveAnno();
+            }
+        }
 
         private void ImportAnnoFromElan(string filename)
         {
@@ -624,7 +642,7 @@ namespace ssi
             }
         }
 
-        private void exportAnnoToFrameWiseMenu_Click(object sender, RoutedEventArgs e)
+        private void ExportAnnoToFrameWiseMenu_Click(object sender, RoutedEventArgs e)
         {
             Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
             input["separator"] = new UserInputWindow.Input() { Label = "File seperator", DefaultValue = ";" };
@@ -648,26 +666,12 @@ namespace ssi
             bool found = false;
             int chunksize = sr;
 
-            List<string> columns = new List<string>();
-
-            foreach (AnnoTier anno in annoTiers)
-            {
-                if (anno.AnnoList.Count > 0)
-                {
-                    foreach (AnnoListItem ali in anno.AnnoList)
-                    {
-                        if (!columns.Contains(ali.Tier)) columns.Add(ali.Tier);
-                    }
-                }
-                else columns.Add(anno.AnnoList.Name);
-            }
-
             int currenttime = 0;
             string headline = "";
 
-            foreach (string s in columns)
+            foreach (AnnoTier s in annoTiers)
             {
-                headline += s + seperator;
+                headline += s.AnnoList.Scheme.Name + seperator;
             }
 
             string firstmediadir = "";
@@ -687,15 +691,14 @@ namespace ssi
                     Mouse.SetCursor(System.Windows.Input.Cursors.Wait);
                     while (currenttime < maxdur)
                     {
-                        foreach (string s in columns)
-                        {
-                            foreach (AnnoTier anno in annoTiers)
+                      
+                            foreach (AnnoTier tier in annoTiers)
                             {
-                                if (anno.AnnoList.Count > 0)
+                                if (tier.AnnoList.Count > 0)
                                 {
-                                    foreach (AnnoListItem ali in anno.AnnoList)
+                                    foreach (AnnoListItem ali in tier.AnnoList)
                                     {
-                                        if (ali.Tier == s && (ali.Start * 1000) - (ali.Duration * 1000) < currenttime && ali.Stop * 1000 > currenttime)
+                                        if ((ali.Start * 1000) - (ali.Duration * 1000) < currenttime && ali.Stop * 1000 > currenttime)
                                         {
                                             found = true;
                                             headline += ali.Label + seperator;
@@ -709,9 +712,10 @@ namespace ssi
                                 {
                                     found = false;
                                 }
-                            }
                             if (!found) headline += restclass + seperator;
                         }
+                         
+                        
 
                         headline = headline.Remove(headline.Length - 1);
                         file.WriteLine(headline);
@@ -731,11 +735,11 @@ namespace ssi
         private void exportSamples_Click(object sender, RoutedEventArgs e)
         {
             ExportSamplesWindow window = new ExportSamplesWindow();
-            foreach (AnnoTier a in this.annoTiers)
+            foreach (AnnoTier tier in this.annoTiers)
             {
-                if (a.AnnoList.FilePath != null)
+                if (tier.AnnoList.FilePath != null)
                 {
-                    window.control.annoComboBox.Items.Add(a.AnnoList.FilePath + "#" + a.Name);
+                    window.control.annoComboBox.Items.Add(tier.AnnoList.FilePath + "#" + tier.AnnoList.Scheme.Name);
                 }
             }
             foreach (Signal signal in signals)
@@ -756,7 +760,7 @@ namespace ssi
                 {
                     if (annoTier.AnnoList.HasChanged)
                     {
-                        mb = MessageBox.Show("Save continous annotations on tier #" + annoTier.Name + " first?", "Confirm", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                        mb = MessageBox.Show("Save continous annotations on tier #" + annoTier.AnnoList.Scheme.Name + " first?", "Confirm", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
                         if (mb == MessageBoxResult.Yes)
                         {
@@ -982,7 +986,7 @@ namespace ssi
                 if (annoTier.AnnoList.HasChanged)
                 {
                     MessageBoxResult m = MessageBoxResult.None;
-                    m = MessageBox.Show("You need to save continous annotations on tier #" + annoTier.Name + " first", "Confirm", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    m = MessageBox.Show("You need to save continous annotations on tier #" + annoTier.AnnoList.Scheme.Name + " first", "Confirm", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
                     if (m == MessageBoxResult.OK)
                     {
@@ -991,7 +995,7 @@ namespace ssi
                     }
                 }
 
-                string filename = Path.GetDirectoryName(annoTier.AnnoList.FilePath) + "\\" + annoTier.Name + ".stream";
+                string filename = Path.GetDirectoryName(annoTier.AnnoList.FilePath) + "\\" + annoTier.AnnoList.Scheme.Name + ".stream";
 
                 StreamWriter swheader = new StreamWriter(filename, false, System.Text.Encoding.Default);
                 swheader.WriteLine("<?xml version=\"1.0\" ?>");
