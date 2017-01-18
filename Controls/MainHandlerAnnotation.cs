@@ -291,10 +291,10 @@ namespace ssi
         }
 
 
-        private void changeAnnoTierHandler(AnnoTier track, EventArgs e)
+        private void changeAnnoTierHandler(AnnoTier tier, EventArgs e)
         {
-            control.annoNameLabel.Content = track.AnnoList.Name;
-            setAnnoList(track.AnnoList);
+            control.annoNameLabel.Content = "#" + tier.AnnoList.Scheme.Name + " #" + tier.AnnoList.Role + " #" + tier.AnnoList.AnnotatorFullName;
+            setAnnoList(tier.AnnoList);
             control.annoListControl.editComboBox.Items.Clear();
 
             if (AnnoTierStatic.Selected != null)
