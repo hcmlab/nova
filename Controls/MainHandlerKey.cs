@@ -288,11 +288,7 @@ namespace ssi
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
-                    if (AnnoTierStatic.Label == null && Mouse.DirectlyOver == AnnoTierStatic.Selected)
-                    {
-                        removeAnnoTier();
-                    }
-                    else
+                    if (AnnoTierStatic.Label != null) 
                     {
                         AnnoTier.OnKeyDownHandler(sender, e);
                     }

@@ -54,6 +54,7 @@ namespace ssi
 
 
         public AnnoScheme Scheme { get; set; }
+
         public AnnoList()
             : base()
         {

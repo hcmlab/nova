@@ -65,7 +65,11 @@ namespace ssi
 
                 tier.TimeRangeChanged(MainHandler.Time);
                 tier.Name = tier.AnnoList.Name;
-                control.annoNameLabel.Content = "#" + tier.AnnoList.Scheme.Name + " #" + tier.AnnoList.Role + " #" + tier.AnnoList.AnnotatorFullName;
+                string annoNameLabel = "";
+                if (tier.AnnoList.Scheme.Name != null) annoNameLabel += "#" + tier.AnnoList.Scheme.Name + " ";
+                if (tier.AnnoList.Role != null) annoNameLabel += "#" + tier.AnnoList.Role + " ";
+                if (tier.AnnoList.AnnotatorFullName != null) annoNameLabel += "#" + tier.AnnoList.AnnotatorFullName;
+                control.annoNameLabel.Content = annoNameLabel;
             }
 
             updateTimeRange(maxdur);
