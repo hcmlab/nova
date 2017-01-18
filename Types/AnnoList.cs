@@ -36,7 +36,6 @@ namespace ssi
                 filePath = value;
                 string[] tmp = filePath.Split('\\');
                 fileName = tmp[tmp.Length - 1];
-                //name = fileName.Split('.')[0];
             }
         }
 
@@ -49,9 +48,6 @@ namespace ssi
         {
             get { return Path.GetDirectoryName(filePath); }
         }
-
-        public string Name { get; set; }
-
 
         public AnnoScheme Scheme { get; set; }
 

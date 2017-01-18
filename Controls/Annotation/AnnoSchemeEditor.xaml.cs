@@ -118,7 +118,7 @@ namespace ssi
             list.Clear();
 
             list.Scheme.MinOrBackColor = scheme_colorpickermin.SelectedColor.Value;
-            list.Name = this.scheme_name.Text;
+            list.Scheme.Name = this.scheme_name.Text;
          
             return list;
         }
@@ -189,7 +189,7 @@ namespace ssi
                         }
                         AnnotationResultBox.ItemsSource = items;
 
-                        this.scheme_name.Text = list.Name;
+                        this.scheme_name.Text = list.Scheme.Name;
                         if(list.Scheme.MinOrBackColor!= null) this.scheme_colorpickermin.SelectedColor = list.Scheme.MinOrBackColor;
                     }
                     catch (Exception ex)

@@ -378,7 +378,6 @@ namespace ssi
             {
                 merge[i].Label = System.Math.Sqrt(array[i] / numberoftracks).ToString();
             }
-            merge.Name = merge.Name + " #RootMeanSquare";
             merge.Scheme.SampleRate = 1000.0 / ((merge[0].Stop - merge[0].Start) * 1000.0);
             MessageBox.Show("Median of all Annotations has been calculated");
             Ok.IsEnabled = true;
@@ -407,7 +406,6 @@ namespace ssi
             {
                 merge[i].Label = (array[i] / numberoftracks).ToString();
             }
-            merge.Name = merge.Name + " #Median";
             merge.Scheme.SampleRate = 1000.0 / ((merge[0].Stop - merge[0].Start) * 1000.0);
             MessageBox.Show("Median of all Annotations has been calculated");
             Ok.IsEnabled = true;
@@ -465,7 +463,7 @@ namespace ssi
                         sum_sq += err * err;
                     }
                     mse = (double)sum_sq / (al[0].Count);
-                    MessageBox.Show("The Mean Square Error for Annotation " + al[1].Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
+                    MessageBox.Show("The Mean Square Error for Annotation " + al[1].Scheme.Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
                 }
                 else if (al[1].Annotator != null && al[1].Annotator.Contains("RMS"))
                 {
@@ -477,7 +475,7 @@ namespace ssi
                         sum_sq += err * err;
                     }
                     mse = (double)sum_sq / (al[1].Count);
-                    MessageBox.Show("The Mean Square Error for Annotation " + al[0].Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
+                    MessageBox.Show("The Mean Square Error for Annotation " + al[0].Scheme.Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
                 }
                 else MessageBox.Show("Select RMS Annotation and Reference Annotation. If RMS Annotation is not present, please create it first.");
             }

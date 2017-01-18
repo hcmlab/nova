@@ -14,15 +14,6 @@ using System.Windows.Xps.Packaging;
 
 namespace ssi
 {
-    public class AnnoTierPlayEventArgs : EventArgs
-    {
-        public AnnoListItem item = null;
-    }
-
-    public class AnnoTierMoveEventArgs : EventArgs
-    {
-        public double pos = 0;
-    }
 
     public delegate void AnnoTierChangeEventHandler(AnnoTier track, EventArgs e);
 
@@ -44,8 +35,6 @@ namespace ssi
         public static bool askForLabel = false;
         public static AnnoTierLabel objectContainer = null;
 
-        private static bool correctMode = false;
-
         static public event AnnoTierChangeEventHandler OnTierChange;
 
         static public event AnnoTierSegmentChangeEventHandler OnTierSegmentChange;
@@ -64,14 +53,8 @@ namespace ssi
             get { return selectedTier; }            
         }
 
-        public static bool CorrectMode
-        {
-            get { return correctMode; }
-            set
-            {
-                correctMode = value;
-            }
-        }
+        public static bool CorrectMode { get; set; }
+
 
         static public void SelectTier(AnnoTier t)
         {
@@ -168,10 +151,6 @@ namespace ssi
 
         private bool isSelected = false;
         public List<AnnoTierLabel> segments = new List<AnnoTierLabel>();
-        
-        private AnnoList annoList = null;
-        private Brush bgBrush;
-        private Brush ctBrush;
 
         private double currentPositionX = 0;
         public bool isDiscreteOrFree = true;
@@ -189,27 +168,16 @@ namespace ssi
         private List<Line> continuousTierMarkers = new List<Line>();
         private Ellipse continuousTierEllipse = new Ellipse();
 
-        public AnnoList AnnoList
-        {
-            get { return annoList; }
-            set { annoList = value; }
-        }
+        public AnnoList AnnoList { get; set; }
 
-        public Brush BackgroundBrush
-        {
-            get { return bgBrush; }
-            set { bgBrush = value; }
-        }
+        public Brush BackgroundBrush { get; set; }
+ 
+        public Brush ContinuousBrush { get; set; }
 
-        public Brush ContinuousBrush
-        {
-            get { return ctBrush; }
-            set { ctBrush = value; }
-        }
 
         public AnnoTier(AnnoList anno)
         {
-            annoList = anno;
+            AnnoList = anno;
 
             AllowDrop = true;            
             SizeChanged += new SizeChangedEventHandler(sizeChanged);           
@@ -274,11 +242,11 @@ namespace ssi
                                   continuousTierEllipse.Height = this.ActualHeight / 10;
                                   continuousTierEllipse.Width = continuousTierEllipse.Height;
                                   continuousTierEllipse.SetValue(Canvas.TopProperty, (Mouse.GetPosition(this).Y - continuousTierEllipse.Height / 2));
-                                  annoList[closestIndex].Label = (normalized).ToString();
+                                  AnnoList[closestIndex].Label = (normalized).ToString();
 
                                   for (int i = closestIndexOld; i < closestIndex; i++)
                                   {
-                                      if (closestIndexOld > -1) annoList[i].Label = (normalized).ToString();
+                                      if (closestIndexOld > -1) AnnoList[i].Label = (normalized).ToString();
                                   }
                                   closestIndexOld = closestIndex;
 
@@ -294,9 +262,6 @@ namespace ssi
 
             foreach (AnnoListItem item in anno)
             {
-                //For now the TierId is overwritten based on the track id.
-                item.Tier = Name;
-
                 AnnoScheme.Label l = new AnnoScheme.Label(item.Label, item.Color);
 
                 if (isDiscreteOrFree)
@@ -386,13 +351,13 @@ namespace ssi
                         Brush brush = new SolidColorBrush(newColor);
                         this.Background = brush;
                     }
-                    else if (ctBrush != null && !isDiscreteOrFree)
+                    else if (ContinuousBrush != null && !isDiscreteOrFree)
                     {
                         LinearGradientBrush myBrush = new LinearGradientBrush();
                         myBrush.StartPoint = new Point(0, 0);
                         myBrush.EndPoint = new Point(0, 1);
-                        myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ctBrush).GradientStops[0].Color, 0));
-                        myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ctBrush).GradientStops[1].Color, 1));
+                        myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ContinuousBrush).GradientStops[0].Color, 0));
+                        myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ContinuousBrush).GradientStops[1].Color, 1));
                         myBrush.Opacity = 0.6;
                         this.Background = myBrush;
                     }
@@ -406,7 +371,7 @@ namespace ssi
                 }
                 else if (!isDiscreteOrFree)
                 {
-                    if (ctBrush == null)
+                    if (ContinuousBrush == null)
                     {
                         LinearGradientBrush myBrush = new LinearGradientBrush();
                         myBrush.StartPoint = new Point(0, 0);
@@ -414,10 +379,10 @@ namespace ssi
                         myBrush.GradientStops.Add(new GradientStop(Colors.Blue, 0));
                         myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1));
                         myBrush.Opacity = 0.75;
-                        ctBrush = myBrush;
+                        ContinuousBrush = myBrush;
                     }
 
-                    this.Background = ctBrush;
+                    this.Background = ContinuousBrush;
                 }
             }
         }
@@ -453,7 +418,7 @@ namespace ssi
 
         public void deleteSegment(AnnoTierLabel s)
         {
-            annoList.Remove(s.Item);
+            AnnoList.Remove(s.Item);
             s.Tier.Children.Remove(s);
             s.Tier.segments.Remove(s);
         }
@@ -475,25 +440,25 @@ namespace ssi
                 this.Children.Add(continuousTierMarkers[i]);
             }
 
-            double mean = (annoList.Scheme.MinScore + annoList.Scheme.MaxScore) / 2.0;
+            double mean = (AnnoList.Scheme.MinScore + AnnoList.Scheme.MaxScore) / 2.0;
 
             //add lines
 
             int samples = (int) Math.Round(MainHandler.Time.TotalDuration * sr);
             double delta = 1.0 / sr;
-            if (annoList.Count < samples)
+            if (AnnoList.Count < samples)
             {
-                for (int i = annoList.Count; i < samples; i++)
+                for (int i = AnnoList.Count; i < samples; i++)
                 {
                     AnnoListItem ali = new AnnoListItem(i * delta, delta, mean.ToString("F4"), "", Colors.Black);
-                    annoList.Add(ali);
+                    AnnoList.Add(ali);
                 }
             }
 
             int drawlinesnumber;
             if (this.ActualWidth == 0) drawlinesnumber = 1000;
-            else if (annoList.Count > this.ActualWidth) drawlinesnumber = (int)this.ActualWidth;
-            else drawlinesnumber = annoList.Count;
+            else if (AnnoList.Count > this.ActualWidth) drawlinesnumber = (int)this.ActualWidth;
+            else drawlinesnumber = AnnoList.Count;
 
             for (int i = 0; i < drawlinesnumber; i++)
             {
@@ -583,7 +548,7 @@ namespace ssi
                     {
                         AnnoListItem temp = new AnnoListItem(start, len, DefaultLabel, "", DefaultColor, 1.0);
                         temp.Color = DefaultColor;
-                        annoList.AddSorted(temp);
+                        AnnoList.AddSorted(temp);
                         AnnoTierLabel segment = new AnnoTierLabel(temp, this);
 
                         ChangeRepresentationObject ChangeRepresentationObjectforInsert = UnDoObject.MakeChangeRepresentationObjectForInsert(segment);
@@ -658,7 +623,7 @@ namespace ssi
 
                     if (!alreadyinlist)
                     {
-                        if (this.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS) annoList.AddSorted(temp);
+                        if (this.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS) AnnoList.AddSorted(temp);
                         AnnoTierLabel segment = new AnnoTierLabel(temp, this);
                         annorightdirection = true;
                         ChangeRepresentationObject ChangeRepresentationObjectforInsert = UnDoObject.MakeChangeRepresentationObjectForInsert(segment);
@@ -742,7 +707,7 @@ namespace ssi
                 if (isDiscreteOrFree && stop < MainHandler.Time.TotalDuration)
                 {
                     AnnoListItem temp = new AnnoListItem(start, len, this.DefaultLabel, "", this.DefaultColor);
-                    annoList.AddSorted(temp);
+                    AnnoList.AddSorted(temp);
                     AnnoTierLabel segment = new AnnoTierLabel(temp, this);
 
                     segment.Width = 1;
@@ -774,9 +739,9 @@ namespace ssi
 
         public int GetClosestContinuousIndex(double nearestitem)
         {
-            for (int i = 0; i < annoList.Count; i++)
+            for (int i = 0; i < AnnoList.Count; i++)
             {
-                if (annoList[i].Start - nearestitem < 1 / annoList.Scheme.SampleRate && annoList[i].Start - nearestitem > 0)
+                if (AnnoList[i].Start - nearestitem < 1 / AnnoList.Scheme.SampleRate && AnnoList[i].Start - nearestitem > 0)
                 {
                     return i;
                 }
@@ -1056,18 +1021,18 @@ namespace ssi
                         closestIndex = GetClosestContinuousIndex(closestposition);
                         if (closestIndex > -1)
                         {
-                            double range = annoList.Scheme.MaxScore - annoList.Scheme.MinScore;
+                            double range = AnnoList.Scheme.MaxScore - AnnoList.Scheme.MinScore;
                             double normal = 1.0 - ((e.GetPosition(this).Y / this.ActualHeight));
-                            double normalized = (normal * range) + annoList.Scheme.MinScore;
-                            annoList[closestIndex].Label = normalized.ToString();
+                            double normalized = (normal * range) + AnnoList.Scheme.MinScore;
+                            AnnoList[closestIndex].Label = normalized.ToString();
 
                             for (int i = closestIndexOld; i < closestIndex; i++)
                             {
-                                if (annoList[i].Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true)
+                                if (AnnoList[i].Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true)
                                 {
-                                    annoList[i].Label = normalized.ToString();
+                                    AnnoList[i].Label = normalized.ToString();
                                 }
-                                else if (CorrectMode == false) annoList[i].Label = normalized.ToString();
+                                else if (CorrectMode == false) AnnoList[i].Label = normalized.ToString();
                             }
                             closestIndexOld = closestIndex;
                             TimeRangeChanged(MainHandler.Time);
@@ -1135,7 +1100,7 @@ namespace ssi
                     double timeRange = time.SelectionStop - time.SelectionStart;
 
                     int linesinrangenum = 0;
-                    foreach (AnnoListItem ali in annoList)
+                    foreach (AnnoListItem ali in AnnoList)
                     {
                         if (ali.Start >= time.SelectionStart && ali.Stop <= time.SelectionStop)
                         {
@@ -1151,7 +1116,7 @@ namespace ssi
                         }
 
                         int i = 0;
-                        foreach (AnnoListItem ali in annoList)
+                        foreach (AnnoListItem ali in AnnoList)
                         {
                             if (ali.Start >= time.SelectionStart && ali.Stop < time.SelectionStop)
                             {
@@ -1162,8 +1127,8 @@ namespace ssi
                                 if (ali.Label == "") ali.Label = "0.5";
                                 double value = 0.0;
                                 double.TryParse(ali.Label, out value);
-                                double range = annoList.Scheme.MaxScore - annoList.Scheme.MinScore;
-                                value = 1.0 - (value - annoList.Scheme.MinScore) / range;
+                                double range = AnnoList.Scheme.MaxScore - AnnoList.Scheme.MinScore;
+                                value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
 
                                 continuousTierLines[i % continuousTierLines.Count].Y1 = (value) * this.ActualHeight;
                                 if (i % continuousTierLines.Count < continuousTierLines.Count - 1 && ali.Stop < time.SelectionStop - ali.Duration) continuousTierLines[i % continuousTierLines.Count].Y2 = continuousTierLines[i % continuousTierLines.Count + 1].Y1;
@@ -1185,26 +1150,26 @@ namespace ssi
                         {
                             s.Visibility = Visibility.Hidden;
 
-                            index = (int)((double)annoList.Count / (double)continuousTierLines.Count * (double)i + 0.5f);
-                            if (index > annoList.Count) index = annoList.Count - 1;
+                            index = (int)((double)AnnoList.Count / (double)continuousTierLines.Count * (double)i + 0.5f);
+                            if (index > AnnoList.Count) index = AnnoList.Count - 1;
 
-                            if (annoList[index].Start >= time.SelectionStart && annoList[index].Stop <= time.SelectionStop)
+                            if (AnnoList[index].Start >= time.SelectionStart && AnnoList[index].Stop <= time.SelectionStop)
                             {
-                                int offset = (int)((double)annoList.Count / (double)continuousTierLines.Count + 0.5f);
-                                s.X1 = MainHandler.Time.PixelFromTime(annoList[index].Start);
-                                if (i < continuousTierLines.Count - 1 && annoList[index + offset].Stop <= time.SelectionStop) s.X2 = continuousTierLines[i + 1].X1;
-                                else s.X2 = MainHandler.Time.PixelFromTime(annoList[index].Start);
+                                int offset = (int)((double)AnnoList.Count / (double)continuousTierLines.Count + 0.5f);
+                                s.X1 = MainHandler.Time.PixelFromTime(AnnoList[index].Start);
+                                if (i < continuousTierLines.Count - 1 && AnnoList[index + offset].Stop <= time.SelectionStop) s.X2 = continuousTierLines[i + 1].X1;
+                                else s.X2 = MainHandler.Time.PixelFromTime(AnnoList[index].Start);
 
                                 double median = 0;
 
-                                double range = annoList.Scheme.MaxScore - annoList.Scheme.MinScore;
+                                double range = AnnoList.Scheme.MaxScore - AnnoList.Scheme.MinScore;
                                 if (index > 0)
                                 {
                                     for (int k = index - offset; k < index + offset; k++)
                                     {
-                                        double value = double.Parse(annoList[k].Label);
+                                        double value = double.Parse(AnnoList[k].Label);
 
-                                        value = 1.0 - (value - annoList.Scheme.MinScore) / range;
+                                        value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
 
                                         median = median + value;
                                     }
@@ -1213,14 +1178,14 @@ namespace ssi
                                 }
                                 else
                                 {
-                                    double value = double.Parse(annoList[index].Label);
-                                    value = 1.0 - (value - annoList.Scheme.MinScore) / range;
+                                    double value = double.Parse(AnnoList[index].Label);
+                                    value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
                                     s.Y1 = (value) * this.ActualHeight;
                                 }
-                                if (i < continuousTierLines.Count - 1 && annoList[index + offset].Stop <= time.SelectionStop) s.Y2 = continuousTierLines[i + 1].Y1;
+                                if (i < continuousTierLines.Count - 1 && AnnoList[index + offset].Stop <= time.SelectionStop) s.Y2 = continuousTierLines[i + 1].Y1;
                                 else s.Y2 = s.Y1;
 
-                                if (annoList[index].Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
+                                if (AnnoList[index].Confidence < Properties.Settings.Default.UncertaintyLevel && CorrectMode == true) s.Visibility = Visibility.Visible;
                                 else if (CorrectMode == false) s.Visibility = Visibility.Visible;
                                 else s.Visibility = Visibility.Collapsed;
                             }

@@ -7,12 +7,13 @@ namespace ssi
 {
     public partial class TimeTrack : Canvas, ITrack
     {
-        public const uint TICKGAP = 100;
+        public const int MIN_SEGMENT_GAP_IN_PIXELS = 100;
 
-        private bool view_selection = false;
-        private double seconds_from = 0;
-        private double seconds_to = 0;
-        private uint n_ticks = 0;
+        private double segmentGapRelative;
+        private bool isSelection = false;
+        private double secondsFrom = 0;
+        private double secondsTo = 0;
+        private int nSegments = 0;
         private List<TimeTrackSegment> segments = new List<TimeTrackSegment>();
         private int unitCount = 0;
 
@@ -21,9 +22,9 @@ namespace ssi
             MouseDown += new MouseButtonEventHandler(OnMouseDown);
         }
 
-        public void setViewSelection(bool selection)
+        public void IsSelection(bool flag)
         {
-            view_selection = selection;
+            isSelection = flag;
         }
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
@@ -32,40 +33,46 @@ namespace ssi
             TimeTrackSegment.Unit unit = values[++unitCount % values.Length];
             foreach (TimeTrackSegment segment in segments)
             {
-                segment.setUnit(unit); //Little optical workaround to avoid the first and last label to be shown
-                if (segments[0] == segment) segment.Text = "";
-                if (segments[segments.Count - 1] == segment) segment.Text = "";
+                segment.setUnit(unit);
             }
         }
 
         public double SecondsFrom
         {
-            get { return seconds_from; }
+            get { return secondsFrom; }
         }
 
         public double SecondsTo
         {
-            get { return seconds_to; }
+            get { return secondsTo; }
         }
 
         public void TimeRangeChanged(Timeline time)
         {
-            this.seconds_from = view_selection ? time.SelectionStart : 0.0;
-            this.seconds_to = view_selection ? time.SelectionStop : time.TotalDuration;
-            this.Width = time.SelectionInPixel;
+            secondsFrom = isSelection ? time.SelectionStart : 0.0;
+            secondsTo = isSelection ? time.SelectionStop : time.TotalDuration;
+            Width = time.SelectionInPixel;
 
-            n_ticks = (uint)(this.Width / TICKGAP + 0.5);
-            for (int i = segments.Count; i < n_ticks; i++)
+            nSegments = (int) Math.Floor(Width / MIN_SEGMENT_GAP_IN_PIXELS);
+            segmentGapRelative = 1.0 / nSegments;
+
+            int nAvailable = segments.Count;
+            for (int i = nAvailable; i < nSegments; i++)
             {
-                segments.Add(new TimeTrackSegment(this, view_selection));
+                TimeTrackSegment segment = new TimeTrackSegment(this, isSelection);
+                segments.Add(segment);
             }
 
             double pos = 0;
-            for (int i = 0; i < n_ticks; i++)
+            for (int i = 0; i < nSegments; i++)
             {
-                segments[i].setPos(pos, n_ticks);
-
-                pos += 1.0 / n_ticks;
+                segments[i].SetPosition(pos, nSegments);
+                segments[i].SetVisibility(System.Windows.Visibility.Visible);
+                pos += segmentGapRelative;
+            }
+            for (int i = nSegments; i < nAvailable; i++)
+            {
+                segments[i].SetVisibility(System.Windows.Visibility.Hidden);
             }
         }
     }

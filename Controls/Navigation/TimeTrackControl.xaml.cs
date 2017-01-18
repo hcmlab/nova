@@ -11,8 +11,8 @@ namespace ssi
         {
             InitializeComponent();
 
-            timeTrack.setViewSelection(false);
-            timeTrackSelection.setViewSelection(true);
+            timeTrack.IsSelection(false);
+            timeTrackSelection.IsSelection(true);
         }
     }
 }

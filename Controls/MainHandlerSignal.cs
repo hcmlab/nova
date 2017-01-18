@@ -9,11 +9,6 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        protected void removeSignal(object sender, SignalRemoveEventArgs e)
-        {
-            signalTracks.Remove(e.SignalTrack);
-        }
-
         private void addSignal(Signal signal, string color, string background)
         {
             ISignalTrack track = control.signalTrackControl.AddSignalTrack(signal, color, background);
@@ -36,6 +31,31 @@ namespace ssi
             //updateTimeRange(duration);
             //track.timeRangeChanged(ViewHandler.Time);
         }
+
+        protected void removeSignal(object sender, SignalRemoveEventArgs e)
+        {
+            signalTracks.Remove(e.SignalTrack);
+        }
+     
+        private void changeSignalTrackHandler(ISignalTrack track, EventArgs e)
+        {
+            Signal signal = track.getSignal();
+
+            if (signal != null)
+            {
+                control.signalNameLabel.Text = signal.FileName;
+                control.signalNameLabel.ToolTip = signal.FilePath;
+                control.signalBytesLabel.Text = signal.bytes + " bytes";
+                control.signalDimLabel.Text = signal.dim.ToString();
+                control.signalSrLabel.Text = signal.rate + " Hz";
+                control.signalTypeLabel.Text = Signal.TypeName[(int)signal.type];
+                control.signalValueLabel.Text = signal.Value(timeline.SelectionStart).ToString();
+                control.signalValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
+                control.signalValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString();
+            }
+        }
+
+        #region EVENTHANDLERS
 
         private void signalTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -66,24 +86,7 @@ namespace ssi
             }
         }
 
-
-        private void changeSignalTrackHandler(ISignalTrack track, EventArgs e)
-        {
-            Signal signal = track.getSignal();
-
-            if (signal != null)
-            {
-                control.signalNameLabel.Text = signal.FileName;
-                control.signalNameLabel.ToolTip = signal.FilePath;
-                control.signalBytesLabel.Text = signal.bytes + " bytes";
-                control.signalDimLabel.Text = signal.dim.ToString();
-                control.signalSrLabel.Text = signal.rate + " Hz";
-                control.signalTypeLabel.Text = Signal.TypeName[(int)signal.type];
-                control.signalValueLabel.Text = signal.Value(timeline.SelectionStart).ToString();
-                control.signalValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
-                control.signalValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString();
-            }
-        }
+        #endregion EVENTHANDLERS
 
 
     }

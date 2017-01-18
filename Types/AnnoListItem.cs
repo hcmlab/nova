@@ -10,7 +10,6 @@ namespace ssi
         private double duration;
         private string label;
         private string meta;
-        private string tier;
         private Color color;
         private double confidence;
 
@@ -68,15 +67,6 @@ namespace ssi
             }
         }
 
-        public String Tier
-        {
-            get { return tier; }
-            set
-            {
-                tier = value;
-                OnPropertyChanged("Tier");
-            }
-        }
 
         public String Meta
         {

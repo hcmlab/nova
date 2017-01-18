@@ -274,7 +274,7 @@ namespace ssi
                 {
                     if (DatabaseLoaded)
                     {
-                        mongodbStore(true);
+                        databaseStore(true);
                     }
                     else saveAnnoAs();
                 }
@@ -282,7 +282,7 @@ namespace ssi
                 {
                     if (DatabaseLoaded)
                     {
-                        mongodbStore();
+                        databaseStore();
                     }
                     else saveAnno();
                 }
@@ -324,7 +324,7 @@ namespace ssi
                     if (track != null)
                     {
                         if (DatabaseLoaded)
-                            databaseReloadAnno(track);
+                            databaseReload(track);
                         else
                             reloadAnnoTier(track.AnnoList.FilePath);
                     }

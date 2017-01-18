@@ -46,10 +46,9 @@ namespace ssi
             RowDefinition row = new RowDefinition();
             row.Height = new GridLength(1, GridUnitType.Star);
             this.annoTrackGrid.RowDefinitions.Add(row);
-            if (anno.Scheme.Type == AnnoScheme.TYPE.FREE)
+            if (anno.Scheme.MinOrBackColor == Colors.Transparent)
             {
                 anno.Scheme.MinOrBackColor = selectColor(this.annoTrackGrid.RowDefinitions.Count - 1);
-                anno.Scheme.MaxOrForeColor = Colors.Black;
             }
             AnnoTier tier = new AnnoTier(anno);
 

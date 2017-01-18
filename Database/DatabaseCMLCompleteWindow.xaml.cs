@@ -23,7 +23,7 @@ namespace ssi
               //  if (tier.AnnoList.FromDB && tier.AnnoList.AnnotationScheme.name == "voiceactivity")
                 {
 
-                    TierListBox.Items.Add(tier.AnnoList.Name);
+                    TierListBox.Items.Add(tier.AnnoList.Scheme.Name);
                 }
             }
 
