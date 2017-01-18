@@ -65,11 +65,6 @@ namespace ssi
 
                 tier.TimeRangeChanged(MainHandler.Time);
                 tier.Name = tier.AnnoList.Name;
-                string annoNameLabel = "";
-                if (tier.AnnoList.Scheme.Name != null) annoNameLabel += "#" + tier.AnnoList.Scheme.Name + " ";
-                if (tier.AnnoList.Role != null) annoNameLabel += "#" + tier.AnnoList.Role + " ";
-                if (tier.AnnoList.AnnotatorFullName != null) annoNameLabel += "#" + tier.AnnoList.AnnotatorFullName;
-                control.annoNameLabel.Content = annoNameLabel;
             }
 
             updateTimeRange(maxdur);
@@ -349,10 +344,8 @@ namespace ssi
             annoList.Scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
 
             ObjectId annotatid = db.GetObjectID(db.GetDatabase(), "Annotators", "name", Properties.Settings.Default.MongoDBUser);
-            string AnnotatorFullName = db.FetchDBRef(db.GetDatabase(), "Annotators", "fullname", annotatid);
-
-            annoList.Name = "#" + annoList.Role + " #" + annoList.Scheme.Name + " #" + AnnotatorFullName;
-
+            annoList.Annotator = Properties.Settings.Default.MongoDBUser;
+            annoList.AnnotatorFullName = db.FetchDBRef(db.GetDatabase(), "Annotators", "fullname", annotatid);
             addAnnoTier(annoList);
             control.annoListControl.editComboBox.SelectedIndex = 0;
         }

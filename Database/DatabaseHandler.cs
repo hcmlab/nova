@@ -567,8 +567,6 @@ namespace ssi
                 }
 
                 annoList.Role = roledb;
-                annoList.Name = "#" +annoList.Role + " #" + annotdb + " #" + annotatdbfn;
-
                 annoList.Scheme.Name = annosch["name"].ToString();
                 var annotation = documents[0]["labels"].AsBsonArray;
                 if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
