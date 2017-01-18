@@ -394,7 +394,7 @@ namespace ssi
                 {
                     if (track.AnnoList.HasChanged)
                     {
-                        if (track.AnnoList.FromDB)
+                        if (track.AnnoList.LoadedFromDB)
                         {
                         }
                         else

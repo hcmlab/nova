@@ -89,7 +89,7 @@ namespace ssi
                 newAnnoList.FilePath = annoList.FilePath;
                 newAnnoList.Scheme.MinScore = annoList.Scheme.MinScore;
                 newAnnoList.Scheme.MaxScore = annoList.Scheme.MaxScore;
-                newAnnoList.FromDB = annoList.FromDB;
+                newAnnoList.LoadedFromDB = annoList.LoadedFromDB;
 
                 if (annoList.Scheme != null && annoList.Scheme.MinOrBackColor != null && annoList.Scheme.MaxOrForeColor != null && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {

@@ -669,7 +669,7 @@ namespace ssi
                     }
                 }
 
-                annoList.FromDB = true;
+                annoList.LoadedFromDB = true;
                 l.Add(annoList);
                 annoList = null;
             }

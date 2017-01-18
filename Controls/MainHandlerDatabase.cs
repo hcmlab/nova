@@ -160,7 +160,7 @@ namespace ssi
 
                 foreach (AnnoTier track in annoTiers)
                 {
-                    if (track.AnnoList.FromDB && (track.AnnoList.HasChanged || isfinished))
+                    if (track.AnnoList.LoadedFromDB && (track.AnnoList.HasChanged || isfinished))
                     {
                         try
                         {
@@ -325,7 +325,7 @@ namespace ssi
         public void databaseNewAnno(AnnoScheme.TYPE annoType)
         {
             AnnoList annoList = new AnnoList();
-            annoList.FromDB = true;
+            annoList.LoadedFromDB = true;
             string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
             DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.DatabaseAddress);
 

@@ -12,57 +12,21 @@ namespace ssi
             STRING,
         }
 
-        private bool loadedFromDB = false;
-        private string name = null;
         private string filePath = null;
         private string fileName = null;
-        private string role = null;
-        private string subject = null;
-        private AnnoScheme scheme;
-        private string annotator = null;
-        private string annotatorFullName = null;
-        private string fileType = "ASCII";
 
-        public bool FromDB
-        {
-            get { return loadedFromDB; }
-            set { loadedFromDB = value; }
-        }
 
-        public string Role
-        {
-            get { return role; }
-            set { role = value; }
-        }
+        public bool LoadedFromDB { get; set; }
 
-        public string FileType
-        {
-            get { return fileType; }
-            set { fileType = value; }
-        }
+        public string Role { get; set; }
 
-        public string Subject
-        {
-            get { return subject; }
-            set { subject = value; }
-        }
+        public string FileType { get; set; }
 
-        public string FileName
-        {
-            get { return fileName; }
-        }
+        public string Subject { get; set; }
 
-        public string Annotator
-        {
-            get { return annotator; }
-            set { annotator = value; }
-        }
+        public string Annotator { get; set; }
 
-        public string AnnotatorFullName
-        {
-            get { return annotatorFullName; }
-            set { annotatorFullName = value; }
-        }
+        public string AnnotatorFullName { get; set; }
 
         public string FilePath
         {
@@ -72,8 +36,13 @@ namespace ssi
                 filePath = value;
                 string[] tmp = filePath.Split('\\');
                 fileName = tmp[tmp.Length - 1];
-                name = fileName.Split('.')[0];
+                //name = fileName.Split('.')[0];
             }
+        }
+
+        public string FileName
+        {
+            get { return fileName; }
         }
 
         public string Directory
@@ -81,21 +50,14 @@ namespace ssi
             get { return Path.GetDirectoryName(filePath); }
         }
 
-        public string Name
-        {
-            get { return name; }
-            set { name = value; }
-        }
+        public string Name { get; set; }
 
-        public AnnoScheme Scheme
-        {
-            get { return scheme; }
-            set { scheme = value; }
-        }
 
+        public AnnoScheme Scheme { get; set; }
         public AnnoList()
             : base()
         {
         }
+
     }
 }
