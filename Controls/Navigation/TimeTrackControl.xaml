@@ -8,9 +8,7 @@
     <Grid>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="5" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="5" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -18,8 +16,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <local:TimeTrack x:Name="timeTrackSelection" Grid.Row="0" Grid.Column="1" Height="20"></local:TimeTrack>
-        <local:TimeRangeSlider x:Name="rangeSlider" Grid.Row="1" Grid.Column="1"></local:TimeRangeSlider>
-        <local:TimeTrack x:Name="timeTrack" Grid.Row="2" Grid.Column="1" Height="20"></local:TimeTrack>
+        <local:TimeTrack x:Name="timeTrackSelection" Grid.Row="0" Grid.Column="0" Height="20"></local:TimeTrack>
+        <local:TimeRangeSlider x:Name="rangeSlider" Grid.Row="1" Grid.Column="0"></local:TimeRangeSlider>
+        <local:TimeTrack x:Name="timeTrack" Grid.Row="2" Grid.Column="0" Height="20"></local:TimeTrack>
     </Grid>
 </UserControl>

@@ -45,7 +45,6 @@ namespace ssi
 
     public class SignalTrack : SignalTrackStatic, ISignalTrack
     {
-        private Signal signal = null;
         private double signal_from_in_sec = 0;
         private double signal_to_in_sec = 0;
         private Signal resampled = null;
@@ -90,7 +89,7 @@ namespace ssi
         {
             p.Freeze();
 
-            this.signal = signal;
+            Signal = signal;
             this.MouseWheel += new MouseWheelEventHandler(OnSignalTrackMouseWheel);
 
             SignalTrack.SelectTrack(this);
@@ -181,14 +180,14 @@ namespace ssi
     
         public Signal getSignal()
         {
-            //The interface requests this function, doesn't allow fields.
+            //The interface requests this function, doesn't allow fie
             return Signal;
         }
 
         public void clear()
         {
             this.Children.Clear();
-            signal = null;
+            Signal = null;
         }
 
         public void select(bool flag)
@@ -304,22 +303,22 @@ namespace ssi
         {
             base.OnRender(dc);
 
-            if (signal != null && signal.loaded && render_width > 0)
+            if (Signal != null && Signal.loaded && render_width > 0)
             {
                 double height = this.ActualHeight;
                 uint len = (uint)(this.render_width + 0.5);
                 if (resampled == null || resampled.number != len || resample)
                 {
-                    resampled = new Signal(this.signal, len, signal_from_in_sec, signal_to_in_sec);
+                    resampled = new Signal(this.Signal, len, signal_from_in_sec, signal_to_in_sec);
                     if (!auto_scaling)
                     {
-                        resampled.min = signal.min;
-                        resampled.max = signal.max;
+                        resampled.min = Signal.min;
+                        resampled.max = Signal.max;
                     }
                     resample = false;
                 }
 
-                Paint(dc, this, resampled, signal.ShowDim, this.ActualHeight, len, signal.IsAudio);
+                Paint(dc, this, resampled, Signal.ShowDim, this.ActualHeight, len, Signal.IsAudio);
             }
         }
 
