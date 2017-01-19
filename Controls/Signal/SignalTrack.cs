@@ -177,12 +177,11 @@ namespace ssi
             }
         }
 
-        public Signal Signal
-        {
-            get { return signal; }
-        }
+        public Signal Signal { get; set; }
+    
         public Signal getSignal()
         {
+            //The interface requests this function, doesn't allow fields.
             return Signal;
         }
 
@@ -346,6 +345,8 @@ namespace ssi
             this.InvalidateVisual();
         }
 
+        #region EXPORT
+
         public void ExportToXPS(Uri path, Canvas surface)
         {
             if (path == null) return;
@@ -393,6 +394,8 @@ namespace ssi
 
             surface.LayoutTransform = transform;
         }
+
+        #endregion EXPORT
     }
 }
 

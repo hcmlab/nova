@@ -12,11 +12,6 @@ namespace ssi
     public partial class MainHandler
     {
 
-        public void OnKeyUp(object sender, KeyEventArgs e)
-        {
-            keyDown = false;
-        }
-
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (!this.control.annoListControl.editTextBox.IsFocused)
@@ -27,6 +22,7 @@ namespace ssi
 
                     e.Handled = true;
                 }
+
 
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.L))
                 {
@@ -58,7 +54,7 @@ namespace ssi
                 if (e.KeyboardDevice.IsKeyDown(Key.D1) || e.KeyboardDevice.IsKeyDown(Key.D2) || e.KeyboardDevice.IsKeyDown(Key.D3) || e.KeyboardDevice.IsKeyDown(Key.D4) ||
                     e.KeyboardDevice.IsKeyDown(Key.D5) || e.KeyboardDevice.IsKeyDown(Key.D6) || e.KeyboardDevice.IsKeyDown(Key.D7) || e.KeyboardDevice.IsKeyDown(Key.D8) || e.KeyboardDevice.IsKeyDown(Key.D9) ||
                     e.KeyboardDevice.IsKeyDown(Key.NumPad1) || e.KeyboardDevice.IsKeyDown(Key.NumPad2) || e.KeyboardDevice.IsKeyDown(Key.NumPad3) || e.KeyboardDevice.IsKeyDown(Key.NumPad4) || e.KeyboardDevice.IsKeyDown(Key.NumPad5) ||
-                      e.KeyboardDevice.IsKeyDown(Key.NumPad6) || e.KeyboardDevice.IsKeyDown(Key.NumPad7) || e.KeyboardDevice.IsKeyDown(Key.NumPad8) || e.KeyboardDevice.IsKeyDown(Key.NumPad9))
+                    e.KeyboardDevice.IsKeyDown(Key.NumPad6) || e.KeyboardDevice.IsKeyDown(Key.NumPad7) || e.KeyboardDevice.IsKeyDown(Key.NumPad8) || e.KeyboardDevice.IsKeyDown(Key.NumPad9))
                 {
                     int index = 0;
                     if (e.Key - Key.D1 < 10 && AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null && AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count > 0) index = Math.Min(AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count - 1, e.Key - Key.D1);
@@ -90,7 +86,7 @@ namespace ssi
 
                 if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.isDiscreteOrFree && keyDown == false /*&& AnnoTierStatic.Label == null*/)
+                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.isDiscreteOrFree && isKeyDown == false /*&& AnnoTierStatic.Label == null*/)
                     {
                         UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
                         Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
@@ -107,14 +103,55 @@ namespace ssi
                         timeline.CurrentPlayPosition = MainHandler.Time.TimeFromPixel(signalCursor.X);
                         timeline.CurrentPlayPositionPrecise = MainHandler.Time.TimeFromPixel(signalCursor.X);
                         AnnoTierStatic.Label.select(true);
-                        keyDown = true;
+                        isKeyDown = true;
                     }
                     e.Handled = true;
                 }
 
+                else if (e.KeyboardDevice.IsKeyDown(Key.Right) && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !isKeyDown)
+                {
+                    if (AnnoTier.Selected != null) AnnoTier.Selected.Focus();
+                    int i = 0;
+                    double fps = 1.0 / 25.0;
+                    foreach (IMedia im in mediaList.Medias)
+                    {
+                        if (im.IsVideo()) break;
+                        i++;
+                    }
+
+                    if (i < mediaList.Medias.Count)
+                    {
+                        fps = 1.0 / mediaList.Medias[i].GetSampleRate();
+                    }
+
+                    mediaList.move(MainHandler.Time.TimeFromPixel(signalCursor.X) + fps);
+                    timeline.CurrentPlayPosition = MainHandler.Time.TimeFromPixel(signalCursor.X) + fps;
+                    timeline.CurrentPlayPositionPrecise = MainHandler.Time.TimeFromPixel(signalCursor.X) + fps;
+                    double pos = MainHandler.Time.PixelFromTime(timeline.CurrentPlayPosition);
+                    signalCursor.X = pos;
+
+                    isKeyDown = true;
+
+                    if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true)
+                    {
+                        double factor = (((timeline.CurrentPlayPosition - timeline.SelectionStart) / (timeline.SelectionStop - timeline.SelectionStart)));
+                        control.timeTrackControl.rangeSlider.followmedia = true;
+                        control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+
+                        if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
+                        signalCursor.X = 1;
+
+                    }
+                    else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
+                    e.Handled = true;
+                }
+
+
+
+
                 if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.isDiscreteOrFree && keyDown == false /*&& AnnoTierStatic.Label == null*/)
+                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.isDiscreteOrFree && isKeyDown == false /*&& AnnoTierStatic.Label == null*/)
                     {
                         UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
                         Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
@@ -131,18 +168,58 @@ namespace ssi
                         timeline.CurrentPlayPosition = MainHandler.Time.TimeFromPixel(signalCursor.X);
                         timeline.CurrentPlayPositionPrecise = MainHandler.Time.TimeFromPixel(signalCursor.X);
                         AnnoTierStatic.Label.select(true);
-                        keyDown = true;
+                        isKeyDown = true;
                     }
                     e.Handled = true;
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !keyDown)
+                else if (e.KeyboardDevice.IsKeyDown(Key.Left) && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !isKeyDown)
+                {
+                    if (AnnoTier.Selected != null) AnnoTier.Selected.Focus();
+                    int i = 0;
+                    double fps = 1.0 / 25.0;
+                    foreach (IMedia im in mediaList.Medias)
+                    {
+                        if (im.IsVideo()) break;
+                        i++;
+                    }
+
+                    if (i < mediaList.Medias.Count)
+                    {
+                        fps = 1.0 / mediaList.Medias[i].GetSampleRate();
+                    }
+
+                    mediaList.move(MainHandler.Time.TimeFromPixel(signalCursor.X) - fps);
+                    timeline.CurrentPlayPosition = MainHandler.Time.TimeFromPixel(signalCursor.X) - fps;
+                    timeline.CurrentPlayPositionPrecise = MainHandler.Time.TimeFromPixel(signalCursor.X) - fps;
+                    double pos = MainHandler.Time.PixelFromTime(timeline.CurrentPlayPosition);
+                    signalCursor.X = pos;
+
+                    isKeyDown = true;
+
+                    if (Time.CurrentPlayPosition <= Time.SelectionStart && control.navigator.followplaybox.IsChecked == true)
+                    {
+                        double factor = (((timeline.CurrentPlayPosition - timeline.SelectionStart) / (timeline.SelectionStop - timeline.SelectionStart)));
+                        control.timeTrackControl.rangeSlider.followmedia = true;
+                        control.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
+
+                        if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
+                        signalCursor.X = 1;
+
+                    }
+                    else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
+                    e.Handled = true;
+                }
+
+
+
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !isKeyDown)
                 {
                     if (AnnoTierStatic.Selected != null && !AnnoTierStatic.Selected.isDiscreteOrFree)
                     {
                         AnnoTierStatic.Selected.ContinuousAnnoMode();
                     }
-                    keyDown = true;
+                    isKeyDown = true;
                     e.Handled = true;
                 }
 
@@ -213,6 +290,7 @@ namespace ssi
                     {
                         AnnoTierStatic.Selected.UnDoObject.Undo(1);
                     }
+                    e.Handled = true;
                 }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.Y))
@@ -221,6 +299,8 @@ namespace ssi
                     {
                         AnnoTierStatic.Selected.UnDoObject.Redo(1);
                     }
+
+                    e.Handled = true;
                 }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Down))
@@ -288,7 +368,7 @@ namespace ssi
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
-                    if (AnnoTierStatic.Label != null) 
+                    if (AnnoTierStatic.Label != null)
                     {
                         AnnoTier.OnKeyDownHandler(sender, e);
                     }
@@ -331,9 +411,9 @@ namespace ssi
                     e.Handled = true;
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.E) && !keyDown)
+                if (e.KeyboardDevice.IsKeyDown(Key.E) && !isKeyDown)
                 {
-                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.isDiscreteOrFree && keyDown == false)
+                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.isDiscreteOrFree && isKeyDown == false)
                     {
                         UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
                         Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
@@ -346,13 +426,13 @@ namespace ssi
                         timeline.CurrentSelectPosition = annoCursor.X;
                         timeline.CurrentPlayPosition = MainHandler.Time.TimeFromPixel(signalCursor.X);
                         AnnoTierStatic.Label.select(true);
-                        keyDown = true;
+                        isKeyDown = true;
                     }
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.Q) && !keyDown)
+                if (e.KeyboardDevice.IsKeyDown(Key.Q) && !isKeyDown)
                 {
-                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.isDiscreteOrFree && keyDown == false)
+                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.isDiscreteOrFree && isKeyDown == false)
                     {
                         UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
                         Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
@@ -365,11 +445,11 @@ namespace ssi
                         timeline.CurrentSelectPosition = annoCursor.X;
                         timeline.CurrentPlayPosition = MainHandler.Time.TimeFromPixel(signalCursor.X);
                         AnnoTierStatic.Label.select(true);
-                        keyDown = true;
+                        isKeyDown = true;
                     }
                 }
 
-                if ((e.KeyboardDevice.IsKeyDown(Key.W) || !keyDown && AnnoTierStatic.Selected != null) && AnnoTierStatic.Selected.isDiscreteOrFree)
+                if ((e.KeyboardDevice.IsKeyDown(Key.W) || !isKeyDown && AnnoTierStatic.Selected != null) && AnnoTierStatic.Selected.isDiscreteOrFree)
                 {
                     if (AnnoTierStatic.Label == null)
                     {
@@ -380,17 +460,17 @@ namespace ssi
                         ShowLabelBox();
                     }
                     if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
-                    keyDown = true;
+                    isKeyDown = true;
                     // e.Handled = true;
                 }
-                else if ((e.KeyboardDevice.IsKeyDown(Key.W) || !keyDown && AnnoTierStatic.Selected != null) && !AnnoTierStatic.Selected.isDiscreteOrFree)
+                else if ((e.KeyboardDevice.IsKeyDown(Key.W) || !isKeyDown && AnnoTierStatic.Selected != null) && !AnnoTierStatic.Selected.isDiscreteOrFree)
                 {
                     if (AnnoTierStatic.Label != null)
                     {
                         ShowLabelBoxCont();
                     }
                     if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
-                    keyDown = true;
+                    isKeyDown = true;
                 }
                 if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !keyDown*/)
                 {
@@ -452,7 +532,7 @@ namespace ssi
                         AnnoTierStatic.Label.select(true);
                     }
 
-                    keyDown = true;
+                    isKeyDown = true;
                 }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt)/* && !keyDown*/)
@@ -509,13 +589,18 @@ namespace ssi
                         AnnoTierStatic.Label.select(true);
                     }
 
-                    keyDown = true;
+                    isKeyDown = true;
                 }
                 else
                 {
                     AnnoTier.OnKeyDownHandler(sender, e);
                 }
             }
+        }
+
+        public void OnKeyUp(object sender, KeyEventArgs e)
+        {
+            isKeyDown = false;
         }
     }
 }
