@@ -77,7 +77,7 @@ namespace ssi
 
                 try
                 {
-                    if (files.Length > 0) LoadFiles(files);
+                    if (files.Length > 0) loadMultipleFiles(files);
                 }
                 catch { }
 
@@ -131,7 +131,7 @@ namespace ssi
                 {
                     files[i] = filesToDownload[i];
                 }
-                LoadFiles(files);
+                loadMultipleFiles(files);
                 filesToDownload.Clear();
             }
         }
@@ -268,7 +268,7 @@ namespace ssi
                     files2[i] = filesToDownload[i];
                 }
 
-                if (files2.Length > 0) LoadFiles(files2);
+                if (files2.Length > 0) loadMultipleFiles(files2);
                 filesToDownload.Clear();
                 downloads.Clear();
             }
@@ -389,7 +389,7 @@ namespace ssi
 
                 filesToDownload.Clear();
                 downloads.Clear();
-                LoadFiles(files);
+                loadMultipleFiles(files);
             }
         }
 
@@ -432,7 +432,7 @@ namespace ssi
 
                 }
             }
-            else if (!localpath.EndsWith(".stream~") && !localpath.EndsWith(".stream%7E")) loadFromFile(localpath);
+            else if (!localpath.EndsWith(".stream~") && !localpath.EndsWith(".stream%7E")) loadFileHandler(localpath);
         }
 
         #endregion HTTPGET

@@ -9,9 +9,9 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        private void addSignal(Signal signal, string color, string background)
+        private void addSignal(Signal signal, string foreground, string background)
         {
-            ISignalTrack track = control.signalTrackControl.AddSignalTrack(signal, color, background);
+            ISignalTrack track = control.signalTrackControl.AddSignalTrack(signal, foreground, background);
             control.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.TimeRangeChanged;
 
             this.signals.Add(signal);
@@ -28,11 +28,9 @@ namespace ssi
                 track.TimeRangeChanged(MainHandler.Time);
             }
             if (this.signalTracks.Count == 1 && duration > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
-            //updateTimeRange(duration);
-            //track.timeRangeChanged(ViewHandler.Time);
         }
 
-        protected void removeSignal(object sender, SignalRemoveEventArgs e)
+        private void removeSignal(object sender, SignalRemoveEventArgs e)
         {
             signalTracks.Remove(e.SignalTrack);
         }
@@ -40,7 +38,6 @@ namespace ssi
         private void changeSignalTrackHandler(ISignalTrack track, EventArgs e)
         {
             Signal signal = track.getSignal();
-
             if (signal != null)
             {
                 control.signalNameLabel.Text = signal.FileName;
@@ -55,7 +52,7 @@ namespace ssi
             }
         }
 
-        #region EVENTHANDLERS
+        #region EVENTHANDLER
 
         private void signalTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -86,7 +83,7 @@ namespace ssi
             }
         }
 
-        #endregion EVENTHANDLERS
+        #endregion EVENTHANDLER
 
 
     }

@@ -62,15 +62,14 @@ namespace ssi
         private List<AnnoTier> annoTiers = new List<AnnoTier>();
         private List<AnnoList> annoLists = new List<AnnoList>();
 
-        private int tiercount = 0;
         private bool infastforward = false;
         private bool infastbackward = false;
         private bool innomediaplaymode = false;
         private DispatcherTimer _timerff = new DispatcherTimer();
         private DispatcherTimer _timerfb = new DispatcherTimer();
         private DispatcherTimer _timerp = new DispatcherTimer();
-        private bool mouseDown = false;
-        private bool keyDown = false;
+        private bool isMouseButtonDown = false;
+        private bool isKeyDown = false;
         private bool movemedialock = false;
         private double skelfps = 25;
         private double lasttimepos = 0;
@@ -162,8 +161,8 @@ namespace ssi
             control.exportAnnoToCSVMenu.Click += exportAnnoToCSV_Click;
             control.exportAnnoContinuousToDiscreteMenu.Click += exportAnnoContinuousToDiscrete_Click;
             control.exportAnnoToSignalMenu.Click += exportAnnoToSignal_Click;
-            control.exportAnnoDiscreteToContinuouMenu.Click += exportAnnoDiscreteToContinuous_Click;
-            control.exportAnnoToFrameWiseMenu.Click += ExportAnnoToFrameWiseMenu_Click;                           
+            control.exportAnnoDiscreteToContinuouMenu.Click += exportSignalToContinuous_Click;
+            control.exportAnnoToFrameWiseMenu.Click += exportAnnoToFrameWiseMenu_Click;                           
                   
             control.databaseSaveSessionMenu.Click += databaseSaveSession_Click;
             control.databaseSaveSessionAndMarkAsFinishedMenu.Click += databaseSaveSessionAndMarkAsFinished_Click;
@@ -430,7 +429,7 @@ namespace ssi
                 string[] filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 if (filenames != null)
                 {
-                    LoadFiles(filenames);
+                    loadMultipleFiles(filenames);
                 }
             }
         }
@@ -446,7 +445,7 @@ namespace ssi
             if (filenames != null)
             {
                 control.Cursor = Cursors.Wait;
-                LoadFiles(filenames);
+                loadMultipleFiles(filenames);
                 control.Cursor = Cursors.Arrow;
             }
         }

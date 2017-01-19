@@ -25,7 +25,6 @@ namespace ssi
                 annoList.Scheme = new AnnoScheme();
             }
  
-                setAnnoList(annoList);
                 addAnnoTier(annoList);
 
             updateTimeRange(maxdur);
@@ -238,6 +237,8 @@ namespace ssi
 
         public void addAnnoTier(AnnoList anno)
         {
+            setAnnoList(anno);
+
             AnnoTier tier = control.annoTrackControl.addAnnoTier(anno);
             tier.AnnoList.HasChanged = false;
 
@@ -313,14 +314,14 @@ namespace ssi
                 if (mediaList.Medias.Count > 0)
                 {
                     mediaList.move(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
-                    moveCursorTo(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
+                    moveSignalCursorToSecond(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
                     Stop();
                 }
             }
 
-            if (e.RightButton == MouseButtonState.Released && mouseDown == true)
+            if (e.RightButton == MouseButtonState.Released && isMouseButtonDown == true)
             {
-                mouseDown = false;
+                isMouseButtonDown = false;
 
                 if (control.navigator.followAnnoCheckBox.IsChecked == true)
                 {
@@ -362,7 +363,7 @@ namespace ssi
             {
                 if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(false);
 
-                if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS || mouseDown == false))
+                if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS || isMouseButtonDown == false))
                 {
                     foreach (AnnoTier a in annoTiers)
                     {
@@ -376,7 +377,7 @@ namespace ssi
                 }
 
                 if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.RightMouseButtonDown(e);
-                mouseDown = true;
+                isMouseButtonDown = true;
             }
 
             if (AnnoTierStatic.Selected != null)
@@ -403,7 +404,7 @@ namespace ssi
 
         private void annoTrackGrid_MouseUp(object sender, MouseEventArgs e)
         {
-            mouseDown = false;
+            isMouseButtonDown = false;
 
             if (AnnoTier.askForLabel == true)
                 ShowLabelBox();
@@ -423,7 +424,7 @@ namespace ssi
                 Time.CurrentPlayPositionPrecise = item.Start;
 
                 mediaList.move(item.Start);
-                moveCursorTo(item.Start);
+                moveSignalCursorToSecond(item.Start);
 
                 if (item.Start >= timeline.SelectionStop)
                 {

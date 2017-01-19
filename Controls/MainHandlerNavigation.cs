@@ -12,7 +12,6 @@ namespace ssi
 {
     public partial class MainHandler
     {
-
         #region CURSOR
         private void initCursor()
         {
@@ -34,33 +33,25 @@ namespace ssi
 
         private void onCursorChange(double pos)
         {
-            if (SignalTrackStatic.Selected != null)
+            if (SignalTrackStatic.Selected != null && SignalTrackStatic.Selected.Signal != null)
             {
                 Signal signal = SignalTrackStatic.Selected.Signal;
-                if (signal != null)
-                {
-                    double time = Time.TimeFromPixel(pos);
-                    control.signalValueLabel.Text = signal.Value(time).ToString();
-                    control.signalValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
-                    control.signalValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString();
-                }
+                control.signalValueLabel.Text = signal.Value(Time.TimeFromPixel(pos)).ToString();
+                control.signalValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
+                control.signalValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString(); 
             }
         }
 
-        private void moveCursorTo(double seconds)
+        private void moveSignalCursorToSecond(double seconds)
         {
             double pos = MainHandler.Time.PixelFromTime(seconds);
-
             signalCursor.X = pos;
-
-            //this.view.scrollViewer.ScrollToHorizontalOffset(Math.Max(0, pos - this.view.scrollViewer.ActualWidth / 2));
-            double time = Time.TimeFromPixel(pos);
-            control.signalPositionLabel.Text = FileTools.FormatSeconds(time);
+            control.signalPositionLabel.Text = FileTools.FormatSeconds(Time.TimeFromPixel(pos));
         }
 
         #endregion CURSOR
 
-        #region EVENTHANDLERS
+        #region EVENTHANDLER
 
 
         private void navigatorCorrectionMode_Click(object sender, RoutedEventArgs e)
@@ -164,7 +155,7 @@ namespace ssi
         {
             bool is_playing = IsPlaying();
             Stop();
-            moveCursorTo(0);
+            moveSignalCursorToSecond(0);
             if (is_playing)
             {
                 Play();
@@ -174,13 +165,14 @@ namespace ssi
         private void navigatorJumpEnd_Click(object sender, RoutedEventArgs e)
         {
             Stop();
-            moveCursorTo(MainHandler.Time.TotalDuration);
+            moveSignalCursorToSecond(MainHandler.Time.TotalDuration);
         }
 
         private void navigatorPlay_Click(object sender, RoutedEventArgs e)
         {
             handlePlay();
         }
+
         private void navigatorFastForward_Click(object sender, RoutedEventArgs e)
         {
             int updateinms = 300;
@@ -243,6 +235,6 @@ namespace ssi
             }
         }
 
-        #endregion EVENTHANDLERS
+        #endregion EVENTHANDLER
     }
 }

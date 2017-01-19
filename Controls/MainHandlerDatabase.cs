@@ -25,72 +25,6 @@ namespace ssi
     public partial class MainHandler
     {
 
-        #region EVENTHANDLERS
-
-        private void databaseSaveSession_Click(object sender, RoutedEventArgs e)
-        {
-            databaseStore();
-        }
-
-        private void databaseSaveSessionAndMarkAsFinished_Click(object sender, RoutedEventArgs e)
-        {
-            databaseStore(true);
-        }
-
-        private void databaseLoadSession_Click(object sender, RoutedEventArgs e)
-        {
-            databaseLoad();
-        }
-
-        private void databaseManage_Click(object sender, RoutedEventArgs e)
-        {
-            databaseAdd();
-        }
-
-        private void databaseChangeDownloadDirectory_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
-            dialog.ShowNewFolderButton = true;
-            dialog.Description = "Select the folder where you want to store the media of your databases in.";
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-
-            if (result == System.Windows.Forms.DialogResult.OK)
-            {
-                Properties.Settings.Default.DatabaseDirectory = dialog.SelectedPath;
-            }
-        }
-
-        private void databaseCMLCompleteStep_Click(object sender, RoutedEventArgs e)
-        {
-            DatabaseCMLCompleteWindow window = new DatabaseCMLCompleteWindow(this);
-            window.Show();
-        }
-
-        private void databaseCMLTransferStep_Click(object sender, RoutedEventArgs e)
-        {
-            DatabaseCMLTransferWindow window = new DatabaseCMLTransferWindow(this);
-            window.Show();
-        }
-
-        private void databaseCMLExtractFeatures_Click(object sender, RoutedEventArgs e)
-        {
-            //TODO More logic here in the future
-
-            string arguments = " -overwrite -log cml_extract.log " + "\"" + Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\" " + " expert;novice close";
-
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            //   startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            startInfo.FileName = "cmltrain.exe";
-            startInfo.Arguments = "--extract" + arguments;
-            process.StartInfo = startInfo;
-            process.Start();
-            process.WaitForExit();
-        }
-
-        #endregion EVENTHANDLERS
-
 
         #region DATABASELOGIC
 
@@ -320,7 +254,7 @@ namespace ssi
             control.ShadowBox.Visibility = Visibility.Collapsed;
         }
 
-        public void databaseAddNewAnnotation(AnnoScheme.TYPE annoType)
+        private void databaseAddNewAnnotation(AnnoScheme.TYPE annoType)
         {
             AnnoList annoList = new AnnoList();
             annoList.LoadedFromDB = true;
@@ -358,6 +292,72 @@ namespace ssi
 
         #endregion DATABASELOGIC
 
+
+        #region EVENTHANDLERS
+
+        private void databaseSaveSession_Click(object sender, RoutedEventArgs e)
+        {
+            databaseStore();
+        }
+
+        private void databaseSaveSessionAndMarkAsFinished_Click(object sender, RoutedEventArgs e)
+        {
+            databaseStore(true);
+        }
+
+        private void databaseLoadSession_Click(object sender, RoutedEventArgs e)
+        {
+            databaseLoad();
+        }
+
+        private void databaseManage_Click(object sender, RoutedEventArgs e)
+        {
+            databaseAdd();
+        }
+
+        private void databaseChangeDownloadDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
+            dialog.ShowNewFolderButton = true;
+            dialog.Description = "Select the folder where you want to store the media of your databases in.";
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                Properties.Settings.Default.DatabaseDirectory = dialog.SelectedPath;
+            }
+        }
+
+        private void databaseCMLCompleteStep_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLCompleteWindow window = new DatabaseCMLCompleteWindow(this);
+            window.Show();
+        }
+
+        private void databaseCMLTransferStep_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLTransferWindow window = new DatabaseCMLTransferWindow(this);
+            window.Show();
+        }
+
+        private void databaseCMLExtractFeatures_Click(object sender, RoutedEventArgs e)
+        {
+            //TODO More logic here in the future
+
+            string arguments = " -overwrite -log cml_extract.log " + "\"" + Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\" " + " expert;novice close";
+
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            //   startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            startInfo.FileName = "cmltrain.exe";
+            startInfo.Arguments = "--extract" + arguments;
+            process.StartInfo = startInfo;
+            process.Start();
+            process.WaitForExit();
+        }
+
+        #endregion EVENTHANDLERS
 
     }
 }

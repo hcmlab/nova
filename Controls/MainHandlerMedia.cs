@@ -12,10 +12,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        protected void removeMedia(object sender, MediaRemoveEventArgs e)
-        {
-            mediaList.Medias.Remove(e.media);
-        }
+      
 
         private void loadMedia(string filename, bool is_video, string url = null)
         {
@@ -48,7 +45,10 @@ namespace ssi
             });
             _timer.Start();
         }
-
+        private void removeMedia(object sender, MediaRemoveEventArgs e)
+        {
+            mediaList.Medias.Remove(e.media);
+        }
 
 
         #region MEDIAPLAYER

@@ -79,7 +79,7 @@ namespace ssi
             {
                 try
                 {
-                    this.viewh.LoadFiles(new[] { args[i] });
+                    this.viewh.loadMultipleFiles(new[] { args[i] });
                 }
                 catch (Exception)
                 {

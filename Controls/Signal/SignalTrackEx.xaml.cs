@@ -95,7 +95,7 @@ namespace ssi
             Grid.SetColumn(track, 0);
             Grid.SetRow(track, 1);
 
-            for (int i = 0; i < track.getSignal().dim; i++)
+            for (int i = 0; i < track.Signal.dim; i++)
             {
                 DimComboBox.Items.Add(i);
             }
@@ -103,7 +103,7 @@ namespace ssi
 
             this.grid.Children.Add(track);
             this.track = track;
-            this.isAudio = track.getSignal().IsAudio;
+            this.isAudio = track.Signal.IsAudio;
             if (this.isAudio) StatsButton.Visibility = Visibility.Collapsed;
         }
 
@@ -185,7 +185,7 @@ namespace ssi
             if (track != null)
             {
                 uint index = (uint)DimComboBox.SelectedIndex;
-                track.getSignal().ShowDim = index;
+                track.Signal.ShowDim = index;
                 track.InvalidateVisual();
 
                 if (OnChange != null)
@@ -213,7 +213,7 @@ namespace ssi
 
         private void StatsButton_Click(object sender, RoutedEventArgs e)
         {
-            SignalStatsWindow ssw = new SignalStatsWindow(track.getSignal(), track.getSignal().ShowDim);
+            SignalStatsWindow ssw = new SignalStatsWindow(track.Signal, track.Signal.ShowDim);
             MainHandler.Time.OnTimelineChanged += ssw.timeRangeChanged;
             ssw.Topmost = true;
             ssw.WindowStartupLocation = WindowStartupLocation.Manual;
