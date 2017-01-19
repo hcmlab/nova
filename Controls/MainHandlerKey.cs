@@ -110,6 +110,8 @@ namespace ssi
 
                 else if (e.KeyboardDevice.IsKeyDown(Key.Right) && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !isKeyDown)
                 {
+
+                    isKeyDown = true;
                     if (AnnoTier.Selected != null) AnnoTier.Selected.Focus();
                     int i = 0;
                     double fps = 1.0 / 25.0;
@@ -130,7 +132,6 @@ namespace ssi
                     double pos = MainHandler.Time.PixelFromTime(timeline.CurrentPlayPosition);
                     signalCursor.X = pos;
 
-                    isKeyDown = true;
 
                     if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true)
                     {
@@ -141,9 +142,17 @@ namespace ssi
                         if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
                         signalCursor.X = 1;
 
+
                     }
                     else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
+                
+
+
+                    double time = Time.TimeFromPixel(pos);
+                    control.signalPositionLabel.Text = FileTools.FormatSeconds(time);
+                    control.annoTrackControl.currenttime = Time.TimeFromPixel(pos);
                     e.Handled = true;
+
                 }
 
 
@@ -175,6 +184,8 @@ namespace ssi
 
                 else if (e.KeyboardDevice.IsKeyDown(Key.Left) && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !isKeyDown)
                 {
+
+                     isKeyDown = true;
                     if (AnnoTier.Selected != null) AnnoTier.Selected.Focus();
                     int i = 0;
                     double fps = 1.0 / 25.0;
@@ -191,23 +202,34 @@ namespace ssi
 
                     mediaList.move(MainHandler.Time.TimeFromPixel(signalCursor.X) - fps);
                     timeline.CurrentPlayPosition = MainHandler.Time.TimeFromPixel(signalCursor.X) - fps;
-                    timeline.CurrentPlayPositionPrecise = MainHandler.Time.TimeFromPixel(signalCursor.X) - fps;
+                    timeline.CurrentPlayPositionPrecise = timeline.CurrentPlayPosition;
                     double pos = MainHandler.Time.PixelFromTime(timeline.CurrentPlayPosition);
                     signalCursor.X = pos;
+                  
+                  
+                   
 
-                    isKeyDown = true;
-
-                    if (Time.CurrentPlayPosition <= Time.SelectionStart && control.navigator.followplaybox.IsChecked == true)
+                    if (Time.CurrentPlayPosition < Time.SelectionStart && Time.SelectionStart > 0 && control.navigator.followplaybox.IsChecked == true)
                     {
-                        double factor = (((timeline.CurrentPlayPosition - timeline.SelectionStart) / (timeline.SelectionStop - timeline.SelectionStart)));
+                        double factor = (((timeline.SelectionStop - timeline.CurrentPlayPosition) / (timeline.SelectionStop - timeline.SelectionStart)));
                         control.timeTrackControl.rangeSlider.followmedia = true;
                         control.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
 
                         if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
-                        signalCursor.X = 1;
+                        signalCursor.X = MainHandler.Time.PixelFromTime(MainHandler.Time.SelectionStop);
 
                     }
                     else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
+                   
+
+
+                    double time = Time.TimeFromPixel(pos);
+                    if (time != 0)
+                    {
+                        control.signalPositionLabel.Text = FileTools.FormatSeconds(time);
+                        control.annoTrackControl.currenttime = Time.TimeFromPixel(pos);
+                    }
+
                     e.Handled = true;
                 }
 
