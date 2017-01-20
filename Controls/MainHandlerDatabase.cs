@@ -153,7 +153,7 @@ namespace ssi
 
                             {
                                 //annoList.FilePath = annoList.Role + "." + annoList.Scheme.Name + "." + annoList.AnnotatorFullName;
-                                handleAnnotation(annoList, null);
+                                handleAnnotation(annoList);
                             }
 
                             control.ShadowBox.Visibility = Visibility.Collapsed;

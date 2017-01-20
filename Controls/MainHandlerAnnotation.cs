@@ -9,7 +9,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        private void handleAnnotation(AnnoList annoList, string filename)
+        private void handleAnnotation(AnnoList annoList)
         {
             double maxdur = 0;
             if (annoList.Count > 0)
@@ -28,7 +28,17 @@ namespace ssi
                 addAnnoTier(annoList);
 
             updateTimeRange(maxdur);
-            if (this.annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) updateTimeRange(maxdur);
+
+
+            if (this.annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0)
+            {
+
+                fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            }
+
+           
+
         }
 
         private void removeAnnoTier()
@@ -86,6 +96,7 @@ namespace ssi
             else annoNameLabel += "#NewTier ";
             if (AnnoList.Role != null && AnnoList.Role != "") annoNameLabel += "#" + AnnoList.Role + " ";
             if (AnnoList.AnnotatorFullName != null && AnnoList.AnnotatorFullName != "") annoNameLabel += "#" + AnnoList.AnnotatorFullName;
+            else if (AnnoList.Annotator != null && AnnoList.Annotator != "") annoNameLabel += "#" + AnnoList.Annotator;
 
             return annoNameLabel;
         }

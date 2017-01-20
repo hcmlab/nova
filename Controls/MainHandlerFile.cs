@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -22,7 +14,6 @@ namespace ssi
 {
     public partial class MainHandler
     {
-
         #region LOAD
 
         public void loadMultipleFiles(string[] filenames, string[] url = null)
@@ -53,6 +44,7 @@ namespace ssi
                 }
             }
         }
+
         private bool loadFileHandler(string filename, string url = null)
         {
             if (filename == null || filename.EndsWith("~"))
@@ -254,7 +246,6 @@ namespace ssi
             return loaded;
         }
 
-
         private void loadAnnotation(string filename)
         {
             if (!File.Exists(filename))
@@ -264,20 +255,7 @@ namespace ssi
             }
 
             AnnoList annoList = AnnoList.LoadfromFile(filename);
-            double maxdur = 0;
-
-            if (annoList.Count > 0) maxdur = annoList[annoList.Count - 1].Stop;
-
-            if (annoList != null)
-            {
-                addAnnoTier(annoList);
-            }
-
-            updateTimeRange(maxdur);
-            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annoLists.Count != 0 && mediaList.Medias.Count == 0)
-            {
-                fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
-            }
+            handleAnnotation(annoList);
         }
 
         private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
@@ -288,9 +266,8 @@ namespace ssi
                 return;
             }
 
-            //Temp list that contains all annotations from file
-            AnnoList anno = AnnoList.LoadFromCSVFile(filename, samplerate, type, filter);
-            handleAnnotation(anno, filename);
+            AnnoList annoList = AnnoList.LoadFromCSVFile(filename, samplerate, type, filter);
+            handleAnnotation(annoList);
         }
 
         private void loadStream(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
@@ -488,7 +465,6 @@ namespace ssi
             {
                 saveProjectTracks(annoTiers, mediaList, signalTracks, filePath);
             }
-
         }
 
         private void saveProjectTracks(List<AnnoTier> tracks, MediaList ml, List<ISignalTrack> signal_tracks, string filepath)
@@ -541,7 +517,6 @@ namespace ssi
         #endregion SAVE
 
         #region IMPORT
-
 
         private void ImportAnnoFromElan(string filename)
         {
@@ -629,7 +604,6 @@ namespace ssi
 
         #region EXPORT
 
-
         private void ExportFrameWiseAnnotations(int sr, string seperator, string restclass)
         {
             bool found = false;
@@ -660,7 +634,6 @@ namespace ssi
                     Mouse.SetCursor(System.Windows.Input.Cursors.Wait);
                     while (currenttime < maxdur)
                     {
-
                         foreach (AnnoTier tier in annoTiers)
                         {
                             if (tier.AnnoList.Count > 0)
@@ -684,8 +657,6 @@ namespace ssi
                             if (!found) headline += restclass + seperator;
                         }
 
-
-
                         headline = headline.Remove(headline.Length - 1);
                         file.WriteLine(headline);
                         headline = "";
@@ -703,151 +674,141 @@ namespace ssi
 
         private void ExportAnnoContinuousToDiscrete()
         {
-            AnnoTier annoTier = AnnoTierStatic.Selected;
+          
 
-            if (annoTier != null)
+            if (AnnoTierStatic.Selected != null && !AnnoTierStatic.Selected.isDiscreteOrFree)
             {
-                MessageBoxResult mb = MessageBoxResult.None;
-                if (!annoTier.isDiscreteOrFree)
-                {
-                    if (annoTier.AnnoList.HasChanged)
-                    {
-                        mb = MessageBox.Show("Save continous annotations on tier #" + annoTier.AnnoList.Scheme.Name + " first?", "Confirm", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
+                input["labels"] = new UserInputWindow.Input() { Label = "Class labels (separated by ;)", DefaultValue = "LOW;MEDIUM;HIGH" };
+                input["thresholds"] = new UserInputWindow.Input() { Label = "Upper thresholds (separated by ;)", DefaultValue = "0.33;0.66;1.0" };
+                input["offset"] = new UserInputWindow.Input() { Label = "Optional offset (s)", DefaultValue = "0.0" };
+                UserInputWindow dialog = new UserInputWindow("Convert to discrete annotation", input);
+                dialog.ShowDialog();
 
-                        if (mb == MessageBoxResult.Yes)
+                List<string> classes = new List<string>();
+                List<double> upperThresholds = new List<double>();
+                double offset = 0.0;
+
+                if (dialog.DialogResult == true)
+                {
+                    string[] labels = dialog.Result("labels").Split(';');
+                    for (int i = 0; i < labels.Length; i++)
+                    {
+                        classes.Add(labels[i]);
+                    }
+
+                    string[] thresholds = dialog.Result("thresholds").Split(';');
+                    for (int i = 0; i < thresholds.Length; i++)
+                    {
+                        double thresh = -1;
+                        double.TryParse(thresholds[i], out thresh);
+                        if (thresh > -1)
                         {
-                            saveAnnoAs();
-                            annoTier.AnnoList.HasChanged = false;
+                            upperThresholds.Add(thresh);
+                        }
+                        else
+                        {
+                            MessageTools.Warning("Could not parse input");
                         }
                     }
 
-                    if (mb != MessageBoxResult.Cancel)
+                    if (thresholds.Length == labels.Length - 1) upperThresholds.Add(1.0);
+                    else if (thresholds.Length == labels.Length + 1) classes.Add("REST");
+                    else if (thresholds.Length != labels.Length)
                     {
-                        Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
-                        input["labels"] = new UserInputWindow.Input() { Label = "Class labels (separated by ;)", DefaultValue = "LOW;MEDIUM;HIGH" };
-                        input["thresholds"] = new UserInputWindow.Input() { Label = "Upper thresholds (separated by ;)", DefaultValue = "0.33;0.66;1.0" };
-                        input["offset"] = new UserInputWindow.Input() { Label = "Optional offset (s)", DefaultValue = "0.0" };
-                        UserInputWindow dialog = new UserInputWindow("Convert to discrete annotation", input);
-                        dialog.ShowDialog();
+                        MessageBox.Show("Number of labels does not match number of threshholds");
+                    }
 
-                        List<string> classes = new List<string>();
-                        List<double> upperThresholds = new List<double>();
-                        double offset = 0.0;
+                    double.TryParse(dialog.Result("offset"), out offset);
+                }
+                Mouse.SetCursor(Cursors.No);
 
-                        if (dialog.DialogResult == true)
+                AnnoList discretevalues = new AnnoList();
+                discretevalues.Scheme = new AnnoScheme();
+                discretevalues.Scheme.Type = AnnoScheme.TYPE.DISCRETE;
+                discretevalues.Role = AnnoTier.Selected.AnnoList.Role;
+                discretevalues.Annotator = AnnoTier.Selected.AnnoList.Annotator;
+                discretevalues.Scheme.Name = AnnoTier.Selected.AnnoList.Scheme.Name;
+
+                foreach (string label in classes)
+                {
+                    AnnoScheme.Label item = new AnnoScheme.Label(label, System.Windows.Media.Colors.Black);
+                    discretevalues.Scheme.Labels.Add(item);
+                }
+
+                AnnoScheme.Label garbage = new AnnoScheme.Label("GARBAGE", Colors.Black);
+                discretevalues.Scheme.Labels.Add(garbage);
+
+                double lowThres = -Double.MaxValue;
+                double highThres = 1.0;
+
+                foreach (AnnoListItem ali in AnnoTierStatic.Selected.AnnoList)
+                {
+                    double val = 0;
+                    double.TryParse(ali.Label, out val);
+
+                    for (int i = 0; i < classes.Count; i++)
+                    {
+                        highThres = upperThresholds[i];
+                        if (i > 0) lowThres = upperThresholds[i - 1];
+                        else lowThres = -Double.MaxValue;
+
+                        if (val > lowThres && val <= highThres)
                         {
-                            string[] labels = dialog.Result("labels").Split(';');
-                            for (int i = 0; i < labels.Length; i++)
+                            if (!(discretevalues.Count > 0 && discretevalues[discretevalues.Count - 1].Label == classes[i]))
                             {
-                                classes.Add(labels[i]);
-                            }
 
-                            string[] thresholds = dialog.Result("thresholds").Split(';');
-                            for (int i = 0; i < thresholds.Length; i++)
-                            {
-                                double thresh = -1;
-                                double.TryParse(thresholds[i], out thresh);
-                                if (thresh > -1)
+
+                                AnnoListItem newItem = new AnnoListItem(ali.Start + offset, ali.Duration, classes[i],"", discretevalues.Scheme.GetColorForLabel(classes[i])); 
+                                if (newItem.Start < 0.0)
                                 {
-                                    upperThresholds.Add(thresh);
+                                    newItem.Duration = ali.Duration + offset + newItem.Start;
+                                    newItem.Start = 0.0;
+                                    newItem.Stop = newItem.Duration;
                                 }
-                                else
-                                {
-                                    MessageTools.Warning("Could not parse input");
-                                }
+                                if (newItem.Duration > 0.0) discretevalues.Add(newItem);
                             }
-
-                            if (thresholds.Length == labels.Length - 1) upperThresholds.Add(1.0);
-                            else if (thresholds.Length == labels.Length + 1) classes.Add("REST");
-                            else if (thresholds.Length != labels.Length)
+                            else
                             {
-                                MessageBox.Show("Number of labels does not match number of threshholds");
+                                discretevalues[discretevalues.Count - 1].Stop = discretevalues[discretevalues.Count - 1].Stop + ali.Duration;
                             }
-
-                            double.TryParse(dialog.Result("offset"), out offset);
+                            break;
                         }
-                        Mouse.SetCursor(Cursors.No);
-
-                        AnnoList discretevalues = new AnnoList();
-                        annoTier.isDiscreteOrFree = true;
-
-                        double lowThres = -Double.MaxValue;
-                        double highThres = 1.0;
-
-                        foreach (AnnoListItem item in annoTier.AnnoList)
-                        {
-                            double val = double.Parse(item.Label);
-
-                            for (int i = 0; i < classes.Count; i++)
-                            {
-                                highThres = upperThresholds[i];
-                                if (i > 0) lowThres = upperThresholds[i - 1];
-                                else lowThres = -Double.MaxValue;
-
-                                if (val > lowThres && val < highThres)
-                                {
-                                    if (discretevalues.Count > 0 && discretevalues[discretevalues.Count - 1].Label == classes[i])
-                                    {
-                                        discretevalues[discretevalues.Count - 1].Stop = discretevalues[discretevalues.Count - 1].Stop + item.Duration;
-                                    }
-                                    else
-                                    {
-                                        AnnoListItem newItem = item;
-                                        newItem.Start = item.Start + offset;
-                                        if (newItem.Start < 0.0)
-                                        {
-                                            newItem.Duration = item.Duration + offset + newItem.Start;
-                                            newItem.Start = 0.0;
-
-                                            newItem.Stop = newItem.Duration;
-                                        }
-                                        newItem.Stop = item.Stop + offset;
-                                        newItem.Label = classes[i];
-                                        if (newItem.Duration > 0.0) discretevalues.Add(newItem);
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-
-                        annoTier.Children.Clear();
-                        annoTier.AnnoList.Clear();
-
-                        foreach (AnnoListItem ali in discretevalues)
-                        {
-                            annoTier.AnnoList.Add(ali);
-                            annoTier.addSegment(ali);
-                        }
-
-                        Mouse.SetCursor(System.Windows.Input.Cursors.Arrow);
                     }
                 }
-                else
-                {
-                    MessageBox.Show("Tier is already discrete");
-                }
+
+                AnnoTier.UnselectTier();
+                handleAnnotation(discretevalues);
+
+                Mouse.SetCursor(System.Windows.Input.Cursors.Arrow);
+            }
+            else
+            {
+                MessageBox.Show("Tier is already discrete");
             }
         }
 
         private void ExportSignalToContinuous()
         {
-            Signal signal = SignalTrackStatic.Selected.Signal;
-
-            if (signal != null && !SignalTrackStatic.Selected.Signal.IsAudio)
+            if (SignalTrackStatic.Selected != null && SignalTrackStatic.Selected.Signal != null)
             {
-                AnnoList annoList = signal.ExportToAnno();
-                string newFilePath = FileTools.SaveFileDialog(signal.FileName, ".annotation", "Annotation (*.annotation)|*.annotation", Path.GetDirectoryName(signal.FilePath));
-                if (annoList.SaveToFile(newFilePath))
+                Signal signal = SignalTrackStatic.Selected.Signal;
+
+                if (signal != null && !SignalTrackStatic.Selected.Signal.IsAudio)
                 {
-                    MessageBoxResult mb = MessageBoxResult.None;
-                    mb = MessageBox.Show("Load converted annotation?", "Success", MessageBoxButton.YesNo);
-                    if (mb == MessageBoxResult.Yes)
+                    AnnoList annoList = signal.ExportToAnno();
+                    string newFilePath = FileTools.SaveFileDialog(signal.FileName, ".annotation", "Annotation (*.annotation)|*.annotation", Path.GetDirectoryName(signal.FilePath));
+                    if (annoList.SaveToFile(newFilePath))
                     {
-                        loadAnnotation(newFilePath);
+                        MessageBoxResult mb = MessageBoxResult.None;
+                        mb = MessageBox.Show("Load converted annotation?", "Success", MessageBoxButton.YesNo);
+                        if (mb == MessageBoxResult.Yes)
+                        {
+                            loadAnnotation(newFilePath);
+                        }
                     }
                 }
             }
-
         }
 
         private void ExportAnnoToSignal()
@@ -913,7 +874,7 @@ namespace ssi
 
         private void saveAnno_Click(object sender, RoutedEventArgs e)
         {
-                saveAnno();
+            saveAnno();
         }
 
         private void saveProject_Click(object sender, RoutedEventArgs e)
@@ -1050,34 +1011,6 @@ namespace ssi
             }
         }
 
-
         #endregion EVENTHANDLER
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

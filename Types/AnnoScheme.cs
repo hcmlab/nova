@@ -46,6 +46,19 @@ namespace ssi
 
         public List<Label> Labels { get; set; }
 
+        public Color GetColorForLabel(string name)
+        {
+            foreach(Label label in Labels)
+            {
+                if (label.Name == name)
+                {
+                    return label.Color;
+                }
+            }
+
+            return new Color();
+        }
+
         public double MinScore { get; set; }
 
         public double MaxScore { get; set; }
