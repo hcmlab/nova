@@ -193,7 +193,6 @@ namespace ssi
             timeline.SelectionInPixel = control.signalAndAnnoControl.ActualWidth;
             control.signalAndAnnoControl.SizeChanged += signalAndAnnoControlSizeChanged;
 
-            control.timeTrackControl.rangeSlider.Timeline = timeline;
             control.timeTrackControl.rangeSlider.OnTimeRangeChanged += control.timeTrackControl.timeTrack.TimeRangeChanged;
             control.timeTrackControl.rangeSlider.OnTimeRangeChanged += control.timeTrackControl.timeTrackSelection.TimeRangeChanged;
             control.timeTrackControl.rangeSlider.OnTimeRangeChanged += Time.TimelineChanged;
@@ -261,7 +260,7 @@ namespace ssi
                 }
                 else if (result < 0 && !silent)
                 {
-                    MessageBox.Show("The version you are running (" + BuildVersion + ") is more recent than the latest offical release (" + LatestGitVersion + ")");
+                    MessageBox.Show("The version you are running (" + BuildVersion + ") is newer than the latest offical release (" + LatestGitVersion + ")");
                 }
             }
             catch

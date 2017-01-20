@@ -457,7 +457,7 @@ namespace ssi
 
             int drawlinesnumber;
             if (this.ActualWidth == 0) drawlinesnumber = 1000;
-            else if (AnnoList.Count > this.ActualWidth) drawlinesnumber = (int)this.ActualWidth;
+            else if (AnnoList.Count > this.ActualWidth) drawlinesnumber = (int) (this.ActualWidth);
             else drawlinesnumber = AnnoList.Count;
 
             for (int i = 0; i < drawlinesnumber; i++)
@@ -964,7 +964,7 @@ namespace ssi
                         {
                             double pos = GetLeft(selectedLabel);
                             double delta = point.X - selectedLabel.ActualWidth / 2;
-                            if (pos + delta >= 0 && pos + selectedLabel.ActualWidth + delta <= this.Width)
+                            if (pos + delta >= 0 && pos + selectedLabel.ActualWidth + delta <= this.ActualWidth)
                             {
                                 if (isMouseAlreadydown == false)
                                 {
@@ -1167,7 +1167,8 @@ namespace ssi
                                 {
                                     for (int k = index - offset; k < index + offset; k++)
                                     {
-                                        double value = double.Parse(AnnoList[k].Label);
+                                        double value = 0;
+                                        double.TryParse(AnnoList[k].Label, out value);
 
                                         value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
 
@@ -1178,7 +1179,8 @@ namespace ssi
                                 }
                                 else
                                 {
-                                    double value = double.Parse(AnnoList[index].Label);
+                                    double value = median;
+                                    double.TryParse(AnnoList[index].Label, out value);
                                     value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
                                     s.Y1 = (value) * this.ActualHeight;
                                 }

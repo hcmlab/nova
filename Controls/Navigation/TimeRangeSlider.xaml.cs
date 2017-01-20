@@ -8,14 +8,7 @@ namespace ssi
 
     public partial class TimeRangeSlider : UserControl
     {
-        private Timeline _viewTime = null;
         private bool _followmedia = false;
-
-        public Timeline Timeline
-        {
-            get { return _viewTime; }
-            set { _viewTime = value; }
-        }
 
         public bool followmedia
         {
@@ -57,7 +50,7 @@ namespace ssi
 
         public void Update()
         {
-            if (_viewTime != null)
+              if (MainHandler.Time != null)
             {
                
                 //seens to be a bug in avalon lib.try to fix it by adjusting the value
@@ -71,76 +64,76 @@ namespace ssi
                     ui.RangeStartSelected = ui.RangeStopSelected - 1;
                 }
 
-                _viewTime.SelectionStart = _viewTime.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
-                _viewTime.SelectionStop = _viewTime.TotalDuration * ((double)ui.RangeStopSelected / (double)ui.RangeStop);
+                MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
+                MainHandler.Time.SelectionStop = MainHandler.Time.TotalDuration * ((double)ui.RangeStopSelected / (double)ui.RangeStop);
 
-                if (_viewTime.SelectionStart < 0) _viewTime.SelectionStart = 0;
-                if (_viewTime.SelectionStop - _viewTime.SelectionStart < min)
+                if (MainHandler.Time.SelectionStart < 0) MainHandler.Time.SelectionStart = 0;
+                if (MainHandler.Time.SelectionStop - MainHandler.Time.SelectionStart < min)
                 {
-                    _viewTime.SelectionStop = _viewTime.SelectionStart + min;
+                    MainHandler.Time.SelectionStop = MainHandler.Time.SelectionStart + min;
                 }
 
                 if (followmedia)
                 {
-                    if (_viewTime.SelectionStop < Timeline.CurrentPlayPosition)
+                    if (MainHandler.Time.SelectionStop < MainHandler.Time.CurrentPlayPosition)
                     {
-                        if (_viewTime.TotalDuration > 0)
+                        if (MainHandler.Time.TotalDuration > 0)
                         {
-                            ui.RangeStartSelected = ((long)_viewTime.SelectionStart * ui.RangeStop) / (long)_viewTime.TotalDuration;
-                            ui.RangeStopSelected = ((long)_viewTime.SelectionStop * ui.RangeStop) / (long)_viewTime.TotalDuration;
+                            ui.RangeStartSelected = ((long)MainHandler.Time.SelectionStart * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
+                            ui.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
                         }
                     }
                 }
 
                 if (OnTimeRangeChanged != null)
                 {
-                    OnTimeRangeChanged(_viewTime);
-                    OnTimeRangeChanged(_viewTime);
+                    OnTimeRangeChanged(MainHandler.Time);
+                    OnTimeRangeChanged(MainHandler.Time);
                 }
             }
         }
 
         public void UpdateFixedRange(double duration)
         {
-            if (_viewTime != null)
+            if (MainHandler.Time != null)
             {
-                _viewTime.SelectionStart = 0;
+                MainHandler.Time.SelectionStart = 0;
                 ui.RangeStartSelected = 0;
                 //seems to be a bug in avalon lib.try to fix it by adjusting the value
 
-                _viewTime.SelectionStart = _viewTime.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
-                _viewTime.SelectionStop = _viewTime.SelectionStart + duration;
-                ui.RangeStopSelected = ((long)_viewTime.SelectionStop * ui.RangeStop) / (long)_viewTime.TotalDuration;
+                MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
+                MainHandler.Time.SelectionStop = MainHandler.Time.SelectionStart + duration;
+                ui.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
 
-                if (_viewTime.SelectionStart < 0) _viewTime.SelectionStart = 0;
-                if (_viewTime.SelectionStop - _viewTime.SelectionStart < min)
+                if (MainHandler.Time.SelectionStart < 0) MainHandler.Time.SelectionStart = 0;
+                if (MainHandler.Time.SelectionStop - MainHandler.Time.SelectionStart < min)
                 {
-                    _viewTime.SelectionStop = _viewTime.SelectionStart + min;
+                    MainHandler.Time.SelectionStop = MainHandler.Time.SelectionStart + min;
                 }
 
                 if (followmedia)
                 {
-                    if (_viewTime.SelectionStop < Timeline.CurrentPlayPosition)
+                    if (MainHandler.Time.SelectionStop < MainHandler.Time.CurrentPlayPosition)
                     {
-                        if (_viewTime.TotalDuration > 0)
+                        if (MainHandler.Time.TotalDuration > 0)
                         {
-                            ui.RangeStartSelected = ((long)_viewTime.SelectionStart * ui.RangeStop) / (long)_viewTime.TotalDuration;
-                            ui.RangeStopSelected = ((long)_viewTime.SelectionStop * ui.RangeStop) / (long)_viewTime.TotalDuration;
+                            ui.RangeStartSelected = ((long)MainHandler.Time.SelectionStart * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
+                            ui.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
                         }
                     }
                 }
 
                 if (OnTimeRangeChanged != null)
                 {
-                    OnTimeRangeChanged(_viewTime);
-                    OnTimeRangeChanged(_viewTime);
+                    OnTimeRangeChanged(MainHandler.Time);
+                    OnTimeRangeChanged(MainHandler.Time);
                 }
             }
         }
 
         public void MoveAndUpdate(bool moveRight, double moveWindowPercentage)
         {
-            if (_viewTime == null)
+            if (MainHandler.Time == null)
             {
                 return;
             }
