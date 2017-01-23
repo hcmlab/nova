@@ -23,14 +23,14 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <Label Grid.Column="0" Grid.Row="0" >Minimum score</Label>
+
+        <Label Grid.Column="0" Grid.Row="0" >Sample rate (Hz)</Label>
         <TextBox Name="srTextBox" Grid.Column="1" Grid.Row="0" x:FieldModifier="public" Margin="5"/>
         
-        <Label Grid.Column="0" Grid.Row="1" >Maximum score</Label>
+        <Label Grid.Column="0" Grid.Row="1" >Minimum score</Label>
         <TextBox Name="minTextBox" Grid.Column="1" Grid.Row="1" x:FieldModifier="public" Margin="5"/>
         
-        <Label Grid.Column="0" Grid.Row="2" >Sample rate (Hz)</Label>
+        <Label Grid.Column="0" Grid.Row="2" >Maximum score</Label>
         <TextBox Name="maxTextBox" Grid.Column="1" Grid.Row="2" x:FieldModifier="public" Margin="5" />
         <Label Grid.Column="0" Grid.Row="3" >Background</Label>
         
