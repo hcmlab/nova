@@ -88,8 +88,13 @@ namespace ssi
             }
         }
 
-        private void view_Loaded(object sender, RoutedEventArgs e)
+
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            MessageBoxResult mbr =  MessageBox.Show("Are you sure you want to close the Application?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (mbr == MessageBoxResult.Yes) viewh.clearSession();
+            else e.Cancel = true;
         }
     }
 }
