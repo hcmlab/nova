@@ -2,9 +2,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"    
     xmlns:local="clr-namespace:ssi"
-    WindowState="Maximized" Height="Auto" Width="Auto" AllowDrop="True" AllowsTransparency="False" Icon="..\Resources\ui.ico">
+    WindowState="Maximized" Height="Auto" Width="Auto" AllowDrop="True" AllowsTransparency="False" Icon="..\Resources\ui.ico" Closing="Window_Closing">
 
     <Grid>
-        <local:MainControl x:Name="view" Loaded="view_Loaded"></local:MainControl>
+        <local:MainControl x:Name="view"></local:MainControl>
     </Grid>
 </Window>

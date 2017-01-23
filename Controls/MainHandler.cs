@@ -127,8 +127,6 @@ namespace ssi
         public MainHandler(MainControl view)
         {
             control = view;
-            control.Dispatcher.ShutdownStarted += controlShutdownStarted;
-            control.Dispatcher.ShutdownStarted += controlUnloaded;
             control.Drop += controlDrop;
 
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
@@ -293,10 +291,7 @@ namespace ssi
             return 0;
         }
 
-        private void controlShutdownStarted(object sender, EventArgs e)
-        {
-            clearSession();
-        }
+
 
         private void signalAndAnnoControlSizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -306,6 +301,7 @@ namespace ssi
 
         public void clearSession()
         {
+            tokenSource.Cancel();
             Stop();
 
             bool anytrackchanged = false;
@@ -476,10 +472,8 @@ namespace ssi
             }
         }
 
-        private void controlUnloaded(object sender, EventArgs e)
-        {
-            tokenSource.Cancel();
-        }
+
+
 
     }
 }
