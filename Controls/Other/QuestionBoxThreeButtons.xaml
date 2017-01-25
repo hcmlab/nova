@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"        
+        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic" 
         mc:Ignorable="d"
         SizeToContent="Height"
-        WindowStyle="ToolWindow"
-        Height="Auto" Width="300">
+        WindowStyle="ToolWindow" Title="Question" Height="Auto" Width="300">
 
     <Grid Name="questionGrid" Grid.Row="1" >
 
