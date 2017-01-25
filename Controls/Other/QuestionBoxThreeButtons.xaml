@@ -1,0 +1,45 @@
+﻿<Window x:Class="ssi.QuestionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"        
+        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic" 
+        mc:Ignorable="d"
+        SizeToContent="Height"
+        WindowStyle="ToolWindow" Title="Question" Height="Auto" Width="300">
+
+    <Grid Name="questionGrid" Grid.Row="1" >
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center">
+            <TextBlock Name="question_text" TextAlignment="Center" TextWrapping="Wrap">Question?</TextBlock>
+        </Label>
+
+        <Grid Grid.Row="4" Grid.ColumnSpan="3"  HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Name="NoColumn" Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button Name="button_yes" Grid.Column="0" Margin="5" MinWidth="60" Width="Auto" MinHeight="25" Height="Auto" Click="Button_Click">
+                <TextBlock Name="button_yes_text" TextAlignment="Center" TextWrapping="Wrap">Yes</TextBlock>
+            </Button>
+            <Button Name="button_no" Grid.Column="1" Margin="5" MinWidth="60" Width="Auto" MinHeight="25" Height="Auto" Click="Button_Click">
+                <TextBlock Name="button_no_text" TextAlignment="Center" TextWrapping="Wrap">No</TextBlock>
+            </Button>
+            <Button Name="button_cancel" Grid.Column="2" Margin="5" MinWidth="60" Width="Auto" MinHeight="25" Height="Auto" Click="Button_Click">
+                <TextBlock Name="button_cancel_text" TextAlignment="Center" TextWrapping="Wrap">Cancel</TextBlock>
+            </Button>
+        </Grid>
+
+    </Grid>
+</Window>
