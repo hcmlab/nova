@@ -299,25 +299,36 @@ namespace ssi
             if (!movemedialock) control.timeTrackControl.rangeSlider.Update();
         }
 
-        public void clearSession()
+        public void clearSession(bool exiting = false, bool saveRequested = false)
         {
             tokenSource.Cancel();
             Stop();
 
-            bool anytrackchanged = false;
-            foreach (AnnoTier track in annoTiers)
+            bool anytrackchanged = saveRequested;
+            if (!saveRequested && !exiting)
             {
-                if (track.AnnoList.HasChanged) anytrackchanged = true;
+                foreach (AnnoTier track in annoTiers)
+                {
+                    if (track.AnnoList.HasChanged) anytrackchanged = true;
+                }
             }
 
             if (annoTiers.Count > 0 && anytrackchanged)
             {
-                MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
-                if (mbx == MessageBoxResult.Yes)
+                if (!saveRequested)
+                {
+                    MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
+                    if (mbx == MessageBoxResult.Yes)
+                    {
+                        saveSession();
+                    }
+                }
+                else
                 {
                     saveSession();
                 }
             }
+            
 
             DatabaseLoaded = false;
             if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);

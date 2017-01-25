@@ -92,9 +92,64 @@ namespace ssi
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            MessageBoxResult mbr =  MessageBox.Show("Are you sure you want to close the Application?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (mbr == MessageBoxResult.Yes) viewh.clearSession();
-            else e.Cancel = true;
+            bool anytrackchanged = false;
+            foreach (AnnoTier track in viewh.AnnoTiers)
+            {
+                if (track.AnnoList.HasChanged) anytrackchanged = true;
+            }
+
+            QuestionWindow.Input input;
+            if (anytrackchanged)
+            {
+                input = new QuestionWindow.Input() { Question = "Are you sure you want to close the Application?", YesButton = "Save and close", NoButton = "Don't save and close", CancelButton = "Cancel" };
+                QuestionWindow dialog = new QuestionWindow(input);
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dialog.ShowDialog();
+                if (dialog.DialogResult == true)
+                {
+                    if (dialog.Result == 0)
+                    {
+                        viewh.clearSession(true, false);
+                    }
+                    else if (dialog.Result == 1)
+                    {
+                        viewh.clearSession(true, true);
+                    }
+                    else if (dialog.Result == 2)
+                    {
+                        e.Cancel = true;
+                    }
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
+            }
+            else
+            {
+                input = new QuestionWindow.Input() { Question = "Are you sure you want to close the Application?", YesButton = "Yes", NoButton = "", CancelButton = "Cancel" };
+                QuestionWindow dialog = new QuestionWindow(input);
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dialog.ShowDialog();
+                if (dialog.DialogResult == true)
+                {
+                    if (dialog.Result == 1)
+                    {
+                        viewh.clearSession(true, false);
+                    }
+                    else if (dialog.Result == 2)
+                    {
+                        e.Cancel = true;
+                    }
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
+            }
+
+            
+            
         }
     }
 }
