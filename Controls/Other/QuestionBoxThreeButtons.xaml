@@ -8,7 +8,7 @@
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic" 
         mc:Ignorable="d"
         SizeToContent="Height"
-        WindowStyle="ToolWindow" Title="Question" Height="Auto" Width="300">
+        WindowStyle="ToolWindow" Title="Question" Height="Auto" Width="300" ResizeMode="NoResize">
 
     <Grid Name="questionGrid" Grid.Row="1" >
 
