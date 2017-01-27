@@ -91,11 +91,6 @@ namespace ssi
         {
             String userName = userNameTextBox.Text;
             String annoPath = (String)annoComboBox.SelectedItem;
-
-            string[] split = annoPath.Split('#');
-            annoPath = split[0];
-            String tier = "#" + split[1];
-
             ItemCollection signalItems = signalSelectedListBox.Items;
 
             if (userName.Length == 0 || annoPath == null || signalItems.IsEmpty)
@@ -129,7 +124,7 @@ namespace ssi
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 startInfo.FileName = "anno2samp.exe";
-                startInfo.Arguments = userName + " " + annoPath + " " + signalPaths + " " + samplesPath + " " + tier;
+                startInfo.Arguments = userName + " " + annoPath + " " + signalPaths + " " + samplesPath;
                 if (continuousCheckBox.IsChecked == true)
                 {
                     startInfo.Arguments += " -frame " + frameTextBox.Text + " -delta " + deltaTextBox.Text + " -percent " + percentTextBox.Text;
@@ -137,9 +132,20 @@ namespace ssi
                     {
                         startInfo.Arguments += " -label " + labelTextBox.Text;
                     }
+
+                    if(!annoPath.Contains(".annotation")) startInfo.Arguments += " -legacy";
+
+
                 }
                 process.StartInfo = startInfo;
                 process.Start();
+                process.WaitForExit();
+
+                if (process.ExitCode == 0)
+                {
+                    MessageBox.Show("Samplelist successfully created in " + samplesPath);
+                }
+
             }
         }
     }

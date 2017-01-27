@@ -254,12 +254,6 @@ namespace ssi
                     type = scheme.Attributes["type"].Value;
                 }
 
-                string role = "";
-                if (list.Role != null) role = "#" + list.Role + " "; ;
-                string annotator = "";
-                if (list.Annotator != null) annotator = " #" + list.Annotator;
-
-
                 if (type == AnnoScheme.TYPE.DISCRETE.ToString())
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.DISCRETE;
@@ -558,7 +552,7 @@ namespace ssi
         public static AnnoList LoadFromCSVFile(String filepath, double samplerate = 1, string type = "legacy", string filter = null)
         {
             AnnoList list = new AnnoList();
-            list.FilePath = Path.GetDirectoryName(filepath);
+            list.FilePath = filepath;
             list.Scheme = new AnnoScheme();
 
             try
