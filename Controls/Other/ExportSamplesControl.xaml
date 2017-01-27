@@ -28,7 +28,7 @@
 
         <TextBox Name="userNameTextBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Margin="5" Height="25" Text="DefaultUser"></TextBox>
 
-        <ComboBox Name="annoComboBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="5" Height="25" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ComboBox>
+        <ComboBox  SelectedIndex="0" Name="annoComboBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="5" Height="25" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ComboBox>
         <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Height="28">Annotations appear here after they are stored with "Save Single Tier as"</Label>
         <ListBox Name="signalAvailableListBox" Grid.Row="3" Grid.Column="1" Margin="5" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
         <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center">

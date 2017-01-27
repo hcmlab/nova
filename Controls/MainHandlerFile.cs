@@ -895,9 +895,11 @@ namespace ssi
             ExportSamplesWindow window = new ExportSamplesWindow();
             foreach (AnnoTier tier in this.annoTiers)
             {
-                if (tier.AnnoList.FilePath != null)
+                if (tier.AnnoList.FilePath != null && !tier.AnnoList.LoadedFromDB && (tier.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE ||
+                    tier.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE))
                 {
-                    window.control.annoComboBox.Items.Add(tier.AnnoList.FilePath + "#" + tier.AnnoList.Scheme.Name);
+
+                    window.control.annoComboBox.Items.Add(tier.AnnoList.FilePath);
                 }
             }
             foreach (Signal signal in signals)
