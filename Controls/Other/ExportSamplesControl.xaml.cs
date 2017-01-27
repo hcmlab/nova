@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -119,6 +120,25 @@ namespace ssi
                     }
                     signalPaths.Append(item);
                 }
+
+                if(!File.Exists("anno2samp.exe"))
+                {
+                    try
+                    {
+                        string url = "https://github.com/hcmlab/nova/blob/master/bin/anno2samp.exe?raw=true";
+                        WebClient Client = new WebClient();
+                        Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "anno2samp.exe");
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Tools for creating Samplelists are not available, please check your internet connection.");
+                        return;
+                    }
+                  
+                }
+
+
+
 
                 Process process = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo();
