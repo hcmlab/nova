@@ -18,11 +18,11 @@
             </Setter>
         </Style>
         <SolidColorBrush x:Key="ComboBox.Static.Background" Color="Transparent"/>
-        <SolidColorBrush x:Key="ComboBox.Static.Border" Color="Transparent"/>
+        <SolidColorBrush x:Key="ComboBox.Static.Border" Color="LightGray"/>
         <SolidColorBrush x:Key="ComboBox.Static.Editable.Background" Color="#FFFFFFFF"/>
         <SolidColorBrush x:Key="ComboBox.Static.Editable.Border" Color="#FFABADB3"/>
         <SolidColorBrush x:Key="ComboBox.Static.Editable.Button.Background" Color="Transparent"/>
-        <SolidColorBrush x:Key="ComboBox.Static.Editable.Button.Border" Color="Transparent"/>
+        <SolidColorBrush x:Key="ComboBox.Static.Editable.Button.Border" Color="Black"/>
         <SolidColorBrush x:Key="ComboBox.MouseOver.Glyph" Color="#FF000000"/>
         <LinearGradientBrush x:Key="ComboBox.MouseOver.Background" EndPoint="0,1" StartPoint="0,0">
             <GradientStop Color="#FFECF4FC" Offset="0.0"/>
