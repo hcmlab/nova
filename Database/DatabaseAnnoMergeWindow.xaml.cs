@@ -193,7 +193,7 @@ namespace ssi
         {
             database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
 
-            var sessioncollection = database.GetCollection<BsonDocument>("Sessions");
+            var sessioncollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
             var sessions = sessioncollection.Find(_ => true).ToList();
 
             if (sessions.Count > 0)
@@ -232,10 +232,10 @@ namespace ssi
             List<string> Collections = new List<string>();
 
             database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
-            var sessions = database.GetCollection<BsonDocument>("Sessions");
-            var annotations = database.GetCollection<BsonDocument>("Annotations");
-            var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
-            var roles = database.GetCollection<BsonDocument>("Roles");
+            var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
+            var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
 
             var builder = Builders<BsonDocument>.Filter;
 
@@ -265,23 +265,23 @@ namespace ssi
                 result2 = roles.Find(filterat).Single();
                 if (result2.ElementCount > 0) roleid = result2.GetValue(0).AsObjectId;
             }
-            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
             var filter = builder.Eq("session_id", sessionid);
             var annos = annotations.Find(filter).ToList();
 
             foreach (var anno in annos)
             {
                 var filtera = builder.Eq("_id", anno["role_id"]);
-                var roledb = database.GetCollection<BsonDocument>("Roles").Find(filtera).Single();
+                var roledb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles).Find(filtera).Single();
                 string rolename = roledb.GetValue(1).ToString();
 
                 var filterb = builder.Eq("_id", anno["scheme_id"]);
-                var annotdb = database.GetCollection<BsonDocument>("AnnotationSchemes").Find(filterb).Single();
+                var annotdb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes).Find(filterb).Single();
                 string annoschemename = annotdb.GetValue(1).ToString();
                 string type = annotdb.GetValue(2).ToString();
 
                 var filterc = builder.Eq("_id", anno["annotator_id"]);
-                var annotatdb = database.GetCollection<BsonDocument>("Annotators").Find(filterc).Single();
+                var annotatdb = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators).Find(filterc).Single();
                 string annotatorname = annotatdb.GetValue(1).ToString();
                 string annotatornamefull = annotatdb.GetValue(2).ToString();
 
@@ -304,7 +304,7 @@ namespace ssi
 
         public void GetAnnotationSchemes()
         {
-            var annoschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+            var annoschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var annosch = annoschemes.Find(_ => true).ToList();
 
             if (annosch.Count > 0)
@@ -320,7 +320,7 @@ namespace ssi
 
         public void GetRoles()
         {
-            var rolesdb = database.GetCollection<BsonDocument>("Roles");
+            var rolesdb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
             var roles = rolesdb.Find(_ => true).ToList();
 
             if (roles.Count > 0)

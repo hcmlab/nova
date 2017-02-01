@@ -49,34 +49,17 @@ namespace ssi
 
         public class DatabaseSource
         {
-            public string Server { get; set; }
-            public string Database { get; set; }
-            public string Collection { get; set; }
+            public static ObjectId ZERO = new ObjectId();
+
             public ObjectId OID { get; set; }
-            public bool FromString(string str)
+            public override string ToString()
             {
-                string[] parts = str.Split('|');
-                if (parts.Length == 4 )
-                {
-                    Server = parts[0];
-                    Database = parts[1];
-                    Collection = parts[2];
-                    OID = new ObjectId(parts[3]);
-                    return true;
-                }
-                return false;
-            }
-            public string Path
-            {
-                get { return Server + "|" + Database + "|" + Collection + "|" + OID.ToString(); }
+                return OID.ToString();
             }
 
             public DatabaseSource ()
             {
-                Server = "";
-                Database = "";
-                Collection = "Annotations";
-                OID = new ObjectId();
+                OID = ZERO;
             }
         }
 
@@ -96,7 +79,7 @@ namespace ssi
  
         public bool HasDatabase()
         {
-            return Database.Server != "";
+            return Database.OID.CompareTo(DatabaseSource.ZERO) == 0;
         }
     }
 }

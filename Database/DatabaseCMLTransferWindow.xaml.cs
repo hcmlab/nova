@@ -28,6 +28,7 @@ namespace ssi
             InitializeComponent();
 
             this.handler = handler;
+            //TODO Hard coded mfccs for now, this should be more dynamic in the future.
             StreamListBox.Items.Add("close.mfccdd[-f 0.04 -d 0]");
           
             try
@@ -83,7 +84,7 @@ namespace ssi
 
         public void GetAnnotationSchemes()
         {
-            var annoschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+            var annoschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var annosch = annoschemes.Find(_ => true).ToList();
             
             if (annosch.Count > 0)
@@ -110,7 +111,7 @@ namespace ssi
 
         public void GetRoles()
         {
-            var rolesdb = database.GetCollection<BsonDocument>("Roles");
+            var rolesdb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
             var roles = rolesdb.Find(_ => true).ToList();
 
             if (roles.Count > 0)
@@ -136,7 +137,7 @@ namespace ssi
             AnnotatorListBox.Items.Clear();
 
             List<string> Collections = new List<string>();
-            var annotators = database.GetCollection<BsonDocument>("Annotators");
+            var annotators = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
 
             var documents = annotators.Find(_ => true).ToList();
 
@@ -152,11 +153,11 @@ namespace ssi
         public void GetSessionsTraining()
         {
             List<BsonDocument> presentannotations = new List<BsonDocument>();
-            var sessioncollection = database.GetCollection<BsonDocument>("Sessions");
-            var annotationscollection = database.GetCollection<BsonDocument>("Annotations");
-            var annotationschemescollection = database.GetCollection<BsonDocument>("AnnotationSchemes");
-            var rolescollection = database.GetCollection<BsonDocument>("Roles");
-            var annotatorscollection = database.GetCollection<BsonDocument>("Annotators");
+            var sessioncollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var annotationscollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var annotationschemescollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
+            var rolescollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+            var annotatorscollection = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
             if(TierListBox.SelectedItem != null && RoleListBox.SelectedItem != null && AnnotatorListBox.SelectedItem != null)
             {
 
@@ -187,7 +188,7 @@ namespace ssi
 
                 foreach (var annotation in presentannotations)
                 {
-                    string sessionname = FetchDBRef(database, "Sessions", "name", annotation["session_id"].AsObjectId);
+                    string sessionname = FetchDBRef(database, DatabaseDefinitionCollections.Sessions, "name", annotation["session_id"].AsObjectId);
 
                       //TODO make this more flexible in the future to work with "not noxi" data.
                      bool wavfileloaded = File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + sessionname + "\\Expert_close.wav")
@@ -217,7 +218,7 @@ namespace ssi
         public void GetSessionsForward()
 
         {
-            var sessioncollection = database.GetCollection<BsonDocument>("Sessions");
+            var sessioncollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
             var sessions = sessioncollection.Find(_ => true).ToList();
 
             if (sessions.Count > 0)
@@ -226,6 +227,8 @@ namespace ssi
                 List<string> items = new List<string>();
                 foreach (var c in sessions)
                 {
+                    //NOXI Database only, will be more general in the future.
+
                     bool wavfileloaded = File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + c["name"].ToString() + "\\Expert_close.wav")
                    && File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + c["name"].ToString() + "\\Novice_close.wav");
 
@@ -309,9 +312,9 @@ namespace ssi
 
             string scheme = TierListBox.SelectedItem.ToString();
             string annotatorfullname = AnnotatorListBox.SelectedItem.ToString();
-            var annotatorscollection = database.GetCollection<BsonDocument>("Annotators");
+            var annotatorscollection = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
             ObjectId annotatorid = GetIdFromName(annotatorscollection, annotatorfullname, "fullname");
-            string annotator = FetchDBRef(database, "Annotators", "name", annotatorid);
+            string annotator = FetchDBRef(database,  DatabaseDefinitionCollections.Annotators, "name", annotatorid);
 
             double confidence = -1.0;
             if (ConfidenceTextBox.IsEnabled)
