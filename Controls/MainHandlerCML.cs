@@ -25,9 +25,9 @@ namespace ssi
             string ip = split[0];
             string port = split[1];
             string database = Properties.Settings.Default.DatabaseName;
-            string role = tier.AnnoList.Role;
+            string role = tier.AnnoList.Meta.Role;
             string scheme = tier.AnnoList.Scheme.Name;
-            string annotator = tier.AnnoList.Annotator;
+            string annotator = tier.AnnoList.Meta.Annotator;
 
             bool isTrained = false;
             bool isForward = false;

@@ -15,7 +15,7 @@ namespace ssi
 
         #region SAVE TO FILE
 
-        public bool SaveToFile(string filePath, string delimiter = ";")
+        private bool saveToFile(string filePath, string delimiter = ";")
         {
             Dictionary<string, string> LabelIds = new Dictionary<string, string>();
 
@@ -25,7 +25,7 @@ namespace ssi
                 sw.WriteLine("<?xml version=\"1.0\" ?>");
                 sw.WriteLine("<annotation ssi-v=\"3\">");
 
-                sw.WriteLine("    <info ftype=\"" + this.FileType + "\" size=\"" + this.Count + "\" />");
+                sw.WriteLine("    <info ftype=\"" + Source.File.Type.ToString() + "\" size=\"" + this.Count + "\" />");
                 sw.WriteLine("    <meta annotator=\"" + Properties.Settings.Default.Annotator + "\"/>");
                 if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {
@@ -63,7 +63,7 @@ namespace ssi
 
             try
             {
-                if (FileType == "ASCII")
+                if (Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                 {
                     StreamWriter sw = new StreamWriter(filePath + "~", false, System.Text.Encoding.Default);
                     if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -152,7 +152,7 @@ namespace ssi
 
                 HasChanged = false;
                 AnnoList newAnno = new AnnoList();
-                newAnno.FilePath = filePath;
+                newAnno.Source.File.Path = filePath;
             }
             catch (Exception ex)
             {
@@ -165,9 +165,11 @@ namespace ssi
 
         public bool SaveToCSVFile(string delimiter = ";")
         {
-            if (filePath == null || filePath.Split('.')[1] != "csv")
+            string filePath = Source.File.Path;
+
+            if (filePath == "" || filePath.Split('.')[1] != "csv")
             {
-                filePath = FileTools.SaveFileDialog(Scheme.Name, ".csv", "Annotation (*.csv)|*.csv", Directory);
+                filePath = filePath.Split('.')[0] + ".csv";
             }
 
             if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -221,7 +223,7 @@ namespace ssi
         {
             AnnoList list = new AnnoList();
 
-            list.FilePath = filepath;
+            list.Source.File.Path = filepath;
             list.Scheme = new AnnoScheme();
             list.Scheme.Labels = new List<AnnoScheme.Label>();
 
@@ -233,14 +235,14 @@ namespace ssi
                 XmlNode annotation = doc.SelectSingleNode("annotation");
 
                 XmlNode info = annotation.SelectSingleNode("info");
-                list.FileType = info.Attributes["ftype"].Value;
-                int size = Int32.Parse(info.Attributes["size"].Value);
+                list.Source.File.Type = info.Attributes["ftype"].Value == AnnoSource.FileSource.TYPE.ASCII.ToString() ? AnnoSource.FileSource.TYPE.ASCII : AnnoSource.FileSource.TYPE.BINARY;
+                int size = int.Parse(info.Attributes["size"].Value);
 
                 XmlNode meta = annotation.SelectSingleNode("meta");
                 if (meta != null)
                 {
-                    if (meta.Attributes["role"] != null) list.Role = meta.Attributes["role"].Value;
-                    if (meta.Attributes["annotator"] != null) list.Annotator = meta.Attributes["annotator"].Value;
+                    if (meta.Attributes["role"] != null) list.Meta.Role = meta.Attributes["role"].Value;
+                    if (meta.Attributes["annotator"] != null) list.Meta.Annotator = meta.Attributes["annotator"].Value;
                 }
 
                 XmlNode scheme = annotation.SelectSingleNode("scheme");
@@ -319,7 +321,7 @@ namespace ssi
                 if (File.Exists(filepath + "~"))
 
                 {
-                    if (list.FileType == "ASCII")
+                    if (list.Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                     {
                         StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.Default);
                         string line = null;
@@ -381,7 +383,7 @@ namespace ssi
                         }
                         sr.Close();
                     }
-                    else if (list.FileType == "BINARY")
+                    else if (list.Source.File.Type == AnnoSource.FileSource.TYPE.BINARY)
                     {
                         BinaryReader binaryReader = new BinaryReader(File.Open(filepath + "~", FileMode.Open));
                         long length = (binaryReader.BaseStream.Length);
@@ -552,7 +554,7 @@ namespace ssi
         public static AnnoList LoadFromCSVFile(String filepath, double samplerate = 1, string type = "legacy", string filter = null)
         {
             AnnoList list = new AnnoList();
-            list.FilePath = filepath;
+            list.Source.File.Path = filepath;
             list.Scheme = new AnnoScheme();
 
             try
@@ -717,7 +719,7 @@ namespace ssi
                     else tierid = tier.Attributes[2].Value.ToString();
 
                     list[i] = new AnnoList();
-                    list[i].FilePath = filepath;
+                    list[i].Source.File.Path = filepath;
 
                     foreach (XmlNode annotation in tier.ChildNodes)
                     {
@@ -762,7 +764,7 @@ namespace ssi
             foreach (XmlNode annotrack in annotracks)
             {
                 list[index] = new AnnoList();
-                list[index].FilePath = filepath;
+                list[index].Source.File.Path = filepath;
 
                 foreach (XmlNode annotation in annotrack.ChildNodes)
                 {

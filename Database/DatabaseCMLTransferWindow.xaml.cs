@@ -30,10 +30,6 @@ namespace ssi
             this.handler = handler;
             StreamListBox.Items.Add("close.mfccdd[-f 0.04 -d 0]");
           
-
-            connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-
-            dbh = new DatabaseHandler(connectionstring);
             try
             {
                 mongo = new MongoClient(connectionstring);
@@ -44,7 +40,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + ":" + mongo.Settings.Server.Port + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = dbh.checkAuth(Properties.Settings.Default.MongoDBUser, "admin");
+                authlevel = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, "admin");
                 database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
                 if (authlevel > 0)
                 {
@@ -79,7 +75,7 @@ namespace ssi
                 else
                 {
                     MessageBox.Show("You have no rights to access the database list");
-                    authlevel = dbh.checkAuth(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
+                    authlevel = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
                 }
             }
             catch { };

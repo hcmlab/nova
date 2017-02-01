@@ -12,26 +12,24 @@ namespace ssi
     public partial class DatabaseSelectionWindow : Window
     {
         private string collection;
-        private bool isScheme = false;
+        private bool allowEdit = false;
         private MongoClient mongo;
         private string connectionString = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-        private AnnoTier annoTier = null;
+        private AnnoList annoList = null;
         private HashSet<AnnoScheme.Label> usedlabels = null;
-        private AnnoScheme.TYPE schemeType = AnnoScheme.TYPE.DISCRETE;
 
-        public DatabaseSelectionWindow(List<string> strings, bool showadminbuttons, string title = "Select", string Collection = "none", AnnoScheme.TYPE schemeType = AnnoScheme.TYPE.DISCRETE, bool isScheme = false, AnnoTier annoTier = null)
+        public DatabaseSelectionWindow(List<string> strings, bool showadminbuttons, string title = "Select", string Collection = "none", bool allowEdit = false, AnnoList annoList = null)
         {
             InitializeComponent();
             this.titlelabel.Content = title;
             this.collection = Collection;
-            this.isScheme = isScheme;
-            this.annoTier = annoTier;
-            this.schemeType = schemeType;
+            this.allowEdit = allowEdit;
+            this.annoList = annoList;
             if (showadminbuttons)
             {
                 this.Add.Visibility = Visibility.Visible;
                 this.Delete.Visibility = Visibility.Visible;
-                if (this.isScheme == true) this.Edit.Visibility = Visibility.Visible;
+                if (this.allowEdit == true) this.Edit.Visibility = Visibility.Visible;
             }
             else
             {
@@ -82,7 +80,7 @@ namespace ssi
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            if (isScheme)
+            if (allowEdit)
             {
                 string name = null;
                 Brush col1 = null;
@@ -91,17 +89,16 @@ namespace ssi
                 string min = null;
                 string max = null;
 
-                if (annoTier != null)
+                if (annoList != null)
                 {
-                    name = annoTier.AnnoList.Scheme.Name;
+                    name = annoList.Scheme.Name;
 
-                    schemeType = annoTier.AnnoList.Scheme.Type;
-
-                    if (annoTier.isDiscreteOrFree)
+                    if (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE ||
+                        annoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                     {
                         usedlabels = new HashSet<AnnoScheme.Label>();
 
-                        foreach (AnnoListItem item in annoTier.AnnoList)
+                        foreach (AnnoListItem item in annoList)
                         {
                             AnnoScheme.Label l = new AnnoScheme.Label(item.Label, item.Color);
                             bool detected = false;
@@ -115,19 +112,19 @@ namespace ssi
 
                             if (detected == false) usedlabels.Add(l);
                         }
-                        col1 = annoTier.BackgroundBrush;
+                        col1 = new SolidColorBrush(annoList.Scheme.MinOrBackColor);
                     }
                     else
                     {
-                        col1 = new SolidColorBrush(((LinearGradientBrush)annoTier.ContinuousBrush).GradientStops[0].Color);
-                        col2 = new SolidColorBrush(((LinearGradientBrush)annoTier.ContinuousBrush).GradientStops[1].Color);
-                        sr = (1000.0 / (annoTier.AnnoList.Scheme.SampleRate * 1000.0)).ToString();
-                        min = annoTier.AnnoList.Scheme.MinScore.ToString();
-                        max = annoTier.AnnoList.Scheme.MaxScore.ToString();
+                        col1 = new SolidColorBrush(annoList.Scheme.MinOrBackColor);
+                        col2 = new SolidColorBrush(annoList.Scheme.MaxOrForeColor);
+                        sr = (1000.0 / (annoList.Scheme.SampleRate * 1000.0)).ToString();
+                        min = annoList.Scheme.MinScore.ToString();
+                        max = annoList.Scheme.MaxScore.ToString();
                     }
                 }
 
-                storeAnnotationSchemetoDatabase(name, usedlabels, schemeType, col1, col2, sr, min, max);
+                storeAnnotationSchemetoDatabase(name, usedlabels, annoList.Scheme.Type, col1, col2, sr, min, max);
             }
             else
             {
@@ -146,7 +143,7 @@ namespace ssi
 
         private void storeAnnotationSchemetoDatabase(string name = null, HashSet<AnnoScheme.Label> _usedlabels = null, AnnoScheme.TYPE isDiscrete = AnnoScheme.TYPE.DISCRETE, Brush col1 = null, Brush col2 = null, string sr = null, string min = null, string max = null)
         {
-            DatabaseAnnoSchemeWindow dbas = new DatabaseAnnoSchemeWindow(name, usedlabels, schemeType, col1, col2, sr, min, max);
+            DatabaseAnnoSchemeWindow dbas = new DatabaseAnnoSchemeWindow(name, usedlabels, annoList.Scheme.Type, col1, col2, sr, min, max);
             dbas.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbas.ShowDialog();
 
@@ -221,8 +218,7 @@ namespace ssi
             string min = null;
             string max = null;
 
-            DatabaseHandler dh = new DatabaseHandler(connectionString);
-            AnnoScheme a = dh.GetAnnotationScheme(DataBaseResultsBox.SelectedItem.ToString(), schemeType);
+            AnnoScheme a = DatabaseHandler.GetAnnotationScheme(DataBaseResultsBox.SelectedItem.ToString(), annoList.Scheme.Type);
             AnnoScheme.TYPE annoType = a.Type;            
 
             col1 = new SolidColorBrush(a.MinOrBackColor);

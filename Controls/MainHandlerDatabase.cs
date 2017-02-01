@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -53,13 +54,11 @@ namespace ssi
 
                 foreach (AnnoTier track in annoTiers)
                 {
-                    if (track.AnnoList.LoadedFromDB && (track.AnnoList.HasChanged || isfinished))
+                    if (track.AnnoList.Source.HasDatabase() && (track.AnnoList.HasChanged || isfinished))
                     {
                         try
                         {
-                            DatabaseHandler db = new DatabaseHandler("mongodb://" + login + Properties.Settings.Default.DatabaseAddress);
-
-                            string annotator = db.StoreToDatabase(Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, track, loadedDBmedia, isfinished);
+                            string annotator = DatabaseHandler.StoreToDatabase(track.AnnoList, loadedDBmedia, isfinished);
                             if (annotator != null)
                             {
                                 track.AnnoList.HasChanged = false;
@@ -131,9 +130,6 @@ namespace ssi
                     }
                 }
 
-                string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
-                DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.DatabaseAddress);
-
                 control.databaseSaveSessionMenu.IsEnabled = true;
 
                 if (annotations != null)
@@ -143,7 +139,7 @@ namespace ssi
                     control.UpdateLayout();
                     control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
-                    List<AnnoList> annoLists = db.LoadFromDatabase(annotations, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+                    List<AnnoList> annoLists = DatabaseHandler.LoadFromDatabase(annotations, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
                     control.navigator.Statusbar.Content = "Database Session: " + (Properties.Settings.Default.LastSessionId).Replace('_', '-');
                     try
                     {
@@ -217,18 +213,15 @@ namespace ssi
             control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
             DatabaseAnno s = new DatabaseAnno();
-            s.Role = tier.AnnoList.Role;
+            s.Role = tier.AnnoList.Meta.Role;
             s.AnnoScheme = tier.AnnoList.Scheme.Name;
-            s.AnnotatorFullname = tier.AnnoList.AnnotatorFullName;
-            s.Annotator = tier.AnnoList.Annotator;
+            s.AnnotatorFullname = tier.AnnoList.Meta.AnnotatorFullName;
+            s.Annotator = tier.AnnoList.Meta.Annotator;
 
             List<DatabaseAnno> list = new List<DatabaseAnno>();
             list.Add(s);
 
-            string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
-            DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.DatabaseAddress);
-
-            List<AnnoList> annos = db.LoadFromDatabase(list, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> annos = DatabaseHandler.LoadFromDatabase(list, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
             double maxdur = 0;
 
             if (annos[0].Count > 0) maxdur = annos[0][annos[0].Count - 1].Stop;
@@ -257,30 +250,32 @@ namespace ssi
         private void databaseAddNewAnnotation(AnnoScheme.TYPE annoType)
         {
             AnnoList annoList = new AnnoList();
-            annoList.LoadedFromDB = true;
-            string l = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
-            DatabaseHandler db = new DatabaseHandler("mongodb://" + l + Properties.Settings.Default.DatabaseAddress);
 
-            annoList.Role = db.LoadRoles(Properties.Settings.Default.DatabaseName, null);
-            if (annoList.Role == null)
+            annoList.Meta.Role = DatabaseHandler.LoadRoles(null);
+            if (annoList.Meta.Role == null)
             {
                 return;
             }
 
-            string annoScheme = db.SelectAnnotationScheme(Properties.Settings.Default.DatabaseName, null, annoType);
+            string annoScheme = DatabaseHandler.SelectAnnotationScheme(null);
             if (annoScheme == null)
             {
                 return;
             }
 
-            annoList.Scheme = db.GetAnnotationScheme(annoScheme, annoType);
+            annoList.Scheme = DatabaseHandler.GetAnnotationScheme(annoScheme, annoType);
             annoList.Scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
 
-            ObjectId annotatid = db.GetObjectID(db.GetDatabase(), "Annotators", "name", Properties.Settings.Default.MongoDBUser);
-            annoList.Annotator = Properties.Settings.Default.MongoDBUser;
-            annoList.AnnotatorFullName = db.FetchDBRef(db.GetDatabase(), "Annotators", "fullname", annotatid);
+            IMongoDatabase database = DatabaseHandler.Database;
+
+            ObjectId annotatid = DatabaseHandler.GetObjectID(database, "Annotators", "name", Properties.Settings.Default.MongoDBUser);
+            annoList.Meta.Annotator = Properties.Settings.Default.MongoDBUser;
+            annoList.Meta.AnnotatorFullName = DatabaseHandler.FetchDBRef(database, "Annotators", "fullname", annotatid);
             addAnnoTier(annoList);
             control.annoListControl.editComboBox.SelectedIndex = 0;
+
+            annoList.Source.Database.Server = Properties.Settings.Default.DatabaseAddress;
+            annoList.Source.Database.Database = Properties.Settings.Default.DatabaseName;
         }
 
         private void databaseShowDownloadDirectory_Click(object sender, RoutedEventArgs e)

@@ -57,8 +57,7 @@ namespace ssi
                             int context = 0;
                             if (int.TryParse(ContextTextBox.Text, out context))
                             {
-                                DatabaseHandler db = new DatabaseHandler("mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress);
-                                db.StoreToDatabase(Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, tier, handler.loadedDBmedia, false);
+                                DatabaseHandler.StoreToDatabase(tier.AnnoList, handler.loadedDBmedia, false);
 
                                 double confidence = -1.0;
                                 if (ConfidenceTextBox.IsEnabled)

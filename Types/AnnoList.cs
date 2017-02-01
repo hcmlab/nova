@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Windows;
 
 namespace ssi
 {
@@ -12,48 +14,51 @@ namespace ssi
             STRING,
         }
 
-        private string filePath = null;
-        private string fileName = null;
-
-
-        public bool LoadedFromDB { get; set; }
-
-        public string Role { get; set; }
-
-        public string FileType { get; set; }
-
-        public string Subject { get; set; }
-
-        public string Annotator { get; set; }
-
-        public string AnnotatorFullName { get; set; }
-
-        public string FilePath
-        {
-            get { return filePath; }
-            set
-            {
-                filePath = value;
-                string[] tmp = filePath.Split('\\');
-                fileName = tmp[tmp.Length - 1];
-            }
-        }
-
-        public string FileName
-        {
-            get { return fileName; }
-        }
-
-        public string Directory
-        {
-            get { return Path.GetDirectoryName(filePath); }
-        }
-
+        public AnnoSource Source { get; set; }
+   
         public AnnoScheme Scheme { get; set; }
+
+        public AnnoMeta Meta { get; set; }
 
         public AnnoList()
             : base()
         {
+            Source = new AnnoSource();
+            Scheme = new AnnoScheme();
+            Meta = new AnnoMeta();
+        }
+
+        public bool Save(List<DatabaseMediaInfo> loadedMedia = null)
+        {
+            bool saved = false;
+
+            if (Source.HasFile())
+            {
+                if (saveToFile(Source.File.Path))
+                {
+                    saved = true;
+                }
+            }
+
+            if(Source.HasDatabase())
+            {
+                if (DatabaseHandler.StoreToDatabase(this, loadedMedia) != null)
+                {
+                    saved = true;
+                }
+            }
+
+            if (!saved)
+            {
+                string path = FileTools.SaveFileDialog(Scheme.Name, ".annotation", "Annotation(*.annotation)|*.annotation", "");
+                if (path != null)
+                {
+                    Source.File.Path = path;
+                    Save();
+                }
+            }
+
+            return saved;
         }
 
     }
