@@ -14,9 +14,9 @@ namespace ssi
     /// </summary>
     public partial class DatabaseAnnoMainWindow : Window
     {
-        private MongoClient mongo;
-        private IMongoDatabase database;
-        private string connectionstring = "mongodb://127.0.0.1:27017";
+        IMongoDatabase database;
+        MongoClient mongo;
+
         private int authlevel = 0;
         private int localauthlevel = 0;
         private List<DatabaseMediaInfo> ci;
@@ -25,16 +25,13 @@ namespace ssi
         private List<DatabaseAnno> AnnoItems = new List<DatabaseAnno>();
         private List<ObjectId> AnnotationMediaIDS = new List<ObjectId>();
         private CancellationTokenSource cts = new CancellationTokenSource();
-        DatabaseHandler dbh;
-
-
-
-
         public DatabaseAnnoMainWindow()
         {
             InitializeComponent();
 
-           
+            database = DatabaseHandler.Database;
+            mongo = DatabaseHandler.Client;
+
             this.db_server.Text = Properties.Settings.Default.DatabaseAddress;
             this.db_login.Text = Properties.Settings.Default.MongoDBUser;
             this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
@@ -51,24 +48,21 @@ namespace ssi
 
             if (Autologin.IsChecked == true)
             {
-                ConnecttoDB();
+                ConnectToDB();
             }
             showonlymine.IsChecked = Properties.Settings.Default.DatabaseShowOnlyMine;
             showonlyunfinished.IsChecked = Properties.Settings.Default.DatabaseShowOnlyFinished;
         }
 
-        private void ConnecttoDB()
+        private void ConnectToDB()
         {
             Properties.Settings.Default.DatabaseAddress = this.db_server.Text;
             Properties.Settings.Default.MongoDBUser = this.db_login.Text;
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
             Properties.Settings.Default.Save();
 
-            connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-            dbh = new DatabaseHandler(connectionstring);
             try
             {
-                mongo = new MongoClient(connectionstring);
                 int count = 0;
                 while (mongo.Cluster.Description.State.ToString() == "Disconnected")
                 {
@@ -76,7 +70,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + ":" + mongo.Settings.Server.Port + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = dbh.checkAuth(this.db_login.Text, "admin");
+                authlevel = DatabaseHandler.CheckAuthentication(this.db_login.Text, "admin");
 
                 if (authlevel > 0)
                 {
@@ -85,11 +79,10 @@ namespace ssi
                 }
                 else
                 { MessageBox.Show("You have no rights to access the database list");
-                authlevel = dbh.checkAuth(this.db_login.Text, Properties.Settings.Default.DatabaseName);
+                authlevel = DatabaseHandler.CheckAuthentication(this.db_login.Text, Properties.Settings.Default.DatabaseName);
                 }
             }
             catch (MongoException e)
-
             {
                 MessageBox.Show(e.Message, "Connection failed", MessageBoxButton.OK, MessageBoxImage.Warning);
                 mongo.Cluster.Dispose();
@@ -100,7 +93,7 @@ namespace ssi
 
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
-            ConnecttoDB();
+            ConnectToDB();
         }
 
         private void DataBasResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -110,7 +103,7 @@ namespace ssi
                 Properties.Settings.Default.DatabaseName = DataBasResultsBox.SelectedItem.ToString();
                 Properties.Settings.Default.Save();
 
-                localauthlevel = Math.Max(dbh.checkAuth(this.db_login.Text, "admin"), dbh.checkAuth(this.db_login.Text, Properties.Settings.Default.DatabaseName));
+                localauthlevel = Math.Max(DatabaseHandler.CheckAuthentication(this.db_login.Text, "admin"), DatabaseHandler.CheckAuthentication(this.db_login.Text, Properties.Settings.Default.DatabaseName));
                 authlevel = localauthlevel;
                 if (localauthlevel > 1) GetSessions();
             }
@@ -143,7 +136,6 @@ namespace ssi
             files.Clear();
             MediaResultBox.Items.Clear();
             ci = GetMediaFromDB(Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId);
-
 
             var colllection = database.GetCollection<BsonDocument>("Annotations");
             var media = database.GetCollection<BsonDocument>("Media");
@@ -244,7 +236,7 @@ namespace ssi
         {
             DataBasResultsBox.Items.Clear();
 
-            using (var cursor = await mongo.ListDatabasesAsync())
+            using (var cursor = await DatabaseHandler.Client.ListDatabasesAsync())
             {
                 await cursor.ForEachAsync(d => addDbtoList(d["name"].ToString()));
             }
@@ -253,7 +245,7 @@ namespace ssi
 
         public void addDbtoList(string name)
         {
-            if (name != "admin" && name != "local" && dbh.checkAuth(Properties.Settings.Default.MongoDBUser, name) >   1)
+            if (name != "admin" && name != "local" && DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, name) >   1)
             {
                 DataBasResultsBox.Items.Add(name);
             }
@@ -262,9 +254,7 @@ namespace ssi
         public void GetSessions()
 
         {
-            database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
-
-            var sessioncollection = database.GetCollection<BsonDocument>("Sessions");
+            var sessioncollection = DatabaseHandler.Database.GetCollection<BsonDocument>("Sessions");
             var sessions = sessioncollection.Find(_ => true).ToList();
 
             if (sessions.Count > 0)
@@ -319,9 +309,8 @@ namespace ssi
             List<DatabaseAnno> items = new List<DatabaseAnno>();
             List<string> Collections = new List<string>();
 
-            database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
-            var sessions = database.GetCollection<BsonDocument>("Sessions");
-            var annotations = database.GetCollection<BsonDocument>("Annotations");
+            var sessions = DatabaseHandler.Database.GetCollection<BsonDocument>("Sessions");
+            var annotations = DatabaseHandler.Database.GetCollection<BsonDocument>("Annotations");
 
             // BsonDocument documents;
             var builder = Builders<BsonDocument>.Filter;
@@ -474,9 +463,11 @@ namespace ssi
             ObjectId id = new ObjectId();
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq(Name, name);
-            var database = collection.Find(filter).ToList();
-            if (database.Count > 0) id = database[0].GetValue(0).AsObjectId;
-
+            var result = collection.Find(filter).ToList();
+            if (result.Count > 0)
+            {
+                id = result[0].GetValue(0).AsObjectId;
+            }
             return id;
         }
 
@@ -889,7 +880,7 @@ namespace ssi
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if(e.Key == System.Windows.Input.Key.Return) ConnecttoDB(); 
+            if(e.Key == System.Windows.Input.Key.Return) ConnectToDB(); 
         }
 
         private void db_server_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)

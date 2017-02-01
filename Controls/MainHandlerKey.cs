@@ -28,8 +28,7 @@ namespace ssi
                 {
                     if (AnnoTierStatic.Selected != null && Properties.Settings.Default.CMLDefaultStream != null)
                     {
-                        DatabaseHandler db = new DatabaseHandler("mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress);
-                        db.StoreToDatabase(Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser, AnnoTierStatic.Selected, loadedDBmedia, false);
+                        DatabaseHandler.StoreToDatabase(AnnoTierStatic.Selected.AnnoList, loadedDBmedia, false);
                         CompleteTier(Properties.Settings.Default.CMLContext, AnnoTierStatic.Selected, Properties.Settings.Default.CMLDefaultStream, Properties.Settings.Default.CMLDefaultConf, Properties.Settings.Default.CMLDefaultGap, Properties.Settings.Default.CMLDefaultMinDur);
                     }
 
@@ -378,7 +377,7 @@ namespace ssi
                     {
                         databaseStore(true);
                     }
-                    else saveAnnoAs();
+                    else saveSelectedAnnoAs();
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
@@ -386,7 +385,7 @@ namespace ssi
                     {
                         databaseStore();
                     }
-                    else saveAnno();
+                    else saveSelectedAnno();
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
@@ -428,7 +427,7 @@ namespace ssi
                         if (DatabaseLoaded)
                             databaseReload(track);
                         else
-                            reloadAnnoTier(track.AnnoList.FilePath);
+                            reloadAnnoTier(track.AnnoList.Source.File.Path);
                     }
                     e.Handled = true;
                 }

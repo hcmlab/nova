@@ -19,7 +19,6 @@ namespace ssi
         private string connectionstring = "mongodb://127.0.0.1:27017";
         private int authlevel = 0;
         private string lastRole = "";
-        DatabaseHandler dbh;
 
         public DatabaseAdminMainWindow()
         {
@@ -233,7 +232,7 @@ namespace ssi
             Properties.Settings.Default.Save();
 
             connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-            dbh = new DatabaseHandler(connectionstring);
+
             try
             {
                 mongo = new MongoClient(connectionstring);
@@ -244,7 +243,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = dbh.checkAuth(this.db_login.Text, "admin");
+                authlevel = DatabaseHandler.CheckAuthentication(this.db_login.Text, "admin");
 
                 if (authlevel > 0)
                 {
@@ -284,8 +283,6 @@ namespace ssi
             this.Close();
         }
 
-    
-
         public void GetDatabase()
         {
             DataBasResultsBox.Items.Clear();
@@ -294,7 +291,7 @@ namespace ssi
             foreach (var c in databases)
             {
                 string db = c.GetElement(0).Value.ToString();
-                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && dbh.checkAuth(Properties.Settings.Default.MongoDBUser, db) > 2)
+                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, db) > 2)
                     DataBasResultsBox.Items.Add(db);
                
             }
@@ -457,8 +454,7 @@ namespace ssi
                 Properties.Settings.Default.DatabaseName = DataBasResultsBox.SelectedItem.ToString();
                 Properties.Settings.Default.Save();
 
-             
-                authlevel = dbh.checkAuth(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
+                authlevel = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
                 if (authlevel > 2)
                 {
                     GetSessions();
@@ -1166,7 +1162,7 @@ namespace ssi
 
         private void DropUser(string user)
         {
-            int auth = dbh.checkAuth(user, "admin");
+            int auth = DatabaseHandler.CheckAuthentication(user, "admin");
 
             if(user != Properties.Settings.Default.MongoDBUser && auth < 4)
             {

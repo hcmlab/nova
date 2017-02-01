@@ -50,11 +50,9 @@ namespace ssi
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
             Properties.Settings.Default.Save();
 
-            connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-
             try
             {
-                mongo = new MongoClient(connectionstring);
+                MongoClient mongo = DatabaseHandler.Client;
                 int count = 0;
                 while (mongo.Cluster.Description.State.ToString() == "Disconnected")
                 {
@@ -361,8 +359,7 @@ namespace ssi
         {
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
-            DatabaseHandler db = new DatabaseHandler(connectionstring);
-            List<AnnoList> al = db.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
             AnnoList merge = new AnnoList();
             double[] array = new double[al[0].Count];
             foreach (AnnoList a in al)
@@ -388,8 +385,7 @@ namespace ssi
         {
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
-            DatabaseHandler db = new DatabaseHandler(connectionstring);
-            List<AnnoList> al = db.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
 
             AnnoList merge = new AnnoList();
             double[] array = new double[al[0].Count];
@@ -440,11 +436,9 @@ namespace ssi
 
         private void RMSE()
         {
-            DatabaseHandler db = new DatabaseHandler(connectionstring);
-
             if (AnnotationResultBox.SelectedItems.Count == 2)
             {
-                List<AnnoList> al = db.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+                List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
 
                 double sum_sq = 0;
                 double mse;
@@ -453,7 +447,7 @@ namespace ssi
 
                 double[] array = new double[al[0].Count];
 
-                if (al[0].Annotator != null && al[0].Annotator.Contains("RMS"))
+                if (al[0].Meta.Annotator != null && al[0].Meta.Annotator.Contains("RMS"))
                 {
                     for (int i = 0; i < al[0].Count; i++)
                     {
@@ -465,7 +459,7 @@ namespace ssi
                     mse = (double)sum_sq / (al[0].Count);
                     MessageBox.Show("The Mean Square Error for Annotation " + al[1].Scheme.Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
                 }
-                else if (al[1].Annotator != null && al[1].Annotator.Contains("RMS"))
+                else if (al[1].Meta.Annotator != null && al[1].Meta.Annotator.Contains("RMS"))
                 {
                     for (int i = 0; i < al[0].Count; i++)
                     {
