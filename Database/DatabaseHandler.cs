@@ -102,7 +102,7 @@ namespace ssi
 
             MongoClient mongo = Client;
             IMongoDatabase database = Database;
-            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("Roles");
+            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
 
             var sessions = collection.Find(_ => true).ToList();
 
@@ -118,7 +118,7 @@ namespace ssi
 
             string name = annoList.Scheme.Name;
 
-            DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(roles, hasauth, "Tier: " + name + ". Who is annotated? ", "Roles");
+            DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(roles, hasauth, "Tier: " + name + ". Who is annotated? ", DatabaseDefinitionCollections.Roles);
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             dbw.ShowDialog();
 
@@ -137,7 +137,7 @@ namespace ssi
 
             MongoClient mongo = Client;
             IMongoDatabase database = Database;
-            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("AnnotationSchemes");
+            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
 
             var sessions = collection.Find(_ => true).ToList();
 
@@ -157,7 +157,7 @@ namespace ssi
 
             string name = annoList.Scheme.Name;
 
-            DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(AnnotationSchemes, hasauth, "Tier: " + name + ". What is annotated? ", "AnnotationSchemes", true, annoList);
+            DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(AnnotationSchemes, hasauth, "Tier: " + name + ". What is annotated? ", DatabaseDefinitionCollections.Schemes, true, annoList);
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             dbw.ShowDialog();
 
@@ -176,7 +176,7 @@ namespace ssi
             AnnoScheme scheme = new AnnoScheme();
             scheme.Type = annoType;
 
-            var annoSchemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+            var annoSchemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var builder = Builders<BsonDocument>.Filter;
 
             FilterDefinition<BsonDocument> annoSchemeFilter = builder.Eq("name", annoName) & builder.Eq("type", annoType.ToString());
@@ -250,12 +250,12 @@ namespace ssi
 
             BsonArray labels = new BsonArray();
 
-            var annotations = database.GetCollection<BsonDocument>("Annotations");
-            var annotators = database.GetCollection<BsonDocument>("Annotators");
-            var sessions = database.GetCollection<BsonDocument>("Sessions");
-            var roles = database.GetCollection<BsonDocument>("Roles");
-            var medias = database.GetCollection<BsonDocument>("Media");
-            var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var annotators = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators);
+            var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+            var medias = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
+            var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
 
             string lowb = "", highb = "";
             if (!(annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE ||
@@ -308,8 +308,8 @@ namespace ssi
 
                 if (annoList.Meta.AnnotatorFullName != null)
                 {
-                    ObjectId annotatid = GetObjectID(database, "Annotators", "fullname", annoList.Meta.AnnotatorFullName);
-                    annoList.Meta.Annotator = FetchDBRef(database, "Annotators", "name", annotatid);
+                    ObjectId annotatid = GetObjectID(database, DatabaseDefinitionCollections.Annotators, "fullname", annoList.Meta.AnnotatorFullName);
+                    annoList.Meta.Annotator = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "name", annotatid);
                 }
                 else if (annoList.Meta.Annotator == "" && annoList.Meta.AnnotatorFullName == "")
                 {
@@ -321,8 +321,8 @@ namespace ssi
                 {
                     try
                     {
-                        ObjectId annotatid = GetObjectID(database, "Annotators", "name", annoList.Meta.Annotator);
-                        annoList.Meta.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid);
+                        ObjectId annotatid = GetObjectID(database, DatabaseDefinitionCollections.Annotators, "name", annoList.Meta.Annotator);
+                        annoList.Meta.AnnotatorFullName = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
                     }
                     catch
                     {
@@ -336,8 +336,8 @@ namespace ssi
                 try
                 {
                     annoList.Meta.Annotator = dbuser;
-                    ObjectId annotatid = GetObjectID(database, "Annotators", "name", dbuser);
-                    annoList.Meta.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid);
+                    ObjectId annotatid = GetObjectID(database, DatabaseDefinitionCollections.Annotators, "name", dbuser);
+                    annoList.Meta.AnnotatorFullName = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
                 }
                 catch
                 {
@@ -526,9 +526,9 @@ namespace ssi
             MongoClient mongo = new MongoClient(ServerConnectionString);
             IMongoDatabase database = mongo.GetDatabase(databaseName);
 
-            var collection = database.GetCollection<BsonDocument>("Annotations");
-            var roles = database.GetCollection<BsonDocument>("Roles");
-            var annoSchemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+            var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+            var annoSchemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
 
             List<AnnoList> annoLists = new List<AnnoList>();
 
@@ -537,20 +537,20 @@ namespace ssi
                 BsonElement value;
                 AnnoList annoList = new AnnoList();
 
-                ObjectId roleid = GetObjectID(database, "Roles", "name", anno.Role);
-                string roledb = FetchDBRef(database, "Roles", "name", roleid);
+                ObjectId roleid = GetObjectID(database, DatabaseDefinitionCollections.Roles, "name", anno.Role);
+                string roledb = FetchDBRef(database, DatabaseDefinitionCollections.Roles, "name", roleid);
 
-                ObjectId annoSchemeId = GetObjectID(database, "AnnotationSchemes", "name", anno.AnnoScheme);
-                string annotdb = FetchDBRef(database, "AnnotationSchemes", "name", annoSchemeId);
+                ObjectId annoSchemeId = GetObjectID(database, DatabaseDefinitionCollections.Schemes, "name", anno.AnnoScheme);
+                string annotdb = FetchDBRef(database, DatabaseDefinitionCollections.Schemes, "name", annoSchemeId);
 
-                ObjectId annotatorId = GetObjectID(database, "Annotators", "fullname", anno.AnnotatorFullname);
-                string annotatdb = FetchDBRef(database, "Annotators", "name", annotatorId);
-                string annotatdbfn = FetchDBRef(database, "Annotators", "fullname", annotatorId);
+                ObjectId annotatorId = GetObjectID(database, DatabaseDefinitionCollections.Annotators, "fullname", anno.AnnotatorFullname);
+                string annotatdb = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "name", annotatorId);
+                string annotatdbfn = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatorId);
                 annoList.Meta.Annotator = annotatdb;
                 annoList.Meta.AnnotatorFullName = annotatdbfn;
 
-                ObjectId sessionid = GetObjectID(database, "Sessions", "name", sessionName);
-                string sessiondb = FetchDBRef(database, "Sessions", "name", sessionid);
+                ObjectId sessionid = GetObjectID(database, DatabaseDefinitionCollections.Sessions, "name", sessionName);
+                string sessiondb = FetchDBRef(database, DatabaseDefinitionCollections.Sessions, "name", sessionid);
 
                 var builder = Builders<BsonDocument>.Filter;
 
@@ -676,8 +676,6 @@ namespace ssi
                     }
                 }
 
-                annoList.Source.Database.Server = Properties.Settings.Default.DatabaseAddress;
-                annoList.Source.Database.Database = databaseName;
                 annoList.Source.Database.OID = anno.Id;
 
                 annoLists.Add(annoList);
@@ -767,5 +765,18 @@ namespace ssi
         public string subject;
         public string mediatype;
         public string session;
+    }
+
+    public static class DatabaseDefinitionCollections
+    {
+        public static string Annotations = "Annotations";
+        public static string Annotators = "Annotators";
+        public static string Sessions = "Sessions";
+        public static string Roles = "Roles";
+        public static string Subjects = "Subjects";
+        public static string Streams = "Media";
+        public static string StreamTypes = "MediaTypes";
+        public static string Schemes = "AnnotationSchemes";
+        
     }
 }

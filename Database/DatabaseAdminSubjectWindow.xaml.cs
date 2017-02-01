@@ -22,7 +22,7 @@ namespace ssi
             connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
             mongo = new MongoClient(connectionstring);
             database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
-            var session = database.GetCollection<BsonDocument>("Sessions");
+            var session = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
 
             List<BsonDocument> documents;
             var builder = Builders<BsonDocument>.Filter;
@@ -41,7 +41,7 @@ namespace ssi
             if (culture != null) Culturefield.Text = culture;
         }
 
-        public string Name()
+        public string SubjectName()
         {
             return Namefield.Text;
         }

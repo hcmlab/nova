@@ -36,22 +36,22 @@ namespace ssi
             else datepicker.SelectedDate = DateTime.Now;
         }
 
-        public string Name()
+        public string SessionName()
         {
             return Namefield.Text;
         }
 
-        public string Language()
+        public string SessionLanguage()
         {
             return LanguageField.SelectionBoxItem.ToString();
         }
 
-        public string Location()
+        public string SessionLocation()
         {
             return LocationField.Text;
         }
 
-        public DateTime Date()
+        public DateTime SessionDate()
         {
             if (datepicker.SelectedDate != null)
                 return datepicker.SelectedDate.Value;

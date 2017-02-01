@@ -157,54 +157,54 @@ namespace ssi
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", DataBaseResultsBox.SelectedItem.ToString());
 
-                BsonDocument d = new BsonDocument();
-                BsonElement a = new BsonElement("name", dbas.GetName());
-                BsonElement b = new BsonElement("type", dbas.GetType().ToUpper());
-                BsonElement c = new BsonElement("isValid", true);
-                BsonElement f = new BsonElement("sr", dbas.GetFps());
-                BsonElement g = new BsonElement("min", dbas.GetMin());
-                BsonElement h = new BsonElement("max", dbas.GetMax());
-                BsonElement i = new BsonElement("min_color", dbas.GetColorMin());
-                BsonElement i2 = new BsonElement("color", dbas.GetColorMin());
-                BsonElement j = new BsonElement("max_color", dbas.GetColorMax());
+                BsonDocument document = new BsonDocument();
+                BsonElement documentName = new BsonElement("name", dbas.GetName());
+                BsonElement documentType = new BsonElement("type", dbas.GetType().ToUpper());
+                BsonElement documentIsValid = new BsonElement("isValid", true);
+                BsonElement documentSr = new BsonElement("sr", dbas.GetFps());
+                BsonElement documentMin = new BsonElement("min", dbas.GetMin());
+                BsonElement documentMax = new BsonElement("max", dbas.GetMax());
+                BsonElement documentMinColor = new BsonElement("min_color", dbas.GetColorMin());
+                BsonElement documentColor = new BsonElement("color", dbas.GetColorMin());
+                BsonElement documentMaxColor = new BsonElement("max_color", dbas.GetColorMax());
 
                 int index = 0;
-                List<AnnoScheme.Label> lcp = dbas.GetLabelColorPairs();
+                List<AnnoScheme.Label> labelList = dbas.GetLabelColorPairs();
 
                 BsonArray labels = new BsonArray();
 
-                foreach (AnnoScheme.Label l in lcp)
+                foreach (AnnoScheme.Label label in labelList)
                 {
-                    labels.Add(new BsonDocument() { { "id", index++ }, { "name", l.Name }, { "color", l.Color.ToString() }, { "isValid", true } });
+                    labels.Add(new BsonDocument() { { "id", index++ }, { "name", label.Name }, { "color", label.Color.ToString() }, { "isValid", true } });
                 }
 
-                d.Add(a);
-                d.Add(b);
+                document.Add(documentName);
+                document.Add(documentType);
 
                 if (dbas.GetType().ToUpper() == "DISCRETE")
                 {
-                    d.Add(i2);
-                    d.Add("labels", labels);
+                    document.Add(documentColor);
+                    document.Add("labels", labels);
                 }
                 else if (dbas.GetType().ToUpper() == "FREE")
                 {
-                    d.Add(i2);
+                    document.Add(documentColor);
                 }
                 else
                 {
-                    d.Add(f);
-                    d.Add(g);
-                    d.Add(h);
-                    d.Add(i);
-                    d.Add(j);
+                    document.Add(documentSr);
+                    document.Add(documentMin);
+                    document.Add(documentMax);
+                    document.Add(documentMinColor);
+                    document.Add(documentMaxColor);
                 }
-                d.Add(c);
+                document.Add(documentIsValid);
 
-                var coll = database.GetCollection<BsonDocument>("AnnotationSchemes");
+                var coll = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
                 var filterup = builder.Eq("name", name);
                 UpdateOptions uo = new UpdateOptions();
                 uo.IsUpsert = true;
-                var result = coll.ReplaceOne(filterup, d, uo);
+                var result = coll.ReplaceOne(filterup, document, uo);
 
                 // coll.InsertOne(d);
             }

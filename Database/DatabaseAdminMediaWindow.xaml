@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Media" Height="348.344" Width="356.291" Background="LightGray">
+        Title="Streams" Height="348.344" Width="356.291" Background="LightGray">
     <Grid>
         <Label Margin="10,-2,221,287" RenderTransformOrigin="-1.002,-0.947">Connetion Type</Label>
         <ComboBox Name="Connectiontype"   Visibility="Visible" Margin="10,30,117,256"  SelectionChanged="ComboBox_SelectionChanged">

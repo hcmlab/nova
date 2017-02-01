@@ -137,10 +137,10 @@ namespace ssi
             MediaResultBox.Items.Clear();
             ci = GetMediaFromDB(Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId);
 
-            var colllection = database.GetCollection<BsonDocument>("Annotations");
-            var media = database.GetCollection<BsonDocument>("Media");
+            var colllection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
 
-            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("session_id", sessionid);
@@ -254,7 +254,7 @@ namespace ssi
         public void GetSessions()
 
         {
-            var sessioncollection = DatabaseHandler.Database.GetCollection<BsonDocument>("Sessions");
+            var sessioncollection = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
             var sessions = sessioncollection.Find(_ => true).ToList();
 
             if (sessions.Count > 0)
@@ -309,13 +309,13 @@ namespace ssi
             List<DatabaseAnno> items = new List<DatabaseAnno>();
             List<string> Collections = new List<string>();
 
-            var sessions = DatabaseHandler.Database.GetCollection<BsonDocument>("Sessions");
-            var annotations = DatabaseHandler.Database.GetCollection<BsonDocument>("Annotations");
+            var sessions = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var annotations = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
 
             // BsonDocument documents;
             var builder = Builders<BsonDocument>.Filter;
 
-            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
 
             var filter = builder.Eq("session_id", sessionid);
 
@@ -344,10 +344,10 @@ namespace ssi
 
             // AnnotationResultBox.ItemsSource = null;
             ObjectId id = annos["_id"].AsObjectId;
-            string roleid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Roles", "name", annos["role_id"].AsObjectId);
-            string annotid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "AnnotationSchemes", "name", annos["scheme_id"].AsObjectId);
-            string annotatid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Annotators", "name", annos["annotator_id"].AsObjectId);
-            string annotatidfn = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Annotators", "fullname", annos["annotator_id"].AsObjectId);
+            string roleid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Roles, "name", annos["role_id"].AsObjectId);
+            string annotid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Schemes, "name", annos["scheme_id"].AsObjectId);
+            string annotatid = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.DatabaseName),  DatabaseDefinitionCollections.Annotators, "name", annos["annotator_id"].AsObjectId);
+            string annotatidfn = FetchDBRef(mongo.GetDatabase(Properties.Settings.Default.DatabaseName),  DatabaseDefinitionCollections.Annotators, "fullname", annos["annotator_id"].AsObjectId);
           
 
             bool isfinished = false;
@@ -381,10 +381,10 @@ namespace ssi
         public List<DatabaseMediaInfo> GetMediaFromDB(string db, string session)
         {
             List<DatabaseMediaInfo> paths = new List<DatabaseMediaInfo>();
-            var colllection = database.GetCollection<BsonDocument>("Sessions");
-            var media = database.GetCollection<BsonDocument>("Media");
+            var colllection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
 
-            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("session_id", sessionid);
@@ -475,11 +475,11 @@ namespace ssi
         {
             if (AnnotationResultBox.SelectedItem != null)
             {
-                var sessions = database.GetCollection<BsonDocument>("Sessions");
-                var roles = database.GetCollection<BsonDocument>("Roles");
-                var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
-                var annotations = database.GetCollection<BsonDocument>("Annotations");
-                var annotators = database.GetCollection<BsonDocument>("Annotators");
+                var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+                var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+                var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
+                var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+                var annotators = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
 
 
                 List<string> annotator_names = new List<string>();
@@ -495,7 +495,7 @@ namespace ssi
                 if (dbw.DialogResult == true)
                 {
                     string annotator_name = dbw.Result().ToString();
-                    ObjectId annotid_new = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Annotators", "fullname", annotator_name);
+                    ObjectId annotid_new = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName),  DatabaseDefinitionCollections.Annotators, "fullname", annotator_name);
      
 
                 foreach (var item in AnnotationResultBox.SelectedItems)
@@ -544,11 +544,11 @@ namespace ssi
 
         //private void AddAnnotation_Click(object sender, RoutedEventArgs e)
         //{
-        //        var sessions = database.GetCollection<BsonDocument>("Sessions");
-        //        var roles = database.GetCollection<BsonDocument>("Roles");
-        //        var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
-        //        var annotations = database.GetCollection<BsonDocument>("Annotations");
-        //        var annotators = database.GetCollection<BsonDocument>("Annotators");
+        //        var sessions = database.GetCollection<BsonDocument>(DatabaseDefinition.Sessions);
+        //        var roles = database.GetCollection<BsonDocument>(DatabaseDefinition.Roles);
+        //        var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinition.Schemes);
+        //        var annotations = database.GetCollection<BsonDocument>(DatabaseDefinition.Annotations);
+        //        var annotators = database.GetCollection<BsonDocument>( DatabaseDefinition.Annotators);
 
 
         //        List<string> annotator_names = new List<string>();
@@ -571,7 +571,7 @@ namespace ssi
         //        }
 
 
-        //        DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(role_names, false, "Select Role", "Roles");
+        //        DatabaseUserTableWindow dbw = new DatabaseUserTableWindow(role_names, false, "Select Role", DatabaseDefinition.Roles);
         //        dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
         //        dbw.ShowDialog();
 
@@ -689,11 +689,11 @@ namespace ssi
             {
 
 
-                var sessions = database.GetCollection<BsonDocument>("Sessions");
-                var roles = database.GetCollection<BsonDocument>("Roles");
-                var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
-                var annotations = database.GetCollection<BsonDocument>("Annotations");
-                var annotators = database.GetCollection<BsonDocument>("Annotators");
+                var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+                var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+                var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
+                var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+                var annotators = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
 
 
                 foreach (var item in AnnotationResultBox.SelectedItems)
@@ -748,11 +748,11 @@ namespace ssi
                 {
 
                
-                    var sessions = database.GetCollection<BsonDocument>("Sessions");
-                    var roles = database.GetCollection<BsonDocument>("Roles");
-                    var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
-                    var annotations = database.GetCollection<BsonDocument>("Annotations");
-                    var annotators = database.GetCollection<BsonDocument>("Annotators");
+                    var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+                    var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+                    var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
+                    var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+                    var annotators = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
                     ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).Role);
                     ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).AnnoScheme);
                     ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).Annotator);
@@ -770,7 +770,7 @@ namespace ssi
 
                         foreach (BsonDocument doc in annotation["media"].AsBsonArray)
                         {
-                          string name =  FetchDBRef(database, "Media", "name", doc["media_id"].AsObjectId);
+                          string name =  FetchDBRef(database,DatabaseDefinitionCollections.Streams, "name", doc["media_id"].AsObjectId);
 
                           MediaResultBox.SelectedItems.Add(name);
                         }
@@ -823,7 +823,7 @@ namespace ssi
 
         private void ChangeFinishedState(ObjectId id, bool state)
         {
-            var annos = database.GetCollection<BsonDocument>("Annotations");
+            var annos = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
             var builder = Builders<BsonDocument>.Filter;
 
             var filter = builder.Eq("_id", id);
@@ -835,7 +835,7 @@ namespace ssi
 
         private void ChangeLockedState(ObjectId id, bool state)
         {
-            var annos = database.GetCollection<BsonDocument>("Annotations");
+            var annos = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
             var builder = Builders<BsonDocument>.Filter;
 
             var filter = builder.Eq("_id", id);

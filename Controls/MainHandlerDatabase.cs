@@ -268,14 +268,11 @@ namespace ssi
 
             IMongoDatabase database = DatabaseHandler.Database;
 
-            ObjectId annotatid = DatabaseHandler.GetObjectID(database, "Annotators", "name", Properties.Settings.Default.MongoDBUser);
+            ObjectId annotatid = DatabaseHandler.GetObjectID(database, DatabaseDefinitionCollections.Annotators, "name", Properties.Settings.Default.MongoDBUser);
             annoList.Meta.Annotator = Properties.Settings.Default.MongoDBUser;
-            annoList.Meta.AnnotatorFullName = DatabaseHandler.FetchDBRef(database, "Annotators", "fullname", annotatid);
+            annoList.Meta.AnnotatorFullName = DatabaseHandler.FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
             addAnnoTier(annoList);
             control.annoListControl.editComboBox.SelectedIndex = 0;
-
-            annoList.Source.Database.Server = Properties.Settings.Default.DatabaseAddress;
-            annoList.Source.Database.Database = Properties.Settings.Default.DatabaseName;
         }
 
         private void databaseShowDownloadDirectory_Click(object sender, RoutedEventArgs e)
