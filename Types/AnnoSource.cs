@@ -79,7 +79,7 @@ namespace ssi
  
         public bool HasDatabase()
         {
-            return Database.OID.CompareTo(DatabaseSource.ZERO) == 0;
+            return Database.OID.CompareTo(DatabaseSource.ZERO) != 0;
         }
     }
 }
