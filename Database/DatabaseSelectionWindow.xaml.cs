@@ -12,26 +12,24 @@ namespace ssi
     public partial class DatabaseSelectionWindow : Window
     {
         private string collection;
-        private bool isScheme = false;
+        private bool allowEdit = false;
         private MongoClient mongo;
         private string connectionString = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-        private AnnoTier annoTier = null;
+        private AnnoList annoList = null;
         private HashSet<AnnoScheme.Label> usedlabels = null;
-        private AnnoScheme.TYPE schemeType = AnnoScheme.TYPE.DISCRETE;
 
-        public DatabaseSelectionWindow(List<string> strings, bool showadminbuttons, string title = "Select", string Collection = "none", AnnoScheme.TYPE schemeType = AnnoScheme.TYPE.DISCRETE, bool isScheme = false, AnnoTier annoTier = null)
+        public DatabaseSelectionWindow(List<string> strings, bool showadminbuttons, string title = "Select", string Collection = "none", bool allowEdit = false, AnnoList annoList = null)
         {
             InitializeComponent();
             this.titlelabel.Content = title;
             this.collection = Collection;
-            this.isScheme = isScheme;
-            this.annoTier = annoTier;
-            this.schemeType = schemeType;
+            this.allowEdit = allowEdit;
+            this.annoList = annoList;
             if (showadminbuttons)
             {
                 this.Add.Visibility = Visibility.Visible;
                 this.Delete.Visibility = Visibility.Visible;
-                if (this.isScheme == true) this.Edit.Visibility = Visibility.Visible;
+                if (this.allowEdit == true) this.Edit.Visibility = Visibility.Visible;
             }
             else
             {
@@ -82,7 +80,7 @@ namespace ssi
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            if (isScheme)
+            if (allowEdit)
             {
                 string name = null;
                 Brush col1 = null;
@@ -91,17 +89,16 @@ namespace ssi
                 string min = null;
                 string max = null;
 
-                if (annoTier != null)
+                if (annoList != null)
                 {
-                    name = annoTier.AnnoList.Scheme.Name;
+                    name = annoList.Scheme.Name;
 
-                    schemeType = annoTier.AnnoList.Scheme.Type;
-
-                    if (annoTier.isDiscreteOrFree)
+                    if (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE ||
+                        annoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                     {
                         usedlabels = new HashSet<AnnoScheme.Label>();
 
-                        foreach (AnnoListItem item in annoTier.AnnoList)
+                        foreach (AnnoListItem item in annoList)
                         {
                             AnnoScheme.Label l = new AnnoScheme.Label(item.Label, item.Color);
                             bool detected = false;
@@ -115,19 +112,19 @@ namespace ssi
 
                             if (detected == false) usedlabels.Add(l);
                         }
-                        col1 = annoTier.BackgroundBrush;
+                        col1 = new SolidColorBrush(annoList.Scheme.MinOrBackColor);
                     }
                     else
                     {
-                        col1 = new SolidColorBrush(((LinearGradientBrush)annoTier.ContinuousBrush).GradientStops[0].Color);
-                        col2 = new SolidColorBrush(((LinearGradientBrush)annoTier.ContinuousBrush).GradientStops[1].Color);
-                        sr = (1000.0 / (annoTier.AnnoList.Scheme.SampleRate * 1000.0)).ToString();
-                        min = annoTier.AnnoList.Scheme.MinScore.ToString();
-                        max = annoTier.AnnoList.Scheme.MaxScore.ToString();
+                        col1 = new SolidColorBrush(annoList.Scheme.MinOrBackColor);
+                        col2 = new SolidColorBrush(annoList.Scheme.MaxOrForeColor);
+                        sr = (1000.0 / (annoList.Scheme.SampleRate * 1000.0)).ToString();
+                        min = annoList.Scheme.MinScore.ToString();
+                        max = annoList.Scheme.MaxScore.ToString();
                     }
                 }
 
-                storeAnnotationSchemetoDatabase(name, usedlabels, schemeType, col1, col2, sr, min, max);
+                storeAnnotationSchemetoDatabase(name, usedlabels, annoList.Scheme.Type, col1, col2, sr, min, max);
             }
             else
             {
@@ -146,7 +143,7 @@ namespace ssi
 
         private void storeAnnotationSchemetoDatabase(string name = null, HashSet<AnnoScheme.Label> _usedlabels = null, AnnoScheme.TYPE isDiscrete = AnnoScheme.TYPE.DISCRETE, Brush col1 = null, Brush col2 = null, string sr = null, string min = null, string max = null)
         {
-            DatabaseAnnoSchemeWindow dbas = new DatabaseAnnoSchemeWindow(name, usedlabels, schemeType, col1, col2, sr, min, max);
+            DatabaseAnnoSchemeWindow dbas = new DatabaseAnnoSchemeWindow(name, usedlabels, annoList.Scheme.Type, col1, col2, sr, min, max);
             dbas.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dbas.ShowDialog();
 
@@ -160,54 +157,54 @@ namespace ssi
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", DataBaseResultsBox.SelectedItem.ToString());
 
-                BsonDocument d = new BsonDocument();
-                BsonElement a = new BsonElement("name", dbas.GetName());
-                BsonElement b = new BsonElement("type", dbas.GetType().ToUpper());
-                BsonElement c = new BsonElement("isValid", true);
-                BsonElement f = new BsonElement("sr", dbas.GetFps());
-                BsonElement g = new BsonElement("min", dbas.GetMin());
-                BsonElement h = new BsonElement("max", dbas.GetMax());
-                BsonElement i = new BsonElement("min_color", dbas.GetColorMin());
-                BsonElement i2 = new BsonElement("color", dbas.GetColorMin());
-                BsonElement j = new BsonElement("max_color", dbas.GetColorMax());
+                BsonDocument document = new BsonDocument();
+                BsonElement documentName = new BsonElement("name", dbas.GetName());
+                BsonElement documentType = new BsonElement("type", dbas.GetType().ToUpper());
+                BsonElement documentIsValid = new BsonElement("isValid", true);
+                BsonElement documentSr = new BsonElement("sr", dbas.GetFps());
+                BsonElement documentMin = new BsonElement("min", dbas.GetMin());
+                BsonElement documentMax = new BsonElement("max", dbas.GetMax());
+                BsonElement documentMinColor = new BsonElement("min_color", dbas.GetColorMin());
+                BsonElement documentColor = new BsonElement("color", dbas.GetColorMin());
+                BsonElement documentMaxColor = new BsonElement("max_color", dbas.GetColorMax());
 
                 int index = 0;
-                List<AnnoScheme.Label> lcp = dbas.GetLabelColorPairs();
+                List<AnnoScheme.Label> labelList = dbas.GetLabelColorPairs();
 
                 BsonArray labels = new BsonArray();
 
-                foreach (AnnoScheme.Label l in lcp)
+                foreach (AnnoScheme.Label label in labelList)
                 {
-                    labels.Add(new BsonDocument() { { "id", index++ }, { "name", l.Name }, { "color", l.Color.ToString() }, { "isValid", true } });
+                    labels.Add(new BsonDocument() { { "id", index++ }, { "name", label.Name }, { "color", label.Color.ToString() }, { "isValid", true } });
                 }
 
-                d.Add(a);
-                d.Add(b);
+                document.Add(documentName);
+                document.Add(documentType);
 
                 if (dbas.GetType().ToUpper() == "DISCRETE")
                 {
-                    d.Add(i2);
-                    d.Add("labels", labels);
+                    document.Add(documentColor);
+                    document.Add("labels", labels);
                 }
                 else if (dbas.GetType().ToUpper() == "FREE")
                 {
-                    d.Add(i2);
+                    document.Add(documentColor);
                 }
                 else
                 {
-                    d.Add(f);
-                    d.Add(g);
-                    d.Add(h);
-                    d.Add(i);
-                    d.Add(j);
+                    document.Add(documentSr);
+                    document.Add(documentMin);
+                    document.Add(documentMax);
+                    document.Add(documentMinColor);
+                    document.Add(documentMaxColor);
                 }
-                d.Add(c);
+                document.Add(documentIsValid);
 
-                var coll = database.GetCollection<BsonDocument>("AnnotationSchemes");
+                var coll = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
                 var filterup = builder.Eq("name", name);
                 UpdateOptions uo = new UpdateOptions();
                 uo.IsUpsert = true;
-                var result = coll.ReplaceOne(filterup, d, uo);
+                var result = coll.ReplaceOne(filterup, document, uo);
 
                 // coll.InsertOne(d);
             }
@@ -221,8 +218,7 @@ namespace ssi
             string min = null;
             string max = null;
 
-            DatabaseHandler dh = new DatabaseHandler(connectionString);
-            AnnoScheme a = dh.GetAnnotationScheme(DataBaseResultsBox.SelectedItem.ToString(), schemeType);
+            AnnoScheme a = DatabaseHandler.GetAnnotationScheme(DataBaseResultsBox.SelectedItem.ToString(), annoList.Scheme.Type);
             AnnoScheme.TYPE annoType = a.Type;            
 
             col1 = new SolidColorBrush(a.MinOrBackColor);

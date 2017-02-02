@@ -101,7 +101,7 @@ namespace ssi
             QuestionWindow.Input input;
             if (anytrackchanged)
             {
-                input = new QuestionWindow.Input() { Question = "Are you sure you want to close the Application?", YesButton = "Save and close", NoButton = "Don't save and close", CancelButton = "Cancel" };
+                input = new QuestionWindow.Input() { Question = "Save changes before closing the application?", YesButton = "Save", NoButton = "Discard", CancelButton = "Cancel" };
                 QuestionWindow dialog = new QuestionWindow(input);
                 dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 dialog.ShowDialog();
@@ -127,7 +127,7 @@ namespace ssi
             }
             else
             {
-                input = new QuestionWindow.Input() { Question = "Are you sure you want to close the Application?", YesButton = "Yes", NoButton = "", CancelButton = "Cancel" };
+                input = new QuestionWindow.Input() { Question = "Close the application?", YesButton = "Yes", NoButton = "", CancelButton = "Cancel" };
                 QuestionWindow dialog = new QuestionWindow(input);
                 dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 dialog.ShowDialog();

@@ -410,51 +410,50 @@ namespace ssi
 
         #region SAVE
 
-        private void saveAnno()
+        private void saveSelectedAnno()
         {
             if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList != null)
             {
-                saveAnno(AnnoTierStatic.Selected.AnnoList, AnnoTierStatic.Selected.AnnoList.FilePath);
+                AnnoTierStatic.Selected.AnnoList.Save();
             }
         }
 
-        private void saveAnno(string filepath)
-        {
-            saveAnno(AnnoTierStatic.Selected.AnnoList, filepath);
-        }
-
-        private void saveAnno(AnnoList anno, string filepath)
-        {
-            if (anno != null)
-            {
-                if (filepath == null
-                    || filepath.Split('.')[1] == "eaf"
-                    || filepath.Split('.')[1] == "anvil"
-                    || filepath.Split('.')[1] == "anno"
-                    || filepath.Split('.')[1] == "csv")
-                {
-                    filepath = FileTools.SaveFileDialog(anno.Scheme.Name, ".annotation", "Annotation (*.annotation)|*.annotation", "");
-                }
-
-                if (filepath != null)
-                {
-                    anno.SaveToFile(filepath);
-                }
-            }
-        }
-
-        private void saveAnnoAs()
+        private void saveSelectedAnnoAs()
         {
             if (AnnoTierStatic.Selected.AnnoList != null)
             {
-                string filename = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.FileName, ".annotation", "Annotation(*.annotation)|*.annotation", AnnoTierStatic.Selected.AnnoList.Directory);
-                saveAnno(filename);
+                string path = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Source.File.Name, ".annotation", "Annotation(*.annotation)|*.annotation", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
+                if (path != null)
+                {
+                    AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;
+                    AnnoTierStatic.Selected.AnnoList.Save();
+                }
+            }
+        }
+
+        private void saveAnnos()
+        {
+            bool anyTierChanged = false;
+            foreach (AnnoTier tier in annoTiers)
+            {
+                if (tier.AnnoList.HasChanged) anyTierChanged = true;
+            }
+
+            if (annoTiers.Count > 0 && anyTierChanged)
+            {
+                foreach (AnnoTier tier in annoTiers)
+                {
+                    if (tier.AnnoList.HasChanged)
+                    {
+                        tier.AnnoList.Save();
+                    }
+                }
             }
         }
 
         private void saveProject()
         {
-            saveSession();
+            saveAnnos();
 
             string firstmediadir = "";
             if (mediaList.Medias.Count > 0) firstmediadir = mediaList.Medias[0].GetFolderepath();
@@ -463,11 +462,11 @@ namespace ssi
             string filePath = FileTools.SaveFileDialog("project", ".nova", "NOVA Project (*.nova)|*.nova", firstmediadir);
             if (filePath != null)
             {
-                saveProjectTracks(annoTiers, mediaList, signalTracks, filePath);
+                saveProject(annoTiers, mediaList, signalTracks, filePath);
             }
         }
 
-        private void saveProjectTracks(List<AnnoTier> tracks, MediaList ml, List<ISignalTrack> signal_tracks, string filepath)
+        private void saveProject(List<AnnoTier> annoTiers, MediaList mediaList, List<ISignalTrack> signalTracks, string filepath)
         {
             string workdir = Path.GetDirectoryName(filepath);
 
@@ -475,9 +474,9 @@ namespace ssi
             sw.WriteLine("<nova version=\"1\">");
 
             sw.WriteLine("\t<medias>");
-            if (ml != null)
+            if (mediaList != null)
             {
-                foreach (IMedia t in ml.Medias)
+                foreach (IMedia t in mediaList.Medias)
                 {
                     if (t.GetFilepath() != null)
                     {
@@ -488,9 +487,9 @@ namespace ssi
             sw.WriteLine("\t</medias>");
 
             sw.WriteLine("\t<signals>");
-            if (signal_tracks != null)
+            if (signalTracks != null)
             {
-                foreach (SignalTrack st in signal_tracks)
+                foreach (SignalTrack st in signalTracks)
                 {
                     if (st.Signal.FilePath != null)
                     {
@@ -501,11 +500,11 @@ namespace ssi
             sw.WriteLine("\t</signals>");
 
             sw.WriteLine("\t<tiers>");
-            foreach (AnnoTier t in tracks)
+            foreach (AnnoTier t in annoTiers)
             {
-                if (t.AnnoList.FilePath != null)
+                if (t.AnnoList.Source.File.Path != "")
                 {
-                    sw.WriteLine("\t\t<tier name=\"" + t.AnnoList.Scheme.Name + "\">" + FileTools.GetRelativePath(t.AnnoList.FilePath, workdir) + "</tier>");
+                    sw.WriteLine("\t\t<tier name=\"" + t.AnnoList.Scheme.Name + "\">" + FileTools.GetRelativePath(t.AnnoList.Source.File.Path, workdir) + "</tier>");
                 }
             }
             sw.WriteLine("\t</tiers>");
@@ -726,8 +725,8 @@ namespace ssi
                 AnnoList discretevalues = new AnnoList();
                 discretevalues.Scheme = new AnnoScheme();
                 discretevalues.Scheme.Type = AnnoScheme.TYPE.DISCRETE;
-                discretevalues.Role = AnnoTier.Selected.AnnoList.Role;
-                discretevalues.Annotator = AnnoTier.Selected.AnnoList.Annotator;
+                discretevalues.Meta.Role = AnnoTier.Selected.AnnoList.Meta.Role;
+                discretevalues.Meta.Annotator = AnnoTier.Selected.AnnoList.Meta.Annotator;
                 discretevalues.Scheme.Name = AnnoTier.Selected.AnnoList.Scheme.Name;
 
                 foreach (string label in classes)
@@ -798,7 +797,8 @@ namespace ssi
                 {
                     AnnoList annoList = signal.ExportToAnno();
                     string newFilePath = FileTools.SaveFileDialog(signal.FileName, ".annotation", "Annotation (*.annotation)|*.annotation", Path.GetDirectoryName(signal.FilePath));
-                    if (annoList.SaveToFile(newFilePath))
+                    annoList.Source.File.Path = newFilePath;
+                    if (annoList.Save())
                     {
                         MessageBoxResult mb = MessageBoxResult.None;
                         mb = MessageBox.Show("Load converted annotation?", "Success", MessageBoxButton.YesNo);
@@ -834,12 +834,12 @@ namespace ssi
 
                     if (m == MessageBoxResult.OK)
                     {
-                        saveAnnoAs();
+                        saveSelectedAnnoAs();
                         annoTier.AnnoList.HasChanged = false;
                     }
                 }
 
-                string filename = Path.GetDirectoryName(annoTier.AnnoList.FilePath) + "\\" + annoTier.AnnoList.Scheme.Name + ".stream";
+                string filename = Path.GetDirectoryName(annoTier.AnnoList.Source.File.Path) + "\\" + annoTier.AnnoList.Scheme.Name + ".stream";
 
                 StreamWriter swheader = new StreamWriter(filename, false, System.Text.Encoding.Default);
                 swheader.WriteLine("<?xml version=\"1.0\" ?>");
@@ -874,7 +874,7 @@ namespace ssi
 
         private void saveAnno_Click(object sender, RoutedEventArgs e)
         {
-            saveAnno();
+            saveSelectedAnno();
         }
 
         private void saveProject_Click(object sender, RoutedEventArgs e)
@@ -895,11 +895,11 @@ namespace ssi
             ExportSamplesWindow window = new ExportSamplesWindow();
             foreach (AnnoTier tier in this.annoTiers)
             {
-                if (tier.AnnoList.FilePath != null && !tier.AnnoList.LoadedFromDB && (tier.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE ||
+                if (tier.AnnoList.Source.HasFile() && (tier.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE ||
                     tier.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE))
                 {
 
-                    window.control.annoComboBox.Items.Add(tier.AnnoList.FilePath);
+                    window.control.annoComboBox.Items.Add(tier.AnnoList.Source.File.Path);
                 }
             }
             foreach (Signal signal in signals)
@@ -947,7 +947,7 @@ namespace ssi
         {
             if (AnnoTierStatic.Selected != null)
             {
-                string filepath = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Scheme.Name, "xps", "XPS (*.xps)|*.xps", AnnoTierStatic.Selected.AnnoList.Directory);
+                string filepath = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Scheme.Name, "xps", "XPS (*.xps)|*.xps", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
                 if (filepath != null)
                 {
                     var uri = new Uri(filepath);
@@ -963,7 +963,7 @@ namespace ssi
         {
             if (AnnoTierStatic.Selected != null)
             {
-                string filepath = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Scheme.Name, "xps", "PNG (*.png)|*.png", AnnoTierStatic.Selected.AnnoList.Directory);
+                string filepath = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Scheme.Name, "xps", "PNG (*.png)|*.png", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
                 if (filepath != null)
                 {
                     var uri = new Uri(filepath);

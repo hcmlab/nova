@@ -126,6 +126,8 @@
     <Compile Include="Controls\Other\QuestionBoxThreeButtons.xaml.cs">
       <DependentUpon>QuestionBoxThreeButtons.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Types\AnnoMeta.cs" />
+    <Compile Include="Types\AnnoSource.cs" />
     <Compile Include="Types\SignalFile.cs" />
     <Page Include="App\App.xaml">
       <Generator>MSBuild:Compile</Generator>

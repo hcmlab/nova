@@ -19,7 +19,6 @@ namespace ssi
         private string connectionstring = "mongodb://127.0.0.1:27017";
         private int authlevel = 0;
         private string lastRole = "";
-        DatabaseHandler dbh;
 
         public DatabaseAdminMainWindow()
         {
@@ -69,9 +68,9 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", session) & builder.Eq("connection", connection);
-                var media = database.GetCollection<BsonDocument>("Media");
+                var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
 
-                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
 
                 for (int i = 0; i < filenames.Length; i++)
                 {
@@ -134,7 +133,7 @@ namespace ssi
 
                 bool subjectalreadypresent = false;
 
-                var collection = database.GetCollection<BsonDocument>("Roles");
+                var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", lastRole);
                 var documents = collection.Find(filter).ToList();
@@ -165,13 +164,13 @@ namespace ssi
 
             if (dbsw.DialogResult == true)
             {
-                Properties.Settings.Default.LastSessionId = dbsw.Name();
+                Properties.Settings.Default.LastSessionId = dbsw.SessionName();
                 Properties.Settings.Default.Save();
 
-                BsonElement name = new BsonElement("name", dbsw.Name());
-                BsonElement location = new BsonElement("location", dbsw.Location());
-                BsonElement language = new BsonElement("language", dbsw.Language());
-                BsonElement date = new BsonElement("date", dbsw.Date());
+                BsonElement name = new BsonElement("name", dbsw.SessionName());
+                BsonElement location = new BsonElement("location", dbsw.SessionLocation());
+                BsonElement language = new BsonElement("language", dbsw.SessionLanguage());
+                BsonElement date = new BsonElement("date", dbsw.SessionDate());
                 BsonElement isValid = new BsonElement("isValid", true);
                 BsonDocument document = new BsonDocument();
 
@@ -184,14 +183,14 @@ namespace ssi
                 bool sessionnamealreadypresent = false;
                 foreach (var item in CollectionResultsBox.Items)
                 {
-                    if (item.ToString() == dbsw.Name())
+                    if (item.ToString() == dbsw.SessionName())
                     {
                         sessionnamealreadypresent = true;
                     }
                 }
                 if (sessionnamealreadypresent == false)
                 {
-                    var collection = database.GetCollection<BsonDocument>("Sessions");
+                    var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
                     collection.InsertOne(document);
                     GetSessions();
                 }
@@ -233,7 +232,7 @@ namespace ssi
             Properties.Settings.Default.Save();
 
             connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-            dbh = new DatabaseHandler(connectionstring);
+
             try
             {
                 mongo = new MongoClient(connectionstring);
@@ -244,7 +243,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = dbh.checkAuth(this.db_login.Text, "admin");
+                authlevel = DatabaseHandler.CheckAuthentication(this.db_login.Text, "admin");
 
                 if (authlevel > 0)
                 {
@@ -284,8 +283,6 @@ namespace ssi
             this.Close();
         }
 
-    
-
         public void GetDatabase()
         {
             DataBasResultsBox.Items.Clear();
@@ -294,7 +291,7 @@ namespace ssi
             foreach (var c in databases)
             {
                 string db = c.GetElement(0).Value.ToString();
-                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && dbh.checkAuth(Properties.Settings.Default.MongoDBUser, db) > 2)
+                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, db) > 2)
                     DataBasResultsBox.Items.Add(db);
                
             }
@@ -305,7 +302,7 @@ namespace ssi
         {
             database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
 
-            var sessioncollection = database.GetCollection<BsonDocument>("Sessions");
+            var sessioncollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
             var sessions = sessioncollection.Find(_ => true).ToList();
 
             if (CollectionResultsBox.HasItems) CollectionResultsBox.ItemsSource = null;
@@ -325,7 +322,7 @@ namespace ssi
             RolesResultBox.Items.Clear();
 
             List<string> Collections = new List<string>();
-            var roles = database.GetCollection<BsonDocument>("Roles");
+            var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
 
             var documents = roles.Find(_ => true).ToList();
 
@@ -342,7 +339,7 @@ namespace ssi
             AnnotatorsBox.Items.Clear();
 
             List<string> Collections = new List<string>();
-            var roles = database.GetCollection<BsonDocument>("Annotators");
+            var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators);
 
             var documents = roles.Find(_ => true).ToList();
 
@@ -359,7 +356,7 @@ namespace ssi
             SubjectsResultBox.Items.Clear();
 
             List<string> Collections = new List<string>();
-            var subjects = database.GetCollection<BsonDocument>("Subjects");
+            var subjects = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects);
 
             var documents = subjects.Find(_ => true).ToList();
 
@@ -376,8 +373,8 @@ namespace ssi
             MediatypeResultsBox.Items.Clear();
 
             List<string> Collections = new List<string>();
-            var mediatype = database.GetCollection<BsonDocument>("MediaTypes");
-            var sessions = database.GetCollection<BsonDocument>("Sessions");
+            var mediatype = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes);
+            var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
 
             var documents = mediatype.Find(_ => true).ToList();
 
@@ -409,10 +406,10 @@ namespace ssi
         public List<DatabaseMediaInfo> GetMediafromDB(string db, string session)
         {
             List<DatabaseMediaInfo> paths = new List<DatabaseMediaInfo>();
-            var colllection = database.GetCollection<BsonDocument>("Sessions");
-            var media = database.GetCollection<BsonDocument>("Media");
+            var colllection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
 
-            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("session_id", sessionid);
@@ -457,8 +454,7 @@ namespace ssi
                 Properties.Settings.Default.DatabaseName = DataBasResultsBox.SelectedItem.ToString();
                 Properties.Settings.Default.Save();
 
-             
-                authlevel = dbh.checkAuth(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
+                authlevel = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
                 if (authlevel > 2)
                 {
                     GetSessions();
@@ -509,12 +505,12 @@ namespace ssi
         {
             if (SubjectsResultBox.SelectedItem != null)
             {
-                var sessions = database.GetCollection<BsonDocument>("Sessions");
-                var subjects = database.GetCollection<BsonDocument>("Subjects");
-                var media = database.GetCollection<BsonDocument>("Media");
+                var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+                var subjects = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects);
+                var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
                 var builder = Builders<BsonDocument>.Filter;
 
-                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
                 var filter = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
                 var subjectsresult = subjects.Find(filter).ToList();
 
@@ -541,16 +537,16 @@ namespace ssi
                 GetRoles();
                 GetMediaType();
 
-                var sessions = database.GetCollection<BsonDocument>("Sessions");
-                var roles = database.GetCollection<BsonDocument>("Roles");
-                var subjects = database.GetCollection<BsonDocument>("Subjects");
-                var mediatypes = database.GetCollection<BsonDocument>("MediaTypes");
-                var media = database.GetCollection<BsonDocument>("Media");
+                var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+                var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+                var subjects = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects);
+                var mediatypes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes);
+                var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
 
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", Properties.Settings.Default.LastSessionId);
                 var documents = sessions.Find(filter).ToList();
-                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
                 var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
                 var mediadoc = media.Find(filtermedia).Single();
 
@@ -632,13 +628,13 @@ namespace ssi
                         var builder = Builders<BsonDocument>.Filter;
 
                         var filter = builder.Eq("name", ((DatabaseSession)CollectionResultsBox.SelectedItem).Name);
-                        var session = database.GetCollection<BsonDocument>("Sessions").Find(filter).Single();
+                        var session = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).Find(filter).Single();
                         ObjectId sessionid = session.GetValue(0).AsObjectId;
 
                         var filtersession = builder.Eq("session_id", sessionid);
-                        database.GetCollection<BsonDocument>("Annotations").DeleteManyAsync(filtersession);
-                        database.GetCollection<BsonDocument>("Media").DeleteManyAsync(filtersession);
-                        database.GetCollection<BsonDocument>("Sessions").DeleteOne(filter);
+                        database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations).DeleteManyAsync(filtersession);
+                        database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).DeleteManyAsync(filtersession);
+                        database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).DeleteOne(filter);
                     }
                 }
             }
@@ -653,7 +649,7 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", SubjectsResultBox.SelectedItem.ToString());
-                var result = database.GetCollection<BsonDocument>("Subjects").DeleteOne(filter);
+                var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects).DeleteOne(filter);
 
                 GetSubjects();
             }
@@ -663,12 +659,12 @@ namespace ssi
         {
             if (MediaResultBox.SelectedItem != null)
             {
-                var sessions = database.GetCollection<BsonDocument>("Sessions");
-                var media = database.GetCollection<BsonDocument>("Media");
+                var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+                var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
 
                 var builder = Builders<BsonDocument>.Filter;
 
-                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
                 var filtermedia = builder.Eq("name", MediaResultBox.SelectedItem.ToString()) & builder.Eq("session_id", sessionid);
                 var mediadocuments = media.Find(filtermedia).ToList();
 
@@ -703,7 +699,7 @@ namespace ssi
            
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", SubjectsResultBox.SelectedValue.ToString());
-            var session = database.GetCollection<BsonDocument>("Subjects").Find(filter).ToList();
+            var session = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects).Find(filter).ToList();
 
             if (session.Count > 0)
             {
@@ -714,19 +710,19 @@ namespace ssi
                 if (dbsw.DialogResult == true)
                 {
                     var updatelocation = Builders<BsonDocument>.Update.Set("gender", dbsw.Gender());
-                    database.GetCollection<BsonDocument>("Subjects").UpdateOne(filter, updatelocation);
+                    database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects).UpdateOne(filter, updatelocation);
 
                     var updatelanguage = Builders<BsonDocument>.Update.Set("age", dbsw.Age());
-                    database.GetCollection<BsonDocument>("Subjects").UpdateOne(filter, updatelanguage);
+                    database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects).UpdateOne(filter, updatelanguage);
 
                     var updatedate = Builders<BsonDocument>.Update.Set("culture", dbsw.Culture());
-                    database.GetCollection<BsonDocument>("Subjects").UpdateOne(filter, updatedate);
+                    database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects).UpdateOne(filter, updatedate);
 
-                    var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.Name());
-                    database.GetCollection<BsonDocument>("Subjects").UpdateOne(filter, updatename);
+                    var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.SubjectName());
+                    database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects).UpdateOne(filter, updatename);
                 }
 
-                GetSubjects(dbsw.Name());
+                GetSubjects(dbsw.SubjectName());
             }
             }
         }
@@ -741,7 +737,7 @@ namespace ssi
             {
                 //Todo: Add more
                 BsonDocument subject = new BsonDocument {
-                    {"name",  l.Name()},
+                    {"name",  l.SubjectName()},
                     {"gender",  l.Gender()},
                     {"age",  l.Age()},
                     {"culture",  l.Culture()},
@@ -752,16 +748,16 @@ namespace ssi
                 bool subjectalreadypresent = false;
                 foreach (var item in SubjectsResultBox.Items)
                 {
-                    if (item.ToString() == l.Name())
+                    if (item.ToString() == l.SubjectName())
                     {
                         subjectalreadypresent = true;
                     }
                 }
                 if (subjectalreadypresent == false)
                 {
-                    var collection = database.GetCollection<BsonDocument>("Subjects");
+                    var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects);
                     collection.InsertOne(subject);
-                    GetSubjects(l.Name());
+                    GetSubjects(l.SubjectName());
                 }
                 else MessageBox.Show("Subject already exists!");
             }
@@ -771,13 +767,13 @@ namespace ssi
         {
             if (RolesResultBox.SelectedItem != null)
             {
-                var collection = database.GetCollection<BsonDocument>("Roles");
+                var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
                 var update = Builders<BsonDocument>.Update.Set("isValid", false);
                 collection.UpdateOne(filter, update);
 
-                //var result = database.GetCollection<BsonDocument>("Roles").DeleteOne(filter);
+                //var result = database.GetCollection<BsonDocument>(DatabaseDefinition.Roles).DeleteOne(filter);
 
                 GetRoles();
             }
@@ -789,11 +785,11 @@ namespace ssi
             {
                 lastRole = RolesResultBox.SelectedItem.ToString();
 
-                var roles = database.GetCollection<BsonDocument>("Roles");
-                var media = database.GetCollection<BsonDocument>("Media");
+                var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+                var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
                 var builder = Builders<BsonDocument>.Filter;
 
-                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
                 var filter = builder.Eq("name", RolesResultBox.SelectedItem.ToString());
                 var rolesresult = roles.Find(filter).ToList();
 
@@ -812,11 +808,11 @@ namespace ssi
         {
             if (MediatypeResultsBox.SelectedItem != null)
             {
-                var mediatypes = database.GetCollection<BsonDocument>("MediaTypes");
-                var media = database.GetCollection<BsonDocument>("Media");
+                var mediatypes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes);
+                var media = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
                 var builder = Builders<BsonDocument>.Filter;
 
-                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), "Sessions", "name", Properties.Settings.Default.LastSessionId);
+                ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
                 string[] split = MediatypeResultsBox.SelectedItem.ToString().Split('#');
 
                 var filter2 = builder.Eq("name", split[0]) & builder.Eq("type", split[1]);
@@ -859,7 +855,7 @@ namespace ssi
 
                 if (exists == false)
                 {
-                    var collection = database.GetCollection<BsonDocument>("MediaTypes");
+                    var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes);
                     collection.InsertOne(mediatype);
                     GetMediaType(name + "#" + type);
                 }
@@ -877,7 +873,7 @@ namespace ssi
                 string[] split = MediatypeResultsBox.SelectedItem.ToString().Split('#');
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", split[0]) & builder.Eq("type", split[1]);
-                var result = database.GetCollection<BsonDocument>("MediaTypes").DeleteOne(filter);
+                var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes).DeleteOne(filter);
 
                 GetMediaType();
             }
@@ -889,7 +885,7 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name);
-                var session = database.GetCollection<BsonDocument>("Sessions").Find(filter).ToList();
+                var session = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).Find(filter).ToList();
 
                 if (session.Count > 0)
                 {
@@ -899,17 +895,17 @@ namespace ssi
 
                     if (dbsw.DialogResult == true)
                     {
-                        var updatelocation = Builders<BsonDocument>.Update.Set("location", dbsw.Location());
-                        database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatelocation);
+                        var updatelocation = Builders<BsonDocument>.Update.Set("location", dbsw.SessionLocation());
+                        database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).UpdateOne(filter, updatelocation);
 
-                        var updatelanguage = Builders<BsonDocument>.Update.Set("language", dbsw.Language());
-                        database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatelanguage);
+                        var updatelanguage = Builders<BsonDocument>.Update.Set("language", dbsw.SessionLanguage());
+                        database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).UpdateOne(filter, updatelanguage);
 
-                        var updatedate = Builders<BsonDocument>.Update.Set("date", dbsw.Date());
-                        database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatedate);
+                        var updatedate = Builders<BsonDocument>.Update.Set("date", dbsw.SessionDate());
+                        database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).UpdateOne(filter, updatedate);
 
-                        var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.Name());
-                        database.GetCollection<BsonDocument>("Sessions").UpdateOne(filter, updatename);
+                        var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.SessionName());
+                        database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).UpdateOne(filter, updatename);
                     }
                 }
                 GetSessions();
@@ -977,7 +973,7 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("fullname", AnnotatorsBox.SelectedValue);
-                var annotator = database.GetCollection<BsonDocument>("Annotators").Find(filter).Single();
+                var annotator = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators).Find(filter).Single();
 
                 if (annotator != null)
                 {
@@ -1003,16 +999,16 @@ namespace ssi
                             var filterid = builder.Eq("_id", annotator["_id"].AsObjectId);
 
                             var updatename = Builders<BsonDocument>.Update.Set("name", dbsw.NameCombo.SelectionBoxItem.ToString());
-                            database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updatename);
+                            database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators).UpdateOne(filterid, updatename);
 
                             var updatefullname = Builders<BsonDocument>.Update.Set("fullname", dbsw.Fullname());
-                            database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updatefullname);
+                            database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators).UpdateOne(filterid, updatefullname);
 
                             var updateemail = Builders<BsonDocument>.Update.Set("email", dbsw.Email());
-                            database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updateemail);
+                            database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).UpdateOne(filterid, updateemail);
 
                             var updateexpertise = Builders<BsonDocument>.Update.Set("expertise", dbsw.Expertise());
-                            database.GetCollection<BsonDocument>("Annotators").UpdateOne(filterid, updateexpertise);
+                            database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).UpdateOne(filterid, updateexpertise);
 
                             string role = dbsw.RoleBox.SelectionBoxItem.ToString();
 
@@ -1070,9 +1066,9 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("fullname", AnnotatorsBox.SelectedValue);
-                var result = database.GetCollection<BsonDocument>("Annotators").Find(filter).Single();
+                var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filter).Single();
                 string user = result["name"].AsString;
-                var del = database.GetCollection<BsonDocument>("Annotators").DeleteOne(filter);
+                var del = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).DeleteOne(filter);
 
 
 
@@ -1166,7 +1162,7 @@ namespace ssi
 
         private void DropUser(string user)
         {
-            int auth = dbh.checkAuth(user, "admin");
+            int auth = DatabaseHandler.CheckAuthentication(user, "admin");
 
             if(user != Properties.Settings.Default.MongoDBUser && auth < 4)
             {
@@ -1215,7 +1211,7 @@ namespace ssi
                 var filterannotator = builder.Eq("name",name);
                 UpdateOptions uoa = new UpdateOptions();
                 uoa.IsUpsert = true;
-                var result = database.GetCollection<BsonDocument>("Annotators").ReplaceOne(filterannotator, annotator, uoa);
+                var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).ReplaceOne(filterannotator, annotator, uoa);
                 if (result.ModifiedCount == 0)
                 {
                     string role = dbsw.RoleBox.SelectionBoxItem.ToString();

@@ -23,7 +23,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.5.0";
+        public static string BuildVersion = "1.0.0.0.0";
 
         private static Timeline timeline = null;
 
@@ -319,12 +319,12 @@ namespace ssi
                     MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
                     if (mbx == MessageBoxResult.Yes)
                     {
-                        saveSession();
+                        saveAnnos();
                     }
                 }
                 else
                 {
-                    saveSession();
+                    saveAnnos();
                 }
             }
             
@@ -384,35 +384,6 @@ namespace ssi
         }
 
 
-        private void saveSession()
-        {
-            bool anytrackchanged = false;
-            foreach (AnnoTier track in annoTiers)
-            {
-                if (track.AnnoList.HasChanged) anytrackchanged = true;
-            }
-
-            if (annoTiers.Count > 0 && anytrackchanged)
-            {
-                foreach (AnnoTier track in annoTiers)
-                {
-                    if (track.AnnoList.HasChanged)
-                    {
-                        if (track.AnnoList.LoadedFromDB)
-                        {
-                        }
-                        else
-                        {
-                            saveAnno(track.AnnoList, track.AnnoList.FilePath);
-                            track.AnnoList.HasChanged = false;
-                        }
-                    }
-                }
-            }
-        }
-
-
-
         private void updateTimeRange(double duration)
         {
             if (duration > MainHandler.Time.TotalDuration)
@@ -457,7 +428,7 @@ namespace ssi
 
         private void saveSession_Click(object sender, RoutedEventArgs e)
         {
-            saveSession();
+            saveAnnos();
         }
 
         private void showSettings_Click(object sender, RoutedEventArgs e)

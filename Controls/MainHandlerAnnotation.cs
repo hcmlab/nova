@@ -58,7 +58,7 @@ namespace ssi
                         {
                             databaseStore();
                         }
-                        else saveAnno();
+                        else saveSelectedAnno();
 
                         at.AnnoList.HasChanged = false;
                     }
@@ -94,9 +94,9 @@ namespace ssi
             string annoNameLabel = "";
             if (AnnoList.Scheme.Name != null && AnnoList.Scheme.Name != "") annoNameLabel += "#" + AnnoList.Scheme.Name + " ";
             else annoNameLabel += "#NewTier ";
-            if (AnnoList.Role != null && AnnoList.Role != "") annoNameLabel += "#" + AnnoList.Role + " ";
-            if (AnnoList.AnnotatorFullName != null && AnnoList.AnnotatorFullName != "") annoNameLabel += "#" + AnnoList.AnnotatorFullName;
-            else if (AnnoList.Annotator != null && AnnoList.Annotator != "") annoNameLabel += "#" + AnnoList.Annotator;
+            if (AnnoList.Meta.Role != "") annoNameLabel += "#" + AnnoList.Meta.Role + " ";
+            if (AnnoList.Meta.AnnotatorFullName != "") annoNameLabel += "#" + AnnoList.Meta.AnnotatorFullName;
+            else if (AnnoList.Meta.Annotator != "") annoNameLabel += "#" + AnnoList.Meta.Annotator;
 
             return annoNameLabel;
         }

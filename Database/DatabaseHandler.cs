@@ -12,19 +12,33 @@ namespace ssi
 {
     internal class DatabaseHandler
     {
-        private IMongoDatabase database;
-        private MongoClient mongo;
-        private string connectionstring = "mongodb://127.0.0.1:27017";
+        private static string GARBAGELABEL = "GARBAGE";
+        private static Color GARBAGECOLOR = Colors.Black;
 
-        private string GARBAGELABEL = "GARBAGE";
-        private Color GARBAGECOLOR = Colors.Black;
-
-        public DatabaseHandler(string constr)
+        public static string ServerConnectionString
         {
-            this.connectionstring = constr;
+            get { return "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress; }
         }
 
-        public int checkAuth(string dbuser, string db = "admin")
+        public static MongoClient Client
+        {
+            get
+            {
+                MongoClient mongo = new MongoClient(ServerConnectionString);
+                return mongo;
+            }
+        }
+
+        public static IMongoDatabase Database
+        {
+            get
+            {
+                IMongoDatabase database = Client.GetDatabase(Properties.Settings.Default.DatabaseName);
+                return database;
+            }
+        }
+
+        static public int CheckAuthentication(string dbuser, string db = "admin")
         {
             //4 = root
             //3 = admin
@@ -35,7 +49,7 @@ namespace ssi
             int auth = 0;
             try
             {
-                mongo = new MongoClient(connectionstring);
+                MongoClient mongo = new MongoClient(ServerConnectionString);
                 var adminDB = mongo.GetDatabase("admin");
                 var cmd = new BsonDocument("usersInfo", dbuser);
                 var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
@@ -54,8 +68,7 @@ namespace ssi
             }
             catch(Exception e)
             {
-               
-               
+                
             }
 
             return auth;
@@ -82,13 +95,14 @@ namespace ssi
         //}
 
 
-        public string LoadRoles(string db, AnnoTier tier)
+        public static string LoadRoles(AnnoList annoList)
         {
             string role = null;
             List<string> roles = new List<string>();
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(db);
-            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("Roles");
+
+            MongoClient mongo = Client;
+            IMongoDatabase database = Database;
+            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
 
             var sessions = collection.Find(_ => true).ToList();
 
@@ -98,14 +112,13 @@ namespace ssi
             }
 
            
-            int auth = checkAuth(Properties.Settings.Default.MongoDBUser, db);
+            int auth = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
             bool hasauth = false;
             if (auth > 3) hasauth = true;
 
-            string name = "New track";
-            if (tier != null) name = tier.AnnoList.Scheme.Name;
+            string name = annoList.Scheme.Name;
 
-            DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(roles, hasauth, "Tier: " + name + ". Who is annotated? ", "Roles");
+            DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(roles, hasauth, "Tier: " + name + ". Who is annotated? ", DatabaseDefinitionCollections.Roles);
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             dbw.ShowDialog();
 
@@ -117,13 +130,14 @@ namespace ssi
             return role;
         }
 
-        public string SelectAnnotationScheme(string db, AnnoTier tier, AnnoScheme.TYPE type = AnnoScheme.TYPE.DISCRETE)
+        public static string SelectAnnotationScheme(AnnoList annoList)
         {
             string annotype = null;
             List<string> AnnotationSchemes = new List<string>();
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(db);
-            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("AnnotationSchemes");
+
+            MongoClient mongo = Client;
+            IMongoDatabase database = Database;
+            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
 
             var sessions = collection.Find(_ => true).ToList();
 
@@ -131,20 +145,19 @@ namespace ssi
             {
                 if (document["isValid"].AsBoolean == true)
                 {
-                    if ((type == AnnoScheme.TYPE.DISCRETE && document["type"].ToString() == "DISCRETE")) AnnotationSchemes.Add(document["name"].ToString());
-                    else if  (type == AnnoScheme.TYPE.FREE && (document["type"].ToString() == "FREE")) AnnotationSchemes.Add(document["name"].ToString());
-                    else if (type == AnnoScheme.TYPE.CONTINUOUS && document["type"].ToString() == "CONTINUOUS") AnnotationSchemes.Add(document["name"].ToString());
+                    if ((annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE && document["type"].ToString() == "DISCRETE")) AnnotationSchemes.Add(document["name"].ToString());
+                    else if  (annoList.Scheme.Type == AnnoScheme.TYPE.FREE && (document["type"].ToString() == "FREE")) AnnotationSchemes.Add(document["name"].ToString());
+                    else if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && document["type"].ToString() == "CONTINUOUS") AnnotationSchemes.Add(document["name"].ToString());
                 }
             }
 
-            int auth = checkAuth(Properties.Settings.Default.MongoDBUser, db);
+            int auth = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
             bool hasauth = false;
             if (auth > 2) hasauth = true;
 
-            string name = "New Track";
-            if (tier != null) name = tier.AnnoList.Scheme.Name;
+            string name = annoList.Scheme.Name;
 
-            DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(AnnotationSchemes, hasauth, "Tier: " + name + ". What is annotated? ", "AnnotationSchemes", type, true, tier);
+            DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(AnnotationSchemes, hasauth, "Tier: " + name + ". What is annotated? ", DatabaseDefinitionCollections.Schemes, true, annoList);
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             dbw.ShowDialog();
 
@@ -155,15 +168,15 @@ namespace ssi
             return annotype;
         }
 
-        public AnnoScheme GetAnnotationScheme(string annoName, AnnoScheme.TYPE annoType)
+        public static AnnoScheme GetAnnotationScheme(string annoName, AnnoScheme.TYPE annoType)
         {
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
+            MongoClient mongo = new MongoClient(ServerConnectionString);
+            IMongoDatabase database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
 
             AnnoScheme scheme = new AnnoScheme();
             scheme.Type = annoType;
 
-            var annoSchemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+            var annoSchemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var builder = Builders<BsonDocument>.Filter;
 
             FilterDefinition<BsonDocument> annoSchemeFilter = builder.Eq("name", annoName) & builder.Eq("type", annoType.ToString());
@@ -224,43 +237,47 @@ namespace ssi
             return scheme;
         }
 
-        public string StoreToDatabase(string db, string session, string dbuser, AnnoTier annoTrack, List<DatabaseMediaInfo> loadedDBmedia = null, bool isfin = false)
+        public static string StoreToDatabase(AnnoList annoList, List<DatabaseMediaInfo> loadedDBmedia = null, bool isfin = false)
         {
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(db);
+            string session = Properties.Settings.Default.LastSessionId;
+            string dbuser = Properties.Settings.Default.MongoDBUser;
+
+            MongoClient mongo = Client;
+            IMongoDatabase database = Database;
+
             string annotator = null;
-            string originalannotator = annoTrack.AnnoList.Annotator;
+            string originalAnnotator = annoList.Meta.Annotator;
 
             BsonArray labels = new BsonArray();
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(db);
-            var annotations = database.GetCollection<BsonDocument>("Annotations");
-            var annotators = database.GetCollection<BsonDocument>("Annotators");
-            var sessions = database.GetCollection<BsonDocument>("Sessions");
-            var roles = database.GetCollection<BsonDocument>("Roles");
-            var medias = database.GetCollection<BsonDocument>("Media");
-            var annotationschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
+
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var annotators = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators);
+            var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+            var medias = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
+            var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
 
             string lowb = "", highb = "";
-            if (!annoTrack.isDiscreteOrFree)
+            if (!(annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE ||
+                annoList.Scheme.Type == AnnoScheme.TYPE.FREE))
             {
-                lowb = annoTrack.AnnoList.Scheme.MinScore.ToString();
-                highb = annoTrack.AnnoList.Scheme.MaxScore.ToString();
+                lowb = annoList.Scheme.MinScore.ToString();
+                highb = annoList.Scheme.MaxScore.ToString();
             }
 
             ObjectId roleid;
 
-            if (annoTrack.AnnoList.Role == null || annoTrack.AnnoList.Role == annoTrack.AnnoList.Scheme.Name)
+            if (annoList.Meta.Role == null || annoList.Meta.Role == annoList.Scheme.Name)
             {
-                annoTrack.AnnoList.Role = LoadRoles(db, annoTrack);
-                if (annoTrack.AnnoList.Role == null)
+                annoList.Meta.Role = LoadRoles(annoList);
+                if (annoList.Meta.Role == null)
                 {
                     return null;
                 }
             }
 
             var builder = Builders<BsonDocument>.Filter;
-            var filter = builder.Eq("name", annoTrack.AnnoList.Role);
+            var filter = builder.Eq("name", annoList.Meta.Role);
             var roledb = roles.Find(filter).ToList();
             if (roledb.Count > 0)
             {
@@ -271,7 +288,7 @@ namespace ssi
             else
             {
                 BsonDocument b = new BsonDocument();
-                BsonElement n = new BsonElement("name", annoTrack.AnnoList.Scheme.Name);
+                BsonElement n = new BsonElement("name", annoList.Scheme.Name);
                 BsonElement m = new BsonElement("isValid", true);
 
                 b.Add(n);
@@ -289,57 +306,58 @@ namespace ssi
             if (dbuser == "system")
             {
 
-                if (annoTrack.AnnoList.Annotator == null && annoTrack.AnnoList.AnnotatorFullName != null)
+                if (annoList.Meta.AnnotatorFullName != null)
                 {
-                    ObjectId annotatid = GetObjectID(database, "Annotators", "fullname", annoTrack.AnnoList.AnnotatorFullName);
-                    annoTrack.AnnoList.Annotator = FetchDBRef(database, "Annotators", "name", annotatid);
+                    ObjectId annotatid = GetObjectID(database, DatabaseDefinitionCollections.Annotators, "fullname", annoList.Meta.AnnotatorFullName);
+                    annoList.Meta.Annotator = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "name", annotatid);
                 }
-                else if (annoTrack.AnnoList.Annotator == null && annoTrack.AnnoList.AnnotatorFullName == null)
+                else if (annoList.Meta.Annotator == "" && annoList.Meta.AnnotatorFullName == "")
                 {
-                    annoTrack.AnnoList.Annotator = dbuser;
+                    annoList.Meta.Annotator = dbuser;
+                    annoList.Meta.AnnotatorFullName = dbuser;
                 }
 
-                if (annoTrack.AnnoList.AnnotatorFullName == null)
+                if (annoList.Meta.AnnotatorFullName == null)
                 {
                     try
                     {
-                        ObjectId annotatid = GetObjectID(database, "Annotators", "name", annoTrack.AnnoList.Annotator);
-                        annoTrack.AnnoList.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid);
+                        ObjectId annotatid = GetObjectID(database, DatabaseDefinitionCollections.Annotators, "name", annoList.Meta.Annotator);
+                        annoList.Meta.AnnotatorFullName = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
                     }
                     catch
                     {
-                        annoTrack.AnnoList.AnnotatorFullName = Properties.Settings.Default.Annotator;
+                        annoList.Meta.AnnotatorFullName = Properties.Settings.Default.Annotator;
                     }
                 }
             }
 
-            else if (!(annoTrack.AnnoList.AnnotatorFullName == "RMS" || annoTrack.AnnoList.AnnotatorFullName == "Median"))
+            else if (!(annoList.Meta.AnnotatorFullName == "RMS" || annoList.Meta.AnnotatorFullName == "Median"))
             {
                 try
                 {
-                    annoTrack.AnnoList.Annotator = dbuser;
-                    ObjectId annotatid = GetObjectID(database, "Annotators", "name", dbuser);
-                    annoTrack.AnnoList.AnnotatorFullName = FetchDBRef(database, "Annotators", "fullname", annotatid);
+                    annoList.Meta.Annotator = dbuser;
+                    ObjectId annotatid = GetObjectID(database, DatabaseDefinitionCollections.Annotators, "name", dbuser);
+                    annoList.Meta.AnnotatorFullName = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
                 }
                 catch
                 {
-                    annoTrack.AnnoList.AnnotatorFullName = Properties.Settings.Default.Annotator;
+                    annoList.Meta.AnnotatorFullName = Properties.Settings.Default.Annotator;
                 }
 
             }
-            else annoTrack.AnnoList.Annotator = annoTrack.AnnoList.AnnotatorFullName;
+            else annoList.Meta.Annotator = annoList.Meta.AnnotatorFullName;
 
-            annotator = annoTrack.AnnoList.AnnotatorFullName;
+            annotator = annoList.Meta.AnnotatorFullName;
 
             //  if (!(a.AnnoList.Annotator == null || a.AnnoList.Annotator == dbuser || a.AnnoList.Annotator == "RMS" || a.AnnoList.Annotator == "Median")) break; //?? Not called at the moment
 
-            BsonElement annotatorname = new BsonElement("name", annoTrack.AnnoList.Annotator);
-            BsonElement annotatornamefull = new BsonElement("fullname", annoTrack.AnnoList.AnnotatorFullName);
+            BsonElement annotatorname = new BsonElement("name", annoList.Meta.Annotator);
+            BsonElement annotatornamefull = new BsonElement("fullname", annoList.Meta.AnnotatorFullName);
 
             annotatordoc.Add(annotatorname);
             annotatordoc.Add(annotatornamefull);
 
-            var filterannotator = builder.Eq("name", annoTrack.AnnoList.Annotator);
+            var filterannotator = builder.Eq("name", annoList.Meta.Annotator);
             UpdateOptions uoa = new UpdateOptions();
             uoa.IsUpsert = true;
             var resann = annotators.ReplaceOne(filterannotator, annotatordoc, uoa);
@@ -353,11 +371,11 @@ namespace ssi
 
             ObjectId annotid;
             string annotype = null;
-            if (annoTrack.AnnoList.Scheme != null) annotype = annoTrack.AnnoList.Scheme.Name;
+            if (annoList.Scheme != null) annotype = annoList.Scheme.Name;
 
             if (annotype == null)
             {
-                annotype = SelectAnnotationScheme(db, annoTrack, annoTrack.AnnoList.Scheme.Type);
+                annotype = SelectAnnotationScheme(annoList);
             }
 
             if (annotype == null)
@@ -411,47 +429,44 @@ namespace ssi
             document.Add(isfinished);
             document.Add("media", media);
 
-            if (annoTrack != null)
+            if (annoschemetypedb == "DISCRETE")
             {
-                if (annoschemetypedb == "DISCRETE")
+                BsonArray Labels = annotdb[0]["labels"].AsBsonArray;
+                int index = 0;
+                for (int i = 0; i < annoList.Count; i++)
                 {
-                    BsonArray Labels = annotdb[0]["labels"].AsBsonArray;
-                    int index = 0;
-                    for (int i = 0; i < annoTrack.AnnoList.Count; i++)
+                    for (int j = 0; j < Labels.Count; j++)
                     {
-                        for (int j = 0; j < Labels.Count; j++)
+                        if (annoList[i].Label == Labels[j]["name"].ToString())
                         {
-                            if (annoTrack.AnnoList[i].Label == Labels[j]["name"].ToString())
-                            {
-                                index = Labels[j]["id"].AsInt32;
-                                data.Add(new BsonDocument { { "from", annoTrack.AnnoList[i].Start }, { "to", annoTrack.AnnoList[i].Stop }, { "id", index }, { "conf", annoTrack.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
-                                break;
-                            }
-                            else if (annoTrack.AnnoList[i].Label == GARBAGELABEL)
-                            {
-                                data.Add(new BsonDocument { { "from", annoTrack.AnnoList[i].Start }, { "to", annoTrack.AnnoList[i].Stop }, { "id", -1 }, { "conf", annoTrack.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
-                                break;
-                            }
+                            index = Labels[j]["id"].AsInt32;
+                            data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "id", index }, { "conf", annoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
+                            break;
+                        }
+                        else if (annoList[i].Label == GARBAGELABEL)
+                        {
+                            data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "id", -1 }, { "conf", annoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
+                            break;
                         }
                     }
                 }
-                else if (annoschemetypedb == "FREE")
-                {
-                    for (int i = 0; i < annoTrack.AnnoList.Count; i++)
-                    {
-                        data.Add(new BsonDocument { { "from", annoTrack.AnnoList[i].Start }, { "to", annoTrack.AnnoList[i].Stop }, { "name", annoTrack.AnnoList[i].Label }, { "conf", annoTrack.AnnoList[i].Confidence } });
-                    }
-                }
-                else if (annoschemetypedb == "CONTINUOUS")
-                {
-                    for (int i = 0; i < annoTrack.AnnoList.Count; i++)
-                    {
-                        data.Add(new BsonDocument { { "score", annoTrack.AnnoList[i].Label }, { "conf", annoTrack.AnnoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
-                    }
-                }
-
-                document.Add("labels", data);
             }
+            else if (annoschemetypedb == "FREE")
+            {
+                for (int i = 0; i < annoList.Count; i++)
+                {
+                    data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "name", annoList[i].Label }, { "conf", annoList[i].Confidence } });
+                }
+            }
+            else if (annoschemetypedb == "CONTINUOUS")
+            {
+                for (int i = 0; i < annoList.Count; i++)
+                {
+                    data.Add(new BsonDocument { { "score", annoList[i].Label }, { "conf", annoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
+                }
+            }
+
+            document.Add("labels", data);
 
             var filter2 = builder.Eq("scheme_id", annotid) & builder.Eq("role_id", roleid) & builder.Eq("annotator_id", annotatoroID) & builder.Eq("session_id", sessionID);
 
@@ -481,10 +496,10 @@ namespace ssi
             if (!islocked)
             {
                 var check = annotations.Find(filter2).ToList();
-                if (check.Count > 0 && Properties.Settings.Default.DatabaseAskBeforeOverwrite && originalannotator != Properties.Settings.Default.MongoDBUser)
+                if (check.Count > 0 && Properties.Settings.Default.DatabaseAskBeforeOverwrite && originalAnnotator != Properties.Settings.Default.MongoDBUser)
                 {
-                   MessageBoxResult mbres =  MessageBox.Show("Annotation #" + annoTrack.AnnoList.Role+ " #" + annoTrack.AnnoList.Scheme.Name + " #" +
-                       annoTrack.AnnoList.AnnotatorFullName + " already exists, do you want to overwrite it?", "Attention", MessageBoxButton.YesNo);
+                   MessageBoxResult mbres =  MessageBox.Show("Annotation #" + annoList.Meta.Role+ " #" + annoList.Scheme.Name + " #" +
+                       annoList.Meta.AnnotatorFullName + " already exists, do you want to overwrite it?", "Attention", MessageBoxButton.YesNo);
 
                     if (mbres == MessageBoxResult.Yes)
                     {
@@ -506,50 +521,44 @@ namespace ssi
             return annotator;
         }
 
-        public IMongoDatabase GetDatabase()
+        public static List<AnnoList> LoadFromDatabase(System.Collections.IList collections, string databaseName, string sessionName, string userName)
         {
-            return database;
-        }
+            MongoClient mongo = new MongoClient(ServerConnectionString);
+            IMongoDatabase database = mongo.GetDatabase(databaseName);
 
+            var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+            var annoSchemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
 
+            List<AnnoList> annoLists = new List<AnnoList>();
 
-        public List<AnnoList> LoadFromDatabase(System.Collections.IList collections, string db, string session, string dbuser)
-        {
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(db);
-            var collection = database.GetCollection<BsonDocument>("Annotations");
-            var roles = database.GetCollection<BsonDocument>("Roles");
-            var annoschemes = database.GetCollection<BsonDocument>("AnnotationSchemes");
-
-            List<AnnoList> l = new List<AnnoList>();
-
-            foreach (DatabaseAnno s in collections)
+            foreach (DatabaseAnno anno in collections)
             {
                 BsonElement value;
                 AnnoList annoList = new AnnoList();
 
-                ObjectId roleid = GetObjectID(database, "Roles", "name", s.Role);
-                string roledb = FetchDBRef(database, "Roles", "name", roleid);
+                ObjectId roleid = GetObjectID(database, DatabaseDefinitionCollections.Roles, "name", anno.Role);
+                string roledb = FetchDBRef(database, DatabaseDefinitionCollections.Roles, "name", roleid);
 
-                ObjectId annotid = GetObjectID(database, "AnnotationSchemes", "name", s.AnnoScheme);
-                string annotdb = FetchDBRef(database, "AnnotationSchemes", "name", annotid);
+                ObjectId annoSchemeId = GetObjectID(database, DatabaseDefinitionCollections.Schemes, "name", anno.AnnoScheme);
+                string annotdb = FetchDBRef(database, DatabaseDefinitionCollections.Schemes, "name", annoSchemeId);
 
-                ObjectId annotatid = GetObjectID(database, "Annotators", "fullname", s.AnnotatorFullname);
-                string annotatdb = FetchDBRef(database, "Annotators", "name", annotatid);
-                string annotatdbfn = FetchDBRef(database, "Annotators", "fullname", annotatid);
-                annoList.Annotator = annotatdb;
-                annoList.AnnotatorFullName = annotatdbfn;
+                ObjectId annotatorId = GetObjectID(database, DatabaseDefinitionCollections.Annotators, "fullname", anno.AnnotatorFullname);
+                string annotatdb = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "name", annotatorId);
+                string annotatdbfn = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatorId);
+                annoList.Meta.Annotator = annotatdb;
+                annoList.Meta.AnnotatorFullName = annotatdbfn;
 
-                ObjectId sessionid = GetObjectID(database, "Sessions", "name", session);
-                string sessiondb = FetchDBRef(database, "Sessions", "name", sessionid);
+                ObjectId sessionid = GetObjectID(database, DatabaseDefinitionCollections.Sessions, "name", sessionName);
+                string sessiondb = FetchDBRef(database, DatabaseDefinitionCollections.Sessions, "name", sessionid);
 
                 var builder = Builders<BsonDocument>.Filter;
 
-                var filterscheme = builder.Eq("_id", annotid);
+                var filterscheme = builder.Eq("_id", annoSchemeId);
                 var result = collection.Find(filterscheme);
-                var annosch = annoschemes.Find(filterscheme).Single();
+                var annosch = annoSchemes.Find(filterscheme).Single();
 
-                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
+                var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annoSchemeId) & builder.Eq("annotator_id", annotatorId) & builder.Eq("session_id", sessionid);
                 var documents = collection.Find(filter).ToList();
 
                 annoList.Scheme = new AnnoScheme();
@@ -566,9 +575,9 @@ namespace ssi
                     annoList.Scheme.Type = AnnoScheme.TYPE.CONTINUOUS;
                 }
 
-                annoList.Role = roledb;
+                annoList.Meta.Role = roledb;
                 annoList.Scheme.Name = annosch["name"].ToString();
-                var annotation = documents[0]["labels"].AsBsonArray;
+                var labels = documents[0]["labels"].AsBsonArray;
                 if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {
                     if (annosch.TryGetElement("min", out value)) annoList.Scheme.MinScore = double.Parse(annosch["min"].ToString());
@@ -582,10 +591,10 @@ namespace ssi
                     annoList.Scheme.MaxScore = annoList.Scheme.MaxScore;
                     annoList.Scheme.SampleRate = annoList.Scheme.SampleRate;
 
-                    for (int i = 0; i < annotation.Count; i++)
+                    for (int i = 0; i < labels.Count; i++)
                     {
-                        string label = annotation[i]["score"].ToString();
-                        string confidence = annotation[i]["conf"].ToString();
+                        string label = labels[i]["score"].ToString();
+                        string confidence = labels[i]["conf"].ToString();
                         double start = i * ((1000.0 / annoList.Scheme.SampleRate) / 1000.0);
                         double dur = (1000.0 / annoList.Scheme.SampleRate) / 1000.0;
 
@@ -617,14 +626,14 @@ namespace ssi
 
                     annoList.Scheme.Labels.Add(new AnnoScheme.Label(GARBAGELABEL, GARBAGECOLOR));
 
-                    for (int i = 0; i < annotation.Count; i++)
+                    for (int i = 0; i < labels.Count; i++)
                     {
                         string SchemeLabel = "";
                         Color SchemeColor = Colors.Black;
                         bool idfound = false;
                         for (int j = 0; j < schemelabels.Count; j++)
                         {
-                            if (annotation[i]["id"].AsInt32 == schemelabels[j]["id"].AsInt32)
+                            if (labels[i]["id"].AsInt32 == schemelabels[j]["id"].AsInt32)
                             {
                                 SchemeLabel = schemelabels[j]["name"].ToString();
                                 SchemeColor = (Color)ColorConverter.ConvertFromString(schemelabels[j]["color"].ToString());
@@ -634,17 +643,17 @@ namespace ssi
                         }
 
 
-                        if (annotation[i]["id"].AsInt32 == -1 || idfound == false)
+                        if (labels[i]["id"].AsInt32 == -1 || idfound == false)
                         {
                             SchemeLabel = GARBAGELABEL;
                             SchemeColor = GARBAGECOLOR;
                         }
 
-                        double start = double.Parse(annotation[i]["from"].ToString());
-                        double stop = double.Parse(annotation[i]["to"].ToString());
+                        double start = double.Parse(labels[i]["from"].ToString());
+                        double stop = double.Parse(labels[i]["to"].ToString());
                         double duration = stop - start;
                         string label = SchemeLabel;
-                        string confidence = annotation[i]["conf"].ToString();
+                        string confidence = labels[i]["conf"].ToString();
 
                         AnnoListItem ali = new AnnoListItem(start, duration, label, "", SchemeColor, double.Parse(confidence));
                         annoList.AddSorted(ali);
@@ -654,28 +663,29 @@ namespace ssi
                 {
                     annoList.Scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annosch["color"].ToString());
 
-                    for (int i = 0; i < annotation.Count; i++)
+                    for (int i = 0; i < labels.Count; i++)
                     {
-                        double start = double.Parse(annotation[i]["from"].ToString());
-                        double stop = double.Parse(annotation[i]["to"].ToString());
+                        double start = double.Parse(labels[i]["from"].ToString());
+                        double stop = double.Parse(labels[i]["to"].ToString());
                         double duration = stop - start;
-                        string label = annotation[i]["name"].ToString();
-                        string confidence = annotation[i]["conf"].ToString();
+                        string label = labels[i]["name"].ToString();
+                        string confidence = labels[i]["conf"].ToString();
 
                         AnnoListItem ali = new AnnoListItem(start, duration, label, "", Colors.Black, double.Parse(confidence));
                         annoList.AddSorted(ali);
                     }
                 }
 
-                annoList.LoadedFromDB = true;
-                l.Add(annoList);
+                annoList.Source.Database.OID = anno.Id;
+
+                annoLists.Add(annoList);
                 annoList = null;
             }
 
-            return l;
+            return annoLists;
         }
 
-        public string FetchDBRef(IMongoDatabase database, string collection, string attribute, ObjectId reference)
+        public static string FetchDBRef(IMongoDatabase database, string collection, string attribute, ObjectId reference)
         {
             string output = "";
             var builder = Builders<BsonDocument>.Filter;
@@ -690,7 +700,7 @@ namespace ssi
             return output;
         }
 
-        public ObjectId GetObjectID(IMongoDatabase database, string collection, string value, string attribute)
+        public static ObjectId GetObjectID(IMongoDatabase database, string collection, string value, string attribute)
         {
             ObjectId id = new ObjectId();
             var builder = Builders<BsonDocument>.Filter;
@@ -755,5 +765,18 @@ namespace ssi
         public string subject;
         public string mediatype;
         public string session;
+    }
+
+    public static class DatabaseDefinitionCollections
+    {
+        public static string Annotations = "Annotations";
+        public static string Annotators = "Annotators";
+        public static string Sessions = "Sessions";
+        public static string Roles = "Roles";
+        public static string Subjects = "Subjects";
+        public static string Streams = "Media";
+        public static string StreamTypes = "MediaTypes";
+        public static string Schemes = "AnnotationSchemes";
+        
     }
 }
