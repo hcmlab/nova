@@ -111,6 +111,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\Annotation\AnnoSchemeNewLabelWindow.xaml.cs">
+      <DependentUpon>AnnoSchemeNewLabelWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\MainHandlerAnnotation.cs" />
     <Compile Include="Controls\MainHandlerCML.cs" />
     <Compile Include="Controls\MainHandlerDatabase.cs" />
@@ -192,6 +195,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Annotation\AnnoSchemeEditor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Annotation\AnnoSchemeNewLabelWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

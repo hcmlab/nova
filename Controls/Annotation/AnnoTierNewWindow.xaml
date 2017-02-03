@@ -27,7 +27,7 @@
         <StackPanel Grid.Row="1">
             <Label>Discrete scheme with free labels</Label>
             <Separator Height="10" Visibility="Hidden"></Separator>
-            <Button Height="25" Width="120" Content="New Tier no Scheme" Click="Button_Click"></Button>
+            <Button Height="25" Width="120" Content="New Free Tier" Click="Button_Click"></Button>
         </StackPanel>
 
 

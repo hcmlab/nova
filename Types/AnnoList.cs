@@ -61,5 +61,18 @@ namespace ssi
             return saved;
         }
 
+
+        public string DefaultName(string seperator = ".", bool startwithseperator = false, bool showFullname = false)
+        {
+            string name = "";
+            if (startwithseperator) name = seperator + Scheme.Name;
+            else name = Scheme.Name;
+            if (Meta.Role != "") name += seperator + Meta.Role;
+            if (Meta.AnnotatorFullName != "" && showFullname) name += seperator + Meta.AnnotatorFullName ;
+            else if (Meta.Annotator != "") name += seperator + Meta.Annotator;
+
+            return name;
+        }
+
     }
 }

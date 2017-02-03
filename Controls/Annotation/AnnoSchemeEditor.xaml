@@ -53,7 +53,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <p:ColorPicker SelectedColor="{Binding BindingColor}" IsEnabled="true" Width="40" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                    <p:ColorPicker SelectedColor="{Binding Color}" IsEnabled="true" Width="40" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

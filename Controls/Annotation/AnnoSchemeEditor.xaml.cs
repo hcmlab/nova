@@ -54,15 +54,16 @@ namespace ssi
 
         private void AddAnnotation_Click(object sender, RoutedEventArgs e)
         {
-            /*
-            AnnoTierNewLabelWindow l = new AnnoTierNewLabelWindow("Add new Label", "Add new label", "", null, 1, "", "", true);
+
+            AnnoSchemeNewLabelWindow l = new AnnoSchemeNewLabelWindow();
+                
             l.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             l.ShowDialog();
             items = new List<AnnotationSchemeSegment>();
 
             if (l.DialogResult == true)
             {
-                schemes.Add(new AnnotationSchemeSegment() { Label = l.Result(), BindingColor = (Color)ColorConverter.ConvertFromString(l.Color()) });
+                schemes.Add(new AnnotationSchemeSegment() { Label = l.labelTextBox.Text, Color = l.colorPicker.SelectedColor.Value });
             }
 
             foreach (var item in schemes)
@@ -70,7 +71,7 @@ namespace ssi
                 items.Add(item);
             }
             AnnotationResultBox.ItemsSource = items;
-            */
+            
         }
 
         private void DeleteAnnotation_Click(object sender, RoutedEventArgs e)

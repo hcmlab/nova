@@ -135,15 +135,15 @@ namespace ssi
                     if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true)
                     {
                         double factor = (((timeline.CurrentPlayPosition - timeline.SelectionStart) / (timeline.SelectionStop - timeline.SelectionStart)));
-                        control.timeTrackControl.rangeSlider.followmedia = true;
-                        control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+                        control.timeLineControl.rangeSlider.followmedia = true;
+                        control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
 
                         if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
                         signalCursor.X = 1;
 
 
                     }
-                    else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
+                    else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
                 
 
 
@@ -211,14 +211,14 @@ namespace ssi
                     if (Time.CurrentPlayPosition < Time.SelectionStart && Time.SelectionStart > 0 && control.navigator.followplaybox.IsChecked == true)
                     {
                         double factor = (((timeline.SelectionStop - timeline.CurrentPlayPosition) / (timeline.SelectionStop - timeline.SelectionStart)));
-                        control.timeTrackControl.rangeSlider.followmedia = true;
-                        control.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
+                        control.timeLineControl.rangeSlider.followmedia = true;
+                        control.timeLineControl.rangeSlider.MoveAndUpdate(false, factor);
 
                         if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
                         signalCursor.X = MainHandler.Time.PixelFromTime(MainHandler.Time.SelectionStop);
 
                     }
-                    else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
+                    else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
                    
 
 
