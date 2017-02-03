@@ -98,7 +98,6 @@ namespace ssi
                             if (ase.DialogResult == true)
                             {
                                 AnnoList al = ase.GetAnnoList();
-                                al.Source.File.Path = al.Scheme.Name;
                                 addAnnoTier(al);
                             }
                         }
