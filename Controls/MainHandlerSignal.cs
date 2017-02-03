@@ -12,7 +12,7 @@ namespace ssi
         private void addSignal(Signal signal, string foreground, string background)
         {
             ISignalTrack track = control.signalTrackControl.AddSignalTrack(signal, foreground, background);
-            control.timeTrackControl.rangeSlider.OnTimeRangeChanged += track.TimeRangeChanged;
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += track.TimeRangeChanged;
 
             this.signals.Add(signal);
             this.signalTracks.Add(track);
@@ -21,7 +21,7 @@ namespace ssi
             if (duration > MainHandler.Time.TotalDuration)
             {
                 MainHandler.Time.TotalDuration = duration;
-                control.timeTrackControl.rangeSlider.Update();
+                control.timeLineControl.rangeSlider.Update();
             }
             else
             {

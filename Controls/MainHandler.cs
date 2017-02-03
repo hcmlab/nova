@@ -191,10 +191,10 @@ namespace ssi
             timeline.SelectionInPixel = control.signalAndAnnoControl.ActualWidth;
             control.signalAndAnnoControl.SizeChanged += signalAndAnnoControlSizeChanged;
 
-            control.timeTrackControl.rangeSlider.OnTimeRangeChanged += control.timeTrackControl.timeTrack.TimeRangeChanged;
-            control.timeTrackControl.rangeSlider.OnTimeRangeChanged += control.timeTrackControl.timeTrackSelection.TimeRangeChanged;
-            control.timeTrackControl.rangeSlider.OnTimeRangeChanged += Time.TimelineChanged;
-            control.timeTrackControl.rangeSlider.Update();            
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += control.timeLineControl.timeTrack.TimeRangeChanged;
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += control.timeLineControl.timeTrackSelection.TimeRangeChanged;
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += Time.TimelineChanged;
+            control.timeLineControl.rangeSlider.Update();            
 
             mediaList.OnMediaPlay += mediaPlayHandler;
 
@@ -204,11 +204,11 @@ namespace ssi
                 {
                     if (args.Delta > 0)
                     {
-                        control.timeTrackControl.rangeSlider.MoveAndUpdate(true, 0.2f);
+                        control.timeLineControl.rangeSlider.MoveAndUpdate(true, 0.2f);
                     }
                     else if (args.Delta < 0)
                     {
-                        control.timeTrackControl.rangeSlider.MoveAndUpdate(false, 0.2f);
+                        control.timeLineControl.rangeSlider.MoveAndUpdate(false, 0.2f);
                     }
                 }
             };
@@ -295,7 +295,7 @@ namespace ssi
         private void signalAndAnnoControlSizeChanged(object sender, SizeChangedEventArgs e)
         {
             timeline.SelectionInPixel = control.signalAndAnnoControl.ActualWidth;
-            if (!movemedialock) control.timeTrackControl.rangeSlider.Update();
+            if (!movemedialock) control.timeLineControl.rangeSlider.Update();
         }
 
         public void clearSession(bool exiting = false, bool saveRequested = false)
@@ -380,7 +380,7 @@ namespace ssi
 
             Time.TotalDuration = 0;
 
-            control.timeTrackControl.rangeSlider.Update();
+            control.timeLineControl.rangeSlider.Update();
         }
 
 
@@ -389,13 +389,13 @@ namespace ssi
             if (duration > MainHandler.Time.TotalDuration)
             {
                 MainHandler.Time.TotalDuration = duration;
-                if (!movemedialock) control.timeTrackControl.rangeSlider.Update();
+                if (!movemedialock) control.timeLineControl.rangeSlider.Update();
             }
         }
 
         private void fixTimeRange(double duration)
         {
-            if (!movemedialock) control.timeTrackControl.rangeSlider.UpdateFixedRange(duration);
+            if (!movemedialock) control.timeLineControl.rangeSlider.UpdateFixedRange(duration);
         }
 
         private void controlDrop(object sender, DragEventArgs e)

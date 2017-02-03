@@ -82,10 +82,10 @@ namespace ssi
                         {
                             double factor = (((Time.CurrentPlayPositionPrecise - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
 
-                            control.timeTrackControl.rangeSlider.followmedia = true;
-                            control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+                            control.timeLineControl.rangeSlider.followmedia = true;
+                            control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
                         }
-                        else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
+                        else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
 
                         //hm additional syncstep..
                         if (lasttimepos < MainHandler.Time.CurrentPlayPosition)
@@ -156,10 +156,10 @@ namespace ssi
             {
                 double factor = (((Time.CurrentPlayPosition - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
 
-                control.timeTrackControl.rangeSlider.followmedia = true;
-                control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+                control.timeLineControl.rangeSlider.followmedia = true;
+                control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
             }
-            else if (control.navigator.followplaybox.IsChecked == false) control.timeTrackControl.rangeSlider.followmedia = false;
+            else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
             if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
         }
 

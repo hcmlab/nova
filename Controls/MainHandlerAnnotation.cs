@@ -88,22 +88,10 @@ namespace ssi
             control.annoListControl.annoDataGrid.ItemsSource = anno;
         }
 
-        private string buildAnnoNameLabel(AnnoList AnnoList)
-        {
-
-            string annoNameLabel = "";
-            if (AnnoList.Scheme.Name != null && AnnoList.Scheme.Name != "") annoNameLabel += "#" + AnnoList.Scheme.Name + " ";
-            else annoNameLabel += "#NewTier ";
-            if (AnnoList.Meta.Role != "") annoNameLabel += "#" + AnnoList.Meta.Role + " ";
-            if (AnnoList.Meta.AnnotatorFullName != "") annoNameLabel += "#" + AnnoList.Meta.AnnotatorFullName;
-            else if (AnnoList.Meta.Annotator != "") annoNameLabel += "#" + AnnoList.Meta.Annotator;
-
-            return annoNameLabel;
-        }
 
         private void changeAnnoTierHandler(AnnoTier tier, EventArgs e)
         {
-            control.annoNameLabel.Content = buildAnnoNameLabel(tier.AnnoList);
+            control.annoNameLabel.Content = tier.AnnoList.DefaultName(" #", true, true);
             setAnnoList(tier.AnnoList);
             control.annoListControl.editComboBox.Items.Clear();
 
@@ -253,7 +241,7 @@ namespace ssi
             AnnoTier tier = control.annoTrackControl.addAnnoTier(anno);
             tier.AnnoList.HasChanged = false;
 
-            control.timeTrackControl.rangeSlider.OnTimeRangeChanged += tier.TimeRangeChanged;
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += tier.TimeRangeChanged;
 
             annoTiers.Add(tier);
             annoLists.Add(anno);
@@ -440,12 +428,12 @@ namespace ssi
                 if (item.Start >= timeline.SelectionStop)
                 {
                     float factor = (float)(((item.Start - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
-                    control.timeTrackControl.rangeSlider.MoveAndUpdate(true, factor);
+                    control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
                 }
                 else if (item.Stop <= timeline.SelectionStart)
                 {
                     float factor = (float)(((Time.SelectionStart - item.Start)) / (Time.SelectionStop - Time.SelectionStart));
-                    control.timeTrackControl.rangeSlider.MoveAndUpdate(false, factor);
+                    control.timeLineControl.rangeSlider.MoveAndUpdate(false, factor);
                 }
 
                 foreach (AnnoListItem a in AnnoTierStatic.Selected.AnnoList)

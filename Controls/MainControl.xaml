@@ -230,7 +230,7 @@
                         </Grid>
 
                         <Border Grid.Column="0" Grid.Row="3">
-                            <local:TimeTrackControl x:Name="timeTrackControl" />
+                            <local:TimeTrackControl x:Name="timeLineControl" />
                         </Border>
                     </Grid>
                 </AdornerDecorator>

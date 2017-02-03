@@ -165,12 +165,9 @@ namespace ssi
 
         public bool SaveToCSVFile(string delimiter = ";")
         {
-            string filePath = Source.File.Path;
+            string filePath = FileTools.SaveFileDialog(Source.File.Path != "" ? Source.File.Name : DefaultName(), ".csv", "Annotation(*.csv)|*.csv", "");
 
-            if (filePath == "" || filePath.Split('.')[1] != "csv")
-            {
-                filePath = filePath.Split('.')[0] + ".csv";
-            }
+            if (filePath == null) return false;
 
             if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
             {
