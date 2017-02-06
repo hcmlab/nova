@@ -470,7 +470,7 @@ namespace ssi
                     }
                 }
 
-                if ((e.KeyboardDevice.IsKeyDown(Key.W) || !isKeyDown && AnnoTierStatic.Selected != null) && AnnoTierStatic.Selected.isDiscreteOrFree)
+                if ((e.KeyboardDevice.IsKeyDown(Key.W) || !isKeyDown && AnnoTierStatic.Selected != null) && AnnoTierStatic.Selected.isDiscreteOrFree && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
                 {
                     if (AnnoTierStatic.Label == null)
                     {
@@ -493,7 +493,7 @@ namespace ssi
                     if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
                     isKeyDown = true;
                 }
-                if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !keyDown*/)
+                if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !isKeyDown*/)
                 {
                     int i = 0;
                     double fps = 1.0 / 30.0;
@@ -554,9 +554,10 @@ namespace ssi
                     }
 
                     isKeyDown = true;
+                    e.Handled = true;
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt)/* && !keyDown*/)
+                if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt)/* && !isKeyDown*/)
                 {
                     int i = 0;
                     double fps = 1.0 / 30.0;
@@ -611,8 +612,9 @@ namespace ssi
                     }
 
                     isKeyDown = true;
+                    e.Handled = true;
                 }
-                else
+                else if(!e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
                 {
                     AnnoTier.OnKeyDownHandler(sender, e);
                 }
