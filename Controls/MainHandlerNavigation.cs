@@ -69,7 +69,7 @@ namespace ssi
         {
             if (Time.TotalDuration > 0)
             {
-                AnnoTierNewWindow dialog = new AnnoTierNewWindow();
+                AnnoTierNewSchemeWindow dialog = new AnnoTierNewSchemeWindow();
                 dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 dialog.ShowDialog();
 
@@ -85,20 +85,27 @@ namespace ssi
                     {
                         if (annoType == AnnoScheme.TYPE.FREE)
                         {
-                            AnnoScheme annoScheme = new AnnoScheme() { Type = AnnoScheme.TYPE.FREE, MinOrBackColor = Colors.Transparent, MaxOrForeColor = Colors.Black };
-                            AnnoList annoList = new AnnoList() { Scheme = annoScheme };
-                            addAnnoTier(annoList);
+                            AnnoTierNewFreeSchemeWindow dialog2 = new AnnoTierNewFreeSchemeWindow();
+                            dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                            dialog2.ShowDialog();
+
+                            if (dialog2.DialogResult == true)
+                            {
+                                AnnoScheme annoScheme = dialog2.Result;
+                                AnnoList annoList = new AnnoList() { Scheme = annoScheme };
+                                addAnnoTier(annoList);
+                            }
                         }
                         else if (annoType == AnnoScheme.TYPE.DISCRETE)
                         {
-                            AnnoSchemeEditor ase = new AnnoSchemeEditor();
-                            ase.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                            ase.ShowDialog();
+                            AnnoTierNewDiscreteSchemeWindow dialog2 = new AnnoTierNewDiscreteSchemeWindow();
+                            dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                            dialog2.ShowDialog();
 
-                            if (ase.DialogResult == true)
+                            if (dialog2.DialogResult == true)
                             {
-                                AnnoList al = ase.GetAnnoList();
-                                addAnnoTier(al);
+                                AnnoList annoList = dialog2.GetAnnoList();
+                                addAnnoTier(annoList);
                             }
                         }
                         else if (annoType == AnnoScheme.TYPE.CONTINUOUS)
