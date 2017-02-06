@@ -111,8 +111,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controls\Annotation\AnnoSchemeNewLabelWindow.xaml.cs">
-      <DependentUpon>AnnoSchemeNewLabelWindow.xaml</DependentUpon>
+    <Compile Include="Controls\Annotation\AnnoTierNewFreeSchemeWindow.xaml.cs">
+      <DependentUpon>AnnoTierNewFreeSchemeWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MainHandlerAnnotation.cs" />
     <Compile Include="Controls\MainHandlerCML.cs" />
@@ -194,11 +194,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\Annotation\AnnoSchemeEditor.xaml">
+    <Page Include="Controls\Annotation\AnnoTierNewDiscreteSchemeWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\Annotation\AnnoSchemeNewLabelWindow.xaml">
+    <Page Include="Controls\Annotation\AnnoTierNewFreeSchemeWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -266,8 +266,8 @@
       <DependentUpon>AnnoListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Types\AnnoListItem.cs" />
-    <Compile Include="Controls\Annotation\AnnoSchemeEditor.xaml.cs">
-      <DependentUpon>AnnoSchemeEditor.xaml</DependentUpon>
+    <Compile Include="Controls\Annotation\AnnoTierNewDiscreteSchemeWindow.xaml.cs">
+      <DependentUpon>AnnoTierNewDiscreteSchemeWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Annotation\AnnoTier.cs" />
     <Compile Include="Controls\Annotation\AnnoTierControl.xaml.cs">
@@ -306,7 +306,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\Annotation\AnnoTierNewWindow.xaml">
+    <Page Include="Controls\Annotation\AnnoTierNewSchemeWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -428,8 +428,8 @@
     <Compile Include="Controls\Navigation\NavigatorControl.xaml.cs">
       <DependentUpon>NavigatorControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Annotation\AnnoTierNewWindow.xaml.cs">
-      <DependentUpon>AnnoTierNewWindow.xaml</DependentUpon>
+    <Compile Include="Controls\Annotation\AnnoTierNewSchemeWindow.xaml.cs">
+      <DependentUpon>AnnoTierNewSchemeWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\PatternBrushes.xaml.cs">
       <DependentUpon>PatternBrushes.xaml</DependentUpon>
