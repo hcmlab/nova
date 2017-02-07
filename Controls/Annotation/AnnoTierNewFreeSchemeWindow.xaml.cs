@@ -13,8 +13,8 @@ namespace ssi
 
             Result = new AnnoScheme();
 
-            backgroundColorPicker.SelectedColor = Colors.Black;
-            labelColorPicker.SelectedColor = Colors.LightYellow;
+            backgroundColorPicker.SelectedColor = Colors.LightYellow;
+            labelColorPicker.SelectedColor = Colors.Black;
             schemeNameTextBox.Text = "Noname";
         }
 
