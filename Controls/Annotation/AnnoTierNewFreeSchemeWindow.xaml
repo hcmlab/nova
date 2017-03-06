@@ -30,8 +30,8 @@
         <p:ColorPicker Name="labelColorPicker" Grid.Row="2" Grid.Column="1" Margin="5" BorderBrush="DarkGray" Background="Transparent"/>
 
         <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal" >
-            <Button Margin="5" Width="60" Height="25" Click="okButton_Click">OK</Button>
-            <Button Margin="5" Width="60" Height="25" Click="cancelButton_Click">Cancel</Button>
+            <Button Margin="5" Width="60" Height="25" Click="okButton_Click" IsDefault="True" >OK</Button>
+            <Button Margin="5" Width="60" Height="25" Click="cancelButton_Click" IsCancel="True">Cancel</Button>
         </StackPanel>
 
     </Grid>
