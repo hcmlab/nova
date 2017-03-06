@@ -16,7 +16,7 @@ namespace ssi
     public partial class SignalStatsWindow : Window
     {
         private Signal signal;
-        private uint selected_dim;
+        private int selected_dim;
         private List<Brush> brushes = new List<Brush>();
         private ResourceDictionaryCollection pieSeriesPalette;
         private int numclasses = 5;
@@ -24,7 +24,7 @@ namespace ssi
 
         public Timeline vt = MainHandler.Time;
 
-        public SignalStatsWindow(Signal _signal, uint selected_dimension)
+        public SignalStatsWindow(Signal _signal, int selected_dimension)
         {
             InitializeComponent();
 
@@ -52,7 +52,7 @@ namespace ssi
 
             //TODO:
             //Some smarter logic to scale, maybe even make the borders adjustable by the user
-            for (uint d = selected_dim; d <= selected_dim; d++)
+            for (int d = selected_dim; d <= selected_dim; d++)
             {
                 float minVal = float.Parse(MinBox.Text);
                 float maxVal = float.Parse(MaxBox.Text);

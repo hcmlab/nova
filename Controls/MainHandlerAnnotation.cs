@@ -9,76 +9,61 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        private void handleAnnotation(AnnoList annoList)
+        private void addAnnoTierFromList(AnnoList annoList)
         {
             double maxdur = 0;
             if (annoList.Count > 0)
             {
                 maxdur = annoList[annoList.Count - 1].Stop;
             }
-
-            annoList.HasChanged = false;
-
-
-            if (annoList.Scheme == null)
-            {
-                annoList.Scheme = new AnnoScheme();
-            }
- 
-                addAnnoTier(annoList);
+            
+            addAnnoTier(annoList);            
 
             updateTimeRange(maxdur);
             if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) updateTimeRange(maxdur);
 
-
-            if (this.annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0)
-            {
-
-                fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            {           
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
 
-           
-
+            annoList.HasChanged = false;          
         }
 
         private void removeAnnoTier()
         {
-            AnnoTier at = AnnoTierStatic.Selected;
+            AnnoTier tier = AnnoTierStatic.Selected;
 
-            if (at != null)
+            if (tier != null)
             {
                 MessageBoxResult mb = MessageBoxResult.No;
-                if (at.AnnoList.HasChanged)
-                {
-                    mb = MessageBox.Show("Save annotations on tier #" + at.Name + " first?", "Confirm", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
+                if (tier.AnnoList.HasChanged)
+                {
+                    mb = MessageBox.Show("Save annotations on tier #" + tier.Name + " first?", "Confirm", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                     if (mb == MessageBoxResult.Yes)
                     {
-                        if (DatabaseLoaded)
-                        {
-                            databaseStore();
-                        }
-                        else saveSelectedAnno();
-
-                        at.AnnoList.HasChanged = false;
+                        tier.AnnoList.Save();
                     }
                 }
 
                 if (mb != MessageBoxResult.Cancel)
                 {
-                    control.annoTrackControl.annoTrackGrid.RowDefinitions[Grid.GetRow(at)].Height = new GridLength(0);
-                    if (control.annoTrackControl.annoTrackGrid.Children.IndexOf(at) > 0)
+                    control.annoTierControl.Remove(tier);
+
+                    AnnoTierStatic.Unselect();
+                    tier.Children.Clear();
+                    tier.AnnoList.Clear();
+                    annoTiers.Remove(tier);
+
+                    if (annoTiers.Count > 0)
                     {
-                        control.annoTrackControl.annoTrackGrid.Children.RemoveAt(control.annoTrackControl.annoTrackGrid.Children.IndexOf(at) - 1);
-                        control.annoTrackControl.annoTrackGrid.Children.RemoveAt(control.annoTrackControl.annoTrackGrid.Children.IndexOf(at));
+                        AnnoTierStatic.Select(annoTiers[0]);
                     }
-
-                    AnnoTier.UnselectTier();
-                    at.Children.Clear();
-                    at.AnnoList.Clear();
-
-                    annoTiers.Remove(at);
-                    control.annoNameLabel.Content = "#NoTier";
+                    else
+                    {
+                        clearAnnoInfo();
+                    }
                 }
             }
         }
@@ -88,10 +73,62 @@ namespace ssi
             control.annoListControl.annoDataGrid.ItemsSource = anno;
         }
 
-
-        private void changeAnnoTierHandler(AnnoTier tier, EventArgs e)
+        private void clearAnnoInfo()
         {
-            control.annoNameLabel.Content = tier.AnnoList.DefaultName(" #", true, true);
+            control.annoStatusSettingsButton.IsEnabled = false;
+            control.annoStatusFileNameOrSessionLabel.Text = "";
+            control.annoStatusFileNameOrSessionLabel.ToolTip = "";
+            control.annoStatusSchemeNameLabel.Text = "";
+            control.annoStatusSchemeTypeLabel.Text = "";
+            control.annoStatusSchemeContinuousPanel.Visibility = Visibility.Collapsed;
+            control.annoStatusAnnotatorLabel.Text = "";
+            control.annoStatusRoleLabel.Text = "";
+            control.annoStatusSchemeTypeLabel.Text = "";
+            control.annoStatusPositionLabel.Text = "00:00:00.00";
+            control.annoStatusCloseButton.IsEnabled = false;
+        }
+
+        private void setAnnoInfo(AnnoList annoList)
+        {
+            control.annoStatusSettingsButton.IsEnabled = true;
+            if (annoList.Source.HasFile())
+            {
+                control.annoStatusFileNameOrSessionLabel.Text = annoList.Source.File.FullName;
+                control.annoStatusFileNameOrSessionLabel.ToolTip = annoList.Source.File.Path;
+            }
+            else if (annoList.Source.HasDatabase())
+            {
+                control.annoStatusFileNameOrSessionLabel.Text = annoList.Source.Database.Session;
+                control.annoStatusFileNameOrSessionLabel.ToolTip = annoList.Source.Database.OID;
+            }
+            else
+            {
+                control.annoStatusFileNameOrSessionLabel.Text = "*";
+                control.annoStatusFileNameOrSessionLabel.ToolTip = "Not saved yet";
+            }
+
+            control.annoStatusSchemeNameLabel.Text = annoList.Scheme.Name;
+            if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            {
+                control.annoStatusSchemeTypeLabel.Text = annoList.Scheme.Type.ToString();
+                control.annoStatusSchemeContinuousPanel.Visibility = Visibility.Visible;
+                control.annoSchemeContinuousSrLabel.Text = annoList.Scheme.SampleRate.ToString() + " Hz";
+                control.annoSchemeContinuousMinLabel.Text = "min " + annoList.Scheme.MinScore.ToString();
+                control.annoSchemeContinuousMaxLabel.Text = "max " + annoList.Scheme.MaxScore.ToString();
+            }
+            else
+            {
+                control.annoStatusSchemeTypeLabel.Text = annoList.Scheme.Type.ToString();
+                control.annoStatusSchemeContinuousPanel.Visibility = Visibility.Collapsed;
+            }
+            control.annoStatusAnnotatorLabel.Text = annoList.Meta.AnnotatorFullName != "" ? annoList.Meta.AnnotatorFullName : annoList.Meta.Annotator;
+            control.annoStatusRoleLabel.Text = annoList.Meta.Role;
+            control.annoStatusCloseButton.IsEnabled = true;
+        }
+
+        private void annoTierChange(AnnoTier tier, EventArgs e)
+        {
+            setAnnoInfo(tier.AnnoList);
             setAnnoList(tier.AnnoList);
             control.annoListControl.editComboBox.Items.Clear();
 
@@ -134,11 +171,9 @@ namespace ssi
                     control.annoListControl.editTextBox.IsEnabled = true;
                 }
             }
-
-            //this.view.annoNameLabel.Text = track.AnnoList.Filename;
         }
 
-        private void changeAnnoTierSegmentHandler(AnnoTierLabel segment, EventArgs e)
+        private void changeAnnoTierSegmentHandler(AnnoTierSegment segment, EventArgs e)
         {
 
             if (IsPlaying())
@@ -238,26 +273,14 @@ namespace ssi
         {
             setAnnoList(anno);
 
-            AnnoTier tier = control.annoTrackControl.addAnnoTier(anno);
-            tier.AnnoList.HasChanged = false;
-
+            AnnoTier tier = new AnnoTier(anno);
+            control.annoTierControl.Add(tier);
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += tier.TimeRangeChanged;
 
             annoTiers.Add(tier);
             annoLists.Add(anno);
 
-            if (tier.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-            {
-                tier.Background = new LinearGradientBrush(tier.AnnoList.Scheme.MaxOrForeColor, tier.AnnoList.Scheme.MinOrBackColor, 90.0);
-                tier.ContinuousBrush = new LinearGradientBrush(tier.AnnoList.Scheme.MaxOrForeColor, tier.AnnoList.Scheme.MinOrBackColor, 90.0);
-            }
-            else
-            {
-                tier.Background = new SolidColorBrush(tier.AnnoList.Scheme.MinOrBackColor);
-                tier.BackgroundBrush = new SolidColorBrush(tier.AnnoList.Scheme.MinOrBackColor);
-            }
-
-            AnnoTierStatic.SelectTier(tier);
+            AnnoTierStatic.Select(tier);
             tier.TimeRangeChanged(Time);
         }
 
@@ -284,7 +307,7 @@ namespace ssi
 
                 foreach (AnnoListItem item in anno)
                 {
-                    AnnoTierStatic.Selected.addSegment(item);
+                    AnnoTierStatic.Selected.AddSegment(item);
                 }
 
                 AnnoTierStatic.Selected.TimeRangeChanged(MainHandler.Time);
@@ -294,6 +317,21 @@ namespace ssi
             // if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
+        private void annoSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (AnnoTierStatic.Selected != null)
+            {
+                AnnoTierSettingsWindow window = new AnnoTierSettingsWindow();
+                window.DataContext = AnnoTierStatic.Selected;
+                window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
+
+
+                window.ShowDialog();                
+                setAnnoInfo(AnnoTierStatic.Selected.AnnoList);
+                AnnoTierStatic.Selected.AnnoList.HasChanged = true;
+            }
+        }
 
 
         #region EVENTHANDLERS
@@ -306,7 +344,7 @@ namespace ssi
                 annoCursor.X = pos;
                 Time.CurrentSelectPosition = pos;
                 double time = Time.TimeFromPixel(pos);
-                control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
+                control.annoStatusPositionLabel.Text = FileTools.FormatSeconds(time);
             }
             if ((e.RightButton == MouseButtonState.Pressed || e.LeftButton == MouseButtonState.Pressed) && control.navigator.followAnnoCheckBox.IsChecked == true)
             {
@@ -335,7 +373,7 @@ namespace ssi
                 {
                     if (AnnoTierStatic.Selected != null)
                     {
-                        if (AnnoTierStatic.Selected.isDiscreteOrFree)
+                        if (AnnoTierStatic.Selected.IsDiscreteOrFree)
                         {
                             ShowLabelBox();
                         }
@@ -369,7 +407,7 @@ namespace ssi
                         if (a.IsMouseOver)
                         {
                             AnnoTier.SelectLabel(null);
-                            AnnoTier.SelectTier(a);
+                            AnnoTier.Select(a);
                             break;
                         }
                     }
@@ -381,7 +419,7 @@ namespace ssi
 
             if (AnnoTierStatic.Selected != null)
             {
-                if (AnnoTierStatic.Selected.isDiscreteOrFree || (!AnnoTierStatic.Selected.isDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
+                if (AnnoTierStatic.Selected.IsDiscreteOrFree || (!AnnoTierStatic.Selected.IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
                 {
                     double pos = e.GetPosition(control.trackGrid).X;
                     annoCursor.X = pos;
@@ -389,14 +427,14 @@ namespace ssi
 
                     annoCursor.Visibility = Visibility.Visible;
                     double time = Time.TimeFromPixel(pos);
-                    control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
+                    control.annoStatusPositionLabel.Text = FileTools.FormatSeconds(time);
                 }
                 else
                 {
                     annoCursor.X = 0;
                     double time = Time.TimeFromPixel(0);
                     annoCursor.Visibility = Visibility.Hidden;
-                    control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
+                    control.annoStatusPositionLabel.Text = FileTools.FormatSeconds(time);
                 }
             }
         }
@@ -440,7 +478,7 @@ namespace ssi
                 {
                     if (a.Start == item.Start && a.Stop == item.Stop && item.Label == a.Label)
                     {
-                        AnnoTier.SelectLabel(AnnoTierStatic.Selected.getSegment(a));
+                        AnnoTierStatic.SelectLabel(AnnoTierStatic.Selected.GetSegment(a));
                         control.annoListControl.editComboBox.SelectedItem = item.Label;
                         control.annoListControl.editTextBox.Text = item.Label;
 
@@ -452,7 +490,7 @@ namespace ssi
             }
         }
 
-        private void closeAnnoTier_Click(object sender, RoutedEventArgs e)
+        private void annoTierCloseButton_Click(object sender, RoutedEventArgs e)
         {
             removeAnnoTier();
         }

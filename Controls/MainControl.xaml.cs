@@ -18,13 +18,10 @@ namespace ssi
 
         private void ControlLoaded(object sender, RoutedEventArgs e)
         {
-            if (this.ActualWidth > 0 && this.handler == null)
+            if (ActualWidth > 0 && handler == null)
             {
-                this.handler = new MainHandler(this);
-                if (OnHandlerLoaded != null)
-                {
-                    OnHandlerLoaded(this.handler);
-                }
+                handler = new MainHandler(this);
+                OnHandlerLoaded?.Invoke(handler);
             }
         }
 

@@ -206,12 +206,12 @@ namespace ssi.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("30")]
-        public double DefaultZoominSeconds {
+        public double DefaultZoomInSeconds {
             get {
-                return ((double)(this["DefaultZoominSeconds"]));
+                return ((double)(this["DefaultZoomInSeconds"]));
             }
             set {
-                this["DefaultZoominSeconds"] = value;
+                this["DefaultZoomInSeconds"] = value;
             }
         }
         
@@ -416,6 +416,17 @@ namespace ssi.Properties {
             }
             set {
                 this["DatabaseAskBeforeOverwrite"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.DateTime LastUpdateCheckDate {
+            get {
+                return ((global::System.DateTime)(this["LastUpdateCheckDate"]));
+            }
+            set {
+                this["LastUpdateCheckDate"] = value;
             }
         }
     }

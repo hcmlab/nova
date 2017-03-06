@@ -161,9 +161,9 @@ namespace ssi
 
                     xml.MoveToAttribute("type");
                     string type_s = xml.Value;
-                    for (uint i = 0; i < Signal.TypeName.Length; i++)
+                    for (uint i = 0; i < TypeName.Length; i++)
                     {
-                        if (type_s == Signal.TypeName[i])
+                        if (type_s == TypeName[i])
                         {
                             signal.type = (Signal.Type)i;
                         }

@@ -28,6 +28,13 @@ namespace ssi
                     return Path != null ? System.IO.Path.GetDirectoryName(Path) : "";
                 }
             }
+            public string FullName
+            {
+                get
+                {
+                    return Path != null ? System.IO.Path.GetFileName(Path) : "";
+                }
+            }
             public string Name
             {
                 get
@@ -50,6 +57,8 @@ namespace ssi
         public class DatabaseSource
         {
             public static ObjectId ZERO = new ObjectId();
+
+            public string Session { get; set; }
 
             public ObjectId OID { get; set; }
             public override string ToString()

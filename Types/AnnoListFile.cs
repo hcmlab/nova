@@ -276,7 +276,7 @@ namespace ssi
                 }
                 else if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {
-                    list.Scheme.MinOrBackColor = Colors.Orange;
+                    list.Scheme.MinOrBackColor = Defaults.Colors.GradientMin;
                 }
 
                 if (scheme.Attributes["maxcolor"] != null)
@@ -285,7 +285,7 @@ namespace ssi
                 }
                 else if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {
-                    list.Scheme.MaxOrForeColor = Colors.LightBlue;
+                    list.Scheme.MaxOrForeColor = Defaults.Colors.GradientMax;
                 }
 
                 Dictionary<string, string> LabelIds = new Dictionary<string, string>();
@@ -296,13 +296,13 @@ namespace ssi
                     {
                         LabelIds.Add(item.Attributes["id"].Value, item.Attributes["name"].Value);
 
-                        Color color = Colors.Black;
+                        Color color = Defaults.Colors.Foreground;
                         if (item.Attributes["color"] != null) color = (Color)ColorConverter.ConvertFromString(item.Attributes["color"].Value);
                         AnnoScheme.Label lcp = new AnnoScheme.Label(item.Attributes["name"].Value, color);
                         list.Scheme.Labels.Add(lcp);
                     }
 
-                    AnnoScheme.Label garbage = new AnnoScheme.Label("GARBAGE", Colors.Black);
+                    AnnoScheme.Label garbage = new AnnoScheme.Label("GARBAGE", Defaults.Colors.Foreground);
                     list.Scheme.Labels.Add(garbage);
                 }
                 else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
@@ -331,7 +331,7 @@ namespace ssi
                             {
                                 string value = data[0];
                                 double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, value, "", Colors.Black, confidence);
+                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, value, "", Defaults.Colors.Foreground, confidence);
                                 list.Add(e);
                                 start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
                             }
@@ -392,7 +392,7 @@ namespace ssi
                             {
                                 string value = binaryReader.ReadSingle().ToString();
                                 double confidence = (double)binaryReader.ReadSingle();
-                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, value, "", Colors.Black, confidence);
+                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, value, "", Defaults.Colors.Foreground, confidence);
                                 list.Add(e);
                                 start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
                             }
@@ -437,7 +437,6 @@ namespace ssi
                 {
                     MessageBox.Show("Annotation data was not found, load scheme only from '" + filepath + "'");
                 }
-                list.HasChanged = false;
             }
             catch (Exception e)
             {

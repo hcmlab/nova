@@ -28,7 +28,7 @@ namespace ssi
 
         private void MenuItemDeleteClick(object sender, RoutedEventArgs e)
         {
-            if (AnnoTierStatic.Selected.isDiscreteOrFree)
+            if (AnnoTierStatic.Selected.IsDiscreteOrFree)
             {
                 if (annoDataGrid.SelectedItems.Count > 0)
                 {
@@ -39,10 +39,10 @@ namespace ssi
                     AnnoTier track = AnnoTierStatic.Selected;
                     foreach (AnnoListItem s in selected)
                     {
-                        AnnoTierLabel segment = track.getSegment(s);
+                        AnnoTierSegment segment = track.GetSegment(s);
                         if (segment != null)
                         {
-                            track.remSegment(segment);
+                            track.RemoveSegment(segment);
                         }
                     }
                 }

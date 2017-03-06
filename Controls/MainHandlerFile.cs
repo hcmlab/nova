@@ -203,7 +203,6 @@ namespace ssi
                 case SSI_FILE_TYPE.ANNOTATION:
                     loadAnnotation(filename);
                     loaded = true;
-
                     break;
 
                 case SSI_FILE_TYPE.STREAM:
@@ -234,6 +233,11 @@ namespace ssi
                 case SSI_FILE_TYPE.PROJECT:
                     loadProject(filename);
                     loaded = true;
+                    // workaround
+                    foreach (AnnoList annoList in annoLists)
+                    {
+                        annoList.HasChanged = false;
+                    }
                     break;
 
                 default:
@@ -255,7 +259,7 @@ namespace ssi
             }
 
             AnnoList annoList = AnnoList.LoadfromFile(filename);
-            handleAnnotation(annoList);
+            addAnnoTierFromList(annoList);
         }
 
         private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
@@ -267,10 +271,15 @@ namespace ssi
             }
 
             AnnoList annoList = AnnoList.LoadFromCSVFile(filename, samplerate, type, filter);
-            handleAnnotation(annoList);
+            addAnnoTierFromList(annoList);
         }
 
-        private void loadStream(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
+        private void loadStream(string filename)
+        {
+            loadStream(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
+        }
+
+        private void loadStream(string filename, Color signalColor, Color backgroundColor)
         {
             if (!File.Exists(filename))
             {
@@ -283,7 +292,7 @@ namespace ssi
             annoCursor.signalLoaded = true;
             if (signal != null && signal.loaded)
             {
-                addSignal(signal, color, background);
+                addSignal(signal, signalColor, backgroundColor);
 
                 if (signal.meta_name == "face" || signal.meta_name == "skeleton")
                 {
@@ -323,7 +332,12 @@ namespace ssi
             }
         }
 
-        private void loadWav(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
+        private void loadWav(string filename)
+        {
+            loadWav(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
+        }
+
+        private void loadWav(string filename, Color signalColor, Color backgroundColor)
         {
             if (!File.Exists(filename))
             {
@@ -334,30 +348,42 @@ namespace ssi
             Signal signal = Signal.LoadWaveFile(filename);
             if (signal != null && signal.loaded)
             {
-                addSignal(signal, color, background);
+                addSignal(signal, signalColor, backgroundColor);
             }
         }
 
-        private void loadCSV(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
+        private void loadCSV(string filename)
+        {
+            loadCSV(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
+        }
+
+        private void loadCSV(string filename, Color signalColor, Color backgroundColor)
         {
             Signal signal = Signal.LoadCSVFile(filename);
             if (signal != null && signal.loaded)
             {
-                addSignal(signal, color, background);
+                addSignal(signal, signalColor, backgroundColor);
             }
         }
 
-        private void loadARFF(string filename, string color = "#FF000000", string background = "#FFF0F0F0")
+        private void loadARFF(string filename)
+        {
+            loadARFF(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
+        }
+
+        private void loadARFF(string filename, Color signalColor, Color backgroundColor)
         {
             Signal signal = Signal.LoadARFFFile(filename);
             if (signal != null && signal.loaded)
             {
-                addSignal(signal, color, background);
+                addSignal(signal, signalColor, backgroundColor);
             }
         }
 
         public void loadProject(string filepath)
         {
+            clearSession();
+
             string workdir = Path.GetDirectoryName(filepath);
 
             XmlDocument doc = new XmlDocument();
@@ -377,8 +403,16 @@ namespace ssi
 
                 foreach (XmlNode node in doc.SelectNodes("//signal"))
                 {
-                    string background = node.Attributes["bg"].LastChild.Value;
-                    string foreground = node.Attributes["fg"].LastChild.Value;
+                    Color background = Defaults.Colors.Background;
+                    Color foreground = Defaults.Colors.Foreground;
+                    if (node.Attributes["bg"] != null)
+                    {
+                        background = (Color)ColorConverter.ConvertFromString(node.Attributes["bg"].LastChild.Value);
+                    }
+                    if (node.Attributes["fg"] != null)
+                    {
+                        foreground = (Color)ColorConverter.ConvertFromString(node.Attributes["fg"].LastChild.Value);
+                    }
                     string path = node.InnerText;
                     if (Path.GetExtension(path) == ".wav")
                     {
@@ -425,8 +459,9 @@ namespace ssi
                 string path = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Source.File.Name, ".annotation", "Annotation(*.annotation)|*.annotation", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
                 if (path != null)
                 {
-                    AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;
+                    AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;                    
                     AnnoTierStatic.Selected.AnnoList.Save();
+                    setAnnoInfo(AnnoTierStatic.Selected.AnnoList);
                 }
             }
         }
@@ -466,7 +501,7 @@ namespace ssi
             }
         }
 
-        private void saveProject(List<AnnoTier> annoTiers, MediaList mediaList, List<ISignalTrack> signalTracks, string filepath)
+        private void saveProject(List<AnnoTier> annoTiers, MediaList mediaList, List<SignalTrack> signalTracks, string filepath)
         {
             string workdir = Path.GetDirectoryName(filepath);
 
@@ -539,9 +574,9 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
-            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0)
+            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
             {
-                fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
         }
 
@@ -567,9 +602,9 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
-            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0)
+            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
             {
-                fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
         }
 
@@ -593,9 +628,9 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0)
+            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
             {
-                fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
         }
 
@@ -675,7 +710,7 @@ namespace ssi
         {
           
 
-            if (AnnoTierStatic.Selected != null && !AnnoTierStatic.Selected.isDiscreteOrFree)
+            if (AnnoTierStatic.Selected != null && !AnnoTierStatic.Selected.IsDiscreteOrFree)
             {
                 Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
                 input["labels"] = new UserInputWindow.Input() { Label = "Class labels (separated by ;)", DefaultValue = "LOW;MEDIUM;HIGH" };
@@ -776,8 +811,8 @@ namespace ssi
                     }
                 }
 
-                AnnoTier.UnselectTier();
-                handleAnnotation(discretevalues);
+                AnnoTier.Unselect();
+                addAnnoTierFromList(discretevalues);
 
                 Mouse.SetCursor(System.Windows.Input.Cursors.Arrow);
             }
@@ -835,7 +870,6 @@ namespace ssi
                     if (m == MessageBoxResult.OK)
                     {
                         saveSelectedAnnoAs();
-                        annoTier.AnnoList.HasChanged = false;
                     }
                 }
 
@@ -875,6 +909,11 @@ namespace ssi
         private void saveAnno_Click(object sender, RoutedEventArgs e)
         {
             saveSelectedAnno();
+        }
+
+        private void saveAnnoAs_Click(object sender, RoutedEventArgs e)
+        {
+            saveSelectedAnnoAs();
         }
 
         private void saveProject_Click(object sender, RoutedEventArgs e)
@@ -950,11 +989,9 @@ namespace ssi
                 string filepath = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Scheme.Name, "xps", "XPS (*.xps)|*.xps", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
                 if (filepath != null)
                 {
-                    var uri = new Uri(filepath);
-                    if (AnnoTierStatic.Selected.isDiscreteOrFree) AnnoTierStatic.Selected.Background = AnnoTierStatic.Selected.BackgroundBrush;
+                    var uri = new Uri(filepath);                    
                     AnnoTierStatic.Selected.ExportToXPS(uri, AnnoTierStatic.Selected);
-                    AnnoTierStatic.Selected.select(true);
-                    AnnoTierStatic.Selected.TimeRangeChanged(MainHandler.Time);
+                    AnnoTierStatic.Selected.TimeRangeChanged(Time);
                 }
             }
         }
@@ -966,11 +1003,9 @@ namespace ssi
                 string filepath = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Scheme.Name, "xps", "PNG (*.png)|*.png", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
                 if (filepath != null)
                 {
-                    var uri = new Uri(filepath);
-                    if (AnnoTierStatic.Selected.isDiscreteOrFree) AnnoTierStatic.Selected.Background = AnnoTierStatic.Selected.BackgroundBrush;
+                    var uri = new Uri(filepath);                    
                     AnnoTierStatic.Selected.ExportToPng(uri, AnnoTierStatic.Selected);
-                    AnnoTierStatic.Selected.select(true);
-                    AnnoTierStatic.Selected.TimeRangeChanged(MainHandler.Time);
+                    AnnoTierStatic.Selected.TimeRangeChanged(Time);
                 }
             }
         }
