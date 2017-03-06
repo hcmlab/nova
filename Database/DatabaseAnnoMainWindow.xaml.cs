@@ -29,8 +29,7 @@ namespace ssi
         {
             InitializeComponent();
 
-            database = DatabaseHandler.Database;
-            mongo = DatabaseHandler.Client;
+          
 
             this.db_server.Text = Properties.Settings.Default.DatabaseAddress;
             this.db_login.Text = Properties.Settings.Default.MongoDBUser;
@@ -39,6 +38,9 @@ namespace ssi
             this.server_pass.Password = Properties.Settings.Default.DataServerPass;
             Autologin.IsEnabled = false;
             allfiles.Clear();
+
+            database = DatabaseHandler.Database;
+            mongo = DatabaseHandler.Client;
 
             if (Properties.Settings.Default.DatabaseAutoLogin == true)
             {
@@ -93,6 +95,7 @@ namespace ssi
 
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
+
             ConnectToDB();
         }
 
@@ -195,6 +198,7 @@ namespace ssi
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
+
             Properties.Settings.Default.DataServerLogin = this.server_login.Text;
             Properties.Settings.Default.DataServerPass = this.server_pass.Password;
             Properties.Settings.Default.Save();
