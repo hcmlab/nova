@@ -143,7 +143,7 @@ namespace ssi
 
             foreach (var document in sessions)
             {
-                if (document["isValid"].AsBoolean == true)
+                if (document["isValid"].AsBoolean == true) 
                 {
                     if ((annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE && document["type"].ToString() == "DISCRETE")) AnnotationSchemes.Add(document["name"].ToString());
                     else if  (annoList.Scheme.Type == AnnoScheme.TYPE.FREE && (document["type"].ToString() == "FREE")) AnnotationSchemes.Add(document["name"].ToString());
@@ -155,7 +155,8 @@ namespace ssi
             bool hasauth = false;
             if (auth > 2) hasauth = true;
 
-            string name = annoList.Scheme.Name;
+            string name = "New tier";
+            if(annoList != null) name = annoList.Scheme.Name;
 
             DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(AnnotationSchemes, hasauth, "Tier: " + name + ". What is annotated? ", DatabaseDefinitionCollections.Schemes, true, annoList);
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
@@ -375,7 +376,7 @@ namespace ssi
 
             if (annotype == null)
             {
-                annotype = SelectAnnotationScheme(annoList);
+                annotype = SelectAnnotationScheme(null);
             }
 
             if (annotype == null)

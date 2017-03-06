@@ -250,14 +250,15 @@ namespace ssi
         private void databaseAddNewAnnotation(AnnoScheme.TYPE annoType)
         {
             AnnoList annoList = new AnnoList();
+            annoList.Scheme.Type = annoType;
 
-            annoList.Meta.Role = DatabaseHandler.LoadRoles(null);
+            annoList.Meta.Role = DatabaseHandler.LoadRoles(annoList);
             if (annoList.Meta.Role == null)
             {
                 return;
             }
 
-            string annoScheme = DatabaseHandler.SelectAnnotationScheme(null);
+            string annoScheme = DatabaseHandler.SelectAnnotationScheme(annoList);
             if (annoScheme == null)
             {
                 return;
