@@ -124,6 +124,7 @@
     <Compile Include="Controls\MainHandlerMenu.cs" />
     <Compile Include="Controls\MainHandlerNavigation.cs" />
     <Compile Include="Controls\MainHandlerSignal.cs" />
+    <Compile Include="Controls\MainHandlerUpdate.cs" />
     <Compile Include="Controls\Navigation\TimeRangeSlider.xaml.cs">
       <DependentUpon>TimeRangeSlider.xaml</DependentUpon>
     </Compile>
@@ -463,6 +464,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="App\App.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -421,6 +421,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1979-01-01")]
         public global::System.DateTime LastUpdateCheckDate {
             get {
                 return ((global::System.DateTime)(this["LastUpdateCheckDate"]));
