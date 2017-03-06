@@ -59,7 +59,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Label Grid.Column="0">Label</Label>
-            <TextBox Name="labelTextBox" Grid.Column="1" Margin="5" Grid.ColumnSpan="2"></TextBox>
+            <TextBox Name="labelTextBox" Grid.Column="1" Margin="5" Grid.ColumnSpan="2" ></TextBox>
             <p:ColorPicker Name="colorPicker" Grid.Column="3" Width="40" Margin="5" BorderBrush="Transparent" Background="Transparent"/>
         </Grid>
 
@@ -72,8 +72,8 @@
         </DockPanel>
 
         <StackPanel Grid.Row="5" HorizontalAlignment="Right" Orientation="Horizontal" >
-            <Button Margin="5" Width="60" Height="25" Click="okButton_Click">OK</Button>
-            <Button Margin="5" Width="60" Height="25" Click="cancelButton_Click">Cancel</Button>
+            <Button Margin="5" Width="60" Height="25" Click="okButton_Click" IsDefault="True">OK</Button>
+            <Button Margin="5" Width="60" Height="25" Click="cancelButton_Click" IsCancel="True">Cancel</Button>
         </StackPanel>
 
     </Grid>
