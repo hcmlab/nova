@@ -1040,7 +1040,7 @@ namespace ssi
                             //  nicer drawing but slower
                             if (!IsDiscreteOrFree)
                             {
-                                TimeRangeChanged(MainHandler.Time);
+                                //TimeRangeChanged(MainHandler.Time);
                             }
                         }
                     }
@@ -1119,6 +1119,8 @@ namespace ssi
                         int i = 0;
                         foreach (AnnoListItem ali in AnnoList)
                         {
+                           // if (ali.Start <= time.SelectionStart) continue;
+
                             if (ali.Start >= time.SelectionStart && ali.Stop < time.SelectionStop)
                             {
                                 continuousTierLines[i % continuousTierLines.Count].X1 = MainHandler.Time.PixelFromTime(ali.Start);
@@ -1140,6 +1142,7 @@ namespace ssi
 
                                 i++;
                             }
+                           // else if (ali.Stop > time.SelectionStop) break;
                         }
                     }
                     else
@@ -1149,10 +1152,13 @@ namespace ssi
 
                         foreach (Line s in continuousTierLines)
                         {
-                            s.Visibility = Visibility.Hidden;
+                            s.Visibility = Visibility.Collapsed;
 
                             index = (int)((double)AnnoList.Count / (double)continuousTierLines.Count * (double)i + 0.5f);
                             if (index > AnnoList.Count) index = AnnoList.Count - 1;
+
+                           // if (AnnoList[index].Start <= time.SelectionStart) continue;
+
 
                             if (AnnoList[index].Start >= time.SelectionStart && AnnoList[index].Stop <= time.SelectionStop)
                             {
@@ -1192,6 +1198,7 @@ namespace ssi
                                 else if (CorrectMode == false) s.Visibility = Visibility.Visible;
                                 else s.Visibility = Visibility.Collapsed;
                             }
+                          //  else if (AnnoList[index].Stop > time.SelectionStop) break;
                             i++;
                         }
                     }

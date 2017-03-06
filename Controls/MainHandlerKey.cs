@@ -229,7 +229,7 @@ namespace ssi
 
 
 
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !isKeyDown)
+                if (e.KeyboardDevice.IsKeyDown(Key.M) && !isKeyDown)
                 {
                     if (AnnoTierStatic.Selected != null && !AnnoTierStatic.Selected.IsDiscreteOrFree)
                     {
