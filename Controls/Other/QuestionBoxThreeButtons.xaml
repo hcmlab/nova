@@ -30,14 +30,14 @@
                 <ColumnDefinition Name="NoColumn" Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="button_yes" Grid.Column="0" Margin="5" MinWidth="60" Width="Auto" MinHeight="25" Height="Auto" Click="Button_Click">
+            <Button Name="button_yes" Grid.Column="0" Margin="5" MinWidth="60" Width="Auto" MinHeight="25" Height="Auto" Click="Button_Click" IsDefault="True">
                 <TextBlock Name="button_yes_text" TextAlignment="Center" TextWrapping="Wrap">Yes</TextBlock>
             </Button>
             <Button Name="button_no" Grid.Column="1" Margin="5" MinWidth="60" Width="Auto" MinHeight="25" Height="Auto" Click="Button_Click">
                 <TextBlock Name="button_no_text" TextAlignment="Center" TextWrapping="Wrap">No</TextBlock>
             </Button>
-            <Button Name="button_cancel" Grid.Column="2" Margin="5" MinWidth="60" Width="Auto" MinHeight="25" Height="Auto" Click="Button_Click">
-                <TextBlock Name="button_cancel_text" TextAlignment="Center" TextWrapping="Wrap">Cancel</TextBlock>
+            <Button Name="button_cancel" Grid.Column="2" Margin="5" MinWidth="60" Width="Auto" MinHeight="25" Height="Auto" Click="Button_Click" IsCancel="True">
+                <TextBlock Name="button_cancel_text" TextAlignment="Center" TextWrapping="Wrap" >Cancel</TextBlock>
             </Button>
         </Grid>
 

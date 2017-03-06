@@ -39,7 +39,7 @@
                     <CheckBox Name="Autologin" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"  VerticalAlignment="Center" VerticalContentAlignment="Center" />
                     <Label Content="Auto-Connect" />
                 </StackPanel>
-                <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25" Width="100" />
+                <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25" Width="100"/>
             </StackPanel>
         </StackPanel>
 
@@ -171,8 +171,8 @@
 
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-                <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click" />
-                <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click" />
+                <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  IsDefault="True" Click="Ok_Click" />
+                <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click" IsCancel="True" />
             </StackPanel>
         </StackPanel>
     </Grid>
