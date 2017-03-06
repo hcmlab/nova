@@ -42,14 +42,14 @@ namespace ssi
                 ChangeRepresentationObject Undostruct = _UndoActionsCollection.Pop();
                 if (Undostruct.Action == ActionType.Delete)
                 {
-                    AnnoListItem ali = ((AnnoTierLabel)Undostruct.UiElement).Item;
+                    AnnoListItem ali = ((AnnoTierSegment)Undostruct.UiElement).Item;
                     ((AnnoTier)Container).AnnoList.AddSorted(ali);
-                    AnnoTierLabel at = ((AnnoTier)Container).addSegment(ali);
+                    AnnoTierSegment at = ((AnnoTier)Container).AddSegment(ali);
                     this.RedoPushInUnDoForDelete(at);
                 }
                 else if (Undostruct.Action == ActionType.Insert)
                 {
-                    ((AnnoTier)Container).deleteSegment((AnnoTierLabel)Undostruct.UiElement);
+                    ((AnnoTier)Container).DeleteSegment((AnnoTierSegment)Undostruct.UiElement);
                     this.RedoPushInUnDoForInsert(Undostruct.UiElement);
                 }
                 else if (Undostruct.Action == ActionType.Resize)
@@ -57,9 +57,9 @@ namespace ssi
                         this.RedoPushInUnDoForResize(Canvas.GetLeft(Undostruct.UiElement), Undostruct.UiElement);
                         Canvas.SetLeft(Undostruct.UiElement, Undostruct.Margin.X);
                         Undostruct.UiElement.Width = Undostruct.Width;
-                        ((AnnoTierLabel)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
-                        ((AnnoTierLabel)Undostruct.UiElement).Item.Start = Undostruct.Start;
-                        ((AnnoTierLabel)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
+                        ((AnnoTierSegment)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
+                        ((AnnoTierSegment)Undostruct.UiElement).Item.Start = Undostruct.Start;
+                        ((AnnoTierSegment)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
                        
 
                 }
@@ -69,9 +69,9 @@ namespace ssi
                     this.RedoPushInUnDoForMove(Canvas.GetLeft(Undostruct.UiElement), Undostruct.UiElement);
                     Canvas.SetLeft(Undostruct.UiElement,Undostruct.Margin.X);
                     Undostruct.UiElement.Width = Undostruct.Width;
-                    ((AnnoTierLabel)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
-                    ((AnnoTierLabel)Undostruct.UiElement).Item.Start = Undostruct.Start;
-                    ((AnnoTierLabel)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
+                    ((AnnoTierSegment)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
+                    ((AnnoTierSegment)Undostruct.UiElement).Item.Start = Undostruct.Start;
+                    ((AnnoTierSegment)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
                    
                 }
             }
@@ -91,16 +91,16 @@ namespace ssi
                 ChangeRepresentationObject Undostruct = _RedoActionsCollection.Pop();
                 if (Undostruct.Action == ActionType.Delete)
                 {
-                    ((AnnoTier)Container).deleteSegment((AnnoTierLabel)Undostruct.UiElement);
+                    ((AnnoTier)Container).DeleteSegment((AnnoTierSegment)Undostruct.UiElement);
 
                     ChangeRepresentationObject ChangeRepresentationObjectForDelete = this.MakeChangeRepresentationObjectForDelete(Undostruct.UiElement);
                     _UndoActionsCollection.Push(ChangeRepresentationObjectForDelete);
                 }
                 else if (Undostruct.Action == ActionType.Insert)
                 {
-                     AnnoListItem ali = ((AnnoTierLabel)Undostruct.UiElement).Item;
+                     AnnoListItem ali = ((AnnoTierSegment)Undostruct.UiElement).Item;
                     ((AnnoTier)Container).AnnoList.AddSorted(ali);
-                    AnnoTierLabel at = ((AnnoTier)Container).addSegment(ali);
+                    AnnoTierSegment at = ((AnnoTier)Container).AddSegment(ali);
 
                     ChangeRepresentationObject ChangeRepresentationObjectForInsert = this.MakeChangeRepresentationObjectForInsert(at);
                     _UndoActionsCollection.Push(ChangeRepresentationObjectForInsert);
@@ -109,9 +109,9 @@ namespace ssi
                 {
                     Canvas.SetLeft(Undostruct.UiElement, Undostruct.Margin.X);
                     Undostruct.UiElement.Width = Undostruct.Width;
-                    Undostruct.Start = ((AnnoTierLabel)Undostruct.UiElement).Item.Start;
-                    Undostruct.Stop = ((AnnoTierLabel)Undostruct.UiElement).Item.Stop;
-                    Undostruct.Duration = ((AnnoTierLabel)Undostruct.UiElement).Item.Duration;
+                    Undostruct.Start = ((AnnoTierSegment)Undostruct.UiElement).Item.Start;
+                    Undostruct.Stop = ((AnnoTierSegment)Undostruct.UiElement).Item.Stop;
+                    Undostruct.Duration = ((AnnoTierSegment)Undostruct.UiElement).Item.Duration;
 
                     ChangeRepresentationObject ChangeRepresentationObjectForResize = this.MakeChangeRepresentationObjectForResize(Undostruct.Margin.X, Undostruct.UiElement);
                     _UndoActionsCollection.Push(ChangeRepresentationObjectForResize);
@@ -122,9 +122,9 @@ namespace ssi
 
                     Canvas.SetLeft(Undostruct.UiElement, Undostruct.Margin.X);
                     Undostruct.UiElement.Width = Undostruct.Width;
-                    Undostruct.Start = ((AnnoTierLabel)Undostruct.UiElement).Item.Start;
-                    Undostruct.Stop = ((AnnoTierLabel)Undostruct.UiElement).Item.Stop;
-                    Undostruct.Duration = ((AnnoTierLabel)Undostruct.UiElement).Item.Duration;
+                    Undostruct.Start = ((AnnoTierSegment)Undostruct.UiElement).Item.Start;
+                    Undostruct.Stop = ((AnnoTierSegment)Undostruct.UiElement).Item.Stop;
+                    Undostruct.Duration = ((AnnoTierSegment)Undostruct.UiElement).Item.Duration;
 
                     ChangeRepresentationObject ChangeRepresentationObjectForMove = this.MakeChangeRepresentationObjectForMove(Undostruct.Margin.X, Undostruct.UiElement);
                     _UndoActionsCollection.Push(ChangeRepresentationObjectForMove);
@@ -172,9 +172,9 @@ namespace ssi
             MoveStruct.Action = ActionType.Move;
             MoveStruct.Margin.X = pos;
             MoveStruct.Width = UIelement.Width;
-            MoveStruct.Start = ((AnnoTierLabel)UIelement).Item.Start;
-            MoveStruct.Stop = ((AnnoTierLabel)UIelement).Item.Stop;
-            MoveStruct.Duration = ((AnnoTierLabel) UIelement).Item.Duration;
+            MoveStruct.Start = ((AnnoTierSegment)UIelement).Item.Start;
+            MoveStruct.Stop = ((AnnoTierSegment)UIelement).Item.Stop;
+            MoveStruct.Duration = ((AnnoTierSegment) UIelement).Item.Duration;
             MoveStruct.UiElement = UIelement;
             return MoveStruct;
         }
@@ -185,9 +185,9 @@ namespace ssi
             ResizeStruct.Action = ActionType.Resize;
             ResizeStruct.Margin.X = pos;
             ResizeStruct.Width = UIelement.Width;
-            ResizeStruct.Start = ((AnnoTierLabel)UIelement).Item.Start;
-            ResizeStruct.Stop = ((AnnoTierLabel)UIelement).Item.Stop;
-            ResizeStruct.Duration = ((AnnoTierLabel)UIelement).Item.Duration;
+            ResizeStruct.Start = ((AnnoTierSegment)UIelement).Item.Start;
+            ResizeStruct.Stop = ((AnnoTierSegment)UIelement).Item.Stop;
+            ResizeStruct.Duration = ((AnnoTierSegment)UIelement).Item.Duration;
             ResizeStruct.UiElement = UIelement;
             return ResizeStruct;
         }
@@ -223,9 +223,9 @@ namespace ssi
             MoveStruct.Action = ActionType.Move;
             MoveStruct.Margin.X = pos;
             MoveStruct.Width = UIelement.Width;
-            MoveStruct.Start = ((AnnoTierLabel)UIelement).Item.Start;
-            MoveStruct.Stop = ((AnnoTierLabel)UIelement).Item.Stop;
-            MoveStruct.Duration = ((AnnoTierLabel)UIelement).Item.Duration;
+            MoveStruct.Start = ((AnnoTierSegment)UIelement).Item.Start;
+            MoveStruct.Stop = ((AnnoTierSegment)UIelement).Item.Stop;
+            MoveStruct.Duration = ((AnnoTierSegment)UIelement).Item.Duration;
             MoveStruct.UiElement = UIelement;
             _RedoActionsCollection.Push(MoveStruct);
         }
@@ -236,9 +236,9 @@ namespace ssi
             ResizeStruct.Action = ActionType.Resize;
             ResizeStruct.Margin.X = pos;
             ResizeStruct.Width = UIelement.Width;
-            ResizeStruct.Start = ((AnnoTierLabel)UIelement).Item.Start;
-            ResizeStruct.Stop = ((AnnoTierLabel)UIelement).Item.Stop;
-            ResizeStruct.Duration = ((AnnoTierLabel)UIelement).Item.Duration;
+            ResizeStruct.Start = ((AnnoTierSegment)UIelement).Item.Start;
+            ResizeStruct.Stop = ((AnnoTierSegment)UIelement).Item.Stop;
+            ResizeStruct.Duration = ((AnnoTierSegment)UIelement).Item.Duration;
             ResizeStruct.UiElement = UIelement;
             _RedoActionsCollection.Push(ResizeStruct);
         }

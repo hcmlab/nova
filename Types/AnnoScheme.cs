@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace ssi
@@ -32,12 +33,12 @@ namespace ssi
         {
             Type = TYPE.FREE;
             Name = "";
-            Labels = new List<AnnoScheme.Label>();
+            Labels = new List<Label>();
             MinScore = 0;
             MaxScore = 1;
             SampleRate = 1;
-            MinOrBackColor = Colors.White;
-            MaxOrForeColor = Colors.Black;
+            MinOrBackColor = Defaults.Colors.Background;
+            MaxOrForeColor = Defaults.Colors.Foreground;
         }
 
         public TYPE Type { get; set;  }
@@ -68,7 +69,5 @@ namespace ssi
         public Color MinOrBackColor { get; set; }
 
         public Color MaxOrForeColor { get; set; }
-    }
-
-    
+    } 
 }

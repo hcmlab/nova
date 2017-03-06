@@ -5,58 +5,50 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Settings" Height="400" Width="600">
+        WindowStyle="ToolWindow"
+        WindowStartupLocation="CenterOwner"
+        Title="Settings" SizeToContent="WidthAndHeight">
     <Grid>
+
         <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition Height="368*" />
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <TabControl Grid.RowSpan="2">
-            <TabItem Header="General">
 
-                <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
-
-                    <Label Content="Annotator Name" DockPanel.Dock="Top" HorizontalAlignment="left" />
-                    <TextBox Name="Annotator" DockPanel.Dock="Top"  Width="91" HorizontalAlignment="left" />
-
-                    <Label Content="Default zoom in seconds: (0 for max. duration)"  HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <TextBox Name="DefaultZoom" Width="91"  DockPanel.Dock="Top" HorizontalAlignment="left"  PreviewTextInput="NumberValidationTextBox" />
-                    <Label Content="Correction certainty level:"   HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <TextBox Name="Certainty"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
-                    <Label Content="Segment min duration in sec.:"   HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <TextBox Name="Segmentmindur"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
-                    <Label Content="Discrete SampleRate in Hz (0 for none):"   HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <TextBox Name="Samplerate"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left" PreviewTextInput="IntNumberValidationTextBox" />
-                    <Label Content="Check for Updates on Startup:"   HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <CheckBox Name="UpdatesCheckbox"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left"/>
-
-                    <Separator Visibility="Hidden"> </Separator>
-                </DockPanel>
+        <TabControl>
+            <TabItem Grid.Row="0" Header="General">
+                <StackPanel Orientation="Vertical">
+                    <Label Content="Default annotator name:" HorizontalAlignment="left" />
+                    <TextBox Name="Annotator" Margin="5,0,0,5" Width="90" HorizontalAlignment="left" />
+                    <Label Content="Default zoom in seconds (0 for max. duration):"  HorizontalAlignment="left" />
+                    <TextBox Name="DefaultZoom" Margin="5,0,0,5" Width="90" HorizontalAlignment="left"  PreviewTextInput="NumberValidationTextBox" />
+                    <Label Content="Correction certainty level:"   HorizontalAlignment="left" />
+                    <TextBox Name="Certainty" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Content="Segment min duration in seconds:"  HorizontalAlignment="left"  />
+                    <TextBox Name="Segmentmindur" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Content="Discrete sample rate in Hz (0 for none):"   HorizontalAlignment="left"  />
+                    <TextBox Name="Samplerate" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left" PreviewTextInput="IntNumberValidationTextBox" />
+                    <Label Content="Check for updates on startup:" HorizontalAlignment="left"  />
+                    <CheckBox Name="UpdatesCheckbox" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left"/>
+                </StackPanel>
             </TabItem>
 
-            <!--<TabItem Header="Correction Mode" HorizontalAlignment="Right" Width="106">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="2,5">
-                    <Label Content="Acceptance Certainty Level: " Margin="0,0,0,288" />
-                    <TextBox Name="Certainty" Margin="0,0,0,300" Width="91" HorizontalAlignment="Right" RenderTransformOrigin="-1.755,2.974" PreviewTextInput="NumberValidationTextBox" />
-                </StackPanel>
-            </TabItem>-->
-
             <TabItem Header="Database">
-                <DockPanel Grid.Column="1" Grid.Row="0" Margin="10"  HorizontalAlignment="left" DockPanel.Dock="Top">
-                    <Label Content="MongoDB Server: " HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <TextBox Name="DBServer"  HorizontalAlignment="left" DockPanel.Dock="Top"  Width="110" />
-                    <Label Content="MongoDB User: " HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <TextBox Name="DBUser" HorizontalAlignment="left" DockPanel.Dock="Top"  Width="110"  RenderTransformOrigin="-1.755,2.974" />
-                    <Label Content="MongoDB Password: " HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <PasswordBox Name="DBPW" HorizontalAlignment="left" DockPanel.Dock="Top"  Width="110"  RenderTransformOrigin="-1.755,2.974" />
-                    <Label Content="Ask before overwritting existing annotation"   HorizontalAlignment="left" DockPanel.Dock="Top" />
-                    <CheckBox Name="Overwritedbcheckbox"  DockPanel.Dock="Top" Width="91" HorizontalAlignment="Left"/>
-
-                    <Separator Visibility="Hidden"></Separator>
-                </DockPanel>
+                <StackPanel Orientation="Vertical">
+                    <Label Content="Database server:" HorizontalAlignment="Left"/>
+                    <TextBox Name="DBServer" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left"/>
+                    <Label Content="Database user:" HorizontalAlignment="left"/>
+                    <TextBox Name="DBUser" Margin="5,0,0,5" HorizontalAlignment="left" Width="90"/>
+                    <Label Content="Database password:" HorizontalAlignment="left"  />
+                    <PasswordBox Name="DBPassword" Margin="5,0,0,5" HorizontalAlignment="left" Width="90"/>
+                    <Label Content="Ask before overwriting existing annotation" HorizontalAlignment="left" />
+                    <CheckBox Name="OverwriteAnnotation" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left"/>
+                </StackPanel>
             </TabItem>
         </TabControl>
 
-        <Button Margin="503,328,10,10" Grid.Row="1" Click="Button_Click">Ok</Button>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Margin="5" Click="Button_Click">Apply</Button>
+        </StackPanel>
     </Grid>
 </Window>

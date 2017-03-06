@@ -17,14 +17,14 @@ namespace ssi
 
     public delegate void AnnoTierChangeEventHandler(AnnoTier track, EventArgs e);
 
-    public delegate void AnnoTierSegmentChangeEventHandler(AnnoTierLabel segment, EventArgs e);
+    public delegate void AnnoTierSegmentChangeEventHandler(AnnoTierSegment segment, EventArgs e);
 
     public delegate void AnnoTierResizeEventHandler(double pos);
 
     public partial class AnnoTierStatic : Canvas
     {
         static protected AnnoTier selectedTier = null;
-        static protected AnnoTierLabel selectedLabel = null;
+        static protected AnnoTierSegment selectedLabel = null;
 
         static protected int selectedZindex = 0;
         static protected int selectedZindexMax = 0;
@@ -33,7 +33,7 @@ namespace ssi
         static public int closestIndexOld = 0;
         public static bool continuousAnnoMode = false;
         public static bool askForLabel = false;
-        public static AnnoTierLabel objectContainer = null;
+        public static AnnoTierSegment objectContainer = null;
 
         static public event AnnoTierChangeEventHandler OnTierChange;
 
@@ -43,7 +43,7 @@ namespace ssi
 
         static public DispatcherTimer dispatcherTimer = new DispatcherTimer();
 
-        static public AnnoTierLabel Label
+        static public AnnoTierSegment Label
         {
             get { return selectedLabel; }
         }
@@ -55,12 +55,11 @@ namespace ssi
 
         public static bool CorrectMode { get; set; }
 
-
-        static public void SelectTier(AnnoTier t)
+        static public void Select(AnnoTier t)
         {
-            UnselectTier();
+            Unselect();
             selectedTier = t;
-            t.select(true);
+            t.Select(true);
 
             if (OnTierChange != null)
             {
@@ -68,16 +67,16 @@ namespace ssi
             }
         }
 
-        static public void UnselectTier()
+        static public void Unselect()
         {
             if (selectedTier != null)
             {
-                selectedTier.select(false);
+                selectedTier.Select(false);
                 selectedTier = null;
             }
         }
 
-        static public void SelectLabel(AnnoTierLabel s)
+        static public void SelectLabel(AnnoTierSegment s)
         {
             UnselectLabel();
             if (s != null)
@@ -89,13 +88,10 @@ namespace ssi
                     objectContainer = s;
                 }
                 selectedLabel = s;
-                selectedZindex = Panel.GetZIndex(selectedLabel);
-                Panel.SetZIndex(selectedLabel, selectedZindexMax + 1);
+                selectedZindex = GetZIndex(selectedLabel);
+                SetZIndex(selectedLabel, selectedZindexMax + 1);
 
-                if (OnTierSegmentChange != null)
-                {
-                    OnTierSegmentChange(s, null);
-                }
+                OnTierSegmentChange?.Invoke(s, null);
             }
         }
 
@@ -104,7 +100,7 @@ namespace ssi
             if (selectedLabel != null)
             {
                 selectedLabel.select(false);
-                Panel.SetZIndex(selectedLabel, selectedZindex);
+                SetZIndex(selectedLabel, selectedZindex);
                 selectedLabel = null;
             }
         }
@@ -115,19 +111,16 @@ namespace ssi
             {
                 if (selectedLabel != null && selectedTier != null/* && GetSelectedTrack().isDiscrete*/)
                 {
-                    AnnoTierLabel tmp = selectedLabel;
+                    AnnoTierSegment tmp = selectedLabel;
                     UnselectLabel();
-                    selectedTier.remSegment(tmp);
+                    selectedTier.RemoveSegment(tmp);
                 }
             }
         }
 
         static public void FireOnMove(double pos)
         {
-            if (OnTrackResize != null)
-            {
-                OnTrackResize(pos);
-            }
+            OnTrackResize?.Invoke(pos);
         }
     }
 
@@ -150,14 +143,13 @@ namespace ssi
         #endregion Properties
 
         private bool isSelected = false;
-        public List<AnnoTierLabel> segments = new List<AnnoTierLabel>();
+        public List<AnnoTierSegment> segments = new List<AnnoTierSegment>();
 
-        private double currentPositionX = 0;
-        public bool isDiscreteOrFree = true;
+        private double currentPositionX = 0;        
 
         public int lastLabelIndex;
-        public string DefaultLabel = "";
-        public Color DefaultColor = Colors.Black;
+        public string DefaultLabel;
+        public Color DefaultColor;
         private double dx = 0;
         private double lastX;
         private int direction;
@@ -168,28 +160,78 @@ namespace ssi
         private List<Line> continuousTierMarkers = new List<Line>();
         private Ellipse continuousTierEllipse = new Ellipse();
 
+        public Border Border { get; set; }
+
         public AnnoList AnnoList { get; set; }
+        public bool IsDiscreteOrFree
+        {
+            get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE; }
+        }
+        public bool IsContinuous
+        {
+            get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS; }
+        }
 
-        public Brush BackgroundBrush { get; set; }
- 
-        public Brush ContinuousBrush { get; set; }
+        private Color minOrBackColor = Defaults.Colors.Background;
+        public Color MinOrBackColor
+        {
+            get
+            {
+                return minOrBackColor;
+            }
+            set
+            {
+                minOrBackColor = value;
+                AnnoList.Scheme.MinOrBackColor = minOrBackColor;
+                updateBackground();
+            }
+        }
 
+        private Color maxOrForeColor = Defaults.Colors.Foreground;
+        public Color MaxOrForeColor
+        {
+            get
+            {
+                return maxOrForeColor;
+            }
+            set
+            {
+                maxOrForeColor = value;
+                AnnoList.Scheme.MaxOrForeColor = maxOrForeColor;
+                updateBackground();
+            }
+        }
+
+        private void updateBackground()
+        {
+            if (AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS)
+            {
+                Background = new SolidColorBrush(AnnoList.Scheme.MinOrBackColor);
+            }
+            else
+            {
+                Background = new LinearGradientBrush(AnnoList.Scheme.MaxOrForeColor, AnnoList.Scheme.MinOrBackColor, 90.0);
+            }
+        }
 
         public AnnoTier(AnnoList anno)
         {
             AnnoList = anno;
+            
+            maxOrForeColor = anno.Scheme.MaxOrForeColor;
+            minOrBackColor = anno.Scheme.MinOrBackColor;
+            updateBackground();
 
             AllowDrop = true;            
             SizeChanged += new SizeChangedEventHandler(sizeChanged);           
-            isDiscreteOrFree = anno.Scheme.Type == AnnoScheme.TYPE.DISCRETE || anno.Scheme.Type == AnnoScheme.TYPE.FREE;
-
+            
             UnDoObject = new AnnoTierUndoRedo();
             UnDoObject.Container = this;
 
             double mean = (anno.Scheme.MinScore + anno.Scheme.MaxScore) / 2;
             double range = anno.Scheme.MaxScore - anno.Scheme.MinScore;
 
-            DefaultColor = Colors.Black;
+            DefaultColor = Defaults.Colors.Foreground;
             DefaultLabel = "";
 
             switch (anno.Scheme.Type)
@@ -218,9 +260,9 @@ namespace ssi
                     break;
             }
 
-            AnnoTier.SelectTier(this);
+            Select(this);
 
-            if (!isDiscreteOrFree)
+            if (!IsDiscreteOrFree)
             {
                 Loaded += delegate
                 {
@@ -264,9 +306,9 @@ namespace ssi
             {
                 AnnoScheme.Label l = new AnnoScheme.Label(item.Label, item.Color);
 
-                if (isDiscreteOrFree)
+                if (IsDiscreteOrFree)
                 {
-                    addSegment(item);
+                    AddSegment(item);
                 }
             }
         }
@@ -324,7 +366,7 @@ namespace ssi
             if (AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
             {
                 this.Visibility = Visibility.Hidden;
-                foreach (AnnoTierLabel segment in segments)
+                foreach (AnnoTierSegment segment in segments)
                 {
                     segment.Height = e.NewSize.Height;
                 }
@@ -337,59 +379,18 @@ namespace ssi
             }
         }
 
-        public void select(bool flag)
+        public void Select(bool flag)
         {
-            this.isSelected = flag;
-            if (flag)
+            isSelected = flag;
+            if (Border != null)
             {
-                if (BackgroundBrush != null)
-                {
-                    if (this.isDiscreteOrFree)
-                    {
-                        byte newAlpha = 100;
-                        Color newColor = Color.FromArgb(newAlpha, ((SolidColorBrush)BackgroundBrush).Color.R, ((SolidColorBrush)BackgroundBrush).Color.G, ((SolidColorBrush)BackgroundBrush).Color.B);
-                        Brush brush = new SolidColorBrush(newColor);
-                        this.Background = brush;
-                    }
-                    else if (ContinuousBrush != null && !isDiscreteOrFree)
-                    {
-                        LinearGradientBrush myBrush = new LinearGradientBrush();
-                        myBrush.StartPoint = new Point(0, 0);
-                        myBrush.EndPoint = new Point(0, 1);
-                        myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ContinuousBrush).GradientStops[0].Color, 0));
-                        myBrush.GradientStops.Add(new GradientStop(((LinearGradientBrush)ContinuousBrush).GradientStops[1].Color, 1));
-                        myBrush.Opacity = 0.6;
-                        this.Background = myBrush;
-                    }
-                }
-            }
-            else
-            {
-                if (BackgroundBrush != null && isDiscreteOrFree)
-                {
-                    this.Background = BackgroundBrush;
-                }
-                else if (!isDiscreteOrFree)
-                {
-                    if (ContinuousBrush == null)
-                    {
-                        LinearGradientBrush myBrush = new LinearGradientBrush();
-                        myBrush.StartPoint = new Point(0, 0);
-                        myBrush.EndPoint = new Point(0, 1);
-                        myBrush.GradientStops.Add(new GradientStop(Colors.Blue, 0));
-                        myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1));
-                        myBrush.Opacity = 0.75;
-                        ContinuousBrush = myBrush;
-                    }
-
-                    this.Background = ContinuousBrush;
-                }
+                Border.BorderBrush = flag ? Defaults.Brushes.Highlight : Defaults.Brushes.Conceal;
             }
         }
 
-        public AnnoTierLabel getSegment(AnnoListItem item)
+        public AnnoTierSegment GetSegment(AnnoListItem item)
         {
-            foreach (AnnoTierLabel segment in segments)
+            foreach (AnnoTierSegment segment in segments)
             {
                 if (segment.Item == item)
                 {
@@ -399,24 +400,24 @@ namespace ssi
             return null;
         }
 
-        public AnnoTierLabel addSegment(AnnoListItem item)
+        public AnnoTierSegment AddSegment(AnnoListItem item)
         {
-            AnnoTierLabel segment = new AnnoTierLabel(item, this);
+            AnnoTierSegment segment = new AnnoTierSegment(item, this);
             segments.Add(segment);
             this.Children.Add(segment);
-            selectedZindexMax = Math.Max(selectedZindexMax, Panel.GetZIndex(segment));
+            selectedZindexMax = Math.Max(selectedZindexMax, GetZIndex(segment));
 
             return segment;
         }
 
-        public void remSegment(AnnoTierLabel s)
+        public void RemoveSegment(AnnoTierSegment s)
         {
             ChangeRepresentationObject RememberDelete = UnDoObject.MakeChangeRepresentationObjectForDelete((FrameworkElement)s);
             UnDoObject.InsertObjectforUndoRedo(RememberDelete);
-            deleteSegment(s);
+            DeleteSegment(s);
         }
 
-        public void deleteSegment(AnnoTierLabel s)
+        public void DeleteSegment(AnnoTierSegment s)
         {
             AnnoList.Remove(s.Item);
             s.Tier.Children.Remove(s);
@@ -470,7 +471,7 @@ namespace ssi
                 line.X1 = MainHandler.Time.PixelFromTime(MainHandler.Time.TotalDuration / 1000 * i);
                 line.X2 = MainHandler.Time.PixelFromTime(MainHandler.Time.TotalDuration / 1000 * i + MainHandler.Time.TotalDuration / 1000 * (i + 1));
                 continuousTierLines.Add(line);
-                selectedZindexMax = Math.Max(selectedZindexMax, Panel.GetZIndex(line));
+                selectedZindexMax = Math.Max(selectedZindexMax, GetZIndex(line));
                 this.Children.Add(line);
             }
 
@@ -483,7 +484,7 @@ namespace ssi
             this.Children.Add(continuousTierEllipse);
 
             TimeRangeChanged(MainHandler.Time);
-            if (!isDiscreteOrFree)
+            if (!IsDiscreteOrFree)
             {
                 TimeRangeChanged(MainHandler.Time);
             }
@@ -510,7 +511,7 @@ namespace ssi
         {
             if (!CorrectMode)
             {
-                if (isDiscreteOrFree)
+                if (IsDiscreteOrFree)
                 {
                     double start = MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
                     double stop = MainHandler.Time.CurrentPlayPosition;
@@ -544,12 +545,12 @@ namespace ssi
                     closestIndex = GetClosestContinuousIndex(closestposition);
                     closestIndexOld = closestIndex;
 
-                    if (isDiscreteOrFree && stop < MainHandler.Time.TotalDuration)
+                    if (IsDiscreteOrFree && stop < MainHandler.Time.TotalDuration)
                     {
                         AnnoListItem temp = new AnnoListItem(start, len, DefaultLabel, "", DefaultColor, 1.0);
                         temp.Color = DefaultColor;
                         AnnoList.AddSorted(temp);
-                        AnnoTierLabel segment = new AnnoTierLabel(temp, this);
+                        AnnoTierSegment segment = new AnnoTierSegment(temp, this);
 
                         ChangeRepresentationObject ChangeRepresentationObjectforInsert = UnDoObject.MakeChangeRepresentationObjectForInsert(segment);
                         UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectforInsert);
@@ -624,7 +625,7 @@ namespace ssi
                     if (!alreadyinlist)
                     {
                         if (this.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS) AnnoList.AddSorted(temp);
-                        AnnoTierLabel segment = new AnnoTierLabel(temp, this);
+                        AnnoTierSegment segment = new AnnoTierSegment(temp, this);
                         annorightdirection = true;
                         ChangeRepresentationObject ChangeRepresentationObjectforInsert = UnDoObject.MakeChangeRepresentationObjectForInsert(segment);
                         UnDoObject.InsertObjectforUndoRedo(ChangeRepresentationObjectforInsert);
@@ -640,24 +641,24 @@ namespace ssi
         {
             base.OnMouseLeftButtonDown(e);
             UnselectLabel();
-            this.select(true);
+            this.Select(true);
 
             // change track
             if (selectedTier != this)
             {
-                AnnoTier.SelectTier(this);
+                AnnoTier.Select(this);
             }
 
-            if (isDiscreteOrFree || (!isDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
+            if (IsDiscreteOrFree || (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
             {
                 // check for segment selection
 
-                foreach (AnnoTierLabel s in segments)
+                foreach (AnnoTierSegment s in segments)
                 {
                     if (s.IsMouseOver)
                     {
                         SelectLabel(s);
-                        this.select(true);
+                        this.Select(true);
                         break;
                     }
                 }
@@ -675,7 +676,7 @@ namespace ssi
             dx = 0;
 
             UnselectLabel();
-            this.select(true);
+            this.Select(true);
 
             base.OnMouseRightButtonDown(e);
             if (!CorrectMode)
@@ -704,11 +705,11 @@ namespace ssi
                 closestIndex = GetClosestContinuousIndex(closestposition);
                 closestIndexOld = closestIndex;
 
-                if (isDiscreteOrFree && stop < MainHandler.Time.TotalDuration)
+                if (IsDiscreteOrFree && stop < MainHandler.Time.TotalDuration)
                 {
                     AnnoListItem temp = new AnnoListItem(start, len, this.DefaultLabel, "", this.DefaultColor);
                     AnnoList.AddSorted(temp);
-                    AnnoTierLabel segment = new AnnoTierLabel(temp, this);
+                    AnnoTierSegment segment = new AnnoTierSegment(temp, this);
 
                     segment.Width = 1;
                     annorightdirection = true;
@@ -718,21 +719,21 @@ namespace ssi
 
                     this.Children.Add(segment);
                     SelectLabel(segment);
-                    this.select(true);
+                    this.Select(true);
 
                     selectedLabel.Item.Duration = Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
                     selectedLabel.Item.Stop = selectedLabel.Item.Start + selectedLabel.Item.Duration;
                 }
-                else if (!isDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift) && stop < MainHandler.Time.TotalDuration)
+                else if (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift) && stop < MainHandler.Time.TotalDuration)
                 {                    
                     AnnoListItem temp = new AnnoListItem(start, len, "", "", Colors.Black);
-                    AnnoTierLabel segment = new AnnoTierLabel(temp, this);
+                    AnnoTierSegment segment = new AnnoTierSegment(temp, this);
                     segment.Width = 1;
                     annorightdirection = true;
                     segments.Add(segment);
                     this.Children.Add(segment);
                     SelectLabel(segment);
-                    this.select(true);
+                    this.Select(true);
                 }
             }
         }
@@ -783,14 +784,14 @@ namespace ssi
             }
         }
 
-        public void MouseMove(MouseEventArgs e)
+        public new void MouseMove(MouseEventArgs e)
         {
             dx = e.GetPosition(Application.Current.MainWindow).X - lastX;
 
             direction = (dx > 0) ? 1 : 0;
             lastX = e.GetPosition(Application.Current.MainWindow).X;
 
-            if (isDiscreteOrFree || (!isDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
+            if (IsDiscreteOrFree || (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
             {
                 if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
 
@@ -799,7 +800,7 @@ namespace ssi
 
                     if (selectedLabel != null)
                     {
-                        this.select(true);
+                        this.Select(true);
                         double delta = point.X - selectedLabel.ActualWidth;
                         if (annorightdirection)
                         {
@@ -815,7 +816,7 @@ namespace ssi
 
                             if (MainHandler.Time.PixelFromTime(selectedLabel.Item.Stop) >= MainHandler.Time.CurrentSelectPosition - 1 && MainHandler.Time.PixelFromTime(selectedLabel.Item.Start) >= MainHandler.Time.CurrentSelectPosition - 1 && point.X < 0) annorightdirection = false;
                             SelectLabel(selectedLabel);
-                            this.select(true);
+                            this.Select(true);
                         }
                         else
                         {
@@ -831,7 +832,7 @@ namespace ssi
 
                             if ((MainHandler.Time.PixelFromTime(selectedLabel.Item.Start) > MainHandler.Time.CurrentSelectPosition - 1)) annorightdirection = true;
                             SelectLabel(selectedLabel);
-                            this.select(true);
+                            this.Select(true);
                         }
 
 
@@ -855,7 +856,7 @@ namespace ssi
 
                 if (selectedLabel != null && this.isSelected)
                 {
-                    this.select(true);
+                    this.Select(true);
                     Point point = e.GetPosition(selectedLabel);
 
                     // check if use wants to resize/move
@@ -893,7 +894,7 @@ namespace ssi
                                 selectedLabel.resize_right(delta);
 
                                 SelectLabel(selectedLabel);
-                                this.select(true);
+                                this.Select(true);
                                 FireOnMove(selectedLabel.Item.Stop);
                             }
                             else
@@ -901,7 +902,7 @@ namespace ssi
                                 selectedLabel.Item.Duration = Math.Max(Properties.Settings.Default.DefaultMinSegmentSize, minsr);
                                 selectedLabel.Item.Stop = selectedLabel.Item.Start + selectedLabel.Item.Duration;
                                 SelectLabel(selectedLabel);
-                                this.select(true);
+                                this.Select(true);
                             }
 
                             if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
@@ -938,7 +939,7 @@ namespace ssi
                             {
                                 selectedLabel.resize_left(delta);
                                 SelectLabel(selectedLabel);
-                                this.select(true);
+                                this.Select(true);
                                 if (selectedLabel != null) FireOnMove(selectedLabel.Item.Start);
                             }
                             else
@@ -1037,7 +1038,7 @@ namespace ssi
                             closestIndexOld = closestIndex;
                             TimeRangeChanged(MainHandler.Time);
                             //  nicer drawing but slower
-                            if (!isDiscreteOrFree)
+                            if (!IsDiscreteOrFree)
                             {
                                 TimeRangeChanged(MainHandler.Time);
                             }
@@ -1058,7 +1059,7 @@ namespace ssi
             this.Width = time.SelectionInPixel;
 
             //segments can happen in both, discrete and continuous annotations, so we check them in any case
-            foreach (AnnoTierLabel s in segments)
+            foreach (AnnoTierSegment s in segments)
             {
                 s.Visibility = Visibility.Collapsed;
                 if (s.Item.Start >= time.SelectionStart && s.Item.Start <= time.SelectionStop)

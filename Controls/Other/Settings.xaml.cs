@@ -15,14 +15,14 @@ namespace ssi
             InitializeComponent();
             Certainty.Text = Properties.Settings.Default.UncertaintyLevel.ToString();
             Annotator.Text = Properties.Settings.Default.Annotator;
-            DefaultZoom.Text = Properties.Settings.Default.DefaultZoominSeconds.ToString();
+            DefaultZoom.Text = Properties.Settings.Default.DefaultZoomInSeconds.ToString();
             Segmentmindur.Text = Properties.Settings.Default.DefaultMinSegmentSize.ToString();
             Samplerate.Text = Properties.Settings.Default.DefaultDiscreteSampleRate.ToString();
             DBServer.Text = Properties.Settings.Default.DatabaseAddress;
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
-            DBPW.Password = Properties.Settings.Default.MongoDBPass;
+            DBPassword.Password = Properties.Settings.Default.MongoDBPass;
             UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateOnStart;
-            Overwritedbcheckbox.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
+            OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
         }
 
         public double Uncertainty()
@@ -57,7 +57,7 @@ namespace ssi
 
         public string MongoPass()
         {
-            return DBPW.Password;
+            return DBPassword.Password;
         }
 
         public string SampleRate()
@@ -70,9 +70,9 @@ namespace ssi
             return (UpdatesCheckbox.IsChecked == true);
         }
 
-        public bool DBaskforOverwrite()
+        public bool DBAskforOverwrite()
         {
-            return (Overwritedbcheckbox.IsChecked == true);
+            return (OverwriteAnnotation.IsChecked == true);
         }
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
@@ -86,7 +86,6 @@ namespace ssi
             Regex regex = new Regex("^[0-9]+$|^[0-9]*$");
             e.Handled = !regex.IsMatch((sender as TextBox).Text.Insert((sender as TextBox).SelectionStart, e.Text));
         }
-
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {

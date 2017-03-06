@@ -58,6 +58,11 @@ namespace ssi
                 }
             }
 
+            if (saved)
+            {
+                HasChanged = false;
+            }
+
             return saved;
         }
 

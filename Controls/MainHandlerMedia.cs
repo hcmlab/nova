@@ -39,7 +39,7 @@ namespace ssi
                 if (media.GetLength() > 0)
                 {
                     updateTimeRange(media.GetLength());
-                    if (this.mediaList.Medias.Count == 1 && media.GetLength() > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+                    if (this.mediaList.Medias.Count == 1 && media.GetLength() > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
                     _timer.Stop();
                 }
             });
@@ -143,8 +143,8 @@ namespace ssi
                 // Console.WriteLine(signalCursor.X + "_____" + Time.SelectionStart);
 
                 double time = Time.TimeFromPixel(pos);
-                control.signalPositionLabel.Text = FileTools.FormatSeconds(e.pos);
-                control.annoTrackControl.currenttime = Time.TimeFromPixel(pos);
+                control.signalStatusPositionLabel.Text = FileTools.FormatSeconds(e.pos);
+                control.annoTierControl.currentTime = Time.TimeFromPixel(pos);
 
                 if (e.pos > MainHandler.timeline.TotalDuration - 0.5)
                 {
@@ -205,7 +205,7 @@ namespace ssi
             AnnoListItem item = null;
             bool loop = false;
 
-            AnnoTierLabel selected = AnnoTierStatic.Label;
+            AnnoTierSegment selected = AnnoTierStatic.Label;
             if (selected != null)
             {
                 item = selected.Item;

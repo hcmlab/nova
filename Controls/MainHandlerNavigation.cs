@@ -16,9 +16,9 @@ namespace ssi
         private void initCursor()
         {
             control.trackGrid.MouseDown += signalTrackGrid_MouseDown;
-            control.annoTrackControl.MouseDown += annoTrackGrid_MouseDown;
-            control.annoTrackControl.MouseMove += annoTrackGrid_MouseMove;
-            control.annoTrackControl.MouseRightButtonUp += annoTrackGrid_MouseUp;
+            control.annoTierControl.MouseDown += annoTrackGrid_MouseDown;
+            control.annoTierControl.MouseMove += annoTrackGrid_MouseMove;
+            control.annoTierControl.MouseRightButtonUp += annoTrackGrid_MouseUp;
 
             AdornerLayer cursorLayer = control.signalAndAnnoControl.AdornerLayer;
             signalCursor = new Cursor(control.trackGrid, Brushes.Red, 1.5);
@@ -36,9 +36,9 @@ namespace ssi
             if (SignalTrackStatic.Selected != null && SignalTrackStatic.Selected.Signal != null)
             {
                 Signal signal = SignalTrackStatic.Selected.Signal;
-                control.signalValueLabel.Text = signal.Value(Time.TimeFromPixel(pos)).ToString();
-                control.signalValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
-                control.signalValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString(); 
+                control.signalStatusValueLabel.Text = signal.Value(Time.TimeFromPixel(pos)).ToString();
+                control.signalStatusValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
+                control.signalStatusValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString(); 
             }
         }
 
@@ -46,7 +46,7 @@ namespace ssi
         {
             double pos = MainHandler.Time.PixelFromTime(seconds);
             signalCursor.X = pos;
-            control.signalPositionLabel.Text = FileTools.FormatSeconds(Time.TimeFromPixel(pos));
+            control.signalStatusPositionLabel.Text = FileTools.FormatSeconds(Time.TimeFromPixel(pos));
         }
 
         #endregion CURSOR
@@ -83,6 +83,8 @@ namespace ssi
                     }
                     else
                     {
+                        AnnoList annoList = null;
+
                         if (annoType == AnnoScheme.TYPE.FREE)
                         {
                             AnnoTierNewFreeSchemeWindow dialog2 = new AnnoTierNewFreeSchemeWindow();
@@ -92,8 +94,7 @@ namespace ssi
                             if (dialog2.DialogResult == true)
                             {
                                 AnnoScheme annoScheme = dialog2.Result;
-                                AnnoList annoList = new AnnoList() { Scheme = annoScheme };
-                                addAnnoTier(annoList);
+                                annoList = new AnnoList() { Scheme = annoScheme };                                
                             }
                         }
                         else if (annoType == AnnoScheme.TYPE.DISCRETE)
@@ -104,8 +105,7 @@ namespace ssi
 
                             if (dialog2.DialogResult == true)
                             {
-                                AnnoList annoList = dialog2.GetAnnoList();
-                                addAnnoTier(annoList);
+                                annoList = dialog2.GetAnnoList();
                             }
                         }
                         else if (annoType == AnnoScheme.TYPE.CONTINUOUS)
@@ -121,16 +121,20 @@ namespace ssi
                                 }
                             }
 
-                            AnnoTierNewContinuousSchemeWindow.Input input = new AnnoTierNewContinuousSchemeWindow.Input() { SampleRate = defaultSr, MinScore = 0.0, MaxScore = 1.0, MinColor = Colors.LightBlue, MaxColor = Colors.Red };
+                            AnnoTierNewContinuousSchemeWindow.Input input = new AnnoTierNewContinuousSchemeWindow.Input() { SampleRate = defaultSr, MinScore = 0.0, MaxScore = 1.0, MinColor = Defaults.Colors.GradientMin, MaxColor = Defaults.Colors.GradientMax };
                             AnnoTierNewContinuousSchemeWindow dialog2 = new AnnoTierNewContinuousSchemeWindow(input);
                             dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                             dialog2.ShowDialog();
                             if (dialog2.DialogResult == true)
                             {
                                 AnnoScheme annoScheme = dialog2.Result;
-                                AnnoList annoList = new AnnoList() { Scheme = annoScheme };
-                                addAnnoTier(annoList);
+                                annoList = new AnnoList() { Scheme = annoScheme };
                             }
+                        }
+                        if (annoList != null)
+                        {
+                            annoList.Meta.Annotator = Properties.Settings.Default.Annotator;                          
+                            addAnnoTier(annoList);
                         }
                     }
                 }

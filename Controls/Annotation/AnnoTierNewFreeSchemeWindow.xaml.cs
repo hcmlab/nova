@@ -13,9 +13,9 @@ namespace ssi
 
             Result = new AnnoScheme();
 
-            backgroundColorPicker.SelectedColor = Colors.LightYellow;
-            labelColorPicker.SelectedColor = Colors.Black;
-            schemeNameTextBox.Text = "Noname";
+            backgroundColorPicker.SelectedColor = Defaults.Colors.Background;
+            labelColorPicker.SelectedColor = Defaults.Colors.Foreground;
+            schemeNameTextBox.Text = Defaults.Strings.Unkown;
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
@@ -24,7 +24,7 @@ namespace ssi
 
             Result.MinOrBackColor = backgroundColorPicker.SelectedColor.Value;
             Result.MaxOrForeColor = labelColorPicker.SelectedColor.Value;
-            Result.Name = schemeNameTextBox.Text == "" ? "Noname" : schemeNameTextBox.Text;
+            Result.Name = schemeNameTextBox.Text == "" ? Defaults.Strings.Unkown : schemeNameTextBox.Text;
 
             Close();
         }

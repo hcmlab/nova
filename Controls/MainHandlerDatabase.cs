@@ -149,7 +149,7 @@ namespace ssi
 
                             {
                                 //annoList.FilePath = annoList.Role + "." + annoList.Scheme.Name + "." + annoList.AnnotatorFullName;
-                                handleAnnotation(annoList);
+                                addAnnoTierFromList(annoList);
                             }
 
                             control.ShadowBox.Visibility = Visibility.Collapsed;
@@ -236,7 +236,7 @@ namespace ssi
 
                 foreach (AnnoListItem item in annos[0])
                 {
-                    tier.addSegment(item);
+                    tier.AddSegment(item);
                 }
 
                 tier.TimeRangeChanged(MainHandler.Time);

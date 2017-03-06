@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Packaging;
 using System.Windows;
@@ -21,192 +22,115 @@ namespace ssi
 
         static public int brushCounter = 0;
 
-        static protected void SelectTrack(SignalTrack t)
+        static public void Select(SignalTrack t)
         {
-            UnselectTrack();
+            Unselect();
             Selected = t;
-            t.select(true);
 
-            if (OnChange != null)
+            if (Selected.Border != null)
             {
-                OnChange(Selected, null);
+                Selected.Border.BorderBrush = Defaults.Brushes.Highlight;
             }
+
+            OnChange?.Invoke(Selected, null);
         }
 
-        static protected void UnselectTrack()
+        static public void Unselect()
         {
             if (Selected != null)
             {
-                Selected.select(false);
+                Selected.Border.BorderBrush = Defaults.Brushes.Conceal;
                 Selected = null;
             }
         }
     }
 
-    public class SignalTrack : SignalTrackStatic, ISignalTrack
+    public class SignalTrack : SignalTrackStatic, INotifyPropertyChanged
     {
         private double signal_from_in_sec = 0;
         private double signal_to_in_sec = 0;
         private Signal resampled = null;
         private double render_width;
-        private bool is_selected = false;
         private bool resample = false;
-        private bool auto_scaling = false;
+        private bool autoScaling = false;
         private int zoomLevel = 0;
         private int zoomOffset = 0;
         public int brushOffset = 0;
+        private Pen pen;
+       
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public Pen p = new Pen(new SolidColorBrush(Colors.Black), 1.0);
-        private SolidColorBrush s = SystemColors.ControlBrush;
-        private SolidColorBrush b = SystemColors.ControlBrush;
-
-        public SolidColorBrush SignalColor
+        protected void RaisePropertyChanged(string property)
         {
-            get { return s; }
-            set { s = value; }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        public SolidColorBrush BackgroundColor
+        public Border Border { get; set; }
+
+        private Color signalColor;
+        public Color SignalColor
         {
-            get { return b; }
+            get
+            {
+                return signalColor;
+            }
             set
             {
-                b = value;
+                signalColor = value;
+                pen = new Pen(new SolidColorBrush(signalColor), 1.0);
+                pen.Freeze();
+                RaisePropertyChanged("SignalColor");
+                InvalidateVisual();
+            }
+        }
+
+        private Color backgroundColor;
+        public Color BackgroundColor
+        {
+            get
+            {
+                return backgroundColor;
+            }
+            set
+            {
+                backgroundColor = value;
+                Background = new SolidColorBrush(backgroundColor);
+                RaisePropertyChanged("BackgroundColor");
+                InvalidateVisual();
             }
         }
 
         public bool AutoScaling
         {
-            get { return auto_scaling; }
+            get { return autoScaling; }
             set
             {
-                auto_scaling = value;
+                autoScaling = value;               
+                RaisePropertyChanged("AutoScaling");
                 InvalidateVisual();
             }
         }
 
-        public SignalTrack(Signal signal)
-        {
-            p.Freeze();
+        public SignalTrack()
+        {            
+            signalColor = Defaults.Colors.Foreground;
+            backgroundColor = Defaults.Colors.Background;
+            pen = new Pen(new SolidColorBrush(signalColor), 1.0);
+        }
+
+        public SignalTrack(Signal signal) : this()
+        {           
+            pen.Freeze();
 
             Signal = signal;
-            this.MouseWheel += new MouseWheelEventHandler(OnSignalTrackMouseWheel);
+            MouseWheel += new MouseWheelEventHandler(OnSignalTrackMouseWheel);
 
-            SignalTrack.SelectTrack(this);
-        }
-
-        public void zoomReset()
-        {
-            zoomOffset = 0;
-            zoomLevel = 0;
-            InvalidateVisual();
-        }
-
-        public void changeColor(Brush color)
-        {
-            SignalColor = (SolidColorBrush)color;
-            p = new Pen(SignalColor, 1.0);
-            p.Freeze();
-            InvalidateVisual();
-        }
-
-        public void zoom(int level, int offset)
-        {
-            zoomLevel += level;
-            zoomOffset += offset;
-            InvalidateVisual();
-        }
-
-        private void OnSignalTrackMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
-            {
-                return; // TODO: Hack for using move via scroll wheel in RangeSlider
-            }
-
-            if (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
-            {
-                if (e.Delta < 0)
-                {
-                    if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
-                    {
-                        zoom(-3, 0);
-                    }
-                    else
-                    {
-                        zoom(-1, 0);
-                    }
-                }
-                else
-                {
-                    if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
-                    {
-                        zoom(3, 0);
-                    }
-                    else
-                    {
-                        zoom(1, 0);
-                    }
-                }
-            }
-            else
-            {
-                if (e.Delta < 0)
-                {
-                    if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
-                    {
-                        zoom(0, 6);
-                    }
-                    else
-                    {
-                        zoom(0, 1);
-                    }
-                }
-                else
-                {
-                    if (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
-                    {
-                        zoom(0, -6);
-                    }
-                    else
-                    {
-                        zoom(0, -1);
-                    }
-                }
-            }
+            Select(this);
         }
 
         public Signal Signal { get; set; }
-    
-        public Signal getSignal()
-        {
-            //The interface requests this function, doesn't allow fie
-            return Signal;
-        }
 
-        public void clear()
-        {
-            this.Children.Clear();
-            Signal = null;
-        }
-
-        public void select(bool flag)
-        {
-            this.is_selected = flag;
-            if (flag)
-            {
-                byte newAlpha = 40;
-                Color newColor = Color.FromArgb(newAlpha, this.BackgroundColor.Color.R, this.BackgroundColor.Color.G, this.BackgroundColor.Color.B);
-                Brush brush = new SolidColorBrush(newColor);
-                this.Background = brush;
-            }
-            else
-            {
-                this.Background = this.BackgroundColor; // System.Windows.Media.Brushes.Transparent; // System.Windows.Media.Brushes.FloralWhite;
-            }
-        }
-
-        protected void Paint(DrawingContext dc, SignalTrack track, Signal signal, uint dimension, double height, uint width, bool isAudio)
+        protected void Paint(DrawingContext dc, SignalTrack track, Signal signal, int dimension, double height, uint width, bool isAudio)
         {
             if (signal.number == 0 || signal.data == null || height == 0 || width == 0)
             {
@@ -215,7 +139,7 @@ namespace ssi
 
             if (isAudio)
             {
-                for (uint d = dimension; d <= dimension; d++)
+                for (int d = dimension; d <= dimension; d++)
                 {
                     float zoomFactor = track.zoomLevel * ((signal.max[d] - signal.min[d]) / 10);
                     float zoomOffset = track.zoomOffset * ((signal.max[d] - signal.min[d]) / 10);
@@ -237,7 +161,7 @@ namespace ssi
                             to.Y = height - (-signal.data[i * signal.dim + d] - offset) * scale;
                             if (to.Y > height) to.Y = height;
                             else if (to.Y < 0) to.Y = 0;
-                            dc.DrawLine(p, from, to);
+                            dc.DrawLine(pen, from, to);
                         }
                     }
                     else
@@ -250,14 +174,14 @@ namespace ssi
                             to.Y = height - (-signal.data[i * signal.dim + d] - offset) * scale;
                             if (to.Y > height) to.Y = height;
                             else if (to.Y < 0) to.Y = 0;
-                            dc.DrawLine(p, from, to);
+                            dc.DrawLine(pen, from, to);
                         }
                     }
                 }
             }
             else
             {
-                for (uint d = dimension; d <= dimension; d++)
+                for (int d = dimension; d <= dimension; d++)
                 {
                     float zoomFactor = track.zoomLevel * ((signal.max[d] - signal.min[d]) / 10);
                     float zoomOffset = track.zoomOffset * ((signal.max[d] - signal.min[d]) / 10);
@@ -276,7 +200,7 @@ namespace ssi
                             to.Y = height - (signal.data[i * signal.dim + d] - offset) * scale;
                             if (to.Y > height) to.Y = height;
                             else if (to.Y < 0) to.Y = 0;
-                            dc.DrawLine(p, from, to);
+                            dc.DrawLine(pen, from, to);
                             from.X = to.X;
                             from.Y = to.Y;
                         }
@@ -290,7 +214,7 @@ namespace ssi
                             to.Y = height - (signal.data[i * signal.dim + d] - offset) * scale;
                             if (to.Y > height) to.Y = height;
                             else if (to.Y < 0) to.Y = 0;
-                            dc.DrawLine(p, from, to);
+                            dc.DrawLine(pen, from, to);
                             from.X = to.X;
                             from.Y = to.Y;
                         }
@@ -310,7 +234,7 @@ namespace ssi
                 if (resampled == null || resampled.number != len || resample)
                 {
                     resampled = new Signal(this.Signal, len, signal_from_in_sec, signal_to_in_sec);
-                    if (!auto_scaling)
+                    if (!autoScaling)
                     {
                         resampled.min = Signal.min;
                         resampled.max = Signal.max;
@@ -318,7 +242,7 @@ namespace ssi
                     resample = false;
                 }
 
-                Paint(dc, this, resampled, Signal.ShowDim, this.ActualHeight, len, Signal.IsAudio);
+                Paint(dc, this, resampled, Signal.ShowDim, ActualHeight, len, Signal.IsAudio);
             }
         }
 
@@ -329,7 +253,7 @@ namespace ssi
             // change track
             if (Selected != this)
             {
-                SignalTrack.SelectTrack(this);
+                SignalTrack.Select(this);
             }
         }
 
@@ -342,6 +266,17 @@ namespace ssi
             this.Width = pixel;
             this.resample = true;
             this.InvalidateVisual();
+        }
+
+
+        private void OnSignalTrackMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta < 0)
+            {
+            }
+            else
+            {
+            }
         }
 
         #region EXPORT

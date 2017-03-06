@@ -3,52 +3,133 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ssi
 {
     public partial class MainHandler
     {
-        private void addSignal(Signal signal, string foreground, string background)
+        public void clearSignalInfo()
         {
-            ISignalTrack track = control.signalTrackControl.AddSignalTrack(signal, foreground, background);
+            control.signalStatusSettingsButton.IsEnabled = false;
+            control.signalStatusFileNameLabel.Text = "";
+            control.signalStatusFileNameLabel.ToolTip = "";
+            control.signalStatusBytesLabel.Text = "";
+            control.signalStatusDimLabel.Text = "";
+            control.signalStatusDimComboBox.Items.Clear();
+            control.signalStatusSrLabel.Text = "";
+            control.signalStatusTypeLabel.Text = "";
+            control.signalStatusValueLabel.Text = "";
+            control.signalStatusValueMinLabel.Text = "";
+            control.signalStatusValueMaxLabel.Text = "";
+            control.signalStatusPositionLabel.Text = "00:00:00.00";
+            control.signalStatusCloseButton.IsEnabled = false;
+        }
+
+
+        private void addSignal(Signal signal, Color signalColor, Color backgroundColor)
+        {
+            SignalTrack track = new SignalTrack(signal);
+
+            control.signalTrackControl.Add(track, signalColor, backgroundColor);
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += track.TimeRangeChanged;
 
-            this.signals.Add(signal);
-            this.signalTracks.Add(track);
+            signals.Add(signal);
+            signalTracks.Add(track);
 
             double duration = signal.number / signal.rate;
-            if (duration > MainHandler.Time.TotalDuration)
+            if (duration > Time.TotalDuration)
             {
-                MainHandler.Time.TotalDuration = duration;
+                Time.TotalDuration = duration;
                 control.timeLineControl.rangeSlider.Update();
             }
             else
             {
-                track.TimeRangeChanged(MainHandler.Time);
+                track.TimeRangeChanged(Time);
             }
-            if (this.signalTracks.Count == 1 && duration > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
+            if (signalTracks.Count == 1 
+                && duration > Properties.Settings.Default.DefaultZoomInSeconds 
+                && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            {
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
+            }    
         }
 
-        private void removeSignal(object sender, SignalRemoveEventArgs e)
+        private void signalTrackCloseButton_Click(object sender, RoutedEventArgs e)
         {
-            signalTracks.Remove(e.SignalTrack);
+            removeSignalTrack();          
         }
-     
-        private void changeSignalTrackHandler(ISignalTrack track, EventArgs e)
+
+        private void removeSignalTrack()
         {
-            Signal signal = track.getSignal();
+            SignalTrack track = SignalTrackStatic.Selected;
+
+            if (track != null)
+            {
+                control.signalTrackControl.Remove(track);
+
+                SignalTrackStatic.Unselect();
+                track.Children.Clear();
+                signalTracks.Remove(track);
+
+                if (signalTracks.Count > 0)
+                {
+                    SignalTrackStatic.Select(signalTracks[0]);
+                }
+                else
+                {
+                    clearSignalInfo();
+                }
+            }
+        }
+
+        private void changeSignalTrackHandler(SignalTrack track, EventArgs e)
+        {
+            Signal signal = track.Signal;
             if (signal != null)
             {
-                control.signalNameLabel.Text = signal.FileName;
-                control.signalNameLabel.ToolTip = signal.FilePath;
-                control.signalBytesLabel.Text = signal.bytes + " bytes";
-                control.signalDimLabel.Text = signal.dim.ToString();
-                control.signalSrLabel.Text = signal.rate + " Hz";
-                control.signalTypeLabel.Text = Signal.TypeName[(int)signal.type];
-                control.signalValueLabel.Text = signal.Value(timeline.SelectionStart).ToString();
-                control.signalValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
-                control.signalValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString();
+                control.signalStatusSettingsButton.IsEnabled = true;
+                control.signalStatusFileNameLabel.Text = signal.FileName;
+                control.signalStatusFileNameLabel.ToolTip = signal.FilePath;
+                control.signalStatusBytesLabel.Text = signal.bytes + " bytes";                
+                control.signalStatusDimComboBox.Items.Clear();
+                for (int i = 0; i < signal.dim; i++)
+                {
+                    control.signalStatusDimComboBox.Items.Add(i);
+                }
+                control.signalStatusDimComboBox.SelectedIndex = signal.ShowDim;
+                control.signalStatusDimLabel.Text = signal.dim.ToString();
+                control.signalStatusSrLabel.Text = signal.rate + " Hz";
+                control.signalStatusTypeLabel.Text = Signal.TypeName[(int)signal.type];
+                control.signalStatusValueLabel.Text = signal.Value(timeline.SelectionStart).ToString();
+                control.signalStatusValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
+                control.signalStatusValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString();
+                control.signalStatusCloseButton.IsEnabled = true;
+            }
+        }
+
+        private void signalDimComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SignalTrackStatic.Selected != null
+                && control.signalStatusDimComboBox.SelectedIndex != -1 
+                && control.signalStatusDimComboBox.SelectedIndex != SignalTrackStatic.Selected.Signal.ShowDim)
+            {
+                SignalTrackStatic.Selected.Signal.ShowDim = control.signalStatusDimComboBox.SelectedIndex;
+                SignalTrackStatic.Selected.InvalidateVisual();
+            }
+        }
+
+        private void signalSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SignalTrackStatic.Selected != null)
+            {
+                SignalTrackSettingsWindow window = new SignalTrackSettingsWindow();
+                window.DataContext = SignalTrackStatic.Selected;
+                window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;                
+                window.ShowDialog();
             }
         }
 
@@ -73,7 +154,7 @@ namespace ssi
                     Time.CurrentPlayPositionPrecise = MainHandler.Time.TimeFromPixel(signalCursor.X);
                     mediaList.move(MainHandler.Time.TimeFromPixel(pos));
                     double time = Time.TimeFromPixel(pos);
-                    control.signalPositionLabel.Text = FileTools.FormatSeconds(time);
+                    control.signalStatusPositionLabel.Text = FileTools.FormatSeconds(time);
 
                     if (is_playing)
                     {

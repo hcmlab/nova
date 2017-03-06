@@ -11,21 +11,23 @@ namespace ssi
     {
         private void tierMenu_Click(object sender, RoutedEventArgs e)
         {
+            control.saveAnnoMenu.IsEnabled = false;
+            control.saveAnnoMenuAs.IsEnabled = false;
+            control.convertAnnoContinuousToDiscreteMenu.IsEnabled = false;
+            control.convertAnnoToSignalMenu.IsEnabled = false;
+            control.exportMenu.IsEnabled = false;            
+
             AnnoTier a = AnnoTierStatic.Selected;
             if (a != null)
             {
-                if (a.isDiscreteOrFree)
+                if (!a.IsDiscreteOrFree)
                 {
-                    control.exportAnnoContinuousToDiscreteMenu.IsEnabled = false;
-                    control.exportAnnoToSignalMenu.IsEnabled = false;
+                    control.convertAnnoContinuousToDiscreteMenu.IsEnabled = true;
+                    control.convertAnnoToSignalMenu.IsEnabled = true;
                 }
-                else if (!a.isDiscreteOrFree)
-                {
-                    control.exportAnnoContinuousToDiscreteMenu.IsEnabled = true;
-                    control.exportAnnoToSignalMenu.IsEnabled = true;
-                }
-
                 control.saveAnnoMenu.IsEnabled = true;
+                control.saveAnnoMenuAs.IsEnabled = true;
+                control.exportMenu.IsEnabled = true;
             }
         }
 

@@ -6,12 +6,12 @@ using System.Windows.Media;
 
 namespace ssi
 {
-    public class AnnoTierLabel : TextBlock
+    public class AnnoTierSegment : TextBlock
     {
         public const int RESIZE_OFFSET = 5;
         public const int MIN_WIDTH = 2;
         public const string CONFBRUSH = "HatchBrush";
-        private PatternBrushes res = new PatternBrushes();
+        private PatternBrushes patternBrushes = new PatternBrushes();
 
         public bool isSelected;
         public bool isResizeableRight;
@@ -32,7 +32,7 @@ namespace ssi
             get { return tier; }
         }
 
-        public AnnoTierLabel(AnnoListItem item, AnnoTier tier)
+        public AnnoTierSegment(AnnoListItem item, AnnoTier tier)
         {
             this.tier = tier;
             this.item = item;
@@ -136,7 +136,7 @@ namespace ssi
                 this.Background = new SolidColorBrush(item.Color);
                 if (item.Confidence < Properties.Settings.Default.UncertaintyLevel)
                 {
-                    VisualBrush vb = (System.Windows.Media.VisualBrush)res.Resources[CONFBRUSH];
+                    VisualBrush vb = (System.Windows.Media.VisualBrush)patternBrushes.Resources[CONFBRUSH];
                     this.Background = vb;
                 }
 

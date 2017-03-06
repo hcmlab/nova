@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ssi
 {
@@ -23,21 +24,21 @@ namespace ssi
         public TimeRangeSlider()
         {
             InitializeComponent();
+                       
+            slider.RangeStart = 0;
+            slider.RangeStop = 100000;
+            slider.RangeStartSelected = 0;
+            slider.RangeStopSelected = 100000;
+            slider.MinRange = 1;
 
-            ui.RangeStart = 0;
-            ui.RangeStop = 100000;
-            ui.RangeStartSelected = 0;
-            ui.RangeStopSelected = 100000;
-            ui.MinRange = 1;
-
-            ui.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(OnMouseDoubleClick);
-            ui.PreviewMouseUp += (sender, args) => Update();
-            ui.PreviewMouseMove += (sender, args) => MouseMove();
+            slider.MouseDoubleClick += new MouseButtonEventHandler(OnMouseDoubleClick);
+            slider.PreviewMouseUp += (sender, args) => Update();
+            slider.PreviewMouseMove += (sender, args) => MouseMove();
         }
 
-        private void OnMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ui.SetSelectedRange(ui.RangeStart, ui.RangeStop);
+            slider.SetSelectedRange(slider.RangeStart, slider.RangeStop);
         }
 
         public new void MouseMove()
@@ -55,17 +56,17 @@ namespace ssi
                
                 //seens to be a bug in avalon lib.try to fix it by adjusting the value
 
-                if (ui.RangeStartSelected > ui.RangeStop) ui.RangeStartSelected = ui.RangeStop;
-                if (ui.RangeStopSelected > ui.RangeStop) ui.RangeStopSelected = ui.RangeStop;
-                if (ui.RangeStartSelected < ui.RangeStart) ui.RangeStartSelected = ui.RangeStart;
-                if (ui.RangeStopSelected < ui.RangeStart) ui.RangeStopSelected = ui.RangeStart;
-                if (ui.RangeStopSelected < ui.RangeStartSelected + 1)
+                if (slider.RangeStartSelected > slider.RangeStop) slider.RangeStartSelected = slider.RangeStop;
+                if (slider.RangeStopSelected > slider.RangeStop) slider.RangeStopSelected = slider.RangeStop;
+                if (slider.RangeStartSelected < slider.RangeStart) slider.RangeStartSelected = slider.RangeStart;
+                if (slider.RangeStopSelected < slider.RangeStart) slider.RangeStopSelected = slider.RangeStart;
+                if (slider.RangeStopSelected < slider.RangeStartSelected + 1)
                 {
-                    ui.RangeStartSelected = ui.RangeStopSelected - 1;
+                    slider.RangeStartSelected = slider.RangeStopSelected - 1;
                 }
 
-                MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
-                MainHandler.Time.SelectionStop = MainHandler.Time.TotalDuration * ((double)ui.RangeStopSelected / (double)ui.RangeStop);
+                MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)slider.RangeStartSelected / (double)slider.RangeStop);
+                MainHandler.Time.SelectionStop = MainHandler.Time.TotalDuration * ((double)slider.RangeStopSelected / (double)slider.RangeStop);
 
                 if (MainHandler.Time.SelectionStart < 0) MainHandler.Time.SelectionStart = 0;
                 if (MainHandler.Time.SelectionStop - MainHandler.Time.SelectionStart < min)
@@ -79,8 +80,8 @@ namespace ssi
                     {
                         if (MainHandler.Time.TotalDuration > 0)
                         {
-                            ui.RangeStartSelected = ((long)MainHandler.Time.SelectionStart * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
-                            ui.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
+                            slider.RangeStartSelected = ((long)MainHandler.Time.SelectionStart * slider.RangeStop) / (long)MainHandler.Time.TotalDuration;
+                            slider.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * slider.RangeStop) / (long)MainHandler.Time.TotalDuration;
                         }
                     }
                 }
@@ -98,12 +99,12 @@ namespace ssi
             if (MainHandler.Time != null)
             {
                 MainHandler.Time.SelectionStart = 0;
-                ui.RangeStartSelected = 0;
+                slider.RangeStartSelected = 0;
                 //seems to be a bug in avalon lib.try to fix it by adjusting the value
 
-                MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)ui.RangeStartSelected / (double)ui.RangeStop);
+                MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)slider.RangeStartSelected / (double)slider.RangeStop);
                 MainHandler.Time.SelectionStop = MainHandler.Time.SelectionStart + duration;
-                ui.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
+                slider.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * slider.RangeStop) / (long)MainHandler.Time.TotalDuration;
 
                 if (MainHandler.Time.SelectionStart < 0) MainHandler.Time.SelectionStart = 0;
                 if (MainHandler.Time.SelectionStop - MainHandler.Time.SelectionStart < min)
@@ -117,8 +118,8 @@ namespace ssi
                     {
                         if (MainHandler.Time.TotalDuration > 0)
                         {
-                            ui.RangeStartSelected = ((long)MainHandler.Time.SelectionStart * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
-                            ui.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * ui.RangeStop) / (long)MainHandler.Time.TotalDuration;
+                            slider.RangeStartSelected = ((long)MainHandler.Time.SelectionStart * slider.RangeStop) / (long)MainHandler.Time.TotalDuration;
+                            slider.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * slider.RangeStop) / (long)MainHandler.Time.TotalDuration;
                         }
                     }
                 }
@@ -138,24 +139,24 @@ namespace ssi
                 return;
             }
 
-            var range = ui.RangeStopSelected - ui.RangeStartSelected;
+            var range = slider.RangeStopSelected - slider.RangeStartSelected;
 
             double step = range * moveWindowPercentage + 0.5;
             var moveStep = (long)Math.Max(1, step);
 
             if (moveRight)
             {
-                var effectiveStep = Math.Min(moveStep, ui.RangeStop - ui.RangeStopSelected); // do not change selection range on border conditions
+                var effectiveStep = Math.Min(moveStep, slider.RangeStop - slider.RangeStopSelected); // do not change selection range on border conditions
 
-                ui.RangeStopSelected += effectiveStep;
-                ui.RangeStartSelected += effectiveStep;
+                slider.RangeStopSelected += effectiveStep;
+                slider.RangeStartSelected += effectiveStep;
             }
             else
             {
-                var effectiveStep = Math.Min(moveStep, ui.RangeStartSelected - ui.RangeStart); // do not change selection range on border conditions
+                var effectiveStep = Math.Min(moveStep, slider.RangeStartSelected - slider.RangeStart); // do not change selection range on border conditions
 
-                ui.RangeStartSelected -= effectiveStep;
-                ui.RangeStopSelected -= effectiveStep;
+                slider.RangeStartSelected -= effectiveStep;
+                slider.RangeStopSelected -= effectiveStep;
             }
 
             Update();

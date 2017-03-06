@@ -24,8 +24,8 @@ namespace ssi
             items = new ObservableCollection<AnnotationSchemeSegment>();
             LabelsListBox.ItemsSource = items;
 
-            backroundColorPicket.SelectedColor = Colors.LightYellow;
-            schemeNameTextField.Text = "Noname";            
+            backroundColorPicket.SelectedColor = Defaults.Colors.Background;
+            schemeNameTextField.Text = Defaults.Strings.Unkown;            
         }
 
         private void AddLabel_Click(object sender, RoutedEventArgs e)
@@ -63,7 +63,7 @@ namespace ssi
             AnnoList list = new AnnoList();
             list.Scheme.Type = AnnoScheme.TYPE.DISCRETE;
             list.Scheme.MinOrBackColor = backroundColorPicket.SelectedColor.Value;            
-            list.Scheme.Name = schemeNameTextField.Text == "" ? "Noname" : schemeNameTextField.Text;
+            list.Scheme.Name = schemeNameTextField.Text == "" ? Defaults.Strings.Unkown : schemeNameTextField.Text;
 
             foreach (AnnotationSchemeSegment a in LabelsListBox.Items)
             {

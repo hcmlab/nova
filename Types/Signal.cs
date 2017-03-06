@@ -84,9 +84,9 @@ namespace ssi
         private String fileName = null;
         private String filePath = null;
         private bool isAudio = false;
-        private uint showDim = 0;
+        private int showDim = 0;
 
-        public uint ShowDim
+        public int ShowDim
         {
             get { return showDim; }
             set

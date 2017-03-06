@@ -9,28 +9,29 @@ namespace ssi
     /// </summary>
     public partial class AnnoTierControl : UserControl
     {
-        public double currenttime = 0;
+        public double currentTime = 0;
 
         public AnnoTierControl()
         {
             InitializeComponent();
         }
 
-        public void clear()
+        public void Clear()
         {
-            this.annoTrackGrid.RowDefinitions.Clear();
-            this.annoTrackGrid.Children.Clear();
+            annoTierGrid.RowDefinitions.Clear();
+            annoTierGrid.Children.Clear();
         }
 
-        public AnnoTier addAnnoTier(AnnoList anno)
+        public void Add(AnnoTier tier)
         {
-            if (this.annoTrackGrid.RowDefinitions.Count > 0)
+            if (annoTierGrid.RowDefinitions.Count > 0)
             {
                 // add splitter
                 RowDefinition split_row = new RowDefinition();
                 split_row.Height = new GridLength(1, GridUnitType.Auto);
-                this.annoTrackGrid.RowDefinitions.Add(split_row);
+                annoTierGrid.RowDefinitions.Add(split_row);
                 GridSplitter splitter = new GridSplitter();
+                splitter.Background = Defaults.Brushes.Conceal;
                 splitter.ResizeDirection = GridResizeDirection.Rows;
                 splitter.Height = 3;
                 splitter.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -38,41 +39,35 @@ namespace ssi
                 splitter.ShowsPreview = true;
                 Grid.SetColumnSpan(splitter, 1);
                 Grid.SetColumn(splitter, 0);
-                Grid.SetRow(splitter, this.annoTrackGrid.RowDefinitions.Count - 1);
-                this.annoTrackGrid.Children.Add(splitter);
+                Grid.SetRow(splitter, annoTierGrid.RowDefinitions.Count - 1);
+                annoTierGrid.Children.Add(splitter);
             }
 
-            // add anno track
+            // add anno tier
             RowDefinition row = new RowDefinition();
             row.Height = new GridLength(1, GridUnitType.Star);
-            this.annoTrackGrid.RowDefinitions.Add(row);
-            if (anno.Scheme.MinOrBackColor == Colors.Transparent)
-            {
-                anno.Scheme.MinOrBackColor = selectColor(this.annoTrackGrid.RowDefinitions.Count - 1);
-            }
-            AnnoTier tier = new AnnoTier(anno);
+            annoTierGrid.RowDefinitions.Add(row);
 
-            Grid.SetColumn(tier, 0);
-            Grid.SetRow(tier, this.annoTrackGrid.RowDefinitions.Count - 1);
-          
-            this.annoTrackGrid.Children.Add(tier);
+            Border border = new Border();
+            border.BorderThickness = new Thickness(7, 0, 0, 0);
+            border.BorderBrush = Defaults.Brushes.Conceal;
+            border.Child = tier;
 
-            return tier;
+            Grid.SetColumn(border, 0);
+            Grid.SetRow(border, annoTierGrid.RowDefinitions.Count - 1);
+            annoTierGrid.Children.Add(border);
+
+            tier.Border = border;
         }
 
-        //Default Color Scheme
-        private Color selectColor(int index)
+        public void Remove(AnnoTier tier)
         {
-            index = index / 2;
-            if (index % 8 == 0) return Colors.Khaki;
-            else if (index % 8 == 1) return Colors.SkyBlue;
-            else if (index % 8 == 2) return Colors.YellowGreen;
-            else if (index % 8 == 3) return Colors.Tomato;
-            else if (index % 8 == 4) return Colors.RosyBrown;
-            else if (index % 8 == 5) return Colors.Goldenrod;
-            else if (index % 8 == 6) return Colors.LightSeaGreen;
-            else if (index % 8 == 7) return Colors.LightGray;
-            else return Colors.AliceBlue;
+            annoTierGrid.RowDefinitions[Grid.GetRow(tier)].Height = new GridLength(0);
+            if (annoTierGrid.Children.IndexOf(tier) > 0)
+            {
+                annoTierGrid.Children.RemoveAt(annoTierGrid.Children.IndexOf(tier) - 1);
+                annoTierGrid.Children.RemoveAt(annoTierGrid.Children.IndexOf(tier));
+            }
         }
     }
 }

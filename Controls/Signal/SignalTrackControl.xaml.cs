@@ -5,30 +5,8 @@ using System.Windows.Media;
 
 namespace ssi
 {
-    public class SignalRemoveEventArgs : EventArgs
-    {
-        private readonly SignalTrack signalTrack;
-
-        public SignalRemoveEventArgs(SignalTrack signalTrack)
-        {
-            this.signalTrack = signalTrack;
-        }
-
-        public SignalTrack SignalTrack
-        {
-            get { return signalTrack; }
-        }
-    }
-
     public partial class SignalTrackControl : UserControl
     {
-        public event EventHandler<SignalRemoveEventArgs> RemoveSignal;
-
-        protected virtual void OnRemoveSignal(SignalTrack signal)
-        {
-            RemoveSignal?.Invoke(this, new SignalRemoveEventArgs(signal));
-        }
-
         public SignalTrackControl()
         {
             InitializeComponent();
@@ -36,111 +14,58 @@ namespace ssi
 
         public void Clear()
         {
-            try
-            {
-                signalTrackGrid.Children.Clear();
-                signalTrackGrid.RowDefinitions.Clear();
-            }
-            catch { }
+            signalTrackGrid.Children.Clear();
+            signalTrackGrid.RowDefinitions.Clear();
         }
 
-        public ISignalTrack AddSignalTrack(Signal signal, string color, string background)
+        public void Add(SignalTrack track, Color signalColor, Color backgroundColor)
         {
-            if (this.signalTrackGrid.Children.Count > 0)
+            if (signalTrackGrid.Children.Count > 0)
             {
-                // add splitter
+                RowDefinition split_row = new RowDefinition();
+                split_row.Height = new GridLength(1, GridUnitType.Auto);
+                signalTrackGrid.RowDefinitions.Add(split_row);
                 GridSplitter splitter = new GridSplitter();
+                splitter.Background = Defaults.Brushes.Conceal;
                 splitter.ResizeDirection = GridResizeDirection.Rows;
                 splitter.Height = 3;
                 splitter.HorizontalAlignment = HorizontalAlignment.Stretch;
                 splitter.VerticalAlignment = VerticalAlignment.Stretch;
                 splitter.ShowsPreview = true;
-                this.signalTrackGrid.Children.Add(splitter);
+                Grid.SetColumnSpan(splitter, 1);
+                Grid.SetColumn(splitter, 0);
+                Grid.SetRow(splitter, signalTrackGrid.RowDefinitions.Count - 1);
+                signalTrackGrid.Children.Add(splitter);
             }
 
             // add signal track
-            SignalTrack track = new SignalTrack(signal);
-            track.SignalColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
+            RowDefinition row = new RowDefinition();
+            row.Height = new GridLength(1, GridUnitType.Star);
+            signalTrackGrid.RowDefinitions.Add(row);
+            
+            track.SignalColor = signalColor;
+            track.BackgroundColor = backgroundColor;
 
-            //track.BackgroundColor = SystemColors.ActiveBorderBrush;
-            track.BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(background));
+            Border border = new Border();                        
+            border.BorderThickness = new Thickness(7,0,0,0);
+            border.BorderBrush = Defaults.Brushes.Highlight;
+            border.Child = track;           
 
-            SignalTrackEx trackex = new SignalTrackEx();
-            trackex.CloseButton.Click += RemoveTrack;
-            trackex.AddTrack(track);
-            trackex.SignalColor = track.SignalColor.Color;
-            trackex.BackColor = track.BackgroundColor.Color;
+            Grid.SetColumn(border, 0);
+            Grid.SetRow(border, signalTrackGrid.RowDefinitions.Count - 1);
+            signalTrackGrid.Children.Add(border);
 
-            this.signalTrackGrid.Children.Add(trackex);
+            track.Border = border;
+        }        
 
-            this.signalTrackGrid.RowDefinitions.Clear();
-            foreach (UIElement ui in this.signalTrackGrid.Children)
-            {
-                if (ui is GridSplitter)
-                {
-                    RowDefinition split_row = new RowDefinition();
-                    split_row.Height = new GridLength(1, GridUnitType.Auto);
-                    this.signalTrackGrid.RowDefinitions.Add(split_row);
-                    Grid.SetRow(ui, this.signalTrackGrid.RowDefinitions.Count - 1);
-                    Grid.SetColumnSpan(track, 2);
-                }
-                else if (ui is SignalTrackEx)
-                {
-                    RowDefinition track_row = new RowDefinition();
-
-                    track_row.Height = new GridLength(1, GridUnitType.Star);
-                    this.signalTrackGrid.RowDefinitions.Add(track_row);
-                    Grid.SetRow(ui, this.signalTrackGrid.RowDefinitions.Count - 1);
-                    Grid.SetColumnSpan(track, 2);
-                }
-            }
-
-            return track;
-        }
-
-        private void RemoveTrack(object sender, RoutedEventArgs e)
+        public void Remove(SignalTrack track)
         {
-            SignalTrackEx trackex = GetAncestorOfType<SignalTrackEx>(sender as Button);
-            trackex.RemoveTrack(trackex.signaltrack);
-            GridSplitter splitter = null;
-
-            if (this.signalTrackGrid.Children.IndexOf(trackex) < this.signalTrackGrid.Children.Count - 1)
+            signalTrackGrid.RowDefinitions[Grid.GetRow(track.Border)].Height = new GridLength(0);
+            if (signalTrackGrid.Children.IndexOf(track.Border) > 0)
             {
-                splitter = (GridSplitter)this.signalTrackGrid.Children[this.signalTrackGrid.Children.IndexOf(trackex) + 1];
-                this.signalTrackGrid.Children.Remove(splitter);
+                signalTrackGrid.Children.RemoveAt(signalTrackGrid.Children.IndexOf(track.Border) - 1);
+                signalTrackGrid.Children.RemoveAt(signalTrackGrid.Children.IndexOf(track.Border));
             }
-
-            this.signalTrackGrid.Children.Remove(trackex);
-
-            this.signalTrackGrid.RowDefinitions.Clear();
-            foreach (UIElement ui in this.signalTrackGrid.Children)
-            {
-                if (ui is GridSplitter)
-                {
-                    RowDefinition split_row = new RowDefinition();
-                    split_row.Height = new GridLength(1, GridUnitType.Auto);
-                    this.signalTrackGrid.RowDefinitions.Add(split_row);
-                    Grid.SetRow(ui, this.signalTrackGrid.RowDefinitions.Count - 1);
-                }
-                else if (ui is SignalTrackEx)
-                {
-                    RowDefinition track_row = new RowDefinition();
-                    track_row.Height = new GridLength(1, GridUnitType.Star);
-                    this.signalTrackGrid.RowDefinitions.Add(track_row);
-                    Grid.SetRow(ui, this.signalTrackGrid.RowDefinitions.Count - 1);
-                }
-            }
-
-            //We tell the viewhandler here to remove the track. this is only important for the project file.
-            OnRemoveSignal(trackex.signaltrack);
-        }
-
-        public T GetAncestorOfType<T>(FrameworkElement child) where T : FrameworkElement
-        {
-            var parent = VisualTreeHelper.GetParent(child);
-            if (parent != null && !(parent is T))
-                return (T)GetAncestorOfType<T>((FrameworkElement)parent);
-            return (T)parent;
         }
     }
 }

@@ -57,7 +57,7 @@ namespace ssi
 
                 for (int i = 0; i < roles.Count; i++)
                 {
-                    if ((roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db || (roles[i]["role"].ToString() == "userAdminAnyDatabase"  || roles[i]["role"].ToString() == "dbAdminAnyDatabase")) && auth <= 4) { auth = 4; }
+                    if ((roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db || (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "dbAdminAnyDatabase")) && auth <= 4) { auth = 4; }
                     else if ((roles[i]["role"].ToString() == "dbAdmin" && roles[i]["db"] == db) && auth <= 3) { auth = 3; }
                     else if ((roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db) && auth <= 2) { auth = 2; }
                     else if ((roles[i]["role"].ToString() == "readAnyDatabase") && auth <= 1) { auth = 1; }
@@ -66,9 +66,9 @@ namespace ssi
                     //edit/add more roles if you want to change security levels
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                
+
             }
 
             return auth;
@@ -111,7 +111,7 @@ namespace ssi
                 if (document["isValid"].AsBoolean == true) roles.Add(document["name"].ToString());
             }
 
-           
+
             int auth = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
             bool hasauth = false;
             if (auth > 3) hasauth = true;
@@ -143,10 +143,10 @@ namespace ssi
 
             foreach (var document in sessions)
             {
-                if (document["isValid"].AsBoolean == true) 
+                if (document["isValid"].AsBoolean == true)
                 {
                     if ((annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE && document["type"].ToString() == "DISCRETE")) AnnotationSchemes.Add(document["name"].ToString());
-                    else if  (annoList.Scheme.Type == AnnoScheme.TYPE.FREE && (document["type"].ToString() == "FREE")) AnnotationSchemes.Add(document["name"].ToString());
+                    else if (annoList.Scheme.Type == AnnoScheme.TYPE.FREE && (document["type"].ToString() == "FREE")) AnnotationSchemes.Add(document["name"].ToString());
                     else if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && document["type"].ToString() == "CONTINUOUS") AnnotationSchemes.Add(document["name"].ToString());
                 }
             }
@@ -156,7 +156,7 @@ namespace ssi
             if (auth > 2) hasauth = true;
 
             string name = "New tier";
-            if(annoList != null) name = annoList.Scheme.Name;
+            if (annoList != null) name = annoList.Scheme.Name;
 
             DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(AnnotationSchemes, hasauth, "Tier: " + name + ". What is annotated? ", DatabaseDefinitionCollections.Schemes, true, annoList);
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
@@ -186,7 +186,7 @@ namespace ssi
             {
                 annoSchemeDocument = annoSchemes.Find(annoSchemeFilter).Single();
                 if (annoSchemeDocument["type"].ToString() == annoType.ToString())
-                { 
+                {
                     scheme.Name = annoSchemeDocument["name"].ToString();
                     if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                     {
@@ -230,11 +230,11 @@ namespace ssi
                     }
                 }
             }
-            catch(Exception ex)
-            {   
-                MessageTools.Warning(ex.ToString());            
+            catch (Exception ex)
+            {
+                MessageTools.Warning(ex.ToString());
             }
-           
+
             return scheme;
         }
 
@@ -483,7 +483,7 @@ namespace ssi
             UpdateOptions uo = new UpdateOptions();
             uo.IsUpsert = true;
 
-          
+
 
             bool islocked = false;
             try
@@ -499,8 +499,8 @@ namespace ssi
                 var check = annotations.Find(filter2).ToList();
                 if (check.Count > 0 && Properties.Settings.Default.DatabaseAskBeforeOverwrite && originalAnnotator != Properties.Settings.Default.MongoDBUser)
                 {
-                   MessageBoxResult mbres =  MessageBox.Show("Annotation #" + annoList.Meta.Role+ " #" + annoList.Scheme.Name + " #" +
-                       annoList.Meta.AnnotatorFullName + " already exists, do you want to overwrite it?", "Attention", MessageBoxButton.YesNo);
+                    MessageBoxResult mbres = MessageBox.Show("Annotation #" + annoList.Meta.Role + " #" + annoList.Scheme.Name + " #" +
+                        annoList.Meta.AnnotatorFullName + " already exists, do you want to overwrite it?", "Attention", MessageBoxButton.YesNo);
 
                     if (mbres == MessageBoxResult.Yes)
                     {
@@ -513,10 +513,11 @@ namespace ssi
 
                 var result = annotations.ReplaceOne(filter2, document, uo);
             }
-            else {
+            else
+            {
                 MessageBox.Show("Annotaion is locked and therefore can't be overwritten");
-                    return null;
-                    };
+                return null;
+            };
 
 
             return annotator;
@@ -731,7 +732,7 @@ namespace ssi
         public bool IsFinished { get; set; }
 
         public bool IsLocked { get; set; }
-        
+
         public bool IsOwner { get; set; }
 
         public string Date { get; set; }
@@ -778,6 +779,6 @@ namespace ssi
         public static string Streams = "Media";
         public static string StreamTypes = "MediaTypes";
         public static string Schemes = "AnnotationSchemes";
-        
+
     }
 }

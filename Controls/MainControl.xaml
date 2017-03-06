@@ -27,9 +27,10 @@
             </MenuItem>
             <MenuItem Header="Tier" Name="tierMenu">
                 <MenuItem Header="Save selected tier" Name="saveAnnoMenu" IsEnabled="False" />
-                <MenuItem Header="Convert to discrete" Name="exportAnnoContinuousToDiscreteMenu" IsEnabled="False" />
-                <MenuItem Header="Convert to stream" Name="exportAnnoToSignalMenu" IsEnabled="False" />
-                <MenuItem Header="Export" Name="export">
+                <MenuItem Header="Save selected tier as" Name="saveAnnoMenuAs" IsEnabled="False" />
+                <MenuItem Header="Convert to discrete" Name="convertAnnoContinuousToDiscreteMenu" IsEnabled="False" />
+                <MenuItem Header="Convert to stream" Name="convertAnnoToSignalMenu" IsEnabled="False" />
+                <MenuItem Header="Export" Name="exportMenu">
                     <MenuItem Header="Export to CSV" Name="exportAnnoToCSVMenu" IsEnabled="True" />
                     <MenuItem Header="Export to XPS" Name="exportTierToXPSMenu" IsEnabled="True" />
                     <MenuItem Header="Export to PNG" Name="exportTierToPNGMenu" IsEnabled="True" />
@@ -106,7 +107,7 @@
                     Grid.Column="0"
                     Grid.RowSpan="1"
                     Grid.Row="1"
-                    Height="3"
+                    Height="6"
                     Width="Auto"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
@@ -118,11 +119,19 @@
                 </Border>
             </Grid>
 
-            <GridSplitter ResizeDirection="Columns" Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="0" Height="Auto" Width="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0">
+            <GridSplitter 
+                ResizeDirection="Columns"
+                Grid.Column="1"
+                Grid.ColumnSpan="1" 
+                Grid.Row="0" 
+                Height="Auto"
+                Width="6"
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Stretch" 
+                Margin="0">
             </GridSplitter>
 
             <Grid Grid.Column="2" Grid.Row="0">
-
 
                 <AdornerDecorator Name="signalAndAnnoControl">
 
@@ -138,11 +147,12 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="150" />
+                            <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <Grid Grid.Column="0" Grid.Row="0">
+                        <Grid Grid.Column="0" 
+                              Grid.Row="0">
 
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -152,26 +162,43 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <StatusBar Grid.Column="0" Grid.Row="0" Margin="0" Background="Transparent">
+                            <StatusBar Name="signalStatusBar"
+                                Grid.Column="0"
+                                Grid.Row="0">
 
-                                <TextBlock Name="signalNameLabel" TextTrimming="WordEllipsis"></TextBlock>
+                                <Button Name="signalStatusSettingsButton" Background="Transparent" BorderBrush="Transparent">
+                                    <Image Source="/Resources/settings.png" Width="16"></Image>
+                                </Button>
+                                <TextBlock Name="signalStatusFileNameLabel" TextTrimming="WordEllipsis"></TextBlock>
                                 <Separator />
-                                <TextBlock Name="signalSrLabel" ToolTip="The sample rate in Hz of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
+                                <TextBlock Name="signalStatusSrLabel" ToolTip="The sample rate in Hz of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
                                 <Separator />
-                                <TextBlock Name="signalDimLabel" ToolTip="The sample dimension of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
+                                <ComboBox Name="signalStatusDimComboBox" Width="Auto" Height="20" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                <TextBlock Name="signalStatusDimLabel" ToolTip="The sample dimension of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
                                 <Separator />
-                                <TextBlock Name="signalBytesLabel" ToolTip="The sample bytes of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
+                                <TextBlock Name="signalStatusBytesLabel" ToolTip="The sample bytes of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
                                 <Separator />
-                                <TextBlock Name="signalTypeLabel" ToolTip="The sample type of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
+                                <TextBlock Name="signalStatusTypeLabel" ToolTip="The sample type of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
                                 <Separator />
-                                <TextBlock Name="signalValueMinLabel" ToolTip="The min Value of the Signal" TextTrimming="WordEllipsis"></TextBlock>
+                                <TextBlock Name="signalStatusValueMinLabel" ToolTip="The min Value of the Signal" TextTrimming="WordEllipsis"></TextBlock>
                                 <Separator />
-                                <TextBlock Name="signalValueMaxLabel" ToolTip="The max Value of the Signal" TextTrimming="WordEllipsis"></TextBlock>
+                                <TextBlock Name="signalStatusValueMaxLabel" ToolTip="The max Value of the Signal" TextTrimming="WordEllipsis"></TextBlock>
                                 <Separator />
-                                <TextBlock Name="signalValueLabel" ToolTip="The current sample value of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
+                                <TextBlock Name="signalStatusValueLabel" ToolTip="The current sample value of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
 
                                 <StatusBarItem HorizontalContentAlignment="Right">
-                                    <TextBlock Name="signalPositionLabel" TextTrimming="WordEllipsis">00:00:00</TextBlock>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Name="signalStatusPositionLabel" 
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="WordEllipsis">00:00:00.00</TextBlock>
+                                        <Label></Label>
+                                        <Button Name="signalStatusCloseButton" 
+                                                Content="X" 
+                                                HorizontalAlignment="Right" 
+                                                Background="Transparent" 
+                                                BorderBrush="Transparent" 
+                                                ToolTip="Close selected signal track"/>
+                                    </StackPanel>
                                 </StatusBarItem>
                             </StatusBar>
 
@@ -194,45 +221,78 @@
                                         ShowsPreview="True">
                         </GridSplitter>
 
-                        <Grid Grid.Column="0" Grid.Row="2">
+                        <Grid Grid.Column="0" 
+                              Grid.Row="2">
 
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="30*" />
-                                <ColumnDefinition Width="20*" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <StatusBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Background="Transparent">
+                            <StatusBar Name="annoStatusBar"
+                                Grid.Column="0" 
+                                Grid.Row="0">
 
-                                <Button Name="annoNameLabel" Background="Transparent" BorderBrush="Transparent">#NoTier</Button>
+                                <Button Name="annoStatusSettingsButton" Background="Transparent" BorderBrush="Transparent">
+                                    <Image Source="/Resources/settings.png" Width="16"></Image>
+                                </Button>
+                                <TextBlock Name="annoStatusFileNameOrSessionLabel" TextTrimming="WordEllipsis"></TextBlock>
+                                <Separator />
+                                <TextBlock Name="annoStatusSchemeNameLabel" ToolTip="Name of the scheme" TextTrimming="WordEllipsis"></TextBlock>
+                                <Separator />
+                                <TextBlock Name="annoStatusSchemeTypeLabel" ToolTip="The scheme type" TextTrimming="WordEllipsis"></TextBlock>
+                                <StatusBar Name="annoStatusSchemeContinuousPanel" Background="Transparent">
+                                    <Separator />
+                                    <TextBlock Name="annoSchemeContinuousSrLabel" ToolTip="Sample rate in Hz" TextTrimming="WordEllipsis"></TextBlock>
+                                    <Separator />
+                                    <TextBlock Name="annoSchemeContinuousMinLabel" ToolTip="Minimum score value" TextTrimming="WordEllipsis"></TextBlock>
+                                    <Separator />
+                                    <TextBlock Name="annoSchemeContinuousMaxLabel" ToolTip="Maximum score value" TextTrimming="WordEllipsis"></TextBlock>
+                                </StatusBar>
+                                <Separator />
+                                <TextBlock Name="annoStatusAnnotatorLabel" ToolTip="Name of the annotator" TextTrimming="WordEllipsis"></TextBlock>
+                                <Separator />
+                                <TextBlock Name="annoStatusRoleLabel" ToolTip="Name of the role that is annotated" TextTrimming="WordEllipsis"></TextBlock>
 
                                 <StatusBarItem HorizontalContentAlignment="Right">
-                                    <StackPanel Orientation="Horizontal" Width="82">
-                                        <TextBlock Name="annoPositionLabel" VerticalAlignment="Center">00:00:00.00</TextBlock>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Name="annoStatusPositionLabel" 
+                                                   VerticalAlignment="Center" 
+                                                   TextTrimming="WordEllipsis">00:00:00.00</TextBlock>
                                         <Label></Label>
-                                        <Button x:Name="closeAnnoTierButton" Content="X" HorizontalAlignment="Right" Background="Transparent" BorderBrush="Transparent" />
+                                        <Button Name="annoStatusCloseButton" 
+                                                Content="X" 
+                                                HorizontalAlignment="Right" 
+                                                Background="Transparent" 
+                                                BorderBrush="Transparent"
+                                                ToolTip="Close selected annotation tier"/>
                                     </StackPanel>
                                 </StatusBarItem>
+                                
                             </StatusBar>
 
-                            <Border Grid.Column="0" Grid.Row="1" BorderThickness="0" Grid.ColumnSpan="2">
+                            <Border Grid.Column="0"
+                                    Grid.Row="1"
+                                    BorderThickness="0">
                                 <local:AnnoTierControl
-                                    x:Name="annoTrackControl"
+                                    x:Name="annoTierControl"
                                     Width="Auto"
                                     Height="Auto"
                                     Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Stretch" />
                             </Border>
+                            
                         </Grid>
 
                         <Border Grid.Column="0" Grid.Row="3">
                             <local:TimeTrackControl x:Name="timeLineControl" />
                         </Border>
                     </Grid>
+                    
                 </AdornerDecorator>
 
             </Grid>

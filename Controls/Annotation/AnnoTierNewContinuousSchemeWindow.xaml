@@ -22,26 +22,30 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Label Grid.Column="0" Grid.Row="0" >Sample rate (Hz)</Label>
-        <TextBox Name="srTextBox" Grid.Column="1" Grid.Row="0" x:FieldModifier="public" Margin="5"/>
+        <Label Grid.Column="0" Grid.Row="0" >Scheme name</Label>
+        <TextBox Name="nameTextBox" Grid.Column="1" Grid.Row="0" Margin="5"/>
+
+        <Label Grid.Column="0" Grid.Row="1" >Sample rate (Hz)</Label>
+        <TextBox Name="srTextBox" Grid.Column="1" Grid.Row="1" Margin="5"/>
         
-        <Label Grid.Column="0" Grid.Row="1" >Minimum score</Label>
-        <TextBox Name="minTextBox" Grid.Column="1" Grid.Row="1" x:FieldModifier="public" Margin="5"/>
+        <Label Grid.Column="0" Grid.Row="2" >Minimum score</Label>
+        <TextBox Name="minTextBox" Grid.Column="1" Grid.Row="2" Margin="5"/>
         
-        <Label Grid.Column="0" Grid.Row="2" >Maximum score</Label>
-        <TextBox Name="maxTextBox" Grid.Column="1" Grid.Row="2" x:FieldModifier="public" Margin="5" />
-        <Label Grid.Column="0" Grid.Row="3" >Background</Label>
+        <Label Grid.Column="0" Grid.Row="3" >Maximum score</Label>
+        <TextBox Name="maxTextBox" Grid.Column="1" Grid.Row="3" Margin="5" />
+        <Label Grid.Column="0" Grid.Row="4" >Background</Label>
         
-        <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal">
+        <StackPanel Grid.Column="1" Grid.Row="4" Orientation="Horizontal">
             <Label>Min=</Label>
-            <p:ColorPicker Name="colorPickerMin" Grid.Column="2" Width="40" Margin="0,0,5,5" BorderBrush="Transparent" Background="Transparent"/>
+            <p:ColorPicker Name="colorPickerMin" Grid.Column="2" Width="40" Margin="0,0,5,5" BorderBrush="DarkGray" Background="Transparent"/>
             <Label>Max=</Label>
-            <p:ColorPicker Name="colorPickerMax" Grid.Column="2" Width="40" Margin="0,0,5,5" BorderBrush="Transparent" Background="Transparent"/>
+            <p:ColorPicker Name="colorPickerMax" Grid.Column="2" Width="40" Margin="0,0,5,5" BorderBrush="DarkGray" Background="Transparent"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="4" Grid.ColumnSpan="2"  HorizontalAlignment="Right" Orientation="Horizontal" >
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal" >
             <Button Margin="5" Width="60" Height="25" Click="okButton_Click">OK</Button>
             <Button Margin="5" Width="60" Height="25" Click="cancelButton_Click">Cancel</Button>
         </StackPanel>
