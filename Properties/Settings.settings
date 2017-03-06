@@ -102,7 +102,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="LastUpdateCheckDate" Type="System.DateTime" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">1979-01-01</Value>
     </Setting>
   </Settings>
 </SettingsFile>
