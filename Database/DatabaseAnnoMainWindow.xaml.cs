@@ -63,6 +63,9 @@ namespace ssi
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
             Properties.Settings.Default.Save();
 
+
+            mongo = DatabaseHandler.Client;
+
             try
             {
                 int count = 0;
@@ -78,6 +81,7 @@ namespace ssi
                 {
                     SelectDatabase();
                     Autologin.IsEnabled = true;
+                    Autologin.IsChecked = true;
                 }
                 else
                 { MessageBox.Show("You have no rights to access the database list");
