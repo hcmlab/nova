@@ -54,7 +54,7 @@ namespace ssi
 
                 foreach (AnnoTier track in annoTiers)
                 {
-                    if (track.AnnoList.Source.HasDatabase() && (track.AnnoList.HasChanged || isfinished))
+                    if ((track.AnnoList.Source.HasDatabase() || !track.AnnoList.Source.HasFile()) && (track.AnnoList.HasChanged || isfinished))
                     {
                         try
                         {
