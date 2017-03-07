@@ -75,6 +75,7 @@ namespace ssi
                 Color color = (Color)ColorConverter.ConvertFromString(dialog.Result("color"));
                 AnnoScheme.Label lcp = new AnnoScheme.Label(name, color);
 
+
                 labelcolors.Add(lcp);
 
                 foreach (AnnoScheme.Label lp in labelcolors)
