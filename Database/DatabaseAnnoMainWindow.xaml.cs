@@ -285,11 +285,11 @@ namespace ssi
             string output = "";
             var builder = Builders<BsonDocument>.Filter;
             var filtera = builder.Eq("_id", reference);
-            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).Single();
+            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
 
-            if (result != null)
+            if (result.Count > 0 && result[0] != null)
             {
-                output = result[attribute].ToString();
+                output = result[0][attribute].ToString();
             }
 
             return output;
