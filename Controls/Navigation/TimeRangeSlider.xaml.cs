@@ -104,7 +104,18 @@ namespace ssi
 
                 MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)slider.RangeStartSelected / (double)slider.RangeStop);
                 MainHandler.Time.SelectionStop = MainHandler.Time.SelectionStart + duration;
-                slider.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * slider.RangeStop) / (long)MainHandler.Time.TotalDuration;
+                //slider.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * slider.RangeStop) / (long)MainHandler.Time.TotalDuration;
+
+
+                double stop = MainHandler.Time.SelectionStop * slider.RangeStop;
+                double dur = MainHandler.Time.TotalDuration;
+                if (dur > 0)
+                {
+                    slider.RangeStopSelected = (uint)Math.Round(stop / dur);
+                }
+
+
+
 
                 if (MainHandler.Time.SelectionStart < 0) MainHandler.Time.SelectionStart = 0;
                 if (MainHandler.Time.SelectionStop - MainHandler.Time.SelectionStart < min)
