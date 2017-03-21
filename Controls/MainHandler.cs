@@ -282,7 +282,10 @@ namespace ssi
                 }
             }
             
+
             DatabaseLoaded = false;
+            showHideGeometricGrid(false,AnnoScheme.TYPE.FREE);
+
             if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
 
             clearSignalInfo();
