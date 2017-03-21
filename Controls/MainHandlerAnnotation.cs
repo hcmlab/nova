@@ -80,7 +80,7 @@ namespace ssi
             control.geometricListControl.geometricDataGrid.ItemsSource = pl;
         }
 
-        private void showHideGeometricGrid(bool show)
+        private void showHideGeometricGrid(bool show, AnnoScheme.TYPE type = AnnoScheme.TYPE.POINT)
         {
             double width = control.viewGridCol3.ActualWidth + control.viewGridCol1.ActualWidth;
             double col1MinWidth = Convert.ToDouble(control.viewGridCol1.MinWidth.ToString());
@@ -123,11 +123,15 @@ namespace ssi
                 control.viewGridCol1.Width = new GridLength(col1MinWidth, GridUnitType.Pixel);
                 control.viewGridCol1.MaxWidth = width - col3MinWidth;
 
+                if(type != AnnoScheme.TYPE.DISCRETE && type != AnnoScheme.TYPE.FREE && type != AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    control.myGridRow1.Height = new GridLength(row1MinHeight, GridUnitType.Pixel);
+                    control.myGridRow1.MaxHeight = height - row3MinHeight;
+                    control.myGridRow3.Height = new GridLength(1, GridUnitType.Star);
+                    control.myGridRow3.MaxHeight = height - row1MinHeight;
+                }
 
-                control.myGridRow1.Height = new GridLength(row1MinHeight, GridUnitType.Pixel);
-                control.myGridRow1.MaxHeight = height - row3MinHeight;
-                control.myGridRow3.Height = new GridLength(1, GridUnitType.Star);
-                control.myGridRow3.MaxHeight = height - row1MinHeight;
+              
 
                 visibility = Visibility.Collapsed;
             }
@@ -226,7 +230,7 @@ namespace ssi
                 }
                 else
                 {
-                    showHideGeometricGrid(false);
+                    showHideGeometricGrid(false, tier.AnnoList.Scheme.Type);
                 }
 
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -742,19 +746,23 @@ namespace ssi
                         if (control.geometricListControl.geometricDataGrid.Items[0].GetType().Name == "PointListItem")
                         {
                             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
-                            foreach (PointListItem p in item.Points)
+
+                            if(item.Points != null)
                             {
-                                if (p.XCoord != -1 && p.YCoord != -1)
+                                foreach (PointListItem p in item.Points)
                                 {
-                                    Ellipse dot = new Ellipse();
-                                    dot.Stroke = new SolidColorBrush(Colors.Black);
-                                    dot.StrokeThickness = 1;
-                                    dot.Fill = new SolidColorBrush(item.Color);
-                                    dot.Height = 10;
-                                    dot.Width = 10;
-                                    Canvas.SetLeft(dot, (p.XCoord * scale) - dot.Width / 2);
-                                    Canvas.SetTop(dot, (p.YCoord * scale) - dot.Height / 2);
-                                    go.canvas.Children.Add(dot);
+                                    if (p.XCoord != -1 && p.YCoord != -1)
+                                    {
+                                        Ellipse dot = new Ellipse();
+                                        dot.Stroke = new SolidColorBrush(Colors.Black);
+                                        dot.StrokeThickness = 1;
+                                        dot.Fill = new SolidColorBrush(item.Color);
+                                        dot.Height = 10;
+                                        dot.Width = 10;
+                                        Canvas.SetLeft(dot, (p.XCoord * scale) - dot.Width / 2);
+                                        Canvas.SetTop(dot, (p.YCoord * scale) - dot.Height / 2);
+                                        go.canvas.Children.Add(dot);
+                                    }
                                 }
                             }
                         }

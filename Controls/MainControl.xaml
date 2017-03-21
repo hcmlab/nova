@@ -86,7 +86,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Name="myGridRow1" MinHeight="200" />
                     <RowDefinition Name="myGridRow2" Height="Auto" />
-                    <RowDefinition Name="myGridRow3" MinHeight="150" />
+                    <RowDefinition Name="myGridRow3" Height="250" MinHeight="150" />
                 </Grid.RowDefinitions>
 
                 <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5">
@@ -116,7 +116,7 @@
 
                 <Grid Name="ListGrid" Grid.Column="0" Grid.Row="2">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition MinWidth="300" Width="*" />
+                        <ColumnDefinition MinWidth="200" Width="*" />
                         <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Name="ListGridCol3" MinWidth="0" Width="0"/>
                 </Grid.ColumnDefinitions>

@@ -50,6 +50,7 @@ namespace ssi
 
         public string Result()
         {
+            if (DataBaseResultsBox.SelectedItem == null) return null;
             return DataBaseResultsBox.SelectedItem.ToString();
         }
 
