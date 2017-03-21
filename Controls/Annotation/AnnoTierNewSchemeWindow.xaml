@@ -64,22 +64,22 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <Button Name="button_point" Grid.Column="0" Grid.Row="0" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click">
+            <Button Name="button_point" Grid.Column="0" Grid.Row="0" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click" ToolTip="Create Point Annotations">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap"> 
                     New Points Scheme
                 </TextBlock>
             </Button>
-            <Button IsEnabled="False" Name="button_polygon" Grid.Column="1" Grid.Row="0" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click">
+            <Button IsEnabled="False" Name="button_polygon" Grid.Column="1" Grid.Row="0" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click" ToolTip="Coming soon">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap">
                     New Polygon Scheme
                 </TextBlock>
             </Button>
-            <Button IsEnabled="False" Name="button_graph" Grid.Column="0" Grid.Row="1" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click">
+            <Button IsEnabled="False" Name="button_graph" Grid.Column="0" Grid.Row="1" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click" ToolTip="Coming soon">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap">
                     New Graph Scheme
                 </TextBlock>
             </Button>
-            <Button IsEnabled="False" Name="button_segmentation" Grid.Column="1" Grid.Row="1" MaxHeight="35" Height="Auto" Width="120" Click="Button_Click">
+            <Button IsEnabled="False" Name="button_segmentation" Grid.Column="1" Grid.Row="1" MaxHeight="35" Height="Auto" Width="120" Click="Button_Click" ToolTip="Coming soon">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap">
                     New Segmentation Scheme
                 </TextBlock>
