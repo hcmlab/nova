@@ -20,6 +20,10 @@ namespace ssi
             control.annoTierControl.MouseMove += annoTrackGrid_MouseMove;
             control.annoTierControl.MouseRightButtonUp += annoTrackGrid_MouseUp;
 
+            control.mediaVideoControl.MouseDown += geometricOverlay_MouseDown;
+            control.mediaVideoControl.MouseUp += geometricOverlay_MouseUp;
+            control.mediaVideoControl.MouseMove += geometricOverlay_MouseMove;
+
             AdornerLayer cursorLayer = control.signalAndAnnoControl.AdornerLayer;
             signalCursor = new Cursor(control.trackGrid, Brushes.Red, 1.5);
             cursorLayer.Add(signalCursor);
@@ -94,7 +98,7 @@ namespace ssi
                             if (dialog2.DialogResult == true)
                             {
                                 AnnoScheme annoScheme = dialog2.Result;
-                                annoList = new AnnoList() { Scheme = annoScheme };                                
+                                annoList = new AnnoList() { Scheme = annoScheme };
                             }
                         }
                         else if (annoType == AnnoScheme.TYPE.DISCRETE)
@@ -108,7 +112,8 @@ namespace ssi
                                 annoList = dialog2.GetAnnoList();
                             }
                         }
-                        else if (annoType == AnnoScheme.TYPE.CONTINUOUS)
+                        else if (annoType == AnnoScheme.TYPE.CONTINUOUS || annoType == AnnoScheme.TYPE.POINT || annoType == AnnoScheme.TYPE.POLYGON ||
+                                  annoType == AnnoScheme.TYPE.GRPAH || annoType == AnnoScheme.TYPE.SEGMENTATION)
                         {
                             double defaultSr = 25.0;
 
@@ -121,14 +126,70 @@ namespace ssi
                                 }
                             }
 
-                            AnnoTierNewContinuousSchemeWindow.Input input = new AnnoTierNewContinuousSchemeWindow.Input() { SampleRate = defaultSr, MinScore = 0.0, MaxScore = 1.0, MinColor = Defaults.Colors.GradientMin, MaxColor = Defaults.Colors.GradientMax };
-                            AnnoTierNewContinuousSchemeWindow dialog2 = new AnnoTierNewContinuousSchemeWindow(input);
-                            dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                            dialog2.ShowDialog();
-                            if (dialog2.DialogResult == true)
+                            if (annoType == AnnoScheme.TYPE.CONTINUOUS)
                             {
-                                AnnoScheme annoScheme = dialog2.Result;
-                                annoList = new AnnoList() { Scheme = annoScheme };
+                                AnnoTierNewContinuousSchemeWindow.Input input = new AnnoTierNewContinuousSchemeWindow.Input() { SampleRate = defaultSr, MinScore = 0.0, MaxScore = 1.0, MinColor = Defaults.Colors.GradientMin, MaxColor = Defaults.Colors.GradientMax };
+                                AnnoTierNewContinuousSchemeWindow dialog2 = new AnnoTierNewContinuousSchemeWindow(input);
+                                dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                                dialog2.ShowDialog();
+                                if (dialog2.DialogResult == true)
+                                {
+                                    AnnoScheme annoScheme = dialog2.Result;
+                                    annoList = new AnnoList() { Scheme = annoScheme };
+                                }
+                            }
+                            else
+                            {
+
+
+                                if (annoType == AnnoScheme.TYPE.POINT)
+                                {
+                                    AnnoTierNewPointSchemeWindow.Input input = new AnnoTierNewPointSchemeWindow.Input() { SampleRate = defaultSr, NumPoints = 1.0, Color = Colors.Green };
+                                    AnnoTierNewPointSchemeWindow dialog2 = new AnnoTierNewPointSchemeWindow(input);
+                                    dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                                    dialog2.ShowDialog();
+                                    if (dialog2.DialogResult == true)
+                                    {
+                                        AnnoScheme annoScheme = dialog2.Result;
+                                        annoList = new AnnoList() { Scheme = annoScheme };
+                                    }
+                                }
+                                else if (annoType == AnnoScheme.TYPE.POLYGON)
+                                {
+                                    AnnoTierNewPolygonSchemeWindow.Input input = new AnnoTierNewPolygonSchemeWindow.Input() { SampleRate = defaultSr, NumNodes = 1.0, NodeColour = Colors.Green, LineColour = Colors.Red };
+                                    AnnoTierNewPolygonSchemeWindow dialog2 = new AnnoTierNewPolygonSchemeWindow(input);
+                                    dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                                    dialog2.ShowDialog();
+                                    if (dialog2.DialogResult == true)
+                                    {
+                                        AnnoScheme annoScheme = dialog2.Result;
+                                        annoList = new AnnoList() { Scheme = annoScheme };
+                                    }
+                                }
+                                else if (annoType == AnnoScheme.TYPE.GRPAH)
+                                {
+                                    AnnoTierNewGraphSchemeWindow.Input input = new AnnoTierNewGraphSchemeWindow.Input() { SampleRate = defaultSr, NumNodes = 1.0, NodeColour = Colors.Green, LineColour = Colors.Red };
+                                    AnnoTierNewGraphSchemeWindow dialog2 = new AnnoTierNewGraphSchemeWindow(input);
+                                    dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                                    dialog2.ShowDialog();
+                                    if (dialog2.DialogResult == true)
+                                    {
+                                        AnnoScheme annoScheme = dialog2.Result;
+                                        annoList = new AnnoList() { Scheme = annoScheme };
+                                    }
+                                }
+                                else if (annoType == AnnoScheme.TYPE.SEGMENTATION)
+                                {
+                                    AnnoTierNewSegmentationSchemeWindow.Input input = new AnnoTierNewSegmentationSchemeWindow.Input() { SampleRate = defaultSr, MinScore = 0.0, MaxScore = 1.0, MinColor = Colors.LightBlue, MaxColor = Colors.Red };
+                                    AnnoTierNewSegmentationSchemeWindow dialog2 = new AnnoTierNewSegmentationSchemeWindow(input);
+                                    dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                                    dialog2.ShowDialog();
+                                    if (dialog2.DialogResult == true)
+                                    {
+                                        AnnoScheme annoScheme = dialog2.Result;
+                                        annoList = new AnnoList() { Scheme = annoScheme };
+                                    }
+                                }
                             }
                         }
                         if (annoList != null)

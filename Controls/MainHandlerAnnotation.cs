@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace ssi
 {
@@ -73,6 +75,84 @@ namespace ssi
             control.annoListControl.annoDataGrid.ItemsSource = anno;
         }
 
+        private void setPointList(PointList pl)
+        {
+            control.geometricListControl.geometricDataGrid.ItemsSource = pl;
+        }
+
+        private void showHideGeometricGrid(bool show)
+        {
+            double width = control.viewGridCol3.ActualWidth + control.viewGridCol1.ActualWidth;
+            double col1MinWidth = Convert.ToDouble(control.viewGridCol1.MinWidth.ToString());
+            double col3MinWidth = Convert.ToDouble(control.viewGridCol3.MinWidth.ToString());
+
+
+            double height = control.myGridRow3.ActualHeight + control.myGridRow1.ActualHeight;
+            double row1MinHeight = Convert.ToDouble(control.myGridRow1.MinHeight.ToString());
+            double row3MinHeight = Convert.ToDouble(control.myGridRow3.MinHeight.ToString());
+
+            Visibility visibility = Visibility.Visible;
+
+            if (show)
+            {
+                control.geometricListControl.Visibility = Visibility.Visible;
+                control.ListGridCol3.MinWidth = 305;
+                control.ListGridCol3.Width = new GridLength(1, GridUnitType.Star);
+                control.ListGridSplitter.Visibility = Visibility.Visible;
+
+                control.viewGridCol3.Width = new GridLength(col3MinWidth, GridUnitType.Pixel);
+                control.viewGridCol3.MaxWidth = width - col1MinWidth;
+                control.viewGridCol1.Width = new GridLength(1, GridUnitType.Star);
+                control.viewGridCol1.MaxWidth = width - col3MinWidth;
+
+                control.myGridRow3.Height = new GridLength(row3MinHeight, GridUnitType.Pixel);
+                control.myGridRow3.MaxHeight = height - row1MinHeight;
+                control.myGridRow1.Height = new GridLength(1, GridUnitType.Star);
+                control.myGridRow1.MaxHeight = height - row3MinHeight;
+            }
+            else
+            {
+
+                control.geometricListControl.Visibility = Visibility.Collapsed;
+                control.ListGridCol3.MinWidth = 0;
+                control.ListGridCol3.Width = new GridLength(0, GridUnitType.Star);
+                control.ListGridSplitter.Visibility = Visibility.Collapsed;
+
+                control.viewGridCol3.Width = new GridLength(1, GridUnitType.Star);
+                control.viewGridCol3.MaxWidth = width - col1MinWidth;
+                control.viewGridCol1.Width = new GridLength(col1MinWidth, GridUnitType.Pixel);
+                control.viewGridCol1.MaxWidth = width - col3MinWidth;
+
+
+                control.myGridRow1.Height = new GridLength(row1MinHeight, GridUnitType.Pixel);
+                control.myGridRow1.MaxHeight = height - row3MinHeight;
+                control.myGridRow3.Height = new GridLength(1, GridUnitType.Star);
+                control.myGridRow3.MaxHeight = height - row1MinHeight;
+
+                visibility = Visibility.Collapsed;
+            }
+
+            Grid videoGrid = control.mediaVideoControl.videoGrid;
+            int VNumChildren = videoGrid.Children.Count;
+            for (int i = 0; i < VNumChildren; ++i)
+            {
+                if (videoGrid.Children[i].GetType().Name == "MediaBox")
+                {
+                    MediaBox mb = (MediaBox)videoGrid.Children[i];
+                    int MBNumChildren = mb.mediaBoxGrid.Children.Count;
+                    for (int j = 0; j < MBNumChildren; ++j)
+                    {
+                        var a = mb.mediaBoxGrid.Children[j].GetType().Name;
+                        if (mb.mediaBoxGrid.Children[j].GetType().Name == "GeometricOverlay")
+                        {
+                            mb.mediaBoxGrid.Children[j].Visibility = visibility;
+                        }
+                    }
+
+                }
+            }
+        }
+
         private void clearAnnoInfo()
         {
             control.annoStatusSettingsButton.IsEnabled = false;
@@ -87,6 +167,8 @@ namespace ssi
             control.annoStatusPositionLabel.Text = "00:00:00.00";
             control.annoStatusCloseButton.IsEnabled = false;
         }
+
+
 
         private void setAnnoInfo(AnnoList annoList)
         {
@@ -134,7 +216,28 @@ namespace ssi
 
             if (AnnoTierStatic.Selected != null)
             {
+
+                if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                {
+                    showHideGeometricGrid(true);
+                }
+                else
+                {
+                    showHideGeometricGrid(false);
+                }
+
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    control.annoListControl.editButton.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editComboBox.IsEnabled = false;
+                    control.annoListControl.editTextBox.IsEnabled = false;
+                }
+                else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT)
                 {
                     control.annoListControl.editButton.Visibility = Visibility.Collapsed;
                     control.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
@@ -485,7 +588,47 @@ namespace ssi
                         break;
                     }
                 }
+                if (item.Geometric)
+                {
+                    if (item.Points != null && item.Points.Count > 0)
+                    {
+                        if (control.geometricListControl.Visibility == Visibility.Visible &&
+                            double.IsNaN(control.geometricListControl.Width))
+                        {
+                            showHideGeometricGrid(true);
 
+                        }
+                        setPointList(item.Points);
+                        Grid videoGrid = control.mediaVideoControl.videoGrid;
+                        int VNumChildren = videoGrid.Children.Count;
+                        for (int i = 0; i < VNumChildren; ++i)
+                        {
+                            if (videoGrid.Children[i].GetType().Name == "MediaBox")
+                            {
+                                MediaBox mb = (MediaBox)videoGrid.Children[i];
+                                int MBNumChildren = mb.mediaBoxGrid.Children.Count;
+                                for (int j = 0; j < MBNumChildren; ++j)
+                                {
+                                    if (mb.mediaBoxGrid.Children[j].GetType().Name == "GeometricOverlay")
+                                    {
+                                        mb.zoomBoxControl.ZoomToFill();
+                                        double scale = mb.zoomBoxControl.Zoom;
+                                        double width = ((UIElement)mb.mediaelement.GetView()).RenderSize.Width;
+                                        double height = ((UIElement)mb.mediaelement.GetView()).RenderSize.Height;
+                                        GeometricOverlay go = (GeometricOverlay)mb.mediaBoxGrid.Children[j];
+                                        if (go.Name == "overlay")
+                                        {
+                                            go.Width = scale * width;
+                                            go.Height = scale * height;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        geometricOverlayUpdate(AnnoScheme.TYPE.POINT);
+                    }
+
+                }
                 movemedialock = false;
             }
         }
@@ -534,7 +677,406 @@ namespace ssi
                 else item.Label = control.annoListControl.editTextBox.Text;
             }
         }
+        private void geometricTableUpdate()
+        {
+            control.geometricListControl.geometricDataGrid.Items.Refresh();
+            return;
+            //switch (type)
+            //{
+            //    case AnnoScheme.TYPE.POINT:
+            //        //control.list
+            //        break;
+            //    case AnnoScheme.TYPE.POLYGON:
+            //        break;
+            //    case AnnoScheme.TYPE.GRPAH:
+            //        break;
+            //    case AnnoScheme.TYPE.SEGMENTATION:
+            //        break;
+            //}
+        }
 
+        public void geometricOverlayUpdate(AnnoScheme.TYPE type)
+        {
+            double scale = 0.0;
+
+            Grid videoGrid = control.mediaVideoControl.videoGrid;
+            int VNumChildren = videoGrid.Children.Count;
+            GeometricOverlay go = null;
+            for (int i = 0; i < VNumChildren; ++i)
+            {
+                bool stop = false;
+                if (videoGrid.Children[i].GetType().Name == "MediaBox")
+                {
+                    MediaBox mb = (MediaBox)videoGrid.Children[i];
+                    int MBNumChildren = mb.mediaBoxGrid.Children.Count;
+                    for (int j = 0; j < MBNumChildren; ++j)
+                    {
+                        if (mb.mediaBoxGrid.Children[j].GetType().Name == "GeometricOverlay")
+                        {
+                            go = (GeometricOverlay)mb.mediaBoxGrid.Children[j];
+                            if (go.Name == "overlay")
+                            {
+                                scale = mb.zoomBoxControl.Zoom;
+                                stop = true;
+                                break;
+                            }
+                            else
+                            {
+                                go = null;
+                            }
+                        }
+                    }
+                }
+                if (stop) break;
+            }
+
+            if (go == null) return;
+
+            go.canvas.Children.Clear();
+
+            switch (type)
+            {
+                case AnnoScheme.TYPE.POINT:
+                    if (control.annoListControl.annoDataGrid.SelectedItems.Count == 1)
+                    {
+                        if (control.geometricListControl.geometricDataGrid.Items[0].GetType().Name == "PointListItem")
+                        {
+                            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
+                            foreach (PointListItem p in item.Points)
+                            {
+                                if (p.XCoord != -1 && p.YCoord != -1)
+                                {
+                                    Ellipse dot = new Ellipse();
+                                    dot.Stroke = new SolidColorBrush(Colors.Black);
+                                    dot.StrokeThickness = 1;
+                                    dot.Fill = new SolidColorBrush(item.Color);
+                                    dot.Height = 10;
+                                    dot.Width = 10;
+                                    Canvas.SetLeft(dot, (p.XCoord * scale) - dot.Width / 2);
+                                    Canvas.SetTop(dot, (p.YCoord * scale) - dot.Height / 2);
+                                    go.canvas.Children.Add(dot);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case AnnoScheme.TYPE.POLYGON:
+                    break;
+                case AnnoScheme.TYPE.GRPAH:
+                    break;
+                case AnnoScheme.TYPE.SEGMENTATION:
+                    break;
+            }
+        }
+
+        private static bool rightHeld;
+        private static bool RightHeld
+        {
+            get { return rightHeld; }
+            set
+            {
+                rightHeld = value;
+                if (!value)
+                {
+                    RightHeldPos = new double[2] { 0, 0 };
+                }
+            }
+        }
+
+        private static double[] rightHeldPos;
+        private static double[] RightHeldPos
+        {
+            get
+            {
+                if (rightHeldPos == null)
+                {
+                    rightHeldPos = new double[2] { 0, 0 };
+                }
+                return rightHeldPos;
+            }
+            set
+            {
+                if (value.Length == 2)
+                {
+                    rightHeldPos = value;
+                }
+            }
+        }
+
+
+        private void geometricOverlay_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (RightHeld)
+            {
+                Grid videoGrid = control.mediaVideoControl.videoGrid;
+                int VNumChildren = videoGrid.Children.Count;
+                for (int i = 0; i < VNumChildren; ++i)
+                {
+                    if (videoGrid.Children[i].GetType().Name == "MediaBox")
+                    {
+                        MediaBox mb = (MediaBox)videoGrid.Children[i];
+                        int MBNumChildren = mb.mediaBoxGrid.Children.Count;
+                        for (int j = 0; j < MBNumChildren; ++j)
+                        {
+                            if (mb.mediaBoxGrid.Children[j].GetType().Name == "GeometricOverlay")
+                            {
+                                GeometricOverlay go = (GeometricOverlay)mb.mediaBoxGrid.Children[j];
+                                if (go.Name == "overlay")
+                                {
+                                    if (go.Visibility == Visibility.Visible)
+                                    {
+
+                                        double scale = mb.zoomBoxControl.Zoom;
+                                        double x, y;
+                                        Point p = Mouse.GetPosition(go);
+                                        x = Math.Round(p.X, 2);
+                                        y = Math.Round(p.Y, 2);
+
+                                        double deltaX = x - RightHeldPos[0];
+                                        double deltaY = y - RightHeldPos[1];
+
+                                        RightHeldPos = new double[] { x, y };
+
+                                        deltaX /= scale;
+                                        deltaY /= scale;
+                                        if (control.annoListControl.annoDataGrid.SelectedItems.Count == 1)
+                                        {
+                                            if (control.geometricListControl.geometricDataGrid.Items[0].GetType().Name == "PointListItem")
+                                            {
+                                                AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
+
+                                                foreach (PointListItem pli in control.geometricListControl.geometricDataGrid.SelectedItems)
+                                                {
+                                                    pli.XCoord += deltaX;
+                                                    pli.YCoord += deltaY;
+                                                }
+                                                geometricOverlayUpdate(AnnoScheme.TYPE.POINT);
+                                                geometricTableUpdate();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void geometricOverlay_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.RightButton == MouseButtonState.Released)
+            {
+                RightHeld = false;
+            }
+        }
+
+        private void geometricOverlay_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Grid videoGrid = control.mediaVideoControl.videoGrid;
+            int VNumChildren = videoGrid.Children.Count;
+            for (int i = 0; i < VNumChildren; ++i)
+            {
+                if (videoGrid.Children[i].GetType().Name == "MediaBox")
+                {
+                    MediaBox mb = (MediaBox)videoGrid.Children[i];
+                    int MBNumChildren = mb.mediaBoxGrid.Children.Count;
+                    for (int j = 0; j < MBNumChildren; ++j)
+                    {
+                        if (mb.mediaBoxGrid.Children[j].GetType().Name == "GeometricOverlay")
+                        {
+                            GeometricOverlay go = (GeometricOverlay)mb.mediaBoxGrid.Children[j];
+                            if (go.Name == "overlay")
+                            {
+                                if (go.Visibility == Visibility.Visible)
+                                {
+                                    double scale = mb.zoomBoxControl.Zoom;
+
+                                    if (double.IsNaN(go.Width) || double.IsNaN(go.Height))
+                                    {
+                                        mb.zoomBoxControl.ZoomToFill();
+                                        double width = ((UIElement)mb.mediaelement.GetView()).RenderSize.Width;
+                                        double height = ((UIElement)mb.mediaelement.GetView()).RenderSize.Height;
+                                        go.Width = scale * width;
+                                        go.Height = scale * height;
+                                    }
+
+                                    double x, y;
+                                    Point p = Mouse.GetPosition(go);
+                                    x = Math.Round(p.X, 2);
+                                    y = Math.Round(p.Y, 2);
+
+                                    if (e.LeftButton == MouseButtonState.Pressed)
+                                    {
+                                        if ((x > 0 && x < go.Width &&
+                                            y > 0 && y < go.Height))
+                                        {
+
+                                            if (control.annoListControl.annoDataGrid.SelectedItems.Count == 1)
+                                            {
+                                                if (control.geometricListControl.geometricDataGrid.Items[0].GetType().Name == "PointListItem")
+                                                {
+                                                    if (control.geometricListControl.geometricDataGrid.SelectedItems.Count == 1)
+                                                    {
+                                                        string name = control.geometricListControl.geometricDataGrid.SelectedItems[0].GetType().Name;
+                                                        if (name == "PointListItem")
+                                                        {
+                                                            foreach (PointListItem plt in control.geometricListControl.geometricDataGrid.SelectedItems)
+                                                            {
+                                                                plt.Label = control.geometricListControl.editTextBox.Text;
+
+                                                                plt.XCoord = x / scale;
+                                                                plt.YCoord = y / scale;
+                                                            }
+                                                        }
+                                                        geometricOverlayUpdate(AnnoScheme.TYPE.POINT);
+                                                        geometricTableUpdate();
+                                                    }
+                                                    else if (control.geometricListControl.geometricDataGrid.SelectedItems.Count > 1)
+                                                    {
+                                                        MessageBox.Show("Please select a single point from the points list");
+                                                    }
+                                                    else
+                                                    {
+                                                        MessageBox.Show("Please select a point from the points list");
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                MessageBox.Show("Please select a single frame then a point from the points list");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (control.annoListControl.annoDataGrid.SelectedItems.Count == 0)
+                                            {
+                                                MessageBox.Show("Please select a single frame then a single point from the points list");
+                                            }
+                                        }
+                                    }
+                                    else if (e.RightButton == MouseButtonState.Pressed)
+                                    {
+                                        RightHeldPos = new double[] { x, y };
+                                        RightHeld = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void geometricListEdit_Click(object sender, RoutedEventArgs e)
+        {
+            //if (isNumeric(control.geometricListControl.xTextBox.Text) && isNumeric(control.geometricListControl.yTextBox.Text))
+            {
+                if (control.geometricListControl.geometricDataGrid.SelectedItems.Count == 1)
+                {
+                    string name = control.geometricListControl.geometricDataGrid.SelectedItems[0].GetType().Name;
+                    if (name == "PointListItem")
+                    {
+                        foreach (PointListItem item in control.geometricListControl.geometricDataGrid.SelectedItems)
+                        {
+                            item.Label = control.geometricListControl.editTextBox.Text;
+                            //item.XCoord = Convert.ToDouble(control.geometricListControl.xTextBox.Text);
+                            //item.YCoord = Convert.ToDouble(control.geometricListControl.yTextBox.Text);
+                        }
+                    }
+                }
+            }
+            //else
+            //{
+            //    MessageBoxResult mb = MessageBoxResult.OK;
+            //    mb = MessageBox.Show("Please only enter integer values for X and Y", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+            //}
+
+        }
+
+        private bool isNumeric(string text)
+        {
+            Regex regex = new Regex("[0-9]+");
+            bool r = regex.IsMatch(text);
+            return r;
+        }
+
+        private void geometricListEdit_Focused(object sender, MouseEventArgs e)
+        {
+            control.geometricListControl.editTextBox.SelectAll();
+        }
+
+        private void geometricListSelectAll_Click(object sender, RoutedEventArgs e)
+        {
+            if (control.geometricListControl.geometricDataGrid.Items.Count > 0)
+            {
+                control.geometricListControl.geometricDataGrid.SelectAll();
+            }
+        }
+
+        private void geometricListCopy_Click(object sender, RoutedEventArgs e)
+        {
+            if (control.annoListControl.annoDataGrid.SelectedItems.Count == 1)
+            {
+                if (control.geometricListControl.geometricDataGrid.Items[0].GetType().Name == "PointListItem")
+                {
+                    AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
+                    AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
+
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        if (Math.Round(list[i].Start, 2) == Math.Round(item.Stop, 2))
+                        {
+                            for (int j = 0; j < list[i].Points.Count; ++j)
+                            {
+                                list[i].Points[j].Label = item.Points[j].Label;
+                                list[i].Points[j].XCoord = item.Points[j].XCoord;
+                                list[i].Points[j].YCoord = item.Points[j].YCoord;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                MessageBoxResult mb = MessageBoxResult.OK;
+                mb = MessageBox.Show("Select one frame to copy", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void geometricList_Selection(object sender, SelectionChangedEventArgs e)
+        {
+            AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
+            if (list != null) geometricOverlayUpdate(list.Scheme.Type);
+            if (control.geometricListControl.geometricDataGrid.SelectedItems.Count == 1)
+            {
+                PointListItem item = (PointListItem)control.geometricListControl.geometricDataGrid.SelectedItems[0];
+                control.geometricListControl.editTextBox.Text = item.Label;
+            }
+        }
+
+        private void geometricListDelete(object sender, RoutedEventArgs e)
+        {
+            if (control.geometricListControl.geometricDataGrid.SelectedItems.Count != 0)
+            {
+                string name = control.geometricListControl.geometricDataGrid.SelectedItem.GetType().Name;
+                if (name == "PointListItem")
+                {
+                    PointListItem[] selected = new PointListItem[control.geometricListControl.geometricDataGrid.SelectedItems.Count];
+                    control.geometricListControl.geometricDataGrid.SelectedItems.CopyTo(selected, 0);
+                    control.geometricListControl.geometricDataGrid.SelectedIndex = -1;
+
+                    foreach (PointListItem pli in selected)
+                    {
+                        pli.XCoord = -1;
+                        pli.YCoord = -1;
+                    }
+                    geometricOverlayUpdate(AnnoScheme.TYPE.POINT);
+                    geometricTableUpdate();
+                }
+            }
+        }
         #endregion EVENTHANDLERS
     }
 }

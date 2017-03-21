@@ -66,12 +66,12 @@
 
         </Menu>
 
-        <Grid Name="viewGrid" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="Auto" Height="Auto">
+        <Grid Name="viewGrid" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="400" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="200*" />
+                <ColumnDefinition Name="viewGridCol1" Width="400" MinWidth="400" />
+                <ColumnDefinition Name="viewGridCol2" Width="Auto" />
+                <ColumnDefinition Name="viewGridCol3" MinWidth="400" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="400*" />
@@ -84,13 +84,13 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="230" />
+                    <RowDefinition Name="myGridRow1" MinHeight="200" />
+                    <RowDefinition Name="myGridRow2" Height="Auto" />
+                    <RowDefinition Name="myGridRow3" MinHeight="150" />
                 </Grid.RowDefinitions>
 
                 <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5">
-                    <Grid Name="videoskel" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="Auto" Height="Auto" Grid.Column="0" Grid.Row="0">
+                    <Grid Name="videoskel" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Column="0" Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
@@ -114,10 +114,36 @@
                     Margin="0">
                 </GridSplitter>
 
-                <Border Grid.Column="0" Grid.Row="2" BorderThickness="2">
+                <Grid Name="ListGrid" Grid.Column="0" Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition MinWidth="300" Width="*" />
+                        <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Name="ListGridCol3" MinWidth="0" Width="0"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Border Grid.Column="0" BorderThickness="2">
                     <local:AnnoListControl x:Name="annoListControl"></local:AnnoListControl>
                 </Border>
+                <GridSplitter 		
+                        Name="ListGridSplitter"		
+                        ResizeDirection="Columns" 		
+                        Grid.Column="1" 		
+                        Grid.ColumnSpan="1" 		
+                        Grid.Row="0" 		
+                        Height="Auto" 		
+                        Width="3" 		
+                        HorizontalAlignment="Stretch" 		
+                        VerticalAlignment="Stretch" 		
+                        Margin="0"		
+                        Visibility="Collapsed">
+                </GridSplitter>
+                <Border Grid.Column="2" BorderThickness="2">
+                    <local:GeometricListControl Visibility="Collapsed" x:Name="geometricListControl"></local:GeometricListControl>
+                </Border>
             </Grid>
+        </Grid>
 
             <GridSplitter 
                 ResizeDirection="Columns"

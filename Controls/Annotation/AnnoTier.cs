@@ -262,42 +262,56 @@ namespace ssi
 
             Select(this);
 
-            if (!IsDiscreteOrFree)
+            if (!(anno.Scheme.Type == AnnoScheme.TYPE.FREE || anno.Scheme.Type == AnnoScheme.TYPE.DISCRETE))
             {
                 Loaded += delegate
                 {
-                    InitContinousValues(anno.Scheme.SampleRate);
-                    dispatcherTimer.Interval = TimeSpan.FromMilliseconds(20);
-                    dispatcherTimer.Tick += new EventHandler(delegate (object s, EventArgs a)
-                  {
-                      if (continuousAnnoMode && this.isSelected)
-                      {
-                          double closestposition = MainHandler.Time.CurrentPlayPosition;
-                          closestIndex = GetClosestContinuousIndex(closestposition);
-                          if (closestIndex > -1)
-                          {
-                              if (this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 && Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver))
-                              {
-                                  double normal = 1.0 - (Mouse.GetPosition(this).Y / this.ActualHeight);
-                                  double normalized = (normal * range) + anno.Scheme.MinScore;
+                    if (anno.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                    {
+                        InitContinousValues(anno.Scheme.SampleRate);
+                        dispatcherTimer.Interval = TimeSpan.FromMilliseconds(20);
+                        dispatcherTimer.Tick += new EventHandler(delegate (object s, EventArgs a)
+                        {
+                            if (continuousAnnoMode && this.isSelected)
+                            {
+                                double closestposition = MainHandler.Time.CurrentPlayPosition;
+                                closestIndex = GetClosestContinuousIndex(closestposition);
+                                if (closestIndex > -1)
+                                {
+                                    if (this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 &&
+                                        Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver))
+                                    {
+                                        double normal = 1.0 - (Mouse.GetPosition(this).Y / this.ActualHeight);
+                                        double normalized = (normal * range) + anno.Scheme.MinScore;
 
-                                  continuousTierEllipse.Height = this.ActualHeight / 10;
-                                  continuousTierEllipse.Width = continuousTierEllipse.Height;
-                                  continuousTierEllipse.SetValue(Canvas.TopProperty, (Mouse.GetPosition(this).Y - continuousTierEllipse.Height / 2));
-                                  AnnoList[closestIndex].Label = (normalized).ToString();
+                                        continuousTierEllipse.Height = this.ActualHeight / 10;
+                                        continuousTierEllipse.Width = continuousTierEllipse.Height;
+                                        continuousTierEllipse.SetValue(Canvas.TopProperty, (Mouse.GetPosition(this).Y - continuousTierEllipse.Height / 2));
+                                        AnnoList[closestIndex].Label = (normalized).ToString();
 
-                                  for (int i = closestIndexOld; i < closestIndex; i++)
-                                  {
-                                      if (closestIndexOld > -1) AnnoList[i].Label = (normalized).ToString();
-                                  }
-                                  closestIndexOld = closestIndex;
+                                        for (int i = closestIndexOld; i < closestIndex; i++)
+                                        {
+                                            if (closestIndexOld > -1) AnnoList[i].Label = (normalized).ToString();
+                                        }
+                                        closestIndexOld = closestIndex;
 
-                                  TimeRangeChanged(MainHandler.Time);
-                              }
-                          }
-                      }
-                      else continuousTierEllipse.Visibility = Visibility.Hidden;
-                  });
+                                        TimeRangeChanged(MainHandler.Time);
+                                    }
+                                }
+                            }
+                            else continuousTierEllipse.Visibility = Visibility.Hidden;
+                        });
+                    }
+                    else if (anno.Scheme.Type == AnnoScheme.TYPE.POINT)
+                    {
+                        InitPointValues(anno);
+                    }
+                    else if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                    { }
+                    else if (anno.Scheme.Type == AnnoScheme.TYPE.GRPAH)
+                    { }
+                    else if (anno.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                    { }
                 };
             }
             selectedTier = this;
@@ -488,6 +502,31 @@ namespace ssi
             {
                 TimeRangeChanged(MainHandler.Time);
             }
+        }
+
+        public void InitPointValues(AnnoList anno)
+        {
+            double sr = anno.Scheme.SampleRate;
+            int numPoints = Convert.ToInt32(anno.Scheme.MinScore);
+
+            int samples = (int)Math.Round(MainHandler.Time.TotalDuration * sr * numPoints);
+            double delta = 1.0 / sr;
+            if (AnnoList.Count < samples)
+            {
+                for (int i = AnnoList.Count; i < samples; i++)
+                {
+                    PointList points = new PointList();
+                    for (int j = 0; j < numPoints; ++j)
+                    {
+                        points.Add(new PointListItem(-1, -1, (j + 1).ToString(), 0));
+                    }
+                    AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, true, points);
+                    AnnoList.Add(ali);
+                }
+            }
+
+            TimeRangeChanged(MainHandler.Time);
+            //TimeRangeChanged(MainHandler.Time);
         }
 
         public void ContinuousAnnoMode()

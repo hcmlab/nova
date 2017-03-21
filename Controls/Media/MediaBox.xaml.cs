@@ -29,6 +29,23 @@ namespace ssi
             {
                 zoombox.Visibility = Visibility.Visible;
                 this.MediaDropBox.Children.Add(media.GetView());
+
+                GeometricOverlay geometricOverlayZoom = new GeometricOverlay();
+                geometricOverlayZoom.Name = "zoomBlocker";
+                mediaBoxGrid.Children.Add(geometricOverlayZoom);
+                Grid.SetColumn(geometricOverlayZoom, 0);
+                Grid.SetRow(geometricOverlayZoom, 0);
+                geometricOverlayZoom.Visibility = Visibility.Collapsed;
+
+                GeometricOverlay geometricOverlay = new GeometricOverlay();
+                geometricOverlay.Name = "overlay";
+                mediaBoxGrid.Children.Add(geometricOverlay);
+                Grid.SetColumn(geometricOverlay, 0);
+                Grid.SetRow(geometricOverlay, 0);
+                geometricOverlay.Visibility = Visibility.Collapsed;
+
+
+
             }
             else this.mediaBoxGrid.Children.Add(media.GetView());
         }

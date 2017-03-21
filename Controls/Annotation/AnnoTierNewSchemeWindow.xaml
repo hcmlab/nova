@@ -5,41 +5,86 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Tier Selection" Height="340" Width="480" ResizeMode="NoResize"
+        Title="Tier Selection" Height="440" Width="480" ResizeMode="NoResize"
         WindowStyle="ToolWindow">
     <Grid Margin="5,0,5,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row="0">
-            <Label>Discrete scheme with fixed labels</Label>
+            <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                Discrete scheme with fixed labels
+            </TextBlock>
             <Separator Height="10" Visibility="Hidden"></Separator>
-            <Button Height="25" Width="120" Content="New Discrete Tier" Click="Button_Click_1"></Button>
-        </StackPanel>        
-        
+            <Button Name="button_discrete" Height="25" Width="120" Content="New Discrete Tier" Click="Button_Click"></Button>
+        </StackPanel>
+
         <StackPanel Grid.Row="1">
-            <Label>Discrete scheme with free labels</Label>
+            <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                Discrete scheme with free labels
+            </TextBlock>
             <Separator Height="10" Visibility="Hidden"></Separator>
-            <Button Height="25" Width="120" Content="New Free Tier" Click="Button_Click"></Button>
+            <Button Name="button_free" Height="25" Width="120" Content="New Tier no Scheme" Click="Button_Click"></Button>
         </StackPanel>
 
 
         <StackPanel Grid.Row="2">
-            <Label>Scheme with continuous values</Label>
+            <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                Scheme with continuous values
+            </TextBlock>
             <Separator Height="10" Visibility="Hidden"></Separator>
-            <Button Height="25" Width="120" Content="New Continuous Tier" Click="Button_Click_2"></Button>
+            <Button Name="button_continuous" Height="25" Width="120" Content="New Continuous Tier" Click="Button_Click"></Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" VerticalAlignment="Center">
+            <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                Geometric Annotations
+            </TextBlock>
         </StackPanel>
 
         <Image x:Name="discrete_png" Grid.Row="0" Grid.Column="1" Margin="5" Width="280" Height="90" Source="/Resources/discrete.png"/>
         <Image x:Name="free_png" Grid.Row="1" Grid.Column="1" Margin="5" Width="280" Height="90" Source="/Resources/free.png"/>
         <Image x:Name="continuous_png" Grid.Row="2" Grid.Column="1" Margin="5" Width="280" Height="90" Source="/Resources/continuous.png"/>
+
+        <Grid Grid.Row="3" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Button Name="button_point" Grid.Column="0" Grid.Row="0" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click">
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap"> 
+                    New Points Scheme
+                </TextBlock>
+            </Button>
+            <Button IsEnabled="False" Name="button_polygon" Grid.Column="1" Grid.Row="0" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click">
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                    New Polygon Scheme
+                </TextBlock>
+            </Button>
+            <Button IsEnabled="False" Name="button_graph" Grid.Column="0" Grid.Row="1" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click">
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                    New Graph Scheme
+                </TextBlock>
+            </Button>
+            <Button IsEnabled="False" Name="button_segmentation" Grid.Column="1" Grid.Row="1" MaxHeight="35" Height="Auto" Width="120" Click="Button_Click">
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                    New Segmentation Scheme
+                </TextBlock>
+            </Button>
+        </Grid>
 
     </Grid>
 </Window>

@@ -59,9 +59,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-
         <DockPanel Name="zoombox" Visibility="Collapsed">
-            <Controls:ZoomControl>
+            <Controls:ZoomControl Name="zoomBoxControl">
                 <Grid Name="MediaDropBox" Width="Auto"
                               Height="Auto" >
                 </Grid>
@@ -79,8 +78,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            
-            
+
+
 
             <TextBlock Grid.Column="0"
                 Grid.Row="0"
@@ -91,7 +90,7 @@
                 ToolTip="Check to mute audio" Checked="volumeCheck_Checked" Unchecked="volumeCheck_Unchecked" VerticalAlignment="Center"></CheckBox>
                 <!--<Button Name="zoomIn"  Click="zoomIn_Click" Width="20" Background="{x:Null}" BorderBrush="{x:Null}"  ToolTip="zoomIn">+</Button>
                 <Button Name="zoomOut"  Click="zoomOut_Click" Width="20" Background="{x:Null}" BorderBrush="{x:Null}"  ToolTip="zoomOut">-</Button>-->
-              
+
                 <Button Name="CloseButton"  Width="20" Background="{x:Null}" BorderBrush="{x:Null}"  ToolTip="Close">X</Button>
             </StackPanel>
 
