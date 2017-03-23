@@ -156,6 +156,37 @@ namespace ssi
                     double time = Time.TimeFromPixel(pos);
                     control.signalStatusPositionLabel.Text = FileTools.FormatSeconds(time);
 
+
+                    if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                    {
+                        while (control.annoListControl.annoDataGrid.SelectedItems.Count > 0)
+                        {
+                          control.annoListControl.annoDataGrid.SelectedItems.RemoveAt(0);
+                        }
+                        int i = 0;
+                        foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
+                        {
+                            if (ali.Start <= time)
+                            {
+                                ++i;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        control.annoListControl.annoDataGrid.SelectedItems.Add(control.annoListControl.annoDataGrid.Items[i]);
+                        control.geometricListControl.geometricDataGrid.Items.Refresh();
+                        control.geometricListControl.geometricDataGrid.ScrollIntoView(control.geometricListControl.geometricDataGrid.Items[0]);
+                        control.annoListControl.annoDataGrid.Items.Refresh();
+                        control.annoListControl.annoDataGrid.ScrollIntoView(control.annoListControl.annoDataGrid.Items[i]);
+
+                    }
+
                     if (is_playing)
                     {
                         Play();

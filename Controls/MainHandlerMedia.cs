@@ -127,6 +127,7 @@ namespace ssi
             }
         }
 
+
         private void mediaPlayHandler(MediaList videos, MediaPlayEventArgs e)
         {
             if (movemedialock == false)
@@ -135,9 +136,29 @@ namespace ssi
 
                 if (Time.SelectionStop - Time.SelectionStart < 1) Time.SelectionStart = Time.SelectionStop - 1;
 
+
                 Time.CurrentPlayPosition = e.pos;
 
-                if (!visualizeskel && !visualizepoints) signalCursor.X = pos;
+                if (!visualizeskel && !visualizepoints)
+                {
+                    signalCursor.X = pos;
+                    if (!AnnoTierStatic.Selected.IsNotGeometric)
+                    {
+                        while (control.annoListControl.annoDataGrid.SelectedItems.Count > 0)
+                        {
+                            control.annoListControl.annoDataGrid.SelectedItems.RemoveAt(0);
+                        }
+                        AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
+                        double deltaTime = ali.Duration;
+                        double roughtPosition = Time.CurrentPlayPosition / deltaTime;
+                        ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[(int)roughtPosition];
+                        if (ali.Points.Count > 0)
+                        {
+                            geometricOverlayUpdate(AnnoScheme.TYPE.POINT, ali);
+                        }
+                    }
+                   
+                }
                 //   Console.WriteLine("5 " + signalCursor.X);
                 //if (ViewHandler.Time.TimeFromPixel(signalCursor.X) > Time.SelectionStop || signalCursor.X <= 1 ) signalCursor.X = ViewHandler.Time.PixelFromTime(Time.SelectionStart);
                 // Console.WriteLine(signalCursor.X + "_____" + Time.SelectionStart);
@@ -230,8 +251,6 @@ namespace ssi
             {
                 System.Console.WriteLine(e.ToString());
             }
-
-            //
         }
 
         public bool IsPlaying()
@@ -245,6 +264,23 @@ namespace ssi
             {
                 mediaList.stop();
                 control.navigator.playButton.Content = ">";
+                int i = 0;
+                foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
+                {
+                    if (ali.Start <= Time.CurrentPlayPosition)
+                    {
+                        ++i;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                control.annoListControl.annoDataGrid.SelectedItems.Add(control.annoListControl.annoDataGrid.Items[i]);
+                control.geometricListControl.geometricDataGrid.Items.Refresh();
+                control.geometricListControl.geometricDataGrid.ScrollIntoView(control.geometricListControl.geometricDataGrid.Items[0]);
+                control.annoListControl.annoDataGrid.Items.Refresh();
+                control.annoListControl.annoDataGrid.ScrollIntoView(control.annoListControl.annoDataGrid.Items[i]);
             }
         }
 

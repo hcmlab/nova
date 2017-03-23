@@ -431,11 +431,19 @@ namespace ssi
                 AnnoTierSettingsWindow window = new AnnoTierSettingsWindow();
                 window.DataContext = AnnoTierStatic.Selected;
                 window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-
-
-
+                
                 window.ShowDialog();                
                 setAnnoInfo(AnnoTierStatic.Selected.AnnoList);
+                if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT)
+                {
+                    foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.ItemsSource)
+                    {
+                        ali.Color = AnnoTierStatic.Selected.MinOrBackColor;
+                    }
+                    geometricOverlayUpdate(AnnoScheme.TYPE.POINT);
+                }
+
+
                 AnnoTierStatic.Selected.AnnoList.HasChanged = true;
             }
         }
@@ -646,7 +654,7 @@ namespace ssi
         {
             control.annoListControl.editTextBox.SelectAll();
         }
-
+        
         private void annoListEdit_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
@@ -699,7 +707,7 @@ namespace ssi
             //}
         }
 
-        public void geometricOverlayUpdate(AnnoScheme.TYPE type)
+        public void geometricOverlayUpdate(AnnoScheme.TYPE type, AnnoListItem ali = null)
         {
             double scale = 0.0;
 
@@ -741,11 +749,12 @@ namespace ssi
             switch (type)
             {
                 case AnnoScheme.TYPE.POINT:
-                    if (control.annoListControl.annoDataGrid.SelectedItems.Count == 1)
+                    if (control.annoListControl.annoDataGrid.SelectedItems.Count == 1  || ali != null)
                     {
-                        if (control.geometricListControl.geometricDataGrid.Items[0].GetType().Name == "PointListItem")
+                        if (ali != null || control.geometricListControl.geometricDataGrid.Items[0].GetType().Name == "PointListItem")
                         {
-                            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
+
+                            AnnoListItem item = (ali == null) ? (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0] : ali;
 
                             if(item.Points != null)
                             {
@@ -855,8 +864,11 @@ namespace ssi
 
                                                 foreach (PointListItem pli in control.geometricListControl.geometricDataGrid.SelectedItems)
                                                 {
-                                                    pli.XCoord += deltaX;
-                                                    pli.YCoord += deltaY;
+                                                    if (pli.XCoord != -1 && pli.YCoord != -1)
+                                                    {
+                                                        pli.XCoord += deltaX;
+                                                        pli.YCoord += deltaY;
+                                                    }
                                                 }
                                                 geometricOverlayUpdate(AnnoScheme.TYPE.POINT);
                                                 geometricTableUpdate();
@@ -978,27 +990,19 @@ namespace ssi
 
         private void geometricListEdit_Click(object sender, RoutedEventArgs e)
         {
-            //if (isNumeric(control.geometricListControl.xTextBox.Text) && isNumeric(control.geometricListControl.yTextBox.Text))
+            
+            if (control.geometricListControl.geometricDataGrid.SelectedItems.Count == 1)
             {
-                if (control.geometricListControl.geometricDataGrid.SelectedItems.Count == 1)
+                string name = control.geometricListControl.geometricDataGrid.SelectedItems[0].GetType().Name;
+                if (name == "PointListItem")
                 {
-                    string name = control.geometricListControl.geometricDataGrid.SelectedItems[0].GetType().Name;
-                    if (name == "PointListItem")
+                    int index = control.geometricListControl.geometricDataGrid.SelectedIndex;
+                    foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.ItemsSource)
                     {
-                        foreach (PointListItem item in control.geometricListControl.geometricDataGrid.SelectedItems)
-                        {
-                            item.Label = control.geometricListControl.editTextBox.Text;
-                            //item.XCoord = Convert.ToDouble(control.geometricListControl.xTextBox.Text);
-                            //item.YCoord = Convert.ToDouble(control.geometricListControl.yTextBox.Text);
-                        }
+                        ali.Points[index].Label = control.geometricListControl.editTextBox.Text;
                     }
                 }
             }
-            //else
-            //{
-            //    MessageBoxResult mb = MessageBoxResult.OK;
-            //    mb = MessageBox.Show("Please only enter integer values for X and Y", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
-            //}
 
         }
 
@@ -1085,6 +1089,40 @@ namespace ssi
                 }
             }
         }
+
+        
+        private void geometricKeyDown(object sender, KeyEventArgs e)
+        {
+            if (control.annoListControl.annoDataGrid.SelectedItems.Count == 1 && control.geometricListControl.geometricDataGrid.SelectedItems.Count == 1)
+            {
+                int index = control.geometricListControl.geometricDataGrid.SelectedIndex;
+                if (e.Key == Key.OemPeriod)
+                {
+                    if (index+1 < control.geometricListControl.geometricDataGrid.Items.Count)
+                    {
+                        while (control.geometricListControl.geometricDataGrid.SelectedItems.Count > 0)
+                        {
+                            control.geometricListControl.geometricDataGrid.SelectedItems.RemoveAt(0);
+                        }
+                        control.geometricListControl.geometricDataGrid.SelectedItems.Add(control.geometricListControl.geometricDataGrid.Items[index+1]);
+                        
+                    }
+                }
+                else if (e.Key == Key.OemComma)
+                {
+                    if (index - 1 >= 0 )
+                    {
+                        while (control.geometricListControl.geometricDataGrid.SelectedItems.Count > 0)
+                        {
+                            control.geometricListControl.geometricDataGrid.SelectedItems.RemoveAt(0);
+                        }
+                        control.geometricListControl.geometricDataGrid.SelectedItems.Add(control.geometricListControl.geometricDataGrid.Items[index - 1]);
+                        geometricTableUpdate();
+                    }
+                }
+            }
+        }
+
         #endregion EVENTHANDLERS
     }
 }
