@@ -51,6 +51,7 @@ namespace ssi
             }
             catch
             {
+                MessageBox.Show("An Error occured. Please check your Connection!");
             }
         }
 
