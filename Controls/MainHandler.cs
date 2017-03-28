@@ -20,7 +20,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.6.0;
+        public static string BuildVersion = "0.9.9.6.0";
 
         private static Timeline timeline = null;
 
