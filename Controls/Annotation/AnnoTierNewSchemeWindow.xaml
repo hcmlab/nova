@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Tier Selection" Height="440" Width="480" ResizeMode="NoResize"
+        Title="Tier Selection" ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow">
     <Grid Margin="5,0,5,0">
         <Grid.RowDefinitions>
@@ -24,7 +25,7 @@
                 Discrete scheme with fixed labels
             </TextBlock>
             <Separator Height="10" Visibility="Hidden"></Separator>
-            <Button Name="button_discrete" Height="25" Width="120" Content="New Discrete Tier" Click="Button_Click"></Button>
+            <Button Name="button_discrete" Height="25" Width="120" Content="Discrete" Click="Button_Click"></Button>
         </StackPanel>
 
         <StackPanel Grid.Row="1">
@@ -32,7 +33,7 @@
                 Discrete scheme with free labels
             </TextBlock>
             <Separator Height="10" Visibility="Hidden"></Separator>
-            <Button Name="button_free" Height="25" Width="120" Content="New Tier no Scheme" Click="Button_Click"></Button>
+            <Button Name="button_free" Height="25" Width="120" Content="Free" Click="Button_Click"></Button>
         </StackPanel>
 
 
@@ -41,7 +42,7 @@
                 Scheme with continuous values
             </TextBlock>
             <Separator Height="10" Visibility="Hidden"></Separator>
-            <Button Name="button_continuous" Height="25" Width="120" Content="New Continuous Tier" Click="Button_Click"></Button>
+            <Button Name="button_continuous" Height="25" Width="120" Content="Continuous" Click="Button_Click"></Button>
         </StackPanel>
 
         <StackPanel Grid.Row="3" VerticalAlignment="Center">
@@ -54,34 +55,34 @@
         <Image x:Name="free_png" Grid.Row="1" Grid.Column="1" Margin="5" Width="280" Height="90" Source="/Resources/free.png"/>
         <Image x:Name="continuous_png" Grid.Row="2" Grid.Column="1" Margin="5" Width="280" Height="90" Source="/Resources/continuous.png"/>
 
-        <Grid Grid.Row="3" Grid.Column="1">
+        <Grid Grid.Row="3" Grid.Column="1" Margin="5">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <Button Name="button_point" Grid.Column="0" Grid.Row="0" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click" ToolTip="Create Point Annotations">
+            <Button Name="button_point" Grid.Column="0" Grid.Row="0" Margin="5" Click="Button_Click" ToolTip="Create Point Annotations">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap"> 
-                    New Points Scheme
+                    Points
                 </TextBlock>
             </Button>
-            <Button IsEnabled="False" Name="button_polygon" Grid.Column="1" Grid.Row="0" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click" ToolTip="Coming soon">
+            <Button IsEnabled="False" Name="button_polygon" Grid.Column="1" Grid.Row="0" Margin="5" Click="Button_Click" ToolTip="Coming soon">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                    New Polygon Scheme
+                    Polygon
                 </TextBlock>
             </Button>
-            <Button IsEnabled="False" Name="button_graph" Grid.Column="0" Grid.Row="1" MaxHeight="30" Height="Auto" Width="120" Click="Button_Click" ToolTip="Coming soon">
+            <Button IsEnabled="False" Name="button_graph" Grid.Column="0" Grid.Row="1" Margin="5" Click="Button_Click" ToolTip="Coming soon">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                    New Graph Scheme
+                    Graph
                 </TextBlock>
             </Button>
-            <Button IsEnabled="False" Name="button_segmentation" Grid.Column="1" Grid.Row="1" MaxHeight="35" Height="Auto" Width="120" Click="Button_Click" ToolTip="Coming soon">
+            <Button IsEnabled="False" Name="button_segmentation" Grid.Column="1" Grid.Row="1" Margin="5" Click="Button_Click" ToolTip="Coming soon">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                    New Segmentation Scheme
+                    Segmentation
                 </TextBlock>
             </Button>
         </Grid>

@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Height="Auto" Width="Auto">
 
-    <Grid Name="annoTierGrid"
+    <Grid Name="grid"
         VerticalAlignment="Stretch"
         HorizontalAlignment="Stretch"
         Width="Auto"
@@ -13,4 +13,5 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
     </Grid>
+    
 </UserControl>

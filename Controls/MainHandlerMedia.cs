@@ -12,55 +12,122 @@ namespace ssi
 {
     public partial class MainHandler
     {
-      
-
-        private void loadMedia(string filename, bool is_video, string url = null)
+        private void addMediaBox(IMedia media)
         {
-            if (!File.Exists(filename))
-            {
-                MessageTools.Error("Media file not found '" + filename + "'");
-                return;
-            }
+            MediaBox box = new MediaBox(media);
+            control.mediaBoxControl.Add(box);
+            
+            mediaBoxes.Add(box);
 
-            double pos = MainHandler.Time.TimeFromPixel(signalCursor.X);
-            IMedia media = mediaList.addMedia(filename, pos, url);
-            control.mediaVideoControl.addMedia(media, is_video);
-            control.navigator.playButton.IsEnabled = true;
-            innomediaplaymode = false;
-            noMediaPlayHandler(null);
-
-            ColumnDefinition columvideo = control.videoskel.ColumnDefinitions[0];
-            columvideo.Width = new GridLength(1, GridUnitType.Star);
-
-            DispatcherTimer _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromMilliseconds(50);
-            _timer.Tick += new EventHandler(delegate (object s, EventArgs a)
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(50);
+            timer.Tick += new EventHandler(delegate (object o, EventArgs a)
             {
                 if (media.GetLength() > 0)
                 {
                     updateTimeRange(media.GetLength());
-                    if (this.mediaList.Medias.Count == 1 && media.GetLength() > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
-                    _timer.Stop();
+                    if (mediaList.Count == 1
+                        && media.GetLength() > Properties.Settings.Default.DefaultZoomInSeconds
+                        && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+                    {
+                        fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
+                    }
+                    timer.Stop();
                 }
             });
-            _timer.Start();
+            timer.Start();
+
+            MediaBoxStatic.Select(box);
         }
-        private void removeMedia(object sender, MediaRemoveEventArgs e)
+
+        public void clearMediaBox()
         {
-            mediaList.Medias.Remove(e.media);
+            control.mediaSettingsButton.Visibility = Visibility.Hidden;
+            control.mediaStatusFileNameLabel.Text = "";
+            control.mediaStatusFileNameLabel.ToolTip = "";
+            control.mediaStatusSampleRateLabel.Text = "";
+            control.mediaVolumeControl.Visibility = Visibility.Collapsed;
+            control.mediaPositionLabel.Text = "#0";
+            control.mediaCloseButton.Visibility = Visibility.Hidden;
+        }
+
+        private void changeMediaBox(MediaBox box)
+        {
+            if (box != null)
+            {
+                IMedia media = box.Media;
+                if (media != null)
+                {
+                    control.mediaSettingsButton.Visibility = Visibility.Visible;
+                    control.mediaStatusFileNameLabel.Text = Path.GetFileName(media.GetFilepath());
+                    control.mediaStatusFileNameLabel.ToolTip = media.GetFilepath();
+                    control.mediaStatusSampleRateLabel.Text = media.GetSampleRate().ToString() + " Hz";
+                    if (media.HasAudio())
+                    {
+                        control.mediaVolumeControl.volumeSlider.Value = media.GetVolume();
+                        control.mediaVolumeControl.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        control.mediaVolumeControl.Visibility = Visibility.Collapsed;
+                    }
+                    control.mediaCloseButton.Visibility = Visibility.Visible;
+                }
+            }           
+        }
+
+        private void onMediaBoxChange(MediaBox box, EventArgs e)
+        {
+            changeMediaBox(box);
+        }
+
+        private void mediaVolumeControl_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (MediaBoxStatic.Selected != null && MediaBoxStatic.Selected.Media != null && MediaBoxStatic.Selected.Media.HasAudio())
+            {
+                MediaBoxStatic.Selected.Media.SetVolume(control.mediaVolumeControl.volumeSlider.Value);
+            }
+        }
+
+        private void mediaBoxCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            removeMediaBox();
+        }
+
+        private void removeMediaBox()
+        {
+            MediaBox box = MediaBoxStatic.Selected;
+
+            if (box != null)
+            {
+                control.mediaBoxControl.Remove(box);
+
+                MediaBoxStatic.Unselect();
+                mediaBoxes.Remove(box);
+                mediaList.Remove(box.Media);
+
+                if (mediaBoxes.Count > 0)
+                {
+                    MediaBoxStatic.Select(mediaBoxes[0]);
+                }
+                else
+                {
+                    clearMediaBox();
+                }
+            }
         }
 
 
         #region MEDIAPLAYER
 
         // Plays Signal (e.g Skeleton, Face) when no audiovisual file is loaded
-        private void noMediaPlayHandler(Signal s = null)
+        private void noMediaPlayHandler(Signal signal = null)
         {
             control.navigator.playButton.IsEnabled = true;
             double fps;
-            if (s != null)
+            if (signal != null)
             {
-                fps = s.rate;
+                fps = signal.rate;
                 skelfps = fps;
             }
             else
@@ -76,7 +143,7 @@ namespace ssi
                     // if (media_list.Medias.Count == 0)
                     if (visualizeskel || visualizepoints)
                     {
-                        signalCursor.X = MainHandler.Time.PixelFromTime(MainHandler.Time.CurrentPlayPositionPrecise);
+                        signalCursor.X = Time.PixelFromTime(Time.CurrentPlayPositionPrecise);
 
                         if (Time.CurrentPlayPositionPrecise >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true)
                         {
@@ -88,16 +155,16 @@ namespace ssi
                         else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
 
                         //hm additional syncstep..
-                        if (lasttimepos < MainHandler.Time.CurrentPlayPosition)
+                        if (lasttimepos < Time.CurrentPlayPosition)
                         {
-                            lasttimepos = MainHandler.Time.CurrentPlayPosition;
-                            MainHandler.Time.CurrentPlayPositionPrecise = lasttimepos;
+                            lasttimepos = Time.CurrentPlayPosition;
+                            Time.CurrentPlayPositionPrecise = lasttimepos;
                         }
                         if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
                     }
                 }
 
-                if (!innomediaplaymode)
+                if (!inNoMediaPlayMode)
                 {
                     if (_timerp != null)
                     {
@@ -107,7 +174,7 @@ namespace ssi
                 }
             });
 
-            if (innomediaplaymode)
+            if (inNoMediaPlayMode)
             {
                 // lasttimepos = ViewHandler.Time.CurrentPlayPosition;
                 control.navigator.playButton.Content = "II";
@@ -127,47 +194,29 @@ namespace ssi
             }
         }
 
-
-        private void mediaPlayHandler(MediaList videos, MediaPlayEventArgs e)
+        private void onMediaPlay(MediaList videos, MediaPlayEventArgs e)
         {
             if (movemedialock == false)
             {
-                double pos = MainHandler.Time.PixelFromTime(e.pos);
+                double time = e.pos;
+                double pos = Time.PixelFromTime(time);
 
-                if (Time.SelectionStop - Time.SelectionStart < 1) Time.SelectionStart = Time.SelectionStop - 1;
+                if (Time.SelectionStop - Time.SelectionStart < 1)
+                {
+                    Time.SelectionStart = Time.SelectionStop - 1;
+                }
 
-
-                Time.CurrentPlayPosition = e.pos;
+                Time.CurrentPlayPosition = time;
 
                 if (!visualizeskel && !visualizepoints)
                 {
                     signalCursor.X = pos;
-                    if (!AnnoTierStatic.Selected.IsNotGeometric)
-                    {
-                        while (control.annoListControl.annoDataGrid.SelectedItems.Count > 0)
-                        {
-                            control.annoListControl.annoDataGrid.SelectedItems.RemoveAt(0);
-                        }
-                        AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
-                        double deltaTime = ali.Duration;
-                        double roughtPosition = Time.CurrentPlayPosition / deltaTime;
-                        ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[(int)roughtPosition];
-                        if (ali.Points.Count > 0)
-                        {
-                            geometricOverlayUpdate(AnnoScheme.TYPE.POINT, ali);
-                        }
-                    }
-                   
                 }
-                //   Console.WriteLine("5 " + signalCursor.X);
-                //if (ViewHandler.Time.TimeFromPixel(signalCursor.X) > Time.SelectionStop || signalCursor.X <= 1 ) signalCursor.X = ViewHandler.Time.PixelFromTime(Time.SelectionStart);
-                // Console.WriteLine(signalCursor.X + "_____" + Time.SelectionStart);
 
-                double time = Time.TimeFromPixel(pos);
-                control.signalStatusPositionLabel.Text = FileTools.FormatSeconds(e.pos);
-                control.annoTierControl.currentTime = Time.TimeFromPixel(pos);
+                updatePositionLabels(time);
+                control.annoTierControl.currentTime = time;
 
-                if (e.pos > MainHandler.timeline.TotalDuration - 0.5)
+                if (time > timeline.TotalDuration - 0.5)
                 {
                     Stop();
                 }
@@ -180,8 +229,14 @@ namespace ssi
                 control.timeLineControl.rangeSlider.followmedia = true;
                 control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
             }
-            else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
-            if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
+            else if (control.navigator.followplaybox.IsChecked == false)
+            {
+                control.timeLineControl.rangeSlider.followmedia = false;
+                if (AnnoTierStatic.Label != null)
+                {
+                    AnnoTierStatic.Label.select(true);
+                }
+            }
         }
 
         private void handlePlay()
@@ -189,12 +244,12 @@ namespace ssi
             if ((string)control.navigator.playButton.Content == "II")
             {
                 //   nomediaPlayHandler(null);
-                innomediaplaymode = false;
+                inNoMediaPlayMode = false;
                 control.navigator.playButton.Content = ">";
             }
             else
             {
-                innomediaplaymode = true;
+                inNoMediaPlayMode = true;
                 noMediaPlayHandler(null);
                 control.navigator.playButton.Content = "II";
             }
@@ -205,7 +260,7 @@ namespace ssi
             control.navigator.fastForwardButton.Content = ">>";
             control.navigator.fastBackwardButton.Content = "<<";
 
-            if (mediaList.Medias.Count > 0)
+            if (mediaList.Count > 0)
             {
                 if (IsPlaying())
                 {
@@ -244,13 +299,15 @@ namespace ssi
 
             try
             {
-                mediaList.play(item, loop);
+                mediaList.Play(item, loop);
                 control.navigator.playButton.Content = "II";
             }
             catch (Exception e)
             {
                 System.Console.WriteLine(e.ToString());
             }
+
+            //
         }
 
         public bool IsPlaying()
@@ -262,25 +319,8 @@ namespace ssi
         {
             if (IsPlaying())
             {
-                mediaList.stop();
+                mediaList.Stop();
                 control.navigator.playButton.Content = ">";
-                int i = 0;
-                foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
-                {
-                    if (ali.Start <= Time.CurrentPlayPosition)
-                    {
-                        ++i;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                control.annoListControl.annoDataGrid.SelectedItems.Add(control.annoListControl.annoDataGrid.Items[i]);
-                control.geometricListControl.geometricDataGrid.Items.Refresh();
-                control.geometricListControl.geometricDataGrid.ScrollIntoView(control.geometricListControl.geometricDataGrid.Items[0]);
-                control.annoListControl.annoDataGrid.Items.Refresh();
-                control.annoListControl.annoDataGrid.ScrollIntoView(control.annoListControl.annoDataGrid.Items[i]);
             }
         }
 

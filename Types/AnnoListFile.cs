@@ -135,21 +135,21 @@ namespace ssi
                             sw.WriteLine(output + e.Confidence.ToString("n2"));
                         }
                     }
-                    else if(Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                    else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
                     {
                         foreach (AnnoListItem e in this)
                         {
                             sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
                         }
                     }
-                    else if(Scheme.Type == AnnoScheme.TYPE.GRPAH)
+                    else if (Scheme.Type == AnnoScheme.TYPE.GRPAH)
                     {
                         foreach (AnnoListItem e in this)
                         {
                             sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
                         }
                     }
-                    else if(Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                    else if (Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                     {
                         foreach (AnnoListItem e in this)
                         {

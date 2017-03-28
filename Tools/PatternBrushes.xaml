@@ -2,41 +2,52 @@
 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 xmlns:sys="clr-namespace:System;assembly=mscorlib"
 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
     <Page.Resources>
         <VisualBrush
-    x:Key="DotFillBrush"
-    TileMode="Tile"
-    Viewport="0,0,10,10"
-    ViewportUnits="Absolute"
-    Viewbox="0,0,10,10"
-    ViewboxUnits="Absolute">
+            x:Key="DotFillBrush"
+            TileMode="Tile"
+            Viewport="0,0,10,10"
+            ViewportUnits="Absolute"
+            Viewbox="0,0,10,10"
+            ViewboxUnits="Absolute">
             <VisualBrush.Visual>
-
                 <Canvas>
                     <Rectangle Fill="Black" Width="20" Height="20" />
                     <Ellipse
-        Fill="Red"
-        Width="5" Height="5" />
+                        Fill="Red"
+                        Width="5" Height="5" />     
                 </Canvas>
             </VisualBrush.Visual>
         </VisualBrush>
 
         <VisualBrush
-      x:Key="HatchBrush"
-      TileMode="Tile" Viewport="0,0,10,10"
-      ViewportUnits="Absolute" Viewbox="0,0,10,10"
-      ViewboxUnits="Absolute">
+              x:Key="HatchBrush"
+              TileMode="Tile" Viewport="0,0,10,10"
+              ViewportUnits="Absolute" Viewbox="0,0,10,10"
+              ViewboxUnits="Absolute">
             <VisualBrush.Visual>
                 <Canvas>
                     <Rectangle Fill="Black" Width="10" Height="10" />
-                    <Path Stroke="Red" Data="M 0 0  10 10" />
+                    <Path Stroke="Red" Data="M 0 0 10 10" />
                     <Path Stroke="Red" Data="M 0 10 l 10 -10" />
                 </Canvas>
             </VisualBrush.Visual>
         </VisualBrush>
 
-        <!--<Border BorderThickness="10" CornerRadius="10" HorizontalAlignment="Right" Height="150" VerticalAlignment="Bottom" Width="150" Margin="0,0,92.666,42.667">
-            <Border.BorderBrush>-->
+        <VisualBrush
+              x:Key="DashedBrush"
+              TileMode="Tile" Viewport="0,0,10,2"
+              ViewportUnits="Absolute" Viewbox="0,0,10,2"
+              ViewboxUnits="Absolute">
+            <VisualBrush.Visual>
+                <Canvas>
+                    <Rectangle Fill="White" Width="10" Height="2" />
+                    <Path Stroke="Black" Data="M 0 1 10 1" />
+                </Canvas>
+            </VisualBrush.Visual>
+        </VisualBrush>
+
         <VisualBrush
             x:Key="BorderBrush">
             <VisualBrush.Visual>
@@ -57,19 +68,14 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
                 </Grid>
             </VisualBrush.Visual>
         </VisualBrush>
-        <!--</Border.BorderBrush>
-        </Border>-->
+
+        
+        
     </Page.Resources>
 
     <Canvas>
-        <Rectangle Canvas.Top="20" Canvas.Left="20"
-  Width="80" Height="40"
-  Fill="{StaticResource DotFillBrush}" />
-        <Rectangle Canvas.Top="20" Canvas.Left="120"
-  Width="80" Height="40"
-  Fill="{StaticResource HatchBrush}" />
-        <Rectangle Canvas.Top="20" Canvas.Left="217"
-  Width="80" Height="40"
-  Fill="{StaticResource BorderBrush}" />
+        <Rectangle Canvas.Top="20" Canvas.Left="20" Width="80" Height="40" Fill="{StaticResource DotFillBrush}" />
+        <Rectangle Canvas.Top="20" Canvas.Left="120" Width="80" Height="40" Fill="{StaticResource HatchBrush}" />
+        <Rectangle Canvas.Top="20" Canvas.Left="217" Width="80" Height="40" Fill="{StaticResource DashedBrush}" />
     </Canvas>
 </Page>

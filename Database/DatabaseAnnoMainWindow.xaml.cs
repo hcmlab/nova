@@ -29,7 +29,8 @@ namespace ssi
         {
             InitializeComponent();
 
-          
+            database = DatabaseHandler.Database;
+            mongo = DatabaseHandler.Client;
 
             this.db_server.Text = Properties.Settings.Default.DatabaseAddress;
             this.db_login.Text = Properties.Settings.Default.MongoDBUser;
@@ -38,9 +39,6 @@ namespace ssi
             this.server_pass.Password = Properties.Settings.Default.DataServerPass;
             Autologin.IsEnabled = false;
             allfiles.Clear();
-
-            database = DatabaseHandler.Database;
-            mongo = DatabaseHandler.Client;
 
             if (Properties.Settings.Default.DatabaseAutoLogin == true)
             {
@@ -63,9 +61,6 @@ namespace ssi
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
             Properties.Settings.Default.Save();
 
-
-            mongo = DatabaseHandler.Client;
-
             try
             {
                 int count = 0;
@@ -81,7 +76,6 @@ namespace ssi
                 {
                     SelectDatabase();
                     Autologin.IsEnabled = true;
-                    Autologin.IsChecked = true;
                 }
                 else
                 { MessageBox.Show("You have no rights to access the database list");
@@ -99,7 +93,6 @@ namespace ssi
 
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
-
             ConnectToDB();
         }
 
@@ -202,7 +195,6 @@ namespace ssi
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-
             Properties.Settings.Default.DataServerLogin = this.server_login.Text;
             Properties.Settings.Default.DataServerPass = this.server_pass.Password;
             Properties.Settings.Default.Save();
@@ -285,11 +277,11 @@ namespace ssi
             string output = "";
             var builder = Builders<BsonDocument>.Filter;
             var filtera = builder.Eq("_id", reference);
-            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
+            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).Single();
 
-            if (result.Count > 0 && result[0] != null)
+            if (result != null)
             {
-                output = result[0][attribute].ToString();
+                output = result[attribute].ToString();
             }
 
             return output;

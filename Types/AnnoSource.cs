@@ -25,7 +25,7 @@ namespace ssi
             {
                 get
                 {
-                    return Path != null ? System.IO.Path.GetDirectoryName(Path) : "";
+                    return Path != null && Path != "" ? System.IO.Path.GetDirectoryName(Path) : "";
                 }
             }
             public string FullName

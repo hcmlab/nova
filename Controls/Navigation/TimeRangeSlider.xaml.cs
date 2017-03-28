@@ -101,11 +101,9 @@ namespace ssi
                 MainHandler.Time.SelectionStart = 0;
                 slider.RangeStartSelected = 0;
                 //seems to be a bug in avalon lib.try to fix it by adjusting the value
-
-                MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)slider.RangeStartSelected / (double)slider.RangeStop);
+                
+                MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * (slider.RangeStartSelected / slider.RangeStop);
                 MainHandler.Time.SelectionStop = MainHandler.Time.SelectionStart + duration;
-                //slider.RangeStopSelected = ((long)MainHandler.Time.SelectionStop * slider.RangeStop) / (long)MainHandler.Time.TotalDuration;
-
 
                 double stop = MainHandler.Time.SelectionStop * slider.RangeStop;
                 double dur = MainHandler.Time.TotalDuration;
@@ -113,9 +111,6 @@ namespace ssi
                 {
                     slider.RangeStopSelected = (uint)Math.Round(stop / dur);
                 }
-
-
-
 
                 if (MainHandler.Time.SelectionStart < 0) MainHandler.Time.SelectionStart = 0;
                 if (MainHandler.Time.SelectionStop - MainHandler.Time.SelectionStart < min)

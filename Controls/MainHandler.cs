@@ -1,5 +1,4 @@
-﻿using Octokit;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -7,8 +6,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,7 +20,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.5.3";
+        public static string BuildVersion = "1.0.0.0.0";
 
         private static Timeline timeline = null;
 
@@ -52,8 +49,7 @@ namespace ssi
         {
             get { return timeline; }
         }
-
-        private MediaList mediaList = new MediaList();
+        
         public Cursor signalCursor = null;
         public Cursor annoCursor = null;
 
@@ -61,10 +57,12 @@ namespace ssi
         private List<Signal> signals = new List<Signal>();
         private List<AnnoTier> annoTiers = new List<AnnoTier>();
         private List<AnnoList> annoLists = new List<AnnoList>();
+        private MediaList mediaList = new MediaList();
+        private List<MediaBox> mediaBoxes = new List<MediaBox>();
 
         private bool infastforward = false;
         private bool infastbackward = false;
-        private bool innomediaplaymode = false;
+        private bool inNoMediaPlayMode = false;
         private DispatcherTimer _timerff = new DispatcherTimer();
         private DispatcherTimer _timerfb = new DispatcherTimer();
         private DispatcherTimer _timerp = new DispatcherTimer();
@@ -73,7 +71,7 @@ namespace ssi
         private bool movemedialock = false;
         private double skelfps = 25;
         private double lasttimepos = 0;
-        private string lastdlfile = null;
+        private string lastDownloadFileName = null;
         private bool visualizeskel = false;
         private bool visualizepoints = false;
         public bool databaseloaded = false;
@@ -129,32 +127,53 @@ namespace ssi
             control = view;
             control.Drop += controlDrop;
 
+            // Shadow box
+
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
+            
+            // Media
 
-            control.mediaVideoControl.RemoveMedia += new EventHandler<MediaRemoveEventArgs>(removeMedia);
+            control.mediaStatusBar.Background = Defaults.Brushes.Highlight;
+            mediaList.OnMediaPlay += onMediaPlay;
+            MediaBoxStatic.OnBoxChange += onMediaBoxChange;
+            control.mediaVolumeControl.volumeSlider.ValueChanged += mediaVolumeControl_ValueChanged;
+            control.mediaCloseButton.Click += mediaBoxCloseButton_Click;
 
-            control.signalStatusBar.Background = Defaults.Brushes.Conceal;
-            control.signalStatusSettingsButton.Click += signalSettingsButton_Click;
+            // Signal
+
+            control.signalStatusBar.Background = Defaults.Brushes.Highlight;
+            control.signalSettingsButton.Click += signalSettingsButton_Click;
             control.signalStatusDimComboBox.SelectionChanged += signalDimComboBox_SelectionChanged;
-            control.signalStatusCloseButton.Click += signalTrackCloseButton_Click;
+            control.signalVolumeControl.volumeSlider.ValueChanged += signalVolumeControl_ValueChanged;
+            control.signalCloseButton.Click += signalTrackCloseButton_Click;
+            SignalTrackStatic.OnTrackChange += onSignalTrackChange;
+            control.signalAndAnnoGrid.MouseDown += signalTrackGrid_MouseDown;
 
-            control.annoStatusBar.Background = Defaults.Brushes.Conceal;
+            // Anno
+
+            control.annoStatusBar.Background = Defaults.Brushes.Highlight;
+            control.annoCloseButton.Click += annoTierCloseButton_Click;
+            control.annoSettingsButton.Click += annoSettingsButton_Click;
             control.annoListControl.annoDataGrid.SelectionChanged += annoList_SelectionChanged;
             control.annoListControl.editButton.Click += annoListEdit_Click;
             control.annoListControl.editTextBox.KeyDown += annoListEdit_KeyDown;
             control.annoListControl.editTextBox.GotMouseCapture += annoListEdit_Focused;
-            control.annoStatusCloseButton.Click += annoTierCloseButton_Click;
-            control.annoStatusSettingsButton.Click += annoSettingsButton_Click;
+            AnnoTierStatic.OnTierChange += onAnnoTierChange;
+            AnnoTierStatic.OnTierSegmentChange += changeAnnoTierSegmentHandler;
+            control.annoTierControl.MouseDown += annoTierControl_MouseDown;
+            control.annoTierControl.MouseMove += annoTierControl_MouseMove;
+            control.annoTierControl.MouseRightButtonUp += annoTierControl_MouseRightButtonUp;
 
+            // Geometric
 
             control.geometricListControl.editButton.Click += geometricListEdit_Click;
             control.geometricListControl.editTextBox.GotMouseCapture += geometricListEdit_Focused;
+            //control.geometricListControl.xTextBox.GotMouseCapture += geometricListEdit_Focused;
+            //control.geometricListControl.yTextBox.GotMouseCapture += geometricListEdit_Focused;
             control.geometricListControl.copyButton.Click += geometricListCopy_Click;
             control.geometricListControl.selectAllButton.Click += geometricListSelectAll_Click;
             control.geometricListControl.geometricDataGrid.SelectionChanged += geometricList_Selection;
             control.geometricListControl.MenuItemDeleteClick.Click += geometricListDelete;
-            control.geometricListControl.KeyDown += geometricKeyDown;
-
 
             // Menu
 
@@ -190,6 +209,8 @@ namespace ssi
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
             control.databaseManageMenu.Click += databaseManage_Click;
 
+            // Navigator
+
             control.navigator.newAnnoButton.Click += navigatorNewAnno_Click;
             control.navigator.clearButton.Click += navigatorClearSession_Click;
             control.navigator.jumpFrontButton.Click += navigatorJumpFront_Click;
@@ -198,22 +219,19 @@ namespace ssi
             control.navigator.fastBackwardButton.Click += navigatorFastBackward_Click;
             control.navigator.jumpEndButton.Click += navigatorJumpEnd_Click;
             control.navigator.followAnnoCheckBox.Unchecked += navigatorFollowAnno_Unchecked;
-            control.navigator.correctionModeCheckBox.Click += navigatorCorrectionMode_Click;
-                   
-            AnnoTierStatic.OnTierChange += annoTierChange;
-            AnnoTierStatic.OnTierSegmentChange += changeAnnoTierSegmentHandler;
-            SignalTrackStatic.OnChange += changeSignalTrackHandler;
+            control.navigator.correctionModeCheckBox.Click += navigatorCorrectionMode_Click;                  
+
+            // Timeline
 
             timeline = new Timeline();
-            timeline.SelectionInPixel = control.signalAndAnnoControl.ActualWidth;
-            control.signalAndAnnoControl.SizeChanged += signalAndAnnoControlSizeChanged;
-
+            timeline.SelectionInPixel = control.signalAndAnnoAdorner.ActualWidth;
+            control.signalAndAnnoAdorner.SizeChanged += signalAndAnnoControlSizeChanged;
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += control.timeLineControl.timeTrack.TimeRangeChanged;
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += control.timeLineControl.timeTrackSelection.TimeRangeChanged;
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += Time.TimelineChanged;
             control.timeLineControl.rangeSlider.Update();            
 
-            mediaList.OnMediaPlay += mediaPlayHandler;
+            // Mouse
 
             control.MouseWheel += (sender, args) =>
             {
@@ -230,7 +248,11 @@ namespace ssi
                 }
             };
 
+            // Cursor
+
             initCursor();
+
+            // Update
 
             if (Properties.Settings.Default.CheckUpdateOnStart && Properties.Settings.Default.LastUpdateCheckDate.Date != DateTime.Today.Date)
             {
@@ -239,15 +261,16 @@ namespace ssi
                 checkForUpdates(true);
             }
 
-            clearSignalInfo();
+            // Clear
+            
+            clearSignalTrack();
             clearAnnoInfo();
+            clearMediaBox();
         }
-
-    
 
         private void signalAndAnnoControlSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            timeline.SelectionInPixel = control.signalAndAnnoControl.ActualWidth;
+            timeline.SelectionInPixel = control.signalAndAnnoAdorner.ActualWidth;
             if (!movemedialock) control.timeLineControl.rangeSlider.Update();
         }
         
@@ -281,13 +304,10 @@ namespace ssi
                 }
             }
             
-
             DatabaseLoaded = false;
-            showHideGeometricGrid(false,AnnoScheme.TYPE.FREE);
-
             if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
 
-            clearSignalInfo();
+            clearSignalTrack();
             clearAnnoInfo();
             
             control.navigator.playButton.IsEnabled = false;
@@ -298,41 +318,45 @@ namespace ssi
 
             control.annoTierControl.Clear();
             control.signalTrackControl.Clear();
-            control.mediaVideoControl.clear();
-            control.pointcontrol.Clear();
+            control.mediaBoxControl.Clear();
+            //control.pointcontrol.Clear();
 
-            innomediaplaymode = false;
+            inNoMediaPlayMode = false;
 
             signalTracks.Clear();
             signals.Clear();
             annoTiers.Clear();
             annoLists.Clear();
-            mediaList.clear();
-            control.videoskel.Children.OfType<GridSplitter>().ToList().ForEach(b => control.videoskel.Children.Remove(b));
+            mediaList.Clear();
+            mediaBoxes.Clear();
 
             visualizepoints = false;
             visualizeskel = false;
-
-            while (control.videoskel.ColumnDefinitions.Count > 1)
-            {
-                control.videoskel.ColumnDefinitions.RemoveAt(control.videoskel.ColumnDefinitions.Count - 1);
-            }
-
-            if (control.videoskel.ColumnDefinitions.Count > 1)
-            {
-                ColumnDefinition column = control.videoskel.ColumnDefinitions[1];
-                control.videoskel.ColumnDefinitions.Remove(column);
-            }
 
             Time.TotalDuration = 0;
 
             control.timeLineControl.rangeSlider.Update();
         }
 
+        private void updatePositionLabels(double time)
+        {
+            if (SignalTrackStatic.Selected != null && SignalTrackStatic.Selected.Signal != null)
+            {
+                Signal signal = SignalTrackStatic.Selected.Signal;
+                control.signalPositionLabel.Text = FileTools.FormatSeconds(time);
+                control.signalStatusValueLabel.Text = signal.Value(time).ToString();
+                control.signalStatusValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
+                control.signalStatusValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString();
+            }
+            if (MediaBoxStatic.Selected != null && MediaBoxStatic.Selected.Media != null)
+            {
+                control.mediaPositionLabel.Text = "#" + FileTools.FormatFrames(time, MediaBoxStatic.Selected.Media.GetSampleRate());
+            }
+        }
 
         private void updateTimeRange(double duration)
         {
-            if (duration > MainHandler.Time.TotalDuration)
+            if (duration > Time.TotalDuration)
             {
                 Time.TotalDuration = duration;
                 if (!movemedialock) control.timeLineControl.rangeSlider.Update();

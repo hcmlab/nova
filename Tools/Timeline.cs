@@ -15,11 +15,8 @@
         }
 
         public void TimelineChanged(Timeline time)
-        {
-            if (OnTimelineChanged != null)
-            {
-                OnTimelineChanged(time);   
-            }           
+        {            
+            OnTimelineChanged?.Invoke(time);                       
         }
 
         public double CurrentPlayPosition

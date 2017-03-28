@@ -80,9 +80,9 @@ namespace ssi
         }
 
         public bool loaded = false;
-        private String name = null;
-        private String fileName = null;
-        private String filePath = null;
+        private string name = null;
+        private string fileName = null;
+        private string filePath = null;
         private bool isAudio = false;
         private int showDim = 0;
 
@@ -101,6 +101,8 @@ namespace ssi
                 }
             }
         }
+
+        public IMedia Media { get; set; }
 
         public bool IsAudio
         {
@@ -188,7 +190,7 @@ namespace ssi
         }
 
         //shrink konsturktor
-        public Signal(Signal s, UInt32 width, double fromInSec, double toInSec)
+        public Signal(Signal s, uint width, double fromInSec, double toInSec)
         {
             this.dim = s.dim;
             this.bytes = s.bytes;

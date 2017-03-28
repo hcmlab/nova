@@ -1,91 +1,86 @@
-﻿using System.Windows;
+﻿using System;
+using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace ssi
 {
-    /// <summary>
-    /// Interaction logic for MediaBox.xaml
-    /// </summary>
-    public partial class MediaBox : UserControl
+    public delegate void MediaBoxChangeEventHandler(MediaBox track, EventArgs e);
+
+    public partial class MediaBoxStatic
+    {
+        static public MediaBox Selected = null;
+
+        static public event MediaBoxChangeEventHandler OnBoxChange;
+
+        static public void Select(MediaBox box)
+        {
+            Unselect();
+            Selected = box;
+
+            if (Selected.Border != null)
+            {
+                Selected.Border.BorderBrush = Defaults.Brushes.Highlight;
+            }
+
+            OnBoxChange?.Invoke(Selected, null);
+        }
+
+        static public void Unselect()
+        {
+            if (Selected != null)
+            {
+                Selected.Border.BorderBrush = Defaults.Brushes.Conceal;
+                Selected = null;
+            }
+        }
+    }
+
+    public partial class MediaBox : UserControl, INotifyPropertyChanged
     {
         private IMedia media = null;
-        private bool is_video;
+        public IMedia Media
+        { 
+            get { return media; }
+        }
 
-        public MediaBox(IMedia media, bool is_video)
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void RaisePropertyChanged(string property)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        }
+
+        public MediaBox(IMedia media)
         {
             this.media = media;
 
             InitializeComponent();
 
-            string filepath = media.GetFilepath();
-            string[] tmp = filepath.Split('\\');
-            string filename = tmp[tmp.Length - 1];
-            this.nameLabel.Text = filename;
-            this.nameLabel.ToolTip = filepath;
-            this.is_video = is_video;
             Grid.SetColumn(media.GetView(), 0);
             Grid.SetRow(media.GetView(), 0);
-            if (is_video)
-            {
-                zoombox.Visibility = Visibility.Visible;
-                this.MediaDropBox.Children.Add(media.GetView());
 
-                GeometricOverlay geometricOverlayZoom = new GeometricOverlay();
-                geometricOverlayZoom.Name = "zoomBlocker";
-                mediaBoxGrid.Children.Add(geometricOverlayZoom);
-                Grid.SetColumn(geometricOverlayZoom, 0);
-                Grid.SetRow(geometricOverlayZoom, 0);
-                geometricOverlayZoom.Visibility = Visibility.Collapsed;
-
-                GeometricOverlay geometricOverlay = new GeometricOverlay();
-                geometricOverlay.Name = "overlay";
-                mediaBoxGrid.Children.Add(geometricOverlay);
-                Grid.SetColumn(geometricOverlay, 0);
-                Grid.SetRow(geometricOverlay, 0);
-                geometricOverlay.Visibility = Visibility.Collapsed;
-
-
-
-            }
-            else this.mediaBoxGrid.Children.Add(media.GetView());
+            zoomControl.Child = media.GetView();
         }
 
-        public IMedia mediaelement
-        {
-            get { return media; }
-            set { media = value; }
-        }
-
-        public bool isvideo
-        {
-            get { return is_video; }
-            set { is_video = value; }
-        }
+        public Border Border { get; set; }
 
         public void RemoveMediaBox(IMedia media)
         {
             media.Stop();
             media.Clear();
-            this.MediaDropBox.Children.Remove(media.GetView());
+            zoomControl.Child = null;
         }
 
-        private void volumeCheck_Checked(object sender, RoutedEventArgs e)
+        protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            this.media.SetVolume(0);
-        }
+            base.OnMouseDown(e);
 
-        private void volumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (this.volumeCheck.IsChecked == false)
+            if (MediaBoxStatic.Selected != this)
             {
-                this.media.SetVolume((double)volumeSlider.Value);
+                MediaBoxStatic.Select(this);
             }
         }
-
-        private void volumeCheck_Unchecked(object sender, RoutedEventArgs e)
-        {
-            this.media.SetVolume(this.volumeSlider.Value);
-        }
-
     }
 }

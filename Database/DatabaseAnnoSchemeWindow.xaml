@@ -41,7 +41,7 @@
         <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Single" Margin="199,42,247,160">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="130" Header="Label" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Width="130" Header="Label" DisplayMemberBinding="{Binding Label}" />
 
                     <GridViewColumn Width="60" Header="Color">
                         <GridViewColumn.DisplayMemberBinding>

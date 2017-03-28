@@ -472,7 +472,7 @@ namespace ssi
                             {
                                 for (UInt32 j = 0; j < signal.dim; j++)
                                 {
-                                    signal.data[i * signal.dim + j] = (float)BitConverter.ToSingle(data_buffer, index);
+                                    signal.data[i * signal.dim + j] = (float)BitConverter.ToDouble(data_buffer, index);
                                     index += step;
                                 }
                             }

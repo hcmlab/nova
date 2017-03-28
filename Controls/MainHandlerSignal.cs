@@ -12,25 +12,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public void clearSignalInfo()
-        {
-            control.signalStatusSettingsButton.IsEnabled = false;
-            control.signalStatusFileNameLabel.Text = "";
-            control.signalStatusFileNameLabel.ToolTip = "";
-            control.signalStatusBytesLabel.Text = "";
-            control.signalStatusDimLabel.Text = "";
-            control.signalStatusDimComboBox.Items.Clear();
-            control.signalStatusSrLabel.Text = "";
-            control.signalStatusTypeLabel.Text = "";
-            control.signalStatusValueLabel.Text = "";
-            control.signalStatusValueMinLabel.Text = "";
-            control.signalStatusValueMaxLabel.Text = "";
-            control.signalStatusPositionLabel.Text = "00:00:00.00";
-            control.signalStatusCloseButton.IsEnabled = false;
-        }
-
-
-        private void addSignal(Signal signal, Color signalColor, Color backgroundColor)
+        private void addSignalTrack(Signal signal, Color signalColor, Color backgroundColor)
         {
             SignalTrack track = new SignalTrack(signal);
 
@@ -55,7 +37,9 @@ namespace ssi
                 && Properties.Settings.Default.DefaultZoomInSeconds != 0)
             {
                 fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
-            }    
+            }
+
+            SignalTrackStatic.Select(track);
         }
 
         private void signalTrackCloseButton_Click(object sender, RoutedEventArgs e)
@@ -81,20 +65,38 @@ namespace ssi
                 }
                 else
                 {
-                    clearSignalInfo();
+                    clearSignalTrack();
                 }
             }
         }
 
-        private void changeSignalTrackHandler(SignalTrack track, EventArgs e)
+        public void clearSignalTrack()
+        {
+            control.signalSettingsButton.Visibility = Visibility.Hidden;
+            control.signalStatusFileNameLabel.Text = "";
+            control.signalStatusFileNameLabel.ToolTip = "";
+            control.signalStatusBytesLabel.Text = "";
+            control.signalStatusDimLabel.Text = "";
+            control.signalStatusDimComboBox.Items.Clear();
+            control.signalStatusSrLabel.Text = "";
+            control.signalStatusTypeLabel.Text = "";
+            control.signalStatusValueLabel.Text = "";
+            control.signalStatusValueMinLabel.Text = "";
+            control.signalStatusValueMaxLabel.Text = "";
+            control.signalVolumeControl.Visibility = Visibility.Collapsed; 
+            control.signalPositionLabel.Text = "00:00:00.00";
+            control.signalCloseButton.Visibility = Visibility.Hidden;
+        }
+
+        private void changeSignalTrack(SignalTrack track)
         {
             Signal signal = track.Signal;
             if (signal != null)
             {
-                control.signalStatusSettingsButton.IsEnabled = true;
+                control.signalSettingsButton.Visibility = Visibility.Visible;
                 control.signalStatusFileNameLabel.Text = signal.FileName;
                 control.signalStatusFileNameLabel.ToolTip = signal.FilePath;
-                control.signalStatusBytesLabel.Text = signal.bytes + " bytes";                
+                control.signalStatusBytesLabel.Text = signal.bytes + " bytes";
                 control.signalStatusDimComboBox.Items.Clear();
                 for (int i = 0; i < signal.dim; i++)
                 {
@@ -107,8 +109,22 @@ namespace ssi
                 control.signalStatusValueLabel.Text = signal.Value(timeline.SelectionStart).ToString();
                 control.signalStatusValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
                 control.signalStatusValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString();
-                control.signalStatusCloseButton.IsEnabled = true;
+                if (signal.IsAudio && signal.Media != null && signal.Media.HasAudio())
+                {
+                    control.signalVolumeControl.volumeSlider.Value = signal.Media.GetVolume();                    
+                    control.signalVolumeControl.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    control.signalVolumeControl.Visibility = Visibility.Collapsed;
+                }
+                control.signalCloseButton.Visibility = Visibility.Visible;
             }
+        }
+
+        private void onSignalTrackChange(SignalTrack track, EventArgs e)
+        {
+            changeSignalTrack(track);
         }
 
         private void signalDimComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -131,6 +147,14 @@ namespace ssi
                 window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;                
                 window.ShowDialog();
             }
+        }       
+
+        private void signalVolumeControl_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (SignalTrackStatic.Selected != null && SignalTrackStatic.Selected.Signal.Media != null && MediaBoxStatic.Selected.Media.HasAudio())
+            {
+                SignalTrackStatic.Selected.Signal.Media.SetVolume(control.signalVolumeControl.volumeSlider.Value);
+            }
         }
 
         #region EVENTHANDLER
@@ -141,51 +165,19 @@ namespace ssi
             {
                 if (AnnoTierStatic.Label != null && Mouse.DirectlyOver.GetType() != AnnoTierStatic.Label.GetType() || AnnoTierStatic.Label == null)
                 {
-                    AnnoTier.UnselectLabel();
+                    AnnoTierStatic.UnselectLabel();
                     bool is_playing = IsPlaying();
                     if (is_playing)
                     {
                         Stop();
                     }
 
-                    double pos = e.GetPosition(control.trackGrid).X;
+                    double pos = e.GetPosition(control.signalAndAnnoGrid).X;
                     signalCursor.X = pos;
-                    Time.CurrentPlayPosition = MainHandler.Time.TimeFromPixel(signalCursor.X);
-                    Time.CurrentPlayPositionPrecise = MainHandler.Time.TimeFromPixel(signalCursor.X);
-                    mediaList.move(MainHandler.Time.TimeFromPixel(pos));
-                    double time = Time.TimeFromPixel(pos);
-                    control.signalStatusPositionLabel.Text = FileTools.FormatSeconds(time);
-
-
-                    if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
-                    {
-                        while (control.annoListControl.annoDataGrid.SelectedItems.Count > 0)
-                        {
-                          control.annoListControl.annoDataGrid.SelectedItems.RemoveAt(0);
-                        }
-                        int i = 0;
-                        foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
-                        {
-                            if (ali.Start <= time)
-                            {
-                                ++i;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        control.annoListControl.annoDataGrid.SelectedItems.Add(control.annoListControl.annoDataGrid.Items[i]);
-                        control.geometricListControl.geometricDataGrid.Items.Refresh();
-                        control.geometricListControl.geometricDataGrid.ScrollIntoView(control.geometricListControl.geometricDataGrid.Items[0]);
-                        control.annoListControl.annoDataGrid.Items.Refresh();
-                        control.annoListControl.annoDataGrid.ScrollIntoView(control.annoListControl.annoDataGrid.Items[i]);
-
-                    }
+                    Time.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+                    Time.CurrentPlayPositionPrecise = Time.TimeFromPixel(signalCursor.X);
+                    mediaList.Move(Time.TimeFromPixel(pos));                    
+                    updatePositionLabels(Time.TimeFromPixel(pos));
 
                     if (is_playing)
                     {

@@ -16,7 +16,7 @@ namespace ssi
     {
         #region LOAD
 
-        public void loadMultipleFiles(string[] filenames, string[] url = null)
+        public void loadMultipleFiles(string[] filenames)
         {
             int i = 0;
             foreach (string filename in filenames)
@@ -31,30 +31,29 @@ namespace ssi
                     }
                     else
                     {
-                        if (url != null)
-                        {
-                            loadFileHandler(filename, url[i]);
-                            i++;
-                        }
-                        else
-                        {
-                            loadFileHandler(filename);
-                        }
+                        loadFile(filename);
                     }
                 }
             }
         }
 
-        private bool loadFileHandler(string filename, string url = null)
+        private bool loadFile(string filepath)
         {
-            if (filename == null || filename.EndsWith("~"))
+            return loadFile(filepath, Defaults.Colors.Foreground, Defaults.Colors.Background);
+        }
+
+        private bool loadFile(string filepath,
+            Color foreground,
+            Color background)
+        {
+            if (filepath == null || filepath.EndsWith("~"))
             {
                 return false;
             }
 
             control.Cursor = Cursors.Wait;
             Action EmptyDelegate = delegate () { };
-            control.ShadowBoxText.Text = "Loading '" + filename + "'";
+            control.ShadowBoxText.Text = "Loading '" + filepath + "'";
             control.ShadowBox.Visibility = Visibility.Visible;
             control.UpdateLayout();
             control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
@@ -63,10 +62,10 @@ namespace ssi
 
             SSI_FILE_TYPE ftype = SSI_FILE_TYPE.UNKOWN;
 
-            int index = filename.LastIndexOf('.');
+            int index = filepath.LastIndexOf('.');
             if (index > 0)
             {
-                string type = filename.Substring(index + 1);
+                string type = filepath.Substring(index + 1);
                 switch (type)
                 {
                     case "avi":
@@ -132,106 +131,57 @@ namespace ssi
             switch (ftype)
             {
                 case SSI_FILE_TYPE.VIDEO:
-                    loadMedia(filename, true, url);
+                    loadMediaFile(filepath, MediaType.VIDEO);
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.CSV:
-
-                    //Read first line, check if format is an annotation, else interpret it as external csv
-                    //Read second line to check for sample rate (only relevant for continous files)
-                    string csvanno = "^([0-9]+.[0-9]+|[0-9]+);([0-9]+.[0-9]+|[0-9]+);.*";
-                    string legacyanno = "^([0-9]+.[0-9]+|[0-9]+) ([0-9]+.[0-9]+|[0-9]+) .*";
-                    string csvcont = "^([0-9]+.[0-9]+|[0-9]+;)(.)[^;]*";
-                    string csvcontnew = "^((-?)[0-9]+.[0-9]+|[0-9]+;)+([0-9]+|[0-9]+;)(.)[^;];\\#.*";
-
-                    string type = "";
-
-                    Regex reg = new Regex(csvanno);
-                    Regex reglegacy = new Regex(legacyanno);
-                    Regex regcont = new Regex(csvcont);
-                    Regex regcontnew = new Regex(csvcontnew);
-                    StreamReader sr = new StreamReader(filename, System.Text.Encoding.Default);
-                    string line = sr.ReadLine();
-                    double samplerate = 1.0;
-
-                    if (line != null)
-                    {
-                        bool iscontinouswithtier = regcontnew.IsMatch(line);
-                        if (reg.IsMatch(line) && !iscontinouswithtier) type = "semicolon";
-                        else if (reglegacy.IsMatch(line) && !iscontinouswithtier) type = "legacy";
-                        else if ((regcont.IsMatch(line) || iscontinouswithtier))
-                        {
-                            string[] data = line.Split(';');
-                            try
-                            {
-                                double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                                line = sr.ReadLine();
-                                data = line.Split(';');
-                                double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                                samplerate = start2 - start;
-                                type = "continuous";
-                            }
-                            catch
-                            {
-                                MessageBox.Show("Error reading continuous file");
-                            }
-                        }
-
-                        sr.Close();
-                    }
-                    else type = "semicolon";
-
-                    if (type == "continuous" || type == "semicolon" || type == "legacy")
-                    {
-                        loadCSVAnnotation(filename, samplerate, type);
-                    }
-                    else
-                    {
-                        loadCSV(filename);
-                    }
-
+                    loadCSVFile(filepath, foreground, background);
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.AUDIO:
-                    loadWav(filename);
-                    loadMedia(filename, false);
+                    Signal signal = loadWAVSignalFile(filepath, foreground, background);
+                    IMedia media = loadMediaFile(filepath, MediaType.AUDIO);                    
+                    if (signal != null)
+                    {
+                        signal.Media = media;
+                    }
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.ANNOTATION:
-                    loadAnnotation(filename);
+                    loadAnnoFile(filepath);
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.STREAM:
-                    loadStream(filename);
+                    loadSignalFile(filepath, foreground, background);
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.EVENTS:
-                    ImportAnnoFromSSIEvents(filename);
+                    ImportAnnoFromSSIEvents(filepath);
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.EAF:
-                    ImportAnnoFromElan(filename);
+                    ImportAnnoFromElan(filepath);
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.ARFF:
-                    loadARFF(filename);
+                    loadARFFAnnoFile(filepath);
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.ANVIL:
-                    ImportAnnoFromAnvil(filename);
+                    ImportAnnoFromAnvil(filepath);
                     loaded = true;
                     break;
 
                 case SSI_FILE_TYPE.PROJECT:
-                    loadProject(filename);
+                    loadProjectFile(filepath);
                     loaded = true;
                     // workaround
                     foreach (AnnoList annoList in annoLists)
@@ -250,7 +200,38 @@ namespace ssi
             return loaded;
         }
 
-        private void loadAnnotation(string filename)
+        private void addMedia(IMedia media)
+        {
+            double time = Time.TimeFromPixel(signalCursor.X);
+            media.Move(time);
+            mediaList.Add(media);
+
+            if (media.GetMediaType() != MediaType.AUDIO)
+            {
+                addMediaBox(media);
+            }
+
+            control.navigator.playButton.IsEnabled = true;
+            inNoMediaPlayMode = false;
+        }
+
+        private IMedia loadMediaFile(string filename, MediaType type)
+        {
+            if (!File.Exists(filename))
+            {
+                MessageTools.Error("Media file not found '" + filename + "'");
+                return null;
+            }
+
+            MediaKit media = new MediaKit(filename, type);
+            // Media media = new Media(filename, type);   
+            media.OnMediaMouseDown += OnMediaMouseDown;
+            addMedia(media);
+
+            return media;
+        }
+
+        private void loadAnnoFile(string filename)
         {
             if (!File.Exists(filename))
             {
@@ -258,11 +239,11 @@ namespace ssi
                 return;
             }
 
-            AnnoList annoList = AnnoList.LoadfromFile(filename);
+            AnnoList annoList = AnnoList.LoadfromFile(filename);            
             addAnnoTierFromList(annoList);
         }
 
-        private void loadCSVAnnotation(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
+        private void loadCSVAnnoFile(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
         {
             if (!File.Exists(filename))
             {
@@ -274,12 +255,26 @@ namespace ssi
             addAnnoTierFromList(annoList);
         }
 
-        private void loadStream(string filename)
+        private void loadARFFAnnoFile(string filename)
         {
-            loadStream(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
+            loadARFFAnnoFile(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
         }
 
-        private void loadStream(string filename, Color signalColor, Color backgroundColor)
+        private void loadARFFAnnoFile(string filename, Color signalColor, Color backgroundColor)
+        {
+            Signal signal = Signal.LoadARFFFile(filename);
+            if (signal != null && signal.loaded)
+            {
+                addSignalTrack(signal, signalColor, backgroundColor);
+            }
+        }
+
+        private void loadSignalFile(string filename)
+        {
+            loadSignalFile(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
+        }
+
+        private void loadSignalFile(string filename, Color signalColor, Color backgroundColor)
         {
             if (!File.Exists(filename))
             {
@@ -288,99 +283,111 @@ namespace ssi
             }
 
             Signal signal = Signal.LoadStreamFile(filename);
-            signalCursor.signalLoaded = true;
-            annoCursor.signalLoaded = true;
             if (signal != null && signal.loaded)
             {
-                addSignal(signal, signalColor, backgroundColor);
 
-                if (signal.meta_name == "face" || signal.meta_name == "skeleton")
+                if (signal.meta_name == "face")
                 {
-                    if (control.videoskel.ColumnDefinitions.Count < 2 && mediaList.Medias.Count > 0)
-                    {
-                        ColumnDefinition split_column = new ColumnDefinition();
-                        split_column.Width = new GridLength(1, GridUnitType.Auto);
-                        control.videoskel.ColumnDefinitions.Add(split_column);
-                        GridSplitter splitter = new GridSplitter();
-                        splitter.ResizeDirection = GridResizeDirection.Columns;
-                        splitter.Width = 3;
-                        splitter.HorizontalAlignment = HorizontalAlignment.Stretch;
-                        splitter.VerticalAlignment = VerticalAlignment.Stretch;
-                        Grid.SetRowSpan(splitter, 1);
-                        //Grid.SetColumn(splitter, 0);
-                        Grid.SetColumn(splitter, control.videoskel.ColumnDefinitions.Count - 1);
-
-                        control.videoskel.Children.Add(splitter);
-
-                        ColumnDefinition column = new ColumnDefinition();
-                        column.Width = new GridLength(1, GridUnitType.Star);
-                        control.videoskel.ColumnDefinitions.Add(column);
-                    }
-                    else if (control.videoskel.ColumnDefinitions.Count < 2)
-                    {
-                        ColumnDefinition columvideo = control.videoskel.ColumnDefinitions[0];
-                        columvideo.Width = new GridLength(0, GridUnitType.Pixel);
-
-                        ColumnDefinition column = new ColumnDefinition();
-                        column.Width = new GridLength(1, GridUnitType.Star);
-                        control.videoskel.ColumnDefinitions.Add(column);
-                    }
-                    control.pointcontrol.AddSignal(signal);
-                    visualizepoints = true;
-                    control.navigator.playButton.IsEnabled = true;
+                    IMedia media = new Face(filename, signal);
+                    addMedia(media);
+                }
+                else if (signal.meta_name == "skeleton")
+                {
+                    IMedia media = new Skeleton(filename, signal);
+                    addMedia(media);
+                }
+                else
+                {
+                    signalCursor.signalLoaded = true;
+                    annoCursor.signalLoaded = true;
+                    addSignalTrack(signal, signalColor, backgroundColor);                  
                 }
             }
         }
 
-        private void loadWav(string filename)
-        {
-            loadWav(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
-        }
-
-        private void loadWav(string filename, Color signalColor, Color backgroundColor)
+        private Signal loadWAVSignalFile(string filename, Color signalColor, Color backgroundColor)
         {
             if (!File.Exists(filename))
             {
                 MessageTools.Error("Wav file not found '" + filename + "'");
-                return;
+                return null;
             }
 
             Signal signal = Signal.LoadWaveFile(filename);
             if (signal != null && signal.loaded)
             {
-                addSignal(signal, signalColor, backgroundColor);
+                addSignalTrack(signal, signalColor, backgroundColor);
+            }
+
+            return signal;
+        }
+
+        private void loadCSVFile(string filename, Color foreground, Color background)
+        {
+            //Read first line, check if format is an annotation, else interpret it as external csv
+            //Read second line to check for sample rate (only relevant for continous files)
+            string csvanno = "^([0-9]+.[0-9]+|[0-9]+);([0-9]+.[0-9]+|[0-9]+);.*";
+            string legacyanno = "^([0-9]+.[0-9]+|[0-9]+) ([0-9]+.[0-9]+|[0-9]+) .*";
+            string csvcont = "^([0-9]+.[0-9]+|[0-9]+;)(.)[^;]*";
+            string csvcontnew = "^((-?)[0-9]+.[0-9]+|[0-9]+;)+([0-9]+|[0-9]+;)(.)[^;];\\#.*";
+
+            string type = "";
+
+            Regex reg = new Regex(csvanno);
+            Regex reglegacy = new Regex(legacyanno);
+            Regex regcont = new Regex(csvcont);
+            Regex regcontnew = new Regex(csvcontnew);
+            StreamReader sr = new StreamReader(filename, System.Text.Encoding.Default);
+            string line = sr.ReadLine();
+            double samplerate = 1.0;
+
+            if (line != null)
+            {
+                bool iscontinouswithtier = regcontnew.IsMatch(line);
+                if (reg.IsMatch(line) && !iscontinouswithtier) type = "semicolon";
+                else if (reglegacy.IsMatch(line) && !iscontinouswithtier) type = "legacy";
+                else if ((regcont.IsMatch(line) || iscontinouswithtier))
+                {
+                    string[] data = line.Split(';');
+                    try
+                    {
+                        double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                        line = sr.ReadLine();
+                        data = line.Split(';');
+                        double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                        samplerate = start2 - start;
+                        type = "continuous";
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Error reading continuous file");
+                    }
+                }
+
+                sr.Close();
+            }
+            else type = "semicolon";
+
+            if (type == "continuous" || type == "semicolon" || type == "legacy")
+            {
+                loadCSVAnnoFile(filename, samplerate, type);
+            }
+            else
+            {
+                loadCSVSignalFile(filename, foreground, background);
             }
         }
 
-        private void loadCSV(string filename)
-        {
-            loadCSV(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
-        }
-
-        private void loadCSV(string filename, Color signalColor, Color backgroundColor)
+        private void loadCSVSignalFile(string filename, Color signalColor, Color backgroundColor)
         {
             Signal signal = Signal.LoadCSVFile(filename);
             if (signal != null && signal.loaded)
             {
-                addSignal(signal, signalColor, backgroundColor);
+                addSignalTrack(signal, signalColor, backgroundColor);
             }
         }
-
-        private void loadARFF(string filename)
-        {
-            loadARFF(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
-        }
-
-        private void loadARFF(string filename, Color signalColor, Color backgroundColor)
-        {
-            Signal signal = Signal.LoadARFFFile(filename);
-            if (signal != null && signal.loaded)
-            {
-                addSignal(signal, signalColor, backgroundColor);
-            }
-        }
-
-        public void loadProject(string filepath)
+   
+        public void loadProjectFile(string filepath)
         {
             clearSession();
 
@@ -391,14 +398,9 @@ namespace ssi
             {
                 doc.Load(filepath);
                 foreach (XmlNode node in doc.SelectNodes("//media"))
-                {
-                    bool isvideo = true;
-                    string path = node.InnerText;
-                    if (Path.GetExtension(path) == ".wav")
-                    {
-                        isvideo = false;
-                    }
-                    loadMedia(FileTools.GetAbsolutePath(path, workdir), isvideo);
+                {                    
+                    string path = FileTools.GetAbsolutePath(node.InnerText, workdir);
+                    loadFile(path);
                 }
 
                 foreach (XmlNode node in doc.SelectNodes("//signal"))
@@ -413,15 +415,8 @@ namespace ssi
                     {
                         foreground = (Color)ColorConverter.ConvertFromString(node.Attributes["fg"].LastChild.Value);
                     }
-                    string path = node.InnerText;
-                    if (Path.GetExtension(path) == ".wav")
-                    {
-                        loadWav(FileTools.GetAbsolutePath(path, workdir), foreground, background);
-                    }
-                    else
-                    {
-                        loadStream(FileTools.GetAbsolutePath(path, workdir), foreground, background);
-                    }
+                    string path = FileTools.GetAbsolutePath(node.InnerText, workdir);
+                    loadFile(path, foreground, background);
                 }
 
                 foreach (XmlNode node in (doc.SelectNodes("//tier")))
@@ -431,7 +426,8 @@ namespace ssi
                     {
                         path = node.Attributes["filepath"].LastChild.Value;
                     }
-                    loadFileHandler(FileTools.GetAbsolutePath(path, workdir));
+                    path = FileTools.GetAbsolutePath(path, workdir);
+                    loadFile(path);
                 }
             }
             catch (Exception e)
@@ -456,6 +452,7 @@ namespace ssi
         {
             if (AnnoTierStatic.Selected.AnnoList != null)
             {
+                string directory = AnnoTierStatic.Selected.AnnoList.Source.File.Directory;
                 string path = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Source.File.Name, ".annotation", "Annotation(*.annotation)|*.annotation", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
                 if (path != null)
                 {
@@ -491,17 +488,17 @@ namespace ssi
             saveAnnos();
 
             string firstmediadir = "";
-            if (mediaList.Medias.Count > 0) firstmediadir = mediaList.Medias[0].GetFolderepath();
+            if (mediaList.Count > 0) firstmediadir = mediaList[0].GetDirectory();
             else if (signals.Count > 0) firstmediadir = signals[0].Directory;
 
             string filePath = FileTools.SaveFileDialog("project", ".nova", "NOVA Project (*.nova)|*.nova", firstmediadir);
             if (filePath != null)
             {
-                saveProject(annoTiers, mediaList, signalTracks, filePath);
+                saveProject(annoTiers, mediaBoxes, signalTracks, filePath);
             }
         }
 
-        private void saveProject(List<AnnoTier> annoTiers, MediaList mediaList, List<SignalTrack> signalTracks, string filepath)
+        private void saveProject(List<AnnoTier> annoTiers, List<MediaBox> mediaBoxes, List<SignalTrack> signalTracks, string filepath)
         {
             string workdir = Path.GetDirectoryName(filepath);
 
@@ -511,11 +508,11 @@ namespace ssi
             sw.WriteLine("\t<medias>");
             if (mediaList != null)
             {
-                foreach (IMedia t in mediaList.Medias)
+                foreach (MediaBox box in mediaBoxes)
                 {
-                    if (t.GetFilepath() != null)
+                    if (box.Media.GetFilepath() != null)
                     {
-                        sw.WriteLine("\t\t<media>" + FileTools.GetRelativePath(t.GetFilepath(), workdir) + "</media>");
+                        sw.WriteLine("\t\t<media>" + FileTools.GetRelativePath(box.Media.GetFilepath(), workdir) + "</media>");
                     }
                 }
             }
@@ -652,7 +649,7 @@ namespace ssi
             }
 
             string firstmediadir = "";
-            if (mediaList.Medias.Count > 0) firstmediadir = mediaList.Medias[0].GetFolderepath();
+            if (mediaList.Count > 0) firstmediadir = mediaList[0].GetDirectory();
             else if (signals.Count > 0) firstmediadir = signals[0].Directory;
 
             string filepath = FileTools.SaveFileDialog("SampledAnnotations_Export", "txt", "Plain Text(*.txt)|*.txt", firstmediadir);
@@ -839,7 +836,7 @@ namespace ssi
                         mb = MessageBox.Show("Load converted annotation?", "Success", MessageBoxButton.YesNo);
                         if (mb == MessageBoxResult.Yes)
                         {
-                            loadAnnotation(newFilePath);
+                            loadAnnoFile(newFilePath);
                         }
                     }
                 }
@@ -897,7 +894,7 @@ namespace ssi
                 mb = MessageBox.Show("Successfully converted anno to stream. Load the stream?", "Success", MessageBoxButton.YesNo);
                 if (mb == MessageBoxResult.Yes)
                 {
-                    loadStream(filename);
+                    loadSignalFile(filename);
                 }
             }
         }

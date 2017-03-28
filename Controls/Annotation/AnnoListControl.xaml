@@ -39,7 +39,8 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="75" DisplayMemberBinding="{Binding Label}">
+                        
+                        <GridViewColumn Width="70" DisplayMemberBinding="{Binding Label}">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="Label" Click="GridViewColumnHeader_Click">Label</GridViewColumnHeader>
                             </GridViewColumn.Header>

@@ -156,7 +156,7 @@ namespace ssi
                 }
 
                 return 0;
-            }            
+            }
         }
     }
 }

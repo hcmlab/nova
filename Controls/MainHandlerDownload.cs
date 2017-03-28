@@ -160,7 +160,7 @@ namespace ssi
 
                 double percent = ((double)bytesreceived / (double)bytestotal) * 100.0;
 
-                control.navigator.Statusbar.Content = "Downloading " + lastdlfile + "  (" + percent.ToString("F3") + "%)";
+                control.navigator.Statusbar.Content = "Downloading " + lastDownloadFileName + "  (" + percent.ToString("F3") + "%)";
                 control.navigator.Statusbar.UpdateLayout();
                 control.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 control.ShadowBox.Visibility = Visibility.Visible;
@@ -180,7 +180,7 @@ namespace ssi
         {
             bool iscanceled = false;
             string localfilepath = Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid + "\\";
-            lastdlfile = fileName;
+            lastDownloadFileName = fileName;
 
             string ftpfilepath = "/" + folder + fileName;
             string localpath = localfilepath + fileName;
@@ -206,7 +206,6 @@ namespace ssi
                     Console.WriteLine("OK");
 
                     Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid);
-                    tokenSource = new CancellationTokenSource();
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
@@ -342,7 +341,7 @@ namespace ssi
 
                     Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", filename, URL);
                     Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid);
-                    tokenSource = new CancellationTokenSource();
+
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
@@ -433,7 +432,7 @@ namespace ssi
 
                 }
             }
-            else if (!localpath.EndsWith(".stream~") && !localpath.EndsWith(".stream%7E")) loadFileHandler(localpath);
+            else if (!localpath.EndsWith(".stream~") && !localpath.EndsWith(".stream%7E")) loadFile(localpath);
         }
 
         #endregion HTTPGET

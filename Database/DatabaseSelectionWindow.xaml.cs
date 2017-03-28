@@ -50,7 +50,6 @@ namespace ssi
 
         public string Result()
         {
-            if (DataBaseResultsBox.SelectedItem == null) return null;
             return DataBaseResultsBox.SelectedItem.ToString();
         }
 
@@ -130,14 +129,14 @@ namespace ssi
             else
             {
                 Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
-                input["Name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = "" };
+                input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = "" };
                 UserInputWindow dialog = new UserInputWindow("Add new name", input);
                 dialog.ShowDialog();
 
                 if (dialog.DialogResult == true)
                 {
-                    DataBaseResultsBox.Items.Add(dialog.Result("Name"));
-                    DataBaseResultsBox.SelectedItem = dialog.Result("Name");
+                    DataBaseResultsBox.Items.Add(dialog.Result("name"));
+                    DataBaseResultsBox.SelectedItem = dialog.Result("name");
                 }
             }
         }

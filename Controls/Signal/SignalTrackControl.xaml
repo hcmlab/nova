@@ -4,7 +4,7 @@
     xmlns:local="clr-namespace:ssi"
     Height="Auto" Width="Auto"  AllowDrop="True">
 
-    <Grid Name="signalTrackGrid"
+    <Grid Name="grid"
         VerticalAlignment="Stretch"
         HorizontalAlignment="Stretch"
         Width="Auto"

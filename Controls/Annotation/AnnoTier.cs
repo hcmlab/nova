@@ -60,11 +60,8 @@ namespace ssi
             Unselect();
             selectedTier = t;
             t.Select(true);
-
-            if (OnTierChange != null)
-            {
-                OnTierChange(selectedTier, null);
-            }
+            
+            OnTierChange?.Invoke(selectedTier, null);
         }
 
         static public void Unselect()
@@ -165,24 +162,11 @@ namespace ssi
         public AnnoList AnnoList { get; set; }
         public bool IsDiscreteOrFree
         {
-            get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || 
-                         AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE; }
+            get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE; }
         }
-        public bool IsContinuousOrGeometric
+        public bool IsContinuous
         {
-            get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
-                         !IsNotGeometric; }
-        }
-
-        public bool IsNotGeometric
-        {
-            get
-            {
-                return !(AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
-                       AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
-                       AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
-                       AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION);
-            }
+            get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS; }
         }
 
         private Color minOrBackColor = Defaults.Colors.Background;
@@ -521,22 +505,17 @@ namespace ssi
         {
             double sr = anno.Scheme.SampleRate;
             int numPoints = Convert.ToInt32(anno.Scheme.MinScore);
+            int samples = (int)Math.Round(MainHandler.Time.TotalDuration * sr);
 
-            int samples = (int)Math.Round(MainHandler.Time.TotalDuration * sr * numPoints);
             double delta = 1.0 / sr;
             if (AnnoList.Count < samples)
             {
-                //Random rnd = new Random();
                 for (int i = AnnoList.Count; i < samples; i++)
                 {
                     PointList points = new PointList();
                     for (int j = 0; j < numPoints; ++j)
                     {
-                        int x = -1;
-                        int y = -1;
-                        //x = rnd.Next(50, 150);
-                        //y = rnd.Next(50, 150);
-                        points.Add(new PointListItem(x, y, (j + 1).ToString(), 0));
+                        points.Add(new PointListItem(-1, -1, (j + 1).ToString(), 0));
                     }
                     AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, true, points);
                     AnnoList.Add(ali);
@@ -544,6 +523,7 @@ namespace ssi
             }
 
             TimeRangeChanged(MainHandler.Time);
+            //TimeRangeChanged(MainHandler.Time);
         }
 
         public void ContinuousAnnoMode()
@@ -1175,8 +1155,6 @@ namespace ssi
                         int i = 0;
                         foreach (AnnoListItem ali in AnnoList)
                         {
-                           // if (ali.Start <= time.SelectionStart) continue;
-
                             if (ali.Start >= time.SelectionStart && ali.Stop < time.SelectionStop)
                             {
                                 continuousTierLines[i % continuousTierLines.Count].X1 = MainHandler.Time.PixelFromTime(ali.Start);
@@ -1198,7 +1176,6 @@ namespace ssi
 
                                 i++;
                             }
-                           // else if (ali.Stop > time.SelectionStop) break;
                         }
                     }
                     else
@@ -1212,9 +1189,6 @@ namespace ssi
 
                             index = (int)((double)AnnoList.Count / (double)continuousTierLines.Count * (double)i + 0.5f);
                             if (index > AnnoList.Count) index = AnnoList.Count - 1;
-
-                           // if (AnnoList[index].Start <= time.SelectionStart) continue;
-
 
                             if (AnnoList[index].Start >= time.SelectionStart && AnnoList[index].Stop <= time.SelectionStop)
                             {
@@ -1254,7 +1228,6 @@ namespace ssi
                                 else if (CorrectMode == false) s.Visibility = Visibility.Visible;
                                 else s.Visibility = Visibility.Collapsed;
                             }
-                          //  else if (AnnoList[index].Stop > time.SelectionStop) break;
                             i++;
                         }
                     }

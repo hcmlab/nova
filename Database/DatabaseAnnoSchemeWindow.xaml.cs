@@ -71,16 +71,15 @@ namespace ssi
             if (dialog.DialogResult == true)
             {
                 items = new List<AnnoScheme.Label>();
-                string name = dialog.Result("label");
+                string label = dialog.Result("label");
                 Color color = (Color)ColorConverter.ConvertFromString(dialog.Result("color"));
-                AnnoScheme.Label lcp = new AnnoScheme.Label(name, color);
-
+                AnnoScheme.Label lcp = new AnnoScheme.Label(label, color);
 
                 labelcolors.Add(lcp);
 
                 foreach (AnnoScheme.Label lp in labelcolors)
                 {
-                    items.Add(new AnnoScheme.Label(name, color) { Name = lp.Name, Color = lp.Color });
+                    items.Add(new AnnoScheme.Label(label, color) { Name = lp.Name, Color = lp.Color });
                 }
 
                 AnnotationResultBox.ItemsSource = items;

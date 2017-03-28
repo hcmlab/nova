@@ -23,15 +23,16 @@ namespace ssi
         private Color headColor;
         private Color backColor;
 
-        private int renderWidth = 640;
-        private int renderHeight = 360;
-        private double zoomFactor = 1.0;
-        private double offsetY = 0.0;
-        private double offsetX = 0.0;
+        private int width;
+        private int height;
 
         private int numJoints = 0;
         private int jointValues = 0;
         private int numSkeletons = 1;
+
+        private float[] mins = { 0, 0, 0 };
+        private float[] maxs = { 0, 0, 0 };
+        private float[] facs = { 1, 1, 1 };
 
         private WriteableBitmap writeableBmp;
         private DispatcherTimer timer;
@@ -45,11 +46,14 @@ namespace ssi
             handler?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        public Face(string filepath, Signal signal)
+        public Face(string filepath, Signal signal, int width = 600, int height = 600)
         {
             this.filepath = filepath;
             this.signal = signal;
-            type = MediaType.SKELETON;
+            this.width = width;
+            this.height = height;
+
+            type = MediaType.FACE;
 
             BackColor = Defaults.Colors.Background;
             SignalColor = Defaults.Colors.Foreground;
@@ -57,14 +61,13 @@ namespace ssi
 
             numSkeletons = signal.meta_num;
 
-            this.numJoints = 25;
-            if (signal.meta_type == "kinect1") this.numJoints = 20;
-            else if (signal.meta_type == "kinect2") this.numJoints = 25;
-            
+            if (signal.meta_type == "ssi") numJoints = 25;
+            else if (signal.meta_type == "kinect1") numJoints = 20;
+            else if (signal.meta_type == "kinect2") numJoints = 25;
 
             jointValues = (int)((signal.dim / numSkeletons) / numJoints);
 
-            writeableBmp = new WriteableBitmap(renderWidth, renderHeight, 96.0, 96.0, PixelFormats.Bgra32, null);
+            writeableBmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgr32, null);
             writeableBmp.Clear(BackColor);            
 
             Source = writeableBmp;
@@ -72,6 +75,50 @@ namespace ssi
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(1000.0 / signal.rate);
             timer.Tick += new EventHandler(Draw);
+
+            minMax();
+            scale();
+        }
+
+        public void minMax()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                mins[i] = signal.min[i];
+                maxs[i] = signal.max[i];
+            }
+            
+            for (int i = 3; i < signal.dim; i++)
+            {
+                int dim = i % 3;
+                if (mins[dim] > signal.min[i])
+                {
+                    mins[dim] = signal.min[i];
+                }
+                else if (maxs[dim] < signal.max[i])
+                {
+                    maxs[dim] = signal.max[i];
+                }                                      
+            }
+
+            mins[0] = mins[1] = Math.Min(mins[0], mins[1]);
+            maxs[0] = maxs[1] = Math.Max(maxs[0], maxs[1]);
+        }
+
+        public void scale()
+        {
+            for (int i = 0; i < signal.number * signal.dim; i++)
+            {
+                int dim = i % 3;
+                if (maxs[dim] - mins[dim] != 0)
+                {
+                    signal.data[i] = (signal.data[i] - mins[dim]) / (maxs[dim] - mins[dim]);
+                }
+                else
+                {
+                    signal.data[i] = signal.data[i] - mins[dim];
+                }
+            }
         }
         
         public void Draw(object myObject, EventArgs myEventArgs)
@@ -81,39 +128,23 @@ namespace ssi
 
         public void Draw(double time)
         {
-            int actualdim = 3;
-            int index = (int)((int)(time * signal.rate) * signal.dim);
-
-            Color col = SignalColor;
-            double width = renderWidth;
-            double height = renderHeight;
+            uint index = (uint)(time * signal.rate);
 
             writeableBmp.Lock();
             writeableBmp.Clear(BackColor);
-        
-            //add some logic here  
-            //  if(signal.meta_type == "kinect2")
 
-            if (index < signal.data.Length)
+            if (index < signal.number)
             {
-                for (int i = 0; i < signal.dim; i = i + 3)
+                for (uint i = index * signal.dim; i < (index+1) * signal.dim; i += 3)
                 {
-                    double X = (signal.data[index + i * actualdim]) * zoomFactor * height + (width / 2) + offsetX;
-                    double Y = height - (signal.data[index + i * actualdim + 1]) * zoomFactor * width - height / 2 + offsetY;
-                    double Z = signal.data[index + i * actualdim + 2] * 100;
-                    writeableBmp.DrawLineAa((int)X, (int)Y, (int)X + 1, (int)Y, this.SignalColor);
+                    double X = signal.data[i] * width;
+                    double Y = height - signal.data[i+1] * height;
+                    writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
                 }
             }
 
             writeableBmp.Unlock();
 
-        }
-
-        private Color getColor(int Z)
-        {
-            Color c = this.SignalColor;
-            c.A = (byte)(Z < 255 ? Z : 255);
-            return c;
         }
 
         public MediaType GetMediaType()
@@ -157,12 +188,17 @@ namespace ssi
 
         public double GetSampleRate()
         {
-            return 0;
+            return signal.rate;
         }
 
         public UIElement GetView()
         {
             return this;
+        }
+
+        public WriteableBitmap GetOverlay()
+        {
+            return writeableBmp;
         }
 
         public double GetLength()
@@ -172,6 +208,10 @@ namespace ssi
 
         public void Clear()
         {
+            if (writeableBmp != null)
+            {
+                writeableBmp.Clear(BackColor);
+            }
         }
 
         public void Play()
