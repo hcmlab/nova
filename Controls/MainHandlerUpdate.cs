@@ -56,7 +56,7 @@ namespace ssi
 
         private void updateApplication_Click(object sender, RoutedEventArgs e)
         {
-            checkForUpdates(true);
+            checkForUpdates(false);
         }
 
         public int compareVersion(string Version1, string Version2)
