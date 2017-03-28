@@ -5,105 +5,70 @@ using System.Windows.Media;
 
 namespace ssi
 {
-    /// <summary>
-    /// Interaction logic for MediaControl.xaml
-    /// </summary>
-    ///
-
-    public class MediaRemoveEventArgs : EventArgs
-    {
-        private readonly IMedia _media;
-
-    
-
-
-
-        public MediaRemoveEventArgs(IMedia media)
-        {
-            _media = media;
-        }
-
-        public IMedia media
-        {
-            get { return _media; }
-        }
-    }
 
     public partial class MediaBoxControl : UserControl
     {
-        public event EventHandler<MediaRemoveEventArgs> RemoveMedia;
- 
-
-        protected virtual void OnRemoveMedia(IMedia media)
-        {
-            if (RemoveMedia != null) RemoveMedia(this, new MediaRemoveEventArgs(media));
-        }
-
         public MediaBoxControl()
         {
             InitializeComponent();
         }
 
-        public void clear()
-        {
-            this.audioGrid.RowDefinitions.Clear();
-            this.audioGrid.Children.Clear();
-            this.videoGrid.RowDefinitions.Clear();
-            this.videoGrid.Children.Clear();
+        public void Clear()
+        {            
+            grid.Children.Clear();
+            grid.ColumnDefinitions.Clear();
         }
 
-        public void addMedia(IMedia media, bool is_video)
+        public void Add(MediaBox box)
         {
-            Grid grid = is_video ? videoGrid : audioGrid;
-
-            if (is_video == true && grid.RowDefinitions.Count > 0)
+            for (int i = 0; i < grid.ColumnDefinitions.Count; i+=2)
             {
-                // splitter
-                RowDefinition split_row = new RowDefinition();
-                split_row.Height = new GridLength(1, GridUnitType.Auto);
-                grid.RowDefinitions.Add(split_row);
-                GridSplitter splitter = new GridSplitter();
-                splitter.ResizeDirection = GridResizeDirection.Rows;
-                splitter.Height = 3;
-                splitter.HorizontalAlignment = HorizontalAlignment.Stretch;
-                splitter.VerticalAlignment = VerticalAlignment.Stretch;
-                Grid.SetColumnSpan(splitter, 1);
-                Grid.SetColumn(splitter, 0);
-                Grid.SetRow(splitter, grid.RowDefinitions.Count - 1);
-                grid.Children.Add(splitter);
+                grid.ColumnDefinitions[i].Width = new GridLength(1, GridUnitType.Star);
             }
 
-            // video
-            RowDefinition row = new RowDefinition();
-            row.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(row);
+            if (grid.Children.Count > 0)
+            {
+                // splitter
+                ColumnDefinition split = new ColumnDefinition();
+                split.Width = new GridLength(1, GridUnitType.Auto);
+                grid.ColumnDefinitions.Add(split);
+                GridSplitter splitter = new GridSplitter();
+                splitter.ResizeDirection = GridResizeDirection.Columns;
+                splitter.Width = 5;
+                splitter.HorizontalAlignment = HorizontalAlignment.Stretch;
+                splitter.VerticalAlignment = VerticalAlignment.Stretch;
+                splitter.ShowsPreview = true;
+                Grid.SetRowSpan(splitter, 1);
+                Grid.SetRow(splitter, 0);
+                Grid.SetColumn(splitter, grid.ColumnDefinitions.Count - 1);
+                grid.Children.Add(splitter);
+            }            
 
-            MediaBox media_box = new MediaBox(media, is_video);
-            media_box.CloseButton.Click += removeMedia;
-            Grid.SetColumn(media_box, 0);
-            Grid.SetRow(media_box, grid.RowDefinitions.Count - 1);
-            grid.Children.Add(media_box);
+            // media
+            ColumnDefinition column = new ColumnDefinition();
+            column.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(column);
+
+            Border border = new Border();
+            border.BorderThickness = new Thickness(Defaults.SelectionBorderWidth, 0, 0, 0);
+            border.BorderBrush = Defaults.Brushes.Highlight;
+            border.Child = box;
+
+            Grid.SetRow(border, 0);
+            Grid.SetColumn(border, grid.ColumnDefinitions.Count - 1);
+            grid.Children.Add(border);
+
+            box.Border = border;
         }
 
-        public void removeMedia(object sender, RoutedEventArgs e)
+        public void Remove(MediaBox box)
         {
-            MediaBox media = GetAncestorOfType<MediaBox>(sender as Button);
-            Grid grid = media.isvideo ? this.videoGrid : this.audioGrid;
-            media.RemoveMediaBox(media.mediaelement);
-            grid.Children.Remove(media);
-            grid.RowDefinitions[Grid.GetRow(media)].Height = new GridLength(0);
-            if (grid.RowDefinitions.Count > Grid.GetRow(media) + 1) grid.RowDefinitions[Grid.GetRow(media)].Height = new GridLength(0);
-            OnRemoveMedia(media.mediaelement);
-        }
-
-
-
-        public static T GetAncestorOfType<T>(FrameworkElement child) where T : FrameworkElement
-        {
-            var parent = VisualTreeHelper.GetParent(child);
-            if (parent != null && !(parent is T))
-                return (T)GetAncestorOfType<T>((FrameworkElement)parent);
-            return (T)parent;
-        }
+            grid.ColumnDefinitions[Grid.GetColumn(box.Border)].Width = new GridLength(0);
+            if (grid.Children.IndexOf(box.Border) > 0)
+            {
+                grid.Children.RemoveAt(grid.Children.IndexOf(box.Border) - 1);
+                grid.Children.RemoveAt(grid.Children.IndexOf(box.Border));
+            }
+        }        
     }
 }

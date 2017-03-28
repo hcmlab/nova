@@ -90,7 +90,7 @@ namespace ssi
                         UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
                         Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
 
-                        mediaList.move(Time.TimeFromPixel(relativeLocation.X + AnnoTierStatic.Label.Width));
+                        mediaList.Move(Time.TimeFromPixel(relativeLocation.X + AnnoTierStatic.Label.Width));
 
                         if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                         {
@@ -114,18 +114,18 @@ namespace ssi
                     if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.Focus();
                     int i = 0;
                     double fps = 1.0 / 25.0;
-                    foreach (IMedia im in mediaList.Medias)
+                    foreach (IMedia media in mediaList)
                     {
-                        if (im.IsVideo()) break;
+                        if (media.GetMediaType() == MediaType.VIDEO) break;
                         i++;
                     }
 
-                    if (i < mediaList.Medias.Count)
+                    if (i < mediaList.Count)
                     {
-                        fps = 1.0 / mediaList.Medias[i].GetSampleRate();
+                        fps = 1.0 / mediaList[i].GetSampleRate();
                     }
 
-                    mediaList.move(Time.TimeFromPixel(signalCursor.X) + fps);
+                    mediaList.Move(Time.TimeFromPixel(signalCursor.X) + fps);
                     timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X) + fps;
                     timeline.CurrentPlayPositionPrecise = Time.TimeFromPixel(signalCursor.X) + fps;
                     double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
@@ -145,11 +145,9 @@ namespace ssi
                     }
                     else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
                 
-
-
                     double time = Time.TimeFromPixel(pos);
-                    control.signalStatusPositionLabel.Text = FileTools.FormatSeconds(time);
-                    control.annoTierControl.currentTime = Time.TimeFromPixel(pos);
+                    updatePositionLabels(time);
+                    control.annoTierControl.currentTime = time;
                     e.Handled = true;
 
                 }
@@ -164,7 +162,7 @@ namespace ssi
                         UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
                         Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
 
-                        mediaList.move(Time.TimeFromPixel(relativeLocation.X));
+                        mediaList.Move(Time.TimeFromPixel(relativeLocation.X));
 
                         if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                         {
@@ -188,18 +186,18 @@ namespace ssi
                     if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.Focus();
                     int i = 0;
                     double fps = 1.0 / 25.0;
-                    foreach (IMedia im in mediaList.Medias)
+                    foreach (IMedia im in mediaList)
                     {
-                        if (im.IsVideo()) break;
+                        if (im.GetMediaType() == MediaType.VIDEO) break;
                         i++;
                     }
 
-                    if (i < mediaList.Medias.Count)
+                    if (i < mediaList.Count)
                     {
-                        fps = 1.0 / mediaList.Medias[i].GetSampleRate();
+                        fps = 1.0 / mediaList[i].GetSampleRate();
                     }
 
-                    mediaList.move(Time.TimeFromPixel(signalCursor.X) - fps);
+                    mediaList.Move(Time.TimeFromPixel(signalCursor.X) - fps);
                     timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X) - fps;
                     timeline.CurrentPlayPositionPrecise = timeline.CurrentPlayPosition;
                     double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
@@ -220,7 +218,7 @@ namespace ssi
                     double time = Time.TimeFromPixel(pos);
                     if (time != 0)
                     {
-                        control.signalStatusPositionLabel.Text = FileTools.FormatSeconds(time);
+                        updatePositionLabels(time);
                         control.annoTierControl.currentTime = Time.TimeFromPixel(pos);
                     }
 
@@ -229,7 +227,7 @@ namespace ssi
 
 
 
-                if (e.KeyboardDevice.IsKeyDown(Key.M) && !isKeyDown)
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !isKeyDown)
                 {
                     if (AnnoTierStatic.Selected != null && !AnnoTierStatic.Selected.IsDiscreteOrFree)
                     {
@@ -426,7 +424,7 @@ namespace ssi
                         UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
                         Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
 
-                        mediaList.move(Time.TimeFromPixel(relativeLocation.X + AnnoTierStatic.Label.Width));
+                        mediaList.Move(Time.TimeFromPixel(relativeLocation.X + AnnoTierStatic.Label.Width));
 
                         annoCursor.X = relativeLocation.X;
                         signalCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
@@ -445,7 +443,7 @@ namespace ssi
                         UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
                         Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
 
-                        mediaList.move(Time.TimeFromPixel(relativeLocation.X));
+                        mediaList.Move(Time.TimeFromPixel(relativeLocation.X));
 
                         annoCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
                         signalCursor.X = relativeLocation.X;
@@ -483,18 +481,18 @@ namespace ssi
                 {
                     int i = 0;
                     double fps = 1.0 / 30.0;
-                    foreach (IMedia im in mediaList.Medias)
+                    foreach (IMedia im in mediaList)
                     {
-                        if (im.IsVideo())
+                        if (im.GetMediaType() == MediaType.VIDEO)
                         {
                             break;
                         }
                         i++;
                     }
 
-                    if (i < mediaList.Medias.Count)
+                    if (i < mediaList.Count)
                     {
-                        fps = 1.0 / mediaList.Medias[i].GetSampleRate();
+                        fps = 1.0 / mediaList[i].GetSampleRate();
                     }
 
                     //In case no media is loaded it takes the sr of the first loaded signal
@@ -506,7 +504,7 @@ namespace ssi
                         }
                     }
 
-                    mediaList.move(Time.TimeFromPixel(signalCursor.X) + fps);
+                    mediaList.Move(Time.TimeFromPixel(signalCursor.X) + fps);
 
                     if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                     {
@@ -547,21 +545,21 @@ namespace ssi
                 {
                     int i = 0;
                     double fps = 1.0 / 30.0;
-                    foreach (IMedia im in mediaList.Medias)
+                    foreach (IMedia im in mediaList)
                     {
-                        if (im.IsVideo())
+                        if (im.GetMediaType() == MediaType.VIDEO)
                         {
                             break;
                         }
                         i++;
                     }
 
-                    if (i < mediaList.Medias.Count)
+                    if (i < mediaList.Count)
                     {
-                        fps = 1.0 / mediaList.Medias[i].GetSampleRate();
+                        fps = 1.0 / mediaList[i].GetSampleRate();
                     }
 
-                    mediaList.move(Time.TimeFromPixel(signalCursor.X) - fps);
+                    mediaList.Move(Time.TimeFromPixel(signalCursor.X) - fps);
                     if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                     {
                         annoCursor.X = annoCursor.X - Time.PixelFromTime(fps);

@@ -18,9 +18,7 @@ namespace ssi
     {
         static public SignalTrack Selected = null;
 
-        static public event SignalTrackChangeEventHandler OnChange;
-
-        static public int brushCounter = 0;
+        static public event SignalTrackChangeEventHandler OnTrackChange;
 
         static public void Select(SignalTrack t)
         {
@@ -32,7 +30,7 @@ namespace ssi
                 Selected.Border.BorderBrush = Defaults.Brushes.Highlight;
             }
 
-            OnChange?.Invoke(Selected, null);
+            OnTrackChange?.Invoke(Selected, null);
         }
 
         static public void Unselect()
@@ -124,8 +122,6 @@ namespace ssi
 
             Signal = signal;
             MouseWheel += new MouseWheelEventHandler(OnSignalTrackMouseWheel);
-
-            Select(this);
         }
 
         public Signal Signal { get; set; }
@@ -253,7 +249,7 @@ namespace ssi
             // change track
             if (Selected != this)
             {
-                SignalTrack.Select(this);
+                SignalTrackStatic.Select(this);
             }
         }
 

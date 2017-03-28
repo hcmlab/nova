@@ -52,6 +52,23 @@ namespace ssi
                     sw.WriteLine("    </scheme>");
                 }
 
+                else if (Scheme.Type == AnnoScheme.TYPE.POINT)
+                {
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"POINT\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                }
+                else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                {
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                }
+                else if (Scheme.Type == AnnoScheme.TYPE.GRPAH)
+                {
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                }
+                else if (Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                {
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                }
+
                 sw.WriteLine("</annotation>");
                 sw.Close();
             }
@@ -102,6 +119,41 @@ namespace ssi
                             {
                                 sw.WriteLine(e.Start.ToString("n2") + delimiter + e.Stop.ToString("n2") + delimiter + -1 + delimiter + e.Confidence.ToString("n2"));
                             }
+                        }
+                    }
+
+                    else if (Scheme.Type == AnnoScheme.TYPE.POINT)
+                    {
+                        foreach (AnnoListItem e in this)
+                        {
+                            string output = "";
+                            output += e.Label + delimiter;
+                            for (int i = 0; i < e.Points.Count; ++i)
+                            {
+                                output += '(' + e.Points[i].Label + ':' + e.Points[i].XCoord + ':' + e.Points[i].YCoord + ":" + e.Points[i].Confidence + ')' + delimiter;
+                            }
+                            sw.WriteLine(output + e.Confidence.ToString("n2"));
+                        }
+                    }
+                    else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                    {
+                        foreach (AnnoListItem e in this)
+                        {
+                            sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
+                        }
+                    }
+                    else if (Scheme.Type == AnnoScheme.TYPE.GRPAH)
+                    {
+                        foreach (AnnoListItem e in this)
+                        {
+                            sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
+                        }
+                    }
+                    else if (Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                    {
+                        foreach (AnnoListItem e in this)
+                        {
+                            sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
                         }
                     }
 
@@ -261,10 +313,29 @@ namespace ssi
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.CONTINUOUS;
                 }
-                else
+                else if (type == AnnoScheme.TYPE.FREE.ToString())
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.FREE;
                 }
+
+                else if (type == AnnoScheme.TYPE.POINT.ToString())
+                {
+                    list.Scheme.Type = AnnoScheme.TYPE.POINT;
+                }
+                else if (type == AnnoScheme.TYPE.POLYGON.ToString())
+                {
+                    list.Scheme.Type = AnnoScheme.TYPE.POLYGON;
+                }
+                else if (type == AnnoScheme.TYPE.GRPAH.ToString())
+                {
+                    list.Scheme.Type = AnnoScheme.TYPE.GRPAH;
+                }
+                else if (type == AnnoScheme.TYPE.SEGMENTATION.ToString())
+                {
+                    list.Scheme.Type = AnnoScheme.TYPE.SEGMENTATION;
+                }
+
+
 
                 if (scheme.Attributes["color"] != null)
                 {
@@ -308,7 +379,9 @@ namespace ssi
                 else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
                 }
-                else if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                else if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS || list.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                         list.Scheme.Type == AnnoScheme.TYPE.POLYGON || list.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                         list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
                     list.Scheme.MinScore = double.Parse(scheme.Attributes["min"].Value);
@@ -376,6 +449,23 @@ namespace ssi
                                 }
                                 AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
                                 list.AddSorted(e);
+                            }
+
+                            else if (list.Scheme.Type == AnnoScheme.TYPE.POINT)
+                            {
+                                string frameLabel = data[0];
+                                double frameConfidence = Convert.ToDouble(data[data.Count() - 1], CultureInfo.InvariantCulture);
+                                PointList points = new PointList();
+                                for (int i = 1; i < data.Count() - 1; ++i)
+                                {
+                                    string pd = data[i].Replace("(", "");
+                                    pd = pd.Replace(")", "");
+                                    string[] pointData = pd.Split(':');
+                                    points.Add(new PointListItem(double.Parse(pointData[1]), double.Parse(pointData[2]), pointData[0], double.Parse(pointData[3])));
+                                }
+                                AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, frameConfidence, true, points);
+                                list.Add(ali);
+                                start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
                             }
                         }
                         sr.Close();

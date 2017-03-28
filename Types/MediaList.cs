@@ -11,7 +11,7 @@ namespace ssi
 
     public delegate void MediaPlayEventHandler(MediaList videos, MediaPlayEventArgs e);
 
-    public class MediaList
+    public class MediaList : List<IMedia>
     {
         private bool isPlaying = false;
 
@@ -20,15 +20,8 @@ namespace ssi
             get { return isPlaying; }
         }
 
-        private List<IMedia> medias = new List<IMedia>();
-
-        public List<IMedia> Medias
-        {
-            get { return medias; }
-        }
-
         private DispatcherTimer timer = null;
-        private MediaPlayEventArgs media_play_args = new MediaPlayEventArgs();
+        private MediaPlayEventArgs arguments = new MediaPlayEventArgs();
         public MediaPlayEventHandler OnMediaPlay;
 
         private AnnoListItem play_item = null;
@@ -36,94 +29,81 @@ namespace ssi
 
         public MediaList()
         {
-            this.timer = new DispatcherTimer();
-            this.timer.Interval = new TimeSpan(0, 0, 0, 0, 100);
-            this.timer.Tick += new EventHandler(timer_Tick);
+            timer = new DispatcherTimer();
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 100);
+            timer.Tick += new EventHandler(timer_Tick);
         }
 
-        public void clear()
+        public new void Clear()
         {
-            foreach (IMedia media in medias)
+            foreach (IMedia media in this)
             {
                 media.Clear();
             }
-            medias.Clear();
-        }
-
-        public IMedia addMedia(string filename, double pos_in_seconds, string url = null)
-        {
-            MediaKit media = new MediaKit(filename, pos_in_seconds);
-            media.DBID(url);
-            // Media media = new Media(filename, pos_in_seconds);
-            this.medias.Add(media);
-            return media;
+            base.Clear();
         }
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            if (Medias.Count > 0)
+            
+            if (Count > 0)
             {
-                double pos = medias[0].GetPosition();
+                double pos = this[0].GetPosition();
                 if (pos >= play_item.Stop)
                 {
-                    if (this.play_loop)
+                    if (play_loop)
                     {
-                        play(play_item, true);
+                        Play(play_item, true);
                     }
                     else
                     {
-                        stop();
+                        Stop();
                     }
                 }
                 else
                 {
-                    media_play_args.pos = pos;
-                    if (OnMediaPlay != null)
-                    {
-                        OnMediaPlay(this, media_play_args);
-                    }
+                    arguments.pos = pos;                    
+                    OnMediaPlay?.Invoke(this, arguments);
                 }
             }
         }
 
-        public void play(AnnoListItem item, bool loop)
+        public void Play(AnnoListItem item, bool loop)
         {
-            if (medias.Count > 0)
+            if (Count > 0)
             {
-                this.play_item = item;
-                this.play_loop = loop;
-                this.timer.Start();
-                foreach (IMedia v in medias)
+                play_item = item;
+                play_loop = loop;
+                timer.Start();
+                foreach (IMedia media in this)
                 {
-                    //v.Position = TimeSpan.FromSeconds(item.Start);
-                    //v.MediaPosition = (long) (item.Start * 1000.0);
-                    v.Move(item.Start);
-                    v.Play();
+                    media.Move(item.Start);
+                    media.Play();
                 }
                 isPlaying = true;
             }
         }
 
-        public void stop()
+        public void Stop()
         {
-            if (medias.Count > 0)
+            if (Count > 0)
             {
-                this.timer.Stop();
-                foreach (IMedia v in medias)
+                timer.Stop();
+                foreach (IMedia media in this)
                 {
-                    v.Pause();
+                    media.Pause();
                 }
                 isPlaying = false;
             }
         }
 
-        public void move(double to_in_ms)
+        public void Move(double time)
         {
-            foreach (IMedia v in medias)
+            foreach (IMedia media in this)
             {
-                if (v.IsVideo())
+                if (media.GetMediaType() != MediaType.AUDIO)
                 {
-                    v.Move(to_in_ms);
+                    media.Move(time);
                 }
             }
         }

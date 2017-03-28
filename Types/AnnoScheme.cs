@@ -15,6 +15,10 @@ namespace ssi
             DISCRETE,
             FREE,
             CONTINUOUS,
+            POINT,
+            POLYGON,
+            GRPAH,
+            SEGMENTATION,
         }
 
         public class Label

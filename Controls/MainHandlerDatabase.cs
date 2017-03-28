@@ -54,7 +54,7 @@ namespace ssi
 
                 foreach (AnnoTier track in annoTiers)
                 {
-                    if ((track.AnnoList.Source.HasDatabase() || !track.AnnoList.Source.HasFile()) && (track.AnnoList.HasChanged || isfinished))
+                    if (track.AnnoList.Source.HasDatabase() && (track.AnnoList.HasChanged || isfinished))
                     {
                         try
                         {
@@ -146,7 +146,6 @@ namespace ssi
                         if (annoLists != null)
                         {
                             foreach (AnnoList annoList in annoLists)
-
                             {
                                 //annoList.FilePath = annoList.Role + "." + annoList.Scheme.Name + "." + annoList.AnnotatorFullName;
                                 addAnnoTierFromList(annoList);
@@ -250,15 +249,14 @@ namespace ssi
         private void databaseAddNewAnnotation(AnnoScheme.TYPE annoType)
         {
             AnnoList annoList = new AnnoList();
-            annoList.Scheme.Type = annoType;
 
-            annoList.Meta.Role = DatabaseHandler.LoadRoles(annoList);
+            annoList.Meta.Role = DatabaseHandler.LoadRoles(null);
             if (annoList.Meta.Role == null)
             {
                 return;
             }
 
-            string annoScheme = DatabaseHandler.SelectAnnotationScheme(annoList);
+            string annoScheme = DatabaseHandler.SelectAnnotationScheme(null);
             if (annoScheme == null)
             {
                 return;

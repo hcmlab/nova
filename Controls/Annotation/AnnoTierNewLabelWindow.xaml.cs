@@ -47,8 +47,6 @@ namespace ssi
                     infoLabel.Text = "Edit free label";
                     freeSchemeGrid.Visibility = Visibility.Visible;
                     labelTextBox.Text = item.Label;
-                    labelTextBox.Focus();
-                    labelTextBox.SelectAll();
                     break;
             }
         }

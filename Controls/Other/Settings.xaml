@@ -28,7 +28,7 @@
                     <TextBox Name="Segmentmindur" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
                     <Label Content="Discrete sample rate in Hz (0 for none):"   HorizontalAlignment="left"  />
                     <TextBox Name="Samplerate" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left" PreviewTextInput="IntNumberValidationTextBox" />
-                    <Label Content="Check for updates once a day:" HorizontalAlignment="left"  />
+                    <Label Content="Check for updates on startup:" HorizontalAlignment="left"  />
                     <CheckBox Name="UpdatesCheckbox" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left"/>
                 </StackPanel>
             </TabItem>

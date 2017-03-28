@@ -61,6 +61,11 @@ namespace ssi
             }
         }
 
+        public static string FormatFrames(double seconds, double fps)
+        {
+            return Math.Round(seconds * fps).ToString();
+        }
+
         public static string GetRelativePath(string filespec, string folder)
         {
             Uri pathUri = new Uri(filespec);

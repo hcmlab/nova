@@ -1,14 +1,30 @@
 ﻿using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace ssi
 {
-    public interface IMedia
+    public enum MediaType
     {
+        AUDIO,
+        VIDEO,
+        SKELETON,
+        FACE
+    };
+
+    public interface IMedia
+    { 
+
         UIElement GetView();
 
-        void DBID(string url);
+        WriteableBitmap GetOverlay();
+
+        MediaType GetMediaType();
+
+        bool HasAudio();        
 
         void SetVolume(double volume);
+
+        double GetVolume();
 
         void Play();
 
@@ -18,7 +34,7 @@ namespace ssi
 
         void Clear();
 
-        void Move(double to_in_seconds);
+        void Move(double time);
 
         double GetPosition();
 
@@ -26,10 +42,8 @@ namespace ssi
 
         double GetSampleRate();
 
-        bool IsVideo();
-
         string GetFilepath();
 
-        string GetFolderepath();
+        string GetDirectory();
     }
 }

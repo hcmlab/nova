@@ -21,22 +21,22 @@ namespace ssi
         {
             InitializeComponent();
 
-            this.view.OnHandlerLoaded += viewHandlerLoaded;
+            view.OnHandlerLoaded += viewHandlerLoaded;
             CultureInfo ci = new CultureInfo("en-GB");
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
-            this.Title = "(NOn)Verbal Annotator | v" + MainHandler.BuildVersion + " | HCM-Lab, Augsburg University | http://openssi.net";
+            Title = "(NOn)Verbal Annotator | v" + MainHandler.BuildVersion + " | HCM-Lab, Augsburg University | http://openssi.net";
         }
 
         private void viewHandlerLoaded(MainHandler handler)
         {
-            this.viewh = handler;
-            this.viewh.LoadButton.Click += loadButton_Click;
-            this.KeyDown += OnKeyDown;
-            this.PreviewKeyDown += handler.OnPreviewKeyDown;
-            this.KeyDown += handler.OnKeyDown;
-            this.KeyUp += handler.OnKeyUp;
+            viewh = handler;
+            viewh.LoadButton.Click += loadButton_Click;
+            KeyDown += OnKeyDown;
+            PreviewKeyDown += handler.OnPreviewKeyDown;
+            KeyDown += handler.OnKeyDown;
+            KeyUp += handler.OnKeyUp;
 
             HandleClArgs(Environment.GetCommandLineArgs());
 
@@ -50,26 +50,26 @@ namespace ssi
         {
             if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Enter))
             {
-                if (this.WindowStyle != WindowStyle.None)
+                if (WindowStyle != WindowStyle.None)
                 {
-                    this.WindowStyle = WindowStyle.None;
-                    this.WindowState = WindowState.Normal;
-                    this.WindowState = WindowState.Maximized;
+                    WindowStyle = WindowStyle.None;
+                    WindowState = WindowState.Normal;
+                    WindowState = WindowState.Maximized;
                 }
             }
             else if (e.KeyboardDevice.IsKeyDown(Key.Escape))
             {
-                if (this.WindowStyle != WindowStyle.SingleBorderWindow)
+                if (WindowStyle != WindowStyle.SingleBorderWindow)
                 {
-                    this.WindowStyle = WindowStyle.SingleBorderWindow;
-                    this.WindowState = WindowState.Normal;
+                    WindowStyle = WindowStyle.SingleBorderWindow;
+                    WindowState = WindowState.Normal;
                 }
             }
         }
 
         private void loadButton_Click(object sender, RoutedEventArgs e)
         {
-            this.viewh.loadFiles();
+            viewh.loadFiles();
         }
 
         private void HandleClArgs(IList<string> args)
@@ -79,7 +79,7 @@ namespace ssi
             {
                 try
                 {
-                    this.viewh.loadMultipleFiles(new[] { args[i] });
+                    viewh.loadMultipleFiles(new[] { args[i] });
                 }
                 catch (Exception)
                 {
@@ -87,8 +87,6 @@ namespace ssi
                 }
             }
         }
-
-
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {

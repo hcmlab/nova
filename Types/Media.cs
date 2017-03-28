@@ -1,27 +1,43 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace ssi
 {
     public class Media : MediaElement, IMedia
     {
         private string filepath;
-        private string dbId;
+        private MediaType type;
+
+        public MediaType GetMediaType()
+        {
+            return type;
+        }
 
         public string GetFilepath()
         {
             return filepath;
         }
 
-        public string GetFolderepath()
+        public string GetDirectory()
         {
             return filepath.Substring(0, filepath.LastIndexOf("/") + 1);
         }
 
+        public new bool HasAudio()
+        {
+            return base.HasAudio;
+        }
+
         public void SetVolume(double volume)
         {
-            this.Volume = volume;
+            Volume = volume;
+        }
+
+        public double GetVolume()
+        {
+            return Volume;
         }
 
         public double GetSampleRate()
@@ -29,12 +45,7 @@ namespace ssi
             return 0;
         }
 
-        public void DBID(string url)
-        {
-            this.dbId = url;
-        }
-
-        public Media(string filepath, double pos_in_seconds)
+        public Media(string filepath, MediaType type)
         {
             this.LoadedBehavior = MediaState.Manual;
             this.UnloadedBehavior = MediaState.Manual;
@@ -44,11 +55,12 @@ namespace ssi
             //this.ScrubbingEnabled = true;
             this.Pause();
             this.filepath = filepath;
+            this.type = type;
         }
 
-        public void Move(double to_in_seconds)
+        public void Move(double time)
         {
-            this.Position = TimeSpan.FromSeconds(to_in_seconds);
+            this.Position = TimeSpan.FromSeconds(time);
         }
 
         public double GetPosition()
@@ -56,14 +68,14 @@ namespace ssi
             return Position.TotalMilliseconds / 1000.0;
         }
 
-        public bool IsVideo()
-        {
-            return this.HasVideo;
-        }
-
         public UIElement GetView()
         {
             return this;
+        }
+
+        public WriteableBitmap GetOverlay()
+        {
+            throw new NotImplementedException();
         }
 
         public double GetLength()

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace ssi
 {
@@ -75,7 +77,7 @@ namespace ssi
 
         private void clearAnnoInfo()
         {
-            control.annoStatusSettingsButton.IsEnabled = false;
+            control.annoSettingsButton.Visibility = Visibility.Hidden;
             control.annoStatusFileNameOrSessionLabel.Text = "";
             control.annoStatusFileNameOrSessionLabel.ToolTip = "";
             control.annoStatusSchemeNameLabel.Text = "";
@@ -84,13 +86,13 @@ namespace ssi
             control.annoStatusAnnotatorLabel.Text = "";
             control.annoStatusRoleLabel.Text = "";
             control.annoStatusSchemeTypeLabel.Text = "";
-            control.annoStatusPositionLabel.Text = "00:00:00.00";
-            control.annoStatusCloseButton.IsEnabled = false;
+            control.annoPositionLabel.Text = "00:00:00.00";
+            control.annoCloseButton.Visibility = Visibility.Hidden;
         }
 
         private void setAnnoInfo(AnnoList annoList)
         {
-            control.annoStatusSettingsButton.IsEnabled = true;
+            control.annoSettingsButton.Visibility = Visibility.Visible;
             if (annoList.Source.HasFile())
             {
                 control.annoStatusFileNameOrSessionLabel.Text = annoList.Source.File.FullName;
@@ -123,10 +125,10 @@ namespace ssi
             }
             control.annoStatusAnnotatorLabel.Text = annoList.Meta.AnnotatorFullName != "" ? annoList.Meta.AnnotatorFullName : annoList.Meta.Annotator;
             control.annoStatusRoleLabel.Text = annoList.Meta.Role;
-            control.annoStatusCloseButton.IsEnabled = true;
+            control.annoCloseButton.Visibility = Visibility.Visible;
         }
 
-        private void annoTierChange(AnnoTier tier, EventArgs e)
+        private void onAnnoTierChange(AnnoTier tier, EventArgs e)
         {
             setAnnoInfo(tier.AnnoList);
             setAnnoList(tier.AnnoList);
@@ -134,7 +136,27 @@ namespace ssi
 
             if (AnnoTierStatic.Selected != null)
             {
+                if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                {
+                    control.geometricListControl.IsEnabled = true;
+                }
+                else
+                {
+                    control.geometricListControl.IsEnabled = false;
+                }
+
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    control.annoListControl.editButton.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editComboBox.IsEnabled = false;
+                    control.annoListControl.editTextBox.IsEnabled = false;
+                }
+                else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT)
                 {
                     control.annoListControl.editButton.Visibility = Visibility.Collapsed;
                     control.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
@@ -273,9 +295,9 @@ namespace ssi
         {
             setAnnoList(anno);
 
-            AnnoTier tier = new AnnoTier(anno);
+            AnnoTier tier = new AnnoTier(anno);            
             control.annoTierControl.Add(tier);
-            control.timeLineControl.rangeSlider.OnTimeRangeChanged += tier.TimeRangeChanged;
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += tier.TimeRangeChanged;            
 
             annoTiers.Add(tier);
             annoLists.Add(anno);
@@ -336,22 +358,22 @@ namespace ssi
 
         #region EVENTHANDLERS
 
-        private void annoTrackGrid_MouseMove(object sender, MouseEventArgs e)
+        private void annoTierControl_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                double pos = e.GetPosition(control.trackGrid).X;
+                double pos = e.GetPosition(control.signalAndAnnoGrid).X;
                 annoCursor.X = pos;
                 Time.CurrentSelectPosition = pos;
                 double time = Time.TimeFromPixel(pos);
-                control.annoStatusPositionLabel.Text = FileTools.FormatSeconds(time);
+                control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
             }
             if ((e.RightButton == MouseButtonState.Pressed || e.LeftButton == MouseButtonState.Pressed) && control.navigator.followAnnoCheckBox.IsChecked == true)
             {
-                if (mediaList.Medias.Count > 0)
+                if (mediaList.Count > 0)
                 {
-                    mediaList.move(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
-                    moveSignalCursorToSecond(Time.TimeFromPixel(e.GetPosition(control.trackGrid).X));
+                    mediaList.Move(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
+                    moveSignalCursor(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
                     Stop();
                 }
             }
@@ -382,7 +404,7 @@ namespace ssi
             }
         }
 
-        private void annoTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
+        private void annoTierControl_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (control.navigator.askforlabels.IsChecked == true) AnnoTier.askForLabel = true;
             else AnnoTier.askForLabel = false;
@@ -421,25 +443,25 @@ namespace ssi
             {
                 if (AnnoTierStatic.Selected.IsDiscreteOrFree || (!AnnoTierStatic.Selected.IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
                 {
-                    double pos = e.GetPosition(control.trackGrid).X;
+                    double pos = e.GetPosition(control.signalAndAnnoGrid).X;
                     annoCursor.X = pos;
                     Time.CurrentSelectPosition = pos;
 
                     annoCursor.Visibility = Visibility.Visible;
                     double time = Time.TimeFromPixel(pos);
-                    control.annoStatusPositionLabel.Text = FileTools.FormatSeconds(time);
+                    control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
                 }
                 else
                 {
                     annoCursor.X = 0;
                     double time = Time.TimeFromPixel(0);
                     annoCursor.Visibility = Visibility.Hidden;
-                    control.annoStatusPositionLabel.Text = FileTools.FormatSeconds(time);
+                    control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
                 }
             }
         }
 
-        private void annoTrackGrid_MouseUp(object sender, MouseEventArgs e)
+        private void annoTierControl_MouseRightButtonUp(object sender, MouseEventArgs e)
         {
             isMouseButtonDown = false;
 
@@ -460,8 +482,8 @@ namespace ssi
                 Time.CurrentPlayPosition = item.Start;
                 Time.CurrentPlayPositionPrecise = item.Start;
 
-                mediaList.move(item.Start);
-                moveSignalCursorToSecond(item.Start);
+                mediaList.Move(item.Start);
+                moveSignalCursor(item.Start);
 
                 if (item.Start >= timeline.SelectionStop)
                 {
@@ -484,6 +506,11 @@ namespace ssi
 
                         break;
                     }
+                }
+
+                if (item.Geometric)
+                {
+                    geometricSelectItem(item);
                 }
 
                 movemedialock = false;
@@ -534,6 +561,8 @@ namespace ssi
                 else item.Label = control.annoListControl.editTextBox.Text;
             }
         }
+
+       
 
         #endregion EVENTHANDLERS
     }
