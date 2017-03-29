@@ -24,7 +24,7 @@ namespace ssi
                 }
                 else if (Source.HasDatabase())
                 {
-                    return Source.Database.Session;
+                    return Scheme.Name;
                 }
                 else
                 {

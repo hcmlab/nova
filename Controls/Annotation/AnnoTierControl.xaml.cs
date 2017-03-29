@@ -61,6 +61,10 @@ namespace ssi
             label.Content = " " + tier.AnnoList.Name;
             label.HorizontalAlignment = HorizontalAlignment.Left;
             label.VerticalAlignment = VerticalAlignment.Center;
+            label.Foreground = Brushes.Black;
+            Color color = Defaults.Colors.Highlight;
+            color.A = 128;
+            label.Background = new SolidColorBrush(color);
             label.IsHitTestVisible = false;            
             Grid.SetColumn(label, 0);
             Grid.SetRow(label, grid.RowDefinitions.Count - 1);

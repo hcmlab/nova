@@ -29,9 +29,6 @@ namespace ssi
         {
             InitializeComponent();
 
-            database = DatabaseHandler.Database;
-            mongo = DatabaseHandler.Client;
-
             this.db_server.Text = Properties.Settings.Default.DatabaseAddress;
             this.db_login.Text = Properties.Settings.Default.MongoDBUser;
             this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
@@ -60,6 +57,9 @@ namespace ssi
             Properties.Settings.Default.MongoDBUser = this.db_login.Text;
             Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
             Properties.Settings.Default.Save();
+
+            database = DatabaseHandler.Database;
+            mongo = DatabaseHandler.Client;
 
             try
             {
@@ -277,11 +277,11 @@ namespace ssi
             string output = "";
             var builder = Builders<BsonDocument>.Filter;
             var filtera = builder.Eq("_id", reference);
-            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).Single();
+            var result = database.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
 
-            if (result != null)
+            if (result.Count > 0)
             {
-                output = result[attribute].ToString();
+                output = result[0][attribute].ToString();
             }
 
             return output;
@@ -761,14 +761,17 @@ namespace ssi
                     var builder = Builders<BsonDocument>.Filter;
                     var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
 
-                    var annotation = annotations.Find(filter).Single();
+                    var annotation = annotations.Find(filter).ToList();
+
+                    if (annotation.Count == 0)
+                    {
+                        return;
+                    }
 
                     BsonElement value;
-                    if(annotation.TryGetElement("media", out value))
-                    { 
-                      
-
-                        foreach (BsonDocument doc in annotation["media"].AsBsonArray)
+                    if(annotation[0].TryGetElement("media", out value))
+                    {                       
+                        foreach (BsonDocument doc in annotation[0]["media"].AsBsonArray)
                         {
                           string name =  FetchDBRef(database,DatabaseDefinitionCollections.Streams, "name", doc["media_id"].AsObjectId);
 
