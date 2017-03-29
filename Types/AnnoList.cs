@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 
@@ -12,7 +13,10 @@ namespace ssi
             MAP,
             TUPLE,
             STRING,
+            ID,
         }
+
+        public int ID { get; }
 
         public string Name
         {
@@ -33,6 +37,13 @@ namespace ssi
             }
         }
 
+        private static int seed = Environment.TickCount;
+        private static Random rnd = new Random(seed);
+        public int GetRandomInt(int start, int finish)
+        {
+            return rnd.Next(start, finish);
+        }
+
         public AnnoSource Source { get; set; }
    
         public AnnoScheme Scheme { get; set; }
@@ -45,6 +56,7 @@ namespace ssi
             Source = new AnnoSource();
             Scheme = new AnnoScheme();
             Meta = new AnnoMeta();
+            ID = GetRandomInt(1, Int32.MaxValue);
         }
 
         public bool Save(List<DatabaseMediaInfo> loadedMedia = null)

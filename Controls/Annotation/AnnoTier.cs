@@ -164,9 +164,32 @@ namespace ssi
         {
             get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE; }
         }
-        public bool IsContinuous
+        public bool IsContinuousOrGeometric
         {
-            get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS; }
+            get
+            {
+                return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
+                       IsGeometric;
+            }
+        }
+
+        public bool IsNotGeometric
+        {
+            get
+            {
+                return (!IsGeometric);
+            }
+        }
+
+        public bool IsGeometric
+        {
+            get
+            {
+                return (AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION);
+            }
         }
 
         private Color minOrBackColor = Defaults.Colors.Background;
@@ -518,8 +541,8 @@ namespace ssi
                     {
                         int x = -1;
                         int y = -1;
-                        x = rnd.Next(50, 200);
-                        y = rnd.Next(50, 200);
+                        //x = rnd.Next(50, 200);
+                        //y = rnd.Next(50, 200);
                         points.Add(new PointListItem(x, y, (j + 1).ToString(), 0));
                     }
                     AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, true, points);

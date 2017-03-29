@@ -70,7 +70,8 @@
               VerticalAlignment="Stretch" 
               HorizontalAlignment="Stretch" 
               Width="Auto" 
-              Height="Auto">
+              Height="Auto"
+              Name="viewGrid">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="320" MinWidth="320" />
