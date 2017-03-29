@@ -49,6 +49,14 @@ namespace ssi
             }
         }
 
+        private void annoContinuousMode_Changed(object sender, RoutedEventArgs e)
+        {
+         
+            if (AnnoTier.Selected != null && AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            AnnoTier.Selected.ContinuousAnnoMode();
+        }
+
+
         private void navigatorNewAnno_Click(object sender, RoutedEventArgs e)
         {
             if (Time.TotalDuration > 0)

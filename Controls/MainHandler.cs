@@ -163,7 +163,8 @@ namespace ssi
             control.annoTierControl.MouseDown += annoTierControl_MouseDown;
             control.annoTierControl.MouseMove += annoTierControl_MouseMove;
             control.annoTierControl.MouseRightButtonUp += annoTierControl_MouseRightButtonUp;
-
+            control.annoContinuousMode.Checked += annoContinuousMode_Changed;
+            control.annoContinuousMode.Unchecked += annoContinuousMode_Changed;
             // Geometric
 
             control.geometricListControl.editButton.Click += geometricListEdit_Click;

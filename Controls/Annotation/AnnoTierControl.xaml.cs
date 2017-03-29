@@ -58,7 +58,7 @@ namespace ssi
             grid.Children.Add(tier);
 
             Label label = new Label();
-            label.Content = " " + tier.AnnoList.Name;
+            label.Content = " " + tier.AnnoList.Scheme.Name;
             label.HorizontalAlignment = HorizontalAlignment.Left;
             label.VerticalAlignment = VerticalAlignment.Center;
             label.Foreground = Brushes.Black;
