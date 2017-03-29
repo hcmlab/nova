@@ -64,6 +64,10 @@ namespace ssi
             label.Content = Path.GetFileName(path);
             label.HorizontalAlignment = HorizontalAlignment.Center;
             label.VerticalAlignment = VerticalAlignment.Top;
+            label.Foreground = Brushes.Black;
+            Color color = Defaults.Colors.Highlight;
+            color.A = 128;
+            label.Background = new SolidColorBrush(color);
             label.IsHitTestVisible = false;
             Grid.SetRow(label, 0);
             Grid.SetColumn(label, grid.ColumnDefinitions.Count - 1);
