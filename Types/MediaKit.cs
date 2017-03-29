@@ -78,11 +78,19 @@ namespace ssi
             {
                 engine.GetMetadata(inputFile);
             }
-            sampleRate = inputFile.Metadata.VideoData.Fps;
-            string frameSize = inputFile.Metadata.VideoData.FrameSize;
-            string[] tokens = frameSize.Split('x');
-            int.TryParse(tokens[0], out width);
-            int.TryParse(tokens[1], out height);
+            if (type == MediaType.VIDEO)
+            {
+                sampleRate = inputFile.Metadata.VideoData.Fps;
+                string frameSize = inputFile.Metadata.VideoData.FrameSize;
+                string[] tokens = frameSize.Split('x');
+                int.TryParse(tokens[0], out width);
+                int.TryParse(tokens[1], out height);
+            }
+            else if (type == MediaType.AUDIO)
+            {
+                string[] tokens = inputFile.Metadata.AudioData.SampleRate.Split(' ');
+                double.TryParse(tokens[0], out sampleRate);
+            }
 
             // add grid
             grid = new Grid();
@@ -94,13 +102,16 @@ namespace ssi
             grid.Children.Add(this);
 
             // add overlay
-            overlayImage = new Image();
-            overlayBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
-            overlayBitmap.Clear(Colors.Transparent);
-            overlayImage.Source = overlayBitmap;
-            Grid.SetColumn(overlayImage, 0);
-            Grid.SetRow(overlayImage, 0);            
-            grid.Children.Add(overlayImage);
+            if (type == MediaType.VIDEO)
+            {
+                overlayImage = new Image();
+                overlayBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+                overlayBitmap.Clear(Colors.Transparent);
+                overlayImage.Source = overlayBitmap;
+                Grid.SetColumn(overlayImage, 0);
+                Grid.SetRow(overlayImage, 0);
+                grid.Children.Add(overlayImage);
+            }
         }
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
