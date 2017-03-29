@@ -11,6 +11,7 @@ namespace ssi
 {
     public class AnnoSource
     {
+
         public class FileSource
         {
             public enum TYPE

@@ -14,6 +14,25 @@ namespace ssi
             STRING,
         }
 
+        public string Name
+        {
+            get
+            {
+                if (Source.HasFile())
+                {
+                    return Source.File.Name;
+                }
+                else if (Source.HasDatabase())
+                {
+                    return Source.Database.Session;
+                }
+                else
+                {
+                    return "*";
+                }
+            }
+        }
+
         public AnnoSource Source { get; set; }
    
         public AnnoScheme Scheme { get; set; }
@@ -67,14 +86,32 @@ namespace ssi
         }
 
 
-        public string DefaultName(string seperator = ".", bool startwithseperator = false, bool showFullname = false)
+        public string DefaultName(string seperator = ".", bool startWithSeperator = false, bool showFullName = false)
         {
             string name = "";
-            if (startwithseperator) name = seperator + Scheme.Name;
-            else name = Scheme.Name;
-            if (Meta.Role != "") name += seperator + Meta.Role;
-            if (Meta.AnnotatorFullName != "" && showFullname) name += seperator + Meta.AnnotatorFullName ;
-            else if (Meta.Annotator != "") name += seperator + Meta.Annotator;
+
+            if (startWithSeperator)
+            {
+                name = seperator + Scheme.Name;
+            }
+            else
+            {
+                name = Scheme.Name;
+            }
+
+            if (Meta.Role != "")
+            {
+                name += seperator + Meta.Role;
+            }
+
+            if (Meta.AnnotatorFullName != "" && showFullName)
+            {
+                name += seperator + Meta.AnnotatorFullName;
+            }
+            else if (Meta.Annotator != "")
+            {
+                name += seperator + Meta.Annotator;
+            }
 
             return name;
         }

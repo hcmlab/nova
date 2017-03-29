@@ -18,10 +18,11 @@ namespace ssi
 
         public void loadMultipleFiles(string[] filenames)
         {
-            int i = 0;
+            Array.Sort(filenames, StringComparer.InvariantCulture);
+
             foreach (string filename in filenames)
             {
-                if (File.Exists(filename))
+                if (File.Exists(filename) || Directory.Exists(filename))
                 {
                     FileAttributes attr = File.GetAttributes(filename);
                     if ((attr & FileAttributes.Directory) == FileAttributes.Directory)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -57,6 +58,16 @@ namespace ssi
             Grid.SetRow(border, 0);
             Grid.SetColumn(border, grid.ColumnDefinitions.Count - 1);
             grid.Children.Add(border);
+
+            Label label = new Label();
+            string path = box.Media.GetFilepath();
+            label.Content = Path.GetFileName(path);
+            label.HorizontalAlignment = HorizontalAlignment.Center;
+            label.VerticalAlignment = VerticalAlignment.Top;
+            label.IsHitTestVisible = false;
+            Grid.SetRow(label, 0);
+            Grid.SetColumn(label, grid.ColumnDefinitions.Count - 1);
+            grid.Children.Add(label);
 
             box.Border = border;
         }
