@@ -227,6 +227,8 @@ namespace ssi
             MediaKit media = new MediaKit(filename, type);
             // Media media = new Media(filename, type);   
             media.OnMediaMouseDown += OnMediaMouseDown;
+            media.OnMediaMouseUp += OnMediaMouseUp;
+            media.OnMediaMouseMove += OnMediaMouseMove;
             addMedia(media);
 
             return media;

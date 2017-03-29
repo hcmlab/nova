@@ -41,6 +41,7 @@ namespace ssi
             result.MaxOrForeColor = defaultInput.LineColour;
             result.MinOrBackColor = defaultInput.NodeColour;
 
+            nameTextBox.Text = Defaults.Strings.Unkown;
             srTextBox.Text = defaultInput.SampleRate.ToString();
             numNodesTextBox.Text = defaultInput.NumNodes.ToString();
             colorPickerNodes.SelectedColor = defaultInput.NodeColour;
@@ -50,7 +51,7 @@ namespace ssi
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-
+            result.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
             double value;
             if (double.TryParse(srTextBox.Text, out value))
             {

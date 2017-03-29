@@ -321,6 +321,21 @@ namespace ssi
             {
                 mediaList.Stop();
                 control.navigator.playButton.Content = ">";
+
+                int i = 0;
+                foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
+                {
+                    if (ali.Start <= Time.CurrentPlayPosition)
+                    {
+                        ++i;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                jumpToGeometric(i);
             }
         }
 

@@ -21,20 +21,24 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Label Grid.Column="0" Grid.Row="0" >Sample rate (Hz)</Label>
-        <TextBox Name="srTextBox" Grid.Column="1" Grid.Row="0" x:FieldModifier="public" Margin="5"/>
+        <Label Grid.Column="0" Grid.Row="0" >Scheme name</Label>
+        <TextBox Name="nameTextBox" Grid.Column="1" Grid.Row="0" x:FieldModifier="public" Margin="5"/>
+        
+        <Label Grid.Column="0" Grid.Row="1" >Sample rate (Hz)</Label>
+        <TextBox Name="srTextBox" Grid.Column="1" Grid.Row="1" x:FieldModifier="public" Margin="5"/>
 
-        <Label Grid.Column="0" Grid.Row="1" >Number of Points</Label>
-        <TextBox Name="numPointsTextBox" Grid.Column="1" Grid.Row="1" x:FieldModifier="public" Margin="5"/>
+        <Label Grid.Column="0" Grid.Row="2" >Number of Points</Label>
+        <TextBox Name="numPointsTextBox" Grid.Column="1" Grid.Row="2" x:FieldModifier="public" Margin="5"/>
 
-        <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
-            <Label>Colour=</Label>
+        <Label Grid.Column="0" Grid.Row="3" >Colour</Label>
+        <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
             <p:ColorPicker Name="colorPicker" Grid.Column="2" Width="40" Margin="0,0,5,5" BorderBrush="Transparent" Background="Transparent"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2"  HorizontalAlignment="Right" Orientation="Horizontal" >
+        <StackPanel Grid.Row="4" Grid.ColumnSpan="2"  HorizontalAlignment="Right" Orientation="Horizontal" >
             <Button Margin="5" Width="60" Height="25" Click="okButton_Click">OK</Button>
             <Button Margin="5" Width="60" Height="25" Click="cancelButton_Click">Cancel</Button>
         </StackPanel>
