@@ -51,17 +51,23 @@ namespace ssi
             track.SignalColor = signalColor;
             track.BackgroundColor = backgroundColor;
 
-            Border border = new Border();                        
-            border.BorderThickness = new Thickness(Defaults.SelectionBorderWidth, 0,0,0);
-            border.BorderBrush = Defaults.Brushes.Highlight;            
-            //border.Child = track;
-
-
             Grid.SetColumn(track, 0);
             Grid.SetRow(track, grid.RowDefinitions.Count - 1);
             grid.Children.Add(track);
 
+            Label label = new Label();
+            label.Content = " " + track.Signal.Name;
+            label.HorizontalAlignment = HorizontalAlignment.Left;
+            label.VerticalAlignment = VerticalAlignment.Center;
+            label.IsHitTestVisible = false;
+            Grid.SetColumn(label, 0);
+            Grid.SetRow(label, grid.RowDefinitions.Count - 1);
+            grid.Children.Add(label);
 
+            Border border = new Border();
+            border.BorderThickness = new Thickness(Defaults.SelectionBorderWidth, 0, 0, 0);
+            border.BorderBrush = Defaults.Brushes.Highlight;
+            border.IsHitTestVisible = false;
             Grid.SetColumn(border, 0);
             Grid.SetRow(border, grid.RowDefinitions.Count - 1);
             grid.Children.Add(border);

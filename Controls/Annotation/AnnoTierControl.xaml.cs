@@ -53,14 +53,23 @@ namespace ssi
             row.Height = new GridLength(1, GridUnitType.Star);
             grid.RowDefinitions.Add(row);
 
-            Border border = new Border();
-            border.BorderThickness = new Thickness(Defaults.SelectionBorderWidth, 0, 0, 0);
-            border.BorderBrush = Defaults.Brushes.Highlight;
-
             Grid.SetColumn(tier, 0);
             Grid.SetRow(tier, grid.RowDefinitions.Count - 1);
             grid.Children.Add(tier);
 
+            Label label = new Label();
+            label.Content = " " + tier.AnnoList.Name;
+            label.HorizontalAlignment = HorizontalAlignment.Left;
+            label.VerticalAlignment = VerticalAlignment.Center;
+            label.IsHitTestVisible = false;            
+            Grid.SetColumn(label, 0);
+            Grid.SetRow(label, grid.RowDefinitions.Count - 1);
+            grid.Children.Add(label);
+
+            Border border = new Border();
+            border.BorderThickness = new Thickness(Defaults.SelectionBorderWidth, 0, 0, 0);
+            border.BorderBrush = Defaults.Brushes.Highlight;
+            border.IsHitTestVisible = false;
             Grid.SetColumn(border, 0);
             Grid.SetRow(border, grid.RowDefinitions.Count - 1);
             grid.Children.Add(border);
