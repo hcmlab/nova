@@ -68,7 +68,7 @@ namespace ssi
                     break;
                 case AnnoScheme.TYPE.POLYGON:
                     break;
-                case AnnoScheme.TYPE.GRPAH:
+                case AnnoScheme.TYPE.GRAPH:
                     break;
                 case AnnoScheme.TYPE.SEGMENTATION:
                     break;
@@ -92,7 +92,7 @@ namespace ssi
                         break;
                     case AnnoScheme.TYPE.POLYGON:
                         break;
-                    case AnnoScheme.TYPE.GRPAH:
+                    case AnnoScheme.TYPE.GRAPH:
                         break;
                     case AnnoScheme.TYPE.SEGMENTATION:
                         break;

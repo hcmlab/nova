@@ -47,7 +47,7 @@ namespace ssi
                     annotype = AnnoScheme.TYPE.POLYGON;
                     break;
                 case "button_graph":
-                    annotype = AnnoScheme.TYPE.GRPAH;
+                    annotype = AnnoScheme.TYPE.GRAPH;
                     break;
                 case "button_segmentation":
                     annotype = AnnoScheme.TYPE.SEGMENTATION;

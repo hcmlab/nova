@@ -171,7 +171,7 @@ namespace ssi
             {
                 return (AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
-                       AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION);
             }
         }
@@ -312,7 +312,7 @@ namespace ssi
                     }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON)
                     { }
-                    else if (anno.Scheme.Type == AnnoScheme.TYPE.GRPAH)
+                    else if (anno.Scheme.Type == AnnoScheme.TYPE.GRAPH)
                     { }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                     { }

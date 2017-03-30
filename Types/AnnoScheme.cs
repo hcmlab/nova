@@ -17,7 +17,7 @@ namespace ssi
             CONTINUOUS,
             POINT,
             POLYGON,
-            GRPAH,
+            GRAPH,
             SEGMENTATION,
         }
 
