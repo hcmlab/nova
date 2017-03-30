@@ -146,7 +146,7 @@ namespace ssi
                                 annoList = new AnnoList() { Scheme = annoScheme };
                             }
                         }
-                        else if (annoType == AnnoScheme.TYPE.GRPAH)
+                        else if (annoType == AnnoScheme.TYPE.GRAPH)
                         {
                             AnnoTierNewGraphSchemeWindow.Input input = new AnnoTierNewGraphSchemeWindow.Input() { SampleRate = defaultSr, NumNodes = 1.0, NodeColour = Colors.Green, LineColour = Colors.Red };
                             AnnoTierNewGraphSchemeWindow dialog2 = new AnnoTierNewGraphSchemeWindow(input);
