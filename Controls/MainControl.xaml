@@ -76,7 +76,7 @@
               Name="viewGrid">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="320" MinWidth="320" />
+                <ColumnDefinition Width="320" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
