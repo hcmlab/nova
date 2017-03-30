@@ -211,6 +211,21 @@ namespace ssi
                 if (!visualizeskel && !visualizepoints)
                 {
                     signalCursor.X = pos;
+                    if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsGeometric)
+                    {
+                        while (control.annoListControl.annoDataGrid.SelectedItems.Count > 0)
+                        {
+                            control.annoListControl.annoDataGrid.SelectedItems.RemoveAt(0);
+                        }
+                        AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
+                        double deltaTime = ali.Duration;
+                        double roughtPosition = Time.CurrentPlayPosition / deltaTime;
+                        ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[(int)roughtPosition];
+                        if (ali.Points.Count > 0)
+                        {
+                            geometricOverlayUpdate(ali, AnnoScheme.TYPE.POINT, (int)roughtPosition);
+                        }
+                    }
                 }
 
                 updatePositionLabels(time);
@@ -321,6 +336,21 @@ namespace ssi
             {
                 mediaList.Stop();
                 control.navigator.playButton.Content = ">";
+
+                int i = 0;
+                foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
+                {
+                    if (ali.Start <= Time.CurrentPlayPosition)
+                    {
+                        ++i;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                jumpToGeometric(i);
             }
         }
 

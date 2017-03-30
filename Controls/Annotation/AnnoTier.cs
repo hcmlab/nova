@@ -164,9 +164,32 @@ namespace ssi
         {
             get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE; }
         }
-        public bool IsContinuous
+        public bool IsContinuousOrGeometric
         {
-            get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS; }
+            get
+            {
+                return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
+                       IsGeometric;
+            }
+        }
+
+        public bool IsNotGeometric
+        {
+            get
+            {
+                return (!IsGeometric);
+            }
+        }
+
+        public bool IsGeometric
+        {
+            get
+            {
+                return (AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION);
+            }
         }
 
         private Color minOrBackColor = Defaults.Colors.Background;
@@ -510,12 +533,17 @@ namespace ssi
             double delta = 1.0 / sr;
             if (AnnoList.Count < samples)
             {
+                Random rnd = new Random();
                 for (int i = AnnoList.Count; i < samples; i++)
                 {
                     PointList points = new PointList();
                     for (int j = 0; j < numPoints; ++j)
                     {
-                        points.Add(new PointListItem(-1, -1, (j + 1).ToString(), 0));
+                        int x = -1;
+                        int y = -1;
+                        //x = rnd.Next(50, 200);
+                        //y = rnd.Next(50, 200);
+                        points.Add(new PointListItem(x, y, (j + 1).ToString(), 0));
                     }
                     AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, true, points);
                     AnnoList.Add(ali);

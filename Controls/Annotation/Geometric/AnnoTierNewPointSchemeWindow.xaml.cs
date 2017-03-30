@@ -40,6 +40,7 @@ namespace ssi
             result.MinScore = defaultInput.NumPoints;
             result.MinOrBackColor = defaultInput.Color;
 
+            nameTextBox.Text = Defaults.Strings.Unkown;
             srTextBox.Text = defaultInput.SampleRate.ToString();
             numPointsTextBox.Text = defaultInput.NumPoints.ToString();
             colorPicker.SelectedColor = defaultInput.Color;
@@ -48,7 +49,7 @@ namespace ssi
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-
+            result.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
             double value;
             if (double.TryParse(srTextBox.Text, out value))
             {

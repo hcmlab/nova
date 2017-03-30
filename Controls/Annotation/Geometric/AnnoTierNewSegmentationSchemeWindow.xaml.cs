@@ -43,6 +43,7 @@ namespace ssi
             result.MaxOrForeColor = defaultInput.MaxColor;
             result.MinOrBackColor = defaultInput.MinColor;
 
+            nameTextBox.Text = Defaults.Strings.Unkown;
             srTextBox.Text = defaultInput.SampleRate.ToString();
             minTextBox.Text = defaultInput.MinScore.ToString();
             maxTextBox.Text = defaultInput.MaxScore.ToString();
@@ -53,7 +54,7 @@ namespace ssi
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-
+            result.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
             double value;
             if (double.TryParse(srTextBox.Text, out value))
             {

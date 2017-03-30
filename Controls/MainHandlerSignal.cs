@@ -179,6 +179,24 @@ namespace ssi
                     mediaList.Move(Time.TimeFromPixel(pos));                    
                     updatePositionLabels(Time.TimeFromPixel(pos));
 
+                    if (AnnoTierStatic.Selected != null)
+                    {
+                        if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                        {
+                            if (control.annoListControl.annoDataGrid.Items.Count > 0)
+                            {
+                                AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
+                                double deltaTime = ali.Duration;
+                                double roughtPosition = Time.CurrentPlayPosition / deltaTime;
+                                jumpToGeometric((int)roughtPosition);
+                            }
+                        }
+                    }
+
                     if (is_playing)
                     {
                         Play();

@@ -23,6 +23,8 @@ namespace ssi
 
             signalCursor.MouseDown += annoTierControl_MouseDown;
             annoCursor.MouseDown += annoTierControl_MouseDown;
+            control.viewGrid.KeyDown += annoTrackGrid_KeyDown;
+            control.viewGrid.KeyUp += annoTrackGrid_KeyUp;
         }
 
         private void moveSignalCursor(double time)
@@ -202,6 +204,7 @@ namespace ssi
 
         private void navigatorJumpFront_Click(object sender, RoutedEventArgs e)
         {
+            jumpToGeometric(0);
             bool is_playing = IsPlaying();
             Stop();
             moveSignalCursor(0);
@@ -209,12 +212,17 @@ namespace ssi
             {
                 Play();
             }
+            jumpToGeometric(0);
+
         }
 
         private void navigatorJumpEnd_Click(object sender, RoutedEventArgs e)
         {
             Stop();
+
             moveSignalCursor(Time.TotalDuration);
+            int end = control.annoListControl.annoDataGrid.Items.Count - 1;
+            jumpToGeometric(end);
         }
 
         private void navigatorPlay_Click(object sender, RoutedEventArgs e)

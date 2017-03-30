@@ -14,7 +14,13 @@ namespace ssi
     {
         public delegate void MediaMouseDown(MediaKit media, double x, double y);
         public event MediaMouseDown OnMediaMouseDown;
-         
+
+        public delegate void MediaMouseUp(MediaKit media, double x, double y);
+        public event MediaMouseUp OnMediaMouseUp;
+
+        public delegate void MediaMouseMove(MediaKit media, double x, double y);
+        public event MediaMouseMove OnMediaMouseMove;
+
         private Grid grid;
         private WriteableBitmap overlayBitmap;
         private Image overlayImage;
@@ -95,6 +101,8 @@ namespace ssi
             // add grid
             grid = new Grid();
             grid.MouseDown += OnMouseDown;
+            grid.MouseUp += OnMouseUp;
+            grid.MouseMove += OnMouseMove;
 
             // add video
             Grid.SetColumn(this, 0);
@@ -114,6 +122,17 @@ namespace ssi
             }
         }
 
+        private void OnMouseMove(object sender, MouseEventArgs e)
+        {
+            Point p = e.GetPosition(VideoImage);
+            double pixelWidth = VideoImage.Source.Width;
+            double pixelHeight = VideoImage.Source.Height;
+            double x = pixelWidth * p.X / VideoImage.ActualWidth;
+            double y = pixelHeight * p.Y / VideoImage.ActualHeight;
+
+            OnMediaMouseMove?.Invoke(this, x, y);
+        }
+
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             Point p = e.GetPosition(VideoImage);
@@ -123,6 +142,17 @@ namespace ssi
             double y = pixelHeight * p.Y / VideoImage.ActualHeight;
 
             OnMediaMouseDown?.Invoke (this, x, y);
+        }
+
+        private void OnMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Point p = e.GetPosition(VideoImage);
+            double pixelWidth = VideoImage.Source.Width;
+            double pixelHeight = VideoImage.Source.Height;
+            double x = pixelWidth * p.X / VideoImage.ActualWidth;
+            double y = pixelHeight * p.Y / VideoImage.ActualHeight;
+
+            OnMediaMouseUp?.Invoke(this, x, y);
         }
 
         public void Move(double time)
