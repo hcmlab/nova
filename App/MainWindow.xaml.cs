@@ -79,7 +79,11 @@ namespace ssi
             {
                 try
                 {
-                    viewh.loadMultipleFiles(new[] { args[i] });
+
+                    string filedir;
+                    if (Path.IsPathRooted(args[i])) filedir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location) +  "\\" + args[i];
+                    else filedir = args[i];
+                    viewh.loadMultipleFiles(new[] { filedir });
                 }
                 catch (Exception)
                 {
