@@ -164,22 +164,6 @@ namespace ssi
         {
             get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE; }
         }
-        public bool IsContinuousOrGeometric
-        {
-            get
-            {
-                return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
-                       IsGeometric;
-            }
-        }
-
-        public bool IsNotGeometric
-        {
-            get
-            {
-                return (!IsGeometric);
-            }
-        }
 
         public bool IsGeometric
         {
