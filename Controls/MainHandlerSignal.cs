@@ -23,21 +23,7 @@ namespace ssi
             signalTracks.Add(track);
 
             double duration = signal.number / signal.rate;
-            if (duration > Time.TotalDuration)
-            {
-                Time.TotalDuration = duration;
-                control.timeLineControl.rangeSlider.Update();
-            }
-            else
-            {
-                track.TimeRangeChanged(Time);
-            }
-            if (signalTracks.Count == 1 
-                && duration > Properties.Settings.Default.DefaultZoomInSeconds 
-                && Properties.Settings.Default.DefaultZoomInSeconds != 0)
-            {
-                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
-            }
+            UpdateTimeRange(duration, track);
 
             SignalTrackStatic.Select(track);
         }
@@ -184,7 +170,7 @@ namespace ssi
                         if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
                         AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                         AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
+                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
                         AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                         {
                             if (control.annoListControl.annoDataGrid.Items.Count > 0)

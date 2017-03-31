@@ -29,6 +29,7 @@ namespace ssi
         private int numJoints = 0;
         private int jointValues = 0;
         private int numSkeletons = 1;
+        private double postion = 0;
 
         private WriteableBitmap writeableBmp;
         private DispatcherTimer timer;
@@ -79,7 +80,8 @@ namespace ssi
         }
 
         public void Draw(double time)
-        {            
+        {
+            postion = time;
             int index = (int)(time * signal.rate);
             
             Color col = SignalColor;
@@ -295,7 +297,7 @@ namespace ssi
 
         public double GetPosition()
         {
-            return 0;
+            return postion;
         }
 
         public double GetSampleRate()
@@ -314,7 +316,7 @@ namespace ssi
 
         public double GetLength()
         {
-            return 0;
+            return signal.number/signal.rate;
         }
 
         public void Clear()

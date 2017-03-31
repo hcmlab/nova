@@ -35,7 +35,7 @@ namespace ssi
             InitializeComponent();
 
             result = new AnnoScheme();
-            result.Type = AnnoScheme.TYPE.GRAPH;
+            result.Type = AnnoScheme.TYPE.GRPAH;
             result.SampleRate = defaultInput.SampleRate;
             result.MinScore = defaultInput.NumNodes;
             result.MaxOrForeColor = defaultInput.LineColour;
