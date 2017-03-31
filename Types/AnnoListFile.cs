@@ -60,7 +60,7 @@ namespace ssi
                 {
                     sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
                 }
-                else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
+                else if (Scheme.Type == AnnoScheme.TYPE.GRPAH)
                 {
                     sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
                 }
@@ -142,7 +142,7 @@ namespace ssi
                             sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
                         }
                     }
-                    else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
+                    else if (Scheme.Type == AnnoScheme.TYPE.GRPAH)
                     {
                         foreach (AnnoListItem e in this)
                         {
@@ -326,9 +326,9 @@ namespace ssi
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.POLYGON;
                 }
-                else if (type == AnnoScheme.TYPE.GRAPH.ToString())
+                else if (type == AnnoScheme.TYPE.GRPAH.ToString())
                 {
-                    list.Scheme.Type = AnnoScheme.TYPE.GRAPH;
+                    list.Scheme.Type = AnnoScheme.TYPE.GRPAH;
                 }
                 else if (type == AnnoScheme.TYPE.SEGMENTATION.ToString())
                 {
@@ -380,7 +380,7 @@ namespace ssi
                 {
                 }
                 else if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS || list.Scheme.Type == AnnoScheme.TYPE.POINT ||
-                         list.Scheme.Type == AnnoScheme.TYPE.POLYGON || list.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
+                         list.Scheme.Type == AnnoScheme.TYPE.POLYGON || list.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
                          list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);

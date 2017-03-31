@@ -146,7 +146,7 @@ namespace ssi
                                 annoList = new AnnoList() { Scheme = annoScheme };
                             }
                         }
-                        else if (annoType == AnnoScheme.TYPE.GRAPH)
+                        else if (annoType == AnnoScheme.TYPE.GRPAH)
                         {
                             AnnoTierNewGraphSchemeWindow.Input input = new AnnoTierNewGraphSchemeWindow.Input() { SampleRate = defaultSr, NumNodes = 1.0, NodeColour = Colors.Green, LineColour = Colors.Red };
                             AnnoTierNewGraphSchemeWindow dialog2 = new AnnoTierNewGraphSchemeWindow(input);
@@ -291,6 +291,27 @@ namespace ssi
                 control.navigator.fastBackwardButton.Content = "<<";
             }
         }
+
+        public void UpdateTimeRange(double duration, SignalTrack track)
+        {
+            if (duration > Time.TotalDuration)
+            {
+                Time.TotalDuration = duration;
+                control.timeLineControl.rangeSlider.Update();
+            }
+            else if(track != null)
+            {
+                track.TimeRangeChanged(Time);
+            }
+            if (signalTracks.Count == 1
+                && duration > Properties.Settings.Default.DefaultZoomInSeconds
+                && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            {
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
+            }
+
+        }
+        
 
         #endregion EVENTHANDLER
     }
