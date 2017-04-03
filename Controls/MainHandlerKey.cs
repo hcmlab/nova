@@ -455,7 +455,7 @@ namespace ssi
                     }
                 }
 
-                if ((e.KeyboardDevice.IsKeyDown(Key.W) || !isKeyDown && AnnoTierStatic.Selected != null) && AnnoTierStatic.Selected.IsDiscreteOrFree && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
+                if ((e.KeyboardDevice.IsKeyDown(Key.W) || !isKeyDown && AnnoTierStatic.Selected != null) && AnnoTierStatic.Selected.IsDiscreteOrFree && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                 {
                     if (AnnoTierStatic.Label == null)
                     {
