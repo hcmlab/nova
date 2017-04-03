@@ -33,7 +33,7 @@ namespace ssi
           
             try
             {
-                mongo = new MongoClient(connectionstring);
+                mongo = DatabaseHandler.Client;
                 int count = 0;
                 while (mongo.Cluster.Description.State.ToString() == "Disconnected")
                 {
@@ -402,6 +402,8 @@ namespace ssi
                     scheme + " " +
                     annotator + " " +
                     "\"" + stream + "\""; ;
+
+                    string test = startInfo.Arguments;
 
                 logTextBox.AppendText("-------------------------------------------\r\n" + startInfo.Arguments + "\r\n\r\n");
 
