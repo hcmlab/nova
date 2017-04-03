@@ -149,9 +149,9 @@ namespace ssi
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if (AnnoTierStatic.Label != null && Mouse.DirectlyOver.GetType() != AnnoTierStatic.Label.GetType() || AnnoTierStatic.Label == null)
+                 if (AnnoTierStatic.Label != null && Mouse.DirectlyOver.GetType() != AnnoTierStatic.Label.GetType() || AnnoTierStatic.Label == null)
                 {
-                    AnnoTierStatic.UnselectLabel();
+                     AnnoTierStatic.UnselectLabel();
                     bool is_playing = IsPlaying();
                     if (is_playing)
                     {
