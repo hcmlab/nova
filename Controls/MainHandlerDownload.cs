@@ -206,6 +206,7 @@ namespace ssi
                     Console.WriteLine("OK");
 
                     Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid);
+                    tokenSource = new CancellationTokenSource();
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
@@ -342,6 +343,7 @@ namespace ssi
                     Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", filename, URL);
                     Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid);
 
+                    tokenSource = new CancellationTokenSource();
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
