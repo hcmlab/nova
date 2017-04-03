@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace ssi
@@ -337,7 +338,12 @@ namespace ssi
                 mediaList.Stop();
                 control.navigator.playButton.Content = ">";
 
-                int i = 0;
+
+                if (Keyboard.IsKeyDown(Key.LeftShift))
+                {
+
+                
+                    int i = 0;
                 foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
                 {
                     if (ali.Start <= Time.CurrentPlayPosition)
@@ -349,8 +355,9 @@ namespace ssi
                         break;
                     }
                 }
-
+                
                 jumpToGeometric(i);
+                }
             }
         }
 

@@ -648,7 +648,7 @@ namespace ssi
 
             foreach (AnnoTier s in annoTiers)
             {
-                headline += s.AnnoList.Scheme.Name + seperator;
+                headline += s.AnnoList.Meta.Role + "_" +  s.AnnoList.Scheme.Name + seperator;
             }
 
             string firstmediadir = "";
@@ -682,13 +682,13 @@ namespace ssi
                                     }
                                     else found = false;
                                 }
-                                if (found) break;
                             }
                             else
                             {
                                 found = false;
                             }
-                            if (!found) headline += restclass + seperator;
+                            if (!found)
+                                headline += restclass + seperator;
                         }
 
                         headline = headline.Remove(headline.Length - 1);
