@@ -403,7 +403,6 @@ namespace ssi
                     annotator + " " +
                     "\"" + stream + "\""; ;
 
-                    string test = startInfo.Arguments;
 
                 logTextBox.AppendText("-------------------------------------------\r\n" + startInfo.Arguments + "\r\n\r\n");
 
