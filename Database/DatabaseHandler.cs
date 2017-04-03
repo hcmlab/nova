@@ -116,7 +116,11 @@ namespace ssi
             bool hasauth = false;
             if (auth > 3) hasauth = true;
 
-            string name = annoList.Scheme.Name;
+            string name = "New tier";
+
+            if (annoList != null) 
+            name = annoList.Scheme.Name;
+
 
             DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(roles, hasauth, "Tier: " + name + ". Who is annotated? ", DatabaseDefinitionCollections.Roles);
             dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
