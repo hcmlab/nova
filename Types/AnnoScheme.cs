@@ -17,7 +17,7 @@ namespace ssi
             CONTINUOUS,
             POINT,
             POLYGON,
-            GRPAH,
+            GRAPH,
             SEGMENTATION,
         }
 
@@ -69,6 +69,8 @@ namespace ssi
         public double MaxScore { get; set; }
 
         public double SampleRate { get; set; }
+
+        public int NumberOfPoints { get; set; }
 
         public Color MinOrBackColor { get; set; }
 

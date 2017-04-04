@@ -90,7 +90,7 @@ namespace ssi
 
                         if (annoType == AnnoScheme.TYPE.FREE)
                         {
-                            AnnoTierNewFreeSchemeWindow dialog2 = new AnnoTierNewFreeSchemeWindow();
+                            AnnoTierNewFreeSchemeWindow dialog2 = new AnnoTierNewFreeSchemeWindow(annoLists.Count);
                             dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                             dialog2.ShowDialog();
 
@@ -124,7 +124,7 @@ namespace ssi
                             }
                         } else if (annoType == AnnoScheme.TYPE.POINT)
                         {
-                            AnnoTierNewPointSchemeWindow.Input input = new AnnoTierNewPointSchemeWindow.Input() { SampleRate = defaultSr, NumPoints = 1.0, Color = Colors.Green };
+                            AnnoTierNewPointSchemeWindow.Input input = new AnnoTierNewPointSchemeWindow.Input() { SampleRate = defaultSr, NumPoints = 1, Color = Colors.Green };
                             AnnoTierNewPointSchemeWindow dialog2 = new AnnoTierNewPointSchemeWindow(input);
                             dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                             dialog2.ShowDialog();
@@ -136,7 +136,7 @@ namespace ssi
                         }
                         else if (annoType == AnnoScheme.TYPE.POLYGON)
                         {
-                            AnnoTierNewPolygonSchemeWindow.Input input = new AnnoTierNewPolygonSchemeWindow.Input() { SampleRate = defaultSr, NumNodes = 1.0, NodeColour = Colors.Green, LineColour = Colors.Red };
+                            AnnoTierNewPolygonSchemeWindow.Input input = new AnnoTierNewPolygonSchemeWindow.Input() { SampleRate = defaultSr, NumNodes = 1, NodeColour = Colors.Green, LineColour = Colors.Red };
                             AnnoTierNewPolygonSchemeWindow dialog2 = new AnnoTierNewPolygonSchemeWindow(input);
                             dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                             dialog2.ShowDialog();
@@ -146,9 +146,9 @@ namespace ssi
                                 annoList = new AnnoList() { Scheme = annoScheme };
                             }
                         }
-                        else if (annoType == AnnoScheme.TYPE.GRPAH)
+                        else if (annoType == AnnoScheme.TYPE.GRAPH)
                         {
-                            AnnoTierNewGraphSchemeWindow.Input input = new AnnoTierNewGraphSchemeWindow.Input() { SampleRate = defaultSr, NumNodes = 1.0, NodeColour = Colors.Green, LineColour = Colors.Red };
+                            AnnoTierNewGraphSchemeWindow.Input input = new AnnoTierNewGraphSchemeWindow.Input() { SampleRate = defaultSr, NumNodes = 1, NodeColour = Colors.Green, LineColour = Colors.Red };
                             AnnoTierNewGraphSchemeWindow dialog2 = new AnnoTierNewGraphSchemeWindow(input);
                             dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                             dialog2.ShowDialog();

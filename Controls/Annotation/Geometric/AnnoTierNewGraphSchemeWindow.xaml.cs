@@ -25,7 +25,7 @@ namespace ssi
         public class Input
         {
             public double SampleRate { get; set; }
-            public double NumNodes { get; set; }
+            public int NumNodes { get; set; }
             public Color NodeColour { get; set; }
             public Color LineColour { get; set; }
         }
@@ -35,9 +35,9 @@ namespace ssi
             InitializeComponent();
 
             result = new AnnoScheme();
-            result.Type = AnnoScheme.TYPE.GRPAH;
+            result.Type = AnnoScheme.TYPE.GRAPH;
             result.SampleRate = defaultInput.SampleRate;
-            result.MinScore = defaultInput.NumNodes;
+            result.NumberOfPoints = defaultInput.NumNodes;
             result.MaxOrForeColor = defaultInput.LineColour;
             result.MinOrBackColor = defaultInput.NodeColour;
 

@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace ssi
@@ -17,7 +11,7 @@ namespace ssi
         {
             MediaBox box = new MediaBox(media);
             control.mediaBoxControl.Add(box);
-            
+
             mediaBoxes.Add(box);
 
             DispatcherTimer timer = new DispatcherTimer();
@@ -74,7 +68,7 @@ namespace ssi
                     }
                     control.mediaCloseButton.Visibility = Visibility.Visible;
                 }
-            }           
+            }
         }
 
         private void onMediaBoxChange(MediaBox box, EventArgs e)
@@ -117,7 +111,6 @@ namespace ssi
                 }
             }
         }
-
 
         #region MEDIAPLAYER
 
@@ -338,31 +331,26 @@ namespace ssi
                 mediaList.Stop();
                 control.navigator.playButton.Content = ">";
 
-
-                if (Keyboard.IsKeyDown(Key.LeftShift))
+                if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.IsGeometric || AnnoTierStatic.Selected.IsContinuous))
                 {
-
-                
                     int i = 0;
-                foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
-                {
-                    if (ali.Start <= Time.CurrentPlayPosition)
+                    foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
                     {
-                        ++i;
+                        if (ali.Start <= Time.CurrentPlayPosition)
+                        {
+                            ++i;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
-                    else
-                    {
-                        break;
-                    }
-                }
-                
-                jumpToGeometric(i);
+
+                    jumpToGeometric(i);
                 }
             }
         }
 
         #endregion MEDIAPLAYER
-
-
     }
 }

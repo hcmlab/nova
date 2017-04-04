@@ -25,7 +25,7 @@ namespace ssi
         public class Input
         {
             public double SampleRate { get; set; }
-            public double NumNodes { get; set; }
+            public int NumNodes { get; set; }
             public Color NodeColour { get; set; }
             public Color LineColour{ get; set; }
         }
@@ -37,7 +37,7 @@ namespace ssi
             result = new AnnoScheme();
             result.Type = AnnoScheme.TYPE.POLYGON;
             result.SampleRate = defaultInput.SampleRate;
-            result.MinScore = defaultInput.NumNodes;
+            result.NumberOfPoints = defaultInput.NumNodes;
             result.MaxOrForeColor = defaultInput.LineColour;
             result.MinOrBackColor = defaultInput.NodeColour;
 
@@ -59,7 +59,7 @@ namespace ssi
             }
             if (double.TryParse(numNodesTextBox.Text, out value))
             {
-                result.MinScore = value;
+                result.NumberOfPoints = (int)value;
             }
             result.MinOrBackColor = colorPickerNodes.SelectedColor.Value;
             result.MaxOrForeColor = colorPickerLines.SelectedColor.Value;

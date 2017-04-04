@@ -139,7 +139,7 @@ namespace ssi
             {
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
-                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
                     control.geometricListControl.Visibility = Visibility.Visible;
@@ -553,7 +553,7 @@ namespace ssi
                     }
                 }
 
-                if (item.Geometric)
+                if (item.isGeometric)
                 {
                     AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
                     double deltaTime = ali.Duration;

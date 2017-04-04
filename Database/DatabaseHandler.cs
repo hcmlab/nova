@@ -150,8 +150,12 @@ namespace ssi
                 if (document["isValid"].AsBoolean == true)
                 {
                     if ((annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE && document["type"].ToString() == "DISCRETE")) AnnotationSchemes.Add(document["name"].ToString());
-                    else if  (annoList.Scheme.Type == AnnoScheme.TYPE.FREE && (document["type"].ToString() == "FREE")) AnnotationSchemes.Add(document["name"].ToString());
+                    else if (annoList.Scheme.Type == AnnoScheme.TYPE.FREE && (document["type"].ToString() == "FREE")) AnnotationSchemes.Add(document["name"].ToString());
                     else if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && document["type"].ToString() == "CONTINUOUS") AnnotationSchemes.Add(document["name"].ToString());
+                    else if (annoList.Scheme.Type == AnnoScheme.TYPE.POINT && document["type"].ToString() == "POINT") AnnotationSchemes.Add(document["name"].ToString());
+                    else if (annoList.Scheme.Type == AnnoScheme.TYPE.GRAPH && document["type"].ToString() == "GRAPH") AnnotationSchemes.Add(document["name"].ToString());
+                    else if (annoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION && document["type"].ToString() == "SEGMENTATION") AnnotationSchemes.Add(document["name"].ToString());
+                    else if (annoList.Scheme.Type == AnnoScheme.TYPE.POLYGON && document["type"].ToString() == "POLYGON") AnnotationSchemes.Add(document["name"].ToString());
                 }
             }
 
@@ -231,6 +235,41 @@ namespace ssi
                     {
                         scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
                     }
+
+                    else if (scheme.Type == AnnoScheme.TYPE.POINT)
+                    {
+                        scheme.NumberOfPoints = annoSchemeDocument["num_points"].ToInt32();
+                        scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
+                        scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
+                    }
+
+                    else if (scheme.Type == AnnoScheme.TYPE.POLYGON)
+                    {
+                        //TODO
+                        scheme.NumberOfPoints = annoSchemeDocument["num_points"].ToInt32();
+                        scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
+                        scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
+                    }
+
+                    else if (scheme.Type == AnnoScheme.TYPE.GRAPH)
+                    {
+                        //TODO
+                        scheme.NumberOfPoints = annoSchemeDocument["num_points"].ToInt32();
+                        scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
+                        scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
+                    }
+
+                    else if (scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                    {
+                        //TODO
+                        scheme.NumberOfPoints = annoSchemeDocument["num_points"].ToInt32();
+                        scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
+                        scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
+                    }
+
+
+
+
                 }
             }
             catch(Exception ex)
@@ -470,6 +509,33 @@ namespace ssi
                 }
             }
 
+            else if (annoschemetypedb == "POINT")
+            {
+
+              
+                BsonDocument singlepoint;
+                for (int i = 0; i < annoList.Count; i++)
+                {
+                    BsonArray Points = new BsonArray();
+                    for (int j = 0; j < annoList.Scheme.NumberOfPoints; j++)
+                    {
+                        singlepoint = new BsonDocument();
+                        singlepoint.Add(new BsonElement("label", annoList[i].Points[j].Label));
+                        singlepoint.Add(new BsonElement("x", annoList[i].Points[j].XCoord));
+                        singlepoint.Add(new BsonElement("y", annoList[i].Points[j].YCoord));
+                        singlepoint.Add(new BsonElement("conf", annoList[i].Points[j].Confidence));
+
+                        Points.Add(singlepoint);
+                    }
+
+                    data.Add(new BsonDocument { { "label", annoList[i].Label }, { "conf", annoList[i].Confidence }, { "points", Points } });
+                }
+            }
+
+            //TODO add other geometric annotations
+
+  
+
             document.Add("labels", data);
 
             var filter2 = builder.Eq("scheme_id", annotid) & builder.Eq("role_id", roleid) & builder.Eq("annotator_id", annotatoroID) & builder.Eq("session_id", sessionID);
@@ -579,6 +645,28 @@ namespace ssi
                     annoList.Scheme.Type = AnnoScheme.TYPE.CONTINUOUS;
                 }
 
+                else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == AnnoScheme.TYPE.POINT.ToString())
+                {
+                    annoList.Scheme.Type = AnnoScheme.TYPE.POINT;
+                }
+
+                else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == AnnoScheme.TYPE.POLYGON.ToString())
+                {
+                    annoList.Scheme.Type = AnnoScheme.TYPE.POLYGON;
+                }
+
+                else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == AnnoScheme.TYPE.SEGMENTATION.ToString())
+                {
+                    annoList.Scheme.Type = AnnoScheme.TYPE.SEGMENTATION;
+                }
+
+                else if (annosch.TryGetElement("type", out value) && annosch["type"].ToString() == AnnoScheme.TYPE.GRAPH.ToString())
+                {
+                    annoList.Scheme.Type = AnnoScheme.TYPE.GRAPH;
+                }
+
+
+
                 annoList.Meta.Role = roledb;
                 annoList.Scheme.Name = annosch["name"].ToString();
                 var labels = documents[0]["labels"].AsBsonArray;
@@ -679,6 +767,41 @@ namespace ssi
                         annoList.AddSorted(ali);
                     }
                 }
+
+
+                else if (annoList.Scheme.Type == AnnoScheme.TYPE.POINT)
+                {
+                    annoList.Scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annosch["color"].ToString());
+
+                    for (int i = 0; i < labels.Count; i++)
+                    {
+                        BsonDocument entry = labels[i].AsBsonDocument;
+                        string label = entry["label"].AsString;
+                        double confidence = entry["conf"].AsDouble;
+                        PointList pl = new PointList();
+                        BsonArray points = entry["points"].AsBsonArray;
+
+                        foreach(BsonDocument b in points)
+                        {
+                            int x = b["x"].ToInt32();
+                            int y = b["y"].ToInt32();
+                            string l = b["label"].ToString();
+                            double c = b["conf"].ToDouble();
+                            PointListItem pli = new PointListItem(x, y, l, c);
+                            pl.Add(pli);
+                        }
+
+                        double start = i * ((1000.0 / annoList.Scheme.SampleRate) / 1000.0);
+                        double dur = (1000.0 / annoList.Scheme.SampleRate) / 1000.0;
+
+                        AnnoListItem ali = new AnnoListItem(start, dur, label, "", annoList.Scheme.MinOrBackColor, confidence, true, pl);
+                        annoList.Add(ali);
+                    }
+
+ 
+                }
+
+
 
                 annoList.Source.Database.OID = anno.Id;
                 annoList.Source.Database.Session = sessionName;

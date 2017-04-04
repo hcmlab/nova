@@ -171,8 +171,16 @@ namespace ssi
             {
                 return (AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
-                       AnnoList.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION);
+            }
+        }
+
+        public bool IsContinuous
+        {
+            get
+            {
+                return AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ;
             }
         }
 
@@ -312,7 +320,7 @@ namespace ssi
                     }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON)
                     { }
-                    else if (anno.Scheme.Type == AnnoScheme.TYPE.GRPAH)
+                    else if (anno.Scheme.Type == AnnoScheme.TYPE.GRAPH)
                     { }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                     { }
@@ -511,7 +519,7 @@ namespace ssi
         public void InitPointValues(AnnoList anno)
         {
             double sr = anno.Scheme.SampleRate;
-            int numPoints = Convert.ToInt32(anno.Scheme.MinScore);
+            int numPoints = anno.Scheme.NumberOfPoints;
             int samples = (int)Math.Round(MainHandler.Time.TotalDuration * sr);
 
             double delta = 1.0 / sr;
@@ -527,7 +535,7 @@ namespace ssi
                         int y = -1;
                         //x = rnd.Next(50, 200);
                         //y = rnd.Next(50, 200);
-                        points.Add(new PointListItem(x, y, (j + 1).ToString(), 0));
+                        points.Add(new PointListItem(x, y, (j + 1).ToString(), 1.0));
                     }
                     AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, true, points);
                     AnnoList.Add(ali);

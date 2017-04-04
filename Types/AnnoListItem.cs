@@ -15,7 +15,7 @@ namespace ssi
         private bool geometric;
         private PointList points;
 
-        public bool Geometric
+        public bool isGeometric
         {
             get { return geometric; }
             set
