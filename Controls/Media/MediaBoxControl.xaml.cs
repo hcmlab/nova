@@ -78,11 +78,49 @@ namespace ssi
 
         public void Remove(MediaBox box)
         {
-            grid.ColumnDefinitions[Grid.GetColumn(box.Border)].Width = new GridLength(0);
-            if (grid.Children.IndexOf(box.Border) > 0)
+            int columnIndex = Grid.GetColumn(box.Border);
+            int childIndex = 0;
+
+            bool isLast = columnIndex == grid.ColumnDefinitions.Count - 1;
+
+            // remove children:
+
+            // splitter            
+            childIndex = grid.Children.IndexOf(box.Border);
+            if (!isLast) grid.Children.RemoveAt(childIndex + 2);
+            // label
+            childIndex = grid.Children.IndexOf(box.Border);
+            grid.Children.RemoveAt(childIndex + 1);
+            // border
+            childIndex = grid.Children.IndexOf(box.Border);
+            grid.Children.RemoveAt(childIndex);
+
+            // update row indices of remaining children:
+
+            int row = 0;
+            for (int i = 0; i < grid.Children.Count; i++)
             {
-                grid.Children.RemoveAt(grid.Children.IndexOf(box.Border) - 1);
-                grid.Children.RemoveAt(grid.Children.IndexOf(box.Border));
+                if ((i + 1) % 3 == 0)
+                {
+                    row++;
+                }
+                Grid.SetColumn(grid.Children[i], row);
+                if ((i + 1) % 3 == 0)
+                {
+                    row++;
+                }
+            }
+
+            // remove rows:
+
+            grid.ColumnDefinitions.RemoveAt(grid.ColumnDefinitions.Count - 1);
+            if (!isLast) grid.ColumnDefinitions.RemoveAt(grid.ColumnDefinitions.Count - 1);
+
+            // resize 
+
+            for (int i = 0; i < grid.ColumnDefinitions.Count; i += 2)
+            {
+                grid.ColumnDefinitions[i].Width = new GridLength(1, GridUnitType.Star);
             }
         }        
     }

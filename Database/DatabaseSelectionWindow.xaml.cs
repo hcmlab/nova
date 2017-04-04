@@ -214,7 +214,7 @@ namespace ssi
                 BsonElement documentMinColor = new BsonElement("min_color", new SolidColorBrush(annoList.Scheme.MinOrBackColor).Color.ToString() );
                 BsonElement documentColor = new BsonElement("color", new SolidColorBrush(annoList.Scheme.MinOrBackColor).Color.ToString());
                 BsonElement documentMaxColor = new BsonElement("max_color", new SolidColorBrush(annoList.Scheme.MaxOrForeColor).Color.ToString());
-                BsonElement documentPointsNum = new BsonElement("num_points", annoList.Scheme.NumberOfPoints);
+                BsonElement documentPointsNum = new BsonElement("num", annoList.Scheme.NumberOfPoints);
             
 
 

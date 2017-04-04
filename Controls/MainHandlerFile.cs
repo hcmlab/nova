@@ -213,7 +213,6 @@ namespace ssi
             }
 
             control.navigator.playButton.IsEnabled = true;
-            inNoMediaPlayMode = false;
         }
 
         private IMedia loadMediaFile(string filename, MediaType type)
@@ -461,7 +460,7 @@ namespace ssi
                 {
                     AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;                    
                     AnnoTierStatic.Selected.AnnoList.Save();
-                    setAnnoInfo(AnnoTierStatic.Selected.AnnoList);
+                    updateAnnoInfo(AnnoTierStatic.Selected);
                 }
             }
         }

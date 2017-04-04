@@ -18,11 +18,16 @@ namespace ssi
             {
                 if (e.KeyboardDevice.IsKeyDown(Key.Space))
                 {
-                    handlePlay();
-
+                    if (IsPlaying())
+                    {
+                        Stop();
+                    }
+                    else
+                    {
+                        Play();
+                    }
                     e.Handled = true;
                 }
-
 
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.L))
                 {

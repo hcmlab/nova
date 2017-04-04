@@ -37,5 +37,7 @@ namespace ssi
         }
 
         public static int SelectionBorderWidth = 7;
+
+        public static double DefaultSampleRate = 25.0;
     }
 }

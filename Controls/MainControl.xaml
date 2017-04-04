@@ -6,8 +6,6 @@
     Height="Auto"
     Loaded="ControlLoaded">
 
-
-
     <Grid>
 
         <Grid.RowDefinitions>
@@ -371,7 +369,9 @@
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right"
                                                 Name="annorightMenu">
-                                        <CheckBox x:Name="annoContinuousMode" Style="{DynamicResource OrangeSwitchStyle}" ToolTip="Continuous Annotation Mode" Visibility="Collapsed"  />
+                                        <CheckBox x:Name="annoContinuousMode" Style="{DynamicResource OrangeSwitchStyle}" 
+                                                  ToolTip="Continuous Annotation Mode" 
+                                                  Visibility="Collapsed"/>
                                         <Separator Width="20" Visibility="Hidden"></Separator>
                                         <TextBlock x:Name="annoPositionLabel" 
                                     		VerticalAlignment="Center" 

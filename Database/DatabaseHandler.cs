@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 
 using System;
 using System.Collections.Generic;
@@ -238,7 +239,7 @@ namespace ssi
 
                     else if (scheme.Type == AnnoScheme.TYPE.POINT)
                     {
-                        scheme.NumberOfPoints = annoSchemeDocument["num_points"].ToInt32();
+                        scheme.NumberOfPoints = annoSchemeDocument["num"].ToInt32();
                         scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
                         scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
                     }
@@ -246,7 +247,7 @@ namespace ssi
                     else if (scheme.Type == AnnoScheme.TYPE.POLYGON)
                     {
                         //TODO
-                        scheme.NumberOfPoints = annoSchemeDocument["num_points"].ToInt32();
+                        scheme.NumberOfPoints = annoSchemeDocument["num"].ToInt32();
                         scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
                         scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
                     }
@@ -254,7 +255,7 @@ namespace ssi
                     else if (scheme.Type == AnnoScheme.TYPE.GRAPH)
                     {
                         //TODO
-                        scheme.NumberOfPoints = annoSchemeDocument["num_points"].ToInt32();
+                        scheme.NumberOfPoints = annoSchemeDocument["num"].ToInt32();
                         scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
                         scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
                     }
@@ -262,7 +263,7 @@ namespace ssi
                     else if (scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                     {
                         //TODO
-                        scheme.NumberOfPoints = annoSchemeDocument["num_points"].ToInt32();
+                        scheme.NumberOfPoints = annoSchemeDocument["num"].ToInt32();
                         scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
                         scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
                     }
@@ -813,6 +814,7 @@ namespace ssi
             return annoLists;
         }
 
+
         public static string FetchDBRef(IMongoDatabase database, string collection, string attribute, ObjectId reference)
         {
             string output = "";
@@ -907,4 +909,6 @@ namespace ssi
         public static string Schemes = "AnnotationSchemes";
         
     }
+
+  
 }
