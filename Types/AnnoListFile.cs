@@ -54,19 +54,19 @@ namespace ssi
 
                 else if (Scheme.Type == AnnoScheme.TYPE.POINT)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"POINT\" sr=\"" + this.Scheme.SampleRate + "\" num_points=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"POINT\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num_points=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num_points=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\"  />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\"  />");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num_points=\"" + this.Scheme.NumberOfPoints +  "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints +  "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
                 }
 
                 sw.WriteLine("</annotation>");
@@ -379,13 +379,18 @@ namespace ssi
                 else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
                 }
-                else if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS || list.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                else if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    list.Scheme.MinScore = double.Parse(scheme.Attributes["min"].Value);
+                    list.Scheme.MaxScore = double.Parse(scheme.Attributes["max"].Value);
+                    list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
+                }
+                else if (list.Scheme.Type == AnnoScheme.TYPE.POINT ||
                          list.Scheme.Type == AnnoScheme.TYPE.POLYGON || list.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                          list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
-                    list.Scheme.NumberOfPoints = int.Parse(scheme.Attributes["num_points"].Value);
-                    //list.Scheme.MaxScore = double.Parse(scheme.Attributes["max"].Value);
+                    list.Scheme.NumberOfPoints = int.Parse(scheme.Attributes["num"].Value);                    
                 }
 
                 if (File.Exists(filepath + "~"))

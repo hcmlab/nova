@@ -83,11 +83,52 @@ namespace ssi
 
         public void Remove(AnnoTier tier)
         {
-            grid.RowDefinitions[Grid.GetRow(tier)].Height = new GridLength(0);
-            if (grid.Children.IndexOf(tier) > 0)
+            int rowIndex = Grid.GetRow(tier.Border);
+            int childIndex = 0;
+
+            bool isLast = rowIndex == grid.RowDefinitions.Count - 1;
+
+            // remove children:
+
+            // splitter            
+            childIndex = grid.Children.IndexOf(tier.Border);
+            if (!isLast) grid.Children.RemoveAt(childIndex + 1);
+            // track
+            childIndex = grid.Children.IndexOf(tier.Border);
+            grid.Children.RemoveAt(childIndex - 2);
+            // label
+            childIndex = grid.Children.IndexOf(tier.Border);
+            grid.Children.RemoveAt(childIndex - 1);
+            // border
+            childIndex = grid.Children.IndexOf(tier.Border);
+            grid.Children.RemoveAt(childIndex);
+
+            // update row indices of remaining children:
+
+            int row = 0;
+            for (int i = 0; i < grid.Children.Count; i++)
             {
-                grid.Children.RemoveAt(grid.Children.IndexOf(tier) - 1);
-                grid.Children.RemoveAt(grid.Children.IndexOf(tier));
+                if ((i + 1) % 4 == 0)
+                {
+                    row++;
+                }
+                Grid.SetRow(grid.Children[i], row);
+                if ((i + 1) % 4 == 0)
+                {
+                    row++;
+                }
+            }
+
+            // remove rows:
+
+            grid.RowDefinitions.RemoveAt(grid.RowDefinitions.Count - 1);
+            if (!isLast) grid.RowDefinitions.RemoveAt(grid.RowDefinitions.Count - 1);
+
+            // resize 
+
+            for (int i = 0; i < grid.RowDefinitions.Count; i += 2)
+            {
+                grid.RowDefinitions[i].Height = new GridLength(1, GridUnitType.Star);
             }
         }
     }

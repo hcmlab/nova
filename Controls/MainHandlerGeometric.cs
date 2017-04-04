@@ -37,22 +37,20 @@ namespace ssi
         {
             WriteableBitmap overlay = null;
 
-            foreach (IMedia m in mediaList)
-            {
-                if (m.GetMediaType() == MediaType.VIDEO)
-                {
-                    overlay = m.GetOverlay();
-                    break;
-                }
-            }
+            IMedia video = mediaList.GetFirstVideo();
 
-            if (overlay == null)
+            if (video != null)
             {
+                overlay = video.GetOverlay();
+            }
+            else
+            { 
                 return;
             }
 
+            overlay.Lock();
             overlay.Clear();
-
+            
             switch (type)
             {
                 case AnnoScheme.TYPE.POINT:                            
@@ -72,32 +70,9 @@ namespace ssi
                     break;
                 case AnnoScheme.TYPE.SEGMENTATION:
                     break;
-            }
+            }            
 
-            
-            foreach (AnnoList al in geometricCompare)
-            {
-                switch (al.Scheme.Type)
-                {
-                    case AnnoScheme.TYPE.POINT:
-                        foreach (PointListItem p in al[pos].Points)
-                        {
-                            if (p.XCoord != -1 && p.YCoord != -1)
-                            {
-                                Color color = al[pos].Color;
-                                //color.A = 128;
-                                overlay.FillEllipseCentered((int)p.XCoord, (int)p.YCoord, 1, 1, color);
-                            }
-                        }
-                        break;
-                    case AnnoScheme.TYPE.POLYGON:
-                        break;
-                    case AnnoScheme.TYPE.GRAPH:
-                        break;
-                    case AnnoScheme.TYPE.SEGMENTATION:
-                        break;
-                }
-            }
+            overlay.Unlock();
         }
 
         private static bool rightHeld;

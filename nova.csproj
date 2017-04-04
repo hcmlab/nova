@@ -64,6 +64,9 @@
     <Reference Include="MongoDB.Driver.Core">
       <HintPath>References\MongoDB.Driver.Core.dll</HintPath>
     </Reference>
+    <Reference Include="MongoDB.Driver.GridFS">
+      <HintPath>References\MongoDB.Driver.GridFS.dll</HintPath>
+    </Reference>
     <Reference Include="Octokit">
       <HintPath>References\Octokit.dll</HintPath>
     </Reference>
@@ -144,6 +147,7 @@
     <Compile Include="Controls\MainHandlerMedia.cs" />
     <Compile Include="Controls\MainHandlerMenu.cs" />
     <Compile Include="Controls\MainHandlerNavigation.cs" />
+    <Compile Include="Controls\MainHandlerPlay.cs" />
     <Compile Include="Controls\MainHandlerSignal.cs" />
     <Compile Include="Controls\MainHandlerUpdate.cs" />
     <Compile Include="Controls\Navigation\TimeRangeSlider.xaml.cs">

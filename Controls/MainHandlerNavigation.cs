@@ -189,6 +189,62 @@ namespace ssi
         {
             clearSession();
         }
+        
+        private void navigatorPlay_Click(object sender, RoutedEventArgs e)
+        {
+            if (playIsPlaying)
+            {
+                Stop();
+            }
+            else
+            {
+                Play();
+            }
+        }     
+
+        private void updateNavigator()
+        {
+            if (mediaList.Count > 0
+                || signalTracks.Count > 0
+                || annoTiers.Count > 0)
+            {
+                control.navigator.playButton.IsEnabled = true;                
+            }
+            else
+            {
+                control.navigator.playButton.IsEnabled = false;
+                control.navigator.Statusbar.Content = "";
+            }
+
+            if (!playIsPlaying)
+            {
+                control.navigator.playButton.Content = ">";
+            }
+            else
+            {
+                control.navigator.playButton.Content = "II";
+            }
+        }
+
+        public void updateTimeRange(double duration, SignalTrack track)
+        {
+            if (duration > Time.TotalDuration)
+            {
+                Time.TotalDuration = duration;
+                control.timeLineControl.rangeSlider.Update();
+            }
+            else if(track != null)
+            {
+                track.TimeRangeChanged(Time);
+            }
+            if (signalTracks.Count == 1
+                && duration > Properties.Settings.Default.DefaultZoomInSeconds
+                && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            {
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
+            }
+
+        }
 
         private void navigatorFollowAnno_Unchecked(object sender, RoutedEventArgs e)
         {
@@ -224,94 +280,6 @@ namespace ssi
             int end = control.annoListControl.annoDataGrid.Items.Count - 1;
             jumpToGeometric(end);
         }
-
-        private void navigatorPlay_Click(object sender, RoutedEventArgs e)
-        {
-            handlePlay();
-        }
-
-        private void navigatorFastForward_Click(object sender, RoutedEventArgs e)
-        {
-            int updateinms = 300;
-            double updatestep = 1;
-
-            infastbackward = false;
-            if (infastforward) infastforward = false;
-            else infastforward = true;
-
-            if (infastforward)
-            {
-                control.navigator.fastForwardButton.Content = ">";
-                _timerff.Interval = TimeSpan.FromMilliseconds(updateinms);
-                _timerff.Tick += new EventHandler(delegate (object s, EventArgs a)
-                {
-                    if (mediaList.Count > 0)
-                    {
-                        mediaList.Move(MainHandler.Time.TimeFromPixel(signalCursor.X) + updatestep);
-                        //  media_list.move(Time.CurrentPlayPosition+1);
-                        if (!infastforward) _timerff.Stop();
-                    }
-                });
-                _timerff.Start();
-            }
-            else
-            {
-                _timerff.Stop();
-                control.navigator.fastForwardButton.Content = ">>";
-            }
-        }
-
-        private void navigatorFastBackward_Click(object sender, RoutedEventArgs e)
-        {
-            int updateinms = 300;
-            double updatestep = 1;
-
-            infastforward = false;
-
-            if (infastbackward) infastbackward = false;
-            else infastbackward = true;
-
-            if (infastbackward)
-            {
-                control.navigator.fastBackwardButton.Content = ">";
-                _timerfb.Interval = TimeSpan.FromMilliseconds(updateinms);
-                _timerfb.Tick += new EventHandler(delegate (object s, EventArgs a)
-                {
-                    if (mediaList.Count > 0)
-                    {
-                        mediaList.Move(Time.TimeFromPixel(signalCursor.X) - updatestep);
-                        if (!infastbackward) _timerfb.Stop();
-                    }
-                });
-                _timerfb.Start();
-            }
-            else
-            {
-                _timerfb.Stop();
-                control.navigator.fastBackwardButton.Content = "<<";
-            }
-        }
-
-        public void UpdateTimeRange(double duration, SignalTrack track)
-        {
-            if (duration > Time.TotalDuration)
-            {
-                Time.TotalDuration = duration;
-                control.timeLineControl.rangeSlider.Update();
-            }
-            else if(track != null)
-            {
-                track.TimeRangeChanged(Time);
-            }
-            if (signalTracks.Count == 1
-                && duration > Properties.Settings.Default.DefaultZoomInSeconds
-                && Properties.Settings.Default.DefaultZoomInSeconds != 0)
-            {
-                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
-            }
-
-        }
-        
 
         #endregion EVENTHANDLER
     }

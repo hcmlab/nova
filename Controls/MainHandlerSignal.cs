@@ -23,9 +23,10 @@ namespace ssi
             signalTracks.Add(track);
 
             double duration = signal.number / signal.rate;
-            UpdateTimeRange(duration, track);
+            updateTimeRange(duration, track);
 
             SignalTrackStatic.Select(track);
+            updateNavigator();
         }
 
         private void signalTrackCloseButton_Click(object sender, RoutedEventArgs e)
@@ -52,6 +53,7 @@ namespace ssi
                 else
                 {
                     clearSignalTrack();
+                    updateNavigator();
                 }
             }
         }
@@ -74,8 +76,13 @@ namespace ssi
             control.signalCloseButton.Visibility = Visibility.Hidden;
         }
 
-        private void changeSignalTrack(SignalTrack track)
+        private void updateSignalTrack(SignalTrack track)
         {
+            if (track == null)
+            {
+                return;
+            }
+
             Signal signal = track.Signal;
             if (signal != null)
             {
@@ -104,13 +111,13 @@ namespace ssi
                 {
                     control.signalVolumeControl.Visibility = Visibility.Collapsed;
                 }
-                control.signalCloseButton.Visibility = Visibility.Visible;
+                control.signalCloseButton.Visibility = playIsPlaying ? Visibility.Hidden : Visibility.Visible;
             }
         }
 
         private void onSignalTrackChange(SignalTrack track, EventArgs e)
         {
-            changeSignalTrack(track);
+            updateSignalTrack(track);
         }
 
         private void signalDimComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -145,14 +152,15 @@ namespace ssi
 
         #region EVENTHANDLER
 
-        private void signalTrackGrid_MouseDown(object sender, MouseButtonEventArgs e)
+        private void signalAndAnnoGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                  if (AnnoTierStatic.Label != null && Mouse.DirectlyOver.GetType() != AnnoTierStatic.Label.GetType() || AnnoTierStatic.Label == null)
                 {
-                     AnnoTierStatic.UnselectLabel();
+                    AnnoTierStatic.UnselectLabel();
                     bool is_playing = IsPlaying();
+
                     if (is_playing)
                     {
                         Stop();
@@ -167,18 +175,18 @@ namespace ssi
 
                     if (AnnoTierStatic.Selected != null)
                     {
-                        if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                        if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                         AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
                         AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                         AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                         {
                             if (control.annoListControl.annoDataGrid.Items.Count > 0)
                             {
-                                AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
-                                double deltaTime = ali.Duration;
-                                double roughtPosition = Time.CurrentPlayPosition / deltaTime;
-                                jumpToGeometric((int)roughtPosition);
+                                int position = (int)(Time.CurrentPlayPosition * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
+                                if (position < control.annoListControl.annoDataGrid.Items.Count)
+                                {
+                                    jumpToGeometric(position);
+                                }
                             }
                         }
                     }

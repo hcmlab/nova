@@ -37,7 +37,6 @@ namespace ssi
                 splitter.HorizontalAlignment = HorizontalAlignment.Stretch;
                 splitter.VerticalAlignment = VerticalAlignment.Stretch;
                 splitter.ShowsPreview = true;
-                Grid.SetColumnSpan(splitter, 1);
                 Grid.SetColumn(splitter, 0);
                 Grid.SetRow(splitter, grid.RowDefinitions.Count - 1);
                 grid.Children.Add(splitter);
@@ -81,11 +80,52 @@ namespace ssi
 
         public void Remove(SignalTrack track)
         {
-            grid.RowDefinitions[Grid.GetRow(track.Border)].Height = new GridLength(0);
-            if (grid.Children.IndexOf(track.Border) > 0)
+            int rowIndex = Grid.GetRow(track.Border);
+            int childIndex = 0;
+                        
+            bool isLast = rowIndex == grid.RowDefinitions.Count - 1;
+
+            // remove children:
+
+            // splitter            
+            childIndex = grid.Children.IndexOf(track.Border);
+            if (!isLast) grid.Children.RemoveAt(childIndex + 1);
+            // track
+            childIndex = grid.Children.IndexOf(track.Border);
+            grid.Children.RemoveAt(childIndex - 2);
+            // label
+            childIndex = grid.Children.IndexOf(track.Border);
+            grid.Children.RemoveAt(childIndex - 1);
+            // border
+            childIndex = grid.Children.IndexOf(track.Border);
+            grid.Children.RemoveAt(childIndex);
+
+            // update row indices of remaining children:
+
+            int row = 0;
+            for (int i = 0; i < grid.Children.Count; i++)
             {
-                grid.Children.RemoveAt(grid.Children.IndexOf(track.Border) - 1);
-                grid.Children.RemoveAt(grid.Children.IndexOf(track.Border));
+                if ((i + 1) % 4 == 0)
+                {
+                    row++;
+                }
+                Grid.SetRow(grid.Children[i], row);
+                if ((i + 1) % 4 == 0)
+                {
+                    row++;
+                }
+            }
+
+            // remove rows:
+
+            grid.RowDefinitions.RemoveAt(grid.RowDefinitions.Count-1);
+            if (!isLast) grid.RowDefinitions.RemoveAt(grid.RowDefinitions.Count - 1);
+
+            // resize 
+
+            for (int i = 0; i < grid.RowDefinitions.Count; i += 2)
+            {
+                grid.RowDefinitions[i].Height = new GridLength(1, GridUnitType.Star);
             }
         }
     }

@@ -60,21 +60,15 @@ namespace ssi
         private MediaList mediaList = new MediaList();
         private List<MediaBox> mediaBoxes = new List<MediaBox>();
 
-        private bool infastforward = false;
-        private bool infastbackward = false;
-        private bool inNoMediaPlayMode = false;
-        private DispatcherTimer _timerff = new DispatcherTimer();
-        private DispatcherTimer _timerfb = new DispatcherTimer();
-        private DispatcherTimer _timerp = new DispatcherTimer();
+        private bool playIsPlaying = false;        
+        private double playSampleRate = Defaults.DefaultSampleRate;
+        private int playLastTick = 0;
+        DispatcherTimer playTimer = null;
+
         private bool isMouseButtonDown = false;
         private bool isKeyDown = false;
-        private bool movemedialock = false;
-        private double skelfps = 25;
-        private double lasttimepos = 0;
         private string lastDownloadFileName = null;
-        private bool visualizeskel = false;
-        private bool visualizepoints = false;
-        public bool databaseloaded = false;
+        public bool databaseIsLoaded = false;
 
         public List<DatabaseMediaInfo> loadedDBmedia = null;
        
@@ -83,8 +77,8 @@ namespace ssi
 
         public bool DatabaseLoaded
         {
-            get { return databaseloaded; }
-            set { databaseloaded = value; }
+            get { return databaseIsLoaded; }
+            set { databaseIsLoaded = value; }
         }
 
         public class DownloadStatus
@@ -117,11 +111,6 @@ namespace ssi
             get { return control.loadMenu; }
         }
 
-        public MenuItem clearButton
-        {
-            get { return control.clearSessionMenu; }
-        }
-
         public MainHandler(MainControl view)
         {
             control = view;
@@ -134,7 +123,6 @@ namespace ssi
             // Media
 
             control.mediaStatusBar.Background = Defaults.Brushes.Highlight;
-            mediaList.OnMediaPlay += onMediaPlay;
             MediaBoxStatic.OnBoxChange += onMediaBoxChange;
             control.mediaVolumeControl.volumeSlider.ValueChanged += mediaVolumeControl_ValueChanged;
             control.mediaCloseButton.Click += mediaBoxCloseButton_Click;
@@ -147,7 +135,7 @@ namespace ssi
             control.signalVolumeControl.volumeSlider.ValueChanged += signalVolumeControl_ValueChanged;
             control.signalCloseButton.Click += signalTrackCloseButton_Click;
             SignalTrackStatic.OnTrackChange += onSignalTrackChange;
-            control.signalAndAnnoGrid.MouseDown += signalTrackGrid_MouseDown;
+            control.signalAndAnnoGrid.MouseDown += signalAndAnnoGrid_MouseDown;
 
             // Anno
 
@@ -165,6 +153,7 @@ namespace ssi
             control.annoTierControl.MouseRightButtonUp += annoTierControl_MouseRightButtonUp;
             control.annoContinuousMode.Checked += annoContinuousMode_Changed;
             control.annoContinuousMode.Unchecked += annoContinuousMode_Changed;
+
             // Geometric
 
             control.geometricListControl.editButton.Click += geometricListEdit_Click;
@@ -217,8 +206,6 @@ namespace ssi
             control.navigator.clearButton.Click += navigatorClearSession_Click;
             control.navigator.jumpFrontButton.Click += navigatorJumpFront_Click;
             control.navigator.playButton.Click += navigatorPlay_Click;
-            control.navigator.fastForwardButton.Click += navigatorFastForward_Click;
-            control.navigator.fastBackwardButton.Click += navigatorFastBackward_Click;
             control.navigator.jumpEndButton.Click += navigatorJumpEnd_Click;
             control.navigator.followAnnoCheckBox.Unchecked += navigatorFollowAnno_Unchecked;
             control.navigator.correctionModeCheckBox.Click += navigatorCorrectionMode_Click;                  
@@ -250,6 +237,11 @@ namespace ssi
                 }
             };
 
+            // Player
+
+            playTimer = new DispatcherTimer();
+            playTimer.Tick += PlayTimer_Tick;
+
             // Cursor
 
             initCursor();
@@ -273,12 +265,20 @@ namespace ssi
         private void signalAndAnnoControlSizeChanged(object sender, SizeChangedEventArgs e)
         {
             timeline.SelectionInPixel = control.signalAndAnnoAdorner.ActualWidth;
-            if (!movemedialock) control.timeLineControl.rangeSlider.Update();
+            control.timeLineControl.rangeSlider.Update();
         }
-        
+
+        public void updateControl()
+        {
+            updateNavigator();
+            updateSignalTrack(SignalTrackStatic.Selected);
+            updateMediaBox(MediaBoxStatic.Selected);
+            updateAnnoInfo(AnnoTierStatic.Selected);            
+        }
+
         public void clearSession(bool exiting = false, bool saveRequested = false)
         {
-            tokenSource.Cancel();
+            tokenSource.Cancel();            
             Stop();
 
             bool anytrackchanged = saveRequested;
@@ -312,19 +312,13 @@ namespace ssi
             clearSignalTrack();
             clearAnnoInfo();
             
-            control.navigator.playButton.IsEnabled = false;
-            control.navigator.Statusbar.Content = "";
-
             signalCursor.X = 0;
             setAnnoList(null);
 
             control.annoTierControl.Clear();
             control.signalTrackControl.Clear();
             control.mediaBoxControl.Clear();
-
             control.geometricListControl.Visibility = Visibility.Collapsed;
-
-            inNoMediaPlayMode = false;
 
             signalTracks.Clear();
             signals.Clear();
@@ -333,11 +327,9 @@ namespace ssi
             mediaList.Clear();
             mediaBoxes.Clear();
 
-            visualizepoints = false;
-            visualizeskel = false;
-
             Time.TotalDuration = 0;
-
+            
+            updateControl();
             control.timeLineControl.rangeSlider.Update();
         }
 
@@ -362,13 +354,13 @@ namespace ssi
             if (duration > Time.TotalDuration)
             {
                 Time.TotalDuration = duration;
-                if (!movemedialock) control.timeLineControl.rangeSlider.Update();
+                control.timeLineControl.rangeSlider.Update();
             }
         }
 
         private void fixTimeRange(double duration)
         {
-            if (!movemedialock) control.timeLineControl.rangeSlider.UpdateFixedRange(duration);
+            control.timeLineControl.rangeSlider.UpdateFixedRange(duration);
         }
 
         private void controlDrop(object sender, DragEventArgs e)

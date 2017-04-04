@@ -33,6 +33,7 @@ namespace ssi
             timer.Start();
 
             MediaBoxStatic.Select(box);
+            updateNavigator();
         }
 
         public void clearMediaBox()
@@ -46,7 +47,7 @@ namespace ssi
             control.mediaCloseButton.Visibility = Visibility.Hidden;
         }
 
-        private void changeMediaBox(MediaBox box)
+        private void updateMediaBox(MediaBox box)
         {
             if (box != null)
             {
@@ -66,14 +67,14 @@ namespace ssi
                     {
                         control.mediaVolumeControl.Visibility = Visibility.Collapsed;
                     }
-                    control.mediaCloseButton.Visibility = Visibility.Visible;
+                    control.mediaCloseButton.Visibility = playIsPlaying ? Visibility.Hidden : Visibility.Visible;
                 }
             }
         }
 
         private void onMediaBoxChange(MediaBox box, EventArgs e)
         {
-            changeMediaBox(box);
+            updateMediaBox(box);
         }
 
         private void mediaVolumeControl_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -95,7 +96,7 @@ namespace ssi
 
             if (box != null)
             {
-                control.mediaBoxControl.Remove(box);
+                control.mediaBoxControl.Remove(box);                
 
                 MediaBoxStatic.Unselect();
                 mediaBoxes.Remove(box);
@@ -108,249 +109,23 @@ namespace ssi
                 else
                 {
                     clearMediaBox();
+                    updateNavigator();
                 }
             }
         }
 
-        #region MEDIAPLAYER
-
-        // Plays Signal (e.g Skeleton, Face) when no audiovisual file is loaded
-        private void noMediaPlayHandler(Signal signal = null)
+        private double getMaxVideoSampleRate()
         {
-            control.navigator.playButton.IsEnabled = true;
-            double fps;
-            if (signal != null)
+            double rate = 0;
+            foreach (IMedia media in mediaList)
             {
-                fps = signal.rate;
-                skelfps = fps;
-            }
-            else
-            {
-                fps = skelfps;
-            }
-            EventHandler ev = new EventHandler(delegate (object sender, EventArgs a)
-            {
-                if (!movemedialock)
+                if (media.GetMediaType() != MediaType.AUDIO)
                 {
-                    double time = (MainHandler.Time.CurrentPlayPositionPrecise + (1000.0 / fps) / 1000.0);
-                    MainHandler.Time.CurrentPlayPositionPrecise = time;
-                    // if (media_list.Medias.Count == 0)
-                    if (visualizeskel || visualizepoints)
-                    {
-                        signalCursor.X = Time.PixelFromTime(Time.CurrentPlayPositionPrecise);
-
-                        if (Time.CurrentPlayPositionPrecise >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true)
-                        {
-                            double factor = (((Time.CurrentPlayPositionPrecise - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
-
-                            control.timeLineControl.rangeSlider.followmedia = true;
-                            control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
-                        }
-                        else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
-
-                        //hm additional syncstep..
-                        if (lasttimepos < Time.CurrentPlayPosition)
-                        {
-                            lasttimepos = Time.CurrentPlayPosition;
-                            Time.CurrentPlayPositionPrecise = lasttimepos;
-                        }
-                        if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
-                    }
-                }
-
-                if (!inNoMediaPlayMode)
-                {
-                    if (_timerp != null)
-                    {
-                        _timerp.Stop();
-                        _timerp = null;
-                    }
-                }
-            });
-
-            if (inNoMediaPlayMode)
-            {
-                // lasttimepos = ViewHandler.Time.CurrentPlayPosition;
-                control.navigator.playButton.Content = "II";
-                // Play();
-                _timerp = new DispatcherTimer();
-                _timerp.Interval = TimeSpan.FromMilliseconds(1000.0 / fps);
-                _timerp.Tick += ev;
-                _timerp.Start();
-            }
-            else
-            {
-                if (_timerp != null)
-                {
-                    _timerp.Stop();
-                    _timerp.Tick -= ev;
+                    rate = Math.Max(rate, media.GetSampleRate());
                 }
             }
+            return rate == 0 ? Defaults.DefaultSampleRate : rate;
         }
-
-        private void onMediaPlay(MediaList videos, MediaPlayEventArgs e)
-        {
-            if (movemedialock == false)
-            {
-                double time = e.pos;
-                double pos = Time.PixelFromTime(time);
-
-                if (Time.SelectionStop - Time.SelectionStart < 1)
-                {
-                    Time.SelectionStart = Time.SelectionStop - 1;
-                }
-
-                Time.CurrentPlayPosition = time;
-
-                if (!visualizeskel && !visualizepoints)
-                {
-                    signalCursor.X = pos;
-                    if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsGeometric)
-                    {
-                        while (control.annoListControl.annoDataGrid.SelectedItems.Count > 0)
-                        {
-                            control.annoListControl.annoDataGrid.SelectedItems.RemoveAt(0);
-                        }
-                        AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
-                        double deltaTime = ali.Duration;
-                        double roughtPosition = Time.CurrentPlayPosition / deltaTime;
-                        ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[(int)roughtPosition];
-                        if (ali.Points.Count > 0)
-                        {
-                            geometricOverlayUpdate(ali, AnnoScheme.TYPE.POINT, (int)roughtPosition);
-                        }
-                    }
-                }
-
-                updatePositionLabels(time);
-                control.annoTierControl.currentTime = time;
-
-                if (time > timeline.TotalDuration - 0.5)
-                {
-                    Stop();
-                }
-            }
-
-            if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true && !movemedialock)
-            {
-                double factor = (((Time.CurrentPlayPosition - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
-
-                control.timeLineControl.rangeSlider.followmedia = true;
-                control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
-            }
-            else if (control.navigator.followplaybox.IsChecked == false)
-            {
-                control.timeLineControl.rangeSlider.followmedia = false;
-                if (AnnoTierStatic.Label != null)
-                {
-                    AnnoTierStatic.Label.select(true);
-                }
-            }
-        }
-
-        private void handlePlay()
-        {
-            if ((string)control.navigator.playButton.Content == "II")
-            {
-                //   nomediaPlayHandler(null);
-                inNoMediaPlayMode = false;
-                control.navigator.playButton.Content = ">";
-            }
-            else
-            {
-                inNoMediaPlayMode = true;
-                noMediaPlayHandler(null);
-                control.navigator.playButton.Content = "II";
-            }
-
-            infastbackward = false;
-            infastforward = false;
-
-            control.navigator.fastForwardButton.Content = ">>";
-            control.navigator.fastBackwardButton.Content = "<<";
-
-            if (mediaList.Count > 0)
-            {
-                if (IsPlaying())
-                {
-                    Stop();
-                }
-                else
-                {
-                    Play();
-                }
-            }
-        }
-
-        public void Play()
-        {
-            Stop();
-
-            double pos = 0;
-            AnnoListItem item = null;
-            bool loop = false;
-
-            AnnoTierSegment selected = AnnoTierStatic.Label;
-            if (selected != null)
-            {
-                item = selected.Item;
-                signalCursor.X = Time.PixelFromTime(item.Start);
-                loop = true;
-            }
-            else
-            {
-                pos = signalCursor.X;
-                double from = MainHandler.Time.TimeFromPixel(pos);
-                double to = MainHandler.timeline.TotalDuration;
-                item = new AnnoListItem(from, to, "");
-                signalCursor.X = pos;
-            }
-
-            try
-            {
-                mediaList.Play(item, loop);
-                control.navigator.playButton.Content = "II";
-            }
-            catch (Exception e)
-            {
-                System.Console.WriteLine(e.ToString());
-            }
-
-            //
-        }
-
-        public bool IsPlaying()
-        {
-            return mediaList.IsPlaying;
-        }
-
-        public void Stop()
-        {
-            if (IsPlaying())
-            {
-                mediaList.Stop();
-                control.navigator.playButton.Content = ">";
-
-                if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.IsGeometric || AnnoTierStatic.Selected.IsContinuous))
-                {
-                    int i = 0;
-                    foreach (AnnoListItem ali in control.annoListControl.annoDataGrid.Items)
-                    {
-                        if (ali.Start <= Time.CurrentPlayPosition)
-                        {
-                            ++i;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    jumpToGeometric(i);
-                }
-            }
-        }
-
-        #endregion MEDIAPLAYER
+       
     }
 }
