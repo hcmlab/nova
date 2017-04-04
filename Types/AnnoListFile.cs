@@ -54,19 +54,19 @@ namespace ssi
 
                 else if (Scheme.Type == AnnoScheme.TYPE.POINT)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"POINT\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"POINT\" sr=\"" + this.Scheme.SampleRate + "\" num_points=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num_points=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
                 }
-                else if (Scheme.Type == AnnoScheme.TYPE.GRPAH)
+                else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num_points=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\"  />");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num_points=\"" + this.Scheme.NumberOfPoints +  "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
                 }
 
                 sw.WriteLine("</annotation>");
@@ -142,7 +142,7 @@ namespace ssi
                             sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
                         }
                     }
-                    else if (Scheme.Type == AnnoScheme.TYPE.GRPAH)
+                    else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
                     {
                         foreach (AnnoListItem e in this)
                         {
@@ -326,9 +326,9 @@ namespace ssi
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.POLYGON;
                 }
-                else if (type == AnnoScheme.TYPE.GRPAH.ToString())
+                else if (type == AnnoScheme.TYPE.GRAPH.ToString())
                 {
-                    list.Scheme.Type = AnnoScheme.TYPE.GRPAH;
+                    list.Scheme.Type = AnnoScheme.TYPE.GRAPH;
                 }
                 else if (type == AnnoScheme.TYPE.SEGMENTATION.ToString())
                 {
@@ -380,12 +380,12 @@ namespace ssi
                 {
                 }
                 else if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS || list.Scheme.Type == AnnoScheme.TYPE.POINT ||
-                         list.Scheme.Type == AnnoScheme.TYPE.POLYGON || list.Scheme.Type == AnnoScheme.TYPE.GRPAH ||
+                         list.Scheme.Type == AnnoScheme.TYPE.POLYGON || list.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                          list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
-                    list.Scheme.MinScore = double.Parse(scheme.Attributes["min"].Value);
-                    list.Scheme.MaxScore = double.Parse(scheme.Attributes["max"].Value);
+                    list.Scheme.NumberOfPoints = int.Parse(scheme.Attributes["num_points"].Value);
+                    //list.Scheme.MaxScore = double.Parse(scheme.Attributes["max"].Value);
                 }
 
                 if (File.Exists(filepath + "~"))

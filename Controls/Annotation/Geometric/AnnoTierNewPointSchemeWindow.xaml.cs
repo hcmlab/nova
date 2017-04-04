@@ -25,7 +25,7 @@ namespace ssi
         public class Input
         {
             public double SampleRate { get; set; }
-            public double NumPoints { get; set; }
+            public int NumPoints { get; set; }
             public Color Color { get; set; }
         }
 
@@ -37,7 +37,7 @@ namespace ssi
             result.Type = AnnoScheme.TYPE.POINT;
             result.SampleRate = defaultInput.SampleRate;
 
-            result.MinScore = defaultInput.NumPoints;
+            result.NumberOfPoints = defaultInput.NumPoints;
             result.MinOrBackColor = defaultInput.Color;
 
             nameTextBox.Text = Defaults.Strings.Unkown;
@@ -61,7 +61,7 @@ namespace ssi
                 {
                     value = 1;
                 }
-                result.MinScore = value;
+                result.NumberOfPoints = (int)value;
             }
             result.MinOrBackColor = colorPicker.SelectedColor.Value;
             result.MaxOrForeColor = colorPicker.SelectedColor.Value;

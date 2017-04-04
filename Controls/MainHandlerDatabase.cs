@@ -54,7 +54,7 @@ namespace ssi
 
                 foreach (AnnoTier track in annoTiers)
                 {
-                    if (track.AnnoList.Source.HasDatabase() && (track.AnnoList.HasChanged || isfinished))
+                    if (DatabaseLoaded && (track.AnnoList.HasChanged || isfinished))
                     {
                         try
                         {
@@ -70,6 +70,12 @@ namespace ssi
                             if (ex.Message.Contains("not auth"))
                             {
                                 MessageBox.Show("Sorry, you don't have write access to the database", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+
+                            else if (ex.Message.Contains("MaxDocumentSize"))
+                            {
+                                MessageBox.Show(ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
                             }
                             else
                             {
@@ -251,14 +257,14 @@ namespace ssi
             AnnoList annoList = new AnnoList();
             annoList.Scheme.Type = annoType;
 
-            annoList.Meta.Role = DatabaseHandler.LoadRoles(annoList);
-            if (annoList.Meta.Role == null)
+            string annoScheme = DatabaseHandler.SelectAnnotationScheme(annoList);
+            if (annoScheme == null)
             {
                 return;
             }
 
-            string annoScheme = DatabaseHandler.SelectAnnotationScheme(annoList);
-            if (annoScheme == null)
+            annoList.Meta.Role = DatabaseHandler.LoadRoles(annoList);
+            if (annoList.Meta.Role == null)
             {
                 return;
             }

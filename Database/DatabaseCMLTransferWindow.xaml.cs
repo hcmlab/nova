@@ -24,13 +24,12 @@ namespace ssi
 
         public DatabaseCMLTransferWindow(MainHandler handler)
         {
-         
             InitializeComponent();
 
             this.handler = handler;
             //TODO Hard coded mfccs for now, this should be more dynamic in the future.
             StreamListBox.Items.Add("close.mfccdd[-f 0.04 -d 0]");
-          
+
             try
             {
                 mongo = DatabaseHandler.Client;
@@ -63,10 +62,8 @@ namespace ssi
                     FillGapTextBox.Text = Properties.Settings.Default.CMLDefaultGap.ToString();
                     RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
 
-
-
                     string[] roles = Properties.Settings.Default.CMLDefaultRole.Split(';');
-                    for(int i=0; i< roles.Length;i++)
+                    for (int i = 0; i < roles.Length; i++)
                     {
                         RoleListBox.SelectedItems.Add(roles[i]);
                     }
@@ -86,7 +83,7 @@ namespace ssi
         {
             var annoschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var annosch = annoschemes.Find(_ => true).ToList();
-            
+
             if (annosch.Count > 0)
             {
                 List<string> items = new List<string>();
@@ -101,11 +98,11 @@ namespace ssi
                     if (c["type"].ToString() == "DISCRETE") items.Add(c["name"].ToString());
                 }
                 items.Sort();
-                TierListBox.ItemsSource = items;                
-            }        
+                TierListBox.ItemsSource = items;
+            }
             else
             {
-                 TierListBox.ItemsSource = null;
+                TierListBox.ItemsSource = null;
             }
         }
 
@@ -115,7 +112,7 @@ namespace ssi
             var roles = rolesdb.Find(_ => true).ToList();
 
             if (roles.Count > 0)
-            {                
+            {
                 if (RoleListBox.Items != null)
                 {
                     RoleListBox.Items.Clear();
@@ -124,7 +121,7 @@ namespace ssi
                 List<string> items = new List<string>();
                 foreach (var c in roles)
                 {
-                    items.Add(c["name"].ToString());                    
+                    items.Add(c["name"].ToString());
                 }
                 items.Sort();
                 RoleListBox.ItemsSource = items;
@@ -137,14 +134,14 @@ namespace ssi
             AnnotatorListBox.Items.Clear();
 
             List<string> Collections = new List<string>();
-            var annotators = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
+            var annotators = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators);
 
             var documents = annotators.Find(_ => true).ToList();
 
             List<string> items = new List<string>();
             foreach (BsonDocument b in documents)
             {
-                items.Add(b["fullname"].ToString());                    
+                items.Add(b["fullname"].ToString());
             }
             items.Sort();
             AnnotatorListBox.ItemsSource = items;
@@ -157,15 +154,14 @@ namespace ssi
             var annotationscollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
             var annotationschemescollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var rolescollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
-            var annotatorscollection = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
-            if(TierListBox.SelectedItem != null && RoleListBox.SelectedItem != null && AnnotatorListBox.SelectedItem != null)
+            var annotatorscollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators);
+            if (TierListBox.SelectedItem != null && RoleListBox.SelectedItem != null && AnnotatorListBox.SelectedItem != null)
             {
-
                 string schemename = TierListBox.SelectedItem.ToString();
                 ObjectId annoschemeid = GetIdFromName(annotationschemescollection, schemename);
 
                 List<ObjectId> roleids = new List<ObjectId>();
-                foreach(var item in RoleListBox.SelectedItems)
+                foreach (var item in RoleListBox.SelectedItems)
                 {
                     string rolename = RoleListBox.SelectedItem.ToString();
                     ObjectId roleid = GetIdFromName(rolescollection, rolename);
@@ -175,7 +171,7 @@ namespace ssi
                 string annotatorfullname = AnnotatorListBox.SelectedItem.ToString();
                 ObjectId annotatorid = GetIdFromName(annotatorscollection, annotatorfullname, "fullname");
 
-                foreach(var roleid in roleids)
+                foreach (var roleid in roleids)
                 {
                     List<BsonDocument> presentannotationstemp = new List<BsonDocument>();
                     var builder = Builders<BsonDocument>.Filter;
@@ -190,17 +186,16 @@ namespace ssi
                 {
                     string sessionname = FetchDBRef(database, DatabaseDefinitionCollections.Sessions, "name", annotation["session_id"].AsObjectId);
 
-                      //TODO make this more flexible in the future to work with "not noxi" data.
-                     bool wavfileloaded = File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + sessionname + "\\Expert_close.wav")
-                     && File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + sessionname + "\\Novice_close.wav");
-
+                    //TODO make this more flexible in the future to work with "not noxi" data.
+                    bool wavfileloaded = File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + sessionname + "\\Expert_close.wav")
+                    && File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + sessionname + "\\Novice_close.wav");
 
                     if (!items.Contains(sessionname) && wavfileloaded) items.Add(sessionname);
                 }
                 var newList = items.OrderBy(x => x).ToList();
 
                 newList.Sort();
-                TrainSessionsListBox.ItemsSource = newList;                
+                TrainSessionsListBox.ItemsSource = newList;
             }
         }
 
@@ -232,10 +227,10 @@ namespace ssi
                     bool wavfileloaded = File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + c["name"].ToString() + "\\Expert_close.wav")
                    && File.Exists(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\" + c["name"].ToString() + "\\Novice_close.wav");
 
-                  if(wavfileloaded)  items.Add(c["name"].ToString());
+                    if (wavfileloaded) items.Add(c["name"].ToString());
                 }
                 items.Sort();
-                ForwardSessionsListBox.ItemsSource = items;                
+                ForwardSessionsListBox.ItemsSource = items;
             }
             else
             {
@@ -247,11 +242,8 @@ namespace ssi
         {
             if (TierListBox.SelectedItem != null && StreamListBox.SelectedItem != null)
             {
-
                 process(true, false, false);
-
             }
-
         }
 
         private void TrainButton_Click(object sender, RoutedEventArgs e)
@@ -284,13 +276,11 @@ namespace ssi
                 Properties.Settings.Default.Save();
             }
 
-
-
             Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\\models");
 
             string stream = (string)StreamListBox.SelectedItem;
             int context = 0;
-            int.TryParse(ContextTextBox.Text, out context);            
+            int.TryParse(ContextTextBox.Text, out context);
 
             string username = Properties.Settings.Default.MongoDBUser;
             string password = Properties.Settings.Default.MongoDBPass;
@@ -312,9 +302,9 @@ namespace ssi
 
             string scheme = TierListBox.SelectedItem.ToString();
             string annotatorfullname = AnnotatorListBox.SelectedItem.ToString();
-            var annotatorscollection = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
+            var annotatorscollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators);
             ObjectId annotatorid = GetIdFromName(annotatorscollection, annotatorfullname, "fullname");
-            string annotator = FetchDBRef(database,  DatabaseDefinitionCollections.Annotators, "name", annotatorid);
+            string annotator = FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "name", annotatorid);
 
             double confidence = -1.0;
             if (ConfidenceTextBox.IsEnabled)
@@ -336,139 +326,130 @@ namespace ssi
             Properties.Settings.Default.CMLDefaultMinDur = minDur;
             Properties.Settings.Default.Save();
 
-
             logTextBox.Text = "";
             try
             {
-
-           
-
-            if (extract)
-            //EXTRACT MISSING FEATURES
-            {
-                sessions = "";
-
-                foreach (var item in TrainSessionsListBox.SelectedItems)
+                if (extract)
+                //EXTRACT MISSING FEATURES
                 {
-                    sessions = sessions + item + ";";
-                }
-                foreach (var item in ForwardSessionsListBox.SelectedItems)
-                {
-                    sessions = sessions + item + ";";
-                }
-                sessions = sessions.Remove(sessions.Length - 1);
+                    sessions = "";
 
-                string arguments = " -list " + sessions + " -log cml.log " + "\"" + Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\" " + " expert;novice close";
+                    foreach (var item in TrainSessionsListBox.SelectedItems)
+                    {
+                        sessions = sessions + item + ";";
+                    }
+                    foreach (var item in ForwardSessionsListBox.SelectedItems)
+                    {
+                        sessions = sessions + item + ";";
+                    }
+                    sessions = sessions.Remove(sessions.Length - 1);
 
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = "cmltrain.exe";
-                startInfo.Arguments = "--extract" + arguments;
-                logTextBox.AppendText(startInfo.Arguments + "-------------------------------------------\r\n");
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                if (process.ExitCode != 0)
-                {
-                    return;
+                    string arguments = " -list " + sessions + " -log cml.log " + "\"" + Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\" " + " expert;novice close";
+
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.FileName = "cmltrain.exe";
+                    startInfo.Arguments = "--extract" + arguments;
+                    logTextBox.AppendText(startInfo.Arguments + "-------------------------------------------\r\n");
+                    process.StartInfo = startInfo;
+                    process.Start();
+                    process.WaitForExit();
+                    if (process.ExitCode != 0)
+                    {
+                        return;
+                    }
+                    logTextBox.AppendText(File.ReadAllText("cml.log"));
                 }
-                logTextBox.AppendText(File.ReadAllText("cml.log"));
+
+                //TRAIN MODEL
+                if (train)
+                {
+                    sessions = "";
+                    foreach (var item in TrainSessionsListBox.SelectedItems)
+                    {
+                        sessions = sessions + item + ";";
+                    }
+                    sessions = sessions.Remove(sessions.Length - 1);
+
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.FileName = "cmltrain.exe";
+                    startInfo.Arguments = "--train "
+                        + "-context " + context +
+                        " -username " + username +
+                        " -password " + password +
+                        " -list " + sessions +
+                        " -log cml.log " +
+                        "\"" + datapath + "\\" + db + "\" " +
+                        ip + " " +
+                        port + " " +
+                        db + " " +
+                        roles + " " +
+                        scheme + " " +
+                        annotator + " " +
+                        "\"" + stream + "\""; ;
+
+                    logTextBox.AppendText("-------------------------------------------\r\n" + startInfo.Arguments + "\r\n\r\n");
+
+                    process.StartInfo = startInfo;
+                    process.Start();
+                    process.WaitForExit();
+                    if (process.ExitCode != 0)
+                    {
+                        return;
+                    }
+                    logTextBox.AppendText(File.ReadAllText("cml.log"));
+                }
+
+                //CREATE ANNOTATIONS
+                if (forward)
+                {
+                    sessions = "";
+                    foreach (var item in ForwardSessionsListBox.SelectedItems)
+                    {
+                        sessions = sessions + item + ";";
+                    }
+
+                    sessions = sessions.Remove(sessions.Length - 1);
+
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.FileName = "cmltrain.exe";
+                    startInfo.Arguments = "--forward "
+                        + "-context " + context +
+                        " -username " + username +
+                        " -password " + password +
+                        " -list " + sessions +
+                        " -assign " + username +
+                        " -confidence " + confidence +
+                        " -mingap " + minGap +
+                        " -mindur " + minDur +
+                        " -log cml.log " +
+                        "\"" + datapath + "\\" + db + "\" " +
+                        ip + " " +
+                        port + " " +
+                        db + " " +
+                        roles + " " +
+                        scheme + " " +
+                        annotator + " " +
+                        "\"" + stream + "\"";
+
+                    logTextBox.AppendText("-------------------------------------------\r\n" + startInfo.Arguments + "\r\n\r\n");
+
+                    process.StartInfo = startInfo;
+                    process.Start();
+                    process.WaitForExit();
+                    if (process.ExitCode != 0)
+                    {
+                        return;
+                    }
+                    logTextBox.AppendText(File.ReadAllText("cml.log"));
+                }
             }
-
-            //TRAIN MODEL
-            if (train)        
-            {
-                sessions = "";
-                foreach (var item in TrainSessionsListBox.SelectedItems)
-                {
-                    sessions = sessions + item + ";";
-                }
-                sessions = sessions.Remove(sessions.Length - 1);
-
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = "cmltrain.exe";
-                startInfo.Arguments = "--train "
-                    + "-context " + context +
-                    " -username " + username +
-                    " -password " + password +
-                    " -list " + sessions +
-                    " -log cml.log " +
-                    "\"" + datapath + "\\" + db + "\" " +
-                    ip + " " +
-                    port + " " +
-                    db + " " +
-                    roles + " " +
-                    scheme + " " +
-                    annotator + " " +
-                    "\"" + stream + "\""; ;
-
-
-                logTextBox.AppendText("-------------------------------------------\r\n" + startInfo.Arguments + "\r\n\r\n");
-
-                process.StartInfo = startInfo;             
-                process.Start();
-                process.WaitForExit();
-                if (process.ExitCode != 0)
-                {
-                    return;
-                }
-                logTextBox.AppendText(File.ReadAllText("cml.log"));
-            }
-       
-            //CREATE ANNOTATIONS
-            if (forward)
-            {
-
-                sessions = "";
-                foreach (var item in ForwardSessionsListBox.SelectedItems)
-                {
-                    sessions = sessions + item + ";";
-                }
-
-                sessions = sessions.Remove(sessions.Length - 1);
-
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = "cmltrain.exe";
-                startInfo.Arguments = "--forward "
-                    + "-context " + context +
-                    " -username " + username +
-                    " -password " + password +
-                    " -list " + sessions +
-                    " -assign " + username +
-                    " -confidence " + confidence +
-                    " -mingap " + minGap +
-                    " -mindur " + minDur +
-                    " -log cml.log " +
-                    "\"" + datapath + "\\" + db + "\" " +
-                    ip + " " +
-                    port + " " +
-                    db + " " +
-                    roles + " " +
-                    scheme + " " +
-                    annotator + " " +
-                    "\"" + stream + "\"";
-
-                logTextBox.AppendText("-------------------------------------------\r\n" + startInfo.Arguments + "\r\n\r\n");
-
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                if (process.ExitCode != 0)
-                {
-                    return;
-                }
-                logTextBox.AppendText(File.ReadAllText("cml.log"));
-
-            }
-            }
-
             catch
             {
                 MessageBox.Show("Cooperative Machine Learning System not found. This will be integrated in the public release soon.");
             }
-        
         }
 
         private void TierListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -550,17 +531,14 @@ namespace ssi
         private void RoleListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             string roles = "";
-            foreach(var item in RoleListBox.SelectedItems)
+            foreach (var item in RoleListBox.SelectedItems)
             {
                 roles = roles + item.ToString() + ";";
-
             }
             Properties.Settings.Default.CMLDefaultRole = roles;
             Properties.Settings.Default.Save();
 
             GetSessionsTraining();
         }
-
-      
     }
 }

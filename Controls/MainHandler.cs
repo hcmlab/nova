@@ -321,7 +321,8 @@ namespace ssi
             control.annoTierControl.Clear();
             control.signalTrackControl.Clear();
             control.mediaBoxControl.Clear();
-            //control.pointcontrol.Clear();
+
+            control.geometricListControl.Visibility = Visibility.Collapsed;
 
             inNoMediaPlayMode = false;
 
