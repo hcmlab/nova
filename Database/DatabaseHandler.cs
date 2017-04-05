@@ -904,9 +904,9 @@ namespace ssi
         public static string Sessions = "Sessions";
         public static string Roles = "Roles";
         public static string Subjects = "Subjects";
-        public static string Streams = "Media";
-        public static string StreamTypes = "MediaTypes";
-        public static string Schemes = "AnnotationSchemes";
+        public static string Streams = "Streams";
+        public static string StreamTypes = "StreamTypes";
+        public static string Schemes = "Schemes";
         
     }
 
