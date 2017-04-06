@@ -550,6 +550,9 @@ namespace ssi
                 XDocument doc = XDocument.Load(filepath);
                 var events = doc.Descendants("event");
 
+                //list.Scheme.Type = AnnoScheme.TYPE.DISCRETE;
+                //list.Scheme.Labels = new List<AnnoScheme.Label>();
+
                 foreach (var e in events)
                 {
                     string label = null;
@@ -627,10 +630,20 @@ namespace ssi
                             break;
                     }
 
+                    AnnoScheme.Label asl = new AnnoScheme.Label(label, Colors.Black);
+                    if(!list.Scheme.Labels.Any(item => item.Name == asl.Name)) list.Scheme.Labels.Add(asl); 
+
                     var state_attr = e.Attribute("state");
                     if (state_attr.Value.ToString().ToUpper() == "COMPLETED")
                     {
-                        list.AddSorted(new AnnoListItem(start, duration, label, meta));
+                        Color color = Colors.Black;
+
+                        //if (list.Scheme.Labels.Find(x => x.Name == label) != null)
+                        //{
+                        //    color = list.Scheme.Labels.Find(x => x.Name == label).Color;
+                        //}
+
+                        list.AddSorted(new AnnoListItem(start, duration, label, meta, color));
                     }
                 }
             }
@@ -638,6 +651,10 @@ namespace ssi
             {
                 MessageTools.Error(ex.ToString());
             }
+
+            //AnnoScheme.Label garbage = new AnnoScheme.Label("GARBAGE", Colors.Black);
+            //list.Scheme.Labels.Add(garbage);
+
 
             return list;
         }
