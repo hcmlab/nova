@@ -460,26 +460,27 @@ namespace ssi
                     }
                 }
 
-                if ((e.KeyboardDevice.IsKeyDown(Key.W) || !isKeyDown && AnnoTierStatic.Selected != null) && AnnoTierStatic.Selected.IsDiscreteOrFree && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                if ((e.KeyboardDevice.IsKeyDown(Key.W) && !isKeyDown && AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree) && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !isKeyDown)
                 {
-                    if (AnnoTierStatic.Label == null)
+                    if (AnnoTierStatic.Label == null && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                     {
                         AnnoTierStatic.Selected.NewAnnoKey();
                     }
-                    else
+                    else if(!e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                     {
                         ShowLabelBox();
                     }
                     if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
                     isKeyDown = true;
                 }
-                else if ((e.KeyboardDevice.IsKeyDown(Key.W) || !isKeyDown && AnnoTierStatic.Selected != null) && !AnnoTierStatic.Selected.IsDiscreteOrFree)
+                else if ((e.KeyboardDevice.IsKeyDown(Key.W) && AnnoTierStatic.Selected != null) && !AnnoTierStatic.Selected.IsDiscreteOrFree &&  !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                 {
                     if (AnnoTierStatic.Label != null)
                     {
                         ShowLabelBoxCont();
+                        AnnoTierStatic.Label.select(true);
                     }
-                    if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
+
                     isKeyDown = true;
                 }
                 if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !isKeyDown*/)
