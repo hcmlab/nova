@@ -528,10 +528,10 @@ namespace ssi
                         binaryReader.Close();
                     }
                 }
-                else
-                {
-                    MessageBox.Show("Annotation data was not found, load scheme only from '" + filepath + "'");
-                }
+                //else
+                //{
+                //    MessageBox.Show("Annotation data was not found, load scheme only from '" + filepath + "'");
+                //}
             }
             catch (Exception e)
             {
