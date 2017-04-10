@@ -13,26 +13,12 @@ namespace ssi
 {
     public partial class MainHandler
     {
+        private int pointSize = 1;
 
         private void setPointList(PointList pl)
         {
             control.geometricListControl.geometricDataGrid.ItemsSource = pl;
         }
-
-        private void setSegmentationList(SegmentationList sl)
-        {
-            control.geometricListControl.geometricDataGrid.ItemsSource = sl;
-        }
-
-        //private void setPolygonList(PolygonList pl)
-        //{
-        //    control.geometricListControl.geometricDataGrid.ItemsSource = pl;
-        //}
-
-        //private void setGraphList(GraphList gl)
-        //{
-        //    control.geometricListControl.geometricDataGrid.ItemsSource = gl;
-        //}
 
         private void geometricTableUpdate()
         {
@@ -41,23 +27,11 @@ namespace ssi
 
         private void geometricSelectItem(AnnoListItem item, int pos)
         {
-            AnnoScheme.TYPE type = ((AnnoList)control.annoListControl.annoDataGrid.ItemsSource).Scheme.Type;
-            switch (type)
+            if (item.Points != null && item.Points.Count > 0)
             {
-                case AnnoScheme.TYPE.POINT:
-                    if (item.Points != null && item.Points.Count > 0) setPointList(item.Points);
-                    break;
-                //case AnnoScheme.TYPE.POLYGON:
-                //    if (item.Polygons != null && item.Polygons.Count > 0) setPolygonList(item.Polygons);
-                //    break;
-                //case AnnoScheme.TYPE.GRAPH:
-                //    if (item.Garphs != null && item.Graphs.Count > 0) setGraphList(item.Graphs);
-                //    break;
-                case AnnoScheme.TYPE.SEGMENTATION:
-                    if (item.Segments != null && item.Segments.Count > 0) setSegmentationList(item.Segments);
-                    break;
+                setPointList(item.Points);              
+                geometricOverlayUpdate(pos);
             }
-            geometricOverlayUpdate(pos);
         }
 
         public void geometricOverlayUpdate(int pos)
@@ -93,7 +67,7 @@ namespace ssi
                                     if (p.XCoord != -1 && p.YCoord != -1)
                                     {
                                         Color color = item.Color;
-                                        overlay.FillEllipseCentered((int)p.XCoord, (int)p.YCoord, 1, 1, color);
+                                        overlay.FillEllipseCentered((int)p.XCoord, (int)p.YCoord, pointSize, pointSize, color);
                                     }
                                 }
                                 break;
@@ -102,25 +76,11 @@ namespace ssi
                             case AnnoScheme.TYPE.GRAPH:
                                 break;
                             case AnnoScheme.TYPE.SEGMENTATION:
-                                int[,] mask = item.Segments[0].getMask();
-                                int width = item.Segments[0].getWidth();
-                                int height = item.Segments[0].getHeight();
-                                byte a = 255;
-                                for (int x = 0; x < width; ++x)
-                                {
-                                    for (int y = 0; y < height; ++y)
-                                    {
-                                        Color currentPixel = overlay.GetPixel(x, y);
-                                        byte b = (byte)mask[x, y];
-                                        currentPixel = Color.FromArgb(a, b, b, b);
-                                        overlay.SetPixel(x, y, currentPixel);
-                                    }
-                                }
                                 break;
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     continue;
                 }
@@ -342,6 +302,20 @@ namespace ssi
                         }
                         control.geometricListControl.geometricDataGrid.SelectedItems.Add(control.geometricListControl.geometricDataGrid.Items[index - 1]);
                         geometricTableUpdate();
+                    }
+                }
+                else if (e.Key == Key.OemPlus || e.Key == Key.OemMinus)
+                {
+                    AnnoScheme.TYPE type = ((AnnoList)control.annoListControl.annoDataGrid.ItemsSource).Scheme.Type;
+                    if (type == AnnoScheme.TYPE.POINT)
+                    {
+                        if (e.Key == Key.OemPlus) ++pointSize;
+                        if (pointSize > 5) pointSize = 5;
+                        if (e.Key == Key.OemMinus) --pointSize;
+                        if (pointSize < 1) pointSize = 1;
+                        AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+                        int pos = control.annoListControl.annoDataGrid.SelectedIndex;
+                        geometricOverlayUpdate(pos);
                     }
                 }
             }
