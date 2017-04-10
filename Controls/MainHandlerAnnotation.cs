@@ -413,7 +413,6 @@ namespace ssi
                     }
                 }
             }
-
         }
 
         private void annoTierControl_MouseDown(object sender, MouseButtonEventArgs e)
