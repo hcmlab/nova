@@ -64,27 +64,41 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-
-            <Button Name="button_point" Grid.Column="0" Grid.Row="0" Margin="5" Click="Button_Click" ToolTip="Create Point Annotations">
+            
+            
+            <Button Name="button_point" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Click="Button_Click" ToolTip="Create Point Annotations">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap"> 
                     Points
                 </TextBlock>
             </Button>
-            <Button IsEnabled="False" Name="button_polygon" Grid.Column="1" Grid.Row="0" Margin="5" Click="Button_Click" ToolTip="Coming soon">
-                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                    Polygon
-                </TextBlock>
-            </Button>
-            <Button IsEnabled="False" Name="button_graph" Grid.Column="0" Grid.Row="1" Margin="5" Click="Button_Click" ToolTip="Coming soon">
-                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                    Graph
-                </TextBlock>
-            </Button>
-            <Button IsEnabled="False" Name="button_segmentation" Grid.Column="1" Grid.Row="1" Margin="5" Click="Button_Click" ToolTip="Coming soon">
+
+            <Button Name="button_segmentation" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" Click="Button_Click" ToolTip="Coming soon">
                 <TextBlock TextAlignment="Center" TextWrapping="Wrap">
                     Segmentation
                 </TextBlock>
             </Button>
+
+
+            <!--<Button Name="button_point" Grid.Column="0" Grid.Row="0" Margin="5" Click="Button_Click" ToolTip="Create Point Annotations">
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap"> 
+                    Points
+                </TextBlock>
+            </Button>
+            <Button Name="button_polygon" Grid.Column="1" Grid.Row="0" Margin="5" Click="Button_Click" ToolTip="Coming soon">
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                    Polygon
+                </TextBlock>
+            </Button>
+            <Button Name="button_graph" Grid.Column="0" Grid.Row="1" Margin="5" Click="Button_Click" ToolTip="Coming soon">
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                    Graph
+                </TextBlock>
+            </Button>
+            <Button Name="button_segmentation" Grid.Column="1" Grid.Row="1" Margin="5" Click="Button_Click" ToolTip="Coming soon">
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+                    Segmentation
+                </TextBlock>
+            </Button>-->
         </Grid>
 
     </Grid>

@@ -323,7 +323,9 @@ namespace ssi
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.GRAPH)
                     { }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
-                    { }
+                    {
+                        InitSegmentationValues(anno);
+                    }
                 };
             }
             selectedTier = this;
@@ -544,6 +546,31 @@ namespace ssi
 
             TimeRangeChanged(MainHandler.Time);
             //TimeRangeChanged(MainHandler.Time);
+        }
+
+        public void InitSegmentationValues(AnnoList anno)
+        {
+            double sr = anno.Scheme.SampleRate;
+            int samples = (int)Math.Round(MainHandler.Time.TotalDuration * sr);
+
+            double delta = 1.0 / sr;
+            for (int i = AnnoList.Count; i < samples; i++)
+            {
+                if (AnnoList.Count < samples)
+                {
+                    SegmentationList segments = new SegmentationList();
+                    int j = 0;
+                    segments.Add(new SegmentationListItem(anno.Scheme.WidthAndHeight[0], anno.Scheme.WidthAndHeight[1], "Value " + (j).ToString(), 1.0));
+                    for (j = 1; j < 256; ++j)
+                    {
+                        segments.Add(new SegmentationListItem(0, 0, "Value " + (j).ToString(), 1.0));
+                    }
+                    AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, true, null, segments);
+                    AnnoList.Add(ali);
+                }
+            }
+
+            TimeRangeChanged(MainHandler.Time);
         }
 
         public void ContinuousAnnoMode()

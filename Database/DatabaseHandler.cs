@@ -67,10 +67,7 @@ namespace ssi
                     //edit/add more roles if you want to change security levels
                 }
             }
-            catch(Exception e)
-            {
-                
-            }
+            catch{ }
 
             return auth;
         }
@@ -562,7 +559,7 @@ namespace ssi
                 islocked = checklock["isLocked"].AsBoolean;
 
             }
-            catch (Exception ex) { }
+            catch{ }
 
             if (!islocked)
             {

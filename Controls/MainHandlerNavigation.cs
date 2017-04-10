@@ -158,7 +158,9 @@ namespace ssi
                         }
                         else if (annoType == AnnoScheme.TYPE.SEGMENTATION)
                         {
-                            AnnoTierNewSegmentationSchemeWindow.Input input = new AnnoTierNewSegmentationSchemeWindow.Input() { SampleRate = defaultSr, MinScore = 0.0, MaxScore = 1.0, MinColor = Colors.LightBlue, MaxColor = Colors.Red };
+                            int width = (int) mediaList.GetFirstVideo().GetOverlay().Width;
+                            int height = (int)mediaList.GetFirstVideo().GetOverlay().Height;
+                            AnnoTierNewSegmentationSchemeWindow.Input input = new AnnoTierNewSegmentationSchemeWindow.Input() { SampleRate = defaultSr, Width = width, Height = height};
                             AnnoTierNewSegmentationSchemeWindow dialog2 = new AnnoTierNewSegmentationSchemeWindow(input);
                             dialog2.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                             dialog2.ShowDialog();

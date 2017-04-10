@@ -32,7 +32,7 @@ namespace ssi
             }
 
             if (location != null) LocationField.Text = location;
-            if (date != null) datepicker.SelectedDate = date.AsDateTime;
+            if (date != null) datepicker.SelectedDate = date.ToUniversalTime();
             else datepicker.SelectedDate = DateTime.Now;
         }
 

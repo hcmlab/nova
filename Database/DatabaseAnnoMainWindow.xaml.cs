@@ -264,7 +264,7 @@ namespace ssi
                 foreach (var c in sessions)
                 {
 
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString(), OID = c["_id"].AsObjectId });
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime().ToShortDateString(), OID = c["_id"].AsObjectId });
                 }
 
                 CollectionResultsBox.ItemsSource = items;
@@ -357,14 +357,14 @@ namespace ssi
                 isfinished = annos["isFinished"].AsBoolean;
                
             }
-            catch (Exception ex) { }
+            catch{ }
             bool islocked = false;
             try
             {
                 islocked = annos["isLocked"].AsBoolean;
 
             }
-            catch (Exception ex) { }
+            catch{ }
 
             DateTime date = annos["date"].ToUniversalTime();
             ;
@@ -515,15 +515,13 @@ namespace ssi
                     {
                         anno["isFinished"] = false;
                     }
-                    catch (Exception ex)
-                    { }
+                    catch{ }
 
                         try
                         {
                             anno["isLocked"] = false;
                         }
-                        catch (Exception ex)
-                        { }
+                        catch{ }
 
                         UpdateOptions uo = new UpdateOptions();
                     uo.IsUpsert = true;
@@ -715,7 +713,7 @@ namespace ssi
                         islocked = result["isLocked"].AsBoolean;
 
                     }
-                    catch (Exception ex) { }
+                    catch{ }
 
 
                     if (!islocked) annotations.DeleteOne(filter);

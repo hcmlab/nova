@@ -61,7 +61,8 @@ namespace ssi
                 if (position < control.annoListControl.annoDataGrid.Items.Count)
                 {
                     AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[position];
-                    if (ali.Points.Count > 0)
+                    if ((ali.Points != null  && ali.Points.Count > 0) ||
+                        (ali.Segments != null && ali.Segments.Count > 0))
                     {
                         geometricOverlayUpdate(position);
                     }

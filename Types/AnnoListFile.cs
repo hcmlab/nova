@@ -533,7 +533,7 @@ namespace ssi
                 //    MessageBox.Show("Annotation data was not found, load scheme only from '" + filepath + "'");
                 //}
             }
-            catch (Exception e)
+            catch
             {
                 MessageBox.Show("An exception occured while reading annotation from '" + filepath + "'");
             }
@@ -788,7 +788,7 @@ namespace ssi
                 sr.Close(); ;
                 list.HasChanged = false;
             }
-            catch (Exception e)
+            catch
             {
                 MessageBox.Show("An exception occured while reading annotation from '" + filepath + "'");
             }

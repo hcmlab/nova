@@ -19,6 +19,21 @@ namespace ssi
             control.geometricListControl.geometricDataGrid.ItemsSource = pl;
         }
 
+        private void setSegmentationList(SegmentationList sl)
+        {
+            control.geometricListControl.geometricDataGrid.ItemsSource = sl;
+        }
+
+        //private void setPolygonList(PolygonList pl)
+        //{
+        //    control.geometricListControl.geometricDataGrid.ItemsSource = pl;
+        //}
+
+        //private void setGraphList(GraphList gl)
+        //{
+        //    control.geometricListControl.geometricDataGrid.ItemsSource = gl;
+        //}
+
         private void geometricTableUpdate()
         {
             control.geometricListControl.geometricDataGrid.Items.Refresh();
@@ -26,11 +41,23 @@ namespace ssi
 
         private void geometricSelectItem(AnnoListItem item, int pos)
         {
-            if (item.Points != null && item.Points.Count > 0)
+            AnnoScheme.TYPE type = ((AnnoList)control.annoListControl.annoDataGrid.ItemsSource).Scheme.Type;
+            switch (type)
             {
-                setPointList(item.Points);              
-                geometricOverlayUpdate(pos);
+                case AnnoScheme.TYPE.POINT:
+                    if (item.Points != null && item.Points.Count > 0) setPointList(item.Points);
+                    break;
+                //case AnnoScheme.TYPE.POLYGON:
+                //    if (item.Polygons != null && item.Polygons.Count > 0) setPolygonList(item.Polygons);
+                //    break;
+                //case AnnoScheme.TYPE.GRAPH:
+                //    if (item.Garphs != null && item.Graphs.Count > 0) setGraphList(item.Graphs);
+                //    break;
+                case AnnoScheme.TYPE.SEGMENTATION:
+                    if (item.Segments != null && item.Segments.Count > 0) setSegmentationList(item.Segments);
+                    break;
             }
+            geometricOverlayUpdate(pos);
         }
 
         public void geometricOverlayUpdate(int pos)
@@ -75,11 +102,25 @@ namespace ssi
                             case AnnoScheme.TYPE.GRAPH:
                                 break;
                             case AnnoScheme.TYPE.SEGMENTATION:
+                                int[,] mask = item.Segments[0].getMask();
+                                int width = item.Segments[0].getWidth();
+                                int height = item.Segments[0].getHeight();
+                                byte a = 255;
+                                for (int x = 0; x < width; ++x)
+                                {
+                                    for (int y = 0; y < height; ++y)
+                                    {
+                                        Color currentPixel = overlay.GetPixel(x, y);
+                                        byte b = (byte)mask[x, y];
+                                        currentPixel = Color.FromArgb(a, b, b, b);
+                                        overlay.SetPixel(x, y, currentPixel);
+                                    }
+                                }
                                 break;
                         }
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     continue;
                 }

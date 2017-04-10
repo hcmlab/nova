@@ -70,6 +70,8 @@ namespace ssi
 
         public double SampleRate { get; set; }
 
+        public int[] WidthAndHeight { get; set; }
+
         public int NumberOfPoints { get; set; }
 
         public Color MinOrBackColor { get; set; }

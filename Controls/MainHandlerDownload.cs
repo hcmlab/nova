@@ -334,7 +334,7 @@ namespace ssi
                             File.WriteAllBytes(localpath, response);
                             control.Dispatcher.BeginInvoke(new Action<string>(httpPostFinished), DispatcherPriority.Normal, "");
                         }
-                        catch (Exception ex)
+                        catch
                         {
                             //Could happen when we cancel the download.
                         }

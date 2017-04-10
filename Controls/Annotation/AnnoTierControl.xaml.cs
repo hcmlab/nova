@@ -204,7 +204,7 @@ namespace ssi
                     {
                         sp = (StackPanel)child1;
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         ++annoTierIndex;
                         continue;
@@ -219,9 +219,8 @@ namespace ssi
                             {
                                 butt2 = (Button)child2;
                             }
-                            catch (Exception ex)
+                            catch
                             {
-
                                 continue;
                             }
 

@@ -38,7 +38,7 @@ namespace ssi
                 daw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 daw.ShowDialog();
             }
-            catch (Exception ex)
+            catch
             {
                 MessageBox.Show("Not authorized to add a new Session");
             }
@@ -196,7 +196,7 @@ namespace ssi
                         }
                         DatabaseLoaded = true;
                     }
-                    catch (TimeoutException e1)
+                    catch
                     {
                         MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
                     }

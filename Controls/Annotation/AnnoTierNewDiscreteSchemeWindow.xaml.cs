@@ -122,7 +122,7 @@ namespace ssi
                         schemeNameTextField.Text = list.Scheme.Name;
                         backroundColorPicket.SelectedColor = list.Scheme.MinOrBackColor;
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         MessageTools.Warning("This is not a valid annotation file");
                     }

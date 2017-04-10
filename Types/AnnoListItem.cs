@@ -14,6 +14,7 @@ namespace ssi
         private double confidence;
         private bool geometric;
         private PointList points;
+        private SegmentationList segments;
 
         public bool isGeometric
         {
@@ -35,6 +36,19 @@ namespace ssi
             {
                 points = value;
                 OnPropertyChanged("Points");
+            }
+        }
+
+        public SegmentationList Segments
+        {
+            get
+            {
+                return segments;
+            }
+            set
+            {
+                segments = value;
+                OnPropertyChanged("Segments");
             }
         }
 
@@ -113,7 +127,8 @@ namespace ssi
             }
         }
 
-        public AnnoListItem(double start, double duration, string label, string meta = "", Color color = new Color(), double confidence = 1.0, bool geometric = false, PointList points = null)
+        public AnnoListItem(double start, double duration, string label, string meta = "", Color color = new Color(), double confidence = 1.0,
+                            bool geometric = false, PointList points = null, SegmentationList segments = null)
         {
             this.start = Math.Max(0, start);
             this.duration = Math.Max(0, duration);
@@ -127,6 +142,10 @@ namespace ssi
                 if (points != null)
                 {
                     this.points = points;
+                }
+                else if (segments != null)
+                {
+                    this.segments = segments;
                 }
             }
         }

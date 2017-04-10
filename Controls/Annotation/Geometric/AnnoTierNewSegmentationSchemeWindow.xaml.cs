@@ -25,10 +25,8 @@ namespace ssi
         public class Input
         {
             public double SampleRate { get; set; }
-            public double MinScore { get; set; }
-            public double MaxScore { get; set; }
-            public Color MinColor { get; set; }
-            public Color MaxColor { get; set; }
+            public int Width { get; set; }
+            public int Height { get; set; }
         }
 
         public AnnoTierNewSegmentationSchemeWindow(Input defaultInput)
@@ -38,17 +36,11 @@ namespace ssi
             result = new AnnoScheme();
             result.Type = AnnoScheme.TYPE.SEGMENTATION;
             result.SampleRate = defaultInput.SampleRate;
-            result.MaxScore = defaultInput.MaxScore;
-            result.MinScore = defaultInput.MinScore;
-            result.MaxOrForeColor = defaultInput.MaxColor;
-            result.MinOrBackColor = defaultInput.MinColor;
+            result.WidthAndHeight = new int[]{ defaultInput.Width, defaultInput.Height};
 
             nameTextBox.Text = Defaults.Strings.Unkown;
             srTextBox.Text = defaultInput.SampleRate.ToString();
-            minTextBox.Text = defaultInput.MinScore.ToString();
-            maxTextBox.Text = defaultInput.MaxScore.ToString();
-            colorPickerMin.SelectedColor = defaultInput.MinColor;
-            colorPickerMax.SelectedColor = defaultInput.MaxColor;
+
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
@@ -60,16 +52,6 @@ namespace ssi
             {
                 result.SampleRate = value;
             }
-            if (double.TryParse(minTextBox.Text, out value))
-            {
-                result.MinScore = value;
-            }
-            if (double.TryParse(maxTextBox.Text, out value))
-            {
-                result.MaxScore = value;
-            }
-            result.MinOrBackColor = colorPickerMin.SelectedColor.Value;
-            result.MaxOrForeColor = colorPickerMax.SelectedColor.Value;
 
             Close();
         }

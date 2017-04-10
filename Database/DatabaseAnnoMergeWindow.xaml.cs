@@ -203,7 +203,7 @@ namespace ssi
                 foreach (var c in sessions)
                 {
                     //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString(), OID = c["_id"].AsObjectId });
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime().ToShortDateString(), OID = c["_id"].AsObjectId });
                 }
 
                 CollectionResultsBox.ItemsSource = items;

@@ -310,7 +310,7 @@ namespace ssi
             foreach (var c in sessions)
             {
                 //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
-                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString(), OID = c["_id"].AsObjectId });
+                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime().ToShortDateString(), OID = c["_id"].AsObjectId });
             }
 
             CollectionResultsBox.ItemsSource = items;
@@ -889,7 +889,7 @@ namespace ssi
 
                 if (session.Count > 0)
                 {
-                    DatabaseAdminSessionWindow dbsw = new DatabaseAdminSessionWindow(session[0]["name"].ToString(), session[0]["language"].ToString(), session[0]["location"].ToString(), session[0]["date"].AsDateTime);
+                    DatabaseAdminSessionWindow dbsw = new DatabaseAdminSessionWindow(session[0]["name"].ToString(), session[0]["language"].ToString(), session[0]["location"].ToString(), session[0]["date"].ToUniversalTime());
                     dbsw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     dbsw.ShowDialog();
 
@@ -1043,13 +1043,10 @@ namespace ssi
                     
                 GetAnnotators();
                 }
-                  
-
-                   catch (Exception ex)
+                catch
                 {
 
                     MessageBox.Show("Not authorized on admin database to change users");
-
                 }
             }
             }
@@ -1085,7 +1082,7 @@ namespace ssi
                 GetAnnotators();
                 }
             }
-            catch(Exception ex )
+            catch
             {
 
                 MessageBox.Show("Not authorized to delete users");
@@ -1101,7 +1098,7 @@ namespace ssi
             {
                 admindatabase.RunCommand<BsonDocument>(createuser);
             }
-            catch (Exception ex)
+            catch
             {
                 grandRolestoUser(user, role, Properties.Settings.Default.DatabaseName);
             }
@@ -1117,7 +1114,7 @@ namespace ssi
                 var updateroles = new BsonDocument { { "grantRolesToUser", user }, { "roles", new BsonArray { { new BsonDocument { { "role", role }, { "db", db } } } } } };
                 admindatabase.RunCommand<BsonDocument>(updateroles);
             }
-            catch (Exception e)
+            catch
             {
                 MessageBox.Show("Annotator already exists in the database, no new user account was created.");
             }
@@ -1133,12 +1130,7 @@ namespace ssi
                 var updateroles = new BsonDocument { { "revokeRolesFromUser", user }, { "roles", new BsonArray { { new BsonDocument { { "role", role }, { "db", db } } } } } };
                 admindatabase.RunCommand<BsonDocument>(updateroles);
             }
-
-            catch (Exception ex)
-            {
-
-            }
-
+            catch{}
         }
 
 
@@ -1154,7 +1146,7 @@ namespace ssi
             {
                 database.RunCommand<BsonDocument>(changepw);
             }
-            catch (Exception ex)
+            catch
             {
                 MessageBox.Show("Could not change password.");
             }
@@ -1174,7 +1166,7 @@ namespace ssi
                 {
                     database.RunCommand<BsonDocument>(dropuser);
                 }
-                catch (Exception ex)
+                catch
                 {
                     MessageBox.Show("Could not delete user.");
                 }
@@ -1247,7 +1239,7 @@ namespace ssi
 
                 GetAnnotators(dbsw.Fullname());
                 }
-                catch(Exception ex)
+                catch
                 {
                     MessageBox.Show("Not authorized to add users");
                 }
