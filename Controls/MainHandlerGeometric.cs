@@ -13,6 +13,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
+        private int pointSize = 1;
 
         private void setPointList(PointList pl)
         {
@@ -66,7 +67,7 @@ namespace ssi
                                     if (p.XCoord != -1 && p.YCoord != -1)
                                     {
                                         Color color = item.Color;
-                                        overlay.FillEllipseCentered((int)p.XCoord, (int)p.YCoord, 1, 1, color);
+                                        overlay.FillEllipseCentered((int)p.XCoord, (int)p.YCoord, pointSize, pointSize, color);
                                     }
                                 }
                                 break;
@@ -301,6 +302,20 @@ namespace ssi
                         }
                         control.geometricListControl.geometricDataGrid.SelectedItems.Add(control.geometricListControl.geometricDataGrid.Items[index - 1]);
                         geometricTableUpdate();
+                    }
+                }
+                else if (e.Key == Key.OemPlus || e.Key == Key.OemMinus)
+                {
+                    AnnoScheme.TYPE type = ((AnnoList)control.annoListControl.annoDataGrid.ItemsSource).Scheme.Type;
+                    if (type == AnnoScheme.TYPE.POINT)
+                    {
+                        if (e.Key == Key.OemPlus) ++pointSize;
+                        if (pointSize > 5) pointSize = 5;
+                        if (e.Key == Key.OemMinus) --pointSize;
+                        if (pointSize < 1) pointSize = 1;
+                        AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+                        int pos = control.annoListControl.annoDataGrid.SelectedIndex;
+                        geometricOverlayUpdate(pos);
                     }
                 }
             }
