@@ -23,8 +23,6 @@ namespace ssi
 
             signalCursor.MouseDown += annoTierControl_MouseDown;
             annoCursor.MouseDown += annoTierControl_MouseDown;
-            control.viewGrid.KeyDown += annoTrackGrid_KeyDown;
-            control.viewGrid.KeyUp += annoTrackGrid_KeyUp;
         }
 
         private void moveSignalCursor(double time)

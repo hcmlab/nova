@@ -63,7 +63,7 @@ namespace ssi
                     AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[position];
                     if (ali.Points.Count > 0)
                     {
-                        geometricOverlayUpdate(ali, AnnoScheme.TYPE.POINT, position);
+                        geometricOverlayUpdate(position);
                     }
                 }
             }

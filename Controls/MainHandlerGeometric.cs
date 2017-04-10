@@ -29,11 +29,11 @@ namespace ssi
             if (item.Points != null && item.Points.Count > 0)
             {
                 setPointList(item.Points);              
-                geometricOverlayUpdate(item, AnnoScheme.TYPE.POINT, pos);
+                geometricOverlayUpdate(pos);
             }
         }
 
-        public void geometricOverlayUpdate(AnnoListItem item, AnnoScheme.TYPE type, int pos = -1)
+        public void geometricOverlayUpdate(int pos)
         {
             WriteableBitmap overlay = null;
 
@@ -50,28 +50,40 @@ namespace ssi
 
             overlay.Lock();
             overlay.Clear();
-            
-            switch (type)
+            for (int i =0; i < control.annoTierControl.grid.Children.Count; ++i)
             {
-                case AnnoScheme.TYPE.POINT:                            
-                    foreach (PointListItem p in item.Points)
+                try
+                {
+                    AnnoTier at = (AnnoTier)control.annoTierControl.grid.Children[i];
+                    if (at.AnnoList.Show)
                     {
-                        if (p.XCoord != -1 && p.YCoord != -1)
+                        AnnoListItem item = at.AnnoList[pos];
+                        switch (at.AnnoList.Scheme.Type)
                         {
-                            Color color = item.Color;
-                            //color.A = 128;
-                            overlay.FillEllipseCentered((int)p.XCoord, (int)p.YCoord, 1, 1, color);
+                            case AnnoScheme.TYPE.POINT:
+                                foreach (PointListItem p in item.Points)
+                                {
+                                    if (p.XCoord != -1 && p.YCoord != -1)
+                                    {
+                                        Color color = item.Color;
+                                        overlay.FillEllipseCentered((int)p.XCoord, (int)p.YCoord, 1, 1, color);
+                                    }
+                                }
+                                break;
+                            case AnnoScheme.TYPE.POLYGON:
+                                break;
+                            case AnnoScheme.TYPE.GRAPH:
+                                break;
+                            case AnnoScheme.TYPE.SEGMENTATION:
+                                break;
                         }
                     }
-                    break;
-                case AnnoScheme.TYPE.POLYGON:
-                    break;
-                case AnnoScheme.TYPE.GRAPH:
-                    break;
-                case AnnoScheme.TYPE.SEGMENTATION:
-                    break;
-            }            
-
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }
+            }
             overlay.Unlock();
         }
 
@@ -131,7 +143,7 @@ namespace ssi
                     }
                     geometricTableUpdate();
                     int pos = control.annoListControl.annoDataGrid.SelectedIndex;
-                    geometricOverlayUpdate(item, AnnoScheme.TYPE.POINT, pos);
+                    geometricOverlayUpdate(pos);
                 }
             }
         }
@@ -160,7 +172,7 @@ namespace ssi
                     point.YCoord = y;
                     geometricTableUpdate();
                     int pos = control.annoListControl.annoDataGrid.SelectedIndex;
-                    geometricOverlayUpdate(item, AnnoScheme.TYPE.POINT, pos);
+                    geometricOverlayUpdate(pos);
                 }
             }
             if (Mouse.RightButton == MouseButtonState.Pressed)
@@ -235,7 +247,7 @@ namespace ssi
             {
                 AnnoListItem item = (AnnoListItem) control.annoListControl.annoDataGrid.SelectedItem;
                 int pos = control.annoListControl.annoDataGrid.SelectedIndex;
-                geometricOverlayUpdate(item, AnnoScheme.TYPE.POINT, pos);
+                geometricOverlayUpdate(pos);
             }
 
             if (control.geometricListControl.geometricDataGrid.SelectedItems.Count == 1)
@@ -258,7 +270,7 @@ namespace ssi
                 }
                 geometricTableUpdate();
                 int pos = control.annoListControl.annoDataGrid.SelectedIndex;
-                geometricOverlayUpdate(item, AnnoScheme.TYPE.POINT, pos);
+                geometricOverlayUpdate(pos);
             }
         }
 
@@ -313,7 +325,6 @@ namespace ssi
             control.annoListControl.annoDataGrid.ScrollIntoView(control.annoListControl.annoDataGrid.Items[pos]);
 
         }
-
-        private List<AnnoList> geometricCompare = new List<AnnoList>(0);
     }
+
 }

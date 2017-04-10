@@ -413,32 +413,7 @@ namespace ssi
                     }
                 }
             }
-        }
 
-        private bool ctrlHeld = false;
-        private bool CtrlHeld
-        {
-            get { return ctrlHeld; }
-            set
-            {
-                ctrlHeld = value;
-            }
-        }
-
-        private void annoTrackGrid_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
-            {
-                ctrlHeld = true;
-            }
-        }
-
-        private void annoTrackGrid_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
-            {
-                ctrlHeld = false;
-            }
         }
 
         private void annoTierControl_MouseDown(object sender, MouseButtonEventArgs e)
@@ -453,10 +428,14 @@ namespace ssi
                     AnnoTierStatic.Label.isMoveable = true;
                     AnnoTierStatic.Selected.LeftMouseButtonDown(e);
                 }
-                geometricCompare.Clear();
             }
-            else if (e.RightButton == MouseButtonState.Pressed && !CtrlHeld)
+            else if (e.RightButton == MouseButtonState.Pressed)
             {
+                if (AnnoTierStatic.Selected.IsGeometric)
+                {
+                    int pos = control.annoListControl.annoDataGrid.SelectedIndex;
+                    geometricOverlayUpdate(pos);
+                }
                 if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(false);
 
                 if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS || isMouseButtonDown == false))
@@ -474,19 +453,6 @@ namespace ssi
 
                 if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.RightMouseButtonDown(e);
                 isMouseButtonDown = true;
-            }
-            else if (e.RightButton == MouseButtonState.Pressed && CtrlHeld)
-            {
-                try
-                {
-                    AnnoList al = ((AnnoTier)Mouse.DirectlyOver).AnnoList;
-                    if (al.ID != AnnoTierStatic.Selected.AnnoList.ID)
-                    {
-                        geometricCompare.Add(al);
-                    }
-
-                }
-                catch (Exception _) { }
             }
 
             if (AnnoTierStatic.Selected != null)
