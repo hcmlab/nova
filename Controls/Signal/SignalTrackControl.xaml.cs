@@ -12,12 +12,6 @@ namespace ssi
             InitializeComponent();
         }
 
-        public void Clear()
-        {
-            grid.Children.Clear();
-            grid.RowDefinitions.Clear();
-        }
-
         public void Add(SignalTrack track, Color signalColor, Color backgroundColor)
         {
             for (int i = 0; i < grid.RowDefinitions.Count; i += 2)

@@ -45,7 +45,7 @@ namespace ssi
         }
 
         public AnnoSource Source { get; set; }
-   
+
         public AnnoScheme Scheme { get; set; }
 
         public AnnoMeta Meta { get; set; }
@@ -74,7 +74,7 @@ namespace ssi
                 }
             }
 
-            if(Source.HasDatabase())
+            if (Source.HasDatabase())
             {
                 if (DatabaseHandler.StoreToDatabase(this, loadedMedia) != null)
                 {
