@@ -16,7 +16,7 @@ namespace ssi
     {
         #region LOAD
 
-        public void loadMultipleFiles(string[] filenames)
+        public void loadMultipleFilesOrDirectory(string[] filenames)
         {
             Array.Sort(filenames, StringComparer.InvariantCulture);
 
@@ -28,7 +28,7 @@ namespace ssi
                     if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                     {
                         string[] subfilenames = Directory.GetFiles(filename);
-                        loadMultipleFiles(subfilenames);
+                        loadMultipleFilesOrDirectory(subfilenames);
                     }
                     else
                     {

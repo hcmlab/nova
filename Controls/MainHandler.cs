@@ -371,7 +371,7 @@ namespace ssi
                 string[] filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 if (filenames != null)
                 {
-                    loadMultipleFiles(filenames);
+                    loadMultipleFilesOrDirectory(filenames);
                 }
             }
         }
@@ -387,7 +387,7 @@ namespace ssi
             if (filenames != null)
             {
                 control.Cursor = Cursors.Wait;
-                loadMultipleFiles(filenames);
+                loadMultipleFilesOrDirectory(filenames);
                 control.Cursor = Cursors.Arrow;
             }
         }

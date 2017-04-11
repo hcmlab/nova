@@ -77,7 +77,7 @@ namespace ssi
 
                 try
                 {
-                    if (files.Length > 0) loadMultipleFiles(files);
+                    if (files.Length > 0) loadMultipleFilesOrDirectory(files);
                 }
                 catch { }
 
@@ -131,7 +131,7 @@ namespace ssi
                 {
                     files[i] = filesToDownload[i];
                 }
-                loadMultipleFiles(files);
+                loadMultipleFilesOrDirectory(files);
                 filesToDownload.Clear();
             }
         }
@@ -269,7 +269,7 @@ namespace ssi
                     files2[i] = filesToDownload[i];
                 }
 
-                if (files2.Length > 0) loadMultipleFiles(files2);
+                if (files2.Length > 0) loadMultipleFilesOrDirectory(files2);
                 filesToDownload.Clear();
                 downloads.Clear();
             }
@@ -391,7 +391,7 @@ namespace ssi
 
                 filesToDownload.Clear();
                 downloads.Clear();
-                loadMultipleFiles(files);
+                loadMultipleFilesOrDirectory(files);
             }
         }
 
