@@ -58,15 +58,15 @@ namespace ssi
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"POLYGON\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\"  />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"GRAPH\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\"  />");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints +  "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"SEGMENTATION\" sr=\"" + this.Scheme.SampleRate + "\" width=\"" + this.Scheme.WidthAndHeight[0] + "\" height=\"" + this.Scheme.WidthAndHeight[1] + "\" />");
                 }
 
                 sw.WriteLine("</annotation>");
@@ -121,7 +121,6 @@ namespace ssi
                             }
                         }
                     }
-
                     else if (Scheme.Type == AnnoScheme.TYPE.POINT)
                     {
                         foreach (AnnoListItem e in this)
@@ -153,11 +152,29 @@ namespace ssi
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
+                            sw.Write(e.Label);
+                            sw.Write(delimiter);
+                            int[,] mask = e.Segments[0].getMask();
+                            int width = e.Segments[0].getWidth();
+                            int height = e.Segments[0].getHeight();
+                            sw.Write('(');
+                            for (int y = 0; y < height; ++y)
+                            {
+                                sw.Write(mask[0, y].ToString());
+                                for (int x = 1; x < width; ++x)
+                                {
+                                    sw.Write(':' + mask[x,y].ToString());
+                                } 
+                            }
+                            sw.Write(')');
+                            sw.Write(delimiter);
+                            sw.Write(e.Confidence.ToString("n2"));
+                            sw.Write('\n');
                         }
                     }
 
                     sw.Close();
+
                 }
                 else
                 {
@@ -385,12 +402,23 @@ namespace ssi
                     list.Scheme.MaxScore = double.Parse(scheme.Attributes["max"].Value);
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
                 }
-                else if (list.Scheme.Type == AnnoScheme.TYPE.POINT ||
-                         list.Scheme.Type == AnnoScheme.TYPE.POLYGON || list.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
-                         list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                else if (list.Scheme.Type == AnnoScheme.TYPE.POINT)
                 {
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
-                    list.Scheme.NumberOfPoints = int.Parse(scheme.Attributes["num"].Value);                    
+                    list.Scheme.NumberOfPoints = int.Parse(scheme.Attributes["num"].Value);
+                }
+                else if (list.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                {
+                    list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
+                }
+                else if (list.Scheme.Type == AnnoScheme.TYPE.GRAPH)
+                {
+                    list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
+                }
+                else if (list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                {
+                    list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
+                    list.Scheme.WidthAndHeight = new int[2] { int.Parse(scheme.Attributes["width"].Value), int.Parse(scheme.Attributes["height"].Value) };
                 }
 
                 if (File.Exists(filepath + "~"))
@@ -399,10 +427,17 @@ namespace ssi
                     if (list.Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                     {
                         StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.Default);
-                        string line = null;
+                        List<string> lines = new List<string>();
+                        string cLine = null;
+                        while ((cLine = sr.ReadLine()) != null)
+                        {
+                            lines.Add(cLine);
+                        }
+                        sr.Close();
                         double start = 0.0;
-
-                        while ((line = sr.ReadLine()) != null)
+                        //string line = null;
+                        //while ((line = sr.ReadLine()) != null)
+                        foreach (string line in lines)
                         {
                             string[] data = line.Split(';');
                             if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -472,8 +507,52 @@ namespace ssi
                                 list.Add(ali);
                                 start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
                             }
+
+                            else if (list.Scheme.Type == AnnoScheme.TYPE.POLYGON) { }
+                            else if (list.Scheme.Type == AnnoScheme.TYPE.GRAPH) { }
+
+                            else if (list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                            {
+                                SegmentationList segments = new SegmentationList();
+                                int j = 0;
+                                int width = list.Scheme.WidthAndHeight[0];
+                                int height = list.Scheme.WidthAndHeight[1];
+                                segments.Add(new SegmentationListItem(width, height, "Value " + (j).ToString(), 1.0));
+                                for (j = 1; j < 256; ++j)
+                                {
+                                    segments.Add(new SegmentationListItem(0, 0, "Value " + (j).ToString(), 1.0));
+                                }
+
+                                int[,] mask = new int[width, height ];
+
+                                string md = data[1];
+
+                                md = md.Substring(1, md.Length - 2);
+                                string[] maskData = md.Split(':');
+
+                                int mdIndex = 0;
+
+                                for (int y = 0; y < height; ++y)
+                                {
+                                    for (int x = 0; x < width; ++x)
+                                    {
+                                        int m = int.Parse(maskData[mdIndex++]);
+                                        if (m > 255) m = 255;
+                                        mask[x, y] = m;
+                                        
+                                    }
+                                }
+
+                                segments[0].setMask(mask);
+
+                                string frameLabel = data[0];
+                                AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, 1, true, null, segments);
+                                list.Add(ali);
+                                start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
+                            }
                         }
-                        sr.Close();
+                        //sr.Close();
+                        lines.Clear();
                     }
                     else if (list.Source.File.Type == AnnoSource.FileSource.TYPE.BINARY)
                     {

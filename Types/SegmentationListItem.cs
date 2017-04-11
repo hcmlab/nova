@@ -21,11 +21,16 @@ namespace ssi
         {
             mask = new int[width, height];
             Random rnd = new Random();
-            for (int i = 0; i < getWidth(); ++i)
+            
+            for (int y = 0; y < getHeight(); ++y)
             {
-                for (int j = 0; j < getHeight(); ++j)
+                int data = 0;
+                for (int x = 0; x < getWidth(); ++x)
                 {
-                    mask[i, j] = rnd.Next(0, 255);
+                    //mask[x, y] = rnd.Next(0, 255);
+                    //mask[x, y] = 0;
+                    mask[x, y] = data;
+                    data = (data + 1 > 255) ? 0 : ++data;
                 }
             }
             OnPropertyChanged("Mask");

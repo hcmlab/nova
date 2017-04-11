@@ -15,9 +15,22 @@ namespace ssi
     {
         private int pointSize = 1;
 
-        private void setPointList(PointList pl)
+        private void setGeometricList(PointList pl)
         {
             control.geometricListControl.geometricDataGrid.ItemsSource = pl;
+        }
+        //private void setGeometricList(PolygonList pl)
+        //{
+        //    control.geometricListControl.geometricDataGrid.ItemsSource = pl;
+        //}
+        //private void setGeometricList(GraphList gl)
+        //{
+        //    control.geometricListControl.geometricDataGrid.ItemsSource = gl;
+        //}
+
+        private void setGeometricList(SegmentationList sl)
+        {
+            control.geometricListControl.geometricDataGrid.ItemsSource = sl;
         }
 
         private void geometricTableUpdate()
@@ -27,11 +40,23 @@ namespace ssi
 
         private void geometricSelectItem(AnnoListItem item, int pos)
         {
-            if (item.Points != null && item.Points.Count > 0)
+            AnnoScheme.TYPE type = ((AnnoList)control.annoListControl.annoDataGrid.ItemsSource).Scheme.Type;
+            switch (type)
             {
-                setPointList(item.Points);              
-                geometricOverlayUpdate(pos);
+                case AnnoScheme.TYPE.POINT:
+                    if (item.Points != null && item.Points.Count > 0) setGeometricList(item.Points);
+                    break;
+                //case AnnoScheme.TYPE.POLYGON:
+                //    if (item.Polygons != null && item.Polygons.Count > 0) setPolygonList(item.Polygons);
+                //    break;
+                //case AnnoScheme.TYPE.GRAPH:
+                //    if (item.Garphs != null && item.Graphs.Count > 0) setGraphList(item.Graphs);
+                //    break;
+                case AnnoScheme.TYPE.SEGMENTATION:
+                    if (item.Segments != null && item.Segments.Count > 0) setGeometricList(item.Segments);
+                    break;
             }
+            geometricOverlayUpdate(pos);
         }
 
         public void geometricOverlayUpdate(int pos)
@@ -76,6 +101,22 @@ namespace ssi
                             case AnnoScheme.TYPE.GRAPH:
                                 break;
                             case AnnoScheme.TYPE.SEGMENTATION:
+                                int[,] mask = item.Segments[0].getMask();
+                                int width = item.Segments[0].getWidth();
+                                int height = item.Segments[0].getHeight();
+                                byte a = 255;
+                                double alpha = 255.0 - 255.0 * (0.1 * pointSize);
+                                a = (byte)alpha;
+                                for (int x = 0; x < width; ++x)
+                                {
+                                    for (int y = 0; y < height; ++y)
+                                    {
+                                        Color currentPixel = overlay.GetPixel(x, y);
+                                        byte b = (byte)mask[x, y];
+                                        currentPixel = Color.FromArgb(a, b, b, b);
+                                        overlay.SetPixel(x, y, currentPixel);
+                                    }
+                                }
                                 break;
                         }
                     }
@@ -253,8 +294,12 @@ namespace ssi
 
             if (control.geometricListControl.geometricDataGrid.SelectedItems.Count == 1)
             {
-                PointListItem item = (PointListItem)control.geometricListControl.geometricDataGrid.SelectedItems[0];
-                control.geometricListControl.editTextBox.Text = item.Label;
+                string name = control.geometricListControl.geometricDataGrid.SelectedItems[0].GetType().Name;
+                if (name == "PointListItem")
+                {
+                        PointListItem item = (PointListItem)control.geometricListControl.geometricDataGrid.SelectedItems[0];
+                        control.geometricListControl.editTextBox.Text = item.Label;
+                }
             }
         }
 
@@ -307,7 +352,7 @@ namespace ssi
                 else if (e.Key == Key.OemPlus || e.Key == Key.OemMinus)
                 {
                     AnnoScheme.TYPE type = ((AnnoList)control.annoListControl.annoDataGrid.ItemsSource).Scheme.Type;
-                    if (type == AnnoScheme.TYPE.POINT)
+                    //if (type == AnnoScheme.TYPE.POINT)
                     {
                         if (e.Key == Key.OemPlus) ++pointSize;
                         if (pointSize > 5) pointSize = 5;
