@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml;
@@ -292,6 +293,33 @@ namespace ssi
                 {
                     if (meta.Attributes["role"] != null) list.Meta.Role = meta.Attributes["role"].Value;
                     if (meta.Attributes["annotator"] != null) list.Meta.Annotator = meta.Attributes["annotator"].Value;
+                    if (meta.Attributes["trigger"] != null)
+                    {
+                        string[] triggers = meta.Attributes["trigger"].Value.Split(';');
+                        foreach (string trigger in triggers)
+                        {
+                            Match match = Regex.Match(trigger, @"([^{]+)\{([^}]*)\}");
+                            if (match.Success && match.Groups.Count == 3)
+                            {
+                                string dllName = match.Groups[1].Value;
+                                string arguments = match.Groups[2].Value;
+                                Dictionary<string, object> args = arguments.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(part => part.Split('='))
+                                    .ToDictionary(split => split[0], split => (object)split[1]);                                
+                                PluginCaller pluginCaller = new PluginCaller(dllName + ".dll", dllName);
+                                AnnoTrigger annoTrigger = new AnnoTrigger(list, pluginCaller, args);
+                                list.Meta.Trigger.Add(annoTrigger);
+                            }
+                            else
+                            {
+                                MessageTools.Warning("could not parse trigger '" + trigger + "'");
+                            }
+
+
+
+                        }
+                        
+                    }
                 }
 
                 XmlNode scheme = annotation.SelectSingleNode("scheme");
@@ -334,8 +362,6 @@ namespace ssi
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.SEGMENTATION;
                 }
-
-
 
                 if (scheme.Attributes["color"] != null)
                 {
@@ -409,9 +435,9 @@ namespace ssi
                             {
                                 string value = data[0];
                                 double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, value, "", Defaults.Colors.Foreground, confidence);
+                                AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value, "", Defaults.Colors.Foreground, confidence);
                                 list.Add(e);
-                                start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
+                                start = start + 1 / list.Scheme.SampleRate;
                             }
                             else if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                             {
@@ -468,9 +494,9 @@ namespace ssi
                                     string[] pointData = pd.Split(':');
                                     points.Add(new PointListItem(double.Parse(pointData[1]), double.Parse(pointData[2]), pointData[0], double.Parse(pointData[3])));
                                 }
-                                AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, frameConfidence, true, points);
+                                AnnoListItem ali = new AnnoListItem(start, 1 / list.Scheme.SampleRate, frameLabel, "", list.Scheme.MinOrBackColor, frameConfidence, true, points);
                                 list.Add(ali);
-                                start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
+                                start = start + 1 / list.Scheme.SampleRate;
                             }
                         }
                         sr.Close();
@@ -487,9 +513,9 @@ namespace ssi
                             {
                                 string value = binaryReader.ReadSingle().ToString();
                                 double confidence = (double)binaryReader.ReadSingle();
-                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, value, "", Defaults.Colors.Foreground, confidence);
+                                AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value, "", Defaults.Colors.Foreground, confidence);
                                 list.Add(e);
-                                start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
+                                start = start + 1 / list.Scheme.SampleRate;
                             }
                             else if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                             {
@@ -713,7 +739,7 @@ namespace ssi
                     else if (type == "continuous")
                     {
                         list.Scheme.Type = AnnoScheme.TYPE.CONTINUOUS;
-                        list.Scheme.SampleRate = (1000.0 / (samplerate * 1000.0));
+                        list.Scheme.SampleRate = samplerate;
                         string[] data = line.Split(';');
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
                         string label = "";
@@ -744,12 +770,12 @@ namespace ssi
                             {
                                 list.Scheme.MaxScore = double.Parse(data[4]);
                             }
-                            AnnoListItem e = new AnnoListItem(start, samplerate, label, "Range: " + list.Scheme.MinScore + "-" + list.Scheme.MaxScore, Colors.Black);
+                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 /samplerate, label, "Range: " + list.Scheme.MinScore + "-" + list.Scheme.MaxScore, Colors.Black);
                             list.AddSorted(e);
                         }
                         else
                         {
-                            AnnoListItem e = new AnnoListItem(start, samplerate, label, "", Colors.Black, 1);
+                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, label, "", Colors.Black, 1);
                             if (filter == null || tier == filter)
                                 list.AddSorted(e);
                         }

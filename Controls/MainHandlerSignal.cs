@@ -36,8 +36,11 @@ namespace ssi
 
         private void removeSignalTrack()
         {
-            SignalTrack track = SignalTrackStatic.Selected;
+            removeSignalTrack(SignalTrackStatic.Selected);
+        }
 
+        private void removeSignalTrack(SignalTrack track)
+        {          
             if (track != null)
             {
                 control.signalTrackControl.Remove(track);
@@ -52,13 +55,13 @@ namespace ssi
                 }
                 else
                 {
-                    clearSignalTrack();
+                    clearSignalInfo();
                     updateNavigator();
                 }
             }
         }
 
-        public void clearSignalTrack()
+        public void clearSignalInfo()
         {
             control.signalSettingsButton.Visibility = Visibility.Hidden;
             control.signalStatusFileNameLabel.Text = "";

@@ -20,7 +20,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.6.7";
+        public static string BuildVersion = "0.9.9.6.8";
 
         private static Timeline timeline = null;
 
@@ -257,7 +257,7 @@ namespace ssi
 
             // Clear
             
-            clearSignalTrack();
+            clearSignalInfo();
             clearAnnoInfo();
             clearMediaBox();
         }
@@ -307,28 +307,29 @@ namespace ssi
             }
             
             DatabaseLoaded = false;
-            if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
-
-            clearSignalTrack();
-            clearAnnoInfo();
-            
-            signalCursor.X = 0;
-            setAnnoList(null);
-
-            control.annoTierControl.Clear();
-            control.signalTrackControl.Clear();
-            control.mediaBoxControl.Clear();
+            if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);         
+                        
             control.geometricListControl.Visibility = Visibility.Collapsed;
 
-            signalTracks.Clear();
-            signals.Clear();
-            annoTiers.Clear();
-            annoLists.Clear();
+            while (mediaBoxes.Count > 0)
+            {
+                removeMediaBox(mediaBoxes[0]);
+            }
             mediaList.Clear();
-            mediaBoxes.Clear();
+            while (signalTracks.Count > 0)
+            {
+                removeSignalTrack(signalTracks[0]);
+            }
+            while (annoTiers.Count > 0)
+            {
+                removeAnnoTier(annoTiers[0]);
+            }
+            annoLists.Clear();
+            setAnnoList(null);
 
+            signalCursor.X = 0;
             Time.TotalDuration = 0;
-            
+
             updateControl();
             control.timeLineControl.rangeSlider.Update();
         }

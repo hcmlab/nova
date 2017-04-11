@@ -160,12 +160,14 @@
       <DependentUpon>SignalTrackSettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\IPointList.cs" />
+    <Compile Include="Tools\PluginCaller.cs" />
     <Compile Include="Tools\VolumeControl.xaml.cs">
       <DependentUpon>VolumeControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Types\AnnoMeta.cs" />
     <Compile Include="Types\AnnoSource.cs" />
     <Compile Include="Tools\Defaults.cs" />
+    <Compile Include="Types\AnnoTrigger.cs" />
     <Compile Include="Types\Face.cs" />
     <Compile Include="Types\PointList.cs" />
     <Compile Include="Types\PointListItem.cs" />
