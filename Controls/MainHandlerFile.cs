@@ -243,6 +243,11 @@ namespace ssi
 
             AnnoList annoList = AnnoList.LoadfromFile(filename);            
             addAnnoTierFromList(annoList);
+
+            foreach (AnnoTrigger trigger in annoList.Meta.Trigger)
+            {                                
+                mediaList.Add(trigger);
+            }
         }
 
         private void loadCSVAnnoFile(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
@@ -851,7 +856,7 @@ namespace ssi
             if (annoTier.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS) MessageBox.Show("Selected a continious track to convert to ssi stream");
             else
             {
-                double sr = 1000.0 / (annoTier.AnnoList[0].Duration * 1000);
+                double sr = 1 / annoTier.AnnoList[0].Duration;
                 double from = 0.0;
                 double to = annoTier.AnnoList[annoTier.AnnoList.Count - 1].Stop;
                 int num = annoTier.AnnoList.Count;

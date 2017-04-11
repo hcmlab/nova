@@ -688,8 +688,8 @@ namespace ssi
                     {
                         string label = labels[i]["score"].ToString();
                         string confidence = labels[i]["conf"].ToString();
-                        double start = i * ((1000.0 / annoList.Scheme.SampleRate) / 1000.0);
-                        double dur = (1000.0 / annoList.Scheme.SampleRate) / 1000.0;
+                        double start = i / annoList.Scheme.SampleRate;
+                        double dur = 1 / annoList.Scheme.SampleRate;
 
                         AnnoListItem ali = new AnnoListItem(start, dur, label, "", Colors.Black, double.Parse(confidence));
 
@@ -792,8 +792,8 @@ namespace ssi
                             pl.Add(pli);
                         }
 
-                        double start = i * ((1000.0 / annoList.Scheme.SampleRate) / 1000.0);
-                        double dur = (1000.0 / annoList.Scheme.SampleRate) / 1000.0;
+                        double start = i / annoList.Scheme.SampleRate;
+                        double dur = 1 / annoList.Scheme.SampleRate;
 
                         AnnoListItem ali = new AnnoListItem(start, dur, label, "", annoList.Scheme.MinOrBackColor, confidence, true, pl);
                         annoList.Add(ali);

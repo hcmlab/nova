@@ -92,8 +92,11 @@ namespace ssi
 
         private void removeMediaBox()
         {
-            MediaBox box = MediaBoxStatic.Selected;
+            removeMediaBox(MediaBoxStatic.Selected);
+        }
 
+        private void removeMediaBox(MediaBox box)
+        {           
             if (box != null)
             {
                 control.mediaBoxControl.Remove(box);                

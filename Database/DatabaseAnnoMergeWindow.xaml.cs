@@ -375,7 +375,7 @@ namespace ssi
             {
                 merge[i].Label = System.Math.Sqrt(array[i] / numberoftracks).ToString();
             }
-            merge.Scheme.SampleRate = 1000.0 / ((merge[0].Stop - merge[0].Start) * 1000.0);
+            merge.Scheme.SampleRate = 1 / (merge[0].Stop - merge[0].Start);
             MessageBox.Show("Median of all Annotations has been calculated");
             Ok.IsEnabled = true;
             return merge;
@@ -402,7 +402,7 @@ namespace ssi
             {
                 merge[i].Label = (array[i] / numberoftracks).ToString();
             }
-            merge.Scheme.SampleRate = 1000.0 / ((merge[0].Stop - merge[0].Start) * 1000.0);
+            merge.Scheme.SampleRate = 1 / (merge[0].Stop - merge[0].Start);
             MessageBox.Show("Median of all Annotations has been calculated");
             Ok.IsEnabled = true;
             return merge;

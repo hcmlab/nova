@@ -34,8 +34,11 @@ namespace ssi
 
         private void removeAnnoTier()
         {
-            AnnoTier tier = AnnoTierStatic.Selected;
+            removeAnnoTier(AnnoTierStatic.Selected);
+        }
 
+        private void removeAnnoTier(AnnoTier tier)
+        {           
             if (tier != null)
             {
                 MessageBoxResult mb = MessageBoxResult.No;
@@ -55,7 +58,7 @@ namespace ssi
 
                     AnnoTierStatic.Unselect();
                     tier.Children.Clear();
-                    tier.AnnoList.Clear();
+                    tier.AnnoList.Clear();                    
                     annoTiers.Remove(tier);
 
                     if (annoTiers.Count > 0)
