@@ -31,7 +31,7 @@ namespace ssi
                 double time2 = double.Parse(row[1]);
 
                 double step = time2 - time1;
-                rate = 1000.0 / (1000.0 * step);
+                rate = 1 / step;
 
                 uint number = (uint)lines.Length;
                 uint bytes = Signal.TypeSize[(int)type];

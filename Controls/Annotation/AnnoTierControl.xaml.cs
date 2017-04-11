@@ -16,12 +16,6 @@ namespace ssi
             InitializeComponent();
         }
 
-        public void Clear()
-        {
-            grid.RowDefinitions.Clear();
-            grid.Children.Clear();
-        }
-
         public void Add(AnnoTier tier)
         {
             for (int i = 0; i < grid.RowDefinitions.Count; i += 2)

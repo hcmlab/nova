@@ -14,12 +14,6 @@ namespace ssi
             InitializeComponent();
         }
 
-        public void Clear()
-        {            
-            grid.Children.Clear();
-            grid.ColumnDefinitions.Clear();
-        }
-
         public void Add(MediaBox box)
         {
             for (int i = 0; i < grid.ColumnDefinitions.Count; i+=2)

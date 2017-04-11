@@ -8,7 +8,8 @@ namespace ssi
         AUDIO,
         VIDEO,
         SKELETON,
-        FACE
+        FACE,
+        TRIGGER,
     };
 
     public interface IMedia
