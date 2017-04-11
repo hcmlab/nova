@@ -80,10 +80,16 @@ namespace ssi
                 try
                 {
 
-                    string filedir;
-                    if (Path.IsPathRooted(args[i])) filedir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location) +  "\\" + args[i];
-                    else filedir = args[i];
-                    viewh.loadMultipleFiles(new[] { filedir });
+                    string filerooted;
+                    if (!Path.IsPathRooted(args[i]))
+                    {
+                        filerooted = Directory.GetCurrentDirectory() + "\\" + args[i];
+                    }
+                    else
+                    {
+                        filerooted = args[i];
+                    }
+                    viewh.loadMultipleFilesOrDirectory(new[] { filerooted });
                 }
                 catch (Exception)
                 {
