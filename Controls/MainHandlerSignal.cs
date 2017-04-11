@@ -76,6 +76,7 @@ namespace ssi
             control.signalStatusValueMaxLabel.Text = "";
             control.signalVolumeControl.Visibility = Visibility.Collapsed; 
             control.signalPositionLabel.Text = "00:00:00.00";
+            control.signalStatsButton.Visibility = Visibility.Hidden;
             control.signalCloseButton.Visibility = Visibility.Hidden;
         }
 
@@ -90,6 +91,7 @@ namespace ssi
             if (signal != null)
             {
                 control.signalSettingsButton.Visibility = Visibility.Visible;
+                control.signalStatsButton.Visibility = Visibility.Visible;
                 control.signalStatusFileNameLabel.Text = signal.FileName;
                 control.signalStatusFileNameLabel.ToolTip = signal.FilePath;
                 control.signalStatusBytesLabel.Text = signal.bytes + " bytes";
@@ -143,7 +145,28 @@ namespace ssi
                 window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;                
                 window.ShowDialog();
             }
-        }       
+        }
+
+        private void signalStatsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SignalTrackStatic.Selected != null)
+            {
+                SignalStatsWindow ssw = new SignalStatsWindow(SignalTrackStatic.Selected.Signal, SignalTrackStatic.Selected.Signal.ShowDim);
+                Time.OnTimelineChanged += ssw.timeRangeChanged;
+                ssw.Topmost = true;
+                ssw.WindowStartupLocation = WindowStartupLocation.Manual;
+                ssw.Show();
+
+                if (ssw.DialogResult == false)
+                {
+                    Time.OnTimelineChanged -= ssw.timeRangeChanged;
+                }
+
+            }
+        }
+
+
+        
 
         private void signalVolumeControl_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {

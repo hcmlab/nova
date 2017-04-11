@@ -49,23 +49,24 @@ namespace ssi
                 count[i] = 0;
             }
 
+            float minVal = float.Parse(MinBox.Text);
+            float maxVal = float.Parse(MaxBox.Text);
+            float factor = (maxVal - minVal) / numclasses;
 
-            //TODO:
-            //Some smarter logic to scale, maybe even make the borders adjustable by the user
             for (int d = selected_dim; d <= selected_dim; d++)
             {
-                float minVal = float.Parse(MinBox.Text);
-                float maxVal = float.Parse(MaxBox.Text);
-                float factor = (maxVal - minVal) / numclasses;
+                
                 for (int i = 0; i < signal.number; i++)
                 {
                     if (MainHandler.Time.SelectionStart < i / signal.rate && MainHandler.Time.SelectionStop > i / signal.rate)
                     {
                         for (int j = 1; j <= numclasses; j++)
                         {
-                            if ((signal.data[i * signal.dim + d]) <( minVal + j * factor) && (signal.data[i * signal.dim + d]) >= (minVal + (j - 1) * factor))
+                            float val = signal.data[i * signal.dim + d];
+                            if (val <= ( minVal + j * factor) && val >= (minVal + (j - 1) * factor))
                             {
                                 count[j - 1]++;
+                                break;
                             }
                         }
                     }
@@ -74,11 +75,12 @@ namespace ssi
 
 
             keyvalues.Clear();
-            keyvalues.Add(new KeyValuePair<string, int>("Very Low", count[0]));
-            keyvalues.Add(new KeyValuePair<string, int>("Low", count[1]));
-            keyvalues.Add(new KeyValuePair<string, int>("Medium", count[2]));
-            keyvalues.Add(new KeyValuePair<string, int>("High", count[3]));
-            keyvalues.Add(new KeyValuePair<string, int>("Very High", count[4]));
+
+            for(int i = 0; i< numclasses; i++)
+            {
+                keyvalues.Add(new KeyValuePair<string, int>((minVal + i * factor) + "-" + (minVal + (i+1) * factor), count[i]));
+            }
+
             ((PieSeries)mcChart.Series[0]).ItemsSource = keyvalues;
         }
 

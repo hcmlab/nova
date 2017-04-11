@@ -12,19 +12,9 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="40"></RowDefinition>
         </Grid.RowDefinitions>
-
-        <Label Content="Server:IP" Margin="10,0,521,378"></Label>
-        <TextBox x:FieldModifier="public" Margin="10,30,581,371" x:Name="db_server" Focusable="True" />
-        <Label Content="Database Login" Margin="212,0,436,373"></Label>
-        <TextBox x:FieldModifier="public" Margin="223,30,436,373" x:Name="db_login" Focusable="True" TextChanged="db_login_TextChanged" />
-        <Label Content="Database Password" Margin="364,2,165,371" />
-        <PasswordBox x:FieldModifier="public" Margin="364,30,297,373" x:Name="db_pass" Focusable="True" PasswordChanged="db_pass_PasswordChanged" />
-
-        <Label Content="Databases" Margin="10,53,640,317" />
-        <ListBox Name="DataBasResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,80,581,211" SelectionMode="Single" SelectionChanged="DataBasResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <Label Content="Sessions" Margin="10,220,540,171" />
+        <Label Content="Sessions" Margin="10,52,540,339" />
         <!--<ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,243,448,0" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" />-->
-        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="10,243,581,0">
+        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="10,79,581,0">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -74,16 +64,10 @@
                 </GridView>
             </ListView.View>
         </ListView>
-
-        <Button Name="Connect"  Content="Connect" Grid.Column="0" Click="Connect_Click" Margin="496,30,165,371" />
         <Button Name="Ok"  Content="Ok" Grid.Column="0" Grid.Row="1" Click="Ok_Click"  Height="25"  Margin="621,7,55,8" />
         <Button Name="Cancel" Content="Cancel" Grid.Row="1"  Click="Cancel_Click"   Height="25" RenderTransformOrigin="3.367,0.24" Margin="459,7,224,8" />
 
         <Button Name="CalculateMedian"  Content="Median" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False" Margin="606,281,124,116" />
-
-        <CheckBox Name="Autologin" Margin="500,0,109,403" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked" />
-
-        <Label Content="Autologin" Margin="524,0,150,385" />
         <Label Content="AnnoSchemes" Margin="223,53,-223,343" />
         <ListBox x:Name="RolesBox" Grid.Row="0" Grid.Column="0" Margin="364,79,297,212" SelectionMode="Single" SelectionChanged="RolesBox_SelectionChanged"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
         <Label Content="Roles" Margin="364,53,297,343" />

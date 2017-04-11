@@ -122,6 +122,7 @@ namespace ssi
                     control.databaseCMLCompleteStepMenu.IsEnabled = true;
                     control.databaseCMLTransferStepMenu.IsEnabled = true;
                     control.databaseCMLExtractFeaturesMenu.IsEnabled = true;
+                    control.databaseCMLMergeMenu.IsEnabled = true;
 
                     //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
                     if (dbhw.Authlevel() > 2)
@@ -338,6 +339,31 @@ namespace ssi
             DatabaseCMLTransferWindow window = new DatabaseCMLTransferWindow(this);
             window.Show();
         }
+
+
+        private void databaseCMLMerge_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseAnnoMergeWindow window = new DatabaseAnnoMergeWindow();
+            window.ShowDialog();
+
+            if(window.DialogResult == true)
+            { 
+
+                AnnoList rms = window.RMS();
+                AnnoList median = window.Median();
+                if (rms != null)
+                {
+                    DatabaseHandler.StoreToDatabase(rms);
+                }
+                if (median != null)
+                {
+                    DatabaseHandler.StoreToDatabase(median);
+                }
+
+            }
+        }
+
+        
 
         private void databaseCMLExtractFeatures_Click(object sender, RoutedEventArgs e)
         {
