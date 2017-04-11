@@ -50,6 +50,8 @@ namespace ssi
 
         public AnnoMeta Meta { get; set; }
 
+        public bool Show { get; set; }
+
         public AnnoList()
             : base()
         {
@@ -57,6 +59,7 @@ namespace ssi
             Scheme = new AnnoScheme();
             Meta = new AnnoMeta();
             ID = GetRandomInt(1, Int32.MaxValue);
+            Show = true;
         }
 
         public bool Save(List<DatabaseMediaInfo> loadedMedia = null)

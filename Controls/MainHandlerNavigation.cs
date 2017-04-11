@@ -23,7 +23,6 @@ namespace ssi
 
             signalCursor.MouseDown += annoTierControl_MouseDown;
             annoCursor.MouseDown += annoTierControl_MouseDown;
-
         }
 
         private void moveSignalCursor(double time)

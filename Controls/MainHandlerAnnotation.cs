@@ -418,7 +418,6 @@ namespace ssi
             }
         }
 
-
         private void annoTierControl_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (control.navigator.askforlabels.IsChecked == true) AnnoTier.askForLabel = true;
@@ -431,10 +430,14 @@ namespace ssi
                     AnnoTierStatic.Label.isMoveable = true;
                     AnnoTierStatic.Selected.LeftMouseButtonDown(e);
                 }
-                geometricCompare.Clear();
             }
-            else if (e.RightButton == MouseButtonState.Pressed && !Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (e.RightButton == MouseButtonState.Pressed)
             {
+                if (AnnoTierStatic.Selected.IsGeometric)
+                {
+                    int pos = control.annoListControl.annoDataGrid.SelectedIndex;
+                    geometricOverlayUpdate(pos);
+                }
                 if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(false);
 
                 if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS || isMouseButtonDown == false))
@@ -452,19 +455,6 @@ namespace ssi
 
                 if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.RightMouseButtonDown(e);
                 isMouseButtonDown = true;
-            }
-            else if (e.RightButton == MouseButtonState.Pressed &&   Keyboard.IsKeyDown(Key.LeftCtrl))
-            {
-                try
-                {
-                    AnnoList al = ((AnnoTier)Mouse.DirectlyOver).AnnoList;
-                    if (al.ID != AnnoTierStatic.Selected.AnnoList.ID)
-                    {
-                        geometricCompare.Add(al);
-                    }
-
-                }
-                catch (Exception _) { }
             }
 
             if (AnnoTierStatic.Selected != null)

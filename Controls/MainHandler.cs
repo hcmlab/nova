@@ -165,6 +165,7 @@ namespace ssi
             control.geometricListControl.geometricDataGrid.SelectionChanged += geometricList_Selection;
             control.geometricListControl.MenuItemDeleteClick.Click += geometricListDelete;
             control.geometricListControl.KeyDown += geometricKeyDown;
+            //control.annoListControl.visibilityButton.click += visibilityClick;
 
             // Menu
 
@@ -418,6 +419,5 @@ namespace ssi
                 Properties.Settings.Default.Save();
             }
         }
-
     }
 }
