@@ -157,16 +157,18 @@ namespace ssi
                             int[,] mask = e.Segments[0].getMask();
                             int width = e.Segments[0].getWidth();
                             int height = e.Segments[0].getHeight();
-                            sw.Write('(');
+                            //sw.Write('(');
+                            sw.Write('\n');
                             for (int y = 0; y < height; ++y)
                             {
                                 sw.Write(mask[0, y].ToString());
                                 for (int x = 1; x < width; ++x)
                                 {
                                     sw.Write(':' + mask[x,y].ToString());
-                                } 
+                                }
+                                sw.Write('\n');
                             }
-                            sw.Write(')');
+                            //sw.Write(')');
                             sw.Write(delimiter);
                             sw.Write(e.Confidence.ToString("n2"));
                             sw.Write('\n');
@@ -299,7 +301,7 @@ namespace ssi
                 doc.Load(filepath);
 
                 XmlNode annotation = doc.SelectSingleNode("annotation");
-
+                doc = null;
                 XmlNode info = annotation.SelectSingleNode("info");
                 list.Source.File.Type = info.Attributes["ftype"].Value == AnnoSource.FileSource.TYPE.ASCII.ToString() ? AnnoSource.FileSource.TYPE.ASCII : AnnoSource.FileSource.TYPE.BINARY;
                 int size = int.Parse(info.Attributes["size"].Value);
@@ -426,133 +428,141 @@ namespace ssi
                 {
                     if (list.Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                     {
-                        StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.Default);
-                        List<string> lines = new List<string>();
-                        string cLine = null;
-                        while ((cLine = sr.ReadLine()) != null)
+                        if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                         {
-                            lines.Add(cLine);
-                        }
-                        sr.Close();
-                        double start = 0.0;
-                        //string line = null;
-                        //while ((line = sr.ReadLine()) != null)
-                        foreach (string line in lines)
-                        {
-                            string[] data = line.Split(';');
-                            if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                            StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.Default);
+                            //List<string> lines = new List<string>();
+                            //string cLine = null;
+                            //while ((cLine = sr.ReadLine()) != null)
+                            //{
+                            //    lines.Add(cLine);
+                            //}
+                            //sr.Close();
+                            double start = 0.0;
+                            string line = null;
+                            while ((line = sr.ReadLine()) != null)
+                            //foreach (string line in lines)
                             {
-                                string value = data[0];
-                                double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, value, "", Defaults.Colors.Foreground, confidence);
-                                list.Add(e);
-                                start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
-                            }
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
-                            {
-                                start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                                double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                double dur = stop - start;
-                                string label = "";
-                                if (int.Parse(data[2]) < 0) label = "GARBAGE";
-                                else LabelIds.TryGetValue(data[2], out label);
-                                Color color = Colors.Black;
-
-                                if (list.Scheme.Labels.Find(x => x.Name == label) != null)
+                                string[] data = line.Split(';');
+                                if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                                 {
-                                    color = list.Scheme.Labels.Find(x => x.Name == label).Color;
+                                    string value = data[0];
+                                    double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                    AnnoListItem e = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, value, "", Defaults.Colors.Foreground, confidence);
+                                    list.Add(e);
+                                    start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
                                 }
-
-                                double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
-                                list.AddSorted(e);
-                            }
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
-                            {
-                                start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                                double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                double dur = stop - start;
-                                string label = data[2];
-                                double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
-                                Color color = Colors.Black;
-                                if (data.Length > 4)
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                                 {
-                                    string[] metapairs = data[4].Split('=');
-                                    for (int i = 0; i < metapairs.Length; i++)
+                                    start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                    double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                    double dur = stop - start;
+                                    string label = "";
+                                    if (int.Parse(data[2]) < 0) label = "GARBAGE";
+                                    else LabelIds.TryGetValue(data[2], out label);
+                                    Color color = Colors.Black;
+
+                                    if (list.Scheme.Labels.Find(x => x.Name == label) != null)
                                     {
-                                        if (metapairs[i].Contains("color"))
+                                        color = list.Scheme.Labels.Find(x => x.Name == label).Color;
+                                    }
+
+                                    double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
+                                    AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
+                                    list.AddSorted(e);
+                                }
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
+                                {
+                                    start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                    double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                    double dur = stop - start;
+                                    string label = data[2];
+                                    double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
+                                    Color color = Colors.Black;
+                                    if (data.Length > 4)
+                                    {
+                                        string[] metapairs = data[4].Split('=');
+                                        for (int i = 0; i < metapairs.Length; i++)
                                         {
-                                            color = (Color)ColorConverter.ConvertFromString(metapairs[i + 1]);
-                                            break;
+                                            if (metapairs[i].Contains("color"))
+                                            {
+                                                color = (Color)ColorConverter.ConvertFromString(metapairs[i + 1]);
+                                                break;
+                                            }
                                         }
                                     }
-                                }
-                                AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
-                                list.AddSorted(e);
-                            }
-
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.POINT)
-                            {
-                                string frameLabel = data[0];
-                                double frameConfidence = Convert.ToDouble(data[data.Count() - 1], CultureInfo.InvariantCulture);
-                                PointList points = new PointList();
-                                for (int i = 1; i < data.Count() - 1; ++i)
-                                {
-                                    string pd = data[i].Replace("(", "");
-                                    pd = pd.Replace(")", "");
-                                    string[] pointData = pd.Split(':');
-                                    points.Add(new PointListItem(double.Parse(pointData[1]), double.Parse(pointData[2]), pointData[0], double.Parse(pointData[3])));
-                                }
-                                AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, frameConfidence, true, points);
-                                list.Add(ali);
-                                start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
-                            }
-
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.POLYGON) { }
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.GRAPH) { }
-
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
-                            {
-                                SegmentationList segments = new SegmentationList();
-                                int j = 0;
-                                int width = list.Scheme.WidthAndHeight[0];
-                                int height = list.Scheme.WidthAndHeight[1];
-                                segments.Add(new SegmentationListItem(width, height, "Value " + (j).ToString(), 1.0));
-                                for (j = 1; j < 256; ++j)
-                                {
-                                    segments.Add(new SegmentationListItem(0, 0, "Value " + (j).ToString(), 1.0));
+                                    AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
+                                    list.AddSorted(e);
                                 }
 
-                                int[,] mask = new int[width, height ];
-
-                                string md = data[1];
-
-                                md = md.Substring(1, md.Length - 2);
-                                string[] maskData = md.Split(':');
-
-                                int mdIndex = 0;
-
-                                for (int y = 0; y < height; ++y)
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.POINT)
                                 {
-                                    for (int x = 0; x < width; ++x)
+                                    string frameLabel = data[0];
+                                    double frameConfidence = Convert.ToDouble(data[data.Count() - 1], CultureInfo.InvariantCulture);
+                                    PointList points = new PointList();
+                                    for (int i = 1; i < data.Count() - 1; ++i)
                                     {
-                                        int m = int.Parse(maskData[mdIndex++]);
-                                        if (m > 255) m = 255;
-                                        mask[x, y] = m;
-                                        
+                                        string pd = data[i].Replace("(", "");
+                                        pd = pd.Replace(")", "");
+                                        string[] pointData = pd.Split(':');
+                                        points.Add(new PointListItem(double.Parse(pointData[1]), double.Parse(pointData[2]), pointData[0], double.Parse(pointData[3])));
                                     }
+                                    AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, frameConfidence, true, points);
+                                    list.Add(ali);
+                                    start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
                                 }
 
-                                segments[0].setMask(mask);
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.POLYGON) { }
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.GRAPH) { }
 
-                                string frameLabel = data[0];
-                                AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, 1, true, null, segments);
-                                list.Add(ali);
-                                start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                                {
+                                    
+                                }
                             }
+                            //sr.Close();
+                            lines.Clear();
                         }
-                        //sr.Close();
-                        lines.Clear();
+                        else
+                        {
+                            SegmentationList segments = new SegmentationList();
+                            int j = 0;
+                            int width = list.Scheme.WidthAndHeight[0];
+                            int height = list.Scheme.WidthAndHeight[1];
+                            segments.Add(new SegmentationListItem(width, height, "Value " + (j).ToString(), 1.0));
+                            for (j = 1; j < 256; ++j)
+                            {
+                                segments.Add(new SegmentationListItem(0, 0, "Value " + (j).ToString(), 1.0));
+                            }
+
+                            int[,] mask = new int[width, height];
+
+                            string md = data[1];
+
+                            md = md.Substring(1, md.Length - 2);
+                            string[] maskData = md.Split(':');
+
+                            int mdIndex = 0;
+
+                            for (int y = 0; y < height; ++y)
+                            {
+                                for (int x = 0; x < width; ++x)
+                                {
+                                    Console.WriteLine(maskData.Length.ToString() + ' ' + mdIndex.ToString());
+                                    int m = int.Parse(maskData[mdIndex++]);
+                                    if (m > 255) m = 255;
+                                    mask[x, y] = m;
+
+                                }
+                            }
+
+                            segments[0].setMask(mask);
+
+                            string frameLabel = data[0];
+                            AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, 1, true, null, segments);
+                            list.Add(ali);
+                            start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
+                        }
                     }
                     else if (list.Source.File.Type == AnnoSource.FileSource.TYPE.BINARY)
                     {
@@ -612,9 +622,9 @@ namespace ssi
                 //    MessageBox.Show("Annotation data was not found, load scheme only from '" + filepath + "'");
                 //}
             }
-            catch
+            catch (Exception e)
             {
-                MessageBox.Show("An exception occured while reading annotation from '" + filepath + "'");
+                MessageBox.Show("An exception occured while reading annotation from '" + filepath + "'\n\n" + e.ToString());
             }
 
             return list;
