@@ -11,8 +11,8 @@ namespace ssi
     public class ActiveMQSender
     {
         public IConnectionFactory connectionFactory;
-        public IConnection _connection;
-        public ISession _session;
+        public IConnection connection;
+        public ISession session;
 
         public string[] dependencies(Dictionary<string, object> parameters)
         {
@@ -25,16 +25,13 @@ namespace ssi
             {
                 string uri = (string)parameters["uri"];
               
-            
                 connectionFactory = new ConnectionFactory(uri);
 
-                if (_connection == null)
+                if (connection == null)
                 {
-                
-                        _connection = connectionFactory.CreateConnection();
-                        _connection.Start();
-                        _session = _connection.CreateSession();
-                    
+                    connection = connectionFactory.CreateConnection();
+                    connection.Start();
+                    session = connection.CreateSession();
                 }
                
             }
@@ -53,8 +50,8 @@ namespace ssi
                 string label = (string)parameters["label"];
                 string topicname = (string)parameters["topic"];
 
-                ITopic topic = _session.GetTopic(topicname);
-                using (IMessageProducer producer = _session.CreateProducer(topic))
+                ITopic topic = session.GetTopic(topicname);
+                using (IMessageProducer producer = session.CreateProducer(topic))
                 {
                     var textMessage = producer.CreateTextMessage(label);
                     producer.Send(textMessage);
@@ -75,8 +72,8 @@ namespace ssi
             { 
                 string uri = (string)parameters["uri"];
                 string topic = (string)parameters["topic"];
-                _session.Close();
-                _connection.Close();
+                session.Close();
+                connection.Close();
 
             }
             catch (Exception ex)

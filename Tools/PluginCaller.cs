@@ -28,7 +28,8 @@ namespace ssi
             dllName = Path.GetFileNameWithoutExtension(dllPath);
             directory = Environment.CurrentDirectory + "\\" + PLUGIN_FOLDER + "\\" + dllName + "\\";
 
-            if (!downloadDll(dllName))
+            Directory.CreateDirectory(directory);
+            if (!downloadDll(dllName, false))
             {
                 MessageTools.Error("Dll not found '" + dllName + ".dll'");
                 isLoaded = false;
@@ -52,7 +53,7 @@ namespace ssi
                                 string[] dependencies = (string[])result;
                                 foreach (string dependency in dependencies)
                                 {
-                                    if (!downloadDll(dependency))
+                                    if (!downloadDll(dependency, true))
                                     {
                                         MessageTools.Error("Dll not found '" + dependency + ".dll'");
                                         isLoaded = false;
@@ -67,7 +68,7 @@ namespace ssi
             }
         }
 
-        public bool downloadDll(string name)
+        public bool downloadDll(string name, bool isDependency)
         {
             string path = directory + name + ".dll";
 
@@ -77,13 +78,19 @@ namespace ssi
                 {
                     string url = "https://github.com/hcmlab/nova/blob/master/bin/" + PLUGIN_FOLDER + "/" + dllName + "/" + name + ".dll?raw=true";
                     WebClient Client = new WebClient();
-                    Directory.CreateDirectory(directory + dllName + "//" + name);
-                    Client.DownloadFile(url, directory + dllName + "//" + name + ".dll");
-   
+
+                    if(isDependency)
+                    {
+                        Client.DownloadFile(url, Environment.CurrentDirectory + "//" + name + ".dll");
+                    }
+
+                    else Client.DownloadFile(url, directory + "//" + name + ".dll"); ;
+
+
                 }
                 catch
                 {
-                    MessageTools.Error("Tools for creating Samplelists are not available, please check your internet connection.");
+                    MessageTools.Error("Can't download plugin, please check your internet connection.");
                     return false;
                 }
 
@@ -106,7 +113,8 @@ namespace ssi
                 return null;                               
             }
 
-            return type.InvokeMember(name, BindingFlags.InvokeMethod, null, obj, new object[] { args });
+            object result = type.InvokeMember(name, BindingFlags.InvokeMethod, null, obj, new object[] { args });
+
+            return result;
         }
-    }
-}
+    }}

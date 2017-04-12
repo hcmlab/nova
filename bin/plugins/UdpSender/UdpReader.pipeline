@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<pipeline ssi-v="1">
+	
+	<!-- register dlls -->
+	<register>
+		<load name="ssiioput"/>
+		<load name="ssimouse"/>
+		<load name="ssigraphic"/>
+		<load name="ssisignal"/>
+	</register>
+
+	<!-- socket event receiver 
+	
+	Reads events from a socket port and puts them on the event board.
+	Use this component to receive events from external applications.
+	Make sure to adjust the options to fit the incoming event stream.
+	
+	-->
+	<object create="SocketEventReader" port="9999" host="127.0.0.1" osc="false" address="position@cursor"/>		
+	
+	<!-- visualization -->	
+	<object create="EventMonitor:monitor">
+		<listen address="position@cursor" span="20000" />
+	</object>
+	
+	<!-- decoration -->
+	<object create="Decorator" icon="true" title="Pipeline" origin="800,0">
+		<area pos="0,0,400,600">console</area>
+		<area pos="400,0,400,600">plot*,monitor</area>		
+	</object>
+
+</pipeline>

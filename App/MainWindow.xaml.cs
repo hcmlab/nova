@@ -27,6 +27,7 @@ namespace ssi
             Thread.CurrentThread.CurrentUICulture = ci;
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
             Title = "(NOn)Verbal Annotator | v" + MainHandler.BuildVersion + " | HCM-Lab, Augsburg University | http://openssi.net";
+           
         }
 
         private void viewHandlerLoaded(MainHandler handler)
