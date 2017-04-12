@@ -21,9 +21,31 @@ namespace ssi
         private GridViewColumnHeader listViewSortCol = null;
         private ListViewSortAdorner listViewSortAdorner = null;
 
+ 
+
         public AnnoListControl()
         {
             InitializeComponent();
+
+            annoDataGrid.SourceUpdated += AnnoDataGrid_SourceUpdated;
+           
+
+        }
+
+        private void AnnoDataGrid_SourceUpdated(object sender, DataTransferEventArgs e)
+        {
+            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(annoDataGrid.ItemsSource);
+            view.Filter = UserFilter;
+        }
+
+
+
+        private bool UserFilter(object item)
+        {
+            if (String.IsNullOrEmpty(txtSearch.Text))
+                return true;
+            else
+                return ((item as AnnoListItem).Label.IndexOf(txtSearch.Text, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private void MenuItemDeleteClick(object sender, RoutedEventArgs e)
@@ -231,5 +253,21 @@ namespace ssi
             }     
         }
 
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if(annoDataGrid.ItemsSource != null)
+            {
+                CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(annoDataGrid.ItemsSource);
+                view.Filter = UserFilter;
+                CollectionViewSource.GetDefaultView(annoDataGrid.ItemsSource).Refresh();
+            }
+           
+        }
+
+
+    
     }
+
+
+
 }

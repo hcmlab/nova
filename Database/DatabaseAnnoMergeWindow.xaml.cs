@@ -15,7 +15,6 @@ namespace ssi
     {
         private MongoClient mongo;
         private IMongoDatabase database;
-        private string connectionstring = "mongodb://127.0.0.1:27017";
         private int authlevel = 0;
         private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
         private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
@@ -25,34 +24,16 @@ namespace ssi
         public DatabaseAnnoMergeWindow()
         {
             InitializeComponent();
-
-            this.db_server.Text = Properties.Settings.Default.DatabaseAddress;
-            this.db_login.Text = Properties.Settings.Default.MongoDBUser;
-            this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
-            Autologin.IsEnabled = false;
-
-            if (Properties.Settings.Default.DatabaseAutoLogin == true)
-            {
-                Autologin.IsChecked = true;
-            }
-            else Autologin.IsChecked = false;
-
-            if (Autologin.IsChecked == true)
-            {
-                ConnecttoDB();
-            }
+            ConnecttoDB();
+            
         }
 
         private void ConnecttoDB()
         {
-            Properties.Settings.Default.DatabaseAddress = this.db_server.Text;
-            Properties.Settings.Default.MongoDBUser = this.db_login.Text;
-            Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
-            Properties.Settings.Default.Save();
 
             try
             {
-                MongoClient mongo = DatabaseHandler.Client;
+                mongo = DatabaseHandler.Client;
                 int count = 0;
                 while (mongo.Cluster.Description.State.ToString() == "Disconnected")
                 {
@@ -60,15 +41,19 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = checkAuth(this.db_login.Text, "admin");
+                authlevel =  DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
 
-                if (authlevel > 0)
+                if (authlevel > 2)
                 {
-                    SelectDatabase();
-                    Autologin.IsEnabled = true;
+                    GetSessions();
                 }
-                else MessageBox.Show("You have no rights to access the database list");
-                authlevel = checkAuth(this.db_login.Text, Properties.Settings.Default.DatabaseName);
+
+                else
+                {
+                    MessageBox.Show("Sorry, you are not authorized on the database to perform this step!");
+                    this.Close();
+                }
+
             }
             catch (MongoException e)
 
@@ -83,16 +68,6 @@ namespace ssi
             ConnecttoDB();
         }
 
-        private void DataBasResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (DataBasResultsBox.SelectedItem != null)
-            {
-                Properties.Settings.Default.DatabaseName = DataBasResultsBox.SelectedItem.ToString();
-                Properties.Settings.Default.Save();
-
-                GetSessions();
-            }
-        }
 
         private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -102,7 +77,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 GetAnnotationSchemes();
-                GetRoles();
+               // GetRoles();
 
                 //     GetAnnotations();
             }
@@ -127,66 +102,8 @@ namespace ssi
             else return null;
         }
 
-        private int checkAuth(string dbuser, string db = "admin")
-        {
-            //4 = root
-            //3 = admin
-            //2 = write
-            //1 = read
-            //0 = notauthorized
 
-            int auth = 0;
-            try
-            {
-                var adminDB = mongo.GetDatabase(db);
-                var cmd = new BsonDocument("usersInfo", dbuser);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-                var roles = (BsonArray)queryResult[0][0]["roles"];
-
-                for (int i = 0; i < roles.Count; i++)
-                {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" || roles[i]["role"].ToString() == "dbAdmin" && auth < 3) auth = 3;
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && auth < 2) auth = 2;
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" || roles[i]["role"].ToString() == "read" && auth < 1) auth = 1;
-                    else auth = 0;
-
-                    //edit/add more roles if you want to change security levels
-                }
-            }
-            catch
-            {
-                var adminDB = mongo.GetDatabase("admin");
-                var cmd = new BsonDocument("usersInfo", dbuser);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-                var roles = (BsonArray)queryResult[0][0]["roles"];
-
-                for (int i = 0; i < roles.Count; i++)
-                {
-                    if (roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && auth < 4) auth = 4;
-                    else if (roles[i]["role"].ToString() == "dbAdminAnyDatabase" && auth < 3) auth = 3;
-                    else if (roles[i]["role"].ToString() == "readWriteAnyDatabase" && auth < 2) auth = 2;
-                    else if (roles[i]["role"].ToString() == "readAnyDatabase" && auth < 1) auth = 1;
-                    else auth = 0;
-
-                    //edit/add more roles if you want to change security levels
-                }
-            }
-
-            return auth;
-        }
-
-        public void SelectDatabase()
-        {
-            DataBasResultsBox.Items.Clear();
-
-            var databases = mongo.ListDatabasesAsync().Result.ToListAsync().Result;
-            foreach (var c in databases)
-            {
-                if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local")
-                    DataBasResultsBox.Items.Add(c.GetElement(0).Value.ToString());
-            }
-        }
+     
 
         public void GetSessions()
 
@@ -338,17 +255,7 @@ namespace ssi
         {
         }
 
-        private void Autologin_Unchecked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.DatabaseAutoLogin = false;
-            Properties.Settings.Default.Save();
-        }
-
-        private void Autologin_Checked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.DatabaseAutoLogin = true;
-            Properties.Settings.Default.Save();
-        }
+     
 
         private void AnnoSchemesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -360,8 +267,14 @@ namespace ssi
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
             List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
-            AnnoList merge = new AnnoList();
+            AnnoList merge = al[0];
+            merge.Meta.Annotator = "RootMeanSquare";
+            merge.Meta.AnnotatorFullName = "RootMeanSquare";
+
             double[] array = new double[al[0].Count];
+
+
+       
             foreach (AnnoList a in al)
             {
                 for (int i = 0; i < a.Count; i++)
@@ -378,6 +291,7 @@ namespace ssi
             merge.Scheme.SampleRate = 1 / (merge[0].Stop - merge[0].Start);
             MessageBox.Show("Median of all Annotations has been calculated");
             Ok.IsEnabled = true;
+
             return merge;
         }
 
@@ -387,7 +301,11 @@ namespace ssi
 
             List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
 
-            AnnoList merge = new AnnoList();
+            AnnoList merge = al[0];
+            merge.Meta.Annotator = "Median";
+            merge.Meta.AnnotatorFullName = "Median";
+
+
             double[] array = new double[al[0].Count];
             foreach (AnnoList a in al)
             {
@@ -397,7 +315,6 @@ namespace ssi
                 }
             }
 
-            merge = al[0];
             for (int i = 0; i < array.Length; i++)
             {
                 merge[i].Label = (array[i] / numberoftracks).ToString();
@@ -440,6 +357,9 @@ namespace ssi
             {
                 List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
 
+
+
+
                 double sum_sq = 0;
                 double mse;
                 double minerr = double.MaxValue;
@@ -447,7 +367,7 @@ namespace ssi
 
                 double[] array = new double[al[0].Count];
 
-                if (al[0].Meta.Annotator != null && al[0].Meta.Annotator.Contains("RMS"))
+                if (al[0].Meta.Annotator != null && al[0].Meta.Annotator.Contains("RootMeanSquare"))
                 {
                     for (int i = 0; i < al[0].Count; i++)
                     {
@@ -459,7 +379,7 @@ namespace ssi
                     mse = (double)sum_sq / (al[0].Count);
                     MessageBox.Show("The Mean Square Error for Annotation " + al[1].Scheme.Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
                 }
-                else if (al[1].Meta.Annotator != null && al[1].Meta.Annotator.Contains("RMS"))
+                else if (al[1].Meta.Annotator != null && al[1].Meta.Annotator.Contains("RootMeanSquare"))
                 {
                     for (int i = 0; i < al[0].Count; i++)
                     {
@@ -484,17 +404,6 @@ namespace ssi
             //todo do something
         }
 
-        private void db_login_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            Autologin.IsChecked = false;
-            Autologin.IsEnabled = false;
-        }
-
-        private void db_pass_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            Autologin.IsChecked = false;
-            Autologin.IsEnabled = false;
-        }
 
         private void RolesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -504,6 +413,7 @@ namespace ssi
         private void RMS_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
+       
             rms = rootMeanSquare();
         }
 

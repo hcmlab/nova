@@ -172,6 +172,7 @@ namespace ssi
 
             if (dbw.DialogResult == true)
             {
+                if (dbw.Result() == null) return null;
                 annotype = dbw.Result().ToString();
             }
             return annotype;
@@ -375,7 +376,7 @@ namespace ssi
                 }
             }
 
-            else if (!(annoList.Meta.AnnotatorFullName == "RMS" || annoList.Meta.AnnotatorFullName == "Median"))
+            else if (!(originalAnnotator == "RootMeanSquare" || originalAnnotator == "Median"))
             {
                 try
                 {
@@ -567,7 +568,7 @@ namespace ssi
             if (!islocked)
             {
                 var check = annotations.Find(filter2).ToList();
-                if (check.Count > 0 && Properties.Settings.Default.DatabaseAskBeforeOverwrite && originalAnnotator != Properties.Settings.Default.MongoDBUser)
+                if (check.Count > 0 && Properties.Settings.Default.DatabaseAskBeforeOverwrite && originalAnnotator == Properties.Settings.Default.MongoDBUser)
                 {
                    MessageBoxResult mbres =  MessageBox.Show("Annotation #" + annoList.Meta.Role+ " #" + annoList.Scheme.Name + " #" +
                        annoList.Meta.AnnotatorFullName + " already exists, do you want to overwrite it?", "Attention", MessageBoxButton.YesNo);

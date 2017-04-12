@@ -131,6 +131,8 @@ namespace ssi
 
             control.signalStatusBar.Background = Defaults.Brushes.Highlight;
             control.signalSettingsButton.Click += signalSettingsButton_Click;
+            control.signalStatsButton.Click += signalStatsButton_Click;
+            control.signalStatusDimComboBox.SelectionChanged += signalDimComboBox_SelectionChanged;
             control.signalStatusDimComboBox.SelectionChanged += signalDimComboBox_SelectionChanged;
             control.signalVolumeControl.volumeSlider.ValueChanged += signalVolumeControl_ValueChanged;
             control.signalCloseButton.Click += signalTrackCloseButton_Click;
@@ -199,6 +201,7 @@ namespace ssi
             control.databaseCMLTransferStepMenu.Click += databaseCMLTransferStep_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
             control.databaseManageMenu.Click += databaseManage_Click;
+            control.databaseCMLMergeMenu.Click += databaseCMLMerge_Click;
 
             // Navigator
 
