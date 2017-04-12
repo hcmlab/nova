@@ -50,7 +50,7 @@
                 <MenuItem Header="Store Session" Name="databaseSaveSessionMenu" IsEnabled="False" />
                 <MenuItem Header="Store Session and mark as finished" Name="databaseSaveSessionAndMarkAsFinishedMenu" IsEnabled="False" />
                 <MenuItem Header="Cooperative Learning" Visibility="Visible">
-                    <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" IsEnabled="False" />
+                    <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" IsEnabled="False" Visibility="Collapsed" />
                     <MenuItem Header="Complete Session" Name="databaseCMLCompleteStepMenu" IsEnabled="False" />
                     <MenuItem Header="Extract MFCCS for all Sessions" Name="databaseCMLExtractFeaturesMenu" IsEnabled="False"></MenuItem>
                     <MenuItem Header="Train and Label Multiple Sessions" Name="databaseCMLTransferStepMenu"  Visibility="Collapsed"    IsEnabled="False" />

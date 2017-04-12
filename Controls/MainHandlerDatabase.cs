@@ -129,11 +129,13 @@ namespace ssi
                     {
                         control.databaseManageMenu.Visibility = Visibility.Visible;
                         control.databaseCMLTransferStepMenu.Visibility = Visibility.Visible;
+                        control.databaseCMLMergeMenu.Visibility = Visibility.Visible;
                     }
                     else
                     {
                         control.databaseManageMenu.Visibility = Visibility.Collapsed;
                         control.databaseCMLTransferStepMenu.Visibility = Visibility.Collapsed;
+                        control.databaseCMLMergeMenu.Visibility = Visibility.Collapsed;
                     }
                 }
 
