@@ -298,25 +298,29 @@ namespace ssi
                         string[] triggers = meta.Attributes["trigger"].Value.Split(';');
                         foreach (string trigger in triggers)
                         {
-                            Match match = Regex.Match(trigger, @"([^{]+)\{([^}]*)\}");
-                            if (match.Success && match.Groups.Count == 3)
+                            try
                             {
-                                string dllName = match.Groups[1].Value;
-                                string arguments = match.Groups[2].Value;
-                                Dictionary<string, object> args = arguments.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(part => part.Split('='))
-                                    .ToDictionary(split => split[0], split => (object)split[1]);                                
-                                PluginCaller pluginCaller = new PluginCaller(dllName + ".dll", dllName);
-                                AnnoTrigger annoTrigger = new AnnoTrigger(list, pluginCaller, args);
-                                list.Meta.Trigger.Add(annoTrigger);
+                                Match match = Regex.Match(trigger, @"([^{]+)\{([^}]*)\}");
+                                if (match.Success && match.Groups.Count == 3)
+                                {
+                                    string dllName = match.Groups[1].Value;
+                                    string arguments = match.Groups[2].Value;
+                                    Dictionary<string, object> args = arguments.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(part => part.Split('='))
+                                        .ToDictionary(split => split[0], split => (object)split[1]);
+                                    PluginCaller pluginCaller = new PluginCaller(dllName + ".dll", dllName);
+                                    AnnoTrigger annoTrigger = new AnnoTrigger(list, pluginCaller, args);
+                                    list.Meta.Trigger.Add(annoTrigger);
+                                }
+                                else
+                                {
+                                    MessageTools.Warning("could not parse trigger '" + trigger + "'");
+                                }
                             }
-                            else
+                            catch (Exception)
                             {
                                 MessageTools.Warning("could not parse trigger '" + trigger + "'");
                             }
-
-
-
                         }
                         
                     }
