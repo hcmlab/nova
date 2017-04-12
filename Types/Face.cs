@@ -26,9 +26,6 @@ namespace ssi
         private int width;
         private int height;
 
-        private int numJoints = 0;
-        private int jointValues = 0;
-        private int numSkeletons = 1;
         private double postion = 0;
 
         private float[] mins = { 0, 0, 0 };
@@ -59,15 +56,7 @@ namespace ssi
             BackColor = Defaults.Colors.Background;
             SignalColor = Defaults.Colors.Foreground;
             HeadColor = Defaults.Colors.Foreground;
-
-            numSkeletons = signal.meta_num;
-
-            if (signal.meta_type == "ssi") numJoints = 25;
-            else if (signal.meta_type == "kinect1") numJoints = 20;
-            else if (signal.meta_type == "kinect2") numJoints = 25;
-
-            jointValues = (int)((signal.dim / numSkeletons) / numJoints);
-
+    
             writeableBmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgr32, null);
             writeableBmp.Clear(BackColor);            
 

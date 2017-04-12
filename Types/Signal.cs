@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace ssi
@@ -134,19 +135,18 @@ namespace ssi
 
         public double rate;
         public double rate_real;
-        public UInt32 dim;
-        public UInt32 bytes;
-        public Signal.Type type;
+        public uint dim;
+        public uint bytes;
+        public Type type;
         public double time;
-        public UInt32 number;
+        public uint number;
         public float[] data;
         public float[] min;
         public float minmin;
         public float[] max;
         public float maxmax;
-        public string meta_name;
-        public int meta_num;
-        public string meta_type;
+
+        public Dictionary<string, string> Meta { get; set; }
 
         protected Signal()
         {
@@ -160,13 +160,11 @@ namespace ssi
             max = null;
             loaded = false;
             isAudio = false;
-            type = Signal.Type.UNDEF;
-            meta_name = "";
-            meta_num = 0;
-            meta_type = "";
+            type = Type.UNDEF;
+            Meta = new Dictionary<string, string>();
         }
 
-        protected Signal(string filepath, double rate, uint dim, uint bytes, uint number, Signal.Type type, string meta_name = "", int meta_num = 0, string meta_type = "")
+        protected Signal(string filepath, double rate, uint dim, uint bytes, uint number, Type type)
             : base()
         {
             this.filePath = filepath;
@@ -178,10 +176,6 @@ namespace ssi
             this.bytes = bytes;
             this.number = number;
             this.type = type;
-
-            this.meta_name = meta_name;
-            this.meta_num = meta_num;
-            this.meta_type = meta_type;
 
             if (number > 0)
             {
@@ -200,10 +194,6 @@ namespace ssi
             this.name = s.name;
             this.type = s.type;
             this.isAudio = s.isAudio;
-
-            this.meta_name = "";
-            this.meta_num = 0;
-            this.meta_type = "";
 
             uint fromInSamples = (uint)Math.Round(fromInSec * s.rate);
             uint toInSamples = (uint)Math.Round(toInSec * s.rate);

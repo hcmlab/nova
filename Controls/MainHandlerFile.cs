@@ -291,14 +291,13 @@ namespace ssi
 
             Signal signal = Signal.LoadStreamFile(filename);
             if (signal != null && signal.loaded)
-            {
-
-                if (signal.meta_name == "face")
+            {                
+                if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face")
                 {
                     IMedia media = new Face(filename, signal);
                     addMedia(media);
                 }
-                else if (signal.meta_name == "skeleton")
+                else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton")
                 {
                     IMedia media = new Skeleton(filename, signal);
                     addMedia(media);

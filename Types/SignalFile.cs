@@ -63,7 +63,7 @@ namespace ssi
 
             try
             {
-                Signal.Type type = Signal.Type.UNDEF;
+                Type type = Type.UNDEF;
                 uint dim = 0;
                 double rate = 0;
 
@@ -72,9 +72,9 @@ namespace ssi
                     string[] lines = File.ReadAllLines(filepath);
 
                     uint number = (uint)lines.Length;
-                    uint bytes = Signal.TypeSize[(int)type];
+                    uint bytes = TypeSize[(int)type];
 
-                    if (type != Signal.Type.UNDEF
+                    if (type != Type.UNDEF
                         && rate > 0
                         && bytes > 0
                         && number > 0)
@@ -88,7 +88,7 @@ namespace ssi
                             signal = new Signal(filepath, rate, dim, bytes, number, type);
 
                             StreamReader fs_data = new StreamReader(filepath);
-                            LoadDataV2a(signal, fs_data);
+                            LoadDataV2a(signal, fs_data, delims);
                             fs_data.Close();
 
                             signal.loaded = true;
@@ -108,7 +108,13 @@ namespace ssi
         public static Signal LoadStreamFile(string filepath)
         {
             Signal signal = new Signal();
-            if (filepath.EndsWith("~")) filepath = filepath.Remove(filepath.Length - 1);
+            if (filepath.EndsWith("~"))
+            {
+                filepath = filepath.Remove(filepath.Length - 1);
+            }
+
+            XmlDocument doc = new XmlDocument();
+
             try
             {
                 // parse filename
@@ -117,109 +123,74 @@ namespace ssi
                 signal.fileName = tmp[tmp.Length - 1];
                 signal.name = signal.fileName.Split('.')[0];
 
-                // open file
-                FileStream fs = new FileStream(filepath, FileMode.Open, FileAccess.Read);
-                byte[] buffer = new byte[12];
+                doc.Load(filepath);
 
-                // determine version
-                fs.Read(buffer, 0, 4);
-                if (buffer[0] == '<' && buffer[1] == '?' && buffer[2] == 'x')
+                XmlNode node = null;
+
+                node = doc.SelectSingleNode("//info");
+                string ftype_s = node.Attributes["ftype"].Value;
+                signal.rate = double.Parse(node.Attributes["sr"].Value);
+                signal.dim = uint.Parse(node.Attributes["dim"].Value);
+                signal.bytes = uint.Parse(node.Attributes["byte"].Value);                
+                string type_s = node.Attributes["type"].Value;
+                for (uint i = 0; i < TypeName.Length; i++)
                 {
-                    fs.Seek(0, SeekOrigin.Begin);
-                    do
+                    if (type_s == TypeName[i])
                     {
-                    } while (Convert.ToChar(fs.ReadByte()) != '\n');
-                    XmlReader xml = XmlReader.Create(fs);
-                    do
-                    {
-                        xml.Read();
-                    } while (xml.Name != "stream");
-
-                    xml.MoveToAttribute("ssi-v");
-                    string version_s = xml.Value;
-                    int version = int.Parse(version_s);
-
-                    do
-                    {
-                        xml.Read();
-                    } while (xml.Name != "info");
-
-                    xml.MoveToAttribute("ftype");
-                    string ftype_s = xml.Value;
-
-                    xml.MoveToAttribute("sr");
-                    string sr_s = xml.Value;
-                    signal.rate = double.Parse(sr_s);
-
-                    xml.MoveToAttribute("dim");
-                    string dim_s = xml.Value;
-                    signal.dim = uint.Parse(dim_s);
-
-                    xml.MoveToAttribute("byte");
-                    string bytes_s = xml.Value;
-                    signal.bytes = uint.Parse(bytes_s);
-
-                    xml.MoveToAttribute("type");
-                    string type_s = xml.Value;
-                    for (uint i = 0; i < TypeName.Length; i++)
-                    {
-                        if (type_s == TypeName[i])
-                        {
-                            signal.type = (Signal.Type)i;
-                        }
+                        signal.type = (Type)i;
+                        break;
                     }
+                }
+                string delim = " ";
+                if (node.Attributes["delim"] != null)
+                {
+                    delim = node.Attributes["delim"].Value;
+                }
 
-                    uint num = 0;
-                    while (xml.Read())
+                node = doc.SelectSingleNode("//meta");
+                if (node != null)
+                {
+                    foreach(XmlAttribute attribute in node.Attributes)
                     {
-                        if (xml.IsStartElement() && xml.Name == "meta")
-                        {
-                            xml.MoveToAttribute("name");
-                            string meta_name = xml.Value;
-                            signal.meta_name = meta_name;
-
-                            xml.MoveToAttribute("num");
-                            string meta_num = xml.Value;
-                            signal.meta_num = int.Parse(meta_num);
-
-                            xml.MoveToAttribute("type");
-                            string meta_type = xml.Value;
-                            signal.meta_type = meta_type;
-                        }
-
-                        if (xml.IsStartElement() && xml.Name == "chunk")
-                        {
-                            xml.MoveToAttribute("num");
-                            string num_s = xml.Value;
-                            num += uint.Parse(num_s);
-                        }
+                        signal.Meta.Add(attribute.Name, attribute.Value);
                     }
+                }
 
-                    signal.number = num;
-                    signal.time = 0;
-                    signal.data = new float[signal.dim * signal.number];
+                uint num = 0;
+                foreach (XmlNode n in doc.SelectNodes("//chunk"))
+                {
+                    num += uint.Parse(n.Attributes["num"].Value);
+                }
 
-                    if (ftype_s == "ASCII")
+                signal.time = 0;
+                signal.number = num;
+                if (!(signal.number > 0 && signal.dim > 0))
+                {
+                    MessageTools.Error("empty stream file '" + filepath + "'");
+                    return null;
+                }
+                signal.data = new float[signal.dim * signal.number];
+
+                if (ftype_s == "ASCII")
+                {
+                    StreamReader fs_data = new StreamReader(filepath + "~");
+                    if (!LoadDataV2a(signal, fs_data, delim.ToCharArray()))
                     {
-                        StreamReader fs_data = new StreamReader(filepath + "~");
-                        LoadDataV2a(signal, fs_data);
-                        fs_data.Close();
+                        MessageTools.Error("could not read stream data '" + filepath + "'");
+                        return null;
                     }
-                    else
-                    {
-                        FileStream fs_data = new FileStream(filepath + "~", FileMode.Open, FileAccess.Read);
-                        LoadDataV2b(signal, fs_data);
-                        fs_data.Close();
-                    }
+                    fs_data.Close();
                 }
                 else
                 {
-                    MessageTools.Error("could not read stream file '" + filepath + "'");
-                    return null;
+                    FileStream fs_data = new FileStream(filepath + "~", FileMode.Open, FileAccess.Read);
+                    if (!LoadDataV2b(signal, fs_data))
+                    {
+                        MessageTools.Error("could not read stream data '" + filepath + "'");
+                        return null;
+                    }
+                    fs_data.Close();
                 }
-
-                // close file
-                fs.Close();
 
                 signal.minmax();
                 signal.loaded = true;
@@ -250,12 +221,10 @@ namespace ssi
             return true;
         }
 
-        public static bool LoadDataV2a(Signal signal, StreamReader fs)
+        public static bool LoadDataV2a(Signal signal, StreamReader fs, char[] delims)
         {
             string line = null;
             string[] row = null;
-
-            char[] split = { ' ', '\t', ';', ',' };
 
             switch (signal.type)
             {
@@ -264,7 +233,7 @@ namespace ssi
                         for (UInt32 i = 0; i < signal.number; i++)
                         {
                             line = fs.ReadLine();
-                            row = line.Split(split);
+                            row = line.Split(delims);
                             for (UInt32 j = 0; j < signal.dim; j++)
                             {
                                 signal.data[i * signal.dim + j] = (float)short.Parse(row[j]);
@@ -278,7 +247,7 @@ namespace ssi
                         for (UInt32 i = 0; i < signal.number; i++)
                         {
                             line = fs.ReadLine();
-                            row = line.Split(split);
+                            row = line.Split(delims);
                             for (UInt32 j = 0; j < signal.dim; j++)
                             {
                                 signal.data[i * signal.dim + j] = (float)ushort.Parse(row[j]);
@@ -292,7 +261,7 @@ namespace ssi
                         for (UInt32 i = 0; i < signal.number; i++)
                         {
                             line = fs.ReadLine();
-                            row = line.Split(split);
+                            row = line.Split(delims);
                             for (UInt32 j = 0; j < signal.dim; j++)
                             {
                                 signal.data[i * signal.dim + j] = (float)int.Parse(row[j]);
@@ -306,7 +275,7 @@ namespace ssi
                         for (UInt32 i = 0; i < signal.number; i++)
                         {
                             line = fs.ReadLine();
-                            row = line.Split(split);
+                            row = line.Split(delims);
                             for (UInt32 j = 0; j < signal.dim; j++)
                             {
                                 signal.data[i * signal.dim + j] = (float)uint.Parse(row[j]);
@@ -320,7 +289,7 @@ namespace ssi
                         for (UInt32 i = 0; i < signal.number; i++)
                         {
                             line = fs.ReadLine();
-                            row = line.Split(split);
+                            row = line.Split(delims);
                             for (UInt32 j = 0; j < signal.dim; j++)
                             {
                                 signal.data[i * signal.dim + j] = float.Parse(row[j]);
@@ -334,7 +303,7 @@ namespace ssi
                         for (UInt32 i = 0; i < signal.number; i++)
                         {
                             line = fs.ReadLine();
-                            row = line.Split(split);
+                            row = line.Split(delims);
                             for (UInt32 j = 0; j < signal.dim; j++)
                             {
                                 signal.data[i * signal.dim + j] = (float)double.Parse(row[j]);
