@@ -27,12 +27,20 @@ namespace ssi
             position = 0;
             currentOrNextItemIndex = annoList.Count == 0 ? -1 : 0;
 
-            trigger.call("open", args);
+            object result = trigger.call("open", args);
+            if (result != null)
+            {
+                MessageTools.Error(result.ToString());
+            }
         }
 
         ~AnnoTrigger()
         {
-            trigger.call("close", args);
+            object result = trigger.call("close", args);
+            if (result != null)
+            {
+                MessageTools.Error(result.ToString());
+            }
         }
 
         private int findItem(double position)

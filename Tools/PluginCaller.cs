@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,45 +14,99 @@ namespace ssi
         object obj = null;
         Type type = null;
 
+        string dllName;
+        string directory;
+        bool isLoaded;
+        bool IsLoaded { get { return isLoaded; } }
+
+        public const string PLUGIN_FOLDER = "plugins";
+
         public PluginCaller(string dllPath, string typeName)
         {
-            if (!Path.IsPathRooted(dllPath))
-            {
-                dllPath = Environment.CurrentDirectory + "\\" + dllPath;
-            }
-            Assembly asm = Assembly.LoadFile(dllPath);
+            isLoaded = true;
             
-            if (asm != null)
+            dllName = Path.GetFileNameWithoutExtension(dllPath);
+            directory = Environment.CurrentDirectory + "\\" + PLUGIN_FOLDER + "\\" + dllName + "\\";
+
+            if (!downloadDll(dllName))
             {
-                foreach (Type type in asm.GetExportedTypes())
+                MessageTools.Error("Dll not found '" + dllName + ".dll'");
+                isLoaded = false;
+            }
+            else
+            {
+                Assembly asm = Assembly.LoadFile(directory + dllName + ".dll");
+
+                if (asm != null)
                 {
-                    if (type.Name == typeName)
+                    foreach (Type type in asm.GetExportedTypes())
                     {
-                        this.type = type;
-                        obj = Activator.CreateInstance(type);
-                        break;
+                        if (type.Name == typeName)
+                        {
+                            this.type = type;
+                            obj = Activator.CreateInstance(type);
+
+                            object result = call("dependencies", new Dictionary<string, object>());
+                            if (result != null)
+                            {
+                                string[] dependencies = (string[])result;
+                                foreach (string dependency in dependencies)
+                                {
+                                    if (!downloadDll(dependency))
+                                    {
+                                        MessageTools.Error("Dll not found '" + dependency + ".dll'");
+                                        isLoaded = false;
+                                    }
+                                }
+                            }
+
+                            break;
+                        }
                     }
                 }
             }
         }
 
-        public bool call(string name, Dictionary<string,object> args)
+        public bool downloadDll(string name)
         {
-            if (obj == null || type == null)
+            string path = directory + name + ".dll";
+
+            if (!File.Exists(path))
             {
-                return false;
+                try
+                {
+                    string url = "https://github.com/hcmlab/nova/blob/master/bin/" + PLUGIN_FOLDER + "/" + dllName + "/" + name + ".dll?raw=true";
+                    WebClient Client = new WebClient();
+                    Directory.CreateDirectory(directory + dllName + "//" + name);
+                    Client.DownloadFile(url, directory + dllName + "//" + name + ".dll");
+   
+                }
+                catch
+                {
+                    MessageTools.Error("Tools for creating Samplelists are not available, please check your internet connection.");
+                    return false;
+                }
+
+            }
+
+            return true;
+        }
+
+        public object call(string name, Dictionary<string,object> args)
+        {
+            if (obj == null || type == null || !isLoaded)
+            {
+                return null;
             }
 
             Type[] varInfo = { args.GetType() };            
             MethodInfo methodInfo = type.GetMethod(name, varInfo);
             if (methodInfo == null)
             {
-                return false;                               
+                return null;                               
             }
 
-            type.InvokeMember(name, BindingFlags.InvokeMethod, null, obj, new object[] { args });
-
-            return true;
+            return type.InvokeMember(name, BindingFlags.InvokeMethod, null, obj, new object[] { args });
         }
     }
 }

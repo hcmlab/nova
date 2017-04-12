@@ -14,6 +14,10 @@ namespace ssi
         public IConnection _connection;
         public ISession _session;
 
+        public string[] dependencies(Dictionary<string, object> parameters)
+        {
+            return new string[] { "Apache.NMS", "Apache.NMS.ActiveMQ" };
+        }
 
         public string open(Dictionary<string,object> parameters)
         {
