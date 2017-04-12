@@ -14,13 +14,34 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
+               <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5">
+    
 
-            <ListView Name="annoDataGrid" >
+
+        <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5">
+            <Grid>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0" Margin="2" HorizontalAlignment="Left">
+                    <Image Source="/Resources/search.png" Width="18"></Image>
+                    <TextBox x:Name="txtSearch" TextChanged="txtSearch_TextChanged" Width="120">
+                        <TextBox.Resources>
+                        <!--<Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>-->
+                        </TextBox.Resources>
+                    </TextBox>
+                  
+                </DockPanel>
+    
+    <ListView Name="annoDataGrid" Grid.Row="1" >
                 <ListView.ContextMenu>
                     <ContextMenu Name="InvoiceDetailsList" StaysOpen="true">
                         <ContextMenu.BitmapEffect>
@@ -66,6 +87,7 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+            </Grid>
         </Border>
 
         <Grid Grid.Column="0" Grid.Row="1">

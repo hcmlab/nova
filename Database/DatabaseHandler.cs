@@ -172,6 +172,7 @@ namespace ssi
 
             if (dbw.DialogResult == true)
             {
+                if (dbw.Result() == null) return null;
                 annotype = dbw.Result().ToString();
             }
             return annotype;

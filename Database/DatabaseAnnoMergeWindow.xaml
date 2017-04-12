@@ -43,11 +43,12 @@
         <Label Content="Annotations" Margin="223,219,297,10" />
         <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
 
-        <ListBox Name="AnnoSchemesBox" Grid.Row="0" Grid.Column="0" Margin="223,79,436,212" SelectionMode="Single" SelectionChanged="AnnoSchemesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+        <ListBox Name="AnnoSchemesBox" Grid.Row="0" Grid.Column="0" Margin="223,79,297,212" SelectionMode="Single" SelectionChanged="AnnoSchemesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
         <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple" Margin="223,243,297,1">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="120" Header="Scheme" DisplayMemberBinding="{Binding AnnoScheme.AnnoType}" />
+                    <GridViewColumn Width="120" Header="Scheme" DisplayMemberBinding="{Binding AnnoScheme}" />
+
 
                     <GridViewColumn Width="60" Header="Role">
                         <GridViewColumn.DisplayMemberBinding>
@@ -60,6 +61,7 @@
                         </GridViewColumn.DisplayMemberBinding>
                     </GridViewColumn>
 
+          
                     <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
                 </GridView>
             </ListView.View>
@@ -67,15 +69,15 @@
         <Button Name="Ok"  Content="Ok" Grid.Column="0" Grid.Row="1" Click="Ok_Click"  Height="25"  Margin="621,7,55,8" />
         <Button Name="Cancel" Content="Cancel" Grid.Row="1"  Click="Cancel_Click"   Height="25" RenderTransformOrigin="3.367,0.24" Margin="459,7,224,8" />
 
-        <Button Name="CalculateMedian"  Content="Median" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False" Margin="606,281,124,116" />
+        <Button Name="CalculateMedian"  Content="Median" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False" Margin="643,281,87,116" />
         <Label Content="AnnoSchemes" Margin="223,53,-223,343" />
-        <ListBox x:Name="RolesBox" Grid.Row="0" Grid.Column="0" Margin="364,79,297,212" SelectionMode="Single" SelectionChanged="RolesBox_SelectionChanged"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
-        <Label Content="Roles" Margin="364,53,297,343" />
+        <ListBox x:Name="RolesBox" Visibility="Hidden" Grid.Row="0" Grid.Column="0" Margin="364,79,297,212" SelectionMode="Single" SelectionChanged="RolesBox_SelectionChanged"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        <Label Content="Roles" Margin="364,53,297,343" Visibility="Hidden" />
         <Label Content="Continuous" Margin="509,242,165,143" />
         <Label Content="Discrete" Margin="509,70,165,315" />
-        <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="RMS" Grid.Column="0" Click="RMS_Click" IsEnabled="False" Margin="524,281,203,116" />
+        <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="Root Mean Square" Grid.Column="0" Click="RMS_Click" IsEnabled="False" Margin="524,281,150,116" />
         <Label Content="Stats" Margin="524,336,150,49" />
-        <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error" Content="RMSE" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" Margin="524,382,203,15" />
+        <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" Margin="524,382,203,15" />
         <Label Content="Stats" Margin="524,173,150,212" />
     </Grid>
 </Window>

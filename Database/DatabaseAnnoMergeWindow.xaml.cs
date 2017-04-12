@@ -77,7 +77,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 GetAnnotationSchemes();
-                GetRoles();
+               // GetRoles();
 
                 //     GetAnnotations();
             }

@@ -55,10 +55,10 @@ namespace ssi
                     e.Handled = true;
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.D1) || e.KeyboardDevice.IsKeyDown(Key.D2) || e.KeyboardDevice.IsKeyDown(Key.D3) || e.KeyboardDevice.IsKeyDown(Key.D4) ||
+                if ((e.KeyboardDevice.IsKeyDown(Key.D1) || e.KeyboardDevice.IsKeyDown(Key.D2) || e.KeyboardDevice.IsKeyDown(Key.D3) || e.KeyboardDevice.IsKeyDown(Key.D4) ||
                     e.KeyboardDevice.IsKeyDown(Key.D5) || e.KeyboardDevice.IsKeyDown(Key.D6) || e.KeyboardDevice.IsKeyDown(Key.D7) || e.KeyboardDevice.IsKeyDown(Key.D8) || e.KeyboardDevice.IsKeyDown(Key.D9) ||
                     e.KeyboardDevice.IsKeyDown(Key.NumPad1) || e.KeyboardDevice.IsKeyDown(Key.NumPad2) || e.KeyboardDevice.IsKeyDown(Key.NumPad3) || e.KeyboardDevice.IsKeyDown(Key.NumPad4) || e.KeyboardDevice.IsKeyDown(Key.NumPad5) ||
-                    e.KeyboardDevice.IsKeyDown(Key.NumPad6) || e.KeyboardDevice.IsKeyDown(Key.NumPad7) || e.KeyboardDevice.IsKeyDown(Key.NumPad8) || e.KeyboardDevice.IsKeyDown(Key.NumPad9))
+                    e.KeyboardDevice.IsKeyDown(Key.NumPad6) || e.KeyboardDevice.IsKeyDown(Key.NumPad7) || e.KeyboardDevice.IsKeyDown(Key.NumPad8) || e.KeyboardDevice.IsKeyDown(Key.NumPad9)) && AnnoTierStatic.Selected != null)
                 {
                     int index = 0;
                     if (e.Key - Key.D1 < 10 && AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null && AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count > 0) index = Math.Min(AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count - 1, e.Key - Key.D1);
@@ -85,7 +85,7 @@ namespace ssi
                             }
                         }
                     }
-                    e.Handled = true;
+                   // e.Handled = true;
                 }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
@@ -232,15 +232,7 @@ namespace ssi
 
 
 
-                if (e.KeyboardDevice.IsKeyDown(Key.M) && !isKeyDown)
-                {
-                    if (AnnoTierStatic.Selected != null && !AnnoTierStatic.Selected.IsDiscreteOrFree)
-                    {
-                        AnnoTierStatic.Selected.ContinuousAnnoMode();
-                    }
-                    isKeyDown = true;
-                    e.Handled = true;
-                }
+               
 
                 if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
                 {
@@ -439,6 +431,16 @@ namespace ssi
                         AnnoTierStatic.Label.select(true);
                         isKeyDown = true;
                     }
+                }
+
+                if (e.KeyboardDevice.IsKeyDown(Key.M))
+                {
+                    if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
+                    {
+                        AnnoTierStatic.Selected.ContinuousAnnoMode();
+                    }
+                    isKeyDown = true;
+                   // e.Handled = true;
                 }
 
                 if (e.KeyboardDevice.IsKeyDown(Key.Q) && !isKeyDown)
