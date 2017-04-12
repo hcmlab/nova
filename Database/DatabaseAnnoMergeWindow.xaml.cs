@@ -228,9 +228,11 @@ namespace ssi
             {
                 if (AnnoSchemesBox.Items != null) AnnoSchemesBox.Items.Clear();
 
-                foreach (var c in annosch)
+               foreach (var c in annosch)
                 {
-                    AnnoSchemesBox.Items.Add(c["name"]);
+
+                    if (c["isValid"].AsBoolean == true) AnnoSchemesBox.Items.Add(c["name"]);
+
                 }
             }
         }

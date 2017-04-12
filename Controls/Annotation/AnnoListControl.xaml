@@ -29,16 +29,16 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <DockPanel Grid.Row="0" Margin="2" HorizontalAlignment="Left" Opacity="0.5">
+                
+                <DockPanel Grid.Row="0" Margin="2" HorizontalAlignment="Right" Opacity="0.3" >
                     <Image Source="/Resources/search.png" Width="18"></Image>
                     <TextBox x:Name="txtSearch" TextChanged="txtSearch_TextChanged" Width="120">
                         <TextBox.Resources>
-                            <!--<Style TargetType="{x:Type Border}">
-                            <Setter Property="CornerRadius" Value="4"/>
-                        </Style>-->
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="3"/>
+                            </Style>
                         </TextBox.Resources>
                     </TextBox>
-
                 </DockPanel>
 
                 <ListView Name="annoDataGrid" Grid.Row="1" >
@@ -100,9 +100,23 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5" >Relabel</Button>
-            <TextBox Name="editTextBox" Grid.Column="1" Grid.Row="0" Margin="5,5,7,5"></TextBox>
-            <ComboBox Name="editComboBox" Grid.Column="1" Grid.Row="0" Margin="5" Visibility="Collapsed"></ComboBox>
+            <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5" >Relabel
+            
+</Button>
+            <TextBox Name="editTextBox" Grid.Column="1" Grid.Row="0" Margin="5,5,7,5">
+                <TextBox.Resources>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="CornerRadius" Value="3"/>
+                </Style>
+                </TextBox.Resources>
+            </TextBox>
+            <ComboBox Name="editComboBox" Grid.Column="1" Grid.Row="0" Margin="5" Visibility="Collapsed">
+                <ComboBox.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="3"/>
+                    </Style>
+                </ComboBox.Resources>
+            </ComboBox>
         </Grid>
     </Grid>
 </UserControl>
