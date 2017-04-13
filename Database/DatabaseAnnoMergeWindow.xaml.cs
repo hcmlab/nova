@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -25,12 +26,10 @@ namespace ssi
         {
             InitializeComponent();
             ConnecttoDB();
-            
         }
 
         private void ConnecttoDB()
         {
-
             try
             {
                 mongo = DatabaseHandler.Client;
@@ -41,19 +40,17 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel =  DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
+                authlevel = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
 
                 if (authlevel > 2)
                 {
                     GetSessions();
                 }
-
                 else
                 {
                     MessageBox.Show("Sorry, you are not authorized on the database to perform this step!");
                     this.Close();
                 }
-
             }
             catch (MongoException e)
 
@@ -68,7 +65,6 @@ namespace ssi
             ConnecttoDB();
         }
 
-
         private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (CollectionResultsBox.SelectedItem != null)
@@ -77,7 +73,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 GetAnnotationSchemes();
-               // GetRoles();
+                // GetRoles();
 
                 //     GetAnnotations();
             }
@@ -101,9 +97,6 @@ namespace ssi
                 return AnnotationResultBox.SelectedItems;
             else return null;
         }
-
-
-     
 
         public void GetSessions()
 
@@ -198,7 +191,7 @@ namespace ssi
                 string type = annotdb.GetValue(2).ToString();
 
                 var filterc = builder.Eq("_id", anno["annotator_id"]);
-                var annotatdb = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators).Find(filterc).Single();
+                var annotatdb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filterc).Single();
                 string annotatorname = annotatdb.GetValue(1).ToString();
                 string annotatornamefull = annotatdb.GetValue(2).ToString();
 
@@ -228,11 +221,9 @@ namespace ssi
             {
                 if (AnnoSchemesBox.Items != null) AnnoSchemesBox.Items.Clear();
 
-               foreach (var c in annosch)
+                foreach (var c in annosch)
                 {
-
                     if (c["isValid"].AsBoolean == true) AnnoSchemesBox.Items.Add(c["name"]);
-
                 }
             }
         }
@@ -257,8 +248,6 @@ namespace ssi
         {
         }
 
-     
-
         private void AnnoSchemesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             GetAnnotations();
@@ -275,8 +264,6 @@ namespace ssi
 
             double[] array = new double[al[0].Count];
 
-
-       
             foreach (AnnoList a in al)
             {
                 for (int i = 0; i < a.Count; i++)
@@ -300,13 +287,11 @@ namespace ssi
         private AnnoList calculateMedian()
         {
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
-
             List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
 
             AnnoList merge = al[0];
             merge.Meta.Annotator = "Median";
             merge.Meta.AnnotatorFullName = "Median";
-
 
             double[] array = new double[al[0].Count];
             foreach (AnnoList a in al)
@@ -344,12 +329,14 @@ namespace ssi
                 CalculateMedian.IsEnabled = false;
                 CalculateRMS.IsEnabled = false;
                 CalculateRMSE.IsEnabled = false;
+                CalculateKappa.IsEnabled = true;
             }
             else
             {
                 CalculateMedian.IsEnabled = true;
                 CalculateRMS.IsEnabled = true;
                 CalculateRMSE.IsEnabled = true;
+                CalculateKappa.IsEnabled = false;
             }
         }
 
@@ -358,9 +345,6 @@ namespace ssi
             if (AnnotationResultBox.SelectedItems.Count == 2)
             {
                 List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
-
-
-
 
                 double sum_sq = 0;
                 double mse;
@@ -398,6 +382,175 @@ namespace ssi
             else MessageBox.Show("Select RMS Annotation and ONE Reference Annotation. If RMS Annotation is not present, please create it first.");
         }
 
+        private List<AnnoList> convertAnnoListstoMatrix(string restclass)
+        {
+            List<AnnoList> annolists = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+
+            List<AnnoList> convertedlists = new List<AnnoList>();
+
+            double maxlength = GetAnnoListLength(annolists);
+            double chunksize = Properties.Settings.Default.DefaultMinSegmentSize; //Todo make option
+
+            foreach (AnnoList al in annolists)
+            {
+                AnnoList list = ConvertDiscreteAnnoListToContinuousList(al, chunksize, maxlength, restclass);
+                convertedlists.Add(list);
+            }
+
+            return convertedlists;
+        }
+
+        private double GetAnnoListLength(List<AnnoList> annolists)
+        {
+            double length = 0;
+            foreach (AnnoList al in annolists)
+            {
+                if (al.ElementAt(al.Count - 1).Stop > length) length = al.ElementAt(al.Count - 1).Stop;
+            }
+
+            return length;
+        }
+
+        private AnnoList ConvertDiscreteAnnoListToContinuousList(AnnoList annolist, double chunksize, double end, string restclass = "Rest")
+        {
+            AnnoList result = new AnnoList();
+            result.Scheme = annolist.Scheme;
+            double currentpos = 0;
+
+            bool foundlabel = false;
+
+            while (currentpos < end)
+            {
+                foundlabel = false;
+                foreach (AnnoListItem orgitem in annolist)
+                {
+                    if (orgitem.Start < currentpos && orgitem.Stop > currentpos)
+                    {
+                        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
+                        result.Add(ali);
+                        foundlabel = true;
+                        break;
+                    }
+                }
+
+                if (foundlabel == false)
+                {
+                    AnnoListItem ali = new AnnoListItem(currentpos, chunksize, restclass);
+                    result.Add(ali);
+                }
+
+                currentpos = currentpos + chunksize;
+            }
+
+            return result;
+        }
+
+
+        public double FleissKappa(List<AnnoList> annolists, string restclass)
+        {
+
+            int n = annolists.Count;   // n = number of raters, here number of annolists
+
+            List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
+            //add the restclass we introduced in last step.
+            AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
+            classes.Add(rest);
+
+            int k = 0;  //k = number of classes
+            //For Discrete Annotations find number of classes, todo, find number of classes on free annotations.
+            if (annolists[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            {
+                k = classes.Count;
+            }
+
+            int N = annolists[0].Count; //Number of Subjects, here Number of Labels.
+
+            double[] pj = new double[k];
+            double[] Pi = new double[N];
+
+            int dim = n * N;
+
+            //add  and initalize matrix
+            int[,] matrix = new int[N, k];
+
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = 0; j < k; j++)
+                {
+                    matrix[i, j] = 0;
+                }
+            }
+
+            //fill the matrix
+
+            foreach (AnnoList al in annolists)
+            {
+                int count = 0;
+                foreach (AnnoListItem ali in al)
+                {
+                    for (int i = 0; i < classes.Count; i++)
+                    {
+                        if (ali.Label == classes[i].Name)
+                        {
+                            matrix[count, i] = matrix[count, i] + 1;
+                        }
+                    }
+
+                    count++;
+                }
+            }
+
+            //calculate pj
+            for (int j = 0; j < k; j++)
+            {
+                for (int i = 0; i < N; i++)
+                {
+                    pj[j] = pj[j] + matrix[i, j];
+                }
+
+                pj[j] = pj[j] / dim;
+            }
+
+            //Calculate Pi
+
+            for (int i = 0; i < N; i++)
+            {
+                double sum = 0;
+                for (int j = 0; j < k; j++)
+                {
+                    sum = sum + Math.Pow(matrix[i, j], 2.0);
+                }
+
+                sum = sum - n;
+
+                Pi[i] = (1.0 / (n * (n - 1.0))) * (sum);
+            }
+
+            //calculate Pd
+            double Pd = 0;
+
+            for (int i = 0; i < N; i++)
+            {
+                Pd = Pd + Pi[i];
+            }
+
+            Pd = Pd / N;
+
+            double Pe = 0;
+
+            for (int i = 0; i < k; i++)
+            {
+                Pe = Pe + Math.Pow(pj[i], 2.0);
+            }
+
+            double fleiss_kappa = 0.0;
+
+            fleiss_kappa = (Pd - Pe) / (1.0 - Pe);
+
+            return fleiss_kappa;
+        }
+
+      
         private void CalculateMedian_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
@@ -405,7 +558,6 @@ namespace ssi
 
             //todo do something
         }
-
 
         private void RolesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -415,13 +567,32 @@ namespace ssi
         private void RMS_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
-       
+
             rms = rootMeanSquare();
         }
 
         private void CalculateRMSE_Click(object sender, RoutedEventArgs e)
         {
             RMSE();
+        }
+
+        private void CalculateKappa_Click(object sender, RoutedEventArgs e)
+        {
+            string restclass = "Rest";
+            List<AnnoList> convertedlists = convertAnnoListstoMatrix(restclass);
+            double fleisskappa = FleissKappa(convertedlists, restclass);
+
+            //Landis and Koch (1977)
+            string interpretation = "";
+            if (fleisskappa < 0) interpretation = "Poor agreement";
+            else if (fleisskappa >= 0.01 && fleisskappa <= 0.20) interpretation = "Slight agreement";
+            else if (fleisskappa >= 0.21 && fleisskappa <= 0.40) interpretation = "Fair agreement";
+            else if (fleisskappa >= 0.41 && fleisskappa <= 0.60) interpretation = "Moderate agreement";
+            else if (fleisskappa >= 0.61 && fleisskappa <= 0.80) interpretation = "Substantial agreement";
+            else if (fleisskappa >= 0.81 && fleisskappa < 1.00) interpretation = "Almost perfect agreement";
+            else if (fleisskappa == 1.0) interpretation = "Perfect agreement";
+
+            MessageBox.Show("Fleiss Kappa: " + fleisskappa + ": " + interpretation);
         }
     }
 }
