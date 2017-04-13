@@ -428,7 +428,7 @@ namespace ssi
                 {
                     if (list.Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                     {
-                        if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                        if (list.Scheme.Type != AnnoScheme.TYPE.SEGMENTATION)
                         {
                             StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.Default);
                             //List<string> lines = new List<string>();
@@ -520,48 +520,64 @@ namespace ssi
                                     
                                 }
                             }
-                            //sr.Close();
-                            lines.Clear();
+                            sr.Close();
+                            //lines.Clear();
                         }
                         else
                         {
-                            SegmentationList segments = new SegmentationList();
-                            int j = 0;
-                            int width = list.Scheme.WidthAndHeight[0];
-                            int height = list.Scheme.WidthAndHeight[1];
-                            segments.Add(new SegmentationListItem(width, height, "Value " + (j).ToString(), 1.0));
-                            for (j = 1; j < 256; ++j)
+                            StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.Default);
+                            List<string> lines = new List<string>();
+                            string cLine = null;
+                            while ((cLine = sr.ReadLine()) != null)
                             {
-                                segments.Add(new SegmentationListItem(0, 0, "Value " + (j).ToString(), 1.0));
+                                lines.Add(cLine);
                             }
-
-                            int[,] mask = new int[width, height];
-
-                            string md = data[1];
-
-                            md = md.Substring(1, md.Length - 2);
-                            string[] maskData = md.Split(':');
-
-                            int mdIndex = 0;
-
-                            for (int y = 0; y < height; ++y)
+                            sr.Close();
+                            double start = 0.0;
+                            SegmentationList segments = null;
+                            int width = 0;
+                            int height = 0;
+                            int[,] mask = null;
+                            int y = 0;
+                            foreach (string line in lines)
                             {
-                                for (int x = 0; x < width; ++x)
-                                {
-                                    Console.WriteLine(maskData.Length.ToString() + ' ' + mdIndex.ToString());
-                                    int m = int.Parse(maskData[mdIndex++]);
-                                    if (m > 255) m = 255;
-                                    mask[x, y] = m;
 
+                                if (line.StartsWith("Frame"))
+                                {
+                                    y = 0;
+                                    segments = new SegmentationList();
+                                    width = list.Scheme.WidthAndHeight[0];
+                                    height = list.Scheme.WidthAndHeight[1];
+                                    segments.Add(new SegmentationListItem(width, height, "Value 0", 1.0));
+                                    for (int j = 1; j < 256; ++j)
+                                    {
+                                        segments.Add(new SegmentationListItem(0, 0, "Value " + (j).ToString(), 1.0));
+                                    }
+                                    mask = segments[0].getMask();
+                                    width = segments[0].getWidth();
+                                    height = segments[0].getHeight();
+                                }
+                                else if (line.StartsWith(";"))
+                                {
+                                    segments[0].setMask(mask);
+                                    string[] fl = line.Split(';');
+                                    string frameLabel = fl[1];
+                                    AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, 1, true, null, segments);
+                                    list.Add(ali);
+                                    start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
+                                }
+                                else
+                                {
+                                    string[] data = line.Split(':');
+
+                                    for (int x = 0; x < width; ++x)
+                                    {
+                                        mask[x, y] = int.Parse(data[x]);
+                                    }
+                                    ++y;
                                 }
                             }
-
-                            segments[0].setMask(mask);
-
-                            string frameLabel = data[0];
-                            AnnoListItem ali = new AnnoListItem(start, (1000.0 / list.Scheme.SampleRate) / 1000.0, frameLabel, "", list.Scheme.MinOrBackColor, 1, true, null, segments);
-                            list.Add(ali);
-                            start = start + (1000.0 / list.Scheme.SampleRate) / 1000.0;
+                            lines.Clear();
                         }
                     }
                     else if (list.Source.File.Type == AnnoSource.FileSource.TYPE.BINARY)

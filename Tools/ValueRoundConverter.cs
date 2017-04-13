@@ -8,7 +8,7 @@ namespace ssi
     internal class ValueRoundConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {           
+        {
             double Value = (double)value;
             return Math.Round(Value, 2);
         }

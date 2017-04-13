@@ -12,6 +12,18 @@ namespace ssi
         private string label;
         private double confidence;
 
+        public double XCoord
+        {
+            get { return -1; }
+            set { }
+        }
+
+        public double YCoord
+        {
+            get { return -1; }
+            set { }
+        }
+
         public int[,] getMask()
         {
             return mask;
@@ -20,17 +32,18 @@ namespace ssi
         public void createMask(int width, int height)
         {
             mask = new int[width, height];
-            Random rnd = new Random();
-            
-            for (int y = 0; y < getHeight(); ++y)
+            //Random rnd = new Random();
+            //int inc = 1;
+            for (int x = 0; x < width; ++x)
             {
-                int data = 0;
-                for (int x = 0; x < getWidth(); ++x)
+                //int data = 0;
+                for (int y = 0; y < height; ++y)
                 {
-                    //mask[x, y] = rnd.Next(0, 255);
-                    //mask[x, y] = 0;
-                    mask[x, y] = data;
-                    data = (data + 1 > 255) ? 0 : ++data;
+                    mask[x, y] = 0;
+                    //mask[x, y] = data;
+                    //data += inc;
+                    //if (data == 255) inc = -1;
+                    //if (data == 0) inc = 1;
                 }
             }
             OnPropertyChanged("Mask");

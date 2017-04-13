@@ -332,6 +332,7 @@ namespace ssi
             
             updateControl();
             control.timeLineControl.rangeSlider.Update();
+            geometricOverlayUpdate(0);
         }
 
         private void updatePositionLabels(double time)

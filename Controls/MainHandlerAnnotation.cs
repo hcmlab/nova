@@ -67,6 +67,9 @@ namespace ssi
                         clearAnnoInfo();
                         updateNavigator();
                     }
+                    clearGeometricList();
+                    geometricOverlayUpdate(0);
+
                 }
             }
         }
