@@ -329,14 +329,16 @@ namespace ssi
                 CalculateMedian.IsEnabled = false;
                 CalculateRMS.IsEnabled = false;
                 CalculateRMSE.IsEnabled = false;
-                CalculateKappa.IsEnabled = true;
+                CalculateFleissKappa.IsEnabled = true;
+                CalculateCohenKappa.IsEnabled = true;
             }
             else
             {
                 CalculateMedian.IsEnabled = true;
                 CalculateRMS.IsEnabled = true;
                 CalculateRMSE.IsEnabled = true;
-                CalculateKappa.IsEnabled = false;
+                CalculateFleissKappa.IsEnabled = false;
+                CalculateCohenKappa.IsEnabled = false;
             }
         }
 
@@ -446,7 +448,7 @@ namespace ssi
         }
 
 
-        public double FleissKappa(List<AnnoList> annolists, string restclass)
+        private double FleissKappa(List<AnnoList> annolists, string restclass)
         {
 
             int n = annolists.Count;   // n = number of raters, here number of annolists
@@ -550,7 +552,114 @@ namespace ssi
             return fleiss_kappa;
         }
 
-      
+        public double CohensKappa(List<AnnoList> annolists, string restclass)
+        {
+
+            int n = annolists.Count;   // n = number of raters, here number of annolists
+
+            List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
+            //add the restclass we introduced in last step.
+            AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
+            classes.Add(rest);
+
+            int k = 0;  //k = number of classes
+            //For Discrete Annotations find number of classes, todo, find number of classes on free annotations.
+            if (annolists[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            {
+                k = classes.Count;
+            }
+
+            int N = annolists[0].Count; //Number of Subjects, here Number of Labels.
+
+            double[] pj = new double[k];
+            double[] Pi = new double[N];
+
+            int dim = n * N;
+
+            //add  and initalize matrix
+            int[,] matrix = new int[N, k];
+
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = 0; j < k; j++)
+                {
+                    matrix[i, j] = 0;
+                }
+            }
+
+            //fill the matrix
+
+            foreach (AnnoList al in annolists)
+            {
+                int count = 0;
+                foreach (AnnoListItem ali in al)
+                {
+                    for (int i = 0; i < classes.Count; i++)
+                    {
+                        if (ali.Label == classes[i].Name)
+                        {
+                            matrix[count, i] = matrix[count, i] + 1;
+                        }
+                    }
+
+                    count++;
+                }
+            }
+
+            //calculate pj
+            for (int j = 0; j < k; j++)
+            {
+                for (int i = 0; i < N; i++)
+                {
+                    pj[j] = pj[j] + matrix[i, j];
+                }
+
+                pj[j] = pj[j] / dim;
+            }
+
+            //here it differs from fleiss' kappa
+
+
+            //Calculate Pi
+
+            for (int i = 0; i < N; i++)
+            {
+                double sum = 0;
+                for (int j = 0; j < k; j++)
+                {
+                    sum = sum + (Math.Pow(matrix[i, j], 2.0) - matrix[i, j]);
+                }
+
+
+                Pi[i] = (sum / ( n * (n - 1.0)));
+            }
+
+            //calculate Pd
+            double Pd = 0;
+
+            for (int i = 0; i < N; i++)
+            {
+                Pd = Pd + Pi[i];
+            }
+
+            Pd = (1.0 / (N * n * (n - 1.0))) * Pd * n * (n-1) ;
+
+
+            double Pc = 0;
+
+            for (int i = 0; i < k; i++)
+            {
+                Pc = Pc + Math.Pow(pj[i], 2.0);
+            }
+
+            double cohens_kappa = 0.0;
+
+            cohens_kappa = (Pd - Pc) / (1.0 - Pc);
+
+            return cohens_kappa;
+        }
+
+
         private void CalculateMedian_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
@@ -576,7 +685,7 @@ namespace ssi
             RMSE();
         }
 
-        private void CalculateKappa_Click(object sender, RoutedEventArgs e)
+        private void CalculateFleissKappa_Click(object sender, RoutedEventArgs e)
         {
             string restclass = "Rest";
             List<AnnoList> convertedlists = convertAnnoListstoMatrix(restclass);
@@ -593,6 +702,25 @@ namespace ssi
             else if (fleisskappa == 1.0) interpretation = "Perfect agreement";
 
             MessageBox.Show("Fleiss Kappa: " + fleisskappa + ": " + interpretation);
+        }
+
+        private void CalculateCohenKappa_Click(object sender, RoutedEventArgs e)
+        {
+            string restclass = "Rest";
+            List<AnnoList> convertedlists = convertAnnoListstoMatrix(restclass);
+            double cohenkappa = CohensKappa(convertedlists, restclass);
+
+            //Landis and Koch (1977)
+            string interpretation = "";
+            if (cohenkappa < 0) interpretation = "Poor agreement";
+            else if (cohenkappa >= 0.01 && cohenkappa <= 0.20) interpretation = "Slight agreement";
+            else if (cohenkappa >= 0.21 && cohenkappa <= 0.40) interpretation = "Fair agreement";
+            else if (cohenkappa >= 0.41 && cohenkappa <= 0.60) interpretation = "Moderate agreement";
+            else if (cohenkappa >= 0.61 && cohenkappa <= 0.80) interpretation = "Substantial agreement";
+            else if (cohenkappa >= 0.81 && cohenkappa < 1.00) interpretation = "Almost perfect agreement";
+            else if (cohenkappa == 1.0) interpretation = "Perfect agreement";
+            
+            MessageBox.Show("Cohen's Kappa: " + cohenkappa + ": " + interpretation);
         }
     }
 }

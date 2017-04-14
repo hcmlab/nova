@@ -75,7 +75,8 @@
         <Label Content="Roles" Margin="364,53,297,343" Visibility="Hidden" />
         <Label Content="Continuous" Margin="509,242,165,143" />
         <Label Content="Discrete" Margin="509,70,165,315" />
-        <Button x:Name="CalculateKappa" ToolTip="Kappa Demo" Content="Fleiss Kappa" Grid.Column="0" Click="CalculateKappa_Click" IsEnabled="False" Margin="509,185,203,212" />
+        <Button x:Name="CalculateFleissKappa"  Visibility="Hidden" ToolTip="Calculate Fleiss' Kappa" Content="Fleiss Kappa" Grid.Column="0" Click="CalculateFleissKappa_Click" IsEnabled="False" Margin="621,181,74,216" RenderTransformOrigin="1.519,0.756" />
+        <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens Kappa" Content="Cohens Kappa" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False" Margin="509,181,184,216" />
         <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="Root Mean Square" Grid.Column="0" Click="RMS_Click" IsEnabled="False" Margin="509,281,165,116" />
         <Label Content="Stats" Margin="524,336,150,49" />
         <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" Margin="524,382,203,15" />
