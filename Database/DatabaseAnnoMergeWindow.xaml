@@ -69,17 +69,19 @@
         <Button Name="Ok"  Content="Ok" Grid.Column="0" Grid.Row="1" Click="Ok_Click"  Height="25"  Margin="621,7,55,8" />
         <Button Name="Cancel" Content="Cancel" Grid.Row="1"  Click="Cancel_Click"   Height="25" RenderTransformOrigin="3.367,0.24" Margin="459,7,224,8" />
 
-        <Button Name="CalculateMedian"  Content="Median" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False" Margin="643,281,87,116" />
+        <Button Name="CalculateMedian"  Content="Mean" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False" Margin="509,288,184,109" />
         <Label Content="AnnoSchemes" Margin="223,53,-223,343" />
         <ListBox x:Name="RolesBox" Visibility="Hidden" Grid.Row="0" Grid.Column="0" Margin="364,79,297,212" SelectionMode="Single" SelectionChanged="RolesBox_SelectionChanged"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
         <Label Content="Roles" Margin="364,53,297,343" Visibility="Hidden" />
-        <Label Content="Continuous" Margin="509,242,165,143" />
+        <Label Content="Continuous" Margin="509,237,165,148" />
         <Label Content="Discrete" Margin="509,70,165,315" />
-        <Button x:Name="CalculateFleissKappa"  Visibility="Hidden" ToolTip="Calculate Fleiss' Kappa" Content="Fleiss Kappa" Grid.Column="0" Click="CalculateFleissKappa_Click" IsEnabled="False" Margin="621,181,74,216" RenderTransformOrigin="1.519,0.756" />
-        <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens Kappa" Content="Cohens Kappa" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False" Margin="509,181,184,216" />
-        <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="Root Mean Square" Grid.Column="0" Click="RMS_Click" IsEnabled="False" Margin="509,281,165,116" />
-        <Label Content="Stats" Margin="524,336,150,49" />
-        <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" Margin="524,382,203,15" />
-        <Label Content="Stats" Margin="509,157,165,228" />
+        <Button x:Name="CalculateFleissKappa"  ToolTip="Calculate Fleiss' κ" Content="Fleiss κ" Grid.Column="0" Click="CalculateFleissKappa_Click" IsEnabled="False" Margin="621,181,74,216" RenderTransformOrigin="1.519,0.756" />
+        <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens κ" Content="Cohens κ" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False" Margin="509,181,184,216" />
+        <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="RMS" Grid.Column="0" Click="RMS_Click" IsEnabled="False" Margin="621,288,74,109" />
+        <Label Content="Stats" Margin="509,327,165,58" />
+        <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error. Calculates the error between two annotations" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" Margin="621,360,74,37" RenderTransformOrigin="1.85,-0.882" />
+        <Button x:Name="CalculateCronbach" ToolTip="Cronbachs α" Content="Cronbachs α" Grid.Column="0" Click="CalculateCronbach_Click" IsEnabled="False" Margin="509,360,184,37" RenderTransformOrigin="2.198,0.605" />
+        <Label Content="Stats" Margin="509,146,165,250" />
+        <Button x:Name="CalculateMergeDiscrete"  Content="Merge" Grid.Column="0" Click="CalculateMergeDiscrete_Click" IsEnabled="False" Margin="509,94,184,303" />
     </Grid>
 </Window>

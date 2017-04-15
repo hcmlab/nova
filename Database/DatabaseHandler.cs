@@ -376,7 +376,7 @@ namespace ssi
                 }
             }
 
-            else if (!(originalAnnotator == "RootMeanSquare" || originalAnnotator == "Median"))
+            else if (!(originalAnnotator == "RootMeanSquare" || originalAnnotator == "Mean" || originalAnnotator == "Merge"))
             {
                 try
                 {
