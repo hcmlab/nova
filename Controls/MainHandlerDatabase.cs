@@ -352,7 +352,8 @@ namespace ssi
             { 
 
                 AnnoList rms = window.RMS();
-                AnnoList median = window.Median();
+                AnnoList median = window.Mean();
+                AnnoList merge = window.Merge();
                 if (rms != null)
                 {
                     DatabaseHandler.StoreToDatabase(rms);
@@ -360,6 +361,11 @@ namespace ssi
                 if (median != null)
                 {
                     DatabaseHandler.StoreToDatabase(median);
+                }
+
+                if (merge != null)
+                {
+                    DatabaseHandler.StoreToDatabase(merge);
                 }
 
             }
