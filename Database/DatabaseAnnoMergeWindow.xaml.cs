@@ -479,9 +479,10 @@ namespace ssi
                 {
                     vec[j] = al[j][i].Label;
 
-                          maxRepeated = vec.GroupBy(s => s)
-                         .OrderByDescending(s => s.Count())
-                         .First().Key;
+                    //todo.. some more advanced logic
+
+
+                    maxRepeated = vec.GroupBy(s => s).OrderByDescending(s => s.Count()) .First().Key;
 
                     var groups = vec.GroupBy(v => v);
                     foreach (var group in groups)
@@ -505,7 +506,6 @@ namespace ssi
             result.Scheme = al[0].Scheme;
             result.Meta = al[0].Meta;
             result.Source = al[0].Source;
-           // result.Clear();
             result.Meta.Annotator = "Merge";
             result.Meta.AnnotatorFullName = "Merge";
 
@@ -1042,14 +1042,14 @@ namespace ssi
             //Landis and Koch (1977)
             string interpretation = "";
             if (fleisskappa < 0) interpretation = "Poor agreement";
-            else if (fleisskappa >= 0.01 && fleisskappa <= 0.20) interpretation = "Slight agreement";
-            else if (fleisskappa >= 0.21 && fleisskappa <= 0.40) interpretation = "Fair agreement";
-            else if (fleisskappa >= 0.41 && fleisskappa <= 0.60) interpretation = "Moderate agreement";
-            else if (fleisskappa >= 0.61 && fleisskappa <= 0.80) interpretation = "Substantial agreement";
+            else if (fleisskappa >= 0.01 && fleisskappa < 0.21) interpretation = "Slight agreement";
+            else if (fleisskappa >= 0.21 && fleisskappa < 0.41) interpretation = "Fair agreement";
+            else if (fleisskappa >= 0.41 && fleisskappa < 0.61) interpretation = "Moderate agreement";
+            else if (fleisskappa >= 0.61 && fleisskappa < 0.81) interpretation = "Substantial agreement";
             else if (fleisskappa >= 0.81 && fleisskappa < 1.00) interpretation = "Almost perfect agreement";
             else if (fleisskappa == 1.0) interpretation = "Perfect agreement";
 
-            MessageBox.Show("Fleiss Kappa: " + fleisskappa + ": " + interpretation);
+            MessageBox.Show("Fleiss Kappa: " + fleisskappa.ToString("F3") + ": " + interpretation);
         }
 
         private void CalculateCohenKappa_Click(object sender, RoutedEventArgs e)
@@ -1061,14 +1061,14 @@ namespace ssi
             //Landis and Koch (1977)
             string interpretation = "";
             if (cohenkappa < 0) interpretation = "Poor agreement";
-            else if (cohenkappa >= 0.01 && cohenkappa <= 0.20) interpretation = "Slight agreement";
-            else if (cohenkappa >= 0.21 && cohenkappa <= 0.40) interpretation = "Fair agreement";
-            else if (cohenkappa >= 0.41 && cohenkappa <= 0.60) interpretation = "Moderate agreement";
-            else if (cohenkappa >= 0.61 && cohenkappa <= 0.80) interpretation = "Substantial agreement";
+            else if (cohenkappa >= 0.01 && cohenkappa < 0.21) interpretation = "Slight agreement";
+            else if (cohenkappa >= 0.21 && cohenkappa < 0.41) interpretation = "Fair agreement";
+            else if (cohenkappa >= 0.41 && cohenkappa < 0.61) interpretation = "Moderate agreement";
+            else if (cohenkappa >= 0.61 && cohenkappa < 0.81) interpretation = "Substantial agreement";
             else if (cohenkappa >= 0.81 && cohenkappa < 1.00) interpretation = "Almost perfect agreement";
             else if (cohenkappa == 1.0) interpretation = "Perfect agreement";
 
-            MessageBox.Show("Cohen's Kappa: " + cohenkappa + ": " + interpretation);
+            MessageBox.Show("Cohen's Kappa: " + cohenkappa.ToString("F3") + ": " + interpretation);
         }
 
         private void CalculateCronbach_Click(object sender, RoutedEventArgs e)
@@ -1083,13 +1083,13 @@ namespace ssi
 
             string interpretation = "";
             if (cronbachalpha <= 0.5) interpretation = "Unacceptable agreement";
-            else if (cronbachalpha >= 0.51 && cronbachalpha <= 0.6) interpretation = "Poor agreement";
-            else if (cronbachalpha >= 0.61 && cronbachalpha <= 0.70) interpretation = "Questionable agreement";
-            else if (cronbachalpha >= 0.71 && cronbachalpha <= 0.80) interpretation = "Acceptable agreement";
+            else if (cronbachalpha >= 0.51 && cronbachalpha < 0.61) interpretation = "Poor agreement";
+            else if (cronbachalpha >= 0.61 && cronbachalpha < 0.71) interpretation = "Questionable agreement";
+            else if (cronbachalpha >= 0.71 && cronbachalpha < 0.81) interpretation = "Acceptable agreement";
             else if (cronbachalpha >= 0.81 && cronbachalpha < 0.90) interpretation = "Good agreement";
             else if (cronbachalpha >= 0.9) interpretation = "Excellent agreement";
 
-            MessageBox.Show("Cronbach's alpha: " + cronbachalpha + ": " + interpretation + "\nThis feature is in beta, no warranty!");
+            MessageBox.Show("Cronbach's alpha: " + cronbachalpha.ToString("F3") + ": " + interpretation + "\nThis feature is in beta, no warranty!");
 
         }
 

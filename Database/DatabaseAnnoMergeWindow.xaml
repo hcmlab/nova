@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Database Connection" Height="500" Width="794.145" Background="LightGray" ResizeMode="NoResize">
+        Title="Annotation Merge and statistics" Height="500" Width="794.145" Background="LightGray" ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
 
@@ -73,7 +73,7 @@
         <Label Content="AnnoSchemes" Margin="223,53,-223,343" />
         <ListBox x:Name="RolesBox" Visibility="Hidden" Grid.Row="0" Grid.Column="0" Margin="364,79,297,212" SelectionMode="Single" SelectionChanged="RolesBox_SelectionChanged"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
         <Label Content="Roles" Margin="364,53,297,343" Visibility="Hidden" />
-        <Label Content="Continuous" Margin="509,237,165,148" />
+        <Label Content="Continuous" Margin="509,248,165,143" />
         <Label Content="Discrete" Margin="509,70,165,315" />
         <Button x:Name="CalculateFleissKappa"  ToolTip="Calculate Fleiss' κ" Content="Fleiss κ" Grid.Column="0" Click="CalculateFleissKappa_Click" IsEnabled="False" Margin="621,181,74,216" RenderTransformOrigin="1.519,0.756" />
         <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens κ" Content="Cohens κ" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False" Margin="509,181,184,216" />
