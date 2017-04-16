@@ -51,6 +51,10 @@
     <Reference Include="DiffieHellman">
       <HintPath>References\DiffieHellman.dll</HintPath>
     </Reference>
+    <Reference Include="MathNet.Numerics, Version=3.18.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\MathNet.Numerics.dll</HintPath>
+    </Reference>
     <Reference Include="MediaToolkit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\MediaToolkit.dll</HintPath>

@@ -682,9 +682,27 @@ namespace ssi
 
 
 
+        private void DeleteAnnotationbyId(ObjectId id)
+        {
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("_id", id);
+            var result = annotations.Find(filter).ToList();
+            annotations.DeleteOne(filter);
+
+            
+
+        }
+
+
 
         private void DeleteAnnotation_Click(object sender, RoutedEventArgs e)
         {
+
+             // DeleteAnnotationbyId(new ObjectId("58f277d9c215ad0cff335eb7"));
+
+
             if (AnnotationResultBox.SelectedItem != null)
             {
 
@@ -706,13 +724,13 @@ namespace ssi
                     var builder = Builders<BsonDocument>.Filter;
                     var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
 
-                    var result = annotations.Find(filter).Single();
+                    var result = annotations.Find(filter).ToList();
 
 
                     bool islocked = false;
                     try
                     {
-                        islocked = result["isLocked"].AsBoolean;
+                        islocked = result[0]["isLocked"].AsBoolean;
 
                     }
                     catch (Exception ex) { }
