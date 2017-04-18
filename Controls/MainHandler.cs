@@ -269,33 +269,34 @@ namespace ssi
             updateAnnoInfo(AnnoTierStatic.Selected);
         }
 
-        public void clearSession(bool exiting = false, bool saveRequested = false)
+        public bool clearSession()
         {
             tokenSource.Cancel();
             Stop();
 
-            bool anytrackchanged = saveRequested;
-            if (!saveRequested && !exiting)
+            bool anytrackchanged = false;            
+            foreach (AnnoTier track in annoTiers)
             {
-                foreach (AnnoTier track in annoTiers)
-                {
-                    if (track.AnnoList.HasChanged) anytrackchanged = true;
-                }
+                if (track.AnnoList.HasChanged) anytrackchanged = true;
             }
-
+            
             if (annoTiers.Count > 0 && anytrackchanged)
-            {
-                if (!saveRequested)
+            {                
+                MessageBoxResult mbx = MessageBox.Show("There are unsaved changes, save all annotations?", "Question", MessageBoxButton.YesNoCancel);
+                if (mbx == MessageBoxResult.Cancel)
                 {
-                    MessageBoxResult mbx = MessageBox.Show("Save annotations?", "Question", MessageBoxButton.YesNo);
-                    if (mbx == MessageBoxResult.Yes)
-                    {
-                        saveAnnos();
-                    }
+                    return false;
                 }
-                else
+                else if (mbx == MessageBoxResult.Yes)
                 {
-                    saveAnnos();
+                    saveAllAnnos();
+                }
+                else if (mbx == MessageBoxResult.No)
+                {
+                    foreach (AnnoTier track in annoTiers)
+                    {
+                        track.AnnoList.HasChanged = false;
+                    }
                 }
             }
 
@@ -325,6 +326,8 @@ namespace ssi
 
             updateControl();
             control.timeLineControl.rangeSlider.Update();
+
+            return true;
         }
 
         private void updatePositionLabels(double time)
@@ -387,7 +390,7 @@ namespace ssi
 
         private void saveSession_Click(object sender, RoutedEventArgs e)
         {
-            saveAnnos();
+            saveAllAnnos();
         }
 
         private void showSettings_Click(object sender, RoutedEventArgs e)

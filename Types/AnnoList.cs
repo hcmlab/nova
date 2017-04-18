@@ -63,6 +63,11 @@ namespace ssi
         {
             bool saved = false;
 
+            if (!HasChanged)
+            {
+                return true;
+            }
+
             if (Source.HasFile())
             {
                 if (saveToFile(Source.File.Path))

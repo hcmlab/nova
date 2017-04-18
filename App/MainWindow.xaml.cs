@@ -101,63 +101,66 @@ namespace ssi
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            bool anytrackchanged = false;
-            foreach (AnnoTier track in viewh.AnnoTiers)
-            {
-                if (track.AnnoList.HasChanged) anytrackchanged = true;
-            }
+            //bool anytrackchanged = false;
+            //foreach (AnnoTier track in viewh.AnnoTiers)
+            //{
+            //    if (track.AnnoList.HasChanged) anytrackchanged = true;
+            //}
 
-            QuestionWindow.Input input;
-            if (anytrackchanged)
-            {
-                input = new QuestionWindow.Input() { Question = "Save changes before closing the application?", YesButton = "Save", NoButton = "Discard", CancelButton = "Cancel" };
-                QuestionWindow dialog = new QuestionWindow(input);
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dialog.ShowDialog();
-                if (dialog.DialogResult == true)
-                {
-                    if (dialog.Result == 0)
-                    {
-                        viewh.clearSession(true, false);
-                    }
-                    else if (dialog.Result == 1)
-                    {
-                        viewh.clearSession(true, true);
-                    }
-                    else if (dialog.Result == 2)
-                    {
-                        e.Cancel = true;
-                    }
-                }
-                else
-                {
-                    e.Cancel = true;
-                }
-            }
-            else
-            {
-                input = new QuestionWindow.Input() { Question = "Close the application?", YesButton = "Yes", NoButton = "", CancelButton = "Cancel" };
-                QuestionWindow dialog = new QuestionWindow(input);
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dialog.ShowDialog();
-                if (dialog.DialogResult == true)
-                {
-                    if (dialog.Result == 1)
-                    {
-                        viewh.clearSession(true, false);
-                    }
-                    else if (dialog.Result == 2)
-                    {
-                        e.Cancel = true;
-                    }
-                }
-                else
-                {
-                    e.Cancel = true;
-                }
-            }
+            //QuestionWindow.Input input;
+            //if (anytrackchanged)
+            //{
+            //    input = new QuestionWindow.Input() { Question = "Save changes before closing the application?", YesButton = "Save", NoButton = "Discard", CancelButton = "Cancel" };
+            //    QuestionWindow dialog = new QuestionWindow(input);
+            //    dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //    dialog.ShowDialog();
+            //    if (dialog.DialogResult == true)
+            //    {
+            //        if (dialog.Result == 0)
+            //        {
+            //            viewh.clearSession(true, false);
+            //        }
+            //        else if (dialog.Result == 1)
+            //        {
+            //            viewh.clearSession(true, true);
+            //        }
+            //        else if (dialog.Result == 2)
+            //        {
+            //            e.Cancel = true;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        e.Cancel = true;
+            //    }
+            //}
+            //else
+            //{
+            //    input = new QuestionWindow.Input() { Question = "Close the application?", YesButton = "Yes", NoButton = "", CancelButton = "Cancel" };
+            //    QuestionWindow dialog = new QuestionWindow(input);
+            //    dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //    dialog.ShowDialog();
+            //    if (dialog.DialogResult == true)
+            //    {
+            //        if (dialog.Result == 1)
+            //        {
+            //            viewh.clearSession(true, false);
+            //        }
+            //        else if (dialog.Result == 2)
+            //        {
+            //            e.Cancel = true;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        e.Cancel = true;
+            //    }
+            //}
 
-            
+            if (!viewh.clearSession())
+            {
+                e.Cancel = true;
+            }
             
         }
     }
