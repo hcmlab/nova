@@ -324,6 +324,8 @@ namespace ssi
                     { }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                     { }
+
+                    anno.HasChanged = false;
                 };
             }
             selectedTier = this;

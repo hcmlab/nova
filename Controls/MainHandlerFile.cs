@@ -469,29 +469,17 @@ namespace ssi
             }
         }
 
-        private void saveAnnos()
+        private void saveAllAnnos()
         {
-            bool anyTierChanged = false;
             foreach (AnnoTier tier in annoTiers)
             {
-                if (tier.AnnoList.HasChanged) anyTierChanged = true;
-            }
-
-            if (annoTiers.Count > 0 && anyTierChanged)
-            {
-                foreach (AnnoTier tier in annoTiers)
-                {
-                    if (tier.AnnoList.HasChanged)
-                    {
-                        tier.AnnoList.Save();
-                    }
-                }
+                tier.AnnoList.Save();
             }
         }
 
         private void saveProject()
         {
-            saveAnnos();
+            saveAllAnnos();
 
             string firstmediadir = "";
             if (mediaList.Count > 0) firstmediadir = mediaList[0].GetDirectory();
