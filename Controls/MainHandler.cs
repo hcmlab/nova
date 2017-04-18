@@ -1,26 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
-using System.Xml;
 
 namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.6.9";
+        public static string BuildVersion = "0.9.9.7.0";
 
         private static Timeline timeline = null;
 
@@ -49,7 +39,7 @@ namespace ssi
         {
             get { return timeline; }
         }
-        
+
         public Cursor signalCursor = null;
         public Cursor annoCursor = null;
 
@@ -60,10 +50,10 @@ namespace ssi
         private MediaList mediaList = new MediaList();
         private List<MediaBox> mediaBoxes = new List<MediaBox>();
 
-        private bool playIsPlaying = false;        
+        private bool playIsPlaying = false;
         private double playSampleRate = Defaults.DefaultSampleRate;
         private int playLastTick = 0;
-        DispatcherTimer playTimer = null;
+        private DispatcherTimer playTimer = null;
 
         private bool isMouseButtonDown = false;
         private bool isKeyDown = false;
@@ -71,7 +61,7 @@ namespace ssi
         public bool databaseIsLoaded = false;
 
         public List<DatabaseMediaInfo> loadedDBmedia = null;
-       
+
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         public AnnoTierSegment temp_segment;
 
@@ -119,7 +109,7 @@ namespace ssi
             // Shadow box
 
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
-            
+
             // Media
 
             control.mediaStatusBar.Background = Defaults.Brushes.Highlight;
@@ -190,8 +180,8 @@ namespace ssi
             control.convertAnnoContinuousToDiscreteMenu.Click += exportAnnoContinuousToDiscrete_Click;
             control.convertAnnoToSignalMenu.Click += exportAnnoToSignal_Click;
             control.exportAnnoDiscreteToContinuouMenu.Click += exportSignalToContinuous_Click;
-            control.exportAnnoToFrameWiseMenu.Click += exportAnnoToFrameWiseMenu_Click;                           
-                  
+            control.exportAnnoToFrameWiseMenu.Click += exportAnnoToFrameWiseMenu_Click;
+
             control.databaseSaveSessionMenu.Click += databaseSaveSession_Click;
             control.databaseSaveSessionAndMarkAsFinishedMenu.Click += databaseSaveSessionAndMarkAsFinished_Click;
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
@@ -211,7 +201,7 @@ namespace ssi
             control.navigator.playButton.Click += navigatorPlay_Click;
             control.navigator.jumpEndButton.Click += navigatorJumpEnd_Click;
             control.navigator.followAnnoCheckBox.Unchecked += navigatorFollowAnno_Unchecked;
-            control.navigator.correctionModeCheckBox.Click += navigatorCorrectionMode_Click;                  
+            control.navigator.correctionModeCheckBox.Click += navigatorCorrectionMode_Click;
 
             // Timeline
 
@@ -221,7 +211,7 @@ namespace ssi
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += control.timeLineControl.timeTrack.TimeRangeChanged;
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += control.timeLineControl.timeTrackSelection.TimeRangeChanged;
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += Time.TimelineChanged;
-            control.timeLineControl.rangeSlider.Update();            
+            control.timeLineControl.rangeSlider.Update();
 
             // Mouse
 
@@ -259,7 +249,7 @@ namespace ssi
             }
 
             // Clear
-            
+
             clearSignalInfo();
             clearAnnoInfo();
             clearMediaBox();
@@ -276,22 +266,22 @@ namespace ssi
             updateNavigator();
             updateSignalTrack(SignalTrackStatic.Selected);
             updateMediaBox(MediaBoxStatic.Selected);
-            updateAnnoInfo(AnnoTierStatic.Selected);            
+            updateAnnoInfo(AnnoTierStatic.Selected);
         }
 
         public bool clearSession()
         {
-            tokenSource.Cancel();            
+            tokenSource.Cancel();
             Stop();
 
-            bool anytrackchanged = false;            
+            bool anytrackchanged = false;
             foreach (AnnoTier track in annoTiers)
             {
                 if (track.AnnoList.HasChanged) anytrackchanged = true;
             }
-            
+
             if (annoTiers.Count > 0 && anytrackchanged)
-            {                
+            {
                 MessageBoxResult mbx = MessageBox.Show("There are unsaved changes, save all annotations?", "Question", MessageBoxButton.YesNoCancel);
                 if (mbx == MessageBoxResult.Cancel)
                 {
@@ -309,10 +299,10 @@ namespace ssi
                     }
                 }
             }
-            
+
             DatabaseLoaded = false;
-            if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);         
-                        
+            if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
+
             control.geometricListControl.Visibility = Visibility.Collapsed;
 
             while (mediaBoxes.Count > 0)
@@ -424,6 +414,5 @@ namespace ssi
                 Properties.Settings.Default.Save();
             }
         }
-
     }
 }
