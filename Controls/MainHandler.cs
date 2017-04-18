@@ -10,7 +10,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.6.9";
+        public static string BuildVersion = "0.9.9.7.0";
 
         private static Timeline timeline = null;
 
@@ -274,14 +274,14 @@ namespace ssi
             tokenSource.Cancel();
             Stop();
 
-            bool anytrackchanged = false;            
+            bool anytrackchanged = false;
             foreach (AnnoTier track in annoTiers)
             {
                 if (track.AnnoList.HasChanged) anytrackchanged = true;
             }
-            
+
             if (annoTiers.Count > 0 && anytrackchanged)
-            {                
+            {
                 MessageBoxResult mbx = MessageBox.Show("There are unsaved changes, save all annotations?", "Question", MessageBoxButton.YesNoCancel);
                 if (mbx == MessageBoxResult.Cancel)
                 {
