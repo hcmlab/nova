@@ -1,4 +1,6 @@
-﻿using MongoDB.Bson;
+﻿using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.Statistics;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -6,11 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using MathNet.Numerics;
-using System.Diagnostics;
-using System.Windows.Controls.DataVisualization.Charting;
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.Statistics;
 using System.Windows.Media;
 
 namespace ssi
@@ -264,7 +261,6 @@ namespace ssi
         {
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
-
             AnnoList merge = al[0];
             merge.Meta.Annotator = "RootMeanSquare";
             merge.Meta.AnnotatorFullName = "RootMeanSquare";
@@ -360,8 +356,6 @@ namespace ssi
         {
             if (AnnotationResultBox.SelectedItems.Count == 2)
             {
-
-
                 double sum_sq = 0;
                 double mse;
                 double minerr = double.MaxValue;
@@ -462,13 +456,11 @@ namespace ssi
             return result;
         }
 
-
-
         private AnnoList MergeDiscreteLists(List<AnnoList> al, string restclass = "Rest")
         {
             AnnoList cont = new AnnoList();
             cont.Scheme = al[0].Scheme;
-  
+
             for (int i = 0; i < al[0].Count; i++)
             {
                 string[] vec = new string[al.Count];
@@ -481,26 +473,21 @@ namespace ssi
 
                     //todo.. some more advanced logic
 
-
-                    maxRepeated = vec.GroupBy(s => s).OrderByDescending(s => s.Count()) .First().Key;
+                    maxRepeated = vec.GroupBy(s => s).OrderByDescending(s => s.Count()).First().Key;
 
                     var groups = vec.GroupBy(v => v);
                     foreach (var group in groups)
                     {
-                        if(group.Key == maxRepeated)
+                        if (group.Key == maxRepeated)
                         {
-
-                            conf =  (double)group.Count() / (double)al.Count;
+                            conf = (double)group.Count() / (double)al.Count;
                         }
-
-                    } 
+                    }
                 }
 
-                AnnoListItem ali = new AnnoListItem(al[0][i].Start, al[0][i].Duration, maxRepeated,"", Colors.Black, conf);
+                AnnoListItem ali = new AnnoListItem(al[0][i].Start, al[0][i].Duration, maxRepeated, "", Colors.Black, conf);
                 cont.Add(ali);
             }
-
-
 
             AnnoList result = new AnnoList();
             result.Scheme = al[0].Scheme;
@@ -509,39 +496,32 @@ namespace ssi
             result.Meta.Annotator = "Merge";
             result.Meta.AnnotatorFullName = "Merge";
 
-            for  (int i=0; i< cont.Count-1;i++)
+            for (int i = 0; i < cont.Count - 1; i++)
             {
                 double start = cont[i].Start;
                 double conf = 1.0;
 
-                while(cont[i].Label == cont[i+1].Label)
+                while (cont[i].Label == cont[i + 1].Label)
                 {
                     if (cont[i].Confidence < conf) conf = cont[i].Confidence;
 
                     i++;
                     if (i == cont.Count - 1) break;
-                    
-
                 }
                 double dur = cont[i].Start + cont[i].Duration - start; ;
 
                 AnnoListItem ali = new AnnoListItem(start, dur, cont[i].Label, "", Colors.Black, conf);
 
                 if (ali.Label != restclass) result.Add(ali);
-
-
             }
             MessageBox.Show("Annotations have been merged");
             Ok.IsEnabled = true;
 
             return result;
-
         }
-
 
         private double FleissKappa(List<AnnoList> annolists, string restclass)
         {
-
             int n = annolists.Count;   // n = number of raters, here number of annolists
 
             List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
@@ -645,7 +625,6 @@ namespace ssi
 
         public double CohensKappa(List<AnnoList> annolists, string restclass)
         {
-
             int n = annolists.Count;   // n = number of raters, here number of annolists
 
             List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
@@ -710,7 +689,6 @@ namespace ssi
 
             //here it differs from fleiss' kappa
 
-
             //Calculate Pi
 
             for (int i = 0; i < N; i++)
@@ -720,7 +698,6 @@ namespace ssi
                 {
                     sum = sum + (Math.Pow(matrix[i, j], 2.0) - matrix[i, j]);
                 }
-
 
                 Pi[i] = (sum / (n * (n - 1.0)));
             }
@@ -734,7 +711,6 @@ namespace ssi
             }
 
             Pd = (1.0 / (N * n * (n - 1.0))) * Pd * n * (n - 1);
-
 
             double Pc = 0;
 
@@ -750,12 +726,8 @@ namespace ssi
             return cohens_kappa;
         }
 
-
-
-
         public double Krippendorffsalpha(List<AnnoList> annolists, string restclass)
         {
-
             int n = annolists.Count;   // n = number of raters, here number of annolists
 
             List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
@@ -779,7 +751,6 @@ namespace ssi
 
             double[,] matrix = new double[n, N];
 
-
             for (int i = 0; i < n; i++)
             {
                 for (int j = 0; j < N; j++)
@@ -789,21 +760,14 @@ namespace ssi
                 }
             }
 
-
-
             double[,] coincidencematrix = new double[N, N];
 
             for (int i = 0; i < n; i++)
             {
                 for (int j = 0; j < N; j++)
                 {
-
-
                 }
-
             }
-
-
 
             ////add  and initalize matrix
             //int[,] matrix = new int[N, k];
@@ -835,20 +799,16 @@ namespace ssi
             //    }
             //}
 
-
             return 0;
         }
 
-
         private double Cronbachsalpha(List<AnnoList> annolists, int decimals)
         {
-
             int n = annolists.Count;   // n = number of raters, here number of annolists
             int N = annolists[0].Count; //  Number of Values.
 
             double[] varj = new double[n];
             double[] vari = new double[N];
-
 
             double[][] data = new double[n][];
 
@@ -878,19 +838,16 @@ namespace ssi
                 }
             }
 
-
             double factor = (n * (n - 1)) / 2.0;
 
             rvec = (rvec - (double)n) / factor;
-
-
 
             double alpha = (n * rvec) / (1 + (n - 1) * rvec);
             //return PearsonCorrelation(annolists[0], annolists[1]);
             return alpha;
         }
 
-        Matrix<double> SpearmanCorrelationMatrix(double[][] data)
+        private Matrix<double> SpearmanCorrelationMatrix(double[][] data)
         {
             var m = Matrix<double>.Build.DenseIdentity(data.Length);
             for (int i = 0; i < data.Length; i++)
@@ -902,8 +859,6 @@ namespace ssi
                 }
             return m;
         }
-
-
 
         private double PearsonCorrelation(IEnumerable<Double> xs, IEnumerable<Double> ys)
         {
@@ -946,14 +901,10 @@ namespace ssi
             return cov / sigmaX / sigmaY;
         }
 
-
-
-
         private double Variance(double[] nums)
         {
             if (nums.Length > 1)
             {
-
                 double avg = Average(nums);
 
                 double sumofSquares = 0.0;
@@ -980,7 +931,6 @@ namespace ssi
 
         private double Average(double[] nums)
         {
-
             double sum = 0;
 
             if (nums.Length > 1)
@@ -998,11 +948,6 @@ namespace ssi
         {
             return Math.Sqrt(variance);
         }
-
-
-
-
-
 
         private void CalculateMedian_Click(object sender, RoutedEventArgs e)
         {
@@ -1073,8 +1018,6 @@ namespace ssi
 
         private void CalculateCronbach_Click(object sender, RoutedEventArgs e)
         {
-
-
             List<AnnoList> annolists = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
 
             double cronbachalpha = Cronbachsalpha(annolists, 10);
@@ -1090,7 +1033,6 @@ namespace ssi
             else if (cronbachalpha >= 0.9) interpretation = "Excellent agreement";
 
             MessageBox.Show("Cronbach's alpha: " + cronbachalpha.ToString("F3") + ": " + interpretation + "\nThis feature is in beta, no warranty!");
-
         }
 
         private void CalculateMergeDiscrete_Click(object sender, RoutedEventArgs e)
@@ -1101,6 +1043,4 @@ namespace ssi
             merge = MergeDiscreteLists(convertedlists, restclass);
         }
     }
-
-
 }

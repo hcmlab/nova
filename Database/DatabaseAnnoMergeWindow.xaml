@@ -49,7 +49,6 @@
                 <GridView>
                     <GridViewColumn Width="120" Header="Scheme" DisplayMemberBinding="{Binding AnnoScheme}" />
 
-
                     <GridViewColumn Width="60" Header="Role">
                         <GridViewColumn.DisplayMemberBinding>
                             <Binding Path="Role" />
@@ -61,7 +60,6 @@
                         </GridViewColumn.DisplayMemberBinding>
                     </GridViewColumn>
 
-          
                     <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
                 </GridView>
             </ListView.View>
