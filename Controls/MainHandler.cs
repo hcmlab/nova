@@ -323,6 +323,8 @@ namespace ssi
 
             signalCursor.X = 0;
             Time.TotalDuration = 0;
+            Time.SelectionStart = 0;
+            Time.CurrentPlayPosition = 0;
 
             updateControl();
             control.timeLineControl.rangeSlider.Update();
