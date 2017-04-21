@@ -194,7 +194,7 @@
       <DependentUpon>UserInputWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\MessageTools.cs" />
-    <Compile Include="Tools\Timeline.cs" />
+    <Compile Include="Types\Timeline.cs" />
     <Compile Include="Database\DatabaseAdminMainWindow.xaml.cs">
       <DependentUpon>DatabaseAdminMainWindow.xaml</DependentUpon>
     </Compile>
