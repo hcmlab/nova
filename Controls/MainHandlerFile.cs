@@ -462,7 +462,8 @@ namespace ssi
                 string path = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Source.File.Name, ".annotation", "Annotation(*.annotation)|*.annotation", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
                 if (path != null)
                 {
-                    AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;                    
+                    AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;
+                    AnnoTierStatic.Selected.AnnoList.HasChanged = true;
                     AnnoTierStatic.Selected.AnnoList.Save();
                     updateAnnoInfo(AnnoTierStatic.Selected);
                 }
