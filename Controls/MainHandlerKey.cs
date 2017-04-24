@@ -362,7 +362,7 @@ namespace ssi
 
                 if (e.KeyboardDevice.IsKeyDown(Key.R) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0 && AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate != Properties.Settings.Default.DefaultDiscreteSampleRate)
+                    if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0 && AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate != Properties.Settings.Default.DefaultDiscreteSampleRate)
                     {
                         foreach (AnnoListItem ali in AnnoTierStatic.Selected.AnnoList)
                         {
