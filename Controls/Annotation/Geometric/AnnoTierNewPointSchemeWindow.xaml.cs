@@ -19,41 +19,29 @@ namespace ssi
     /// </summary>
     public partial class AnnoTierNewPointSchemeWindow : Window
     {
-        AnnoScheme result;
-        public AnnoScheme Result { get { return result; } }
+        private AnnoScheme scheme;
 
-        public class Input
-        {
-            public double SampleRate { get; set; }
-            public int NumPoints { get; set; }
-            public Color Color { get; set; }
-        }
-
-        public AnnoTierNewPointSchemeWindow(Input defaultInput)
+        public AnnoTierNewPointSchemeWindow(ref AnnoScheme scheme)
         {
             InitializeComponent();
 
-            result = new AnnoScheme();
-            result.Type = AnnoScheme.TYPE.POINT;
-            result.SampleRate = defaultInput.SampleRate;
+            this.scheme = scheme;
 
-            result.NumberOfPoints = defaultInput.NumPoints;
-            result.MinOrBackColor = defaultInput.Color;
-
-            nameTextBox.Text = Defaults.Strings.Unkown;
-            srTextBox.Text = defaultInput.SampleRate.ToString();
-            numPointsTextBox.Text = defaultInput.NumPoints.ToString();
-            colorPicker.SelectedColor = defaultInput.Color;
+            nameTextBox.Text = scheme.Name;
+            srTextBox.Text = scheme.SampleRate.ToString();
+            numPointsTextBox.Text = scheme.NumberOfPoints.ToString();
+            colorPicker.SelectedColor = scheme.MaxOrForeColor;
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            result.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
+
+            scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
             double value;
             if (double.TryParse(srTextBox.Text, out value))
             {
-                result.SampleRate = value;
+                scheme.SampleRate = value;
             }
             if (double.TryParse(numPointsTextBox.Text, out value))
             {
@@ -61,10 +49,10 @@ namespace ssi
                 {
                     value = 1;
                 }
-                result.NumberOfPoints = (int)value;
+                scheme.NumberOfPoints = (int)value;
             }
-            result.MinOrBackColor = colorPicker.SelectedColor.Value;
-            result.MaxOrForeColor = colorPicker.SelectedColor.Value;
+            scheme.MinOrBackColor = colorPicker.SelectedColor.Value;
+            scheme.MaxOrForeColor = colorPicker.SelectedColor.Value;
 
             Close();
         }

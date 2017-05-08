@@ -15,15 +15,10 @@
         </Grid.RowDefinitions>
         <Label Name="titlelabel" Grid.Row="0" Content="Title" />
         <ListBox Name="DataBaseResultsBox" Grid.Row="1" Margin="5,0,5,0" SelectionMode="Single"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <DockPanel Grid.Row="2" LastChildFill="True">
+        <DockPanel Grid.Row="2" LastChildFill="True" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal" Margin="5" DockPanel.Dock="Right">
                 <Button Name="Ok" Content="Ok" Width="25" Click="Ok_Click"></Button>
                 <Button Name="Cancel" Margin="5,0,0,0" Content="Cancel" Click="Cancel_Click"></Button>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Name="Add"  Width="25" Content="+" Click="Add_Click"></Button>
-                <Button Name="Delete" Margin="5,0,0,0" Width="25" Content="-" Click="Delete_Click"></Button>
-                <Button Name="Edit" Margin="5,0,0,0" Content="Edit" Click="Edit_Click" Visibility="Hidden"></Button>
             </StackPanel>
         </DockPanel>
     </Grid>

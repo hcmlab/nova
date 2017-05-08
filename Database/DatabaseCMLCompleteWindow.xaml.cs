@@ -57,7 +57,7 @@ namespace ssi
                             int context = 0;
                             if (int.TryParse(ContextTextBox.Text, out context))
                             {
-                                DatabaseHandler.StoreToDatabase(tier.AnnoList, handler.loadedDBmedia, false);
+                                DatabaseHandler.SaveAnnoList(tier.AnnoList, handler.streams, false);
 
                                 double confidence = -1.0;
                                 if (ConfidenceTextBox.IsEnabled)

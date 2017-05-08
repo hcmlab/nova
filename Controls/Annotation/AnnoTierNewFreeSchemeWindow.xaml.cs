@@ -5,26 +5,26 @@ namespace ssi
 {
     public partial class AnnoTierNewFreeSchemeWindow : Window
     {
-        public AnnoScheme Result { get; }
+        private AnnoScheme scheme;
 
-        public AnnoTierNewFreeSchemeWindow(int annotierscount)
+        public AnnoTierNewFreeSchemeWindow(ref AnnoScheme scheme)
         {
             InitializeComponent();
 
-            Result = new AnnoScheme();
+            this.scheme = scheme;
 
-            backgroundColorPicker.SelectedColor = selectColor(annotierscount);
-            labelColorPicker.SelectedColor = Defaults.Colors.Foreground;
-            schemeNameTextBox.Text = Defaults.Strings.Unkown;
+            backgroundColorPicker.SelectedColor = scheme.MinOrBackColor;
+            labelColorPicker.SelectedColor = scheme.MaxOrForeColor;
+            schemeNameTextBox.Text = scheme.Name;                                   
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
 
-            Result.MinOrBackColor = backgroundColorPicker.SelectedColor.Value;
-            Result.MaxOrForeColor = labelColorPicker.SelectedColor.Value;
-            Result.Name = schemeNameTextBox.Text == "" ? Defaults.Strings.Unkown : schemeNameTextBox.Text;
+            scheme.MinOrBackColor = backgroundColorPicker.SelectedColor.Value;
+            scheme.MaxOrForeColor = labelColorPicker.SelectedColor.Value;
+            scheme.Name = schemeNameTextBox.Text == "" ? Defaults.Strings.Unkown : schemeNameTextBox.Text;
 
             Close();
         }
@@ -35,18 +35,5 @@ namespace ssi
             Close();
         }
 
-
-        private Color selectColor(int index)
-        {
-            if (index % 8 == 0) return Colors.Khaki;
-            else if (index % 8 == 1) return Colors.SkyBlue;
-            else if (index % 8 == 2) return Colors.YellowGreen;
-            else if (index % 8 == 3) return Colors.Tomato;
-            else if (index % 8 == 4) return Colors.RosyBrown;
-            else if (index % 8 == 5) return Colors.Goldenrod;
-            else if (index % 8 == 6) return Colors.LightSeaGreen;
-            else if (index % 8 == 7) return Colors.LightGray;
-            else return Colors.White;
-        }
     }
 }

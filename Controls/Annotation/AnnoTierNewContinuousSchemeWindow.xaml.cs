@@ -19,59 +19,43 @@ namespace ssi
     /// </summary>
     public partial class AnnoTierNewContinuousSchemeWindow : Window
     {
-        AnnoScheme result;
-        public AnnoScheme Result { get { return result; } }
+        private AnnoScheme scheme;
 
-        public class Input
-        {
-            public double SampleRate { get; set; }
-            public double MinScore { get; set; }
-            public double MaxScore { get; set; }
-            public Color MinColor { get; set; }
-            public Color MaxColor { get; set; }
-        }
-
-        public AnnoTierNewContinuousSchemeWindow(Input defaultInput)
+        public AnnoTierNewContinuousSchemeWindow(ref AnnoScheme scheme)
         {
             InitializeComponent();
 
-            result = new AnnoScheme();
-            result.Type = AnnoScheme.TYPE.CONTINUOUS;
-            result.SampleRate = defaultInput.SampleRate;
-            result.MaxScore = defaultInput.MaxScore;
-            result.MinScore = defaultInput.MinScore;
-            result.MaxOrForeColor = defaultInput.MaxColor;
-            result.MinOrBackColor = defaultInput.MinColor;
-
-            nameTextBox.Text = Defaults.Strings.Unkown;
-            srTextBox.Text = defaultInput.SampleRate.ToString();
-            minTextBox.Text = defaultInput.MinScore.ToString();
-            maxTextBox.Text = defaultInput.MaxScore.ToString();
-            colorPickerMin.SelectedColor = defaultInput.MinColor;
-            colorPickerMax.SelectedColor = defaultInput.MaxColor;
+            this.scheme = scheme;
+            
+            nameTextBox.Text = scheme.Name;
+            srTextBox.Text = scheme.SampleRate.ToString();
+            minTextBox.Text = scheme.MinScore.ToString();
+            maxTextBox.Text = scheme.MaxScore.ToString();
+            colorPickerMin.SelectedColor = scheme.MinOrBackColor;
+            colorPickerMax.SelectedColor = scheme.MaxOrForeColor;
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
 
-            result.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
+            scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
 
             double value;
             if (double.TryParse(srTextBox.Text, out value))
-            { 
-                result.SampleRate = value;
+            {
+                scheme.SampleRate = value;
             }            
             if (double.TryParse(minTextBox.Text, out value))
             {
-                result.MinScore = value;
+                scheme.MinScore = value;
             }
             if (double.TryParse(maxTextBox.Text, out value))
             {
-                result.MaxScore = value;
+                scheme.MaxScore = value;
             }
-            result.MinOrBackColor = colorPickerMin.SelectedColor.Value;
-            result.MaxOrForeColor = colorPickerMax.SelectedColor.Value;
+            scheme.MinOrBackColor = colorPickerMin.SelectedColor.Value;
+            scheme.MaxOrForeColor = colorPickerMax.SelectedColor.Value;
 
             Close();
         }

@@ -5,57 +5,52 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-           Title="Details for Annotator" Height="364.92" Width="392.938" Background="DarkGray">
+        Title="Annotator" SizeToContent="Height" Width="300" ResizeMode="NoResize">
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Label Content="Existing MongoDB Login:" Margin="10,3,50,293"/>
-       
-        <ComboBox Name="NameCombo"  Margin="10,43,228,255" SelectionChanged="NameCombo_SelectionChanged"></ComboBox>
+        <Label Content="User:" Grid.Row="0" Grid.Column="0" Margin="5"></Label>
+        <ComboBox Name="NameBox" Grid.Row="0" Grid.Column="1" Margin="5"></ComboBox>
 
-        <Label Content="New MongoDB Login:" Margin="228,0,-164,293" Grid.ColumnSpan="2"></Label>
-        <TextBox Name="Namefield" Text="" Margin="218,46,20,252" PreviewKeyDown="Namefield_PreviewKeyDown"></TextBox>
+        <Label Content="Full name:" Grid.Row="1" Grid.Column="0" Margin="5"></Label>
+        <TextBox Name="FullNameField" Grid.Row="1" Grid.Column="1" Margin="5"></TextBox>
 
-        <Label Content="MongoDB Password:" Margin="228,84,-164,219" Grid.ColumnSpan="2"></Label>
-        <PasswordBox Name="PasswordField" Password="" Margin="218,114,20,184"></PasswordBox>
+        <Label Content="Email:" Grid.Row="2" Grid.Column="0" Margin="5"></Label>
+        <TextBox Name="EmailField" Grid.Row="2" Grid.Column="1" Margin="5"></TextBox>
 
-        <Label Content="Full Name (Shown in the Database):" Margin="10,84,0,213" HorizontalAlignment="Left" Width="334"></Label>
-        <TextBox Name="FullNameField" Text="" Margin="10,114,228,188"></TextBox>
-
-        <Label Content="Email:" Margin="10,157,308,143"></Label>
-        <TextBox Name="Emailfield" Text="" Margin="10,196,228,106"></TextBox>
-
-        <Label Content="Expertise:" Margin="10,233,308,66"></Label>
-        <ComboBox Name="ExpertiseBox" Margin="10,268,228,33" > 
+        <Label Content="Expertise:" Grid.Row="3" Grid.Column="0" Margin="5"></Label>
+        <ComboBox Name="ExpertiseBox" Grid.Row="3" Grid.Column="1" Margin="5" SelectedIndex="2"> 
             <ComboBoxItem>0</ComboBoxItem>
             <ComboBoxItem>1</ComboBoxItem>
             <ComboBoxItem>2</ComboBoxItem>
             <ComboBoxItem>3</ComboBoxItem>
             <ComboBoxItem>4</ComboBoxItem>
-            <ComboBoxItem>5</ComboBoxItem>
         </ComboBox>
 
-
-        <Label Content="Role:" Margin="218,160,100,139"></Label>
-        <ComboBox Name="RoleBox" Margin="218,195,20,106" SelectedIndex="1">
+        <Label Content="Role:" Grid.Row="4" Grid.Column="0" Margin="5"></Label>
+        <ComboBox Name="RoleBox" Grid.Row="4" Grid.Column="1" SelectedIndex="1" Margin="5">
             <ComboBoxItem>read</ComboBoxItem>
             <ComboBoxItem>readWrite</ComboBoxItem>
             <ComboBoxItem>dbAdmin</ComboBoxItem>
-            <ComboBoxItem>userAdmin</ComboBoxItem>
-
-
         </ComboBox>
 
-        <Button Content="OK" Margin="295,299,10,10" Click="Button_Click"></Button>
-        <Button Content="Cancel" Margin="210,299,95,10" Click="Button_Click_1"></Button>
+        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+            <Button Content="OK" Click="OkClick" Margin="5"></Button>
+            <Button Content="Cancel" Click="CancelClick" Margin="5"></Button>
+        </StackPanel>
     </Grid>
 </Window>

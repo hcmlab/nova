@@ -29,24 +29,68 @@ namespace ssi
 
         #region DATABASELOGIC
 
-        private void databaseAdd()
-
+        private void databaseConnect()
         {
-            try
+            bool isConnected = DatabaseHandler.Connect();
+
+            if (isConnected)
             {
-                DatabaseAdminMainWindow daw = new DatabaseAdminMainWindow();
-                daw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                daw.ShowDialog();
+                if (!DatabaseHandler.ChangeDatabase(Properties.Settings.Default.DatabaseName))
+                {
+                    Properties.Settings.Default.DatabaseName = null;
+                    Properties.Settings.Default.Save();
+                }                
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Not authorized to add a new Session");
+                MessageTools.Warning("Unable to connect to database, please check your settings");
+                Properties.Settings.Default.DatabaseAutoLogin = false;
+                Properties.Settings.Default.Save();                           
             }
+
+            updateNavigator();
+        }
+
+        private void DatabaseConnectMenu_Click(object sender, RoutedEventArgs e)
+        {
+            showSettings(true);
+        }
+
+        private void databaseManage(Window dialog)
+        {
+            if (DatabaseHandler.IsSession)
+            {
+                MessageBoxResult result = MessageBox.Show("Before editing a database the workspace has to be cleared. Do you want to continue?", "Question", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+                clearWorkspace();
+            }            
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dialog.ShowDialog();
+        }
+
+        private void databaseManageDBs()
+        {           
+            DatabaseAdminManageDBWindow dialog = new DatabaseAdminManageDBWindow();
+            databaseManage(dialog);
+        }
+
+        private void databaseManageUsers()
+        {            
+            DatabaseAdminManageUsersWindow dialog = new DatabaseAdminManageUsersWindow();
+            databaseManage(dialog);
+        }
+        private void databaseManageSessions()
+        {
+            DatabaseAdminManageSessionsWindow dialog = new DatabaseAdminManageSessionsWindow();
+            databaseManage(dialog);
         }
 
         private void databaseStore(bool isfinished = false)
         {
-            if (DatabaseLoaded)
+            if (DatabaseHandler.IsConnected)
             {
                 string message = "";
 
@@ -54,15 +98,20 @@ namespace ssi
 
                 foreach (AnnoTier track in annoTiers)
                 {
-                    if (DatabaseLoaded && (track.AnnoList.HasChanged || isfinished))
+                    if (!(track.AnnoList.HasChanged || isfinished))
+                    {
+                        continue;
+                    }
+
+                    if (track.AnnoList.Source.HasDatabase || track.AnnoList.Source.StoreToDatabase)
                     {
                         try
                         {
-                            string annotator = DatabaseHandler.StoreToDatabase(track.AnnoList, loadedDBmedia, isfinished);
-                            if (annotator != null)
+                   
+                            if (DatabaseHandler.SaveAnnoList(track.AnnoList, streams, isfinished))
                             {
                                 track.AnnoList.HasChanged = false;
-                                if (annotator != null) message += "\r\n" + track.AnnoList.Scheme.Name;
+                                message += "\r\n" + track.AnnoList.Scheme.Name;
                             }
                         }
                         catch (Exception ex)
@@ -96,50 +145,29 @@ namespace ssi
             }
         }
 
-        private void databaseLoad()
+        private void databaseLoadSession()
         {
-            clearSession();
+            clearWorkspace();
 
-            if (loadedDBmedia != null) loadedDBmedia.Clear();
+            if (streams != null) streams.Clear();
             if (filesToDownload != null) filesToDownload.Clear();
 
             System.Collections.IList annotations = null;
-            List<DatabaseMediaInfo> ci = null;
+            List<DatabaseMediaInfo> streamsInfo = null;
 
-            DatabaseAnnoMainWindow dbhw = new DatabaseAnnoMainWindow();
+            DatabaseAnnoMainWindow dialog = new DatabaseAnnoMainWindow();
             try
             {
-                dbhw.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dbhw.ShowDialog();
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dialog.ShowDialog();
 
-                if (dbhw.DialogResult == true)
+                if (dialog.DialogResult == true)
                 {
-                    annotations = dbhw.Annotations();
-                    loadedDBmedia = dbhw.Media();
-                    ci = dbhw.MediaConnectionInfo();
-                    control.databaseSaveSessionMenu.IsEnabled = true;
-                    control.databaseSaveSessionAndMarkAsFinishedMenu.IsEnabled = true;
-                    control.databaseCMLCompleteStepMenu.IsEnabled = true;
-                    control.databaseCMLTransferStepMenu.IsEnabled = true;
-                    control.databaseCMLExtractFeaturesMenu.IsEnabled = true;
-                    control.databaseCMLMergeMenu.IsEnabled = true;
-
-                    //This is just a UI thing. If a user does not have according rights in the mongodb he will not have acess anyway. We just dont want to show the ui here.
-                    if (dbhw.Authlevel() > 2)
-                    {
-                        control.databaseManageMenu.Visibility = Visibility.Visible;
-                        control.databaseCMLTransferStepMenu.Visibility = Visibility.Visible;
-                        control.databaseCMLMergeMenu.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        control.databaseManageMenu.Visibility = Visibility.Collapsed;
-                        control.databaseCMLTransferStepMenu.Visibility = Visibility.Collapsed;
-                        control.databaseCMLMergeMenu.Visibility = Visibility.Collapsed;
-                    }
+                    annotations = dialog.Annotations();
+                    streams = dialog.Streams();
+                    streamsInfo = dialog.StreamsInfo();
+                    updateNavigator();
                 }
-
-                control.databaseSaveSessionMenu.IsEnabled = true;
 
                 if (annotations != null)
                 {
@@ -149,7 +177,7 @@ namespace ssi
                     control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
                     List<AnnoList> annoLists = DatabaseHandler.LoadFromDatabase(annotations, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
-                    control.navigator.Statusbar.Content = "Database Session: " + (Properties.Settings.Default.LastSessionId).Replace('_', '-');
+                    
                     try
                     {
                         if (annoLists != null)
@@ -164,16 +192,16 @@ namespace ssi
 
                             //handle media
 
-                            if (loadedDBmedia.Count > 0)
+                            if (streams.Count > 0)
                             {
-                                for (int i = 0; i < loadedDBmedia.Count; i++)
+                                for (int i = 0; i < streams.Count; i++)
                                 {
-                                    foreach (DatabaseMediaInfo c in ci)
+                                    foreach (DatabaseMediaInfo c in streamsInfo)
 
                                     {
                                         Properties.Settings.Default.DataServerConnectionType = c.connection;
 
-                                        if (c.filename == loadedDBmedia[i].filename.ToString())
+                                        if (c.filename == streams[i].filename.ToString())
 
                                         {
                                             if (c.connection == "sftp")
@@ -181,12 +209,12 @@ namespace ssi
                                                 Properties.Settings.Default.DataServerConnectionType = "sftp";
                                                 SFTPDownloadFiles(c.ip, c.folder, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
                                             }
-                                            else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "false")
+                                            else if (streamsInfo[i].connection == "http" || streamsInfo[i].connection == "https" && streamsInfo[i].requiresauth == "false")
                                             {
                                                 Properties.Settings.Default.DataServerConnectionType = "http";
                                                 httpGet(c.filepath, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, c.filename);
                                             }
-                                            else if (ci[i].connection == "http" || ci[i].connection == "https" && ci[i].requiresauth == "true")
+                                            else if (streamsInfo[i].connection == "http" || streamsInfo[i].connection == "https" && streamsInfo[i].requiresauth == "true")
                                             {
                                                 Properties.Settings.Default.DataServerConnectionType = "http";
                                                 //This has not been tested and probably needs rework.
@@ -197,7 +225,6 @@ namespace ssi
                                 }
                             }
                         }
-                        DatabaseLoaded = true;
                     }
                     catch (TimeoutException e1)
                     {
@@ -207,12 +234,12 @@ namespace ssi
             }
             catch (Exception ex)
             {
-                dbhw.Close();
+                dialog.Close();
                 MessageTools.Error(ex.ToString());
             }
         }
 
-        private void databaseReload(AnnoTier tier)
+        private void reloadAnnoTierFromDatabase(AnnoTier tier)
         {
             Action EmptyDelegate = delegate () { };
             control.ShadowBoxText.Text = "Reloading Annotation";
@@ -220,13 +247,13 @@ namespace ssi
             control.UpdateLayout();
             control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
-            DatabaseAnno s = new DatabaseAnno();
+            DatabaseAnnotion s = new DatabaseAnnotion();
             s.Role = tier.AnnoList.Meta.Role;
             s.AnnoScheme = tier.AnnoList.Scheme.Name;
             s.AnnotatorFullname = tier.AnnoList.Meta.AnnotatorFullName;
             s.Annotator = tier.AnnoList.Meta.Annotator;
 
-            List<DatabaseAnno> list = new List<DatabaseAnno>();
+            List<DatabaseAnnotion> list = new List<DatabaseAnnotion>();
             list.Add(s);
 
             List<AnnoList> annos = DatabaseHandler.LoadFromDatabase(list, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
@@ -255,33 +282,42 @@ namespace ssi
             control.ShadowBox.Visibility = Visibility.Collapsed;
         }
 
-        private void databaseAddNewAnnotation(AnnoScheme.TYPE annoType)
+        private void addNewAnnotationDatabase()
         {
-            AnnoList annoList = new AnnoList();
-            annoList.Scheme.Type = annoType;
-
-            string annoScheme = DatabaseHandler.SelectAnnotationScheme(annoList);
-            if (annoScheme == null)
+            if (Time.TotalDuration > 0)
             {
-                return;
-            }
+                AnnoList annoList = new AnnoList();
 
-            annoList.Meta.Role = DatabaseHandler.LoadRoles(annoList);
-            if (annoList.Meta.Role == null)
+                string annoScheme = DatabaseHandler.SelectScheme();
+                if (annoScheme == null)
+                {
+                    return;
+                }
+
+                annoList.Meta.Role = DatabaseHandler.SelectRole();
+                if (annoList.Meta.Role == null)
+                {
+                    return;
+                }
+
+                annoList.Scheme = DatabaseHandler.GetAnnotationScheme(annoScheme);
+                annoList.Scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
+
+                IMongoDatabase database = DatabaseHandler.Database;
+
+                ObjectId annotatid = DatabaseHandler.GetObjectID(database, DatabaseDefinitionCollections.Annotators, "name", Properties.Settings.Default.MongoDBUser);
+                annoList.Meta.Annotator = Properties.Settings.Default.MongoDBUser;
+                annoList.Meta.AnnotatorFullName = DatabaseHandler.FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
+
+                annoList.Source.StoreToDatabase = true;
+
+                addAnnoTier(annoList);
+                control.annoListControl.editComboBox.SelectedIndex = 0;
+            }
+            else
             {
-                return;
+                MessageTools.Warning("Nothing to annotate, load some data first.");
             }
-
-            annoList.Scheme = DatabaseHandler.GetAnnotationScheme(annoScheme, annoType);
-            annoList.Scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
-
-            IMongoDatabase database = DatabaseHandler.Database;
-
-            ObjectId annotatid = DatabaseHandler.GetObjectID(database, DatabaseDefinitionCollections.Annotators, "name", Properties.Settings.Default.MongoDBUser);
-            annoList.Meta.Annotator = Properties.Settings.Default.MongoDBUser;
-            annoList.Meta.AnnotatorFullName = DatabaseHandler.FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
-            addAnnoTier(annoList);
-            control.annoListControl.editComboBox.SelectedIndex = 0;
         }
 
         private void databaseShowDownloadDirectory_Click(object sender, RoutedEventArgs e)
@@ -296,24 +332,24 @@ namespace ssi
 
         #region EVENTHANDLERS
 
-        private void databaseSaveSession_Click(object sender, RoutedEventArgs e)
-        {
-            databaseStore();
-        }
-
-        private void databaseSaveSessionAndMarkAsFinished_Click(object sender, RoutedEventArgs e)
-        {
-            databaseStore(true);
-        }
-
         private void databaseLoadSession_Click(object sender, RoutedEventArgs e)
         {
-            databaseLoad();
+            databaseLoadSession();
         }
 
-        private void databaseManage_Click(object sender, RoutedEventArgs e)
+        private void databaseManageDBs_Click(object sender, RoutedEventArgs e)
         {
-            databaseAdd();
+            databaseManageDBs();
+        }
+
+        private void databaseManageUsers_Click(object sender, RoutedEventArgs e)
+        {
+            databaseManageUsers();
+        }
+
+        private void databaseManageSessions_Click(object sender, RoutedEventArgs e)
+        {
+            databaseManageSessions();
         }
 
         private void databaseChangeDownloadDirectory_Click(object sender, RoutedEventArgs e)
@@ -356,16 +392,16 @@ namespace ssi
                 AnnoList merge = window.Merge();
                 if (rms != null)
                 {
-                    DatabaseHandler.StoreToDatabase(rms);
+                    DatabaseHandler.SaveAnnoList(rms);
                 }
                 if (median != null)
                 {
-                    DatabaseHandler.StoreToDatabase(median);
+                    DatabaseHandler.SaveAnnoList(median);
                 }
 
                 if (merge != null)
                 {
-                    DatabaseHandler.StoreToDatabase(merge);
+                    DatabaseHandler.SaveAnnoList(merge);
                 }
 
             }

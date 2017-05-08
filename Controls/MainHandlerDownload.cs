@@ -116,9 +116,6 @@ namespace ssi
             if (numberOfParallelDownloads == 0)
             {
                 Action EmptyDelegate = delegate () { };
-                control.navigator.Statusbar.Content = "© HCM-Lab, Augsburg University";
-                control.navigator.Statusbar.UpdateLayout();
-                control.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 control.ShadowBoxText.UpdateLayout();
                 control.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 control.ShadowBoxText.Text = "Loading Data";
@@ -159,10 +156,7 @@ namespace ssi
                 }
 
                 double percent = ((double)bytesreceived / (double)bytestotal) * 100.0;
-
-                control.navigator.Statusbar.Content = "Downloading " + lastDownloadFileName + "  (" + percent.ToString("F3") + "%)";
-                control.navigator.Statusbar.UpdateLayout();
-                control.navigator.Statusbar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                
                 control.ShadowBox.Visibility = Visibility.Visible;
                 control.ShadowBoxText.Text = "Downloading Files... Total progress: " + "  (" + percent.ToString("F2") + "%)";
             }

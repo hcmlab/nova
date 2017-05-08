@@ -5,40 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Details for Session" Height="364.92" Width="392.938" Background="DarkGray">
+        Title="Session" Height="Auto" Width="300" SizeToContent="Height" WindowStyle="ToolWindow">
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Label Content="Name:" Margin="10,0,228,303"></Label>
-        <TextBox Name="Namefield" Text="" Margin="10,43,228,258"></TextBox>
+        <Label Content="Name:" Grid.Row="0" Grid.Column="0"></Label>
+        <TextBox Name="NameField" Text="" Grid.Row="0" Grid.Column="1" Margin="5"/>
 
-        <Label Content="Language:" Margin="10,81,284,220"></Label>
-        <ComboBox Name="LanguageField" Margin="10,124,228,177" SelectedIndex="0">
-            <ComboBoxItem>English</ComboBoxItem>
-            <ComboBoxItem>German</ComboBoxItem>
-            <ComboBoxItem>French</ComboBoxItem>
-            <ComboBoxItem>Spanish</ComboBoxItem>
-            <ComboBoxItem>Italian</ComboBoxItem>
-            <ComboBoxItem>Turkish</ComboBoxItem>
-            <ComboBoxItem>Arabic</ComboBoxItem>
-            <ComboBoxItem>Indonesian</ComboBoxItem>
-        </ComboBox>
+        <Label Content="Language:" Grid.Row="1" Grid.Column="0"></Label>
+        <TextBox Name="LanguageField" Grid.Row="1" Grid.Column="1" Margin="5"/>
 
-        <Label Content="Location:" Margin="10,157,308,146"></Label>
-        <TextBox Name="LocationField" Text=" " Margin="10,188,228,117"></TextBox>
+        <Label Content="Location:" Grid.Row="2" Grid.Column="0"></Label>
+        <TextBox Name="LocationField" Text=" " Grid.Row="2" Grid.Column="1" Margin="5"/>
 
-        <Label Content="Date:" Margin="10,222,308,72"></Label>
-        <DatePicker Name="datepicker" Margin="10,275,228,10" Text="Pick Date"/>
-
-        <Button Content="Done" Margin="295,299,10,10" Click="Button_Click"></Button>
+        <Label Content="Date:" Grid.Row="3" Grid.Column="0"></Label>
+        <DatePicker Name="DatePicker" Grid.Row="3" Grid.Column="1" Margin="5"/>
+        
+        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+            <Button Content="OK" Click="OkClick" Margin="5"></Button>
+            <Button Content="Cancel" Click="CancelClick" Margin="5"></Button>
+        </StackPanel>
+        
     </Grid>
 </Window>

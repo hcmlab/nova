@@ -13,56 +13,58 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Menu Grid.Row="0" Background="Transparent">
+        <Menu Grid.Row="0" Background="Transparent" Name="menu">
             <MenuItem Header="File">
-                <MenuItem Header="Load" Name="loadMenu" />
-                <MenuItem Header="Save Project" Name="saveProjectMenu" />
-                <MenuItem Header="Save All" Name="saveSessionMenu" />
+                <MenuItem Header="Load Files (add to workspace)" Name="loadFilesMenu" />
+                <MenuItem Header="Load Project (clear workspace)" Name="fileLoadProjectMenu" />
+                <MenuItem Header="Save Project" Name="fileSaveProjectMenu" />
                 <MenuItem Header="Export">
-                    <MenuItem Header="SSI SampleList" Name="exportSamplesMenu" />
-                    <MenuItem Header="Sampled Annotations" Name="exportAnnoToFrameWiseMenu" />
-                </MenuItem>
-                <MenuItem Header="Settings" Name="showSettingsMenu" />
-                <MenuItem Header="Clear" Name="clearSessionMenu" />
-            </MenuItem>
-            <MenuItem Header="Tier" Name="tierMenu">
-                <MenuItem Header="Save selected tier" Name="saveAnnoMenu" IsEnabled="False" />
-                <MenuItem Header="Save selected tier as" Name="saveAnnoMenuAs" IsEnabled="False" />
-                <MenuItem Header="Convert to discrete" Name="convertAnnoContinuousToDiscreteMenu" IsEnabled="False" />
-                <MenuItem Header="Convert to stream" Name="convertAnnoToSignalMenu" IsEnabled="False" />
-                <MenuItem Header="Export" Name="exportMenu">
-                    <MenuItem Header="Export to CSV" Name="exportAnnoToCSVMenu" IsEnabled="True" />
-                    <MenuItem Header="Export to XPS" Name="exportTierToXPSMenu" IsEnabled="True" />
-                    <MenuItem Header="Export to PNG" Name="exportTierToPNGMenu" IsEnabled="True" />
-                </MenuItem>
-            </MenuItem>
-            <MenuItem Header="Signal">
-                <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
-                <MenuItem Header="Convert to Continuous Tier" Name="exportAnnoDiscreteToContinuouMenu" />
-                <MenuItem Header="Export" Name="exports">
-                    <MenuItem Header="Export to XPS" Name="exportSignalToXPSMenu" IsEnabled="True" />
-                    <MenuItem Header="Export to PNG" Name="exportSignalToPNGMenu" IsEnabled="True" />
+                    <MenuItem Header="To SSI Sample List" Name="exportSamplesMenu" />
+                    <MenuItem Header="To GeNIe Data Sheet" Name="exportToGenie" />
+                    <MenuItem Header="Selected Annotation" Name="exportSelectedTierMenu">
+                        <MenuItem Header="To CSV" Name="exportAnnoToCSVMenu" />
+                        <MenuItem Header="To XPS" Name="exportTierToXPSMenu" />
+                        <MenuItem Header="To PNG" Name="exportTierToPNGMenu" />
+                    </MenuItem>
+                    <MenuItem Header="Selected Signal" Name="exportSelectedTrackMenu">
+                        <MenuItem Header="To XPS" Name="exportSignalToXPSMenu" />
+                        <MenuItem Header="To PNG" Name="exportSignalToPNGMenu"/>
+                    </MenuItem>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Database">
-                <!--<MenuItem Header="Calculate Praat features" Name="calculatepraat" />-->
-                <MenuItem Header="Load Session" Name="databaseLoadSessionMenu" />
-                <MenuItem Header="Store Session" Name="databaseSaveSessionMenu" IsEnabled="False" />
-                <MenuItem Header="Store Session and mark as finished" Name="databaseSaveSessionAndMarkAsFinishedMenu" IsEnabled="False" />
-                <MenuItem Header="Cooperative Learning" Visibility="Visible">
-                    <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" IsEnabled="False" Visibility="Collapsed" />
-                    <MenuItem Header="Complete Session" Name="databaseCMLCompleteStepMenu" IsEnabled="False" />
-                    <MenuItem Header="Extract MFCCS for all Sessions" Name="databaseCMLExtractFeaturesMenu" IsEnabled="False"></MenuItem>
-                    <MenuItem Header="Train and Label Multiple Sessions" Name="databaseCMLTransferStepMenu"  Visibility="Collapsed"    IsEnabled="False" />
+                <MenuItem Header="Load Session (clear workspace)" Name="databaseLoadSessionMenu" />
+                <MenuItem Header="Cooperative Learning">
+                    <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" />
+                    <MenuItem Header="Complete Session" Name="databaseCMLCompleteStepMenu"/>
+                    <MenuItem Header="Extract MFCCS For All Sessions" Name="databaseCMLExtractFeaturesMenu"/>
+                    <MenuItem Header="Train And Label Multiple Sessions" Name="databaseCMLTransferStepMenu" />
+                </MenuItem>
+                <MenuItem Header="Administration" Name="databaseAdminMenu">
+                    <MenuItem Header="Manage Users" Name="databaseManageUsersMenu" />
+                    <MenuItem Header="Manage Databases" Name="databaseManageDBsMenu" />
+                    <MenuItem Header="Manage Sessions" Name="databaseManageSessionsMenu" />
                 </MenuItem>
                 <MenuItem Header="Show Download Directory" Name="databaseShowDownloadDirectoryMenu" />
                 <MenuItem Header="Change Download Directory" Name="databaseChangeDownloadDirectoryMenu" />
-                <MenuItem Header="Admin: Manage Database" Visibility="Collapsed" Name="databaseManageMenu" />
-                <!--<MenuItem Header="Test Media to database " Name="mongodbmenu3" />-->
+                <MenuItem Header="Connection" Name="databaseConnectMenu" />
             </MenuItem>
+            <MenuItem Header="Annotation">
+                <MenuItem Header="Save All" Name="annoSaveAllMenu" />
+                <MenuItem Header="Save Selected" Name="annoSaveMenu" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="Save/Export Selected As" Name="annoSaveAsMenu" />
+                <MenuItem Header="Convert Selected Annotation" Name="convertSelectedTierMenu">
+                    <MenuItem Header="To Discrete Annotation" Name="convertAnnoContinuousToDiscreteMenu" />
+                    <MenuItem Header="To Signal" Name="convertAnnoToSignalMenu" />
+                </MenuItem>
+                <MenuItem Header="Convert Selected Signal">
+                    <MenuItem Header="To Continuous Annotation" Name="convertSignalToAnnoContinuousMenu" />
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Settings" Name="showSettingsMenu" />
             <MenuItem Header="?">
                 <MenuItem Header="Shortcuts"  Name="helpMenu" />
-                <MenuItem Header="Check for Update" Name="updateApplicationMenu" />
+                <MenuItem Header="Check For Update" Name="updateApplicationMenu" />
             </MenuItem>
 
         </Menu>

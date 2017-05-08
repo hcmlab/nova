@@ -39,5 +39,18 @@ namespace ssi
         public static int SelectionBorderWidth = 7;
 
         public static double DefaultSampleRate = 25.0;
+
+        public static Color DefaultColors(int index)
+        {
+            if (index % 8 == 0) return System.Windows.Media.Colors.Khaki;
+            else if (index % 8 == 1) return System.Windows.Media.Colors.SkyBlue;
+            else if (index % 8 == 2) return System.Windows.Media.Colors.YellowGreen;
+            else if (index % 8 == 3) return System.Windows.Media.Colors.Tomato;
+            else if (index % 8 == 4) return System.Windows.Media.Colors.RosyBrown;
+            else if (index % 8 == 5) return System.Windows.Media.Colors.Goldenrod;
+            else if (index % 8 == 6) return System.Windows.Media.Colors.LightSeaGreen;
+            else if (index % 8 == 7) return System.Windows.Media.Colors.LightGray;
+            else return System.Windows.Media.Colors.White;
+        }
     }
 }

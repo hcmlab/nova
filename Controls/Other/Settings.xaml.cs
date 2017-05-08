@@ -18,9 +18,15 @@ namespace ssi
             DefaultZoom.Text = Properties.Settings.Default.DefaultZoomInSeconds.ToString();
             Segmentmindur.Text = Properties.Settings.Default.DefaultMinSegmentSize.ToString();
             Samplerate.Text = Properties.Settings.Default.DefaultDiscreteSampleRate.ToString();
-            DBServer.Text = Properties.Settings.Default.DatabaseAddress;
+            string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
+            if (tokens.Length == 2)
+            {
+                DBHost.Text = tokens[0];
+                DBPort.Text = tokens[1];
+            }            
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPassword.Password = Properties.Settings.Default.MongoDBPass;
+            DBConnnect.IsChecked = Properties.Settings.Default.DatabaseAutoLogin;
             UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateOnStart;
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
         }
@@ -45,9 +51,9 @@ namespace ssi
             return Segmentmindur.Text;
         }
 
-        public string MongoServer()
+        public string DatabaseAddress()
         {
-            return DBServer.Text;
+            return DBHost.Text + ":" + DBPort.Text;
         }
 
         public string MongoUser()
@@ -68,6 +74,11 @@ namespace ssi
         public bool CheckforUpdatesonStartup()
         {
             return (UpdatesCheckbox.IsChecked == true);
+        }
+
+        public bool DBAutoConnect()
+        {
+            return (DBConnnect.IsChecked == true);
         }
 
         public bool DBAskforOverwrite()

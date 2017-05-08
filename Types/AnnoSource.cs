@@ -58,7 +58,7 @@ namespace ssi
         public class DatabaseSource
         {
             public static ObjectId ZERO = new ObjectId();
-
+            
             public string Session { get; set; }
 
             public ObjectId OID { get; set; }
@@ -82,17 +82,17 @@ namespace ssi
             Database = new DatabaseSource();
         }
        
-        public bool HasFile()
+        public bool StoreToDatabase { get; set; }
+        public bool StoreToFile { get; set; }
+
+        public bool HasFile
         {
-            return File.Path != "";
-        }
- 
-        public bool HasDatabase()
-        {
-            return Database.OID.CompareTo(DatabaseSource.ZERO) != 0;
+            get { return File.Path != ""; }
         }
 
-
-
+        public bool HasDatabase
+        {
+            get { return Database.OID.CompareTo(DatabaseSource.ZERO) != 0; }
+        }
     }
 }

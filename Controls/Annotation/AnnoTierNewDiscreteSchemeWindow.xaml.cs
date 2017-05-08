@@ -13,24 +13,35 @@ namespace ssi
     /// </summary>
     public partial class AnnoTierNewDiscreteSchemeWindow : Window
     {
-        private ObservableCollection<AnnotationSchemeSegment> items;        
+        private ObservableCollection<Label> items;
+        private AnnoScheme scheme;
 
-        public AnnoTierNewDiscreteSchemeWindow()
+        public AnnoTierNewDiscreteSchemeWindow(ref AnnoScheme scheme)
         {
             InitializeComponent();
 
             DataContext = this;
+            this.scheme = scheme;
 
-            items = new ObservableCollection<AnnotationSchemeSegment>();
+            items = new ObservableCollection<Label>();
+            foreach (AnnoScheme.Label label in scheme.Labels)
+            {
+                items.Add(new Label() { Name = label.Name, Color = label.Color });
+            }
             LabelsListBox.ItemsSource = items;
 
-            backroundColorPicket.SelectedColor = Defaults.Colors.Background;
-            schemeNameTextField.Text = Defaults.Strings.Unkown;            
+            backroundColorPicket.SelectedColor = scheme.MinOrBackColor;
+            schemeNameTextField.Text = scheme.Name;     
+
+            if (scheme.Labels.Count > 0)
+            {
+                DeleteLabel.Visibility = Visibility.Hidden;
+            }
         }
 
         private void AddLabel_Click(object sender, RoutedEventArgs e)
         {
-            AnnotationSchemeSegment item = new AnnotationSchemeSegment() { Label = "", Color = Colors.Black };
+            Label item = new Label() { Name = "", Color = Colors.Black };
             items.Add(item);
             LabelsListBox.SelectedItem = item;
             LabelsListBox.ScrollIntoView(item);            
@@ -47,39 +58,34 @@ namespace ssi
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
+            List<string> usedLabels = new List<string>();
+
+            scheme.MinOrBackColor = backroundColorPicket.SelectedColor.Value;
+            scheme.Name = schemeNameTextField.Text == "" ? Defaults.Strings.Unkown : schemeNameTextField.Text;
+            scheme.Labels.Clear();
+
+            foreach (Label a in LabelsListBox.Items)
+            {                
+                if (a.Name != "" && !usedLabels.Contains(a.Name))
+                {
+                    scheme.Labels.Add(new AnnoScheme.Label(a.Name, a.Color));
+                    usedLabels.Add(a.Name);
+                }
+            }
+
+            AnnoScheme.Label garbage = new AnnoScheme.Label("GARBAGE", Colors.Black);
+            scheme.Labels.Add(garbage);
+
             DialogResult = true;
+            Close();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
-            this.Close();
+            Close();
         }
 
-        public AnnoList GetAnnoList()
-        {
-            List<string> usedLabels = new List<string>();
-
-            AnnoList list = new AnnoList();
-            list.Scheme.Type = AnnoScheme.TYPE.DISCRETE;
-            list.Scheme.MinOrBackColor = backroundColorPicket.SelectedColor.Value;            
-            list.Scheme.Name = schemeNameTextField.Text == "" ? Defaults.Strings.Unkown : schemeNameTextField.Text;
-
-            foreach (AnnotationSchemeSegment a in LabelsListBox.Items)
-            {
-                if (a.Label != "" && !usedLabels.Contains(a.Label))
-                {
-                    AnnoScheme.Label lcp = new AnnoScheme.Label(a.Label, a.Color);
-                    list.Scheme.Labels.Add(lcp);
-                    usedLabels.Add(a.Label);
-                }
-            }
-
-            AnnoScheme.Label garbage = new AnnoScheme.Label("GARBAGE", Colors.Black);
-            list.Scheme.Labels.Add(garbage);
-         
-            return list;
-        }
 
         private void AnnoList_Drop(object sender, DragEventArgs e)
         {
@@ -96,10 +102,8 @@ namespace ssi
                         {
                             foreach (var item in list.Scheme.Labels)
                             {
-                                AnnotationSchemeSegment ass = new AnnotationSchemeSegment();
-                                ass.Label = item.Name;
-                                ass.Color = item.Color;
-                                if (!items.Contains(ass) && ass.Label != "GARBAGE" && ass.Label != "") items.Add(ass);
+                                Label label = new Label() { Name = item.Name, Color = item.Color };
+                                if (!items.Contains(label) && label.Name != "GARBAGE" && label.Name != "") items.Add(label);
                             }
                         }
                         else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
@@ -110,11 +114,9 @@ namespace ssi
                                 labelNames.Add(item.Label);
                             }
                             foreach(string name in labelNames)
-                            {                                 
-                                AnnotationSchemeSegment ass = new AnnotationSchemeSegment();
-                                ass.Label = name;
-                                ass.Color = list.Scheme.MaxOrForeColor;
-                                if (!items.Contains(ass) && ass.Label != "GARBAGE" && ass.Label != "") items.Add(ass);
+                            {
+                                Label label = new Label() { Name = name, Color = list.Scheme.MaxOrForeColor };
+                                if (!items.Contains(label) && label.Name != "GARBAGE" && label.Name != "") items.Add(label);
                             }
                         }
                         else return;
@@ -129,12 +131,11 @@ namespace ssi
                 }
             }
         }
-    }
 
-    public class AnnotationSchemeSegment
-    {
-        public string Label { get; set; }
-
-        public Color Color { get; set; }
+        public class Label
+        {
+            public string Name { get; set; }
+            public Color Color { get; set; }
+        }
     }
 }

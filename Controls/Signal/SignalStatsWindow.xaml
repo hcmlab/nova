@@ -121,6 +121,8 @@
             <TextBox Name="MinBox" Width="50" PreviewTextInput="NumberValidationTextBox" VerticalContentAlignment="Center" Text="0" KeyDown="BoxKeyDown"></TextBox>
             <Label Content="Max:"></Label>
             <TextBox  Name="MaxBox" Width="50"  PreviewTextInput="NumberValidationTextBox" VerticalContentAlignment="Center" Text="1" KeyDown="BoxKeyDown"></TextBox>
+            <Label Content="Avg:"></Label>
+            <TextBox  Name="AvgBox" Width="50"  IsEnabled="False" PreviewTextInput="NumberValidationTextBox" VerticalContentAlignment="Center" Text="1" KeyDown="BoxKeyDown"></TextBox>
         </StackPanel>
         
         <DVC:Chart  Grid.Row="1" Canvas.Left="0" Name="mcChart" BorderThickness="0" BorderBrush="Transparent" Width="Auto" Background="White" Foreground="Black" LegendTitle="Legend" Margin="0,24,0,42" Grid.RowSpan="2">

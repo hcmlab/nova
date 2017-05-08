@@ -21,108 +21,57 @@ namespace ssi
     /// </summary>
     /// 
 
-
     public partial class DatabaseAdminAnnotatorWindow : Window
     {
+        DatabaseAnnotator annotator;
 
-        private MongoClient mongo;
-        private IMongoDatabase database;
-        private string connectionstring = "mongodb://127.0.0.1:27017";
-
-        public DatabaseAdminAnnotatorWindow(string name = null, string fullname = null, string email = null, string expertise = null)
+        public DatabaseAdminAnnotatorWindow(ref DatabaseAnnotator annotator, List<string> names = null)
         {
             InitializeComponent();
-     
-            connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase("admin");
-            var annotators = database.GetCollection<BsonDocument>("system.users");
 
-         
-                List<BsonDocument> documents;
-                var builder = Builders<BsonDocument>.Filter;
-                documents = annotators.Find(_ => true).ToList();
+            this.annotator = annotator;
 
-                NameCombo.Items.Add("");
-
-                foreach (BsonDocument b in documents)
+            if (names == null)
+            {
+                NameBox.Items.Add(annotator.Name);
+                NameBox.SelectedIndex = 0;
+                NameBox.IsEnabled = false;
+                FullNameField.Text = annotator.FullName;
+                EmailField.Text = annotator.Email;
+                ExpertiseBox.SelectedIndex = annotator.Expertise;
+                foreach (var item in RoleBox.Items)
                 {
-                    NameCombo.Items.Add(b["user"].ToString());
+                    if (item.ToString().Contains(annotator.Role))
+                    {
+                        RoleBox.SelectedItem = item;
+                    }
                 }
-            
-
-         
-           
-
-
-
-            if (name != null)
-            {
-                NameCombo.SelectedItem = name;
-                NameCombo.IsEnabled = false;
-                Namefield.IsEnabled = false;
             }
-               
-            if (fullname != null) FullNameField.Text = fullname;
-            if (email != null) Emailfield.Text = email;
-
-            foreach (var item in ExpertiseBox.Items)
+            else
             {
-                if (expertise != null && item.ToString().Contains(expertise))
-                    ExpertiseBox.SelectedItem = item;
+                NameBox.ItemsSource = names;
             }
+        } 
 
-        
-          
-        }
-
-        public string Name()
+        private void OkClick(object sender, RoutedEventArgs e)
         {
-            return Namefield.Text;
+            DialogResult = true;
+
+            annotator.Name = (string)NameBox.SelectedItem;
+            annotator.FullName = FullNameField.Text;
+            annotator.Email = EmailField.Text;
+            annotator.Role = RoleBox.SelectionBoxItem.ToString();
+            annotator.Expertise = ExpertiseBox.SelectedIndex;
+
+            Close();
         }
 
-        public string Password()
+        private void CancelClick(object sender, RoutedEventArgs e)
         {
-            return PasswordField.Password;
+            DialogResult = false;
+            Close();
         }
 
-        public string Fullname()
-        {
-            return FullNameField.Text;
-        }
-
-        public string Email()
-        {
-            return Emailfield.Text;
-        }
-
-        public string Expertise()
-        {
-            return ExpertiseBox.SelectionBoxItem.ToString();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = true;
-        }
-
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = false;
-            this.Close();
-        }
- 
-
-        private void NameCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            Namefield.Clear();
-            PasswordField.Clear();
-        }
-
-        private void Namefield_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            NameCombo.SelectedIndex = 0;
-        }
     }
 }
 

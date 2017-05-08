@@ -99,7 +99,7 @@ namespace ssi
 
         public string GetDirectory()
         {
-            if (annoList.Source.HasFile())
+            if (annoList.Source.HasFile)
             {
                 return annoList.Source.File.Directory;
             }
@@ -109,7 +109,7 @@ namespace ssi
 
         public string GetFilepath()
         {
-            if (annoList.Source.HasFile())
+            if (annoList.Source.HasFile)
             {
                 return annoList.Source.File.Path;
             }

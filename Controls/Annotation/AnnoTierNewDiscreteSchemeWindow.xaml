@@ -39,7 +39,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <p:TextBoxEx Text="{Binding Label}" IsEnabled="true" Width="100" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                    <p:TextBoxEx Text="{Binding Name}" IsEnabled="true" Width="100" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
                                 </StackPanel>
                             </DataTemplate>
 
@@ -59,8 +59,8 @@
         </ListView>
 
         <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Name="AddAnnotation" FontSize="30" Content="+" Grid.Column="0" Click="AddLabel_Click" Background="Transparent" BorderThickness="0" Visibility="Visible" />
-            <Button Name="DeleteAnnotation" FontSize="30" Content="-" Grid.Column="0" Click="DeleteLabel_Click" Background="Transparent" BorderThickness="0" Visibility="Visible" />
+            <Button Name="AddLabel" FontSize="30" Content="+" Grid.Column="0" Click="AddLabel_Click" Background="Transparent" BorderThickness="0" Visibility="Visible" />
+            <Button Name="DeleteLabel" FontSize="30" Content="-" Grid.Column="0" Click="DeleteLabel_Click" Background="Transparent" BorderThickness="0" Visibility="Visible" />
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Right">

@@ -44,7 +44,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
+                authlevel = DatabaseHandler.CheckAuthentication();
 
                 if (authlevel > 2)
                 {
@@ -117,7 +117,7 @@ namespace ssi
                 foreach (var c in sessions)
                 {
                     //CollectionResultsBox.Items.Add(c.GetElement(1).Value.ToString());
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString(), OID = c["_id"].AsObjectId });
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), OID = c["_id"].AsObjectId });
                 }
 
                 CollectionResultsBox.ItemsSource = items;
@@ -142,7 +142,7 @@ namespace ssi
         {
             AnnotationResultBox.ItemsSource = null;
             //  AnnotationResultBox.Items.Clear();
-            List<DatabaseAnno> items = new List<DatabaseAnno>();
+            List<DatabaseAnnotion> items = new List<DatabaseAnnotion>();
             List<string> Collections = new List<string>();
 
             database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
@@ -201,7 +201,7 @@ namespace ssi
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnno() { Role = rolename, AnnoScheme = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
+                    items.Add(new DatabaseAnnotion() { Role = rolename, AnnoScheme = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
                 }
                 //else if (result.ElementCount == 0 && result2.ElementCount > 0 && annos["role_id"].AsObjectId == roleid)
                 //{
@@ -209,7 +209,7 @@ namespace ssi
                 //}
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
-                    items.Add(new DatabaseAnno() { Role = rolename, AnnoScheme = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
+                    items.Add(new DatabaseAnnotion() { Role = rolename, AnnoScheme = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
                 }
             }
 

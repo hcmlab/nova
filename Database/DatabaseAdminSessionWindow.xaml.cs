@@ -10,57 +10,42 @@ namespace ssi
     /// </summary>
     public partial class DatabaseAdminSessionWindow : Window
     {
-        private MongoClient mongo;
-        private IMongoDatabase database;
-        private string connectionstring = "mongodb://127.0.0.1:27017";
+        private DatabaseSession session;
 
-        public DatabaseAdminSessionWindow(string name = null, string language = null, string location = null, BsonDateTime date = null)
+        public DatabaseAdminSessionWindow(ref DatabaseSession session)
         {
             InitializeComponent();
 
-            connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
-            var session = database.GetCollection<BsonDocument>(Properties.Settings.Default.LastSessionId);
+            this.session = session;
 
-            if (name != null) Namefield.Text = name;
-
-            foreach (var item in LanguageField.Items)
-            {
-                if (language != null && item.ToString().Contains(language))
-                    LanguageField.SelectedItem = item;
-            }
-
-            if (location != null) LocationField.Text = location;
-            if (date != null) datepicker.SelectedDate = date.AsDateTime;
-            else datepicker.SelectedDate = DateTime.Now;
-        }
-
-        public string SessionName()
-        {
-            return Namefield.Text;
-        }
-
-        public string SessionLanguage()
-        {
-            return LanguageField.SelectionBoxItem.ToString();
-        }
-
-        public string SessionLocation()
-        {
-            return LocationField.Text;
-        }
+            NameField.Text = session.Name;
+            LanguageField.Text = session.Language;
+            LocationField.Text = session.Location;
+            DatePicker.SelectedDate = session.Date;
+        }       
 
         public DateTime SessionDate()
         {
-            if (datepicker.SelectedDate != null)
-                return datepicker.SelectedDate.Value;
+            if (DatePicker.SelectedDate != null)
+                return DatePicker.SelectedDate.Value;
             else return new DateTime();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void OkClick(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            session.Name = NameField.Text == "" ? Defaults.Strings.Unkown : NameField.Text;
+            session.Language = LanguageField.Text;
+            session.Location = LocationField.Text;
+            session.Date = DatePicker.SelectedDate != null ? DatePicker.SelectedDate.Value : new DateTime();
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void CancelClick(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
         }
     }
 }

@@ -93,5 +93,15 @@ namespace ssi
         {
             return result[name].Text;
         }
+
+        public bool ResultAsInt(string name, out int value)
+        {
+            return int.TryParse(result[name].Text, out value);            
+        }
+
+        public bool ResultAsDouble(string name, out double value)
+        {
+            return double.TryParse(result[name].Text, out value);            
+        }
     }
 }
