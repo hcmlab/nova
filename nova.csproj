@@ -127,17 +127,8 @@
     <Compile Include="Controls\Annotation\AnnoTierSettingsWindow.xaml.cs">
       <DependentUpon>AnnoTierSettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Annotation\Geometric\AnnoTierNewGraphSchemeWindow.xaml.cs">
-      <DependentUpon>AnnoTierNewGraphSchemeWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\Annotation\Geometric\AnnoTierNewPointSchemeWindow.xaml.cs">
       <DependentUpon>AnnoTierNewPointSchemeWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Annotation\Geometric\AnnoTierNewPolygonSchemeWindow.xaml.cs">
-      <DependentUpon>AnnoTierNewPolygonSchemeWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Annotation\Geometric\AnnoTierNewSegmentationSchemeWindow.xaml.cs">
-      <DependentUpon>AnnoTierNewSegmentationSchemeWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Annotation\Geometric\GeometricListControl.xaml.cs">
       <DependentUpon>GeometricListControl.xaml</DependentUpon>
@@ -162,6 +153,18 @@
     </Compile>
     <Compile Include="Controls\Signal\SignalTrackSettingsWindow.xaml.cs">
       <DependentUpon>SignalTrackSettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseAdminManageDBWindow.xaml.cs">
+      <DependentUpon>DatabaseAdminManageDBWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseAdminManageSessionsWindow.xaml.cs">
+      <DependentUpon>DatabaseAdminManageSessionsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseAdminManageUsersWindow.xaml.cs">
+      <DependentUpon>DatabaseAdminManageUsersWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseAdminUserWindow.xaml.cs">
+      <DependentUpon>DatabaseAdminUserWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\IPointList.cs" />
     <Compile Include="Tools\PluginCaller.cs" />
@@ -194,10 +197,7 @@
       <DependentUpon>UserInputWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\MessageTools.cs" />
-    <Compile Include="Types\Timeline.cs" />
-    <Compile Include="Database\DatabaseAdminMainWindow.xaml.cs">
-      <DependentUpon>DatabaseAdminMainWindow.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Tools\Timeline.cs" />
     <Compile Include="Database\DatabaseAdminAnnotatorWindow.xaml.cs">
       <DependentUpon>DatabaseAdminAnnotatorWindow.xaml</DependentUpon>
     </Compile>
@@ -217,17 +217,14 @@
     <Compile Include="Database\DatabaseAnnoMainWindow.xaml.cs">
       <DependentUpon>DatabaseAnnoMainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Database\DatabaseAdminMediaWindow.xaml.cs">
-      <DependentUpon>DatabaseAdminMediaWindow.xaml</DependentUpon>
+    <Compile Include="Database\DatabaseAdminStreamWindow.xaml.cs">
+      <DependentUpon>DatabaseAdminStreamWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Database\DatabaseSelectionWindow.xaml.cs">
       <DependentUpon>DatabaseSelectionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Database\DatabaseAdminSessionWindow.xaml.cs">
       <DependentUpon>DatabaseAdminSessionWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Database\DatabaseAdminSubjectWindow.xaml.cs">
-      <DependentUpon>DatabaseAdminSubjectWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Types\AnnoListFile.cs" />
     <Compile Include="Types\AnnoScheme.cs" />
@@ -256,19 +253,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\Annotation\Geometric\AnnoTierNewGraphSchemeWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Controls\Annotation\Geometric\AnnoTierNewPointSchemeWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\Annotation\Geometric\AnnoTierNewPolygonSchemeWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\Annotation\Geometric\AnnoTierNewSegmentationSchemeWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -378,6 +363,22 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Database\DatabaseAdminManageDBWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Database\DatabaseAdminManageSessionsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Database\DatabaseAdminManageUsersWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Database\DatabaseAdminUserWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Tools\PatternBrushes.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -406,10 +407,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Database\DatabaseAdminMainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Database\DatabaseAdminAnnotatorWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -434,7 +431,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Database\DatabaseAdminMediaWindow.xaml">
+    <Page Include="Database\DatabaseAdminStreamWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -443,10 +440,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Database\DatabaseAdminSessionWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Database\DatabaseAdminSubjectWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         WindowStyle="ToolWindow"
         WindowStartupLocation="CenterOwner"
-        Title="Settings" SizeToContent="WidthAndHeight">
+        Title="Settings" SizeToContent="WidthAndHeight" Width="300">
     <Grid>
 
         <Grid.RowDefinitions>
@@ -15,35 +15,88 @@
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <TabControl>
+        <TabControl Name="Tab">
             <TabItem Grid.Row="0" Header="General">
-                <StackPanel Orientation="Vertical">
-                    <Label Content="Default annotator name:" HorizontalAlignment="left" />
-                    <TextBox Name="Annotator" Margin="5,0,0,5" Width="90" HorizontalAlignment="left" />
-                    <Label Content="Default zoom in seconds (0 for max. duration):"  HorizontalAlignment="left" />
-                    <TextBox Name="DefaultZoom" Margin="5,0,0,5" Width="90" HorizontalAlignment="left"  PreviewTextInput="NumberValidationTextBox" />
-                    <Label Content="Correction certainty level:"   HorizontalAlignment="left" />
-                    <TextBox Name="Certainty" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
-                    <Label Content="Segment min duration in seconds:"  HorizontalAlignment="left"  />
-                    <TextBox Name="Segmentmindur" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" />
-                    <Label Content="Discrete sample rate in Hz (0 for none):"   HorizontalAlignment="left"  />
-                    <TextBox Name="Samplerate" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left" PreviewTextInput="IntNumberValidationTextBox" />
-                    <Label Content="Check for updates on startup:" HorizontalAlignment="left"  />
-                    <CheckBox Name="UpdatesCheckbox" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left"/>
-                </StackPanel>
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                
+                    <Label Grid.Row="0" Content="Default annotator name:" />
+                    <TextBox Grid.Row="1" Name="Annotator" Margin="5,0,5,5" />
+                    <Label Grid.Row="2" Content="Default zoom in seconds (0 for max. duration):" />
+                    <TextBox Grid.Row="3" Name="DefaultZoom" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Grid.Row="4" Content="Correction certainty level:"  />
+                    <TextBox Grid.Row="5" Name="Certainty" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Grid.Row="6" Content="Segment min duration in seconds:" />
+                    <TextBox Grid.Row="7" Name="Segmentmindur" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Grid.Row="8" Content="Discrete sample rate in Hz (0 for none):" />
+                    <TextBox Grid.Row="9" Name="Samplerate" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
+                    <Label Grid.Row="10" Content="Check for updates on startup:"  />
+                    <CheckBox Grid.Row="11" Name="UpdatesCheckbox" Margin="5,0,5,5" />
+                
+                </Grid>
             </TabItem>
 
             <TabItem Header="Database">
-                <StackPanel Orientation="Vertical">
-                    <Label Content="Database server:" HorizontalAlignment="Left"/>
-                    <TextBox Name="DBServer" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left"/>
-                    <Label Content="Database user:" HorizontalAlignment="left"/>
-                    <TextBox Name="DBUser" Margin="5,0,0,5" HorizontalAlignment="left" Width="90"/>
-                    <Label Content="Database password:" HorizontalAlignment="left"  />
-                    <PasswordBox Name="DBPassword" Margin="5,0,0,5" HorizontalAlignment="left" Width="90"/>
-                    <Label Content="Ask before overwriting existing annotation" HorizontalAlignment="left" />
-                    <CheckBox Name="OverwriteAnnotation" Margin="5,0,0,5" Width="90" HorizontalAlignment="Left"/>
-                </StackPanel>
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Row="0"  Content="Database server:"/>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="70"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0">Host:</Label>
+                        <TextBox Grid.Column="1" Name="DBHost" Margin="5,0,5,5" />
+                        <Label Grid.Column="2">Port:</Label>
+                        <TextBox Grid.Column="3" Name="DBPort" Margin="5,0,5,5"/>
+                    </Grid>
+                    <Label Grid.Row="2" Content="Database user:"/>
+                    <TextBox Grid.Row="3" Name="DBUser" Margin="5,0,5,5"/>
+                    <Label Grid.Row="4" Content="Database password:" />
+                    <PasswordBox Grid.Row="5" Name="DBPassword" Margin="5,0,5,5" />
+                    <Label Grid.Row="6" Content="Connect to database at start up:" />
+                    <CheckBox Grid.Row="7" Name="DBConnnect" Margin="5,0,5,5"/>
+                    <Label Grid.Row="8" Content="Ask before overwriting existing annotation:" />
+                    <CheckBox Grid.Row="9" Name="OverwriteAnnotation" Margin="5,0,5,5"/>
+                    
+                </Grid>
             </TabItem>
         </TabControl>
 

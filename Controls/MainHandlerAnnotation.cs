@@ -18,18 +18,18 @@ namespace ssi
             {
                 maxdur = annoList[annoList.Count - 1].Stop;
             }
-            
-            addAnnoTier(annoList);            
+
+            addAnnoTier(annoList);
 
             updateTimeRange(maxdur);
             if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) updateTimeRange(maxdur);
 
             if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
-            {           
+            {
                 fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
 
-            annoList.HasChanged = false;          
+            annoList.HasChanged = false;
         }
 
         private void removeAnnoTier()
@@ -38,7 +38,7 @@ namespace ssi
         }
 
         private void removeAnnoTier(AnnoTier tier)
-        {           
+        {
             if (tier != null)
             {
                 MessageBoxResult mb = MessageBoxResult.No;
@@ -58,7 +58,7 @@ namespace ssi
 
                     AnnoTierStatic.Unselect();
                     tier.Children.Clear();
-                    tier.AnnoList.Clear();                    
+                    tier.AnnoList.Clear();
                     annoTiers.Remove(tier);
 
                     if (annoTiers.Count > 0)
@@ -104,13 +104,13 @@ namespace ssi
             AnnoList annoList = annoTier.AnnoList;
 
             control.annoSettingsButton.Visibility = Visibility.Visible;
-            if (annoList.Source.HasFile())
+            if (annoList.Source.HasFile)
             {
                 control.annoStatusFileNameOrSessionLabel.Text = annoList.Source.File.FullName;
                 control.annoStatusFileNameOrSessionLabel.ToolTip = annoList.Source.File.Path;
-               
+
             }
-            else if (annoList.Source.HasDatabase())
+            else if (annoList.Source.HasDatabase)
             {
                 control.annoStatusFileNameOrSessionLabel.Text = annoList.Source.Database.Session;
                 control.annoStatusFileNameOrSessionLabel.ToolTip = annoList.Source.Database.OID;
@@ -308,13 +308,106 @@ namespace ssi
             }
         }
 
+        public static bool UpdateSchemeDialog(ref AnnoScheme scheme)
+        {
+            Window dialog = null;
+
+            if (scheme.Type == AnnoScheme.TYPE.FREE)
+            {
+                dialog = new AnnoTierNewFreeSchemeWindow(ref scheme);
+            }
+            else if (scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            {
+                dialog = new AnnoTierNewDiscreteSchemeWindow(ref scheme);
+            }
+            else if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            {                
+                dialog = new AnnoTierNewContinuousSchemeWindow(ref scheme);
+            }
+            else if (scheme.Type == AnnoScheme.TYPE.POINT)
+            {                
+                dialog = new AnnoTierNewPointSchemeWindow(ref scheme);
+            }
+            else
+            {
+                return false;
+            }
+
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dialog.ShowDialog();
+
+            return dialog.DialogResult.Value;
+        }
+
+        public static bool AddSchemeDialog(ref AnnoScheme scheme, double defaultSr = 25.0)
+        {
+            AnnoTierNewSchemeWindow dialog = new AnnoTierNewSchemeWindow();
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dialog.ShowDialog();
+
+            if (dialog.DialogResult == true)
+            {                
+                AnnoScheme.TYPE annoType = dialog.Result();
+                scheme.Type = annoType;
+
+                if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    scheme.SampleRate = defaultSr;
+                    scheme.MinScore = 0.0;
+                    scheme.MaxScore = 1.0;
+                    scheme.MinOrBackColor = Defaults.Colors.GradientMin;
+                    scheme.MaxOrForeColor = Defaults.Colors.GradientMax;
+                }
+                else if (scheme.Type == AnnoScheme.TYPE.POINT)
+                {
+                    scheme.SampleRate = defaultSr;
+                    scheme.NumberOfPoints = 1;
+                    scheme.MaxOrForeColor = Colors.Green;
+                }
+
+                return UpdateSchemeDialog(ref scheme);                                
+            }
+
+            return false;
+        }
+
+        public void addNewAnnotationFile()
+        {
+            if (Time.TotalDuration > 0)
+            {
+                AnnoScheme scheme = new AnnoScheme();
+
+                double defaultSr = 25.0;
+                foreach (IMedia m in mediaList)
+                {
+                    if (m.GetMediaType() == MediaType.VIDEO)
+                    {
+                        defaultSr = m.GetSampleRate();
+                        break;
+                    }
+                }
+
+                if (AddSchemeDialog(ref scheme, defaultSr))
+                {                  
+                    AnnoList annoList = new AnnoList() { Scheme = scheme };
+                    annoList.Source.StoreToFile = true;
+                    annoList.Meta.Annotator = Properties.Settings.Default.Annotator;
+                    addAnnoTier(annoList);
+                }
+            }
+            else
+            {
+                MessageTools.Warning("Nothing to annotate, load some data first.");
+            }
+        }
+
         public void addAnnoTier(AnnoList anno)
         {
             setAnnoList(anno);
 
-            AnnoTier tier = new AnnoTier(anno);            
+            AnnoTier tier = new AnnoTier(anno);
             control.annoTierControl.Add(tier);
-            control.timeLineControl.rangeSlider.OnTimeRangeChanged += tier.TimeRangeChanged;            
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += tier.TimeRangeChanged;
 
             annoTiers.Add(tier);
             annoLists.Add(anno);
@@ -325,8 +418,10 @@ namespace ssi
             updateNavigator();
         }
 
-        private void reloadAnnoTier(string filename)
+        private void reloadAnnoTierFromFile(AnnoTier track)
         {
+            string filename = track.AnnoList.Source.File.Path;
+
             if (!File.Exists(filename))
             {
                 MessageTools.Error("Annotation file not found '" + filename + "'");
@@ -365,11 +460,12 @@ namespace ssi
                 AnnoTierSettingsWindow window = new AnnoTierSettingsWindow();
                 window.DataContext = AnnoTierStatic.Selected;
                 window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                window.ShowDialog();                
+                window.ShowDialog();
                 updateAnnoInfo(AnnoTierStatic.Selected);
                 AnnoTierStatic.Selected.AnnoList.HasChanged = true;
             }
         }
+
 
 
         #region EVENTHANDLERS
@@ -399,7 +495,7 @@ namespace ssi
                 isMouseButtonDown = false;
 
                 if (control.navigator.followAnnoCheckBox.IsChecked == true)
-                {                    
+                {
                     if (!IsPlaying())
                     {
                         Play();
@@ -453,7 +549,7 @@ namespace ssi
                 if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.RightMouseButtonDown(e);
                 isMouseButtonDown = true;
             }
-            else if (e.RightButton == MouseButtonState.Pressed &&   Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (e.RightButton == MouseButtonState.Pressed && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 try
                 {
@@ -536,8 +632,8 @@ namespace ssi
                 }
 
                 if (item.isGeometric)
-                {                                        
-                    int position = (int) (Time.CurrentPlayPosition * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
+                {
+                    int position = (int)(Time.CurrentPlayPosition * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
                     geometricSelectItem(item, position);
                 }
             }
@@ -588,7 +684,7 @@ namespace ssi
             }
         }
 
-       
+
 
         #endregion EVENTHANDLERS
     }

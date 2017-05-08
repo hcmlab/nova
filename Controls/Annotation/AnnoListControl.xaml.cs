@@ -42,10 +42,10 @@ namespace ssi
 
         private bool UserFilter(object item)
         {
-            if (String.IsNullOrEmpty(txtSearch.Text))
+            if (String.IsNullOrEmpty(searchTextBox.Text))
                 return true;
             else
-                return ((item as AnnoListItem).Label.IndexOf(txtSearch.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+                return ((item as AnnoListItem).Label.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private void MenuItemDeleteClick(object sender, RoutedEventArgs e)
@@ -253,7 +253,7 @@ namespace ssi
             }     
         }
 
-        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if(annoDataGrid.ItemsSource != null)
             {

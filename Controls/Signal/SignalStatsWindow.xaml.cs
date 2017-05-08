@@ -53,6 +53,9 @@ namespace ssi
             float maxVal = float.Parse(MaxBox.Text);
             float factor = (maxVal - minVal) / numclasses;
 
+            double average = 0;
+            double averagesamples = 0;
+
             for (int d = selected_dim; d <= selected_dim; d++)
             {
                 
@@ -60,9 +63,12 @@ namespace ssi
                 {
                     if (MainHandler.Time.SelectionStart < i / signal.rate && MainHandler.Time.SelectionStop > i / signal.rate)
                     {
+                        average += signal.data[i * signal.dim + d];
+                        averagesamples++;
                         for (int j = 1; j <= numclasses; j++)
                         {
                             float val = signal.data[i * signal.dim + d];
+                            
                             if (val <= ( minVal + j * factor) && val >= (minVal + (j - 1) * factor))
                             {
                                 count[j - 1]++;
@@ -73,6 +79,8 @@ namespace ssi
                 }
             }
 
+            average = average / averagesamples;
+            AvgBox.Text = average.ToString();
 
             keyvalues.Clear();
 

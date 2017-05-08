@@ -17,8 +17,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Column="0" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Left">
-            <Button Name="newAnnoButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center">New  Tier</Button>
-            <Button Name="newAnnoContButton" Width="120" Height="25" Margin="5" Visibility="Collapsed" VerticalAlignment="Center">New Continuous Tier</Button>
+            <Label  Name="newAnnoFromLabel" Margin="5">New Annnotation: </Label>
+            <Button Name="newAnnoFromFileButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center">File</Button>
+            <Button Name="newAnnoFromDatabaseButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center">Database</Button>
         </StackPanel>
 
         <StackPanel Grid.Column="1" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Center">
@@ -37,6 +38,10 @@
             <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Clear</Button>
         </StackPanel>
 
-        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Content="" Name="Statusbar" Margin="5,0,0,0" HorizontalContentAlignment="Left" BorderThickness="0" />
+        <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="statusBar" Margin="0" >
+            <StatusBarItem Name="statusBarDatabase">Database</StatusBarItem>
+            <Separator Background="LightGray"/>
+            <StatusBarItem Name="statusBarSessionInfo"></StatusBarItem>
+        </StatusBar>
     </Grid>
 </UserControl>

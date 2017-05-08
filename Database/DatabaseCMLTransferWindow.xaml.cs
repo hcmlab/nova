@@ -40,7 +40,7 @@ namespace ssi
                     if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + ":" + mongo.Settings.Server.Port + " is online and you entered your credentials correctly!");
                 }
 
-                authlevel = DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, "admin");
+                authlevel = DatabaseHandler.CheckAuthentication();
                 database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
                 if (authlevel > 0)
                 {

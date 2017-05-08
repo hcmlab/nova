@@ -21,18 +21,18 @@
     
 
 
-        <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5">
+        <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5,0,5,0">
             <Grid>
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />                    
                 </Grid.RowDefinitions>
 
                 
-                <DockPanel Grid.Row="0" Margin="2" HorizontalAlignment="Right" Opacity="0.3" >
-                    <Image Source="/Resources/search.png" Width="18"></Image>
-                    <TextBox x:Name="txtSearch" TextChanged="txtSearch_TextChanged" Width="120">
+                <DockPanel Grid.Row="1" Margin="0,5,0,0" Opacity="0.3" LastChildFill="True">
+                    <Image Source="/Resources/search.png" Width="18" DockPanel.Dock="Left"></Image>
+                    <TextBox x:Name="searchTextBox" TextChanged="searchTextBox_TextChanged" DockPanel.Dock="Right" Margin="2,0,0,0">
                         <TextBox.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="3"/>
@@ -41,7 +41,7 @@
                     </TextBox>
                 </DockPanel>
 
-                <ListView Name="annoDataGrid" Grid.Row="1" >
+                <ListView Name="annoDataGrid" Grid.Row="0" >
                 <ListView.ContextMenu>
                     <ContextMenu Name="InvoiceDetailsList" StaysOpen="true">
                         <ContextMenu.BitmapEffect>
@@ -100,9 +100,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5" >Relabel
-            
-</Button>
+            <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5" >Relabel</Button>
             <TextBox Name="editTextBox" Grid.Column="1" Grid.Row="0" Margin="5,5,7,5">
                 <TextBox.Resources>
                 <Style TargetType="{x:Type Border}">

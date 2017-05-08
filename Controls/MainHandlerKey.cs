@@ -29,7 +29,7 @@ namespace ssi
                 {
                     if (AnnoTierStatic.Selected != null && Properties.Settings.Default.CMLDefaultStream != null)
                     {
-                        DatabaseHandler.StoreToDatabase(AnnoTierStatic.Selected.AnnoList, loadedDBmedia, false);
+                        DatabaseHandler.SaveAnnoList(AnnoTierStatic.Selected.AnnoList, streams, false);
                         CompleteTier(Properties.Settings.Default.CMLContext, AnnoTierStatic.Selected, Properties.Settings.Default.CMLDefaultStream, Properties.Settings.Default.CMLDefaultConf, Properties.Settings.Default.CMLDefaultGap, Properties.Settings.Default.CMLDefaultMinDur);
                     }
 
@@ -346,11 +346,7 @@ namespace ssi
             {
                 if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                 {
-                    if (DatabaseLoaded)
-                    {
-                        databaseStore();
-                    }
-                    else saveSelectedAnno();
+                    saveSelectedAnno();
                 }
                 else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
                 {
@@ -389,10 +385,14 @@ namespace ssi
                     AnnoTier track = AnnoTierStatic.Selected;
                     if (track != null)
                     {
-                        if (DatabaseLoaded)
-                            databaseReload(track);
+                        if (track.AnnoList.Source.HasFile)
+                        {
+                            reloadAnnoTierFromFile(track);
+                        }
                         else
-                            reloadAnnoTier(track.AnnoList.Source.File.Path);
+                        {
+                            reloadAnnoTierFromDatabase(track);                            
+                        }
                     }
                     e.Handled = true;
                 }

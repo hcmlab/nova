@@ -11,31 +11,35 @@ namespace ssi
     /// </summary>
     public partial class DatabaseAdminDBMeta : Window
     {
-        private MongoClient mongo;
-        private IMongoDatabase database;
-        private string connectionstring = "mongodb://127.0.0.1:27017";
+        private DatabaseDBMeta db;
 
-        public DatabaseAdminDBMeta()
-        {
+        public DatabaseAdminDBMeta(ref DatabaseDBMeta db)
+        {           
             InitializeComponent();
 
-            connectionstring = "mongodb://" + Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@" + Properties.Settings.Default.DatabaseAddress;
-            mongo = new MongoClient(connectionstring);
-            database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
+            this.db = db;
 
-            var session = database.GetCollection<BsonDocument>(Properties.Settings.Default.LastSessionId);
+            NameField.Text = db.Name;
+            DescriptionField.Text = db.Description;
+            ServerField.Text = db.Server;
+            AuthentificationBox.IsChecked = db.ServerAuth;
+        }
 
-            List<BsonDocument> documents;
-            var builder = Builders<BsonDocument>.Filter;
+        private void OkClick(object sender, RoutedEventArgs e)
+        {
+            db.Name = NameField.Text == "" ? Defaults.Strings.Unkown : NameField.Text;
+            db.Description = DescriptionField.Text;
+            db.Server = ServerField.Text;
+            db.ServerAuth = AuthentificationBox.IsChecked.Value;
 
-            var filter = builder.Eq("name", "subject") & builder.Eq("name", "");
-            documents = session.Find(filter).ToList();
+            DialogResult = true;
+            Close();
+        }
 
-            try
-            {
-                Namefield.Text = documents[0]["name"].ToString();
-            }
-            catch { }
+        private void CancelClick(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
         }
     }
 }

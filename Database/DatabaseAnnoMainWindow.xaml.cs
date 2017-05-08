@@ -22,100 +22,45 @@ namespace ssi
         private List<DatabaseMediaInfo> ci;
         private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
         private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
-        private List<DatabaseAnno> AnnoItems = new List<DatabaseAnno>();
+        private List<DatabaseAnnotion> AnnoItems = new List<DatabaseAnnotion>();
         private List<ObjectId> AnnotationMediaIDS = new List<ObjectId>();
         private CancellationTokenSource cts = new CancellationTokenSource();
         public DatabaseAnnoMainWindow()
         {
             InitializeComponent();
 
-            this.db_server.Text = Properties.Settings.Default.DatabaseAddress;
-            this.db_login.Text = Properties.Settings.Default.MongoDBUser;
-            this.db_pass.Password = Properties.Settings.Default.MongoDBPass;
             this.server_login.Text = Properties.Settings.Default.DataServerLogin;
             this.server_pass.Password = Properties.Settings.Default.DataServerPass;
-            Autologin.IsEnabled = false;
+
             allfiles.Clear();
-
-            if (Properties.Settings.Default.DatabaseAutoLogin == true)
-            {
-                Autologin.IsChecked = true;
-            }
-            else Autologin.IsChecked = false;
-
-            if (Autologin.IsChecked == true)
-            {
-                ConnectToDB();
-            }
-            showonlymine.IsChecked = Properties.Settings.Default.DatabaseShowOnlyMine;
-            showonlyunfinished.IsChecked = Properties.Settings.Default.DatabaseShowOnlyFinished;
-        }
-
-        private void ConnectToDB()
-        {
-            Properties.Settings.Default.DatabaseAddress = this.db_server.Text;
-            Properties.Settings.Default.MongoDBUser = this.db_login.Text;
-            Properties.Settings.Default.MongoDBPass = this.db_pass.Password;
-            Properties.Settings.Default.Save();
 
             database = DatabaseHandler.Database;
             mongo = DatabaseHandler.Client;
 
-            try
-            {
-                int count = 0;
-                while (mongo.Cluster.Description.State.ToString() == "Disconnected")
-                {
-                    Thread.Sleep(100);
-                    if (count++ >= 25) throw new MongoException("Unable to connect to the database. Please make sure that " + mongo.Settings.Server.Host + ":" + mongo.Settings.Server.Port + " is online and you entered your credentials correctly!");
-                }
+            GetDatabases(DatabaseHandler.DatabaseName);
 
-                authlevel = DatabaseHandler.CheckAuthentication(this.db_login.Text, "admin");
-
-                if (authlevel > 0)
-                {
-                    SelectDatabase();
-                    Autologin.IsEnabled = true;
-                }
-                else
-                { MessageBox.Show("You have no rights to access the database list");
-                authlevel = DatabaseHandler.CheckAuthentication(this.db_login.Text, Properties.Settings.Default.DatabaseName);
-                }
-            }
-            catch (MongoException e)
-            {
-                MessageBox.Show(e.Message, "Connection failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                mongo.Cluster.Dispose();
-            }
-
-            //now that we made sure the user can see database, check if he has any admin/writing rights on this specific database
+            showonlymine.IsChecked = Properties.Settings.Default.DatabaseShowOnlyMine;
+            showonlyunfinished.IsChecked = Properties.Settings.Default.DatabaseShowOnlyFinished;
         }
 
-        private void Connect_Click(object sender, RoutedEventArgs e)
+        private void DatabaseResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ConnectToDB();
-        }
-
-        private void DataBasResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (DataBasResultsBox.SelectedItem != null)
+            if (DatabaseBox.SelectedItem != null)
             {
-                Properties.Settings.Default.DatabaseName = DataBasResultsBox.SelectedItem.ToString();
-                Properties.Settings.Default.Save();
-
-                localauthlevel = Math.Max(DatabaseHandler.CheckAuthentication(this.db_login.Text, "admin"), DatabaseHandler.CheckAuthentication(this.db_login.Text, Properties.Settings.Default.DatabaseName));
+                DatabaseHandler.ChangeDatabase(DatabaseBox.SelectedItem.ToString());
+                
+                localauthlevel = DatabaseHandler.CheckAuthentication();
                 authlevel = localauthlevel;
                 if (localauthlevel > 1) GetSessions();
             }
         }
 
-        private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SessionsResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             allfiles.Clear();
-            if (CollectionResultsBox.SelectedItem != null)
-            {
-                
-                Properties.Settings.Default.LastSessionId = ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name;
+            if (SessionsResultsBox.SelectedItem != null)
+            {                
+                Properties.Settings.Default.LastSessionId = ((DatabaseSession)(SessionsResultsBox.SelectedValue)).Name;
                 Properties.Settings.Default.Save();
                 AnnoItems.Clear();
                 GetMedia();
@@ -123,11 +68,6 @@ namespace ssi
                 cts.Dispose();
                 cts = new CancellationTokenSource();
                 GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
-                //if (authlevel > 2)
-                //{
-                //    AddAnnotation.Visibility = Visibility.Visible;
-                //}
-
             }
         }
 
@@ -176,7 +116,7 @@ namespace ssi
 
 
             AnnoItems.Clear();
-           if(DataBasResultsBox.SelectedItem != null)   GetAnnotations(true, showonlyunfinished.IsChecked == true);
+           if(DatabaseBox.SelectedItem != null)   GetAnnotations(true, showonlyunfinished.IsChecked == true);
         }
 
         private void showonlymine_Unchecked(object sender, RoutedEventArgs e)
@@ -185,12 +125,7 @@ namespace ssi
             Properties.Settings.Default.Save();
 
             AnnoItems.Clear();
-            if (DataBasResultsBox.SelectedItem != null) GetAnnotations(false, showonlyunfinished.IsChecked == true);
-        }
-
-        public int Authlevel()
-        {
-            return authlevel;
+            if (DatabaseBox.SelectedItem != null) GetAnnotations(false, showonlyunfinished.IsChecked == true);
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
@@ -198,15 +133,23 @@ namespace ssi
             Properties.Settings.Default.DataServerLogin = this.server_login.Text;
             Properties.Settings.Default.DataServerPass = this.server_pass.Password;
             Properties.Settings.Default.Save();
-
-            this.DialogResult = true;
-            this.Close();
+            
+            if (SessionsResultsBox.SelectedItem != null)
+            {
+                DatabaseSession session = (DatabaseSession)SessionsResultsBox.SelectedItem;
+                if (DatabaseHandler.ChangeSession(session.Name))
+                {
+                    DialogResult = true;
+                }
+            }            
+            
+            Close();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false;
-            this.Close();
+            DialogResult = false;
+            Close();
         }
 
         public System.Collections.IList Annotations()
@@ -216,60 +159,65 @@ namespace ssi
             else return null;
         }
 
-        public List<DatabaseMediaInfo> MediaConnectionInfo()
+        public List<DatabaseMediaInfo> StreamsInfo()
         {
             if (ci != null)
                 return ci;
             else return null;
         }
 
-        public List<DatabaseMediaInfo> Media()
+        public List<DatabaseMediaInfo> Streams()
         {
             if (MediaResultBox.SelectedItems != null)
                 return allfiles;
             else return null;
         }
 
-
-
-        public async void SelectDatabase()
+        private void Select(ListBox list, string select)
         {
-            DataBasResultsBox.Items.Clear();
-
-            using (var cursor = await DatabaseHandler.Client.ListDatabasesAsync())
+            if (select != null)
             {
-                await cursor.ForEachAsync(d => addDbtoList(d["name"].ToString()));
+                foreach (string item in list.Items)
+                {
+                    if (item == select)
+                    {
+                        list.SelectedItem = item;
+                    }
+                }
             }
-            DataBasResultsBox.SelectedIndex = 0;
         }
 
-        public void addDbtoList(string name)
+        public void GetDatabases(string selectedItem = null)
         {
-            if (name != "admin" && name != "local" && DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, name) >   1)
+            DatabaseBox.Items.Clear();
+
+            List<string> databases = DatabaseHandler.GetDatabases();
+
+            foreach (string db in databases)
             {
-                DataBasResultsBox.Items.Add(name);
+                DatabaseBox.Items.Add(db);
             }
+
+            Select(DatabaseBox, selectedItem);
         }
 
         public void GetSessions()
 
         {
-            var sessioncollection = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
-            var sessions = sessioncollection.Find(_ => true).ToList();
+            List<BsonDocument> sessions = DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Sessions, true);            
 
             if (sessions.Count > 0)
             {
-                if (CollectionResultsBox.Items != null) CollectionResultsBox.ItemsSource = null;
+                if (SessionsResultsBox.Items != null) SessionsResultsBox.ItemsSource = null;
                 List<DatabaseSession> items = new List<DatabaseSession>();
                 foreach (var c in sessions)
                 {
-
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].AsDateTime.ToShortDateString(), OID = c["_id"].AsObjectId });
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), OID = c["_id"].AsObjectId });
                 }
 
-                CollectionResultsBox.ItemsSource = items;
+                SessionsResultsBox.ItemsSource = items;
             }
-            else CollectionResultsBox.ItemsSource = null;
+            else SessionsResultsBox.ItemsSource = null;
         }
 
         public string FetchDBRef(IMongoDatabase database, string collection, string attribute, ObjectId reference)
@@ -306,7 +254,7 @@ namespace ssi
            
             AnnotationResultBox.ItemsSource = null;
             //  AnnotationResultBox.Items.Clear();
-            List<DatabaseAnno> items = new List<DatabaseAnno>();
+            List<DatabaseAnnotion> items = new List<DatabaseAnnotion>();
             List<string> Collections = new List<string>();
 
             var sessions = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
@@ -366,15 +314,21 @@ namespace ssi
             }
             catch (Exception ex) { }
 
-            DateTime date = annos["date"].ToUniversalTime();
-            ;
+            string dateString = "";
+            try
+            {
+                DateTime date = annos["date"].ToUniversalTime();
+                dateString = date.ToShortDateString() + " " + date.ToShortTimeString();
+            }
+            catch (Exception ex) { }
+
             if (!onlyme && !onlyunfinished ||
                 onlyme && !onlyunfinished && Properties.Settings.Default.MongoDBUser == annotatid ||
                 !onlyme && onlyunfinished && !isfinished ||
                 onlyme && onlyunfinished && !isfinished && Properties.Settings.Default.MongoDBUser == annotatid)
             {
                 bool isOwner = authlevel > 2 || Properties.Settings.Default.MongoDBUser == annotatid;
-                AnnoItems.Add(new DatabaseAnno() { Id = id, Role = roleid, AnnoScheme = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsLocked = islocked, IsOwner = isOwner, Date = date.ToShortDateString() + " " + date.ToShortTimeString(),  OID = id });
+                AnnoItems.Add(new DatabaseAnnotion() { Id = id, Role = roleid, AnnoScheme = annotid, AnnotatorFullname = annotatidfn, Annotator = annotatid, IsFinished = isfinished, IsLocked = islocked, IsOwner = isOwner, Date = dateString,  OID = id });
             }
         }
 
@@ -481,59 +435,47 @@ namespace ssi
                 var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
                 var annotators = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
 
+                string annotator_name = DatabaseHandler.SelectAnnotator();
 
-                List<string> annotator_names = new List<string>();
-                foreach (var document in annotators.Find(_ => true).ToList())
-                {
-                    annotator_names.Add(document["fullname"].ToString());
-                }
-
-                DatabaseSelectionWindow dbw = new DatabaseSelectionWindow(annotator_names, false, "Select Annotator", "Annotator");
-                dbw.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
-                dbw.ShowDialog();
-
-                if (dbw.DialogResult == true)
-                {
-                    string annotator_name = dbw.Result().ToString();
+                if (annotator_name != null)
+                {                    
                     ObjectId annotid_new = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName),  DatabaseDefinitionCollections.Annotators, "fullname", annotator_name);
      
-
-                foreach (var item in AnnotationResultBox.SelectedItems)
-                {
-                    ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(item)).Role);
-                    ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(item)).AnnoScheme);
-                    ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(item)).Annotator);
-                    ObjectId sessionid = GetIdFromName(sessions, Properties.Settings.Default.LastSessionId);
-
-                    var builder = Builders<BsonDocument>.Filter;
-                    var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
-                    var anno = annotations.Find(filter).Single();
-
-                    anno.Remove("_id");
-                    anno["annotator_id"] = annotid_new;
-                    try
+                    foreach (var item in AnnotationResultBox.SelectedItems)
                     {
-                        anno["isFinished"] = false;
-                    }
-                    catch (Exception ex)
-                    { }
+                        ObjectId roleid = GetIdFromName(roles, ((DatabaseAnnotion)(item)).Role);
+                        ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnnotion)(item)).AnnoScheme);
+                        ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnnotion)(item)).Annotator);
+                        ObjectId sessionid = GetIdFromName(sessions, Properties.Settings.Default.LastSessionId);
 
+                        var builder = Builders<BsonDocument>.Filter;
+                        var filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotatid) & builder.Eq("session_id", sessionid);
+                        var anno = annotations.Find(filter).Single();
+
+                        anno.Remove("_id");
+                        anno["annotator_id"] = annotid_new;
                         try
                         {
-                            anno["isLocked"] = false;
+                            anno["isFinished"] = false;
                         }
                         catch (Exception ex)
                         { }
 
-                        UpdateOptions uo = new UpdateOptions();
-                    uo.IsUpsert = true;
+                            try
+                            {
+                                anno["isLocked"] = false;
+                            }
+                            catch (Exception ex)
+                            { }
 
-                    filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotid_new) & builder.Eq("session_id", sessionid);
-                    var result = annotations.ReplaceOne(filter, anno, uo);
+                            UpdateOptions uo = new UpdateOptions();
+                        uo.IsUpsert = true;
 
+                        filter = builder.Eq("role_id", roleid) & builder.Eq("scheme_id", annotid) & builder.Eq("annotator_id", annotid_new) & builder.Eq("session_id", sessionid);
+                        var result = annotations.ReplaceOne(filter, anno, uo);
 
+                    }
 
-                }
                     AnnoItems.Clear();
                     GetAnnotations(showonlymine.IsChecked == true, showonlyunfinished.IsChecked == true);
 
@@ -716,9 +658,9 @@ namespace ssi
 
                 foreach (var item in AnnotationResultBox.SelectedItems)
                 {
-                    ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(item)).Role);
-                    ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(item)).AnnoScheme);
-                    ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(item)).Annotator);
+                    ObjectId roleid = GetIdFromName(roles, ((DatabaseAnnotion)(item)).Role);
+                    ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnnotion)(item)).AnnoScheme);
+                    ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnnotion)(item)).Annotator);
                     ObjectId sessionid = GetIdFromName(sessions, Properties.Settings.Default.LastSessionId);
 
                     var builder = Builders<BsonDocument>.Filter;
@@ -752,7 +694,7 @@ namespace ssi
             {
                 for (int i = 0; i < AnnotationResultBox.SelectedItems.Count; i++)
                 {
-                    if (authlevel > 2 || Properties.Settings.Default.MongoDBUser == ((DatabaseAnno)(AnnotationResultBox.SelectedValue)).Annotator)
+                    if (authlevel > 2 || Properties.Settings.Default.MongoDBUser == ((DatabaseAnnotion)(AnnotationResultBox.SelectedValue)).Annotator)
                     {
                         DeleteAnnotation.Visibility = Visibility.Visible;
                         CopyAnnotation.Visibility = Visibility.Visible;
@@ -771,9 +713,9 @@ namespace ssi
                     var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
                     var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
                     var annotators = database.GetCollection<BsonDocument>( DatabaseDefinitionCollections.Annotators);
-                    ObjectId roleid = GetIdFromName(roles, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).Role);
-                    ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).AnnoScheme);
-                    ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnno)(AnnotationResultBox.SelectedItems[i])).Annotator);
+                    ObjectId roleid = GetIdFromName(roles, ((DatabaseAnnotion)(AnnotationResultBox.SelectedItems[i])).Role);
+                    ObjectId annotid = GetIdFromName(annotationschemes, ((DatabaseAnnotion)(AnnotationResultBox.SelectedItems[i])).AnnoScheme);
+                    ObjectId annotatid = GetIdFromName(annotators, ((DatabaseAnnotion)(AnnotationResultBox.SelectedItems[i])).Annotator);
                     ObjectId sessionid = GetIdFromName(sessions, Properties.Settings.Default.LastSessionId);
 
                     var builder = Builders<BsonDocument>.Filter;
@@ -800,31 +742,7 @@ namespace ssi
 
             }
         }
-
-        private void Autologin_Unchecked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.DatabaseAutoLogin = false;
-            Properties.Settings.Default.Save();
-        }
-
-        private void Autologin_Checked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.DatabaseAutoLogin = true;
-            Properties.Settings.Default.Save();
-        }
-
-        private void db_login_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            Autologin.IsChecked = false;
-            Autologin.IsEnabled = false;
-        }
-
-        private void db_pass_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            Autologin.IsChecked = false;
-            Autologin.IsEnabled = false;
-        }
-
+        
         private void showonlyunfinished_Checked(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.DatabaseShowOnlyFinished = true;
@@ -852,8 +770,6 @@ namespace ssi
             annos.UpdateOne(filter, update);
         }
 
-
-
         private void ChangeLockedState(ObjectId id, bool state)
         {
             var annos = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
@@ -870,7 +786,7 @@ namespace ssi
             //Properties.Settings.Default.OnlyFinished = true;
             //Properties.Settings.Default.Save();
 
-            DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
+            DatabaseAnnotion anno = (DatabaseAnnotion)((CheckBox)sender).DataContext;
             ChangeFinishedState(anno.Id, true);
         }
 
@@ -880,55 +796,20 @@ namespace ssi
             //Properties.Settings.Default.OnlyFinished = false;
             //Properties.Settings.Default.Save();
 
-            DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
+            DatabaseAnnotion anno = (DatabaseAnnotion)((CheckBox)sender).DataContext;
             ChangeFinishedState(anno.Id, false);
-        }
-
-        private void db_server_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            db_server.SelectAll();
-        }
-
-        private void db_login_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            db_login.SelectAll();
-        }
-
-        private void db_pass_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            db_pass.SelectAll();
-        }
-
-        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if(e.Key == System.Windows.Input.Key.Return) ConnectToDB(); 
-        }
-
-        private void db_server_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
-        {
-            db_server.SelectAll();
-        }
-
-        private void db_login_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
-        {
-            db_login.SelectAll();
-        }
-
-        private void db_pass_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
-        {
-            db_pass.SelectAll();
         }
 
         private void IsLockedCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
+            DatabaseAnnotion anno = (DatabaseAnnotion)((CheckBox)sender).DataContext;
             ChangeLockedState(anno.Id, false);
 
         }
 
         private void IsLockedCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            DatabaseAnno anno = (DatabaseAnno)((CheckBox)sender).DataContext;
+            DatabaseAnnotion anno = (DatabaseAnnotion)((CheckBox)sender).DataContext;
             ChangeLockedState(anno.Id, true);
         }
     }

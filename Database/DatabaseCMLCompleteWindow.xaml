@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ssi"
-             Title="Complete Tier"
+             Title="Complete Annotation"
              Height="400" Width="500">
     <Grid Margin="5">
         <Grid.ColumnDefinitions>

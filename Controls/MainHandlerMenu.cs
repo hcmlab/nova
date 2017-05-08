@@ -9,26 +9,66 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        private void tierMenu_Click(object sender, RoutedEventArgs e)
+        private void updateMenu()
         {
-            control.saveAnnoMenu.IsEnabled = false;
-            control.saveAnnoMenuAs.IsEnabled = false;
-            control.convertAnnoContinuousToDiscreteMenu.IsEnabled = false;
-            control.convertAnnoToSignalMenu.IsEnabled = false;
-            control.exportMenu.IsEnabled = false;            
+            AnnoTier tier = AnnoTierStatic.Selected;
+            bool hasTier = tier != null;
+            SignalTrack track = SignalTrackStatic.Selected;
+            bool hasTrack = track != null;
+            MediaBox box = MediaBoxStatic.Selected;
+            bool hasBox = box != null;
+            bool isConnected = DatabaseHandler.IsConnected;
+            bool isConnectedAndHasSession = isConnected && DatabaseHandler.IsSession;
+            int authentication = DatabaseHandler.CheckAuthentication();
 
-            AnnoTier a = AnnoTierStatic.Selected;
-            if (a != null)
+            // file
+
+            control.fileSaveProjectMenu.IsEnabled = hasTier || hasTrack || hasBox;
+            control.exportSamplesMenu.IsEnabled = hasTier && hasTrack;            
+            control.exportToGenie.IsEnabled = hasTier;
+            control.exportSelectedTrackMenu.IsEnabled = hasTier;
+            control.exportSelectedTierMenu.IsEnabled = hasTier;
+
+            // database
+
+            Visibility databaseVisibility = isConnected ? Visibility.Visible : Visibility.Collapsed;
+
+            control.databaseCMLCompleteStepMenu.Visibility = databaseVisibility;
+            control.databaseCMLTransferStepMenu.Visibility = databaseVisibility;
+            control.databaseCMLExtractFeaturesMenu.Visibility = databaseVisibility;
+            control.databaseCMLMergeMenu.Visibility = databaseVisibility;
+            control.databaseLoadSessionMenu.Visibility = databaseVisibility;
+            control.databaseAdminMenu.Visibility = Visibility.Collapsed;
+
+            if (isConnected && authentication > 2)
             {
-                if (!a.IsDiscreteOrFree)
+                control.databaseAdminMenu.Visibility = Visibility.Visible;
+                control.databaseManageDBsMenu.Visibility = Visibility.Visible;
+                control.databaseManageSessionsMenu.Visibility = Visibility.Visible;
+
+                control.databaseCMLTransferStepMenu.Visibility = Visibility.Visible;
+                control.databaseCMLMergeMenu.Visibility = Visibility.Visible;
+
+                if (isConnected && authentication > 3)
                 {
-                    control.convertAnnoContinuousToDiscreteMenu.IsEnabled = true;
-                    control.convertAnnoToSignalMenu.IsEnabled = true;
+                    control.databaseManageUsersMenu.Visibility = Visibility.Visible;
                 }
-                control.saveAnnoMenu.IsEnabled = true;
-                control.saveAnnoMenuAs.IsEnabled = true;
-                control.exportMenu.IsEnabled = true;
             }
+
+            // annotation
+
+            control.annoSaveAllMenu.IsEnabled = hasTier;
+            control.annoSaveMenu.IsEnabled = hasTier;
+            control.annoSaveAsMenu.IsEnabled = hasTier;
+            control.convertSelectedTierMenu.IsEnabled = hasTier;
+            control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
+            control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
+            control.convertSignalToAnnoContinuousMenu.IsEnabled = hasTrack;
+        }
+
+        private void tierMenu_MouseEnter(object sender, RoutedEventArgs e)
+        {
+            updateMenu();
         }
 
         private void helpMenu_Click(object sender, RoutedEventArgs e)

@@ -28,7 +28,6 @@ namespace ssi
             dllName = Path.GetFileNameWithoutExtension(dllPath);
             directory = Environment.CurrentDirectory + "\\" + PLUGIN_FOLDER + "\\" + dllName + "\\";
 
-            Directory.CreateDirectory(Environment.CurrentDirectory + "\\" + PLUGIN_FOLDER);
             Directory.CreateDirectory(directory);
             if (!downloadDll(dllName, false))
             {
@@ -44,7 +43,7 @@ namespace ssi
                     foreach (Type type in asm.GetExportedTypes())
                     {
                         if (type.Name == typeName)
-                        { 
+                        {
                             this.type = type;
                             obj = Activator.CreateInstance(type);
 

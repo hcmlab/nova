@@ -5,11 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Load Session" Height="700" Width="1000" KeyDown="Window_KeyDown">
+        Title="Load Session" Height="700" Width="1000">
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
@@ -17,33 +16,7 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-
-            <StackPanel Orientation="Vertical" Margin="10">
-                <Label Content="Server:IP" Margin="-3,0,0,0"></Label>
-                <TextBox x:FieldModifier="public" x:Name="db_server" Height="25" GotKeyboardFocus="db_server_GotKeyboardFocus"  GotMouseCapture="db_server_GotMouseCapture" Width="200" Focusable="True" VerticalContentAlignment="Center" />
-            </StackPanel>
-
-            <StackPanel Orientation="Vertical" Margin="10">
-                <Label Content="Database Username" Margin="-3,0,0,0"></Label>
-                <TextBox x:FieldModifier="public" x:Name="db_login" Height="25" Width="200" GotKeyboardFocus="db_login_GotKeyboardFocus" GotMouseCapture="db_login_GotMouseCapture"  Focusable="True" TextChanged="db_login_TextChanged" VerticalContentAlignment="Center" />
-            </StackPanel>
-
-            <StackPanel Orientation="Vertical" Margin="10">
-                <Label Content="Database Password"  Margin="-3,0,0,0" />
-                <PasswordBox x:FieldModifier="public" x:Name="db_pass" Height="25" Width="200"  GotKeyboardFocus="db_pass_GotKeyboardFocus" GotMouseCapture="db_pass_GotMouseCapture" Focusable="True"  PasswordChanged="db_pass_PasswordChanged" VerticalContentAlignment="Center" />
-            </StackPanel>
-
-            <StackPanel Orientation="Vertical" Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <CheckBox Name="Autologin" Checked="Autologin_Checked" Unchecked="Autologin_Unchecked"  VerticalAlignment="Center" VerticalContentAlignment="Center" />
-                    <Label Content="Auto-Connect" />
-                </StackPanel>
-                <Button Name="Connect" Content="Connect" Click="Connect_Click" Height="25" Width="100" />
-            </StackPanel>
-        </StackPanel>
-
-        <Grid Grid.Row="1" Grid.Column="0">
+        <Grid Grid.Row="0" Grid.Column="0">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"></RowDefinition>
@@ -57,12 +30,12 @@
 
             <DockPanel Grid.Column="0" Grid.Row="0" Margin="10">
                 <Label Content="Databases" DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                <ListBox Name="DataBasResultsBox" SelectionMode="Single" SelectionChanged="DataBasResultsBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+                <ListBox Name="DatabaseBox" SelectionMode="Single" SelectionChanged="DatabaseResultsBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
             </DockPanel>
 
             <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
                 <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged" SelectionMode="Single">
+                <ListView Name="SessionsResultsBox" SelectionChanged="SessionsResultsBox_SelectionChanged" SelectionMode="Single">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -169,7 +142,7 @@
             </DockPanel>
         </Grid>
 
-        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
                 <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click" />
                 <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click" />

@@ -22,18 +22,18 @@ namespace ssi
         {
             get
             {
-                if (Source.HasFile())
+                if (Source.HasFile)
                 {
                     return Source.File.Name;
                 }
-                else if (Source.HasDatabase())
+                else if (Source.HasDatabase)
                 {
                     return Scheme.Name;
                 }
                 else
                 {
                     return "*";
-                }
+                }                
             }
         }
 
@@ -68,29 +68,26 @@ namespace ssi
                 return true;
             }
 
-            if (Source.HasFile())
+            if (Source.HasFile || Source.StoreToFile)
             {
-                if (saveToFile(Source.File.Path))
+                if (!Source.HasFile)
+                {
+                    string path = FileTools.SaveFileDialog(Scheme.Name, ".annotation", "Annotation(*.annotation)|*.annotation", "");
+                    if (path != null)
+                    {
+                        Source.File.Path = path;
+                        if (saveToFile(Source.File.Path))
+                        {
+                            saved = true;
+                        }
+                    }
+                }                
+            }
+            else if (Source.HasDatabase || Source.StoreToDatabase)
+            {
+                if (DatabaseHandler.SaveAnnoList(this, loadedMedia))
                 {
                     saved = true;
-                }
-            }
-
-            if (Source.HasDatabase())
-            {
-                if (DatabaseHandler.StoreToDatabase(this, loadedMedia) != null)
-                {
-                    saved = true;
-                }
-            }
-
-            if (!saved)
-            {
-                string path = FileTools.SaveFileDialog(Scheme.Name, ".annotation", "Annotation(*.annotation)|*.annotation", "");
-                if (path != null)
-                {
-                    Source.File.Path = path;
-                    Save();
                 }
             }
 
