@@ -59,7 +59,7 @@ namespace ssi
             ID = GetRandomInt(1, Int32.MaxValue);
         }
 
-        public bool Save(List<DatabaseMediaInfo> loadedMedia = null)
+        public bool Save(List<DatabaseStream> loadedStreams = null)
         {
             bool saved = false;
 
@@ -85,9 +85,13 @@ namespace ssi
             }
             else if (Source.HasDatabase || Source.StoreToDatabase)
             {
-                if (DatabaseHandler.SaveAnnoList(this, loadedMedia))
+                if (DatabaseHandler.SaveAnnoList(this, loadedStreams))
                 {
                     saved = true;
+                }
+                if (!Source.HasDatabase)
+                {
+                    Source.Database.OID = DatabaseHandler.GetAnnotationId(Meta.Role, Scheme.Name, Meta.Annotator, Source.Database.Session);
                 }
             }
 

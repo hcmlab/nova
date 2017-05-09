@@ -20,8 +20,6 @@ namespace ssi
         private MongoClient mongo;
         private IMongoDatabase database;
         private int authlevel = 0;
-        private List<DatabaseMediaInfo> files = new List<DatabaseMediaInfo>();
-        private List<DatabaseMediaInfo> allfiles = new List<DatabaseMediaInfo>();
         private AnnoList mean = null;
         private AnnoList rms = null;
         private AnnoList merge = null;
@@ -142,7 +140,7 @@ namespace ssi
         {
             AnnotationResultBox.ItemsSource = null;
             //  AnnotationResultBox.Items.Clear();
-            List<DatabaseAnnotion> items = new List<DatabaseAnnotion>();
+            List<DatabaseAnnotation> items = new List<DatabaseAnnotation>();
             List<string> Collections = new List<string>();
 
             database = mongo.GetDatabase(Properties.Settings.Default.DatabaseName);
@@ -201,7 +199,7 @@ namespace ssi
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnnotion() { Role = rolename, AnnoScheme = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId });
                 }
                 //else if (result.ElementCount == 0 && result2.ElementCount > 0 && annos["role_id"].AsObjectId == roleid)
                 //{
@@ -209,7 +207,7 @@ namespace ssi
                 //}
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
-                    items.Add(new DatabaseAnnotion() { Role = rolename, AnnoScheme = annoschemename, AnnotatorFullname = annotatornamefull, Annotator = annotatorname, OID = anno["_id"].AsObjectId });
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId });
                 }
             }
 
@@ -394,7 +392,7 @@ namespace ssi
 
         private List<AnnoList> convertAnnoListstoMatrix(string restclass)
         {
-            List<AnnoList> annolists = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
 
             List<AnnoList> convertedlists = new List<AnnoList>();
 
@@ -953,7 +951,7 @@ namespace ssi
         {
             Ok.IsEnabled = false;
 
-            List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
             mean = calculateMean(al);
 
             //todo do something
@@ -968,13 +966,13 @@ namespace ssi
         {
             Ok.IsEnabled = false;
 
-            List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
             rms = rootMeanSquare(al);
         }
 
         private void CalculateRMSE_Click(object sender, RoutedEventArgs e)
         {
-            List<AnnoList> al = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
             RMSE(al);
         }
 
@@ -1018,7 +1016,7 @@ namespace ssi
 
         private void CalculateCronbach_Click(object sender, RoutedEventArgs e)
         {
-            List<AnnoList> annolists = DatabaseHandler.LoadFromDatabase(AnnotationResultBox.SelectedItems, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
 
             double cronbachalpha = Cronbachsalpha(annolists, 10);
 

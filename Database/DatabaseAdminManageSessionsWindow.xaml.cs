@@ -151,7 +151,7 @@ namespace ssi
         }
 
 
-        private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (SessionsBox.SelectedItem != null)
             {

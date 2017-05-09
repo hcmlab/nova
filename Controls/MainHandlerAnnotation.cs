@@ -82,8 +82,8 @@ namespace ssi
         private void clearAnnoInfo()
         {
             control.annoSettingsButton.Visibility = Visibility.Hidden;
-            control.annoStatusFileNameOrSessionLabel.Text = "";
-            control.annoStatusFileNameOrSessionLabel.ToolTip = "";
+            control.annoStatusFileNameOrOIDLabel.Text = "";
+            control.annoStatusFileNameOrOIDLabel.ToolTip = "";
             control.annoStatusSchemeNameLabel.Text = "";
             control.annoStatusSchemeTypeLabel.Text = "";
             control.annoStatusSchemeContinuousPanel.Visibility = Visibility.Collapsed;
@@ -106,19 +106,19 @@ namespace ssi
             control.annoSettingsButton.Visibility = Visibility.Visible;
             if (annoList.Source.HasFile)
             {
-                control.annoStatusFileNameOrSessionLabel.Text = annoList.Source.File.FullName;
-                control.annoStatusFileNameOrSessionLabel.ToolTip = annoList.Source.File.Path;
+                control.annoStatusFileNameOrOIDLabel.Text = annoList.Source.File.FullName;
+                control.annoStatusFileNameOrOIDLabel.ToolTip = annoList.Source.File.Path;
 
             }
             else if (annoList.Source.HasDatabase)
             {
-                control.annoStatusFileNameOrSessionLabel.Text = annoList.Source.Database.Session;
-                control.annoStatusFileNameOrSessionLabel.ToolTip = annoList.Source.Database.OID;
+                control.annoStatusFileNameOrOIDLabel.Text = annoList.Source.Database.OID.ToString();
+                control.annoStatusFileNameOrOIDLabel.ToolTip = annoList.Source.Database.OID;
             }
             else
             {
-                control.annoStatusFileNameOrSessionLabel.Text = "*";
-                control.annoStatusFileNameOrSessionLabel.ToolTip = "Not saved yet";
+                control.annoStatusFileNameOrOIDLabel.Text = "*";
+                control.annoStatusFileNameOrOIDLabel.ToolTip = "Not saved yet";
             }
 
             control.annoStatusSchemeNameLabel.Text = annoList.Scheme.Name;

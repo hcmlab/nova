@@ -24,7 +24,7 @@ namespace ssi
         public PluginCaller(string dllPath, string typeName)
         {
             isLoaded = true;
-            
+  
             dllName = Path.GetFileNameWithoutExtension(dllPath);
             directory = Environment.CurrentDirectory + "\\" + PLUGIN_FOLDER + "\\" + dllName + "\\";
 

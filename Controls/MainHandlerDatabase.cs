@@ -86,230 +86,193 @@ namespace ssi
         {
             DatabaseAdminManageSessionsWindow dialog = new DatabaseAdminManageSessionsWindow();
             databaseManage(dialog);
-        }
-
-        private void databaseStore(bool isfinished = false)
-        {
-            if (DatabaseHandler.IsConnected)
-            {
-                string message = "";
-
-                string login = Properties.Settings.Default.MongoDBUser + ":" + Properties.Settings.Default.MongoDBPass + "@";
-
-                foreach (AnnoTier track in annoTiers)
-                {
-                    if (!(track.AnnoList.HasChanged || isfinished))
-                    {
-                        continue;
-                    }
-
-                    if (track.AnnoList.Source.HasDatabase || track.AnnoList.Source.StoreToDatabase)
-                    {
-                        try
-                        {
-                   
-                            if (DatabaseHandler.SaveAnnoList(track.AnnoList, streams, isfinished))
-                            {
-                                track.AnnoList.HasChanged = false;
-                                message += "\r\n" + track.AnnoList.Scheme.Name;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            if (ex.Message.Contains("not auth"))
-                            {
-                                MessageBox.Show("Sorry, you don't have write access to the database", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-
-                            else if (ex.Message.Contains("MaxDocumentSize"))
-                            {
-                                MessageBox.Show(ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                            }
-                            else
-                            {
-                                MessageBox.Show("Could not store tier '" + track.AnnoList.Scheme.Name + "' to database", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                        }
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(message))
-                {
-                    MessageBox.Show("The following tiers have been stored to the database: " + message, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Load a database session first", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+        }      
 
         private void databaseLoadSession()
         {
             clearWorkspace();
 
-            if (streams != null) streams.Clear();
-            if (filesToDownload != null) filesToDownload.Clear();
-
-            System.Collections.IList annotations = null;
-            List<DatabaseMediaInfo> streamsInfo = null;
-
             DatabaseAnnoMainWindow dialog = new DatabaseAnnoMainWindow();
-            try
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dialog.ShowDialog();
+
+            if (dialog.DialogResult == false)
             {
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dialog.ShowDialog();
+                return;
+            }
 
-                if (dialog.DialogResult == true)
+            Action EmptyDelegate = delegate () { };
+            control.ShadowBox.Visibility = Visibility.Visible;
+            control.UpdateLayout();
+            control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+            System.Collections.IList annotations = dialog.Annotations();           
+            if (annotations != null && annotations.Count > 0)
+            {
+                List<AnnoList> annoLists = DatabaseHandler.LoadSession(annotations);
+                if (annoLists != null)
                 {
-                    annotations = dialog.Annotations();
-                    streams = dialog.Streams();
-                    streamsInfo = dialog.StreamsInfo();
-                    updateNavigator();
-                }
-
-                if (annotations != null)
-                {
-                    Action EmptyDelegate = delegate () { };
-                    control.ShadowBox.Visibility = Visibility.Visible;
-                    control.UpdateLayout();
-                    control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-
-                    List<AnnoList> annoLists = DatabaseHandler.LoadFromDatabase(annotations, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
-                    
-                    try
+                    foreach (AnnoList annoList in annoLists)
                     {
-                        if (annoLists != null)
+                        addAnnoTierFromList(annoList);
+                    }
+                }
+            }
+
+            control.ShadowBox.Visibility = Visibility.Collapsed;
+
+            List<DatabaseStream> streams = dialog.SelectedStreams();
+            databaseSessionStreams = streams;
+            if (streams != null && streams.Count > 0)
+            { 
+                try
+                {
+                    if (filesToDownload != null)
+                    {
+                        filesToDownload.Clear();
+                    }
+
+                    foreach (DatabaseStream stream in streams)
+                    {
+                        string url = stream.URL;
+                        bool requiresAuth = stream.ServerAuth;
+
+                        if (url == "")
                         {
-                            foreach (AnnoList annoList in annoLists)
+                            DatabaseDBMeta meta = new DatabaseDBMeta()
                             {
-                                //annoList.FilePath = annoList.Role + "." + annoList.Scheme.Name + "." + annoList.AnnotatorFullName;
-                                addAnnoTierFromList(annoList);
-                            }
-
-                            control.ShadowBox.Visibility = Visibility.Collapsed;
-
-                            //handle media
-
-                            if (streams.Count > 0)
+                                Name = DatabaseHandler.DatabaseName
+                            };
+                            if (!DatabaseHandler.GetDBMeta(ref meta))
                             {
-                                for (int i = 0; i < streams.Count; i++)
-                                {
-                                    foreach (DatabaseMediaInfo c in streamsInfo)
-
-                                    {
-                                        Properties.Settings.Default.DataServerConnectionType = c.connection;
-
-                                        if (c.filename == streams[i].filename.ToString())
-
-                                        {
-                                            if (c.connection == "sftp")
-                                            {
-                                                Properties.Settings.Default.DataServerConnectionType = "sftp";
-                                                SFTPDownloadFiles(c.ip, c.folder, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, c.filename, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass);
-                                            }
-                                            else if (streamsInfo[i].connection == "http" || streamsInfo[i].connection == "https" && streamsInfo[i].requiresauth == "false")
-                                            {
-                                                Properties.Settings.Default.DataServerConnectionType = "http";
-                                                httpGet(c.filepath, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, c.filename);
-                                            }
-                                            else if (streamsInfo[i].connection == "http" || streamsInfo[i].connection == "https" && streamsInfo[i].requiresauth == "true")
-                                            {
-                                                Properties.Settings.Default.DataServerConnectionType = "http";
-                                                //This has not been tested and probably needs rework.
-                                                httpPost(c.filepath, c.filename, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.DataServerLogin, Properties.Settings.Default.DataServerPass, Properties.Settings.Default.LastSessionId);
-                                            }
-                                        }
-                                    }
-                                }
+                                continue;
                             }
+                            url = meta.Server + '/' + DatabaseHandler.SessionName + '/' + stream.Name;
+                            requiresAuth = meta.ServerAuth;
+                        }
+
+                        string[] split = url.Split(':');
+                        string connection = split[0];                        
+
+                        string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream.Name;
+                        Directory.CreateDirectory(Path.GetDirectoryName(localPath));
+
+                        if (connection == "sftp")
+                        {                            
+                            SFTPDownloadFiles(url, localPath);
+                        }
+                        else if (connection == "http" || connection == "https" && requiresAuth == false)
+                        {                            
+                            httpGet(url, localPath);
+                        }
+                        else if (connection == "http" || connection == "https" && requiresAuth == true)
+                        {
+                            httpPost(url, DatabaseHandler.SessionName, localPath);
                         }
                     }
-                    catch (TimeoutException e1)
-                    {
-                        MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
-                    }
+                }
+                catch (TimeoutException e1)
+                {
+                    MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
                 }
             }
-            catch (Exception ex)
-            {
-                dialog.Close();
-                MessageTools.Error(ex.ToString());
-            }
+     
         }
 
         private void reloadAnnoTierFromDatabase(AnnoTier tier)
         {
+            if (tier == null)
+            {
+                return;
+            }
+
             Action EmptyDelegate = delegate () { };
             control.ShadowBoxText.Text = "Reloading Annotation";
             control.ShadowBox.Visibility = Visibility.Visible;
             control.UpdateLayout();
             control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
-            DatabaseAnnotion s = new DatabaseAnnotion();
-            s.Role = tier.AnnoList.Meta.Role;
-            s.AnnoScheme = tier.AnnoList.Scheme.Name;
-            s.AnnotatorFullname = tier.AnnoList.Meta.AnnotatorFullName;
-            s.Annotator = tier.AnnoList.Meta.Annotator;
+            DatabaseAnnotation annotation = new DatabaseAnnotation();
+            annotation.Role = tier.AnnoList.Meta.Role;
+            annotation.Scheme = tier.AnnoList.Scheme.Name;
+            annotation.AnnotatorFullName = tier.AnnoList.Meta.AnnotatorFullName;
+            annotation.Annotator = tier.AnnoList.Meta.Annotator;
 
-            List<DatabaseAnnotion> list = new List<DatabaseAnnotion>();
-            list.Add(s);
-
-            List<AnnoList> annos = DatabaseHandler.LoadFromDatabase(list, Properties.Settings.Default.DatabaseName, Properties.Settings.Default.LastSessionId, Properties.Settings.Default.MongoDBUser);
+            AnnoList annoList = DatabaseHandler.LoadAnnoList(annotation);
             double maxdur = 0;
 
-            if (annos[0].Count > 0) maxdur = annos[0][annos[0].Count - 1].Stop;
-
-            if (annos[0] != null && tier != null)
+            if (annoList != null)
             {
-                setAnnoList(annos[0]);
+                maxdur = annoList[annoList.Count - 1].Stop;
+
+                setAnnoList(annoList);
                 tier.Children.Clear();
                 tier.AnnoList.Clear();
                 tier.segments.Clear();
-                tier.AnnoList = annos[0];
+                tier.AnnoList = annoList;
 
-                foreach (AnnoListItem item in annos[0])
+                foreach (AnnoListItem item in annoList)
                 {
                     tier.AddSegment(item);
                 }
 
-                tier.TimeRangeChanged(MainHandler.Time);
-            }
+                tier.TimeRangeChanged(Time);
+                updateTimeRange(maxdur);
 
-            updateTimeRange(maxdur);
-            // if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
-            control.ShadowBox.Visibility = Visibility.Collapsed;
+                control.ShadowBox.Visibility = Visibility.Collapsed;
+            } 
         }
 
         private void addNewAnnotationDatabase()
         {
             if (Time.TotalDuration > 0)
-            {
-                AnnoList annoList = new AnnoList();
-
+            {              
                 string annoScheme = DatabaseHandler.SelectScheme();
                 if (annoScheme == null)
                 {
                     return;
                 }
 
-                annoList.Meta.Role = DatabaseHandler.SelectRole();
-                if (annoList.Meta.Role == null)
+                string role = DatabaseHandler.SelectRole();
+                if (role == null)
                 {
                     return;
                 }
 
-                annoList.Scheme = DatabaseHandler.GetAnnotationScheme(annoScheme);
-                annoList.Scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
+                AnnoScheme scheme = DatabaseHandler.GetAnnotationScheme(annoScheme);
+                if (scheme == null)
+                {
+                    return;
+                }
+                scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
 
-                IMongoDatabase database = DatabaseHandler.Database;
+                ObjectId annotatid = DatabaseHandler.GetObjectID(DatabaseDefinitionCollections.Annotators, "name", Properties.Settings.Default.MongoDBUser);
+                string annotator = Properties.Settings.Default.MongoDBUser;
+                string annotatorFullName = DatabaseHandler.FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
 
-                ObjectId annotatid = DatabaseHandler.GetObjectID(database, DatabaseDefinitionCollections.Annotators, "name", Properties.Settings.Default.MongoDBUser);
-                annoList.Meta.Annotator = Properties.Settings.Default.MongoDBUser;
-                annoList.Meta.AnnotatorFullName = DatabaseHandler.FetchDBRef(database, DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
-
-                annoList.Source.StoreToDatabase = true;
+                AnnoList annoList;
+                if (DatabaseHandler.AnnotationExists(annotator, DatabaseHandler.SessionName, role, scheme.Name))
+                {
+                    DatabaseAnnotation annotation = new DatabaseAnnotation()
+                    {
+                        Annotator = annotator,
+                        Session = DatabaseHandler.SessionName,
+                        Role = role,
+                        Scheme = scheme.Name
+                    };
+                    annoList = DatabaseHandler.LoadAnnoList(annotation);
+                    annoList.HasChanged = false;
+                }
+                else
+                {
+                    annoList = new AnnoList();
+                    annoList.Meta.Role = role;
+                    annoList.Meta.Annotator = annotator;
+                    annoList.Meta.AnnotatorFullName = annotatorFullName;
+                    annoList.Scheme = scheme;
+                    annoList.Source.StoreToDatabase = true;
+                    annoList.HasChanged = true;
+                }
 
                 addAnnoTier(annoList);
                 control.annoListControl.editComboBox.SelectedIndex = 0;

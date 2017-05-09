@@ -548,9 +548,11 @@ namespace ssi
             //TimeRangeChanged(MainHandler.Time);
         }
 
-        public void ContinuousAnnoMode()
+        public void ContinuousAnnoMode(bool activated)
         {
-            if (!continuousAnnoMode)
+
+            dispatcherTimer.Stop();
+            if (!activated)
             {
                 dispatcherTimer.Start();
                 continuousAnnoMode = true;
