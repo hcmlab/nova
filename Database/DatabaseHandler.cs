@@ -25,14 +25,19 @@ namespace ssi
 
         #region CONNECT AND AUTH
 
+        public static string ServerInfo
+        {
+            get { return "Server [" + (IsConnected ? Properties.Settings.Default.MongoDBUser + "@" + Properties.Settings.Default.DatabaseAddress : "not connected") + "]"; }            
+        }
+
         public static string DatabaseInfo
         {
-            get { return "Database [" + (IsConnected ? Properties.Settings.Default.MongoDBUser + "@" + Properties.Settings.Default.DatabaseAddress : "not connected") + "]"; }            
+            get { return "Database [" + (IsDatabase ? DatabaseName : "none") + "]"; }
         }
 
         public static string SessionInfo
         {
-            get { return "Session [" + (IsSession ? sessionName.Replace('_', '-') : "not loaded") + "]"; }
+            get { return "Session [" + (IsSession ? sessionName.Replace('_', '-') : "none") + "]"; }
         }
 
         public static bool Connect()

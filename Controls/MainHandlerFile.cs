@@ -408,6 +408,7 @@ namespace ssi
             try
             {
                 doc.Load(filepath);
+               
                 foreach (XmlNode node in doc.SelectNodes("//media"))
                 {                    
                     string path = FileTools.GetAbsolutePath(node.InnerText, workdir);
@@ -428,6 +429,15 @@ namespace ssi
                     }
                     string path = FileTools.GetAbsolutePath(node.InnerText, workdir);
                     loadFile(path, foreground, background);
+                }
+
+                if (DatabaseHandler.IsConnected)
+                {
+                    XmlNode node = doc.SelectSingleNode("//tiers");
+                    if(node!=null && node.Attributes["database"] != null)
+                    {
+                        DatabaseHandler.ChangeDatabase(node.Attributes["database"].LastChild.Value);
+                    }
                 }
 
                 foreach (XmlNode node in (doc.SelectNodes("//tier")))
@@ -555,8 +565,16 @@ namespace ssi
                 }
             }
             sw.WriteLine("\t</signals>");
+           
+            if (DatabaseHandler.IsConnected && DatabaseHandler.IsDatabase && DatabaseHandler.IsSession)
+            {
+                sw.WriteLine("\t<tiers database=\"" + DatabaseHandler.Database + "\">");
+            }
+            else
+            {
+                sw.WriteLine("\t<tiers>");
+            }
 
-            sw.WriteLine("\t<tiers>");
             foreach (AnnoTier t in annoTiers)
             {
                 if (t.AnnoList.Source.HasFile)

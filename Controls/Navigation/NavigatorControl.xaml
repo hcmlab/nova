@@ -39,8 +39,10 @@
         </StackPanel>
 
         <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="statusBar" Margin="0" >
-            <StatusBarItem Name="statusBarDatabase">Database</StatusBarItem>
-            <Separator Background="LightGray"/>
+            <StatusBarItem Name="statusBarServer"></StatusBarItem>
+            <Separator/>
+            <StatusBarItem Name="statusBarDatabase"></StatusBarItem>
+            <Separator/>
             <StatusBarItem Name="statusBarSessionInfo"></StatusBarItem>
         </StatusBar>
     </Grid>

@@ -117,6 +117,8 @@ namespace ssi
             control.navigator.newAnnoFromDatabaseButton.IsEnabled = isConnectedAndHasSession;
             control.navigator.statusBarSessionInfo.Foreground = isConnectedAndHasSession ? Brushes.Green : Brushes.DarkGray;
             control.navigator.statusBarSessionInfo.Content = DatabaseHandler.SessionInfo;
+            control.navigator.statusBarServer.Content = DatabaseHandler.ServerInfo;
+            control.navigator.statusBarServer.Foreground = isConnected ? Brushes.Green : Brushes.DarkGray;
             control.navigator.statusBarDatabase.Content = DatabaseHandler.DatabaseInfo;
             control.navigator.statusBarDatabase.Foreground = isConnected ? Brushes.Green : Brushes.DarkGray;
         }
