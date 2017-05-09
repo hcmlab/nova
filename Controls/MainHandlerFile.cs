@@ -408,6 +408,7 @@ namespace ssi
             try
             {
                 doc.Load(filepath);
+               
                 foreach (XmlNode node in doc.SelectNodes("//media"))
                 {                    
                     string path = FileTools.GetAbsolutePath(node.InnerText, workdir);
@@ -430,20 +431,53 @@ namespace ssi
                     loadFile(path, foreground, background);
                 }
 
-                foreach (XmlNode node in (doc.SelectNodes("//tier")))
+                if (DatabaseHandler.IsConnected)
                 {
-                    string path = node.InnerText;
-                    if (path == "")
+                    XmlNode node = doc.SelectSingleNode("//tiers");
+                    if(node!=null && node.Attributes["database"] != null)
                     {
-                        path = node.Attributes["filepath"].LastChild.Value;
+                        DatabaseHandler.ChangeDatabase(node.Attributes["database"].LastChild.Value);
                     }
-                    path = FileTools.GetAbsolutePath(path, workdir);
-                    loadFile(path);
+                }
+
+                foreach (XmlNode node in (doc.SelectNodes("//tier")))
+                {                    
+                    if (node.Attributes != null && node.Attributes["database"] != null && node.Attributes["database"].LastChild.Value == "true")
+                    {
+                        AnnoList annoList = DatabaseHandler.LoadAnnoList(node.InnerText);
+                        if (annoList != null)
+                        {
+                            addAnnoTier(annoList);
+                        }
+                        else
+                        {
+                            MessageTools.Warning("Could not load annotation from database with id '" + node.InnerText + "'");
+                        }
+                    }
+                    else
+                    {
+                        string path = node.InnerText;
+                        if (path == "")
+                        {
+                            path = node.Attributes["filepath"].LastChild.Value;
+                        }
+                        path = FileTools.GetAbsolutePath(path, workdir);
+                        loadFile(path);
+                    }                    
                 }
             }
             catch (Exception e)
             {
                 MessageTools.Error(e.ToString());
+            }
+        }
+
+        private void loadProject()
+        {
+            string[] filePath = FileTools.OpenFileDialog("NOVA Project (*.nova)|*.nova", false);
+            if (filePath != null && filePath.Length > 0)
+            {
+                loadProjectFile(filePath[0]);
             }
         }
 
@@ -455,7 +489,7 @@ namespace ssi
         {
             if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList != null)
             {
-                AnnoTierStatic.Selected.AnnoList.Save();
+                AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams);
                 updateAnnoInfo(AnnoTierStatic.Selected);
             }
         }
@@ -499,15 +533,6 @@ namespace ssi
             }
         }
 
-        private void loadProject()
-        {           
-            string[] filePath = FileTools.OpenFileDialog("NOVA Project (*.nova)|*.nova", false);
-            if (filePath != null && filePath.Length > 0)
-            {
-                loadProjectFile(filePath[0]);
-            }
-        }
-
         private void saveProjectFile(List<AnnoTier> annoTiers, List<MediaBox> mediaBoxes, List<SignalTrack> signalTracks, string filepath)
         {
             string workdir = Path.GetDirectoryName(filepath);
@@ -540,17 +565,25 @@ namespace ssi
                 }
             }
             sw.WriteLine("\t</signals>");
+           
+            if (DatabaseHandler.IsConnected && DatabaseHandler.IsDatabase && DatabaseHandler.IsSession)
+            {
+                sw.WriteLine("\t<tiers database=\"" + DatabaseHandler.Database + "\">");
+            }
+            else
+            {
+                sw.WriteLine("\t<tiers>");
+            }
 
-            sw.WriteLine("\t<tiers>");
             foreach (AnnoTier t in annoTiers)
             {
                 if (t.AnnoList.Source.HasFile)
                 {
-                    sw.WriteLine("\t\t<tier name=\"" + t.AnnoList.Scheme.Name + "\">" + FileTools.GetRelativePath(t.AnnoList.Source.File.Path, workdir) + "</tier>");
+                    sw.WriteLine("\t\t<tier>" + FileTools.GetRelativePath(t.AnnoList.Source.File.Path, workdir) + "</tier>");
                 }
                 else if (t.AnnoList.Source.HasDatabase)
                 {
-                    //sw.WriteLine("\t\t<tier name=\"" + t.AnnoList.Scheme.Name + "\">" + FileTools.GetRelativePath(t.AnnoList.Source.File.Path, workdir) + "</tier>");
+                    sw.WriteLine("\t\t<tier database=\"true\">" + t.AnnoList.Source.Database.OID.ToString() + "</tier>");
                 }
             }
             sw.WriteLine("\t</tiers>");

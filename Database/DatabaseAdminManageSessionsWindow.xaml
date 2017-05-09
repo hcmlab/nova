@@ -41,17 +41,17 @@
                 <Button Style="{StaticResource MyButton}" Name="EditSession" Content="edit" Click="EditSession_Click" />
                 <Button Style="{StaticResource MyButton}" Name="CopySession" Content="copy" Click="CopySession_Click" />
             </StackPanel>
-            <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged" >
+            <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="SessionsBox_SelectionChanged" >
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="50" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                        <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
 
-                        <GridViewColumn Width="60" Header="Language">
+                        <GridViewColumn Width="Auto" Header="Language">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Language" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
-                        <GridViewColumn Width="60" Header="Location">
+                        <GridViewColumn Width="Auto" Header="Location">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Location" />
                             </GridViewColumn.DisplayMemberBinding>
@@ -81,13 +81,13 @@
             <ListView Name="StreamsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="50" Header="Name" DisplayMemberBinding="{Binding Name}" />
-                        <GridViewColumn Width="60" Header="Type">
+                        <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                        <GridViewColumn Width="Auto" Header="Type">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="StreamType" />
                             </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>                        
-                        <GridViewColumn Width="60" Header="Role">
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Role">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Role" />
                             </GridViewColumn.DisplayMemberBinding>

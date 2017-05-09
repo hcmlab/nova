@@ -10,7 +10,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.8.0";
+        public static string BuildVersion = "0.9.9.8.5";
 
         private static Timeline timeline = null;
 
@@ -59,7 +59,7 @@ namespace ssi
         private bool isKeyDown = false;
         private string lastDownloadFileName = null;
 
-        public List<DatabaseMediaInfo> streams = null;
+        public List<DatabaseStream> databaseSessionStreams;
 
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         public AnnoTierSegment temp_segment;

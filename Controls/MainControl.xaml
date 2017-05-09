@@ -353,7 +353,7 @@
                                                 BorderThickness="0">
                                             <Image Source="/Resources/settings.png" Width="16"></Image>
                                         </Button>
-                                        <TextBlock Name="annoStatusFileNameOrSessionLabel" TextTrimming="WordEllipsis"></TextBlock>
+                                        <TextBlock Name="annoStatusFileNameOrOIDLabel" TextTrimming="WordEllipsis"></TextBlock>
                                         <Separator />
                                         <TextBlock Name="annoStatusSchemeNameLabel" ToolTip="Name of the scheme" TextTrimming="WordEllipsis"></TextBlock>
                                         <Separator />
@@ -378,8 +378,8 @@
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right"
                                                 Name="annorightMenu">
-                                        <CheckBox x:Name="annoContinuousMode" Style="{DynamicResource OrangeSwitchStyle}" 
-                                                  ToolTip="Continuous Annotation Mode" 
+                                        <CheckBox x:Name="annoContinuousMode" Style="{DynamicResource OrangeSwitchStyle}"
+                                                  ToolTip="Continuous Annotation Mode. Shortcut: M" 
                                                   Visibility="Collapsed"/>
                                         <Separator Width="20" Visibility="Hidden"></Separator>
                                         <TextBlock x:Name="annoPositionLabel" 

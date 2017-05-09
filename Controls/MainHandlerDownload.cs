@@ -34,7 +34,6 @@ namespace ssi
         private List<string> filesToDownload = new List<string>();
         private List<DownloadStatus> downloads = new List<DownloadStatus>();
 
-
         private void CanceledDownload(string localpath)
         {
             foreach (DownloadStatus d in downloads)
@@ -170,19 +169,27 @@ namespace ssi
 
         #region SFTP
 
-        private async Task SFTPDownloadFiles(string ftphost, string folder, string db, string sessionid, string fileName, string login, string password)
+        private async Task SFTPDownloadFiles(string url, string localpath)
         {
             bool iscanceled = false;
-            string localfilepath = Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid + "\\";
+
+            string[] split = url.Split(':');
+            string[] split2 = split[1].Split(new char[] { '/' }, 4);
+            string ftphost = split2[2];
+            string fileName = split2[3].Substring(split2[3].LastIndexOf("/") + 1, (split2[3].Length - split2[3].LastIndexOf("/") - 1));
+            string folder = split2[3].Remove(split2[3].Length - fileName.Length);
+
+            string login = Properties.Settings.Default.DataServerLogin;
+            string password = Properties.Settings.Default.DataServerPass;
+
             lastDownloadFileName = fileName;
 
-            string ftpfilepath = "/" + folder + fileName;
-            string localpath = localfilepath + fileName;
+            string ftpfilepath = "/" + folder + fileName;            
 
             if (!localpath.EndsWith(".stream~")) filesToDownload.Add(localpath);
             numberOfParallelDownloads++;
 
-            if (!File.Exists(localfilepath + fileName))
+            if (!File.Exists(localpath))
             {
                 DownloadStatus dl = new DownloadStatus();
                 dl.File = localpath;
@@ -195,11 +202,8 @@ namespace ssi
                 {
                     sftp.OnTransferProgress += new FileTransferEvent(SFTPonTransferProgress);
                     await control.Dispatcher.BeginInvoke(new Action<string>(SFTPConnect), DispatcherPriority.Normal, "");
-                    Console.WriteLine("Connecting...");
                     sftp.Connect();
-                    Console.WriteLine("OK");
-
-                    Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid);
+                  
                     tokenSource = new CancellationTokenSource();
                     CancellationToken token = tokenSource.Token;
 
@@ -212,14 +216,11 @@ namespace ssi
                             {
                                 try
                                 {
-                                    Console.WriteLine("Downloading...");
-                                    sftp.Get(ftpfilepath, localfilepath);
-                                    Console.WriteLine("Disconnecting...");
+                                    sftp.Get(ftpfilepath, localpath);
                                     sftp.Close();
                                 }
                                 catch
                                 {
-                                    Console.WriteLine("Disconnecting on cancel..");
                                     sftp.Cancel();
                                     sftp.Close();
                                 }
@@ -228,16 +229,14 @@ namespace ssi
                     }, token);
                 }
                 catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
+                {                    
                     if (null != sftp && sftp.Connected)
                     {
                         sftp.Cancel();
                     }
-                    MessageBox.Show("Can't login to Data Server. Not authorized. Continuing without media.");
+                    MessageBox.Show("Can't login to data server, not authorized!");
                 }
             }
-            else { Console.WriteLine("File " + fileName + " already exists, skipping download"); }
 
             if (!iscanceled) await control.Dispatcher.BeginInvoke(new Action<string>(SFTPUpdateOnTransferEnd), DispatcherPriority.Normal, "");
         }
@@ -279,16 +278,18 @@ namespace ssi
         #endregion SFTP
 
         #region HTTPPOST
-        private async Task httpPost(string URL, string filename, string db, string login, string password, string sessionid = "Default")
+        private async Task httpPost(string URL, string session, string localpath)
         {
-            string fileName = filename;
+            string login = Properties.Settings.Default.DataServerLogin;
+            string password = Properties.Settings.Default.DataServerPass;
+
+            string fileName = Path.GetFileName(localpath);
             if (fileName.EndsWith(".stream%7E"))
             {
                 fileName = fileName.Remove(fileName.Length - 3);
                 fileName = fileName + "~";
             }
-
-            string localpath = Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid + "\\" + filename;
+            
             numberOfParallelDownloads++;
 
             if (!localpath.EndsWith(".stream~")) filesToDownload.Add(localpath);
@@ -304,7 +305,7 @@ namespace ssi
                 try
                 {
                     Action EmptyDelegate = delegate () { };
-                    control.ShadowBoxText.Text = "Downloading '" + filename + "'";
+                    control.ShadowBoxText.Text = "Downloading '" + fileName + "'";
                     control.ShadowBox.Visibility = Visibility.Visible;
                     control.shadowBoxCancelButton.Visibility = Visibility.Visible;
                     control.UpdateLayout();
@@ -334,23 +335,22 @@ namespace ssi
                         }
                     };
 
-                    Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", filename, URL);
-                    Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid);
-
+                    Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", fileName, URL);
+                    
                     tokenSource = new CancellationTokenSource();
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
                     {
                         token.Register(() => { client.CancelAsync(); CanceledDownload(localpath); return; });
-                        string resultString = Regex.Match(sessionid, @"\d+").Value;
+                        string resultString = Regex.Match(session, @"\d+").Value;
                         //Here we assume that the session is stored as simple ID. (as it is done in the Noxi Database). If the SessionID really is a string, this step is not needed.
                         int sid = Int32.Parse(resultString);
                         var values = new NameValueCollection();
                         values.Add("username", login);
                         values.Add("password", password);
                         values.Add("session_id", sid.ToString());
-                        values.Add("filename", filename);
+                        values.Add("filename", fileName);
 
                         Uri url = new Uri(URL);
                         client.UploadValuesAsync(url, values);
@@ -393,34 +393,36 @@ namespace ssi
 
         #region HTTPGET
 
-        private void httpGet(string URL, string db, string sessionid = "Default", string filename = "")
+        private void httpGet(string URL, string localPath)
         {
-            string fileName = filename;
-            if (fileName.EndsWith(".stream%7E"))
+           
+            if (!File.Exists(localPath))
             {
-                fileName = fileName.Remove(fileName.Length - 3);
-                fileName = fileName + "~";
-            }
+                string fileName = Path.GetFileName(localPath);
+                if (fileName.EndsWith(".stream%7E"))
+                {
+                    fileName = fileName.Remove(fileName.Length - 3);
+                    fileName = fileName + "~";
+                }
 
-            string localpath = Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid + "\\" + fileName;
-
-            if (!File.Exists(localpath))
-            {
                 try
                 {
                     WebClient client = new WebClient();
 
                     client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(clientDownloadProgressChanged);
                     client.DownloadFileCompleted += clientDownloadFileCompleted;
-                    client.QueryString.Add("file", localpath);
+                    client.QueryString.Add("file", localPath);
                     client.QueryString.Add("id", numberOfParallelDownloads.ToString());
                     downloadsTotal.Add(0);
                     downloadsReceived.Add(0);
 
-                    if (!localpath.EndsWith(".stream~")) filesToDownload.Add(localpath);
+                    if (!localPath.EndsWith(".stream~"))
+                    {
+                        filesToDownload.Add(localPath);
+                    }
+
                     numberOfParallelDownloads++;
-                    Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory + "\\" + db + "\\" + sessionid);
-                    client.DownloadFileAsync(new Uri(URL), Properties.Settings.Default.DatabaseDirectory + "\\" + db + " \\" + sessionid + "\\" + fileName);
+                    client.DownloadFileAsync(new Uri(URL), localPath);
                 }
                 catch (Exception ex)
                 {
@@ -428,7 +430,10 @@ namespace ssi
 
                 }
             }
-            else if (!localpath.EndsWith(".stream~") && !localpath.EndsWith(".stream%7E")) loadFile(localpath);
+            else
+            {
+                loadFile(localPath);
+            }
         }
 
         #endregion HTTPGET

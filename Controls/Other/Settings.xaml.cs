@@ -23,7 +23,7 @@ namespace ssi
             {
                 DBHost.Text = tokens[0];
                 DBPort.Text = tokens[1];
-            }            
+            }
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPassword.Password = Properties.Settings.Default.MongoDBPass;
             DBConnnect.IsChecked = Properties.Settings.Default.DatabaseAutoLogin;
@@ -101,6 +101,14 @@ namespace ssi
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                this.Close();
+            }
         }
     }
 }

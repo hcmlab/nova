@@ -29,7 +29,7 @@ namespace ssi
                 {
                     if (AnnoTierStatic.Selected != null && Properties.Settings.Default.CMLDefaultStream != null)
                     {
-                        DatabaseHandler.SaveAnnoList(AnnoTierStatic.Selected.AnnoList, streams, false);
+                        AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams);
                         CompleteTier(Properties.Settings.Default.CMLContext, AnnoTierStatic.Selected, Properties.Settings.Default.CMLDefaultStream, Properties.Settings.Default.CMLDefaultConf, Properties.Settings.Default.CMLDefaultGap, Properties.Settings.Default.CMLDefaultMinDur);
                     }
 
@@ -420,7 +420,18 @@ namespace ssi
                 {
                     if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
                     {
-                        AnnoTierStatic.Selected.ContinuousAnnoMode();
+                        
+                        if (control.annoContinuousMode.IsChecked == true)
+                        {
+                            AnnoTierStatic.Selected.ContinuousAnnoMode(true);
+                            control.annoContinuousMode.IsChecked = false;
+                        }
+
+                        else
+                        {
+                            control.annoContinuousMode.IsChecked = true;
+                            AnnoTierStatic.Selected.ContinuousAnnoMode(false);
+                        }
                     }
                     isKeyDown = true;
                     // e.Handled = true;

@@ -35,16 +35,16 @@
 
             <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
                 <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                <ListView Name="SessionsResultsBox" SelectionChanged="SessionsResultsBox_SelectionChanged" SelectionMode="Single">
+                <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="SessionsBox_SelectionChanged" >
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
-                            <GridViewColumn Width="60" Header="Language">
+                            <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Width="Auto" Header="Language">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Language" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-                            <GridViewColumn Width="60" Header="Location">
+                            <GridViewColumn Width="Auto" Header="Location">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Location" />
                                 </GridViewColumn.DisplayMemberBinding>
@@ -52,11 +52,6 @@
                             <GridViewColumn Width="Auto" Header="Date">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Date" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="OID">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="OID" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
                         </GridView>
@@ -74,13 +69,13 @@
                     </StackPanel>
                 </DockPanel>
                 <StackPanel Orientation="Vertical" Margin="10" DockPanel.Dock="Bottom">
-                    <CheckBox Name="showonlymine" Content="Mine only" Checked="showonlymine_Checked" Unchecked="showonlymine_Unchecked" />
-                    <CheckBox Name="showonlyunfinished" Content="Unfinished only" Checked="showonlyunfinished_Checked" Unchecked="showonlyunfinished_Unchecked" />
+                    <CheckBox Name="showonlymine" Content="Mine only" Checked="showOnlyMine_Checked" Unchecked="showOnlyMine_Unchecked" />
+                    <CheckBox Name="showOnlyUnfinished" Content="Unfinished only" Checked="showOnlyUnfinished_Checked" Unchecked="showOnlyUnfinished_Unchecked" />
                 </StackPanel>
-                <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended">
+                <ListView Name="AnnotationsBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding AnnoScheme}" />
+                            <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
                             <GridViewColumn Width="Auto" Header="Role">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Role" />
@@ -88,7 +83,7 @@
                             </GridViewColumn>
                             <GridViewColumn Width="Auto" Header="Annotator">
                                 <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="AnnotatorFullname" />
+                                    <Binding Path="AnnotatorFullName" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
                             <GridViewColumn Width="Auto" Header="Finished">
@@ -115,30 +110,46 @@
                                     <Binding Path="Date" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="OID">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="OID" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>
             </DockPanel>
 
             <DockPanel Grid.Column="3" Grid.Row="0"  Margin="10">
-                <Label Content="Streams"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
+                <Label Content="SelectedStreams"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
                 <StackPanel Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,10,0,0">
-                    <CheckBox Name="requireslogin" Content="Server Authentication" Margin="0,0,5,5" VerticalAlignment="Center" Checked="requireslogin_Checked" Unchecked="requireslogin_Unchecked" IsEnabled="False" />
                     <DockPanel LastChildFill="True">
                         <Label Content="Username" Width="70" />
-                        <TextBox x:FieldModifier="public" x:Name="server_login" Margin="0,0,5,5" Height="25" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
+                        <TextBox x:FieldModifier="public" x:Name="serverLogin" Margin="0,0,5,5" Height="25" Focusable="True" VerticalContentAlignment="Center" />
                     </DockPanel>
                     <DockPanel LastChildFill="True">
                         <Label Content="Password" Width="70" />
-                        <PasswordBox x:FieldModifier="public" x:Name="server_pass" Margin="0,0,5,0" Height="25" Focusable="True" IsEnabled="False" VerticalContentAlignment="Center" />
+                        <PasswordBox x:FieldModifier="public" x:Name="serverPassword" Margin="0,0,5,0" Height="25" Focusable="True" VerticalContentAlignment="Center" />
                     </DockPanel>
                 </StackPanel>
-                <ListBox Name="MediaResultBox" Grid.Row="0" Grid.Column="0" SelectionMode="Extended" SelectionChanged="MediaResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+                
+                <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="0" Grid.Column="0">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Width="Auto" Header="Type">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="StreamType" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Role">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Role" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Subject">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Subject" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
             </DockPanel>
         </Grid>
 
