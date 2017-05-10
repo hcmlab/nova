@@ -283,13 +283,6 @@ namespace ssi
             }
         }
 
-        private void databaseShowDownloadDirectory_Click(object sender, RoutedEventArgs e)
-        {
-            Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory);
-            Process.Start(Properties.Settings.Default.DatabaseDirectory);
-        }
-
-
         #endregion DATABASELOGIC
 
 
@@ -315,20 +308,6 @@ namespace ssi
             databaseManageSessions();
         }
 
-        private void databaseChangeDownloadDirectory_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
-            dialog.ShowNewFolderButton = true;
-            dialog.Description = "Select the folder where you want to store the media of your databases in.";
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-
-            if (result == System.Windows.Forms.DialogResult.OK)
-            {
-                Properties.Settings.Default.DatabaseDirectory = dialog.SelectedPath;
-            }
-        }
-
         private void databaseCMLCompleteStep_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLCompleteWindow window = new DatabaseCMLCompleteWindow(this);
@@ -340,7 +319,6 @@ namespace ssi
             DatabaseCMLTransferWindow window = new DatabaseCMLTransferWindow(this);
             window.Show();
         }
-
 
         private void databaseCMLMerge_Click(object sender, RoutedEventArgs e)
         {

@@ -38,7 +38,7 @@
             <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Clear</Button>
         </StackPanel>
 
-        <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="statusBar" Margin="0" >
+        <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="statusBar" Margin="0">
             <StatusBarItem Name="statusBarServer"></StatusBarItem>
             <Separator/>
             <StatusBarItem Name="statusBarDatabase"></StatusBarItem>

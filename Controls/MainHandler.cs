@@ -10,7 +10,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.8.5";
+        public static string BuildVersion = "0.9.9.8.6";
 
         private static Timeline timeline = null;
 
@@ -131,8 +131,8 @@ namespace ssi
             control.annoTierControl.MouseDown += annoTierControl_MouseDown;
             control.annoTierControl.MouseMove += annoTierControl_MouseMove;
             control.annoTierControl.MouseRightButtonUp += annoTierControl_MouseRightButtonUp;
-            control.annoContinuousMode.Checked += annoContinuousMode_Changed;
-            control.annoContinuousMode.Unchecked += annoContinuousMode_Changed;
+            control.annoContinuousModeCheckBox.Checked += annoContinuousMode_Changed;
+            control.annoContinuousModeCheckBox.Unchecked += annoContinuousMode_Changed;
 
             // Geometric
 
@@ -143,6 +143,7 @@ namespace ssi
             control.geometricListControl.geometricDataGrid.SelectionChanged += geometricList_Selection;
             control.geometricListControl.MenuItemDeleteClick.Click += geometricListDelete;
             control.geometricListControl.KeyDown += geometricKeyDown;
+            control.geometricListControl.Visibility = Visibility.Collapsed;
 
             // Menu
 
@@ -169,8 +170,6 @@ namespace ssi
             control.convertSignalToAnnoContinuousMenu.Click += convertSignalToAnnoContinuous_Click;
             
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
-            control.databaseShowDownloadDirectoryMenu.Click += databaseShowDownloadDirectory_Click;
-            control.databaseChangeDownloadDirectoryMenu.Click += databaseChangeDownloadDirectory_Click;
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
             control.databaseCMLTransferStepMenu.Click += databaseCMLTransferStep_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
@@ -306,8 +305,6 @@ namespace ssi
 
             if (Time.TotalDuration > 0) fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
 
-            control.geometricListControl.Visibility = Visibility.Collapsed;
-
             while (mediaBoxes.Count > 0)
             {
                 removeMediaBox(mediaBoxes[0]);
@@ -336,6 +333,7 @@ namespace ssi
 
             updateControl();
             control.timeLineControl.rangeSlider.Update();
+            control.geometricListControl.Visibility = Visibility.Collapsed;
 
             return true;
         }

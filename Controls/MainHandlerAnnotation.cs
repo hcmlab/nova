@@ -104,20 +104,17 @@ namespace ssi
             AnnoList annoList = annoTier.AnnoList;
 
             control.annoSettingsButton.Visibility = Visibility.Visible;
+            control.annoStatusFileNameOrOIDLabel.Text = annoList.Name;
             if (annoList.Source.HasFile)
-            {
-                control.annoStatusFileNameOrOIDLabel.Text = annoList.Source.File.FullName;
+            {                
                 control.annoStatusFileNameOrOIDLabel.ToolTip = annoList.Source.File.Path;
-
             }
             else if (annoList.Source.HasDatabase)
-            {
-                control.annoStatusFileNameOrOIDLabel.Text = annoList.Source.Database.OID.ToString();
+            {             
                 control.annoStatusFileNameOrOIDLabel.ToolTip = annoList.Source.Database.OID;
             }
             else
-            {
-                control.annoStatusFileNameOrOIDLabel.Text = "*";
+            {             
                 control.annoStatusFileNameOrOIDLabel.ToolTip = "Not saved yet";
             }
 
@@ -148,17 +145,17 @@ namespace ssi
 
             if (AnnoTierStatic.Selected != null)
             {
+                control.annoContinuousModeCheckBox.Visibility = Visibility.Collapsed;
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
-                    control.geometricListControl.Visibility = Visibility.Visible;
-                    control.annorightMenu.Children[0].Visibility = Visibility.Collapsed;
+                    control.geometricListControl.Visibility = Visibility.Visible;                    
                 }
                 else
                 {
-                    control.geometricListControl.Visibility = Visibility.Collapsed;
+                    control.geometricListControl.Visibility = Visibility.Hidden;                    
                 }
 
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -168,7 +165,7 @@ namespace ssi
                     control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     control.annoListControl.editComboBox.IsEnabled = false;
                     control.annoListControl.editTextBox.IsEnabled = false;
-                    control.annorightMenu.Children[0].Visibility = Visibility.Visible;
+                    control.annoContinuousModeCheckBox.Visibility = Visibility.Visible;
                 }
                 else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT)
                 {
@@ -177,7 +174,6 @@ namespace ssi
                     control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     control.annoListControl.editComboBox.IsEnabled = false;
                     control.annoListControl.editTextBox.IsEnabled = false;
-                    control.annorightMenu.Children[0].Visibility = Visibility.Collapsed;
                 }
 
                 control.annoListControl.editComboBox.Items.Clear();
@@ -188,7 +184,6 @@ namespace ssi
                     control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     control.annoListControl.editTextBox.IsEnabled = false;
                     control.annoListControl.editButton.Visibility = Visibility.Visible;
-                    control.annorightMenu.Children[0].Visibility = Visibility.Collapsed;
 
                     if (AnnoTierStatic.Selected.AnnoList.Scheme != null
                         && AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null)
@@ -197,7 +192,6 @@ namespace ssi
                         {
                             control.annoListControl.editComboBox.Items.Add(lcp.Name);
                         }
-
                         control.annoListControl.editComboBox.SelectedIndex = 0;
                     }
                 }
@@ -207,7 +201,6 @@ namespace ssi
                     control.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
                     control.annoListControl.editButton.Visibility = Visibility.Visible;
                     control.annoListControl.editTextBox.IsEnabled = true;
-                    control.annorightMenu.Children[0].Visibility = Visibility.Collapsed;
                 }
             }
         }
@@ -625,8 +618,6 @@ namespace ssi
                     {
                         AnnoTierStatic.SelectLabel(AnnoTierStatic.Selected.GetSegment(a));
                         control.annoListControl.editComboBox.SelectedItem = item.Label;
-                        control.annoListControl.editTextBox.Text = item.Label;
-
                         break;
                     }
                 }

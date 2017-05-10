@@ -150,6 +150,38 @@ namespace ssi
             }            
         }
 
+        private void CopySession_Click(object sender, RoutedEventArgs e)
+        {
+            if (SessionsBox.SelectedItem != null)
+            {
+                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+                List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
+
+                Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
+                input["names"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = session.Name };
+                UserInputWindow dialog = new UserInputWindow("Enter new name (if several separate by ';')", input);
+                dialog.ShowDialog();
+                if (dialog.DialogResult == true)
+                {
+                    string names = dialog.Result("names");
+                    string[] tokens = names.Split(';');
+                    foreach (string token in tokens)
+                    {
+                        session.Name = token;
+                        if (DatabaseHandler.AddSession(session))
+                        {
+                            foreach (DatabaseStream stream in streams)
+                            {
+                                stream.Session = session.Name;
+                                DatabaseHandler.AddStream(stream);
+                            }
+                        }
+                    }
+
+                    GetSessions(session.Name);
+                }
+            }
+        }
 
         private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -227,6 +259,27 @@ namespace ssi
             }
         }
 
+        private void CopyStream_Click(object sender, RoutedEventArgs e)
+        {
+            if (StreamsBox.SelectedItem != null)
+            {
+                DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
+                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+
+                DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dialog.ShowDialog();
+
+                if (dialog.DialogResult == true)
+                {
+                    if (DatabaseHandler.AddStream(stream))
+                    {
+                        GetStreams(session, stream.Name);
+                    }
+                }
+            }
+        }
+
         private void StreamsBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var item = sender as ListViewItem;
@@ -253,37 +306,5 @@ namespace ssi
             }
         }
 
-        private void CopySession_Click(object sender, RoutedEventArgs e)
-        {
-            if (SessionsBox.SelectedItem != null)
-            {
-                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
-
-                Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
-                input["names"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = "" };
-                UserInputWindow dialog = new UserInputWindow("Enter new name (if several separate by ';')", input);
-                dialog.ShowDialog();
-                if (dialog.DialogResult == true)
-                {
-                    string names = dialog.Result("names");
-                    string[] tokens = names.Split(';');
-                    foreach (string token in tokens)
-                    {
-                        session.Name = token;
-                        if (DatabaseHandler.AddSession(session))
-                        {
-                            foreach (DatabaseStream stream in streams)
-                            {
-                                stream.Session = session.Name;
-                                DatabaseHandler.AddStream(stream);
-                            }
-                        }
-                    }
-
-                    GetSessions(session.Name);
-                }
-            }
-        }
     }
 }

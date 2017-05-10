@@ -69,9 +69,9 @@ namespace ssi
 
         private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (CollectionResultsBox.SelectedItem != null)
+            if (SessionsResultsBox.SelectedItem != null)
             {
-                Properties.Settings.Default.LastSessionId = ((DatabaseSession)(CollectionResultsBox.SelectedValue)).Name;
+                Properties.Settings.Default.LastSessionId = ((DatabaseSession)(SessionsResultsBox.SelectedValue)).Name;
                 Properties.Settings.Default.Save();
 
                 GetAnnotationSchemes();
@@ -110,7 +110,7 @@ namespace ssi
 
             if (sessions.Count > 0)
             {
-                if (CollectionResultsBox.Items != null) CollectionResultsBox.Items.Clear();
+                if (SessionsResultsBox.Items != null) SessionsResultsBox.Items.Clear();
                 List<DatabaseSession> items = new List<DatabaseSession>();
                 foreach (var c in sessions)
                 {
@@ -118,9 +118,9 @@ namespace ssi
                     items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), OID = c["_id"].AsObjectId });
                 }
 
-                CollectionResultsBox.ItemsSource = items;
+                SessionsResultsBox.ItemsSource = items;
             }
-            else CollectionResultsBox.ItemsSource = null;
+            else SessionsResultsBox.ItemsSource = null;
         }
 
         public ObjectId GetObjectID(IMongoDatabase database, string collection, string value, string attribute)
@@ -177,7 +177,9 @@ namespace ssi
                 result2 = roles.Find(filterat).Single();
                 if (result2.ElementCount > 0) roleid = result2.GetValue(0).AsObjectId;
             }
-            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", Properties.Settings.Default.LastSessionId);
+
+            DatabaseSession session = (DatabaseSession) SessionsResultsBox.SelectedItem;
+            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", session.Name);
             var filter = builder.Eq("session_id", sessionid);
             var annos = annotations.Find(filter).ToList();
 
@@ -199,7 +201,7 @@ namespace ssi
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId });
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session=  session.Name});
                 }
                 //else if (result.ElementCount == 0 && result2.ElementCount > 0 && annos["role_id"].AsObjectId == roleid)
                 //{
@@ -207,7 +209,7 @@ namespace ssi
                 //}
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
-                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId });
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = session.Name });
                 }
             }
 
@@ -390,7 +392,7 @@ namespace ssi
             else MessageBox.Show("Select RMS Annotation and ONE Reference Annotation. If RMS Annotation is not present, please create it first.");
         }
 
-        private List<AnnoList> convertAnnoListstoMatrix(string restclass)
+        private List<AnnoList> convertAnnoListsToMatrix(string restclass)
         {
             List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
 
@@ -979,7 +981,7 @@ namespace ssi
         private void CalculateFleissKappa_Click(object sender, RoutedEventArgs e)
         {
             string restclass = "Rest";
-            List<AnnoList> convertedlists = convertAnnoListstoMatrix(restclass);
+            List<AnnoList> convertedlists = convertAnnoListsToMatrix(restclass);
             double fleisskappa = FleissKappa(convertedlists, restclass);
 
             //Landis and Koch (1977)
@@ -998,7 +1000,7 @@ namespace ssi
         private void CalculateCohenKappa_Click(object sender, RoutedEventArgs e)
         {
             string restclass = "Rest";
-            List<AnnoList> convertedlists = convertAnnoListstoMatrix(restclass);
+            List<AnnoList> convertedlists = convertAnnoListsToMatrix(restclass);
             double cohenkappa = CohensKappa(convertedlists, restclass);
 
             //Landis and Koch (1977)
@@ -1036,7 +1038,7 @@ namespace ssi
         private void CalculateMergeDiscrete_Click(object sender, RoutedEventArgs e)
         {
             string restclass = "Rest";
-            List<AnnoList> convertedlists = convertAnnoListstoMatrix(restclass);
+            List<AnnoList> convertedlists = convertAnnoListsToMatrix(restclass);
 
             merge = MergeDiscreteLists(convertedlists, restclass);
         }

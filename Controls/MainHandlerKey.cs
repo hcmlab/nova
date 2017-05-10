@@ -421,15 +421,15 @@ namespace ssi
                     if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
                     {
                         
-                        if (control.annoContinuousMode.IsChecked == true)
+                        if (control.annoContinuousModeCheckBox.IsChecked == true)
                         {
                             AnnoTierStatic.Selected.ContinuousAnnoMode(true);
-                            control.annoContinuousMode.IsChecked = false;
+                            control.annoContinuousModeCheckBox.IsChecked = false;
                         }
 
                         else
                         {
-                            control.annoContinuousMode.IsChecked = true;
+                            control.annoContinuousModeCheckBox.IsChecked = true;
                             AnnoTierStatic.Selected.ContinuousAnnoMode(false);
                         }
                     }

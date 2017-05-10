@@ -28,12 +28,31 @@ namespace ssi
                 }
                 else if (Source.HasDatabase)
                 {
-                    return Scheme.Name;
+                    return Source.Database.OID.ToString();
                 }
                 else
                 {
                     return "*";
                 }                
+            }
+        }
+
+        public string Path
+        {
+            get
+            {
+                if (Source.HasFile)
+                {
+                    return Source.File.Path;
+                }
+                else if (Source.HasDatabase)
+                {
+                    return Source.Database.OID.ToString();
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
@@ -70,18 +89,19 @@ namespace ssi
 
             if (Source.HasFile || Source.StoreToFile)
             {
+               
                 if (!Source.HasFile)
                 {
-                    string path = FileTools.SaveFileDialog(Scheme.Name, ".annotation", "Annotation(*.annotation)|*.annotation", "");
-                    if (path != null)
+                  Source.File.Path = FileTools.SaveFileDialog(Scheme.Name, ".annotation", "Annotation(*.annotation)|*.annotation", ""); 
+                }
+              
+                if (Source.HasFile)
+                {
+                    if (saveToFile(Source.File.Path))
                     {
-                        Source.File.Path = path;
-                        if (saveToFile(Source.File.Path))
-                        {
-                            saved = true;
-                        }
+                        saved = true;
                     }
-                }                
+                }
             }
             else if (Source.HasDatabase || Source.StoreToDatabase)
             {

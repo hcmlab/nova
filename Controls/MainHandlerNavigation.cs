@@ -52,7 +52,7 @@ namespace ssi
         {
 
             if (AnnoTier.Selected != null && AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-               if (control.annoContinuousMode.IsChecked == true)
+               if (control.annoContinuousModeCheckBox.IsChecked == true)
                 {
                     AnnoTierStatic.Selected.ContinuousAnnoMode(false);
                 }
@@ -115,12 +115,12 @@ namespace ssi
             bool isConnectedAndHasSession = DatabaseHandler.IsConnected && DatabaseHandler.IsSession;
 
             control.navigator.newAnnoFromDatabaseButton.IsEnabled = isConnectedAndHasSession;
-            control.navigator.statusBarSessionInfo.Foreground = isConnectedAndHasSession ? Brushes.Green : Brushes.DarkGray;
+            control.navigator.statusBarSessionInfo.Foreground = isConnectedAndHasSession ? Brushes.Black : Brushes.DarkGray;
             control.navigator.statusBarSessionInfo.Content = DatabaseHandler.SessionInfo;
             control.navigator.statusBarServer.Content = DatabaseHandler.ServerInfo;
-            control.navigator.statusBarServer.Foreground = isConnected ? Brushes.Green : Brushes.DarkGray;
+            control.navigator.statusBarServer.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
             control.navigator.statusBarDatabase.Content = DatabaseHandler.DatabaseInfo;
-            control.navigator.statusBarDatabase.Foreground = isConnected ? Brushes.Green : Brushes.DarkGray;
+            control.navigator.statusBarDatabase.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
         }
 
         public void updateTimeRange(double duration, SignalTrack track)
