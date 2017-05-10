@@ -5,81 +5,123 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Annotation Merge and statistics" Height="500" Width="794.145" Background="LightGray" ResizeMode="NoResize">
+        Title="Annotation Merge and statistics" Height="500" Width="800">
     <Grid>
-        <Grid.RowDefinitions>
-
+           <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Label Content="Sessions" Margin="10,52,540,339" />
-        <!--<ListBox Name="CollectionResultsBox" Grid.Row="0" Grid.Column="0" Margin="10,243,448,0" SelectionMode="Single" SelectionChanged="CollectionResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}" />-->
-        <ListView Name="CollectionResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  Margin="10,79,581,0">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="60" Header="Name" DisplayMemberBinding="{Binding Name}" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
-                    <GridViewColumn Width="60" Header="Language">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Language" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
-                    <GridViewColumn Width="60" Header="Location">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Location" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
-                    <GridViewColumn Width="Auto" Header="Date">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Date" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
 
-                    <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
-                </GridView>
-            </ListView.View>
-        </ListView>
+            <DockPanel Grid.Column="0" Grid.Row="0" Margin="10">
+                <Label Content="Sessions" DockPanel.Dock="Top" Margin="-3,0,0,0" />
+            <ListView Name="SessionsResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  DockPanel.Dock="Top">
+                    <ListView.View>
+                        <GridView>
+                        <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
 
-        <Label Content="Annotations" Margin="223,219,297,10" />
-        <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
+                        <GridViewColumn Width="Auto" Header="Language">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Language" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Location">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Location" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Date">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Date" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
 
-        <ListBox Name="AnnoSchemesBox" Grid.Row="0" Grid.Column="0" Margin="223,79,297,212" SelectionMode="Single" SelectionChanged="AnnoSchemesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-        <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple" Margin="223,243,297,1">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="120" Header="Scheme" DisplayMemberBinding="{Binding AnnoScheme}" />
+                            <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
 
-                    <GridViewColumn Width="60" Header="Role">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="Role" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
-                    <GridViewColumn Width="60" Header="Annotator">
-                        <GridViewColumn.DisplayMemberBinding>
-                            <Binding Path="AnnotatorFullname" />
-                        </GridViewColumn.DisplayMemberBinding>
-                    </GridViewColumn>
+            <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
+                <Label Content="Schemes" DockPanel.Dock="Top" Margin="-3,0,0,0" />
+            <ListBox Name="AnnoSchemesBox" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="AnnoSchemesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+            </DockPanel>
+            
+            <DockPanel Grid.Column="2" Grid.Row="0" Margin="10">
+               <Label Content="Annotations" DockPanel.Dock="Top" Margin="-3,0,0,0" />
+                <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
 
-                    <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <Button Name="Ok"  Content="Ok" Grid.Column="0" Grid.Row="1" Click="Ok_Click"  Height="25"  Margin="621,7,55,8" />
-        <Button Name="Cancel" Content="Cancel" Grid.Row="1"  Click="Cancel_Click"   Height="25" RenderTransformOrigin="3.367,0.24" Margin="459,7,224,8" />
 
-        <Button Name="CalculateMedian"  Content="Mean" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False" Margin="509,288,184,109" />
-        <Label Content="AnnoSchemes" Margin="223,53,-223,343" />
-        <ListBox x:Name="RolesBox" Visibility="Hidden" Grid.Row="0" Grid.Column="0" Margin="364,79,297,212" SelectionMode="Single" SelectionChanged="RolesBox_SelectionChanged"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
-        <Label Content="Roles" Margin="364,53,297,343" Visibility="Hidden" />
-        <Label Content="Continuous" Margin="509,248,165,143" />
-        <Label Content="Discrete" Margin="509,70,165,315" />
-        <Button x:Name="CalculateFleissKappa"  ToolTip="Calculate Fleiss' κ" Content="Fleiss κ" Grid.Column="0" Click="CalculateFleissKappa_Click" IsEnabled="False" Margin="621,181,74,216" RenderTransformOrigin="1.519,0.756" />
-        <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens κ" Content="Cohens κ" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False" Margin="509,181,184,216" />
-        <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="RMS" Grid.Column="0" Click="RMS_Click" IsEnabled="False" Margin="621,288,74,109" />
-        <Label Content="Stats" Margin="509,327,165,58" />
-        <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error. Calculates the error between two annotations" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" Margin="621,360,74,37" RenderTransformOrigin="1.85,-0.882" />
-        <Button x:Name="CalculateCronbach" ToolTip="Cronbachs α" Content="Cronbachs α" Grid.Column="0" Click="CalculateCronbach_Click" IsEnabled="False" Margin="509,360,184,37" RenderTransformOrigin="2.198,0.605" />
-        <Label Content="Stats" Margin="509,146,165,250" />
-        <Button x:Name="CalculateMergeDiscrete"  Content="Merge" Grid.Column="0" Click="CalculateMergeDiscrete_Click" IsEnabled="False" Margin="509,94,184,303" />
+            <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple"  DockPanel.Dock="Top">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
+
+                        <GridViewColumn Width="Auto" Header="Role">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Role" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Annotator">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="AnnotatorFullName" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+
+                            <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
+
+            <DockPanel Grid.Column="3" Grid.Row="0" Margin="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <Label Content="Discrete Merge"/>
+                        <Button x:Name="CalculateMergeDiscrete"  Content="Merge" Grid.Column="0" Click="CalculateMergeDiscrete_Click" IsEnabled="False" />
+
+                        <Label Content="Discrete Stats" />
+                        <Button x:Name="CalculateFleissKappa"  ToolTip="Calculate Fleiss' κ" Content="Fleiss κ" Grid.Column="0" Click="CalculateFleissKappa_Click" IsEnabled="False" />
+                        <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens κ" Content="Cohens κ" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1">
+                        <Label Content="Continuous Merge"/>
+                        <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="RMS" Grid.Column="0" Click="RMS_Click" IsEnabled="False" />
+                        <Button Name="CalculateMedian"  Content="Mean" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False"/>
+                        <Label Content="Continuous Stats"/>
+                        <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error. Calculates the error between two annotations" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" />
+                        <Button x:Name="CalculateCronbach" ToolTip="Cronbachs α" Content="Cronbachs α" Grid.Column="0" Click="CalculateCronbach_Click" IsEnabled="False" />
+
+                    </StackPanel>
+
+                </Grid>
+            </DockPanel>
+
+
+
+          
+           
+            <ListBox x:Name="RolesBox" Visibility="Hidden" Grid.Row="0" Grid.Column="0" Margin="364,79,297,212" SelectionMode="Single" SelectionChanged="RolesBox_SelectionChanged"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+            <Label Content="Roles" Margin="364,53,297,343" Visibility="Hidden" />
+           
+
+        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+                <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click" />
+                <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click" />
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Window>

@@ -45,8 +45,6 @@
                     <MenuItem Header="Manage Databases" Name="databaseManageDBsMenu" />
                     <MenuItem Header="Manage Sessions" Name="databaseManageSessionsMenu" />
                 </MenuItem>
-                <MenuItem Header="Show Download Directory" Name="databaseShowDownloadDirectoryMenu" />
-                <MenuItem Header="Change Download Directory" Name="databaseChangeDownloadDirectoryMenu" />
                 <MenuItem Header="Connection" Name="databaseConnectMenu" />
             </MenuItem>
             <MenuItem Header="Annotation">
@@ -376,11 +374,10 @@
                                     <StackPanel Grid.Row="0"
                                                 Grid.Column="1"
                                                 Orientation="Horizontal"
-                                                HorizontalAlignment="Right"
-                                                Name="annorightMenu">
-                                        <CheckBox x:Name="annoContinuousMode" Style="{DynamicResource OrangeSwitchStyle}"
+                                                HorizontalAlignment="Right">
+                                        <CheckBox x:Name="annoContinuousModeCheckBox" Style="{DynamicResource OrangeSwitchStyle}"
                                                   ToolTip="Continuous Annotation Mode. Shortcut: M" 
-                                                  Visibility="Collapsed"/>
+                                                  Visibility="Hidden"/>
                                         <Separator Width="20" Visibility="Hidden"></Separator>
                                         <TextBlock x:Name="annoPositionLabel" 
                                     		VerticalAlignment="Center" 
@@ -478,7 +475,7 @@
                         <DockPanel x:Name="dockPanel">
                             <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" ContentTemplate="{TemplateBinding ContentTemplate}" RecognizesAccessKey="True" VerticalAlignment="Center" />
                             <Grid>
-                                <Border x:Name="BackgroundBorder" BorderBrush="#FF939393" BorderThickness="1" CornerRadius="3" Height="27" Width="94">
+                                <Border x:Name="BackgroundBorder" BorderBrush="#FF939393" BorderThickness="1" CornerRadius="3" Height="20" Width="94">
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                             <GradientStop Color="#FFB5B5B5" Offset="0" />
@@ -497,7 +494,7 @@
                                         <Line x:Name="On" X1="0" Y1="0" X2="0" Y2="14" Stroke="#FF7A7A7A" StrokeThickness="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Grid>
                                 </Border>
-                                <Border BorderBrush="#FF939393" HorizontalAlignment="Left" x:Name="slider" Width="41" Height="27" BorderThickness="1" CornerRadius="3" RenderTransformOrigin="0.5,0.5" Margin="0">
+                                <Border BorderBrush="#FF939393" HorizontalAlignment="Left" x:Name="slider" Width="41" Height="20" BorderThickness="1" CornerRadius="3" RenderTransformOrigin="0.5,0.5" Margin="0">
                                     <Border.RenderTransform>
                                         <TransformGroup>
                                             <ScaleTransform ScaleX="1" ScaleY="1" />

@@ -77,6 +77,7 @@
                 <Button Style="{StaticResource MyButton}" Content="+" Click="AddStream_Click"  />
                 <Button Style="{StaticResource MyButton}" Content="-" Click="DeleteStream_Click" />
                 <Button Style="{StaticResource MyButton}" Content="edit" Click="EditStream_Click" />
+                <Button Style="{StaticResource MyButton}" Content="copy" Click="CopyStream_Click" />
             </StackPanel>
             <ListView Name="StreamsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single">
                 <ListView.View>

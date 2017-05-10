@@ -441,10 +441,11 @@ namespace ssi
                 }
 
                 foreach (XmlNode node in (doc.SelectNodes("//tier")))
-                {                    
-                    if (node.Attributes != null && node.Attributes["database"] != null && node.Attributes["database"].LastChild.Value == "true")
+                {
+                    string path = node.InnerText;
+                    if (!Path.HasExtension(path))
                     {
-                        AnnoList annoList = DatabaseHandler.LoadAnnoList(node.InnerText);
+                        AnnoList annoList = DatabaseHandler.LoadAnnoList(path);
                         if (annoList != null)
                         {
                             addAnnoTier(annoList);
@@ -455,8 +456,7 @@ namespace ssi
                         }
                     }
                     else
-                    {
-                        string path = node.InnerText;
+                    {                        
                         if (path == "")
                         {
                             path = node.Attributes["filepath"].LastChild.Value;
@@ -568,7 +568,7 @@ namespace ssi
            
             if (DatabaseHandler.IsConnected && DatabaseHandler.IsDatabase && DatabaseHandler.IsSession)
             {
-                sw.WriteLine("\t<tiers database=\"" + DatabaseHandler.Database + "\">");
+                sw.WriteLine("\t<tiers database=\"" + DatabaseHandler.DatabaseName + "\">");
             }
             else
             {
@@ -577,13 +577,13 @@ namespace ssi
 
             foreach (AnnoTier t in annoTiers)
             {
-                if (t.AnnoList.Source.HasFile)
+                if (t.AnnoList.Source.HasFile )
                 {
-                    sw.WriteLine("\t\t<tier>" + FileTools.GetRelativePath(t.AnnoList.Source.File.Path, workdir) + "</tier>");
+                    sw.WriteLine("\t\t<tier>" + FileTools.GetRelativePath(t.AnnoList.Path, workdir) + "</tier>");
                 }
                 else if (t.AnnoList.Source.HasDatabase)
                 {
-                    sw.WriteLine("\t\t<tier database=\"true\">" + t.AnnoList.Source.Database.OID.ToString() + "</tier>");
+                    sw.WriteLine("\t\t<tier>" + t.AnnoList.Path + "</tier>");
                 }
             }
             sw.WriteLine("\t</tiers>");

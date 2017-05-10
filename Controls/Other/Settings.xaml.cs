@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -29,6 +31,7 @@ namespace ssi
             DBConnnect.IsChecked = Properties.Settings.Default.DatabaseAutoLogin;
             UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateOnStart;
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
+            DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
         }
 
         public double Uncertainty()
@@ -98,16 +101,55 @@ namespace ssi
             e.Handled = !regex.IsMatch((sender as TextBox).Text.Insert((sender as TextBox).SelectionStart, e.Text));
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
+            if (Properties.Settings.Default.DatabaseDirectory != DownloadDirectory.Text)                
+            {
+                if (Directory.Exists(DownloadDirectory.Text))
+                {
+                    Directory.CreateDirectory(DownloadDirectory.Text);
+                    Properties.Settings.Default.DatabaseDirectory = DownloadDirectory.Text;
+                    Properties.Settings.Default.Save();
+                }
+                else
+                {
+                    MessageTools.Warning("Directory does not exist '" + DownloadDirectory.Text + "'");
+                    return;
+                }
+            }
+
             DialogResult = true;
+            Close();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
             {
-                this.Close();
+                Close();
+            }
+        }
+
+        private void PickDownloadDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
+            dialog.ShowNewFolderButton = true;
+            dialog.Description = "Select the folder where you want to store the media of your databases in.";
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                DownloadDirectory.Text = dialog.SelectedPath;
+            }
+        }
+
+        private void ViewDownloadDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            if (Directory.Exists(DownloadDirectory.Text))
+            {
+                Directory.CreateDirectory(DownloadDirectory.Text);
+                Process.Start(DownloadDirectory.Text);
             }
         }
     }

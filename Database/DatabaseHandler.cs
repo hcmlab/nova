@@ -2497,7 +2497,7 @@ namespace ssi
             string annotatorName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "name", annotatorID);
             string annotatorFullName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatorID);
 
-            ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, "name", DatabaseHandler.sessionName);
+            ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, "name", annotation.Session);
             string sessionName = FetchDBRef(DatabaseDefinitionCollections.Sessions, "name", sessionID);
 
             var filterScheme = builder.Eq("_id", schemeID);            

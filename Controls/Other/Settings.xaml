@@ -91,17 +91,23 @@
                     <TextBox Grid.Row="3" Name="DBUser" Margin="5,0,5,5"/>
                     <Label Grid.Row="4" Content="Database password:" />
                     <PasswordBox Grid.Row="5" Name="DBPassword" Margin="5,0,5,5" />
-                    <Label Grid.Row="6" Content="Connect to database at start up:" />
-                    <CheckBox Grid.Row="7" Name="DBConnnect" Margin="5,0,5,5"/>
-                    <Label Grid.Row="8" Content="Ask before overwriting existing annotation:" />
-                    <CheckBox Grid.Row="9" Name="OverwriteAnnotation" Margin="5,0,5,5"/>
+                    <Label Grid.Row="6" Content="Download directory:"/>
+                    <DockPanel Grid.Row="7" LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Name="PickDownloadDirectory" Margin="5,0,5,5" Click="PickDownloadDirectory_Click">Pick</Button>
+                            <Button Name="ViewDownloadDirectory" Margin="5,0,5,5" Click="ViewDownloadDirectory_Click">View</Button>
+                        </StackPanel>
+                        <TextBox Name="DownloadDirectory" Margin="5,0,5,5" DockPanel.Dock="Left"/>
+                    </DockPanel>
+                    <CheckBox Grid.Row="8" Name="DBConnnect" Margin="5,0,5,5">Connect to database at start up</CheckBox>
+                    <CheckBox Grid.Row="9" Name="OverwriteAnnotation" Margin="5,0,5,5">Always ask before overwriting an annotation</CheckBox>
                     
                 </Grid>
             </TabItem>
         </TabControl>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Margin="5" Click="Button_Click">Apply</Button>
+            <Button Margin="5" Click="ApplyButton_Click">Apply</Button>
         </StackPanel>
     </Grid>
 </Window>
