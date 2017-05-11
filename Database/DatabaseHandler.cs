@@ -235,7 +235,7 @@ namespace ssi
             return databases.Any(s => name.Equals(s));
         }
 
-        public static List<string> GetDatabases()
+        public static List<string> GetDatabases(int requiresauth = 1)
         {
             List<string> items = new List<string>();
 
@@ -245,7 +245,7 @@ namespace ssi
                 foreach (var c in databases)
                 {
                     string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 2)
+                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > requiresauth)
                     {
                         items.Add(db);
                     }
