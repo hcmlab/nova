@@ -34,7 +34,7 @@
             </MenuItem>
             <MenuItem Header="Database">
                 <MenuItem Header="Load Session (clear workspace)" Name="databaseLoadSessionMenu" />
-                <MenuItem Header="Cooperative Learning">
+                <MenuItem Header="Cooperative Learning" Name="databaseCMLMenu">
                     <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" />
                     <MenuItem Header="Complete Session" Name="databaseCMLCompleteStepMenu"/>
                     <MenuItem Header="Extract MFCCS For All Sessions" Name="databaseCMLExtractFeaturesMenu"/>

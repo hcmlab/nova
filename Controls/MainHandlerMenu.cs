@@ -33,11 +33,15 @@ namespace ssi
 
             Visibility databaseVisibility = isConnected ? Visibility.Visible : Visibility.Collapsed;
 
+            control.databaseCMLMenu.Visibility = databaseVisibility;
             control.databaseCMLCompleteStepMenu.Visibility = databaseVisibility;
             control.databaseCMLTransferStepMenu.Visibility = databaseVisibility;
             control.databaseCMLExtractFeaturesMenu.Visibility = databaseVisibility;
-            control.databaseCMLMergeMenu.Visibility = databaseVisibility;
+            
             control.databaseLoadSessionMenu.Visibility = databaseVisibility;
+
+            control.databaseCMLTransferStepMenu.Visibility = Visibility.Collapsed;
+            control.databaseCMLMergeMenu.Visibility = Visibility.Collapsed;
             control.databaseAdminMenu.Visibility = Visibility.Collapsed;
 
             if (isConnected && authentication > 2)
@@ -45,6 +49,9 @@ namespace ssi
                 control.databaseAdminMenu.Visibility = Visibility.Visible;
                 control.databaseManageDBsMenu.Visibility = Visibility.Visible;
                 control.databaseManageSessionsMenu.Visibility = Visibility.Visible;
+
+                control.databaseCMLTransferStepMenu.Visibility = Visibility.Visible;
+                control.databaseCMLMergeMenu.Visibility = Visibility.Visible; 
 
                 control.databaseCMLTransferStepMenu.Visibility = Visibility.Visible;
                 control.databaseCMLMergeMenu.Visibility = Visibility.Visible;
