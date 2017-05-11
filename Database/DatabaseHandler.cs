@@ -154,7 +154,6 @@ namespace ssi
             }            
             else if (!DatabaseExists(name))
             {
-                MessageTools.Warning("Database '" + name + "' does not exist");
                 return false;
             }
             else if (databaseName != name)
@@ -704,7 +703,6 @@ namespace ssi
 
             if (!DatabaseExists(meta.Name))
             {
-                MessageTools.Warning("Get db meta: database does not exist");
                 return false;
             }
 
@@ -740,7 +738,6 @@ namespace ssi
         {
             if (meta.Name == "")
             {
-                MessageTools.Warning("Add or update db meta: invalid name");
                 return false;
             }         
 
@@ -770,13 +767,11 @@ namespace ssi
 
             if (!DatabaseExists(name))
             {
-                MessageTools.Warning("Update db meta: a database with that name does not exist");
                 return false;
             }
 
             if (name != meta.Name)
             {
-                MessageTools.Warning("Update db meta: database name cannot be changed");
                 return false;
             }
 
@@ -792,7 +787,6 @@ namespace ssi
 
             if (DatabaseExists(meta.Name))
             {
-                MessageTools.Warning("Add database: database already exists");
                 return false;
             }
             
@@ -823,14 +817,12 @@ namespace ssi
 
             if (name == null || name == "" || !DatabaseExists(name))
             {
-                MessageTools.Warning("Delete database: database does not exist");
                 return false;
             }
 
             int authLevel = CheckAuthentication();
             if (authLevel <= 3)
             {                
-                MessageTools.Warning("Delete database: missing rights");
                 return false;
             }
 
@@ -854,19 +846,16 @@ namespace ssi
 
             if (user.Name == "")
             {
-                MessageTools.Warning("Add user: invalid name");
                 return false;
             }
 
             if (UserExists(user.Name))
             {
-                MessageTools.Warning("Add user: user already exists");
                 return false;
             }
 
             if (user.Password == null || user.Password == "")
             {
-                MessageTools.Warning("Add user: invalid password");
                 return false;
             }
 
@@ -899,7 +888,6 @@ namespace ssi
             }
             catch (Exception ex)
             {
-                MessageTools.Warning("Could not add user: " + ex.ToString());
                 return false;
             }
 
@@ -915,13 +903,11 @@ namespace ssi
 
             if (user == null || user == "")
             {
-                MessageTools.Warning("Delete user: invalid user");
                 return false;
             }
 
             if (user == Properties.Settings.Default.MongoDBUser)
             {
-                MessageTools.Warning("Delete user: cannot delete active user");
                 return false;
             }
 
@@ -936,13 +922,11 @@ namespace ssi
                 }
                 catch (Exception ex)
                 {
-                    MessageTools.Warning("Delete user: " + ex.ToString());
                     return false;
                 }
             }
             else
             {
-                MessageTools.Warning("Cannot delete super users");
                 return false;
             }
 
@@ -958,13 +942,11 @@ namespace ssi
 
             if (!UserExists(user.Name))
             {
-                MessageTools.Warning("Change password: user does not exist");
                 return false;
             }
 
             if (user.Password == null || user.Password == "")
             {
-                MessageTools.Warning("Change password: invalid password");
                 return false;
             }
 
@@ -976,7 +958,6 @@ namespace ssi
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Change password: " + ex.ToString());
                 return false;
             }
 
@@ -992,13 +973,11 @@ namespace ssi
 
             if (name == null || name == "")
             {
-                MessageTools.Warning("Revoke role: invalid name");
                 return false;
             }
 
             if (!UserExists(name))
             {
-                MessageTools.Warning("Revoke role: user does not exist");
                 return false;
             }
 
@@ -1014,7 +993,6 @@ namespace ssi
             }
             catch (Exception ex)
             {
-                MessageTools.Warning("Revoke role: " + ex.ToString());
                 return false;
             }
 
@@ -1030,13 +1008,11 @@ namespace ssi
 
             if (name == null || name == "")
             {
-                MessageTools.Warning("Grant role: invalid name");
                 return false;
             }
 
             if (!UserExists(name))
             {
-                MessageTools.Warning("Grant role: user does not exist");
                 return false;
             }
 
@@ -1052,7 +1028,6 @@ namespace ssi
             }
             catch (Exception ex)
             {
-                MessageTools.Warning("Grant role: " + ex.ToString());
                 return false;
             }
 
@@ -1111,7 +1086,6 @@ namespace ssi
 
             if (!UserExists(annotator.Name))
             {
-                MessageTools.Warning("Add annotator: user does not exist");
                 return false;
             }
 
@@ -1149,7 +1123,6 @@ namespace ssi
             }
             else
             {
-                MessageTools.Warning("Add annotator: unkown user role");
                 return false;
             }
 
@@ -1165,7 +1138,6 @@ namespace ssi
 
             if (!UserExists(annotator.Name))
             {
-                MessageTools.Warning("Get annotator: user does not exist");
                 return false;
             }
 
@@ -1236,7 +1208,6 @@ namespace ssi
 
             if (!UserExists(name))
             {
-                MessageTools.Warning("Delete annotator: user does not exist");
                 return false;
             }
 
@@ -1256,7 +1227,6 @@ namespace ssi
         {
             if (role.Name == "")
             {
-                MessageTools.Warning("Add or update role: invalid name");
                 return false;
             }
 
@@ -1284,7 +1254,6 @@ namespace ssi
 
             if (RoleExists(role.Name))
             {
-                MessageTools.Warning("Add role: a role with that name already exists");
                 return false;
             }
 
@@ -1300,13 +1269,11 @@ namespace ssi
             
             if (!RoleExists(name))
             {
-                MessageTools.Warning("Update role: a role with that name does not exist");
                 return false;
             }
 
             if (name != role.Name && RoleExists(role.Name))
             {
-                MessageTools.Warning("Update role: a role with that name already exists");
                 return false;
             }
 
@@ -1322,7 +1289,6 @@ namespace ssi
 
             if (!RoleExists(name))
             {
-                MessageTools.Warning("Delete role: role does not exist");
                 return false;
             }
 
@@ -1344,7 +1310,6 @@ namespace ssi
 
             if (!StreamTypeExists(streamType.Name))
             {
-                MessageTools.Warning("Get stream type: stream type does not exist");
                 return false;
             }
 
@@ -1370,7 +1335,6 @@ namespace ssi
         {
             if (streamType.Name == "")
             {
-                MessageTools.Warning("Add or update stream type: invalid name");
                 return false;
             }
 
@@ -1399,7 +1363,6 @@ namespace ssi
 
             if (StreamTypeExists(streamType.Name))
             {
-                MessageTools.Warning("Add stream type: a stream type with that name already exists");
                 return false;
             }
 
@@ -1415,13 +1378,11 @@ namespace ssi
 
             if (!StreamTypeExists(name))
             {
-                MessageTools.Warning("Update stream type: a stream type with that name does not exist");
                 return false;
             }
 
             if (name != streamType.Name && StreamTypeExists(streamType.Name))
             {
-                MessageTools.Warning("Update stream type: a stream type with that name already exists");
                 return false;
             }
 
@@ -1437,7 +1398,6 @@ namespace ssi
 
             if (!StreamTypeExists(name))
             {
-                MessageTools.Warning("Delete stream type: stream type does not exist");
                 return false;
             }
 
@@ -1460,7 +1420,6 @@ namespace ssi
 
             if (!SubjectExists(subject.Name))
             {
-                MessageTools.Warning("Get subject: subject does not exist");
                 return false;
             }
 
@@ -1500,7 +1459,6 @@ namespace ssi
         {
             if (subject.Name == "")
             {
-                MessageTools.Warning("Add or update subject: invalid name");
                 return false;
             }
 
@@ -1531,7 +1489,6 @@ namespace ssi
 
             if (StreamTypeExists(subject.Name))
             {
-                MessageTools.Warning("Add subject: a subject with that name already exists");
                 return false;
             }
 
@@ -1547,13 +1504,11 @@ namespace ssi
 
             if (!SubjectExists(name))
             {
-                MessageTools.Warning("Update subject: a subject with that name does not exist");
                 return false;
             }
 
             if (name != subject.Name && SubjectExists(subject.Name))
             {
-                MessageTools.Warning("Update subject: a subject with that name already exists");
                 return false;
             }
 
@@ -1569,7 +1524,6 @@ namespace ssi
 
             if (!SubjectExists(name))
             {
-                MessageTools.Warning("Delete subject: subject does not exist");
                 return false;
             }
 
@@ -1586,7 +1540,6 @@ namespace ssi
         {
             if (scheme.Name == "")
             {
-                MessageTools.Warning("Add or update scheme: invalid name");
                 return false;
             }
 
@@ -1664,7 +1617,6 @@ namespace ssi
 
             if (SchemeExists(scheme.Name))
             {
-                MessageTools.Warning("Add scheme: a scheme with that name already exists");
                 return false;
             }
             
@@ -1680,13 +1632,11 @@ namespace ssi
 
             if (!SchemeExists(name))
             {
-                MessageTools.Warning("Update scheme: a scheme with that name does not exists");
                 return false;
             }
 
             if (name != scheme.Name && SchemeExists(scheme.Name))
             {
-                MessageTools.Warning("Update scheme: a scheme with that name already exists");
                 return false;
             }
 
@@ -1702,7 +1652,6 @@ namespace ssi
 
             if (!SchemeExists(name))
             {
-                MessageTools.Warning("Get scheme: a scheme with that name does not exist");
                 return null;
             }
 
@@ -1784,7 +1733,6 @@ namespace ssi
 
             if (!SchemeExists(name))
             {
-                MessageTools.Warning("Delete scheme: scheme does not exist");
                 return false;
             }
 
@@ -1807,7 +1755,6 @@ namespace ssi
 
             if (!SessionExists(session.Name))
             {
-                MessageTools.Warning("Get session: session does not exist");
                 return false;
             }
 
@@ -1844,7 +1791,6 @@ namespace ssi
         {
             if (session.Name == "")
             {
-                MessageTools.Warning("Add or update session: invalid name");
                 return false;
             }
 
@@ -1877,7 +1823,6 @@ namespace ssi
 
             if (SessionExists(session.Name))
             {
-                MessageTools.Warning("Add session: a session with that name already exists");
                 return false;
             }
 
@@ -1893,13 +1838,11 @@ namespace ssi
 
             if (!SessionExists(name))
             {
-                MessageTools.Warning("Update session: a session with that name does not exist");
                 return false;
             }
 
             if (name != session.Name && SessionExists(session.Name))
             {
-                MessageTools.Warning("Update session: a session with that name already exists");
                 return false;
             }
 
@@ -1915,7 +1858,6 @@ namespace ssi
 
             if (!SessionExists(name))
             {
-                MessageTools.Warning("Delete session: session does not exist");
                 return false;
             }
 
@@ -1960,7 +1902,6 @@ namespace ssi
 
             if (!StreamExists(stream.Name, stream.Session))
             {
-                MessageTools.Warning("Get stream: stream does not exist for the session");
                 return false;
             }
 
@@ -2031,28 +1972,24 @@ namespace ssi
             ObjectId sessionId = new ObjectId();
             if (!GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, stream.Session))
             {
-                MessageTools.Warning("Add stream: session not found");
                 return false;
             }
 
             ObjectId roleId = new ObjectId();
             if (stream.Role != null && stream.Role != "" && !GetObjectID(ref roleId, DatabaseDefinitionCollections.Roles, stream.Role))
             {
-                MessageTools.Warning("Add stream: role not found");
                 return false;
             }
 
             ObjectId streamTypeId = new ObjectId();
             if (stream.StreamType != null && stream.StreamType != "" && !GetObjectID(ref streamTypeId, DatabaseDefinitionCollections.StreamTypes, stream.StreamType))
             {
-                MessageTools.Warning("Add stream: stream type not found");
                 return false;
             }
 
             ObjectId subjectId = new ObjectId();
             if (stream.Subject != null && stream.Subject != "" && !GetObjectID(ref subjectId, DatabaseDefinitionCollections.Subjects, stream.Subject))
             {
-                MessageTools.Warning("Add stream: subject not found");
                 return false;
             }
 
@@ -2089,7 +2026,6 @@ namespace ssi
 
             if (StreamExists(stream.Name, stream.Session))
             {
-                MessageTools.Warning("Add stream: a stream with that name already exists for the session");
                 return false;
             }
 
@@ -2105,13 +2041,11 @@ namespace ssi
 
             if (!StreamExists(name, stream.Session))
             {
-                MessageTools.Warning("Update stream: a stream with that name does not exist for the session");
                 return false;
             }
 
             if (name != stream.Name && StreamExists(stream.Name, stream.Session))
             {
-                MessageTools.Warning("Update stream: a stream with that name already exists for the session");
                 return false;
             }
 
@@ -2127,14 +2061,12 @@ namespace ssi
 
             if (!StreamExists(stream.Name, stream.Session))
             {
-                MessageTools.Warning("Delete stream: stream does not exist for the session");
                 return false;
             }
 
             ObjectId sessionId = new ObjectId();
             if (!GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, stream.Session))
             {
-                MessageTools.Warning("Delete stream: session not found");
                 return false;
             }
 
@@ -2157,7 +2089,6 @@ namespace ssi
 
             if (CheckAuthentication() == 0)
             {
-                MessageTools.Warning("Sorry, you have no rights to save annotations");
                 return false;
             }
 

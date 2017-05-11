@@ -41,7 +41,7 @@
                 <Button Style="{StaticResource MyButton}" Name="EditSession" Content="edit" Click="EditSession_Click" />
                 <Button Style="{StaticResource MyButton}" Name="CopySession" Content="copy" Click="CopySession_Click" />
             </StackPanel>
-            <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="SessionsBox_SelectionChanged" >
+            <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" >
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -65,7 +65,7 @@
                 </ListView.View>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
-                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="SessionsBox_PreviewMouseLeftButtonDown" />
+                        <EventSetter Event="PreviewMouseDoubleClick" Handler="SessionsBox_PreviewMouseLeftButtonDown" />
                     </Style>
                 </ListView.ItemContainerStyle>
             </ListView>
@@ -102,7 +102,7 @@
                 </ListView.View>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
-                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="StreamsBox_PreviewMouseLeftButtonDown" />
+                        <EventSetter Event="PreviewMouseDoubleClick" Handler="StreamsBox_PreviewMouseLeftButtonDown" />
                     </Style>
                 </ListView.ItemContainerStyle>
             </ListView>

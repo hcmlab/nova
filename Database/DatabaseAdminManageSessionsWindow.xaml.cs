@@ -132,6 +132,17 @@ namespace ssi
                 if (dialog.DialogResult == true)
                 {
                     DatabaseHandler.UpdateSession(name, session);
+
+                    var sessions = SessionsBox.SelectedItems;
+                    foreach (DatabaseSession s in sessions)
+                    {
+                        if (session != s)
+                        {
+                            session.Name = s.Name;
+                            DatabaseHandler.UpdateSession(s.Name, session);
+                        }
+                    }
+
                     GetSessions(session.Name);
                 }                                
             }
@@ -139,14 +150,14 @@ namespace ssi
 
         private void DeleteSession_Click(object sender, RoutedEventArgs e)
         {
-
             if (SessionsBox.SelectedItem != null)
             {
-                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                if (DatabaseHandler.DeleteSession(session.Name))
+                var sessions = SessionsBox.SelectedItems;
+                foreach (DatabaseSession session in sessions)
                 {
-                    GetSessions();
+                    DatabaseHandler.DeleteSession(session.Name);
                 }
+                GetSessions();
             }            
         }
 
@@ -207,7 +218,7 @@ namespace ssi
             if (SessionsBox.SelectedItem != null)
             {
                 DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                DatabaseStream stream = new DatabaseStream() { Session = session.Name };
+                DatabaseStream stream = new DatabaseStream();
 
                 DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
                 dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -215,10 +226,13 @@ namespace ssi
 
                 if (dialog.DialogResult == true)
                 {
-                    if (DatabaseHandler.AddStream(stream))
-                    {                        
-                        GetStreams(session, stream.Name);
+                    var sessions = SessionsBox.SelectedItems;
+                    foreach (DatabaseSession s in sessions)
+                    {
+                        stream.Session = s.Name;
+                        DatabaseHandler.AddStream(stream);                        
                     }
+                    GetStreams(session, stream.Name);
                 }
             }
         }
@@ -227,12 +241,26 @@ namespace ssi
         {
             if (StreamsBox.SelectedItem != null)
             {
-                DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;                
-                if (DatabaseHandler.DeleteStream(stream))
+                DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
+                string name = stream.Name;
+                List<DatabaseStream> streams = new List<DatabaseStream>();
+
+                var sessions = SessionsBox.SelectedItems;
+                foreach (DatabaseSession s in sessions)
                 {
-                    DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                    GetStreams(session);
-                }                
+                    streams.AddRange(DatabaseHandler.GetSessionStreams(s));
+                }
+
+                foreach (DatabaseStream s in streams)
+                {
+                    if (s.Name == name)
+                    {
+                        DatabaseHandler.DeleteStream(s);
+                    }
+                }
+
+                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+                GetStreams(session);
             }
         }
 
@@ -242,7 +270,7 @@ namespace ssi
             if (StreamsBox.SelectedItem != null)
             {
                 DatabaseStream stream = (DatabaseStream) StreamsBox.SelectedItem;
-                string name = stream.Name;
+                string name = stream.Name;                
 
                 DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
                 dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -250,11 +278,24 @@ namespace ssi
 
                 if (dialog.DialogResult == true)
                 {
-                    if (DatabaseHandler.UpdateStream(name, stream))
+                    List<DatabaseStream> streams = new List<DatabaseStream>();
+                    var sessions = SessionsBox.SelectedItems;
+                    foreach (DatabaseSession s in sessions)
                     {
-                        DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                        GetStreams(session, stream.Name);
+                        streams.AddRange(DatabaseHandler.GetSessionStreams(s));
                     }
+
+                    foreach (DatabaseStream s in streams)
+                    {
+                        if (s.Name == name)
+                        {                            
+                            stream.Session = s.Session;
+                            DatabaseHandler.UpdateStream(name, stream);
+                        }
+                    }
+
+                    DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+                    GetStreams(session, stream.Name);
                 }
             }
         }
