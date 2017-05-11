@@ -909,7 +909,7 @@ namespace ssi
                 if (annoTier.AnnoList.HasChanged)
                 {
                     MessageBoxResult m = MessageBoxResult.None;
-                    m = MessageBox.Show("You need to save continous annotations on tier #" + annoTier.AnnoList.Scheme.Name + " first", "Confirm", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    m = MessageBox.Show("You need to save continous annotations on tier " + annoTier.AnnoList.Scheme.Name + " first", "Confirm", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
                     if (m == MessageBoxResult.OK)
                     {

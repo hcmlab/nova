@@ -134,6 +134,13 @@ namespace ssi
 
                     foreach (DatabaseStream stream in streams)
                     {
+                        string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream.Name;
+                        if (File.Exists(localPath))
+                        {
+                            loadFile(localPath);
+                            continue;
+                        }
+
                         string url = stream.URL;
                         bool requiresAuth = stream.ServerAuth;
 
@@ -147,14 +154,17 @@ namespace ssi
                             {
                                 continue;
                             }
+                            if (meta.Server == "")
+                            {
+                                continue;
+                            }
                             url = meta.Server + '/' + DatabaseHandler.SessionName + '/' + stream.Name;
                             requiresAuth = meta.ServerAuth;
                         }
 
                         string[] split = url.Split(':');
                         string connection = split[0];                        
-
-                        string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream.Name;
+                        
                         Directory.CreateDirectory(Path.GetDirectoryName(localPath));
 
                         if (connection == "sftp")

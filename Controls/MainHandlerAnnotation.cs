@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Media.Imaging;
 
 namespace ssi
 {
@@ -145,18 +146,22 @@ namespace ssi
 
             if (AnnoTierStatic.Selected != null)
             {
+                control.geometricListControl.Visibility = Visibility.Collapsed;
                 control.annoContinuousModeCheckBox.Visibility = Visibility.Collapsed;
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
-                    control.geometricListControl.Visibility = Visibility.Visible;                    
-                }
+                    control.geometricListControl.Visibility = Visibility.Visible;
+                }         
                 else
                 {
-                    control.geometricListControl.Visibility = Visibility.Hidden;                    
-                }
+                    foreach(MediaBox media in mediaBoxes)
+                    {
+                        media.Media.GetOverlay().Clear();
+                    }
+                }       
 
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {

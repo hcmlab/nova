@@ -217,7 +217,7 @@ namespace ssi
                 CancellationToken ct = cancellation.Token;               
                 using (var cursor = await annotations.FindAsync(filter))
                 {
-                    await cursor.ForEachAsync(d => addAnnoToList(d, onlyme, onlyunfinished), ct);
+                    await cursor.ForEachAsync(d => addAnnoToList(d, session, onlyme, onlyunfinished), ct);
                 }
                 AnnotationsBox.ItemsSource = this.annotations;
             }
@@ -230,7 +230,7 @@ namespace ssi
             }
         }
 
-        public void addAnnoToList(BsonDocument annotation, bool onlyMe, bool onlyUnfinished)
+        public void addAnnoToList(BsonDocument annotation, DatabaseSession session, bool onlyMe, bool onlyUnfinished)
         {
             ObjectId id = annotation["_id"].AsObjectId;
 
@@ -272,7 +272,7 @@ namespace ssi
                 onlyMe && onlyUnfinished && !isFinished && Properties.Settings.Default.MongoDBUser == annotatorName)
             {
 
-                annotations.Add(new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName= annotatorFullName, IsFinished = isFinished, IsLocked = islocked, Date = date });
+                annotations.Add(new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = session.Name, IsFinished = isFinished, IsLocked = islocked, Date = date });
             }
         }
         
