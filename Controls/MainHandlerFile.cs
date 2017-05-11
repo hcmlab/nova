@@ -350,30 +350,42 @@ namespace ssi
             Regex regcontnew = new Regex(csvcontnew);
             StreamReader sr = new StreamReader(filename, System.Text.Encoding.Default);
             string line = sr.ReadLine();
+            string[] split = line.Split(';');
             double samplerate = 1.0;
 
             if (line != null)
             {
                 bool iscontinouswithtier = regcontnew.IsMatch(line);
-                if (reg.IsMatch(line) && !iscontinouswithtier) type = "semicolon";
-                else if (reglegacy.IsMatch(line) && !iscontinouswithtier) type = "legacy";
-                else if ((regcont.IsMatch(line) || iscontinouswithtier))
+
+               
+
+                if ((regcont.IsMatch(line) || iscontinouswithtier))
                 {
                     string[] data = line.Split(';');
-                    try
+
+                    if(data.Length == 3)
                     {
-                        double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                        line = sr.ReadLine();
-                        data = line.Split(';');
-                        double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                        samplerate = start2 - start;
-                        type = "continuous";
+                        try
+                        {
+                            double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                            line = sr.ReadLine();
+                            data = line.Split(';');
+                            double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                            samplerate = 1 / (start2 - start);
+                            type = "continuous";
+                        }
+                        catch
+                        {
+                            MessageBox.Show("Error reading continuous file");
+                        }
                     }
-                    catch
-                    {
-                        MessageBox.Show("Error reading continuous file");
-                    }
+
+                    else if (reg.IsMatch(line) && !iscontinouswithtier) type = "semicolon";
+
                 }
+
+                else if (reglegacy.IsMatch(line) && !iscontinouswithtier) type = "legacy";
+              
 
                 sr.Close();
             }

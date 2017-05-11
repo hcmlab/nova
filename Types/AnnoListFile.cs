@@ -694,6 +694,7 @@ namespace ssi
             AnnoList list = new AnnoList();
             list.Source.File.Path = filepath;
             list.Scheme = new AnnoScheme();
+           
 
             try
             {
@@ -756,15 +757,9 @@ namespace ssi
                         }
                         if (data.Length > 2)
                         {
-                            if (data[2].Contains("#"))
-                            {
-                                tier = data[2];
-                                tier = tier.Remove(0, 1);
-                            }
-                            else
-                            {
-                                bool isconfidence = double.TryParse(data[3], out confidence);
-                            }
+                        
+                           bool isconfidence = double.TryParse(data[2], out confidence);
+                           
                         }
                         if (data.Length > 3)
                         {
@@ -774,9 +769,12 @@ namespace ssi
                             {
                                 list.Scheme.MaxScore = double.Parse(data[4]);
                             }
-                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 /samplerate, label, "Range: " + list.Scheme.MinScore + "-" + list.Scheme.MaxScore, Colors.Black);
+                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, label, "Range: " + list.Scheme.MinScore + "-" + list.Scheme.MaxScore, Colors.Black);
                             list.AddSorted(e);
                         }
+
+                       
+
                         else
                         {
                             AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, label, "", Colors.Black, 1);
