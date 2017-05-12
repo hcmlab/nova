@@ -281,7 +281,9 @@ namespace ssi
                     annoList.Meta.AnnotatorFullName = annotatorFullName;
                     annoList.Scheme = scheme;
                     annoList.Source.StoreToDatabase = true;
+                    annoList.Source.Database.Session = DatabaseHandler.SessionName;
                     annoList.HasChanged = true;
+                    
                 }
 
                 addAnnoTier(annoList);

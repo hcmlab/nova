@@ -341,11 +341,12 @@ namespace ssi
                 double maxerr = 0.0;
 
                 double[] array = new double[al[0].Count];
-
+                double length = GetAnnoListMinLength(al);
                 // if (al[0].Meta.Annotator != null && al[0].Meta.Annotator.Contains("RootMeanSquare"))
                 {
-                    for (int i = 0; i < al[0].Count; i++)
+                    for (int i = 0; i < length; i++)
                     {
+             
                         double err = double.Parse(al[0][i].Label) - double.Parse(al[1][i].Label);
                         if (err > maxerr) maxerr = err;
                         if (err < minerr) minerr = err;
@@ -364,7 +365,7 @@ namespace ssi
 
             List<AnnoList> convertedlists = new List<AnnoList>();
 
-            double maxlength = GetAnnoListLength(annolists);
+            double maxlength = GetAnnoListMinLength(annolists);
             double chunksize = Properties.Settings.Default.DefaultMinSegmentSize; //Todo make option
 
             foreach (AnnoList al in annolists)
@@ -376,7 +377,7 @@ namespace ssi
             return convertedlists;
         }
 
-        private double GetAnnoListLength(List<AnnoList> annolists)
+        private double GetAnnoListMinLength(List<AnnoList> annolists)
         {
             double length = 0;
             foreach (AnnoList al in annolists)

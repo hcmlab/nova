@@ -463,13 +463,28 @@ namespace ssi
             if (!IsConnected)
             {
                 return false;
-            }            
+            }
 
-            List<BsonDocument> annotations = GetCollection(DatabaseDefinitionCollections.Annotations);
-            return annotations.Any(s => annotatorId.Equals(s["annotator_id"].AsObjectId)
-                && sessionId.Equals(s["session_id"].AsObjectId)
-                && roleId.Equals(s["role_id"].AsObjectId)
-                && schemeId.Equals(s["scheme_id"].AsObjectId));
+            var builder = Builders<BsonDocument>.Filter;
+
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+
+            var filterAnnotation = builder.Eq("role_id", roleId) & builder.Eq("scheme_id", schemeId) & builder.Eq("annotator_id", annotatorId) & builder.Eq("session_id", sessionId);
+            List<BsonDocument> annotationDocs = annotations.Find(filterAnnotation).ToList();
+
+            if (annotationDocs.Count == 0)
+            {
+                return false;
+            }
+
+
+            return true;
+            //List<BsonDocument> annotations = GetCollection(DatabaseDefinitionCollections.Annotations);
+
+            //return annotations.Any(s => annotatorId.Equals(s["annotator_id"].AsObjectId)
+            //    && sessionId.Equals(s["session_id"].AsObjectId)
+            //    && roleId.Equals(s["role_id"].AsObjectId)
+            //    && schemeId.Equals(s["scheme_id"].AsObjectId));
         }
 
         public static bool AnnotationExists(string annotator, string session, string role, string scheme)

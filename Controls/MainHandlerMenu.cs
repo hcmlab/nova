@@ -68,8 +68,8 @@ namespace ssi
             control.annoSaveMenu.IsEnabled = hasTier;
             control.annoSaveAsMenu.IsEnabled = hasTier;
             control.convertSelectedTierMenu.IsEnabled = hasTier;
-            control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
-            control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
+            control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && tier.IsContinuous;
+            control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsContinuous;
             control.convertSignalToAnnoContinuousMenu.IsEnabled = hasTrack;
         }
 
