@@ -110,6 +110,7 @@ namespace ssi
         public void GetAnnotations(bool onlyme = false)
 
         {
+           
             AnnotationResultBox.ItemsSource = null;
             //  AnnotationResultBox.Items.Clear();
             List<DatabaseAnnotation> items = new List<DatabaseAnnotation>();
@@ -154,6 +155,8 @@ namespace ssi
             var filter = builder.Eq("session_id", sessionid);
             var annos = annotations.Find(filter).ToList();
 
+           
+
             foreach (var anno in annos)
             {
                 var filtera = builder.Eq("_id", anno["role_id"]);
@@ -189,6 +192,7 @@ namespace ssi
 
         public void GetAnnotationSchemes()
         {
+  
             var annoschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var annosch = annoschemes.Find(_ => true).ToList();
 
@@ -235,6 +239,8 @@ namespace ssi
             AnnoList merge = al[0];
             merge.Meta.Annotator = "RootMeanSquare";
             merge.Meta.AnnotatorFullName = "RootMeanSquare";
+            merge.Source.StoreToDatabase = true;
+            merge.Source.Database.Session = al[0].Source.Database.Session;
 
             double[] array = new double[al[0].Count];
 
@@ -264,6 +270,8 @@ namespace ssi
             AnnoList merge = al[0];
             merge.Meta.Annotator = "Mean";
             merge.Meta.AnnotatorFullName = "Mean";
+            merge.Source.StoreToDatabase = true;
+            merge.Source.Database.Session = al[0].Source.Database.Session;
 
             double[] array = new double[al[0].Count];
             foreach (AnnoList a in al)
@@ -333,11 +341,12 @@ namespace ssi
                 double maxerr = 0.0;
 
                 double[] array = new double[al[0].Count];
-
+                double length = GetAnnoListMinLength(al);
                 // if (al[0].Meta.Annotator != null && al[0].Meta.Annotator.Contains("RootMeanSquare"))
                 {
-                    for (int i = 0; i < al[0].Count; i++)
+                    for (int i = 0; i < length; i++)
                     {
+             
                         double err = double.Parse(al[0][i].Label) - double.Parse(al[1][i].Label);
                         if (err > maxerr) maxerr = err;
                         if (err < minerr) minerr = err;
@@ -356,7 +365,7 @@ namespace ssi
 
             List<AnnoList> convertedlists = new List<AnnoList>();
 
-            double maxlength = GetAnnoListLength(annolists);
+            double maxlength = GetAnnoListMinLength(annolists);
             double chunksize = Properties.Settings.Default.DefaultMinSegmentSize; //Todo make option
 
             foreach (AnnoList al in annolists)
@@ -368,7 +377,7 @@ namespace ssi
             return convertedlists;
         }
 
-        private double GetAnnoListLength(List<AnnoList> annolists)
+        private double GetAnnoListMinLength(List<AnnoList> annolists)
         {
             double length = 0;
             foreach (AnnoList al in annolists)
@@ -450,9 +459,10 @@ namespace ssi
             AnnoList result = new AnnoList();
             result.Scheme = al[0].Scheme;
             result.Meta = al[0].Meta;
-            result.Source = al[0].Source;
             result.Meta.Annotator = "Merge";
             result.Meta.AnnotatorFullName = "Merge";
+            result.Source.StoreToDatabase = true;
+            result.Source.Database.Session = al[0].Source.Database.Session;
 
             for (int i = 0; i < cont.Count - 1; i++)
             {

@@ -281,7 +281,9 @@ namespace ssi
                     annoList.Meta.AnnotatorFullName = annotatorFullName;
                     annoList.Scheme = scheme;
                     annoList.Source.StoreToDatabase = true;
+                    annoList.Source.Database.Session = DatabaseHandler.SessionName;
                     annoList.HasChanged = true;
+                    
                 }
 
                 addAnnoTier(annoList);
@@ -343,16 +345,16 @@ namespace ssi
                 AnnoList merge = window.Merge();
                 if (rms != null)
                 {
-                    DatabaseHandler.SaveAnnoList(rms);
+                    rms.Save();
                 }
                 if (median != null)
                 {
-                    DatabaseHandler.SaveAnnoList(median);
+                    median.Save();
                 }
 
                 if (merge != null)
                 {
-                    DatabaseHandler.SaveAnnoList(merge);
+                    merge.Save();
                 }
 
             }

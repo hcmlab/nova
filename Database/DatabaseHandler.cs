@@ -235,7 +235,7 @@ namespace ssi
             return databases.Any(s => name.Equals(s));
         }
 
-        public static List<string> GetDatabases(int requiresauth = 1)
+        public static List<string> GetDatabases()
         {
             List<string> items = new List<string>();
 
@@ -245,7 +245,7 @@ namespace ssi
                 foreach (var c in databases)
                 {
                     string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > requiresauth)
+                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 2)
                     {
                         items.Add(db);
                     }
@@ -463,13 +463,28 @@ namespace ssi
             if (!IsConnected)
             {
                 return false;
-            }            
+            }
 
-            List<BsonDocument> annotations = GetCollection(DatabaseDefinitionCollections.Annotations);
-            return annotations.Any(s => annotatorId.Equals(s["annotator_id"].AsObjectId)
-                && sessionId.Equals(s["session_id"].AsObjectId)
-                && roleId.Equals(s["role_id"].AsObjectId)
-                && schemeId.Equals(s["scheme_id"].AsObjectId));
+            var builder = Builders<BsonDocument>.Filter;
+
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+
+            var filterAnnotation = builder.Eq("role_id", roleId) & builder.Eq("scheme_id", schemeId) & builder.Eq("annotator_id", annotatorId) & builder.Eq("session_id", sessionId);
+            List<BsonDocument> annotationDocs = annotations.Find(filterAnnotation).ToList();
+
+            if (annotationDocs.Count == 0)
+            {
+                return false;
+            }
+
+
+            return true;
+            //List<BsonDocument> annotations = GetCollection(DatabaseDefinitionCollections.Annotations);
+
+            //return annotations.Any(s => annotatorId.Equals(s["annotator_id"].AsObjectId)
+            //    && sessionId.Equals(s["session_id"].AsObjectId)
+            //    && roleId.Equals(s["role_id"].AsObjectId)
+            //    && schemeId.Equals(s["scheme_id"].AsObjectId));
         }
 
         public static bool AnnotationExists(string annotator, string session, string role, string scheme)
@@ -2116,7 +2131,7 @@ namespace ssi
 
             ObjectId sessionID;
             {
-                var filter = builder.Eq("name", sessionName);
+                var filter = builder.Eq("name", annoList.Source.Database.Session);
                 var documents = sessions.Find(filter).ToList();
                 if (documents.Count == 0)
                 {
@@ -2609,7 +2624,7 @@ namespace ssi
                 }
 
                 annoList.Source.Database.OID = annotationDoc["_id"].AsObjectId;
-                annoList.Source.Database.Session = DatabaseHandler.sessionName;
+                annoList.Source.Database.Session = sessionName;
             }
             
             return annoList;

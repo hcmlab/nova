@@ -1,0 +1,100 @@
+﻿<Window x:Class="ssi.DatabaseAdminManageDBWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        Title="Manage Databases" Width="800" Height="400">
+
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="MyButton" >
+            <Setter Property="Margin" Value="2,0,2,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="5">
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="Databases" Grid.Row="0" Grid.Column="0"/>
+        <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+                <Button Style="{StaticResource MyButton}" Name="AddDB" Content="+" Click="AddDB_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="DeleteDB" Content="-" Click="DeleteDB_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="EditDB" Content="edit" Click="EditDB_Click"/>
+            </StackPanel>
+            <ListBox Name="DatabaseBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" SelectionChanged="DatabaseBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+        </DockPanel>
+
+        <Label Content="Annotators" Grid.Row="0" Grid.Column="1" />
+        <DockPanel Grid.Row="1" Grid.Column="1" LastChildFill="True">
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Style="{StaticResource MyButton}" Name="AddAnnotator" Content="+" Click="AddAnnotator_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="DeleteAnnotator" Content="-" Click="DeleteAnnotator_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="EditAnnotator" Content="edit" Click="EditAnnotator_Click"  />
+            </StackPanel >
+            <ListBox x:Name="AnnotatorsBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" Focusable="True" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        </DockPanel>
+
+        <Label Content="Schemes" Grid.Row="0" Grid.Column="2" />
+        <DockPanel Grid.Row="1" Grid.Column="2" LastChildFill="True">
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Style="{StaticResource MyButton}" Name="AddScheme" Content="+" Click="AddScheme_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="DeleteScheme" Content="-" Click="DeleteScheme_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="EditScheme" Content="edit" Click="EditScheme_Click"  />
+            </StackPanel >
+            <ListBox x:Name="SchemesBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" Focusable="True" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        </DockPanel>
+        
+        <Label Content="Roles" Grid.Row="0" Grid.Column="3"/>
+        <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="3" >
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+                <Button Style="{StaticResource MyButton}" Name="AddRole" Content="+" Click="AddRole_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="DeleteRole" Content="-" Click="DeleteRole_Click"  />
+                <Button Style="{StaticResource MyButton}" Name="EditRole" Content="edit" Click="EditRole_Click"  />
+            </StackPanel>
+            <ListBox Name="RolesResultBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
+        </DockPanel>
+
+        <Label Content="Stream Types" Grid.Row="0" Grid.Column="4"/>
+        <DockPanel Grid.Row="1" Grid.Column="4" LastChildFill="True">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+                <Button Style="{StaticResource MyButton}" Name="AddStreamType" Content="+" Click="AddStreamType_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="DeleteStreamType" Content="-" Click="DeleteStreamType_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="EditStreamType" Content="edit" Click="EditStreamType_Click"  />
+            </StackPanel>
+            <ListBox Name="StreamTypesResultBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
+        </DockPanel>
+                
+
+        <Label Content="Subjects" Grid.Row="0" Grid.Column="5"/>
+        <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="5" >
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+                <Button Style="{StaticResource MyButton}" Name="AddSubjects" Content="+" Click="AddSubject_Click" />
+                <Button Style="{StaticResource MyButton}" Name="DeleteSubject" Content="-" Click="DeleteSubject_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="EditSubject" Content="edit" Click="EditSubject_Click" />
+            </StackPanel>
+            <ListBox x:Name="SubjectsResultBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        </DockPanel>
+
+
+        <Button Content="Done" Margin="5" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Name="Ok" Click="Ok_Click" HorizontalAlignment="Right"/>
+
+    </Grid>
+</Window>
