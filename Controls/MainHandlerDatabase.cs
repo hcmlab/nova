@@ -343,16 +343,16 @@ namespace ssi
                 AnnoList merge = window.Merge();
                 if (rms != null)
                 {
-                    DatabaseHandler.SaveAnnoList(rms);
+                    rms.Save();
                 }
                 if (median != null)
                 {
-                    DatabaseHandler.SaveAnnoList(median);
+                    median.Save();
                 }
 
                 if (merge != null)
                 {
-                    DatabaseHandler.SaveAnnoList(merge);
+                    merge.Save();
                 }
 
             }

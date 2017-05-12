@@ -235,7 +235,7 @@ namespace ssi
             return databases.Any(s => name.Equals(s));
         }
 
-        public static List<string> GetDatabases(int requiresauth = 1)
+        public static List<string> GetDatabases()
         {
             List<string> items = new List<string>();
 
@@ -245,7 +245,7 @@ namespace ssi
                 foreach (var c in databases)
                 {
                     string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > requiresauth)
+                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 2)
                     {
                         items.Add(db);
                     }
@@ -2116,7 +2116,7 @@ namespace ssi
 
             ObjectId sessionID;
             {
-                var filter = builder.Eq("name", sessionName);
+                var filter = builder.Eq("name", annoList.Source.Database.Session);
                 var documents = sessions.Find(filter).ToList();
                 if (documents.Count == 0)
                 {
@@ -2609,7 +2609,7 @@ namespace ssi
                 }
 
                 annoList.Source.Database.OID = annotationDoc["_id"].AsObjectId;
-                annoList.Source.Database.Session = DatabaseHandler.sessionName;
+                annoList.Source.Database.Session = sessionName;
             }
             
             return annoList;

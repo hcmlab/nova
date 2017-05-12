@@ -110,6 +110,7 @@ namespace ssi
         public void GetAnnotations(bool onlyme = false)
 
         {
+           
             AnnotationResultBox.ItemsSource = null;
             //  AnnotationResultBox.Items.Clear();
             List<DatabaseAnnotation> items = new List<DatabaseAnnotation>();
@@ -154,6 +155,8 @@ namespace ssi
             var filter = builder.Eq("session_id", sessionid);
             var annos = annotations.Find(filter).ToList();
 
+           
+
             foreach (var anno in annos)
             {
                 var filtera = builder.Eq("_id", anno["role_id"]);
@@ -189,6 +192,7 @@ namespace ssi
 
         public void GetAnnotationSchemes()
         {
+  
             var annoschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var annosch = annoschemes.Find(_ => true).ToList();
 
@@ -235,6 +239,8 @@ namespace ssi
             AnnoList merge = al[0];
             merge.Meta.Annotator = "RootMeanSquare";
             merge.Meta.AnnotatorFullName = "RootMeanSquare";
+            merge.Source.StoreToDatabase = true;
+            merge.Source.Database.Session = al[0].Source.Database.Session;
 
             double[] array = new double[al[0].Count];
 
@@ -264,6 +270,8 @@ namespace ssi
             AnnoList merge = al[0];
             merge.Meta.Annotator = "Mean";
             merge.Meta.AnnotatorFullName = "Mean";
+            merge.Source.StoreToDatabase = true;
+            merge.Source.Database.Session = al[0].Source.Database.Session;
 
             double[] array = new double[al[0].Count];
             foreach (AnnoList a in al)
@@ -450,9 +458,10 @@ namespace ssi
             AnnoList result = new AnnoList();
             result.Scheme = al[0].Scheme;
             result.Meta = al[0].Meta;
-            result.Source = al[0].Source;
             result.Meta.Annotator = "Merge";
             result.Meta.AnnotatorFullName = "Merge";
+            result.Source.StoreToDatabase = true;
+            result.Source.Database.Session = al[0].Source.Database.Session;
 
             for (int i = 0; i < cont.Count - 1; i++)
             {

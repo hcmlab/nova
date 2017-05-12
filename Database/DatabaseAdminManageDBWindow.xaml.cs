@@ -55,7 +55,7 @@ namespace ssi
         {
             DatabaseBox.Items.Clear();
 
-            List<string> databases = DatabaseHandler.GetDatabases(2);
+            List<string> databases = DatabaseHandler.GetDatabases();
 
             foreach (string db in databases)
             {
