@@ -88,7 +88,7 @@ namespace ssi
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
+                            sw.WriteLine(e.Label + delimiter + e.Confidence);
                         }
                     }
                     else if (Scheme.Type == AnnoScheme.TYPE.FREE)
@@ -97,11 +97,11 @@ namespace ssi
                         {
                             if (e.Color != Scheme.MaxOrForeColor)
                             {
-                                sw.WriteLine(e.Start.ToString("n2") + delimiter + e.Stop.ToString("n2") + delimiter + e.Label + delimiter + e.Confidence.ToString("n2"));
+                                sw.WriteLine(e.Start + delimiter + e.Stop + delimiter + e.Label + delimiter + e.Confidence);
                             }
                             else
                             {
-                                sw.WriteLine(e.Start.ToString("n2") + delimiter + e.Stop.ToString("n2") + delimiter + e.Label + delimiter + e.Confidence.ToString("n2") + delimiter + "color=" + e.Color.ToString());
+                                sw.WriteLine(e.Start + delimiter + e.Stop + delimiter + e.Label + delimiter + e.Confidence + delimiter + "color=" + e.Color.ToString());
                             }
                         }
                     }
@@ -114,11 +114,11 @@ namespace ssi
                             if (e.Label != "GARBAGE")
                             {
                                 LabelIds.TryGetValue(e.Label, out index);
-                                sw.WriteLine(e.Start.ToString("n2") + delimiter + e.Stop.ToString("n2") + delimiter + index + delimiter + e.Confidence.ToString("n2"));
+                                sw.WriteLine(e.Start + delimiter + e.Stop + delimiter + index + delimiter + e.Confidence);
                             }
                             else
                             {
-                                sw.WriteLine(e.Start.ToString("n2") + delimiter + e.Stop.ToString("n2") + delimiter + -1 + delimiter + e.Confidence.ToString("n2"));
+                                sw.WriteLine(e.Start + delimiter + e.Stop + delimiter + -1 + delimiter + e.Confidence);
                             }
                         }
                     }
@@ -133,28 +133,28 @@ namespace ssi
                             {
                                 output += '(' + e.Points[i].Label + ':' + e.Points[i].XCoord + ':' + e.Points[i].YCoord + ":" + e.Points[i].Confidence + ')' + delimiter;
                             }
-                            sw.WriteLine(output + e.Confidence.ToString("n2"));
+                            sw.WriteLine(output + e.Confidence);
                         }
                     }
                     else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
+                            sw.WriteLine(e.Label + delimiter + e.Confidence);
                         }
                     }
                     else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
+                            sw.WriteLine(e.Label + delimiter + e.Confidence);
                         }
                     }
                     else if (Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            sw.WriteLine(e.Label + delimiter + e.Confidence.ToString("n2"));
+                            sw.WriteLine(e.Label + delimiter + e.Confidence);
                         }
                     }
 

@@ -86,8 +86,13 @@ namespace ssi
         {
             DatabaseAdminManageSessionsWindow dialog = new DatabaseAdminManageSessionsWindow();
             databaseManage(dialog);
-        }      
+        }
 
+        private void databaseManageAnnotations()
+        {
+            DatabaseAdminManageAnnotationsWindow dialog = new DatabaseAdminManageAnnotationsWindow();
+            databaseManage(dialog);
+        }
         private void databaseLoadSession()
         {
             clearWorkspace();
@@ -158,8 +163,19 @@ namespace ssi
                             {
                                 continue;
                             }
-                            url = meta.Server + '/' + DatabaseHandler.SessionName + '/' + stream.Name;
-                            requiresAuth = meta.ServerAuth;
+                           
+
+                            //In case we host our files on nextcloud, the file format is special. For now we only allow self-hosted.
+                            if(meta.Server.Contains("https://hcm-lab.de/cloud"))
+                            {
+                                url = meta.Server + "/download?path=%2F" + DatabaseHandler.DatabaseName + "%2F" + DatabaseHandler.SessionName + "&files=" + stream.Name;
+                            }
+                            else
+                            { 
+                                url = meta.Server + '/' + DatabaseHandler.SessionName + '/' + stream.Name;
+                                requiresAuth = meta.ServerAuth;
+                            }
+
                         }
 
                         string[] split = url.Split(':');
@@ -320,6 +336,11 @@ namespace ssi
             databaseManageSessions();
         }
 
+        private void databaseManageAnnotations_Click(object sender, RoutedEventArgs e)
+        {
+            databaseManageAnnotations();
+        }
+
         private void databaseCMLCompleteStep_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLCompleteWindow window = new DatabaseCMLCompleteWindow(this);
@@ -359,24 +380,8 @@ namespace ssi
 
             }
         }
-
+       
         
-
-        private void databaseCMLExtractFeatures_Click(object sender, RoutedEventArgs e)
-        {
-            //TODO More logic here in the future
-
-            string arguments = " -overwrite -log cml_extract.log " + "\"" + Properties.Settings.Default.DatabaseDirectory + "\\" + Properties.Settings.Default.DatabaseName + "\" " + " expert;novice close";
-
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            //   startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            startInfo.FileName = "cmltrain.exe";
-            startInfo.Arguments = "--extract" + arguments;
-            process.StartInfo = startInfo;
-            process.Start();
-            process.WaitForExit();
-        }
 
         #endregion EVENTHANDLERS
 

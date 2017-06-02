@@ -4,7 +4,8 @@
     xmlns:local="clr-namespace:ssi"
     Width="Auto"
     Height="Auto"
-    Loaded="ControlLoaded">
+    Loaded="ControlLoaded"
+    Background="White" >
 
     <Grid>
 
@@ -34,16 +35,19 @@
             </MenuItem>
             <MenuItem Header="Database">
                 <MenuItem Header="Load Session (clear workspace)" Name="databaseLoadSessionMenu" />
-                <MenuItem Header="Cooperative Learning" Name="databaseCMLMenu">
-                    <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" />
-                    <MenuItem Header="Complete Session" Name="databaseCMLCompleteStepMenu"/>
-                    <MenuItem Header="Extract MFCCS For All Sessions" Name="databaseCMLExtractFeaturesMenu"/>
-                    <MenuItem Header="Train And Label Multiple Sessions" Name="databaseCMLTransferStepMenu" />
-                </MenuItem>
                 <MenuItem Header="Administration" Name="databaseAdminMenu">
                     <MenuItem Header="Manage Users" Name="databaseManageUsersMenu" />
                     <MenuItem Header="Manage Databases" Name="databaseManageDBsMenu" />
                     <MenuItem Header="Manage Sessions" Name="databaseManageSessionsMenu" />
+                    <MenuItem Header="Manage Annotations" Name="databaseManageAnnotationsMenu" />
+                </MenuItem>
+                <MenuItem Header="Cooperative Learning" Name="databaseCMLMenu">
+                    <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" />
+                    <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
+                    <MenuItem Header="Train Models" Name="databaseCMLTrainMenu"/>
+                    <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
+                    <MenuItem Header="Complete Current Session" Name="databaseCMLCompleteStepMenu" Visibility="Collapsed"/>
+                    <MenuItem Header="Complete Multiple Sessions" Name="databaseCMLTransferStepMenu" Visibility="Collapsed"/>
                 </MenuItem>
                 <MenuItem Header="Connection" Name="databaseConnectMenu" />
             </MenuItem>
@@ -75,32 +79,40 @@
               Name="viewGrid">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Border Grid.Column="0" 
+            <Grid Grid.Column="0" 
                     Grid.Row="0">
-                <local:GeometricListControl x:Name="geometricListControl" Visibility="Collapsed"></local:GeometricListControl>
 
-            </Border>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <Border Grid.Column="0" 
+                <Border Grid.Column="0" 
+                    Grid.Row="0">
+                    <local:GeometricListControl x:Name="geometricListControl"></local:GeometricListControl>
+                </Border>
+
+                <Border Grid.Column="0" 
                     Grid.Row="1">
-                <local:AnnoListControl x:Name="annoListControl"></local:AnnoListControl>
-            </Border>
+                    <local:AnnoListControl x:Name="annoListControl"></local:AnnoListControl>
+                </Border>
+
+            </Grid>
+
 
             <GridSplitter 
                 ResizeDirection="Columns"
                 Grid.Column="1"
                 Grid.Row="0" 
-                Grid.RowSpan="2"
                 Height="Auto"
                 Width="6"
                 HorizontalAlignment="Stretch" 
@@ -109,8 +121,7 @@
             </GridSplitter>
 
             <Grid Grid.Column="2"
-                  Grid.Row="0"
-                  Grid.RowSpan="2">
+                  Grid.Row="0">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -420,7 +431,7 @@
 
             </Grid>
 
-            <Border Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3">
+            <Border Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
                 <local:NavigatorControl x:Name="navigator"></local:NavigatorControl>
             </Border>
 
@@ -433,6 +444,7 @@
                     </StackPanel>
                 </Grid>
             </Grid>
+            
         </Grid>
     </Grid>
 

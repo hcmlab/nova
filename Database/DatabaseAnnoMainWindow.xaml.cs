@@ -122,9 +122,13 @@ namespace ssi
             if (DatabaseBox.SelectedItem != null)
             {
                 DatabaseHandler.ChangeDatabase(DatabaseBox.SelectedItem.ToString());
+                DatabaseDBMeta meta = new DatabaseDBMeta { Name = DatabaseBox.SelectedItem.ToString() };
+                if (DatabaseHandler.GetDBMeta(ref meta)) ServerLoginPanel.Visibility =  meta.ServerAuth? Visibility.Visible : Visibility.Collapsed;
 
                 GetSessions();
 
+               
+ 
                 StreamsBox.ItemsSource = null;
                 AnnotationsBox.ItemsSource = null;
             }

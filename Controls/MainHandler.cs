@@ -173,9 +173,12 @@ namespace ssi
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
             control.databaseCMLTransferStepMenu.Click += databaseCMLTransferStep_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
+            control.databaseCMLTrainMenu.Click += databaseCMLTrain_Click;
+            control.databaseCMLPredictMenu.Click += databaseCMLPredict_Click;
             control.databaseManageUsersMenu.Click += databaseManageUsers_Click;
             control.databaseManageDBsMenu.Click += databaseManageDBs_Click;
             control.databaseManageSessionsMenu.Click += databaseManageSessions_Click;
+            control.databaseManageAnnotationsMenu.Click += databaseManageAnnotations_Click;
             control.databaseCMLMergeMenu.Click += databaseCMLMerge_Click;
 
             control.showSettingsMenu.Click += showSettings_Click;

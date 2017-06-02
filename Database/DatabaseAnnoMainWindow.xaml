@@ -76,16 +76,8 @@
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
-                            <GridViewColumn Width="Auto" Header="Role">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Role" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Annotator">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="AnnotatorFullName" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Role" DisplayMemberBinding="{Binding Role}" />
+                            <GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Annotator}" />
                             <GridViewColumn Width="Auto" Header="Finished">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -104,12 +96,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-
-                            <GridViewColumn Width="Auto" Header="Date">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Date" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Date"  DisplayMemberBinding="{Binding Date}" />
                         </GridView>
                     </ListView.View>
                 </ListView>
@@ -117,7 +104,7 @@
 
             <DockPanel Grid.Column="3" Grid.Row="0"  Margin="10">
                 <Label Content="SelectedStreams"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                <StackPanel Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,10,0,0">
+                <StackPanel Name="ServerLoginPanel"  Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,10,0,0">
                     <DockPanel LastChildFill="True">
                         <Label Content="Username" Width="70" />
                         <TextBox x:FieldModifier="public" x:Name="serverLogin" Margin="0,0,5,5" Height="25" Focusable="True" VerticalContentAlignment="Center" />
@@ -131,7 +118,16 @@
                 <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="0" Grid.Column="0">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Width="Auto" Header="File">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Name" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Name">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="StreamName" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
                             <GridViewColumn Width="Auto" Header="Type">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="StreamType" />

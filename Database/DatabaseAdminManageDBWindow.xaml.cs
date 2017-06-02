@@ -67,15 +67,15 @@ namespace ssi
 
         public void GetRoles(string selectedItem = null)
         {
-            RolesResultBox.Items.Clear();
+            RolesBox.Items.Clear();
 
             List<string> items = DatabaseHandler.GetRoles();
             foreach (string item in items)
             {
-                RolesResultBox.Items.Add(item);
+                RolesBox.Items.Add(item);
             }
 
-            Select(RolesResultBox, selectedItem);
+            Select(RolesBox, selectedItem);
         }
 
         public void GetAnnotators(string selectedItem = null)
@@ -94,28 +94,28 @@ namespace ssi
         public void GetSubjects(string selectedItem = null)
 
         {
-            SubjectsResultBox.Items.Clear();
+            SubjectsBox.Items.Clear();
 
             List<string> items = DatabaseHandler.GetSubjects();
             foreach (string item in items)
             {
-                SubjectsResultBox.Items.Add(item);
+                SubjectsBox.Items.Add(item);
             }
 
-            Select(SubjectsResultBox, selectedItem);
+            Select(SubjectsBox, selectedItem);
         }
 
         public void GetStreamTypes(string selectedItem = null)
         {
-            StreamTypesResultBox.Items.Clear();
+            StreamTypesBox.Items.Clear();
 
             List<string> items = DatabaseHandler.GetStreamTypes();
             foreach (string item in items)
             {
-                StreamTypesResultBox.Items.Add(item);
+                StreamTypesBox.Items.Add(item);
             }
 
-            Select(StreamTypesResultBox, selectedItem);
+            Select(StreamTypesBox, selectedItem);
         }
 
         public void GetSchemes(string selectedItem = null)
@@ -286,9 +286,9 @@ namespace ssi
 
         private void EditRole_Click(object sender, RoutedEventArgs e)
         {
-            if (RolesResultBox.SelectedItem != null)
+            if (RolesBox.SelectedItem != null)
             {
-                string old_name = (string)RolesResultBox.SelectedItem;
+                string old_name = (string)RolesBox.SelectedItem;
                 Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
                 input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = old_name };
                 UserInputWindow dialog = new UserInputWindow("Edit role", input);
@@ -310,9 +310,9 @@ namespace ssi
 
         private void DeleteRole_Click(object sender, RoutedEventArgs e)
         {
-            if (RolesResultBox.SelectedItem != null)
+            if (RolesBox.SelectedItem != null)
             {
-                string name = (string)RolesResultBox.SelectedItem;
+                string name = (string)RolesBox.SelectedItem;
                 if (DatabaseHandler.DeleteRole(name))
                 {
                     GetRoles();
@@ -340,9 +340,9 @@ namespace ssi
         }
         private void EditStreamType_Click(object sender, RoutedEventArgs e)
         {
-            if (StreamTypesResultBox.SelectedItem != null)
+            if (StreamTypesBox.SelectedItem != null)
             {
-                string name = (string)StreamTypesResultBox.SelectedItem;
+                string name = (string)StreamTypesBox.SelectedItem;
                 DatabaseStreamType streamType = new DatabaseStreamType() { Name = name };                
                 if (DatabaseHandler.GetStreamType(ref streamType))
                 {
@@ -367,9 +367,9 @@ namespace ssi
 
         private void DeleteStreamType_Click(object sender, RoutedEventArgs e)
         {
-            if (StreamTypesResultBox.SelectedItem != null)
+            if (StreamTypesBox.SelectedItem != null)
             {
-                string name = (string)StreamTypesResultBox.SelectedItem;
+                string name = (string)StreamTypesBox.SelectedItem;
                 if (DatabaseHandler.DeleteStreamType(name))
                 {
                     GetStreamTypes();
@@ -404,9 +404,9 @@ namespace ssi
 
         private void EditSubject_Click(object sender, RoutedEventArgs e)
         {
-            if (SubjectsResultBox.SelectedItem != null)
+            if (SubjectsBox.SelectedItem != null)
             {
-                string name = (string)SubjectsResultBox.SelectedItem;
+                string name = (string)SubjectsBox.SelectedItem;
                 DatabaseSubject subject = new DatabaseSubject() { Name = name };
                 if (DatabaseHandler.GetSubject(ref subject))
                 {
@@ -437,9 +437,9 @@ namespace ssi
 
         private void DeleteSubject_Click(object sender, RoutedEventArgs e)
         {
-            if (SubjectsResultBox.SelectedItem != null)
+            if (SubjectsBox.SelectedItem != null)
             {
-                string name = (string)SubjectsResultBox.SelectedItem;
+                string name = (string)SubjectsBox.SelectedItem;
                 if (DatabaseHandler.DeleteSubject(name))
                 {
                     GetSubjects();

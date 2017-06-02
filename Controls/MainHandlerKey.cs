@@ -30,7 +30,7 @@ namespace ssi
                     if (AnnoTierStatic.Selected != null && Properties.Settings.Default.CMLDefaultStream != null)
                     {
                         AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams);
-                        CompleteTier(Properties.Settings.Default.CMLContext, AnnoTierStatic.Selected, Properties.Settings.Default.CMLDefaultStream, Properties.Settings.Default.CMLDefaultConf, Properties.Settings.Default.CMLDefaultGap, Properties.Settings.Default.CMLDefaultMinDur);
+                        CMLCompleteTier(Properties.Settings.Default.CMLContext, AnnoTierStatic.Selected, Properties.Settings.Default.CMLDefaultStream, Properties.Settings.Default.CMLDefaultConf, Properties.Settings.Default.CMLDefaultGap, Properties.Settings.Default.CMLDefaultMinDur);
                     }
 
                     e.Handled = true;

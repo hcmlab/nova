@@ -154,6 +154,7 @@ namespace ssi
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
                     control.geometricListControl.Visibility = Visibility.Visible;
+                    control.geometricListControl.Height = control.ActualHeight / 2;
                 }         
                 else
                 {
