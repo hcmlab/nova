@@ -27,14 +27,14 @@ namespace ssi
 
             RolesResultBox.SelectedItem = stream.Role;
             SubjectsResultBox.SelectedItem = stream.Subject;
-            StreamTypesResultsBox.SelectedItem = stream.StreamType;
+            StreamTypesResultsBox.SelectedItem = stream.StreamName;
         }
         
         private void OkClick(object sender, RoutedEventArgs e)
         {
             stream.Name = NameField.Text == "" ? Defaults.Strings.Unkown : NameField.Text;
             stream.Role = RolesResultBox.SelectedItem != null ? RolesResultBox.SelectedItem.ToString() : "";
-            stream.StreamType = StreamTypesResultsBox.SelectedItem != null ? StreamTypesResultsBox.SelectedItem.ToString() : "";
+            stream.StreamName = StreamTypesResultsBox.SelectedItem != null ? StreamTypesResultsBox.SelectedItem.ToString() : "";
             stream.Subject = SubjectsResultBox.SelectedItem != null ? SubjectsResultBox.SelectedItem.ToString() : "";
             stream.URL = CustomUrlField.Text;
             stream.ServerAuth = AuthentificationCheckBox.IsChecked.Value;

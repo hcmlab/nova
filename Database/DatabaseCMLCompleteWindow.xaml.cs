@@ -80,7 +80,7 @@ namespace ssi
                                 Properties.Settings.Default.Save();
 
                                 logTextBox.Text = "";
-                                logTextBox.AppendText(handler.CompleteTier(context, tier, stream, confidence, minGap, minDur));
+                                logTextBox.AppendText(handler.CMLCompleteTier(context, tier, stream, confidence, minGap, minDur));
                                 //logTextBox.AppendText(File.ReadAllText("cml.log"));
                             }
                         }

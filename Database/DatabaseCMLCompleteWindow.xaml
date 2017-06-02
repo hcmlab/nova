@@ -50,6 +50,7 @@
                  Grid.Column="1"
                  SelectionMode="Single" SelectionChanged="StreamListBox_SelectionChanged"
                  Margin="5"></ListBox>
+        
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
 
             <DockPanel       

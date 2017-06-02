@@ -18,7 +18,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5">
+        <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5,5,5,0">
 
             <ListView Name="geometricDataGrid">
                 <ListView.ContextMenu>
@@ -34,25 +34,25 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="75" DisplayMemberBinding="{Binding Label}">
+                        <GridViewColumn Width="Auto" DisplayMemberBinding="{Binding Label}">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="Label" Click="GridViewColumnHeader_Click">Label</GridViewColumnHeader>
                             </GridViewColumn.Header>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="75" Header="X">
+                        <GridViewColumn Width="Auto" Header="X">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="XCoord" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="75"  Header="Y">
+                        <GridViewColumn Width="Auto"  Header="Y">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="YCoord" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="75" Header="Confidence" DisplayMemberBinding="{Binding Confidence}" />
+                        <GridViewColumn Width="Auto" Header="Confidence" DisplayMemberBinding="{Binding Confidence}" />
                     </GridView>
                 </ListView.View>
             </ListView>
@@ -72,10 +72,8 @@
             </Grid.RowDefinitions>
 
             <Button Name="editButton" Width="Auto" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5" >Relabel</Button>
-            <TextBox Name="editTextBox" ToolTip="Label" Grid.Column="1" Grid.Row="0" Height="25" Margin="5"></TextBox>
-            <!--<TextBox Name="xTextBox" ToolTip="X" Grid.Column="2" Grid.Row="0" Height="25" Margin="5"></TextBox>
-            <TextBox Name="yTextBox" ToolTip="Y" Grid.Column="3" Grid.Row="0" Height="25" Margin="5"></TextBox>-->
-            <Button Name="selectAllButton" Width="Auto" Grid.Column="2" Grid.Row="0" Height="25" Margin="5">Select All</Button>
+            <TextBox Name="editTextBox" ToolTip="Label" Grid.Column="1" Grid.Row="0" Height="25" Margin="5,0,5,0"></TextBox>
+            <Button Name="selectAllButton" Width="Auto" Grid.Column="2" Grid.Row="0" Height="25" Margin="5,0,5,0">Select All</Button>
             <Button Name="copyButton" Width="Auto" Grid.Column="3" Grid.Row="0" Height="25" Margin="7,5,5,5">Copy</Button>
         </Grid>
     </Grid>

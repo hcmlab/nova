@@ -1,0 +1,77 @@
+﻿<Window x:Class="ssi.DatabaseAdminManageAnnotationsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        Title="Manage Annotations" Height="600" Width="Auto" SizeToContent="Width">
+
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="MyButton" >
+            <Setter Property="Margin" Value="2,0,2,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*"></ColumnDefinition>
+            <ColumnDefinition Width="500*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="Databases"/>
+        <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
+            <ListBox Name="DatabaseBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DataBaseResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+        </DockPanel>
+
+        <Label Content="Annotations" Grid.Row="0" Grid.Column="1" />
+        <DockPanel Grid.Row="1" Grid.Column="1" LastChildFill="True" >
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+                <Button Style="{StaticResource MyButton}" Name="DeleteSession" Content="-" Click="DeleteAnnotations_Click" />
+                <!--Button Style="{StaticResource MyButton}" Name="EditSession" Content="edit" Click="EditSession_Click" /-->
+                <!--Button Style="{StaticResource MyButton}" Name="CopySession" Content="copy" Click="CopySession_Click" /-->
+            </StackPanel>
+            <ListView Name="AnnotationsBox" SelectionMode="Extended">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="Auto" Header="Session" DisplayMemberBinding="{Binding Session}" />
+                        <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
+                        <GridViewColumn Width="Auto" Header="Role" DisplayMemberBinding="{Binding Role}" />
+                        <GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Annotator}" />
+                        <GridViewColumn Width="Auto" Header="Finished">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox Name="IsFinishedCheckbox" IsEnabled="{Binding IsOwner}" IsChecked="{Binding IsFinished}" Checked="IsFinishedCheckbox_Checked" Unchecked="IsFinishedCheckbox_Unchecked" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Locked">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox Name="IsLockedCheckBox" IsEnabled="{Binding IsOwner}" IsChecked="{Binding IsLocked}" Checked="IsLockedCheckBox_Checked" Unchecked="IsLockedCheckBox_Unchecked" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Date"  DisplayMemberBinding="{Binding Date}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DockPanel>
+        <DockPanel Grid.Row="1" Grid.Column="2" LastChildFill="True"/>
+
+        <Button Content="Done" Margin="5" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Name="Ok" Click="Ok_Click" HorizontalAlignment="Right"/>
+
+    </Grid>
+</Window>

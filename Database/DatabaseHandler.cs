@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -569,14 +570,25 @@ namespace ssi
             return items;
         }
 
-        public static List<BsonDocument> GetCollection(string collectionName, bool onlyValid = true)
+        static List<BsonDocument> fast_documents = new List<BsonDocument>();
+
+        public static List<BsonDocument> GetCollection(string collectionName, bool onlyValid = true, FilterDefinition<BsonDocument> filter = null)
         {
             List<BsonDocument> items = new List<BsonDocument>();
 
             if (IsConnected && IsDatabase)
             {
                 IMongoCollection<BsonDocument> collection = Database.GetCollection<BsonDocument>(collectionName);
-                List<BsonDocument> documents = collection.Find(_ => true).ToList();
+                List<BsonDocument> documents = null;
+                if (filter == null)
+                {
+                    documents = collection.Find(_ => true).ToList();
+                }
+                else
+                {
+                    documents = collection.Find(filter).ToList();
+                }
+
                 foreach (BsonDocument document in documents)
                 {
                     if (onlyValid)
@@ -1776,7 +1788,7 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", session.Name);
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes).Find(filter).Single();
+                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).Find(filter).Single();
                 if (document != null)
                 {
                     BsonElement value;
@@ -1950,14 +1962,17 @@ namespace ssi
                     }
                     stream.Subject = subject;
 
+                    string streamName = "";
                     string streamType = "";
                     if (document.TryGetElement("mediatype_id", out value))
                     {
                         if (document["mediatype_id"].IsObjectId)
                         {
-                            GetObjectName(ref streamType, DatabaseDefinitionCollections.StreamTypes, document["mediatype_id"].AsObjectId);
+                            GetObjectName(ref streamName, DatabaseDefinitionCollections.StreamTypes, document["mediatype_id"].AsObjectId);
+                            GetObjectField(ref streamType, DatabaseDefinitionCollections.StreamTypes, document["mediatype_id"].AsObjectId, "type");
                         }
                     }
+                    stream.StreamName = streamName;
                     stream.StreamType = streamType;
 
                     stream.URL = "";
@@ -1997,7 +2012,7 @@ namespace ssi
             }
 
             ObjectId streamTypeId = new ObjectId();
-            if (stream.StreamType != null && stream.StreamType != "" && !GetObjectID(ref streamTypeId, DatabaseDefinitionCollections.StreamTypes, stream.StreamType))
+            if (stream.StreamName != null && stream.StreamName != "" && !GetObjectID(ref streamTypeId, DatabaseDefinitionCollections.StreamTypes, stream.StreamName))
             {
                 return false;
             }
@@ -2370,6 +2385,21 @@ namespace ssi
             return id;
         }
 
+        public static bool DeleteAnnotation(ObjectId id)
+        {
+            if (!IsConnected && !IsDatabase)
+            {
+                return false;
+            }            
+
+            var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("_id", id);
+            collection.DeleteOne(filter);
+
+            return true;
+        }
+
         public static AnnoList LoadAnnoList(string oid)
         {
             if (!IsConnected)
@@ -2705,6 +2735,8 @@ namespace ssi
         public string Role { get; set; }
 
         public string Subject { get; set; }
+
+        public string StreamName { get; set; }
 
         public string StreamType { get; set; }
 

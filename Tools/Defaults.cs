@@ -33,7 +33,18 @@ namespace ssi
 
         public class Strings
         {
-            public static string Unkown = "Unkown";
+            public static string Unkown = "Unkown";         
+        }
+
+        public class CML
+        {            
+            public static string FolderName = "cml";
+            public static string ChainFolderName = "chains";
+            public static string ChainFileExtension = "chain";
+            public static string ModelsFolderName = "models";
+            public static string ModelsTrainerFolderName = "trainer";
+            public static string ModelsTemplatesFolderName = "templates";
+            public static string TrainerFileExtension = "trainer";
         }
 
         public static int SelectionBorderWidth = 7;

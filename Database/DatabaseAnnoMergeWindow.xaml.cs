@@ -393,6 +393,7 @@ namespace ssi
             AnnoList result = new AnnoList();
             result.Scheme = annolist.Scheme;
             result.Meta = annolist.Meta;
+            result.Source = annolist.Source;
             double currentpos = 0;
 
             bool foundlabel = false;

@@ -154,6 +154,9 @@
     <Compile Include="Controls\Signal\SignalTrackSettingsWindow.xaml.cs">
       <DependentUpon>SignalTrackSettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseAdminManageAnnotationsWindow.xaml.cs">
+      <DependentUpon>DatabaseAdminManageAnnotationsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseAdminManageDBWindow.xaml.cs">
       <DependentUpon>DatabaseAdminManageDBWindow.xaml</DependentUpon>
     </Compile>
@@ -165,6 +168,12 @@
     </Compile>
     <Compile Include="Database\DatabaseAdminUserWindow.xaml.cs">
       <DependentUpon>DatabaseAdminUserWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseCMLExtractFeaturesWindow.xaml.cs">
+      <DependentUpon>DatabaseCMLExtractFeaturesWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\DatabaseCMLTrainAndPredictWindow.xaml.cs">
+      <DependentUpon>DatabaseCMLTrainAndPredictWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\IPointList.cs" />
     <Compile Include="Tools\PluginCaller.cs" />
@@ -363,6 +372,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Database\DatabaseAdminManageAnnotationsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Database\DatabaseAdminManageDBWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -376,6 +389,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Database\DatabaseAdminUserWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Database\DatabaseCMLExtractFeaturesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseCMLTrainAndPredictWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
