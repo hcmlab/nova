@@ -26,7 +26,7 @@ namespace ssi
             isLoaded = true;
   
             dllName = Path.GetFileNameWithoutExtension(dllPath);
-            directory = Environment.CurrentDirectory + "\\" + PLUGIN_FOLDER + "\\" + dllName + "\\";
+            directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + PLUGIN_FOLDER + "\\" + dllName + "\\";
 
             Directory.CreateDirectory(directory);
             if (!downloadDll(dllName, false))
@@ -81,7 +81,7 @@ namespace ssi
 
                     if(isDependency)
                     {
-                        Client.DownloadFile(url, Environment.CurrentDirectory + "//" + name + ".dll");
+                        Client.DownloadFile(url, Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "//" + name + ".dll");
                     }
 
                     else Client.DownloadFile(url, directory + "//" + name + ".dll"); ;

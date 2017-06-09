@@ -104,5 +104,11 @@
     <Setting Name="LastUpdateCheckDate" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)">1979-01-01</Value>
     </Setting>
+    <Setting Name="ContinuousHotkeysNumber" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="ContinuousDeactiveMouse" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

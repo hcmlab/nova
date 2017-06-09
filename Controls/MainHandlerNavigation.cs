@@ -50,17 +50,40 @@ namespace ssi
 
         private void annoContinuousMode_Changed(object sender, RoutedEventArgs e)
         {
+            control.annoContinuousModeDeactiveMouse.IsChecked = Properties.Settings.Default.ContinuousDeactiveMouse;
 
             if (AnnoTier.Selected != null && AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                if (control.annoContinuousModeCheckBox.IsChecked == true)
                 {
                     AnnoTierStatic.Selected.ContinuousAnnoMode(false);
+                    control.annoContinuousModeDeactiveMouse.Visibility = Visibility.Visible;
+                    control.annoContinuousModeDeactiveMouseLabel.Visibility = Visibility.Visible;
+                    
                 }
                 else
                 {
                     AnnoTierStatic.Selected.ContinuousAnnoMode(true);
+                    control.annoContinuousModeDeactiveMouse.Visibility = Visibility.Collapsed;
+                    control.annoContinuousModeDeactiveMouseLabel.Visibility = Visibility.Collapsed;
                 }
         }
+
+
+
+        private void annoContinuousModeDeactiveMouse_Checked(object sender, RoutedEventArgs e)
+        {
+            AnnoTier.MouseActive = false;
+            Properties.Settings.Default.ContinuousDeactiveMouse = true;
+            Properties.Settings.Default.Save();
+        }
+
+        private void annoContinuousModeDeactiveMouse_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AnnoTier.MouseActive = true;
+            Properties.Settings.Default.ContinuousDeactiveMouse = false;
+            Properties.Settings.Default.Save();
+        }
+
 
         private void navigatorNewAnnoFromDatabase_Click(object sender, RoutedEventArgs e)
         {

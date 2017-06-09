@@ -10,7 +10,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static string BuildVersion = "0.9.9.9.0";
+        public static string BuildVersion = "0.9.9.9.1";
 
         private static Timeline timeline = null;
 
@@ -133,6 +133,8 @@ namespace ssi
             control.annoTierControl.MouseRightButtonUp += annoTierControl_MouseRightButtonUp;
             control.annoContinuousModeCheckBox.Checked += annoContinuousMode_Changed;
             control.annoContinuousModeCheckBox.Unchecked += annoContinuousMode_Changed;
+            control.annoContinuousModeDeactiveMouse.Checked += annoContinuousModeDeactiveMouse_Checked;
+            control.annoContinuousModeDeactiveMouse.Unchecked += annoContinuousModeDeactiveMouse_Unchecked;
 
             // Geometric
 
@@ -432,6 +434,7 @@ namespace ssi
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());
                 Properties.Settings.Default.CheckUpdateOnStart = s.CheckforUpdatesonStartup();
+                Properties.Settings.Default.ContinuousHotkeysNumber = int.Parse(s.ContinuousHotkeyLevels());
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();
                 Properties.Settings.Default.Save();
 

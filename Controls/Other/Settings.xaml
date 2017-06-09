@@ -32,6 +32,8 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
                     
                     <Grid.ColumnDefinitions>
@@ -48,8 +50,10 @@
                     <TextBox Grid.Row="7" Name="Segmentmindur" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
                     <Label Grid.Row="8" Content="Discrete sample rate in Hz (0 for none):" />
                     <TextBox Grid.Row="9" Name="Samplerate" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
-                    <Label Grid.Row="10" Content="Check for updates on startup:"  />
-                    <CheckBox Grid.Row="11" Name="UpdatesCheckbox" Margin="5,0,5,5" />
+                    <Label Grid.Row="10" Content="Number of Levels for Continuous Annos:"  />
+                    <TextBox Grid.Row="11" Name="ContinuousHotkeysnum" Margin="5,0,5,5"  PreviewTextInput="IntNumberValidationTextBoxContinuous"/>
+                    <Label Grid.Row="12" Content="Check for updates on startup:"  />
+                    <CheckBox Grid.Row="13" Name="UpdatesCheckbox" Margin="5,0,5,5" />
                 
                 </Grid>
             </TabItem>
