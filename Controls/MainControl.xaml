@@ -386,7 +386,9 @@
                                                 Grid.Column="1"
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right">
-                                        <CheckBox x:Name="annoContinuousModeCheckBox" Style="{DynamicResource OrangeSwitchStyle}"
+                                        <Label Name="annoContinuousModeDeactiveMouseLabel" Visibility="Hidden">Deactive Mouse</Label>
+                                        <CheckBox Name="annoContinuousModeDeactiveMouse"  Visibility="Hidden"></CheckBox>
+                                        <CheckBox x:Name="annoContinuousModeCheckBox" Style="{DynamicResource OrangeSwitchStyle}" 
                                                   ToolTip="Continuous Annotation Mode. Shortcut: M" 
                                                   Visibility="Hidden"/>
                                         <Separator Width="20" Visibility="Hidden"></Separator>

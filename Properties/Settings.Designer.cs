@@ -430,5 +430,29 @@ namespace ssi.Properties {
                 this["LastUpdateCheckDate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int ContinuousHotkeysNumber {
+            get {
+                return ((int)(this["ContinuousHotkeysNumber"]));
+            }
+            set {
+                this["ContinuousHotkeysNumber"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ContinuousDeactiveMouse {
+            get {
+                return ((bool)(this["ContinuousDeactiveMouse"]));
+            }
+            set {
+                this["ContinuousDeactiveMouse"] = value;
+            }
+        }
     }
 }

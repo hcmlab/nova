@@ -20,6 +20,7 @@ namespace ssi
             DefaultZoom.Text = Properties.Settings.Default.DefaultZoomInSeconds.ToString();
             Segmentmindur.Text = Properties.Settings.Default.DefaultMinSegmentSize.ToString();
             Samplerate.Text = Properties.Settings.Default.DefaultDiscreteSampleRate.ToString();
+            ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
             if (tokens.Length == 2)
             {
@@ -74,6 +75,11 @@ namespace ssi
             return Samplerate.Text;
         }
 
+        public string ContinuousHotkeyLevels()
+        {
+            return ContinuousHotkeysnum.Text;
+        }
+
         public bool CheckforUpdatesonStartup()
         {
             return (UpdatesCheckbox.IsChecked == true);
@@ -98,6 +104,12 @@ namespace ssi
         private void IntNumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("^[0-9]+$|^[0-9]*$");
+            e.Handled = !regex.IsMatch((sender as TextBox).Text.Insert((sender as TextBox).SelectionStart, e.Text));
+        }
+
+        private void IntNumberValidationTextBoxContinuous(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("^[2-9]$");
             e.Handled = !regex.IsMatch((sender as TextBox).Text.Insert((sender as TextBox).SelectionStart, e.Text));
         }
 

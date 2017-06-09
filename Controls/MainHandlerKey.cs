@@ -425,17 +425,45 @@ namespace ssi
                         {
                             AnnoTierStatic.Selected.ContinuousAnnoMode(true);
                             control.annoContinuousModeCheckBox.IsChecked = false;
+                           
+
                         }
 
                         else
                         {
                             control.annoContinuousModeCheckBox.IsChecked = true;
                             AnnoTierStatic.Selected.ContinuousAnnoMode(false);
+                           
                         }
                     }
                     isKeyDown = true;
                     // e.Handled = true;
                 }
+
+
+                if (e.KeyboardDevice.IsKeyDown(Key.N))
+                {
+                    if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
+                    {
+
+                        if (control.annoContinuousModeDeactiveMouse.IsChecked == true)
+                        {
+                            
+                            control.annoContinuousModeDeactiveMouse.IsChecked = false;
+
+
+                        }
+
+                        else
+                        {
+                            control.annoContinuousModeDeactiveMouse.IsChecked = true;
+
+                        }
+                    }
+                    isKeyDown = true;
+                    // e.Handled = true;
+                }
+
 
                 if (e.KeyboardDevice.IsKeyDown(Key.Q) && !isKeyDown)
                 {
