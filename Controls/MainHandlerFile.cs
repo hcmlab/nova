@@ -382,9 +382,11 @@ namespace ssi
 
                     else if (reg.IsMatch(line) && !iscontinouswithtier) type = "semicolon";
 
+                    else if (reglegacy.IsMatch(line) && !iscontinouswithtier) type = "legacy";
+
                 }
 
-                else if (reglegacy.IsMatch(line) && !iscontinouswithtier) type = "legacy";
+               
               
 
                 sr.Close();
