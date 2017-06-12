@@ -62,6 +62,9 @@ namespace ssi
             public string Session { get; set; }
 
             public ObjectId OID { get; set; }
+
+            public ObjectId DataID { get; set; }
+
             public override string ToString()
             {
                 return OID.ToString();
