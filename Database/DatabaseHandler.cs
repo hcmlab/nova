@@ -246,7 +246,7 @@ namespace ssi
                 foreach (var c in databases)
                 {
                     string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 2)
+                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 1)
                     {
                         items.Add(db);
                     }
