@@ -454,5 +454,41 @@ namespace ssi.Properties {
                 this["ContinuousDeactiveMouse"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LOW;MEDIUM;HIGH")]
+        public string ConvertToDiscreteClasses {
+            get {
+                return ((string)(this["ConvertToDiscreteClasses"]));
+            }
+            set {
+                this["ConvertToDiscreteClasses"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.33;0.66;1.0")]
+        public string ConvertToDiscreteThreshs {
+            get {
+                return ((string)(this["ConvertToDiscreteThreshs"]));
+            }
+            set {
+                this["ConvertToDiscreteThreshs"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.0")]
+        public string ConvertToDiscreteDelays {
+            get {
+                return ((string)(this["ConvertToDiscreteDelays"]));
+            }
+            set {
+                this["ConvertToDiscreteDelays"] = value;
+            }
+        }
     }
 }

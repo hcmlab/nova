@@ -769,9 +769,9 @@ namespace ssi
             if (AnnoTierStatic.Selected != null && !AnnoTierStatic.Selected.IsDiscreteOrFree)
             {
                 Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
-                input["labels"] = new UserInputWindow.Input() { Label = "Class labels (separated by ;)", DefaultValue = "LOW;MEDIUM;HIGH" };
-                input["thresholds"] = new UserInputWindow.Input() { Label = "Upper thresholds (separated by ;)", DefaultValue = "0.33;0.66;1.0" };
-                input["offset"] = new UserInputWindow.Input() { Label = "Optional offset (s)", DefaultValue = "0.0" };
+                input["labels"] = new UserInputWindow.Input() { Label = "Class labels (separated by ;)", DefaultValue = Properties.Settings.Default.ConvertToDiscreteClasses };
+                input["thresholds"] = new UserInputWindow.Input() { Label = "Upper thresholds (separated by ;)", DefaultValue = Properties.Settings.Default.ConvertToDiscreteThreshs };
+                input["offset"] = new UserInputWindow.Input() { Label = "Optional offset (s)", DefaultValue = Properties.Settings.Default.ConvertToDiscreteDelays };
                 UserInputWindow dialog = new UserInputWindow("Convert to discrete annotation", input);
                 dialog.ShowDialog();
 
@@ -781,6 +781,12 @@ namespace ssi
 
                 if (dialog.DialogResult == true)
                 {
+                    Properties.Settings.Default.ConvertToDiscreteClasses = dialog.Result("labels");
+                    Properties.Settings.Default.ConvertToDiscreteThreshs = dialog.Result("thresholds");
+                    Properties.Settings.Default.ConvertToDiscreteDelays = dialog.Result("offset");
+                    Properties.Settings.Default.Save();
+
+
                     string[] labels = dialog.Result("labels").Split(';');
                     for (int i = 0; i < labels.Length; i++)
                     {
