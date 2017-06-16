@@ -16,6 +16,7 @@ namespace ssi
     public class Face : Image, IMedia, INotifyPropertyChanged
     {
         private float KINECT_SMALL_VALUES_BUG_THRES = -10f;
+        private float KINECT_LARGE_VALUES_BUG_THRES = 10f;
 
         private string filepath;
         private Signal signal;
@@ -84,7 +85,8 @@ namespace ssi
             {
                 // negative values are evil, sometimes occur though            
                 int dim = i % 3;
-                if (signal.data[i] > KINECT_SMALL_VALUES_BUG_THRES)
+                if (signal.data[i] > KINECT_SMALL_VALUES_BUG_THRES 
+                    && signal.data[i] < KINECT_LARGE_VALUES_BUG_THRES)
                 { 
                     if (mins[dim] > signal.data[i])
                     {
@@ -106,7 +108,8 @@ namespace ssi
             for (int i = 0; i < signal.number * signal.dim; i++)
             {
                 // negative values are evil, sometimes occur though
-                if (i >= signal.dim && signal.data[i] <= KINECT_SMALL_VALUES_BUG_THRES)
+                if (i >= signal.dim && signal.data[i] <= KINECT_SMALL_VALUES_BUG_THRES
+                    && signal.data[i] < KINECT_LARGE_VALUES_BUG_THRES)
                 {
                     signal.data[i] = signal.data[i - signal.dim];
                 }

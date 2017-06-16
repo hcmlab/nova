@@ -78,11 +78,11 @@ namespace ssi
             ID = GetRandomInt(1, Int32.MaxValue);
         }
 
-        public bool Save(List<DatabaseStream> loadedStreams = null)
+        public bool Save(List<DatabaseStream> loadedStreams = null, bool force = false)
         {
             bool saved = false;
 
-            if (!HasChanged)
+            if (!force && !HasChanged)
             {
                 return true;
             }
@@ -105,7 +105,7 @@ namespace ssi
             }
             else if (Source.HasDatabase || Source.StoreToDatabase)
             {
-                if (DatabaseHandler.SaveAnnoList(this, loadedStreams))
+                if (DatabaseHandler.SaveAnnoList(this, loadedStreams, force))
                 {
                     saved = true;
                 }

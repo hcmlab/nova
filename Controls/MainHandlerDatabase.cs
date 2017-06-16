@@ -31,6 +31,12 @@ namespace ssi
 
         private void databaseConnect()
         {
+            Action EmptyDelegate = delegate () { };
+            control.ShadowBoxText.Text = "Connecting to Database...";
+            control.ShadowBox.Visibility = Visibility.Visible;
+            control.UpdateLayout();
+            control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
             bool isConnected = DatabaseHandler.Connect();
 
             if (isConnected)
@@ -49,6 +55,9 @@ namespace ssi
             }
 
             updateNavigator();
+           
+            control.ShadowBox.Visibility = Visibility.Collapsed;
+            control.ShadowBoxText.Text = "Loading Data...";
         }
 
         private void DatabaseConnectMenu_Click(object sender, RoutedEventArgs e)

@@ -69,10 +69,10 @@ namespace ssi
         {
             RolesBox.Items.Clear();
 
-            List<string> items = DatabaseHandler.GetRoles();
-            foreach (string item in items)
+            List<DatabaseRole> items = DatabaseHandler.GetRoles();
+            foreach (DatabaseRole item in items)
             {
-                RolesBox.Items.Add(item);
+                RolesBox.Items.Add(item.Name);
             }
 
             Select(RolesBox, selectedItem);
@@ -82,10 +82,10 @@ namespace ssi
         {
             AnnotatorsBox.Items.Clear();
 
-            List<string> items = DatabaseHandler.GetAnnotators();
-            foreach (string item in items)
+            List<DatabaseAnnotator> items = DatabaseHandler.GetAnnotators();
+            foreach (DatabaseAnnotator item in items)
             {
-                AnnotatorsBox.Items.Add(item);
+                AnnotatorsBox.Items.Add(item.Name);
             }
 
             Select(AnnotatorsBox, selectedItem);
@@ -122,10 +122,10 @@ namespace ssi
         {
             SchemesBox.Items.Clear();
 
-            List<string> items = DatabaseHandler.GetSchemes();
-            foreach (string item in items)
+            List<DatabaseScheme> items = DatabaseHandler.GetSchemes();
+            foreach (DatabaseScheme item in items)
             {
-                SchemesBox.Items.Add(item);
+                SchemesBox.Items.Add(item.Name);
             }
 
             Select(SchemesBox, selectedItem);

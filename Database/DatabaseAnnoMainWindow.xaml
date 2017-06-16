@@ -38,7 +38,13 @@
                 <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="SessionsBox_SelectionChanged" >
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Width="Auto" Header="Name">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Name" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+
+
                             <GridViewColumn Width="Auto" Header="Language">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Language" />
@@ -151,6 +157,7 @@
 
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+                <Label Name="LoadingLabel" Visibility="Collapsed">Loading...</Label>
                 <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click" />
                 <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click" />
             </StackPanel>
