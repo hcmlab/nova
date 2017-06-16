@@ -88,6 +88,24 @@ namespace ssi
                 if (force || !File.Exists(toPath))
                 {
                     logTextBox.Text += handler.CMLExtractFeature(chain.Path, fromPath, toPath, chain.Step, chain.Left, chain.Right);
+
+                    string type = "feature";
+                    string name = Path.GetFileNameWithoutExtension(chain.Path);
+
+                    DatabaseStreamType streamType = new DatabaseStreamType() { Name = name, Type = type };
+                    DatabaseHandler.AddStreamType(streamType);
+    
+                    DatabaseStream features = new DatabaseStream();
+                    features.StreamType = type;
+                    features.Session = stream.Session;
+                    features.Role = stream.Role;
+                    features.Subject = stream.Subject;
+                    features.Name = fileName + ".stream";
+                    features.StreamName = name;
+                    DatabaseHandler.AddStream(features);
+
+                    features.Name = fileName + ".stream~";
+                    DatabaseHandler.AddStream(features);
                 }
                 else
                 {
@@ -146,7 +164,7 @@ namespace ssi
             List<DatabaseSession> items = new List<DatabaseSession>();
             foreach (var c in sessions)
             {
-                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), OID = c["_id"].AsObjectId });
+                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), Id = c["_id"].AsObjectId });
             }
             SessionsBox.ItemsSource = items;
 

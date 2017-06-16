@@ -87,7 +87,7 @@ namespace ssi
                 List<DatabaseSession> items = new List<DatabaseSession>();
                 foreach (var c in sessions)
                 {
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), OID = c["_id"].AsObjectId });
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), Id = c["_id"].AsObjectId });
                 }
 
                 SessionsResultsBox.ItemsSource = items;

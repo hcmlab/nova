@@ -241,10 +241,10 @@ namespace ssi
         {
             SchemesBox.Items.Clear();
 
-            List<string> items = DatabaseHandler.GetSchemes();
-            foreach (string item in items)
+            List<DatabaseScheme> items = DatabaseHandler.GetSchemes();
+            foreach (DatabaseScheme item in items)
             {
-                SchemesBox.Items.Add(item);
+                SchemesBox.Items.Add(item.Name);
             }
 
         }
@@ -253,10 +253,10 @@ namespace ssi
         {
             RolesBox.Items.Clear();
 
-            List<string> items = DatabaseHandler.GetRoles();
-            foreach (string item in items)
+            List<DatabaseRole> items = DatabaseHandler.GetRoles();
+            foreach (DatabaseRole item in items)
             {
-                RolesBox.Items.Add(item);
+                RolesBox.Items.Add(item.Name);
             }
 
         }
@@ -319,10 +319,9 @@ namespace ssi
                     annotations.AddRange(DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Annotations, true, filter));
                 }
 
-                List<string> sessionNames;
+                List<string> sessionNames = new List<string>();
                 if (mode == Mode.TRAIN)
                 {
-                    sessionNames = new List<string>();
                     foreach (BsonDocument annotation in annotations)
                     {
                         string sessionName = "";
@@ -335,7 +334,11 @@ namespace ssi
                 }
                 else
                 {
-                    sessionNames = DatabaseHandler.GetSessions();
+                    List<DatabaseSession> allSessions = DatabaseHandler.GetSessions();
+                    foreach(DatabaseSession s in allSessions)
+                    {
+                        sessionNames.Add(s.Name);
+                    }
                     foreach (BsonDocument annotation in annotations)
                     {
                         string sessionName = "";
@@ -366,7 +369,7 @@ namespace ssi
                 List<DatabaseSession> items = new List<DatabaseSession>();
                 foreach (var c in sessions)
                 {
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), OID = c["_id"].AsObjectId });
+                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), Id = c["_id"].AsObjectId });
                 }
                 SessionsBox.ItemsSource = items;
             }

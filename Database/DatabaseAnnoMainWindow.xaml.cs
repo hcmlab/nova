@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace ssi
 {
@@ -146,7 +147,7 @@ namespace ssi
             List<DatabaseSession> items = new List<DatabaseSession>();
             foreach (var c in sessions)
             {
-                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), OID = c["_id"].AsObjectId });
+                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), Id = c["_id"].AsObjectId });
             }
             SessionsBox.ItemsSource = items;
 
@@ -201,8 +202,13 @@ namespace ssi
             }
         }
 
-        public async void GetAnnotations(DatabaseSession session)
+        public void GetAnnotations(DatabaseSession session)
         {
+            Action EmptyDelegate = delegate () { };
+            LoadingLabel.Visibility = Visibility.Visible;
+            this.UpdateLayout();
+            this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
             bool onlyme = showonlymine.IsChecked.Value;
             bool onlyunfinished = showOnlyUnfinished.IsChecked.Value;
 
@@ -210,30 +216,33 @@ namespace ssi
             this.annotations.Clear();
 
             var annotations = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
-            var builder = Builders<BsonDocument>.Filter;
 
-            ObjectId sessionID = new ObjectId();
-            DatabaseHandler.GetObjectID(ref sessionID, DatabaseDefinitionCollections.Sessions, session.Name);
-            
-            var filter = builder.Eq("session_id", sessionID);
-            try
-            {
-                CancellationToken ct = cancellation.Token;               
-                using (var cursor = await annotations.FindAsync(filter))
-                {
-                    await cursor.ForEachAsync(d => addAnnoToList(d, session, onlyme, onlyunfinished), ct);
-                }
-                AnnotationsBox.ItemsSource = this.annotations;
-            }
-            catch (Exception ex)
-            {
-                if (!ex.Message.Contains("canceled"))
-                {
-                    MessageBox.Show("At least one Database Entry seems to be corrupt. Entries have not been loaded.");
-                }
-            }
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("session_id", session.Id);
+            List<DatabaseAnnotation> list = DatabaseHandler.GetAnnotations(filter, onlyme, onlyunfinished);
+           
+            AnnotationsBox.ItemsSource = list;
+            LoadingLabel.Visibility = Visibility.Collapsed;
+
+            //try
+            //{
+            //    CancellationToken ct = cancellation.Token;               
+            //    using (var cursor = await annotations.FindAsync(filter))
+            //    {
+            //        await cursor.ForEachAsync(d => addAnnoToList(d, session, onlyme, onlyunfinished), ct);
+            //    }
+            //    AnnotationsBox.ItemsSource = this.annotations;
+            //}
+            //catch (Exception ex)
+            //{
+            //    if (!ex.Message.Contains("canceled"))
+            //    {
+            //        MessageBox.Show("At least one Database Entry seems to be corrupt. Entries have not been loaded.");
+            //    }
+            //}
         }
 
+        //not used anymore
         public void addAnnoToList(BsonDocument annotation, DatabaseSession session, bool onlyMe, bool onlyUnfinished)
         {
             ObjectId id = annotation["_id"].AsObjectId;
@@ -378,7 +387,8 @@ namespace ssi
 
                     if (!isLocked)
                     {
-                        annotations.DeleteOne(filter);
+                        ObjectId id = result[0]["_id"].AsObjectId;
+                        DatabaseHandler.DeleteAnnotation(id);
                     }
                     else
                     {
