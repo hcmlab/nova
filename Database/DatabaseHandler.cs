@@ -822,6 +822,7 @@ namespace ssi
 
             database.CreateCollection(DatabaseDefinitionCollections.Meta);
             database.CreateCollection(DatabaseDefinitionCollections.Annotations);
+            database.CreateCollection(DatabaseDefinitionCollections.AnnotationData);
             database.CreateCollection(DatabaseDefinitionCollections.Annotators);
             database.CreateCollection(DatabaseDefinitionCollections.Roles);
             database.CreateCollection(DatabaseDefinitionCollections.Schemes);
@@ -2125,7 +2126,7 @@ namespace ssi
             string dbuser = Properties.Settings.Default.MongoDBUser;
 
             var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
-            var annotationdata = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.AnnotationsData);
+            var annotationdata = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.AnnotationData);
             var annotators = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators);
             var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
             var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
@@ -2501,7 +2502,7 @@ namespace ssi
             var builder = Builders<BsonDocument>.Filter;
 
             var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
-            var annotationsdata = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.AnnotationsData);
+            var annotationsdata = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.AnnotationData);
             var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
             var schemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
 
@@ -2885,7 +2886,7 @@ namespace ssi
     public static class DatabaseDefinitionCollections
     {
         public static string Annotations = "Annotations";
-        public static string AnnotationsData = "AnnotationData";
+        public static string AnnotationData = "AnnotationData";
         public static string Annotators = "Annotators";
         public static string Sessions = "Sessions";
         public static string Roles = "Roles";
