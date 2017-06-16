@@ -52,11 +52,11 @@ namespace ssi
         public void GetRoles(string selecteditem = null)
         {
             RolesResultBox.Items.Clear();
-            List<string> roles = DatabaseHandler.GetRoles();
-            roles.Add("");
-            foreach (string role in roles)
+            List<DatabaseRole> roles = DatabaseHandler.GetRoles();
+            RolesResultBox.Items.Add("");
+            foreach (DatabaseRole role in roles)
             {
-                RolesResultBox.Items.Add(role);
+                RolesResultBox.Items.Add(role.Name);
             }
             RolesResultBox.SelectedItem = selecteditem;
         }

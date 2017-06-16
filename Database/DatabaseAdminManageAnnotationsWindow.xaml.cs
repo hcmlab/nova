@@ -66,61 +66,15 @@ namespace ssi
             }
         }
 
-        public void addAnnoToList(ref List<DatabaseAnnotation> annotations, BsonDocument annotation)
-        {
-            ObjectId id = annotation["_id"].AsObjectId;
-
-            string sessionName = "";
-            DatabaseHandler.GetObjectName(ref sessionName, DatabaseDefinitionCollections.Sessions, annotation["session_id"].AsObjectId);
-            string roleName = "";
-            DatabaseHandler.GetObjectName(ref roleName, DatabaseDefinitionCollections.Roles, annotation["role_id"].AsObjectId);
-            string schemeName = "";
-            DatabaseHandler.GetObjectName(ref schemeName, DatabaseDefinitionCollections.Schemes, annotation["scheme_id"].AsObjectId);
-            string annotatorName = "";
-            DatabaseHandler.GetObjectName(ref annotatorName, DatabaseDefinitionCollections.Annotators, annotation["annotator_id"].AsObjectId);
-            string annotatorFullName = "";
-            DatabaseHandler.GetObjectField(ref annotatorFullName, DatabaseDefinitionCollections.Annotators, annotation["annotator_id"].AsObjectId, "fullname");
-
-            bool isFinished = false;
-            try
-            {
-                isFinished = annotation["isFinished"].AsBoolean;
-
-            }
-            catch (Exception ex) { }
-
-            bool islocked = false;
-            try
-            {
-                islocked = annotation["isLocked"].AsBoolean;
-
-            }
-            catch (Exception ex) { }
-
-            DateTime date = DateTime.Today;
-            try
-            {
-                date = annotation["date"].ToUniversalTime();
-            }
-            catch (Exception ex) { }
-
-            annotations.Add(new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = sessionName, IsFinished = isFinished, IsLocked = islocked, Date = date });
-        }
-
         public void GetAnnotations(string selectedItem = null)
         {
-            List<BsonDocument> annotations = DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Annotations, false);            
-
+           
             if (AnnotationsBox.HasItems)
             {
                 AnnotationsBox.ItemsSource = null;
             }
-           
-            List<DatabaseAnnotation> items = new List<DatabaseAnnotation>();
-            foreach (var annotation in annotations)
-            {
-                addAnnoToList(ref items, annotation);
-            }
+
+            List<DatabaseAnnotation> items = DatabaseHandler.GetAnnotations();
             AnnotationsBox.ItemsSource = items;           
         }                
 
