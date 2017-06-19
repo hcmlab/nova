@@ -642,8 +642,6 @@ namespace ssi
             }
 
             return items;
-
-            //return GetCollectionField(DatabaseDefinitionCollections.Schemes, "name");
         }
 
         public static List<string> GetSchemesAll()
