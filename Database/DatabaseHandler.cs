@@ -225,8 +225,9 @@ namespace ssi
                 {
                     if ((roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db || (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "dbAdminAnyDatabase")) && auth <= 4) { auth = 4; }
                     else if ((roles[i]["role"].ToString() == "dbAdmin" && roles[i]["db"] == db) && auth <= 3) { auth = 3; }
-                    else if ((roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db) && auth <= 2) { auth = 2; }
-                    else if ((roles[i]["role"].ToString() == "readAnyDatabase") && auth <= 1) { auth = 1; }
+                    else if ((roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db  && auth <= 2)) { auth = 2; }
+                    else if ((roles[i]["role"].ToString() == "read" && roles[i]["db"] == db && auth <= 1)) { auth = 1; }
+                    else if ((roles[i]["role"].ToString() == "readAnyDatabase")  && auth <= 0) { auth = 0; }
                 }
             }
             catch (Exception e)
@@ -266,7 +267,7 @@ namespace ssi
                 foreach (var c in databases)
                 {
                     string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 1)
+                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 0)
                     {
                         items.Add(db);
                     }
@@ -2181,8 +2182,9 @@ namespace ssi
                 return false;
             }
 
-            if (CheckAuthentication() == 0)
+            if (CheckAuthentication() <= 1)
             {
+                MessageBox.Show("Not authorized to store on this database!");
                 return false;
             }
 
