@@ -172,14 +172,22 @@ namespace ssi
                 sessionName = null;
                 database = Client.GetDatabase(databaseName);
 
-                //Fill the lists each time we change the database, so references are solved only once.
-                roles = GetRoles();
-                sessions = GetSessions();
-                schemes = GetSchemes();
-                annotators = GetAnnotators();
+                UpdateDatabaseLocalLists();
+
+
             }
 
             return true;
+        }
+
+
+        static public void UpdateDatabaseLocalLists()
+        {
+            //Fill the lists each time we change the database, so references are solved only once.
+            roles = GetRoles();
+            sessions = GetSessions();
+            schemes = GetSchemes();
+            annotators = GetAnnotators();
         }
 
         static public int CheckAuthentication()

@@ -34,6 +34,7 @@ namespace ssi
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
+            DatabaseHandler.UpdateDatabaseLocalLists();
             Close();
         }
 

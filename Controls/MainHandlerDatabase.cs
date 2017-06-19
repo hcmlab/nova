@@ -78,6 +78,7 @@ namespace ssi
             }            
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.ShowDialog();
+
         }
 
         private void databaseManageDBs()
