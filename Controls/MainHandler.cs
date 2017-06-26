@@ -251,6 +251,17 @@ namespace ssi
             }
 
 
+            //Download Hardware Video Acceleration Library, if not present yet.
+            string hardwareAcceleratorLibrary = "EVRPresenter64.dll";
+            string hardwareAcceleratorLibraryPath = AppDomain.CurrentDomain.BaseDirectory + hardwareAcceleratorLibrary;
+
+            if (!(File.Exists(hardwareAcceleratorLibraryPath)))
+            {
+                
+                DownloadFile("https://github.com/hcmlab/nova/raw/master/" + hardwareAcceleratorLibrary, hardwareAcceleratorLibraryPath);
+
+            }
+
             if (Properties.Settings.Default.DatabaseDirectory == "")
             {                
                 Properties.Settings.Default.DatabaseDirectory = Directory.GetCurrentDirectory() + "\\data";
