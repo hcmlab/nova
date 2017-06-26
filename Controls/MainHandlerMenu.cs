@@ -30,43 +30,24 @@ namespace ssi
             control.exportSelectedTierMenu.IsEnabled = hasTier;
 
             // database
+                         
+            control.databaseLoadSessionMenu.IsEnabled = isConnected;
 
-            Visibility databaseVisibility = isConnected ? Visibility.Visible : Visibility.Collapsed;
+            control.databaseCMLMenu.IsEnabled = isConnected;
+            control.databaseCMLCompleteStepMenu.IsEnabled = isConnectedAndHasSession;
+            control.databaseCMLExtractFeaturesMenu.IsEnabled = isConnected && (authentication > 1);
+            control.databaseCMLMergeMenu.IsEnabled = isConnected && (authentication > 2);
+            control.databaseCMLTrainMenu.IsEnabled = isConnected && (authentication > 1);
+            control.databaseCMLPredictMenu.IsEnabled = isConnected && (authentication > 1);
 
-            control.databaseCMLMenu.Visibility = databaseVisibility;
-            control.databaseCMLCompleteStepMenu.Visibility = databaseVisibility;
-            control.databaseCMLTransferStepMenu.Visibility = databaseVisibility;
-            control.databaseCMLExtractFeaturesMenu.Visibility = databaseVisibility;
-            
-            control.databaseLoadSessionMenu.Visibility = databaseVisibility;
-
-            control.databaseCMLTransferStepMenu.Visibility = Visibility.Collapsed;
-            control.databaseCMLMergeMenu.Visibility = Visibility.Collapsed;
-            control.databaseAdminMenu.Visibility = Visibility.Collapsed;
-
-            if (isConnected && authentication > 2)
-            {
-                control.databaseAdminMenu.Visibility = Visibility.Visible;
-                control.databaseManageDBsMenu.Visibility = Visibility.Visible;
-                control.databaseManageSessionsMenu.Visibility = Visibility.Visible;
-
-                control.databaseCMLTransferStepMenu.Visibility = Visibility.Visible;
-                control.databaseCMLMergeMenu.Visibility = Visibility.Visible; 
-
-                control.databaseCMLTransferStepMenu.Visibility = Visibility.Visible;
-                control.databaseCMLMergeMenu.Visibility = Visibility.Visible;
-
-                if (isConnected && authentication > 3)
-                {
-                    control.databaseManageUsersMenu.Visibility = Visibility.Visible;
-                }
-            }
+            control.databaseAdminMenu.Visibility = isConnected && (authentication > 2) ? Visibility.Visible : Visibility.Collapsed;
+            control.databaseManageUsersMenu.Visibility = isConnected && (authentication > 3) ? Visibility.Visible : Visibility.Collapsed;             
 
             // annotation
 
             control.annoSaveAllMenu.IsEnabled = hasTier;
             control.annoSaveMenu.IsEnabled = hasTier;
-            control.annoSaveAsMenu.IsEnabled = hasTier;
+            control.annoExportMenu.IsEnabled = hasTier;
             control.convertSelectedTierMenu.IsEnabled = hasTier;
             control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && tier.IsContinuous;
             control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsContinuous;

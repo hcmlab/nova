@@ -21,12 +21,6 @@ namespace ssi
             GetUsers();
         }        
 
-        private void Ok_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
-            Close();
-        }
-
         public void GetUsers(string selectedItem = null)
         {
             UsersBox.Items.Clear();
@@ -99,6 +93,11 @@ namespace ssi
                     }
                 }
             }
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            //DatabaseHandler.UpdateDatabaseLocalLists();
         }
     }
 }

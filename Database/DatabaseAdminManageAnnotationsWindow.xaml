@@ -35,7 +35,7 @@
         <Label Content="Annotations" Grid.Row="0" Grid.Column="1" />
         <DockPanel Grid.Row="1" Grid.Column="1" LastChildFill="True" >
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
-                <Button Style="{StaticResource MyButton}" Name="DeleteSession" Content="-" Click="DeleteAnnotations_Click" />
+                <Button Style="{StaticResource MyButton}" Name="DeleteSession" Content="REM" Click="DeleteAnnotations_Click" />
                 <!--Button Style="{StaticResource MyButton}" Name="EditSession" Content="edit" Click="EditSession_Click" /-->
                 <!--Button Style="{StaticResource MyButton}" Name="CopySession" Content="copy" Click="CopySession_Click" /-->
             </StackPanel>
@@ -70,8 +70,6 @@
             </ListView>
         </DockPanel>
         <DockPanel Grid.Row="1" Grid.Column="2" LastChildFill="True"/>
-
-        <Button Content="Done" Margin="5" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Name="Ok" Click="Ok_Click" HorizontalAlignment="Right"/>
 
     </Grid>
 </Window>

@@ -461,7 +461,7 @@ namespace ssi
         public static Signal LoadWaveFile(string filepath)
         {
             WavHeader Header = new WavHeader();
-            Signal signal = null;
+            Signal signal = null;            
 
             using (FileStream fs = new FileStream(filepath, FileMode.Open, FileAccess.Read))
             using (BinaryReader br = new BinaryReader(fs))

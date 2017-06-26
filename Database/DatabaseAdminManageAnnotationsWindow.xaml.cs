@@ -22,12 +22,6 @@ namespace ssi
             GetDatabases(DatabaseHandler.DatabaseName);
         }
 
-        private void Ok_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
-            Close();
-        }
-
         private void Select(ListBox list, string select)
         {
             if (select != null)

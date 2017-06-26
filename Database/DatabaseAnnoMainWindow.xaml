@@ -6,6 +6,31 @@
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
         Title="Load Session" Height="700" Width="1000">
+
+    <Window.Resources>
+        <Style x:Key="StreamItemColorStyle" TargetType="{x:Type ListViewItem}">
+            <Style.Resources>
+                <SolidColorBrush x:Key="ExistsBrush" Color="#FF042271"/>
+                <SolidColorBrush x:Key="IsMissingBrush" Color="Red"/>
+                <local:StreamItemColorConverter x:Key="StreamColorConverter" />
+            </Style.Resources>
+
+            <!-- Stretch the content so that we can right-align values in the Balance column. -->
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+
+            <Style.Triggers>
+                <!-- When a file exists color it green. -->                
+                <DataTrigger Binding="{Binding Exists, Converter={StaticResource StreamColorConverter}}" Value="+1">
+                    <Setter Property="Foreground" Value="{StaticResource ExistsBrush}" />
+                </DataTrigger>
+                <!-- When a file is missing color it red. -->
+                <DataTrigger Binding="{Binding Exists, Converter={StaticResource StreamColorConverter}}" Value="-1">
+                    <Setter Property="Foreground" Value="{StaticResource IsMissingBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
     <Grid>
 
         <Grid.RowDefinitions>
@@ -70,8 +95,8 @@
                     <Label Content="Annotations" />
                     <StackPanel Orientation="Horizontal"  HorizontalAlignment="Right">
                         <!--<Button Name="AddAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="AddAnnotation_Click" Visibility="Collapsed" />-->
-                        <Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" />
-                        <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="-" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed" />
+                        <Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="ADD" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" />
+                        <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="REM" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed" />
                     </StackPanel>
                 </DockPanel>
                 <StackPanel Orientation="Vertical" Margin="10" DockPanel.Dock="Bottom">
@@ -109,7 +134,7 @@
             </DockPanel>
 
             <DockPanel Grid.Column="3" Grid.Row="0"  Margin="10">
-                <Label Content="SelectedStreams"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
+                <Label Content="Streams"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
                 <StackPanel Name="ServerLoginPanel"  Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,10,0,0">
                     <DockPanel LastChildFill="True">
                         <Label Content="Username" Width="70" />
@@ -120,34 +145,16 @@
                         <PasswordBox x:FieldModifier="public" x:Name="serverPassword" Margin="0,0,5,0" Height="25" Focusable="True" VerticalContentAlignment="Center" />
                     </DockPanel>
                 </StackPanel>
-                
-                <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="0" Grid.Column="0">
+
+                <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="0" Grid.Column="0" ItemContainerStyle="{StaticResource StreamItemColorStyle}" ItemsSource="{Binding}">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="Auto" Header="File">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Name" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Name">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="StreamName" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Type">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="StreamType" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Role">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Role" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Subject">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Subject" />
-                                </GridViewColumn.DisplayMemberBinding>
+                            <GridViewColumn Header="Filename" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>

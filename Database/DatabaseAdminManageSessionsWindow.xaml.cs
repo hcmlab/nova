@@ -22,12 +22,6 @@ namespace ssi
             GetDatabases(DatabaseHandler.DatabaseName);
         }
 
-        private void Ok_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
-            Close();
-        }
-
         private void Select(ListBox list, string select)
         {
             if (select != null)
@@ -67,33 +61,19 @@ namespace ssi
         }
 
         public void GetSessions(string selectedItem = null)
-        {
-            List<BsonDocument> sessions = DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Sessions, true);
-
+        {            
+           
             if (SessionsBox.HasItems)
             {
                 SessionsBox.ItemsSource = null;
             }
 
-            List<DatabaseSession> items = new List<DatabaseSession>();
-            foreach (var c in sessions)
-            {
-                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), Id = c["_id"].AsObjectId });
-            }
+            List<DatabaseSession> items = DatabaseHandler.Sessions;
             SessionsBox.ItemsSource = items;
-
-            if (StreamsBox.HasItems)
-            {
-                StreamsBox.ItemsSource = null;
-            }
 
             if (selectedItem != null)
             {
-                SessionsBox.SelectedItem = items.Find(item => item.Name == selectedItem);
-                if (SessionsBox.SelectedItem != null)
-                {
-                    GetStreams((DatabaseSession)SessionsBox.SelectedItem);
-                }                
+                SessionsBox.SelectedItem = items.Find(item => item.Name == selectedItem);      
             }            
         }
 
@@ -166,7 +146,6 @@ namespace ssi
             if (SessionsBox.SelectedItem != null)
             {
                 DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
 
                 Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
                 input["names"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = session.Name };
@@ -179,14 +158,7 @@ namespace ssi
                     foreach (string token in tokens)
                     {
                         session.Name = token;
-                        if (DatabaseHandler.AddSession(session))
-                        {
-                            foreach (DatabaseStream stream in streams)
-                            {
-                                stream.Session = session.Name;
-                                DatabaseHandler.AddStream(stream);
-                            }
-                        }
+                        DatabaseHandler.AddSession(session);                        
                     }
 
                     GetSessions(session.Name);
@@ -199,7 +171,7 @@ namespace ssi
             if (SessionsBox.SelectedItem != null)
             {
                 DatabaseSession session = (DatabaseSession) SessionsBox.SelectedItem;
-                GetStreams(session);                
+                //GetStreams(session);                
             }
         }
 
@@ -213,139 +185,140 @@ namespace ssi
             }
         }
 
-        private void AddStream_Click(object sender, RoutedEventArgs e)
-        {
-            if (SessionsBox.SelectedItem != null)
-            {
-                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                DatabaseStream stream = new DatabaseStream();
 
-                DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dialog.ShowDialog();
+        //private void AddStream_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (SessionsBox.SelectedItem != null)
+        //    {
+        //        DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+        //        DatabaseStream stream = new DatabaseStream();
 
-                if (dialog.DialogResult == true)
-                {
-                    var sessions = SessionsBox.SelectedItems;
-                    foreach (DatabaseSession s in sessions)
-                    {
-                        stream.Session = s.Name;
-                        DatabaseHandler.AddStream(stream);                        
-                    }
-                    GetStreams(session, stream.Name);
-                }
-            }
-        }
+        //        DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
+        //        dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        //        dialog.ShowDialog();
 
-        private void DeleteStream_Click(object sender, RoutedEventArgs e)
-        {
-            if (StreamsBox.SelectedItem != null)
-            {
-                DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
-                string name = stream.Name;
-                List<DatabaseStream> streams = new List<DatabaseStream>();
+        //        if (dialog.DialogResult == true)
+        //        {
+        //            var sessions = SessionsBox.SelectedItems;
+        //            foreach (DatabaseSession s in sessions)
+        //            {
+        //                stream.Session = s.Name;
+        //                DatabaseHandler.AddStream(stream);                        
+        //            }
+        //            GetStreams(session, stream.Name);
+        //        }
+        //    }
+        //}
 
-                var sessions = SessionsBox.SelectedItems;
-                foreach (DatabaseSession s in sessions)
-                {
-                    streams.AddRange(DatabaseHandler.GetSessionStreams(s));
-                }
+        //private void DeleteStream_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (StreamsBox.SelectedItem != null)
+        //    {
+        //        DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
+        //        string name = stream.Name;
+        //        List<DatabaseStream> streams = new List<DatabaseStream>();
 
-                foreach (DatabaseStream s in streams)
-                {
-                    if (s.Name == name)
-                    {
-                        DatabaseHandler.DeleteStream(s);
-                    }
-                }
+        //        var sessions = SessionsBox.SelectedItems;
+        //        foreach (DatabaseSession s in sessions)
+        //        {
+        //            streams.AddRange(DatabaseHandler.GetSessionStreams(s));
+        //        }
 
-                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                GetStreams(session);
-            }
-        }
+        //        foreach (DatabaseStream s in streams)
+        //        {
+        //            if (s.Name == name)
+        //            {
+        //                DatabaseHandler.DeleteStream(s);
+        //            }
+        //        }
+
+        //        DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+        //        GetStreams(session);
+        //    }
+        //}
 
 
-        private void EditStream_Click(object sender, RoutedEventArgs e)
-        {
-            if (StreamsBox.SelectedItem != null)
-            {
-                DatabaseStream stream = (DatabaseStream) StreamsBox.SelectedItem;
-                string name = stream.Name;                
+        //private void EditStream_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (StreamsBox.SelectedItem != null)
+        //    {
+        //        DatabaseStream stream = (DatabaseStream) StreamsBox.SelectedItem;
+        //        string name = stream.Name;                
 
-                DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dialog.ShowDialog();
+        //        DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
+        //        dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        //        dialog.ShowDialog();
 
-                if (dialog.DialogResult == true)
-                {
-                    List<DatabaseStream> streams = new List<DatabaseStream>();
-                    var sessions = SessionsBox.SelectedItems;
-                    foreach (DatabaseSession s in sessions)
-                    {
-                        streams.AddRange(DatabaseHandler.GetSessionStreams(s));
-                    }
+        //        if (dialog.DialogResult == true)
+        //        {
+        //            List<DatabaseStream> streams = new List<DatabaseStream>();
+        //            var sessions = SessionsBox.SelectedItems;
+        //            foreach (DatabaseSession s in sessions)
+        //            {
+        //                streams.AddRange(DatabaseHandler.GetSessionStreams(s));
+        //            }
 
-                    foreach (DatabaseStream s in streams)
-                    {
-                        if (s.Name == name)
-                        {                            
-                            stream.Session = s.Session;
-                            DatabaseHandler.UpdateStream(name, stream);
-                        }
-                    }
+        //            foreach (DatabaseStream s in streams)
+        //            {
+        //                if (s.Name == name)
+        //                {                            
+        //                    stream.Session = s.Session;
+        //                    DatabaseHandler.UpdateStream(name, stream);
+        //                }
+        //            }
 
-                    DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                    GetStreams(session, stream.Name);
-                }
-            }
-        }
+        //            DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+        //            GetStreams(session, stream.Name);
+        //        }
+        //    }
+        //}
 
-        private void CopyStream_Click(object sender, RoutedEventArgs e)
-        {
-            if (StreamsBox.SelectedItem != null)
-            {
-                DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
-                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+        //private void CopyStream_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (StreamsBox.SelectedItem != null)
+        //    {
+        //        DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
+        //        DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
 
-                DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dialog.ShowDialog();
+        //        DatabaseAdminStreamWindow dialog = new DatabaseAdminStreamWindow(ref stream);
+        //        dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        //        dialog.ShowDialog();
 
-                if (dialog.DialogResult == true)
-                {
-                    if (DatabaseHandler.AddStream(stream))
-                    {
-                        GetStreams(session, stream.Name);
-                    }
-                }
-            }
-        }
+        //        if (dialog.DialogResult == true)
+        //        {
+        //            if (DatabaseHandler.AddStream(stream))
+        //            {
+        //                GetStreams(session, stream.Name);
+        //            }
+        //        }
+        //    }
+        //}
 
-        private void StreamsBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            var item = sender as ListViewItem;
-            if (item != null && item.IsSelected)
-            {
-                EditStream_Click(sender, e);
-            }
-        }
+        //private void StreamsBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    var item = sender as ListViewItem;
+        //    if (item != null && item.IsSelected)
+        //    {
+        //        EditStream_Click(sender, e);
+        //    }
+        //}
 
-        private void GetStreams(DatabaseSession session, string selectedItem = null)
-        {
-            List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
+        //private void GetStreams(DatabaseSession session, string selectedItem = null)
+        //{
+        //    List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
             
-            if (StreamsBox.HasItems)
-            {
-                StreamsBox.ItemsSource = null;
-            }
+        //    if (StreamsBox.HasItems)
+        //    {
+        //        StreamsBox.ItemsSource = null;
+        //    }
 
-            StreamsBox.ItemsSource = streams;
+        //    StreamsBox.ItemsSource = streams;
 
-            if (selectedItem != null)
-            {
-                StreamsBox.SelectedItem = streams.Find(item => item.Name == selectedItem);
-            }
-        }
+        //    if (selectedItem != null)
+        //    {
+        //        StreamsBox.SelectedItem = streams.Find(item => item.Name == selectedItem);
+        //    }
+        //}
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
 namespace ssi
@@ -46,5 +47,6 @@ namespace ssi
         string GetFilepath();
 
         string GetDirectory();
+
     }
 }

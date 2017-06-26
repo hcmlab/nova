@@ -39,6 +39,8 @@ namespace ssi
             var openAnotherInstance = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
             if (openAnotherInstance || SingleInstance<App>.InitializeAsFirstInstance(Unique))
             {
+                //Decide here the number of parallel downloads by any Webclient
+                System.Net.ServicePointManager.DefaultConnectionLimit = 5;
                 var application = new App();
                 application.OnReceiveExternalClArgs(Environment.GetCommandLineArgs());
                 application.InitializeComponent();

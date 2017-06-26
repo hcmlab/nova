@@ -31,13 +31,6 @@ namespace ssi
             GetSchemes();
         }
 
-        private void Ok_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
-            DatabaseHandler.UpdateDatabaseLocalLists();
-            Close();
-        }
-
         private void Select(ListBox list, string select)
         {
             if (select != null)
@@ -70,7 +63,7 @@ namespace ssi
         {
             RolesBox.Items.Clear();
 
-            List<DatabaseRole> items = DatabaseHandler.GetRoles();
+            List<DatabaseRole> items = DatabaseHandler.Roles;
             foreach (DatabaseRole item in items)
             {
                 RolesBox.Items.Add(item.Name);
@@ -83,7 +76,7 @@ namespace ssi
         {
             AnnotatorsBox.Items.Clear();
 
-            List<DatabaseAnnotator> items = DatabaseHandler.GetAnnotators();
+            List<DatabaseAnnotator> items = DatabaseHandler.Annotators;
             foreach (DatabaseAnnotator item in items)
             {
                 AnnotatorsBox.Items.Add(item.Name);
@@ -110,10 +103,10 @@ namespace ssi
         {
             StreamTypesBox.Items.Clear();
 
-            List<string> items = DatabaseHandler.GetStreamTypes();
-            foreach (string item in items)
+            List<DatabaseStream> items = DatabaseHandler.Streams;
+            foreach (DatabaseStream item in items)
             {
-                StreamTypesBox.Items.Add(item);
+                StreamTypesBox.Items.Add(item.Name);
             }
 
             Select(StreamTypesBox, selectedItem);
@@ -123,7 +116,7 @@ namespace ssi
         {
             SchemesBox.Items.Clear();
 
-            List<DatabaseScheme> items = DatabaseHandler.GetSchemes();
+            List<DatabaseScheme> items = DatabaseHandler.Schemes;
             foreach (DatabaseScheme item in items)
             {
                 SchemesBox.Items.Add(item.Name);
@@ -272,12 +265,15 @@ namespace ssi
         {
             Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
             input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = "" };
+            input["hasStreams"] = new UserInputWindow.Input() { Label = "Has streams", DefaultValue = "true" };
             UserInputWindow dialog = new UserInputWindow("Add new role", input);
             dialog.ShowDialog();
             if (dialog.DialogResult == true)
             {
                 string name = dialog.Result("name");
-                DatabaseRole role = new DatabaseRole() { Name = name };
+                bool hasStreams = true;
+                bool.TryParse(dialog.Result("hasStreams"), out hasStreams);
+                DatabaseRole role = new DatabaseRole() { Name = name, HasStreams = hasStreams };
                 if (DatabaseHandler.AddRole(role))
                 {
                     GetRoles(dialog.Result("name"));
@@ -290,16 +286,22 @@ namespace ssi
             if (RolesBox.SelectedItem != null)
             {
                 string old_name = (string)RolesBox.SelectedItem;
+
+                DatabaseRole old_role = DatabaseHandler.Roles.Find(r => r.Name == old_name);
+
                 Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
                 input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = old_name };
+                input["hasStreams"] = new UserInputWindow.Input() { Label = "Has streams", DefaultValue = (old_role == null ? "true" : old_role.HasStreams.ToString()) };
                 UserInputWindow dialog = new UserInputWindow("Edit role", input);
                 dialog.ShowDialog();
 
                 if (dialog.DialogResult == true)
                 {
                     string name = dialog.Result("name");
+                    bool hasStreams = true;
+                    bool.TryParse(dialog.Result("hasStreams"), out hasStreams);
 
-                    DatabaseRole role = new DatabaseRole() { Name = name };
+                    DatabaseRole role = new DatabaseRole() { Name = name, HasStreams = hasStreams };
 
                     if (DatabaseHandler.UpdateRole(old_name, role))
                     {
@@ -325,15 +327,17 @@ namespace ssi
         {
             Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
             input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = "" };
+            input["fileExt"] = new UserInputWindow.Input() { Label = "File extension", DefaultValue = "" };
             input["type"] = new UserInputWindow.Input() { Label = "Type", DefaultValue = "" };
             UserInputWindow dialog = new UserInputWindow("Add new stream type", input);
             dialog.ShowDialog();
             if (dialog.DialogResult == true)
             {
                 string name = dialog.Result("name");
+                string fileExt = dialog.Result("fileExt");
                 string type = dialog.Result("type");
-                DatabaseStreamType streamType = new DatabaseStreamType() { Name = name, Type = type };
-                if (DatabaseHandler.AddStreamType(streamType))
+                DatabaseStream streamType = new DatabaseStream() { Name = name, FileExt = fileExt, Type = type };
+                if (DatabaseHandler.AddStream(streamType))
                 {
                     GetStreamTypes(dialog.Result("name"));
                 }
@@ -344,11 +348,12 @@ namespace ssi
             if (StreamTypesBox.SelectedItem != null)
             {
                 string name = (string)StreamTypesBox.SelectedItem;
-                DatabaseStreamType streamType = new DatabaseStreamType() { Name = name };                
-                if (DatabaseHandler.GetStreamType(ref streamType))
+                DatabaseStream streamType = new DatabaseStream() { Name = name };                
+                if (DatabaseHandler.GetStream(ref streamType))
                 {
                     Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
                     input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = streamType.Name };
+                    input["fileExt"] = new UserInputWindow.Input() { Label = "File extension", DefaultValue = streamType.FileExt };                    
                     input["type"] = new UserInputWindow.Input() { Label = "Type", DefaultValue = streamType.Type };
                     UserInputWindow dialog = new UserInputWindow("Edit stream type", input);
                     dialog.ShowDialog();
@@ -356,8 +361,9 @@ namespace ssi
                     if (dialog.DialogResult == true)
                     {
                         streamType.Name = dialog.Result("name");
+                        streamType.FileExt = dialog.Result("fileExt");
                         streamType.Type = dialog.Result("type");
-                        if (DatabaseHandler.UpdateStreamType(name, streamType))
+                        if (DatabaseHandler.UpdateStream(name, streamType))
                         {
                             GetStreamTypes(name);
                         }
@@ -371,7 +377,7 @@ namespace ssi
             if (StreamTypesBox.SelectedItem != null)
             {
                 string name = (string)StreamTypesBox.SelectedItem;
-                if (DatabaseHandler.DeleteStreamType(name))
+                if (DatabaseHandler.DeleteStream(name))
                 {
                     GetStreamTypes();
                 }
@@ -491,5 +497,10 @@ namespace ssi
             }
         }
 
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            //DatabaseHandler.UpdateDatabaseLocalLists();
+        }
     }
 }

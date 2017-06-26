@@ -12,7 +12,7 @@ namespace ssi
         {
             if (!this.control.annoListControl.editTextBox.IsFocused)
             {
-                if (e.KeyboardDevice.IsKeyDown(Key.Space))
+                if (e.KeyboardDevice.IsKeyDown(Key.Space) && mediaList.Count > 0)
                 {
                     if (IsPlaying())
                     {
@@ -27,10 +27,9 @@ namespace ssi
 
                 if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.L))
                 {
-                    if (AnnoTierStatic.Selected != null && Properties.Settings.Default.CMLDefaultStream != null)
+                    if (AnnoTierStatic.Selected != null)
                     {
-                        AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams);
-                        CMLCompleteTier(Properties.Settings.Default.CMLContext, AnnoTierStatic.Selected, Properties.Settings.Default.CMLDefaultStream, Properties.Settings.Default.CMLDefaultConf, Properties.Settings.Default.CMLDefaultGap, Properties.Settings.Default.CMLDefaultMinDur);
+                        databaseCMLCompleteStep();
                     }
 
                     e.Handled = true;
@@ -104,7 +103,6 @@ namespace ssi
 
                         timeline.CurrentSelectPosition = annoCursor.X;
                         timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                        timeline.CurrentPlayPositionPrecise = Time.TimeFromPixel(signalCursor.X);
                         AnnoTierStatic.Label.select(true);
                         isKeyDown = true;
                     }
@@ -129,7 +127,6 @@ namespace ssi
 
                     mediaList.Move(Time.TimeFromPixel(signalCursor.X) + fps);
                     timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X) + fps;
-                    timeline.CurrentPlayPositionPrecise = Time.TimeFromPixel(signalCursor.X) + fps;
                     double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
                     signalCursor.X = pos;
 
@@ -167,7 +164,6 @@ namespace ssi
 
                         timeline.CurrentSelectPosition = annoCursor.X;
                         timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                        timeline.CurrentPlayPositionPrecise = Time.TimeFromPixel(signalCursor.X);
                         AnnoTierStatic.Label.select(true);
                         isKeyDown = true;
                     }
@@ -192,7 +188,6 @@ namespace ssi
 
                     mediaList.Move(Time.TimeFromPixel(signalCursor.X) - fps);
                     timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X) - fps;
-                    timeline.CurrentPlayPositionPrecise = timeline.CurrentPlayPosition;
                     double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
                     signalCursor.X = pos;
 
@@ -391,7 +386,7 @@ namespace ssi
                         }
                         else
                         {
-                            reloadAnnoTierFromDatabase(track);                            
+                            ReloadAnnoTierFromDatabase(track);                            
                         }
                     }
                     e.Handled = true;
@@ -544,7 +539,6 @@ namespace ssi
 
                     timeline.CurrentSelectPosition = annoCursor.X;
                     timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                    timeline.CurrentPlayPositionPrecise = Time.TimeFromPixel(signalCursor.X);
 
                     if (AnnoTierStatic.Label != null)
                     {
@@ -601,7 +595,6 @@ namespace ssi
 
                     timeline.CurrentSelectPosition = annoCursor.X;
                     timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                    timeline.CurrentPlayPositionPrecise = Time.TimeFromPixel(signalCursor.X);
 
                     double start = annoCursor.X;
                     double end = signalCursor.X;

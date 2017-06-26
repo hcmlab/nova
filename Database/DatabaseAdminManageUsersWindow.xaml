@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="Manage Users" Width="200" Height="400">
+        Title="Manage Users" Width="200" Height="400" Closed="Window_Closed">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >
@@ -30,14 +30,12 @@
         <Label Content="Users" Grid.Row="0" Grid.Column="0"/>
         <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
-                <Button Style="{StaticResource MyButton}" Content="+" Click="AddUser_Click"/>
-                <Button Style="{StaticResource MyButton}" Content="-" Click="DeleteUser_Click"/>
-                <Button Style="{StaticResource MyButton}" Content="edit" Click="EditUser_Click"/>
+                <Button Style="{StaticResource MyButton}" Content="ADD" Click="AddUser_Click"/>
+                <Button Style="{StaticResource MyButton}" Content="REM" Click="DeleteUser_Click"/>
+                <Button Style="{StaticResource MyButton}" Content="EDIT" Click="EditUser_Click"/>
             </StackPanel>
             <ListBox Name="UsersBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
         </DockPanel>
-
-        <Button Content="Done" Margin="5" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Name="Ok" Click="Ok_Click" HorizontalAlignment="Right"/>
 
     </Grid>
 </Window>

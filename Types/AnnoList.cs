@@ -78,7 +78,7 @@ namespace ssi
             ID = GetRandomInt(1, Int32.MaxValue);
         }
 
-        public bool Save(List<DatabaseStream> loadedStreams = null, bool force = false)
+        public bool Save(List<string> loadedStreams = null, bool force = false)
         {
             bool saved = false;
 
@@ -97,7 +97,7 @@ namespace ssi
               
                 if (Source.HasFile)
                 {
-                    if (saveToFile(Source.File.Path))
+                    if (SaveToFile(Source.File.Path))
                     {
                         saved = true;
                     }

@@ -7,6 +7,14 @@ namespace ssi
 {
     public partial class MainHandler
     {
+        public enum MEDIABACKEND
+        {
+            MEDIA,
+            MEDIAKIT
+        }
+
+
+
         private void addMediaBox(IMedia media)
         {
             MediaBox box = new MediaBox(media);
@@ -34,6 +42,8 @@ namespace ssi
 
             MediaBoxStatic.Select(box);
             updateNavigator();
+
+
         }
 
         public void clearMediaBox()

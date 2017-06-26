@@ -128,7 +128,7 @@ namespace ssi
         
         public void Draw(object myObject, EventArgs myEventArgs)
         {
-            Draw(MainHandler.Time.CurrentPlayPositionPrecise);
+            Draw(MainHandler.Time.CurrentPlayPosition);
         }
 
         public void Draw(double time)

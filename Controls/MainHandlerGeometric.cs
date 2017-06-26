@@ -109,7 +109,7 @@ namespace ssi
             }
         }
 
-        void OnMediaMouseMove(MediaKit media, double x, double y)
+        void OnMediaMouseMove(IMedia media, double x, double y)
         {
             if (RightHeld)
             {
@@ -136,7 +136,7 @@ namespace ssi
             }
         }
 
-        void OnMediaMouseUp(MediaKit media, double x, double y)
+        void OnMediaMouseUp(IMedia media, double x, double y)
         {
             if (Mouse.RightButton == MouseButtonState.Released && RightHeld)
             {
@@ -144,7 +144,7 @@ namespace ssi
             }
         }
 
-        void OnMediaMouseDown(MediaKit media, double x, double y)
+        void OnMediaMouseDown(IMedia media, double x, double y)
         {
             if (Mouse.LeftButton == MouseButtonState.Pressed)
             {

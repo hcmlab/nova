@@ -21,6 +21,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 
+
 namespace ssi
 {
     public partial class MainHandler
@@ -62,7 +63,7 @@ namespace ssi
 
         private void DatabaseConnectMenu_Click(object sender, RoutedEventArgs e)
         {
-            showSettings(true);
+            databaseConnect();
         }
 
         private void databaseManage(Window dialog)
@@ -136,10 +137,22 @@ namespace ssi
 
             control.ShadowBox.Visibility = Visibility.Collapsed;
 
-            List<DatabaseStream> streams = dialog.SelectedStreams();
+            List<string> streams = dialog.SelectedStreams();
             databaseSessionStreams = streams;
+
             if (streams != null && streams.Count > 0)
-            { 
+            {
+                List<string> streamsAll = new List<string>();
+                foreach (string stream in streams)
+                {
+                    if (stream.EndsWith("stream"))
+                    {
+                        streamsAll.Add(stream + "~");
+                    }
+                    streamsAll.Add(stream);
+
+                }
+
                 try
                 {
                     if (filesToDownload != null)
@@ -147,45 +160,36 @@ namespace ssi
                         filesToDownload.Clear();
                     }
 
-                    foreach (DatabaseStream stream in streams)
+                    MainHandler.NumberOfAllCurrentDownloads = streamsAll.Count;
+
+                    foreach (string stream in streamsAll)
                     {
-                        string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream.Name;
-                        if (File.Exists(localPath))
+                        string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream;
+                        string url = "";
+                        bool requiresAuth = false;
+
+                        DatabaseDBMeta meta = new DatabaseDBMeta()
                         {
-                            loadFile(localPath);
+                            Name = DatabaseHandler.DatabaseName
+                        };
+                        if (!DatabaseHandler.GetDBMeta(ref meta))
+                        {
                             continue;
                         }
-
-                        string url = stream.URL;
-                        bool requiresAuth = stream.ServerAuth;
-
-                        if (url == "")
+                        if (meta.Server == "")
                         {
-                            DatabaseDBMeta meta = new DatabaseDBMeta()
-                            {
-                                Name = DatabaseHandler.DatabaseName
-                            };
-                            if (!DatabaseHandler.GetDBMeta(ref meta))
-                            {
-                                continue;
-                            }
-                            if (meta.Server == "")
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
                            
-
-                            //In case we host our files on nextcloud, the file format is special. For now we only allow self-hosted.
-                            if(meta.Server.Contains("https://hcm-lab.de/cloud"))
-                            {
-                                url = meta.Server + "/download?path=%2F" + DatabaseHandler.DatabaseName + "%2F" + DatabaseHandler.SessionName + "&files=" + stream.Name;
-                            }
-                            else
-                            { 
-                                url = meta.Server + '/' + DatabaseHandler.SessionName + '/' + stream.Name;
-                                requiresAuth = meta.ServerAuth;
-                            }
-
+                        //In case we host our files on nextcloud, the file format is special. For now we only allow self-hosted, but in the future we add an option for nextcloud in general.
+                        if(meta.Server.Contains("https://hcm-lab.de/cloud"))
+                        {
+                            url = meta.Server + "/download?path=%2F" + DatabaseHandler.DatabaseName + "%2F" + DatabaseHandler.SessionName + "&files=" + stream;
+                        }
+                        else
+                        { 
+                            url = meta.Server + '/' + DatabaseHandler.SessionName + '/' + stream;
+                            requiresAuth = meta.ServerAuth;
                         }
 
                         string[] split = url.Split(':');
@@ -195,7 +199,7 @@ namespace ssi
 
                         if (connection == "sftp")
                         {                            
-                            SFTPDownloadFiles(url, localPath);
+                            SFTP(url, localPath);
                         }
                         else if (connection == "http" || connection == "https" && requiresAuth == false)
                         {                            
@@ -203,11 +207,11 @@ namespace ssi
                         }
                         else if (connection == "http" || connection == "https" && requiresAuth == true)
                         {
-                            httpPost(url, DatabaseHandler.SessionName, localPath);
+                            httpPost(url, localPath);
                         }
                     }
                 }
-                catch (TimeoutException e1)
+                catch
                 {
                     MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
                 }
@@ -215,7 +219,7 @@ namespace ssi
      
         }
 
-        private void reloadAnnoTierFromDatabase(AnnoTier tier)
+        public void ReloadAnnoTierFromDatabase(AnnoTier tier)
         {
             if (tier == null)
             {
@@ -233,11 +237,12 @@ namespace ssi
             annotation.Scheme = tier.AnnoList.Scheme.Name;
             annotation.AnnotatorFullName = tier.AnnoList.Meta.AnnotatorFullName;
             annotation.Annotator = tier.AnnoList.Meta.Annotator;
+            annotation.Session = DatabaseHandler.SessionName;
 
             AnnoList annoList = DatabaseHandler.LoadAnnoList(annotation);
             double maxdur = 0;
 
-            if (annoList != null)
+            if (annoList != null && annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
             {
                 maxdur = annoList[annoList.Count - 1].Stop;
 
@@ -255,8 +260,10 @@ namespace ssi
                 tier.TimeRangeChanged(Time);
                 updateTimeRange(maxdur);
 
-                control.ShadowBox.Visibility = Visibility.Collapsed;
-            } 
+                tier.AnnoList.HasChanged = false;          
+            }
+
+            control.ShadowBox.Visibility = Visibility.Collapsed;
         }
 
         private void addNewAnnotationDatabase()
@@ -349,18 +356,6 @@ namespace ssi
         private void databaseManageAnnotations_Click(object sender, RoutedEventArgs e)
         {
             databaseManageAnnotations();
-        }
-
-        private void databaseCMLCompleteStep_Click(object sender, RoutedEventArgs e)
-        {
-            DatabaseCMLCompleteWindow window = new DatabaseCMLCompleteWindow(this);
-            window.Show();
-        }
-
-        private void databaseCMLTransferStep_Click(object sender, RoutedEventArgs e)
-        {
-            DatabaseCMLTransferWindow window = new DatabaseCMLTransferWindow(this);
-            window.Show();
         }
 
         private void databaseCMLMerge_Click(object sender, RoutedEventArgs e)

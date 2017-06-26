@@ -275,7 +275,7 @@ namespace ssi
 
             Select(this);
 
-            if (!(anno.Scheme.Type == AnnoScheme.TYPE.FREE || anno.Scheme.Type == AnnoScheme.TYPE.DISCRETE))
+            if (!IsDiscreteOrFree)
             {
                 Loaded += delegate
                 {
@@ -300,9 +300,6 @@ namespace ssi
                                         if ((this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 && Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver)) && MouseActive)
                                             yPos = Mouse.GetPosition(this).Y;
 
-
-
-
                                         double numberoflevels = Properties.Settings.Default.ContinuousHotkeysNumber;
                                         double fac =  1 + (1 / (numberoflevels - 1));
                                         double segmentheight = (this.ActualHeight / numberoflevels);
@@ -313,7 +310,6 @@ namespace ssi
                                                 yPos =  (numberoflevels - (i* fac))  * segmentheight;
                                         }
 
-   
                                         double normal = 1.0 - (yPos / this.ActualHeight);
                                         double normalized = (normal * range) + anno.Scheme.MinScore;
 
@@ -351,12 +347,10 @@ namespace ssi
             }
             selectedTier = this;
 
-            foreach (AnnoListItem item in anno)
+            if (IsDiscreteOrFree)
             {
-                AnnoScheme.Label l = new AnnoScheme.Label(item.Label, item.Color);
-
-                if (IsDiscreteOrFree)
-                {
+                foreach (AnnoListItem item in anno)
+                {                
                     AddSegment(item);
                 }
             }

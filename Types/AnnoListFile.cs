@@ -16,7 +16,7 @@ namespace ssi
 
         #region SAVE TO FILE
 
-        private bool saveToFile(string filePath, string delimiter = ";")
+        public bool SaveToFile(string filePath, string delimiter = ";")
         {
             Dictionary<string, string> LabelIds = new Dictionary<string, string>();
 
@@ -26,7 +26,7 @@ namespace ssi
                 sw.WriteLine("<?xml version=\"1.0\" ?>");
                 sw.WriteLine("<annotation ssi-v=\"3\">");
 
-                sw.WriteLine("    <info ftype=\"" + Source.File.Type.ToString() + "\" size=\"" + this.Count + "\" />");
+                sw.WriteLine("    <info ftype=\"" + Source.File.Type.ToString() + "\" size=\"" + this.Count + "\" />");              
                 sw.WriteLine("    <meta annotator=\"" + Properties.Settings.Default.Annotator + "\"/>");
                 if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {
@@ -563,7 +563,7 @@ namespace ssi
                 //    MessageBox.Show("Annotation data was not found, load scheme only from '" + filepath + "'");
                 //}
             }
-            catch (Exception e)
+            catch
             {
                 MessageBox.Show("An exception occured while reading annotation from '" + filepath + "'");
             }
@@ -816,7 +816,7 @@ namespace ssi
                 sr.Close(); ;
                 list.HasChanged = false;
             }
-            catch (Exception e)
+            catch
             {
                 MessageBox.Show("An exception occured while reading annotation from '" + filepath + "'");
             }

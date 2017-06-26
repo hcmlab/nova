@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,7 +11,13 @@ namespace ssi
 {
     public partial class MainHandler
     {
+
+        //Config
         public static string BuildVersion = "0.9.9.9.4";
+        public static MEDIABACKEND Mediabackend = MEDIABACKEND.MEDIAKIT;
+
+
+
 
         private static Timeline timeline = null;
 
@@ -59,7 +66,7 @@ namespace ssi
         private bool isKeyDown = false;
         private string lastDownloadFileName = null;
 
-        public List<DatabaseStream> databaseSessionStreams;
+        public List<string> databaseSessionStreams;
 
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         public AnnoTierSegment temp_segment;
@@ -67,7 +74,7 @@ namespace ssi
         public class DownloadStatus
         {
             public string File;
-            public string percent;
+            public double percent;
             public bool active;
         }
 
@@ -152,7 +159,7 @@ namespace ssi
             control.menu.MouseEnter += tierMenu_MouseEnter;
 
             control.annoSaveMenu.Click += annoSave_Click;
-            control.annoSaveAsMenu.Click += annoSaveAs_Click;
+            control.annoExportMenu.Click += annoExport_Click;
             control.annoSaveAllMenu.Click += annoSaveAll_Click;
 
             control.loadFilesMenu.Click += loadFiles_Click;
@@ -173,7 +180,6 @@ namespace ssi
             
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
-            control.databaseCMLTransferStepMenu.Click += databaseCMLTransferStep_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
             control.databaseCMLTrainMenu.Click += databaseCMLTrain_Click;
             control.databaseCMLPredictMenu.Click += databaseCMLPredict_Click;
@@ -242,6 +248,14 @@ namespace ssi
                 Properties.Settings.Default.LastUpdateCheckDate = DateTime.Today.Date;
                 Properties.Settings.Default.Save();
                 checkForUpdates(true);
+            }
+
+
+            if (Properties.Settings.Default.DatabaseDirectory == "")
+            {                
+                Properties.Settings.Default.DatabaseDirectory = Directory.GetCurrentDirectory() + "\\data";
+                Properties.Settings.Default.Save();
+                Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory);
             }
 
             // Database
@@ -406,23 +420,24 @@ namespace ssi
             saveAllAnnos();
         }
 
-        private void showSettings(bool connectDatabase = false)
+        private void showSettings()
         {
             Settings s = new Settings();
-            s.Tab.SelectedIndex = connectDatabase ? 1 : 0;
+            s.Tab.SelectedIndex = 0;
             s.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             s.ShowDialog();
 
             if (s.DialogResult == true)
             {
-                bool reconnect = connectDatabase;
+                bool reconnect = false;
 
-                if (!reconnect && Properties.Settings.Default.MongoDBUser != s.MongoUser()
+                if (Properties.Settings.Default.MongoDBUser != s.MongoUser()
                     || Properties.Settings.Default.DatabaseAddress != s.DatabaseAddress()
                     || Properties.Settings.Default.MongoDBPass != s.MongoPass())
                 {
                     reconnect = true;
                 }
+
 
                 Properties.Settings.Default.UncertaintyLevel = s.Uncertainty();
                 Properties.Settings.Default.Annotator = s.AnnotatorName();
@@ -439,10 +454,10 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 if (reconnect)
-                {
-                    databaseConnect();                    
+                {                    
+                    databaseConnect();
                 }
-                
+
             }
 
         }

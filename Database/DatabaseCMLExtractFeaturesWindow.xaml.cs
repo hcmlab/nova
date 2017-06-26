@@ -39,6 +39,11 @@ namespace ssi
             this.handler = handler;
 
             GetDatabases(DatabaseHandler.DatabaseName);
+            GetStreams();
+            GetRoles();
+
+            RolesBox.SelectAll();
+            SessionsBox.SelectAll();
         }
 
         private void Done_Click(object sender, RoutedEventArgs e)
@@ -56,7 +61,6 @@ namespace ssi
             }
 
             Chain chain = (Chain) ChainPathComboBox.SelectedItem;
-            string fileName = FilenameTextBox.Text;
             bool force = ForceCheckBox.IsChecked.Value;
 
             if (!File.Exists(chain.Path))
@@ -65,51 +69,49 @@ namespace ssi
                 return;
             }
 
-            if (DatabaseBox.SelectedItem == null || SessionsBox.SelectedItem == null || StreamsBox.SelectedItem == null)
+            if (DatabaseBox.SelectedItem == null || SessionsBox.SelectedItem == null || StreamsBox.SelectedItem == null || RolesBox.SelectedItem == null)
             {
-                MessageTools.Warning("select database, session(s) and stream first");
+                MessageTools.Warning("select database, stream, role and session(s) first");
                 return;
             }
 
             string database = DatabaseHandler.DatabaseName;
             var sessions = SessionsBox.SelectedItems;
+            var roles = RolesBox.SelectedItems;
             DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
-            if (fileName == "")
-            {
-                fileName = Path.GetFileNameWithoutExtension(stream.Name) + "." + Path.GetFileNameWithoutExtension(chain.Path);
-            }
 
             logTextBox.Text = "";
             foreach (DatabaseSession session in sessions)
             {
-                string fromPath = Properties.Settings.Default.DatabaseDirectory + "\\" + database + "\\" + session.Name + "\\" + stream.Name;
-                string toPath = Properties.Settings.Default.DatabaseDirectory + "\\" + database + "\\" + session.Name + "\\" + fileName + ".stream";
+                foreach (string role in roles)
+                {                   
+                    string fromPath = Properties.Settings.Default.DatabaseDirectory + "\\"
+                    + database + "\\"
+                    + session.Name + "\\"
+                    + role + "." + stream.Name + "." + stream.FileExt;
 
-                if (force || !File.Exists(toPath))
-                {
-                    logTextBox.Text += handler.CMLExtractFeature(chain.Path, fromPath, toPath, chain.Step, chain.Left, chain.Right);
+                    string fileName = role + "." + Path.GetFileNameWithoutExtension(stream.Name) + "." + Path.GetFileNameWithoutExtension(chain.Path);
+                    string toPath = Properties.Settings.Default.DatabaseDirectory + "\\"
+                        + database + "\\"
+                        + session.Name + "\\"
+                        + fileName + ".stream";
 
-                    string type = "feature";
-                    string name = Path.GetFileNameWithoutExtension(chain.Path);
+                    if (force || !File.Exists(toPath))
+                    {
+                        logTextBox.Text += handler.CMLExtractFeature(chain.Path, fromPath, toPath, chain.Step, chain.Left, chain.Right);
 
-                    DatabaseStreamType streamType = new DatabaseStreamType() { Name = name, Type = type };
-                    DatabaseHandler.AddStreamType(streamType);
-    
-                    DatabaseStream features = new DatabaseStream();
-                    features.StreamType = type;
-                    features.Session = stream.Session;
-                    features.Role = stream.Role;
-                    features.Subject = stream.Subject;
-                    features.Name = fileName + ".stream";
-                    features.StreamName = name;
-                    DatabaseHandler.AddStream(features);
+                        string type = "feature";
+                        string name = stream.Name + "." + chain.Name;
+                        string ext = Path.GetExtension(toPath).Remove(0,1);                        
 
-                    features.Name = fileName + ".stream~";
-                    DatabaseHandler.AddStream(features);
-                }
-                else
-                {
-                    logTextBox.Text += "skip " + toPath + "\n";
+                        DatabaseStream streamType = new DatabaseStream() { Name = name, Type = type, FileExt = ext };
+                        DatabaseHandler.AddStream(streamType);
+
+                    }
+                    else
+                    {
+                        logTextBox.Text += "skip " + toPath + "\n";
+                    }
                 }
             }
         }
@@ -142,59 +144,42 @@ namespace ssi
             Select(DatabaseBox, selectedItem);
         }
 
-        private void DataBaseResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DatabaseResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (DatabaseBox.SelectedItem != null)
             {
                 string name = DatabaseBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(name);
-                GetSessions();                
+                GetSessions();
+                GetStreams();
+                GetRoles();
             }
         }
 
-        public void GetSessions(string selectedItem = null)
-        {
-            List<BsonDocument> sessions = DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Sessions, true);
-
+        public void GetSessions()
+        {            
             if (SessionsBox.HasItems)
             {
                 SessionsBox.ItemsSource = null;
             }
 
-            List<DatabaseSession> items = new List<DatabaseSession>();
-            foreach (var c in sessions)
-            {
-                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), Id = c["_id"].AsObjectId });
-            }
+            List<DatabaseSession> items = DatabaseHandler.Sessions;            
             SessionsBox.ItemsSource = items;
 
-            if (StreamsBox.HasItems)
-            {
-                StreamsBox.ItemsSource = null;
-            }
-
-            if (selectedItem != null)
-            {
-                SessionsBox.SelectedItem = items.Find(item => item.Name == selectedItem);
-                if (SessionsBox.SelectedItem != null)
-                {
-                    GetStreams((DatabaseSession)SessionsBox.SelectedItem);
-                }                
-            }            
+            SessionsBox.SelectAll();        
         } 
 
         private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (SessionsBox.SelectedItem != null)
             {
-                DatabaseSession session = (DatabaseSession) SessionsBox.SelectedItem;
-                GetStreams(session);                
+                DatabaseSession session = (DatabaseSession) SessionsBox.SelectedItem;            
             }
         }    
 
-        private void GetStreams(DatabaseSession session, string selectedItem = null)
+        private void GetStreams(string selectedItem = null)
         {
-            List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
+            List<DatabaseStream> streams = DatabaseHandler.Streams;
             
             if (StreamsBox.HasItems)
             {
@@ -208,6 +193,22 @@ namespace ssi
                 StreamsBox.SelectedItem = streams.Find(item => item.Name == selectedItem);
             }
         }
+
+        public void GetRoles()
+        {
+            RolesBox.Items.Clear();
+
+            foreach (DatabaseRole item in DatabaseHandler.Roles)
+            {
+                if (item.HasStreams)
+                {
+                    RolesBox.Items.Add(item.Name);
+                }
+            }
+
+            RolesBox.SelectedItem = Properties.Settings.Default.CMLDefaultRole;
+        }
+
 
         private bool parseChainFile(ref Chain chain)
         {
@@ -259,16 +260,23 @@ namespace ssi
             {
                 DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
 
-                string chainDir = Properties.Settings.Default.DatabaseDirectory + "\\" + Defaults.CML.FolderName + "\\" + Defaults.CML.ChainFolderName + "\\" + stream.StreamType;
+                string chainDir = Properties.Settings.Default.DatabaseDirectory + 
+                    "\\" + Defaults.CML.FolderName +
+                    "\\" + Defaults.CML.ChainFolderName + 
+                    "\\" + stream.Type;
                 if (Directory.Exists(chainDir))
                 {
-                    string[] chainFiles = Directory.GetFiles(chainDir, "*." + Defaults.CML.ChainFileExtension);
-                    foreach (string chainFile in chainFiles)
+                    string[] chainDirs = Directory.GetDirectories(chainDir);
+                    foreach (string searchDir in chainDirs)
                     {
-                        Chain chain = new Chain() { Path = chainFile };
-                        if (parseChainFile(ref chain))
+                        string[] chainFiles = Directory.GetFiles(searchDir, "*." + Defaults.CML.ChainFileExtension);
+                        foreach (string chainFile in chainFiles)
                         {
-                            ChainPathComboBox.Items.Add(chain);
+                            Chain chain = new Chain() { Path = chainFile };
+                            if (parseChainFile(ref chain))
+                            {
+                                ChainPathComboBox.Items.Add(chain);
+                            }
                         }
                     }
                 }

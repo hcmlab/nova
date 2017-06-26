@@ -24,11 +24,20 @@ namespace ssi
         private static string databaseName = null;
         private static string sessionName = null;
 
+        private static List<DatabaseStream> streams = new List<DatabaseStream>();
+        public static List<DatabaseStream> Streams { get { return streams; } }
 
         private static List<DatabaseRole> roles = new List<DatabaseRole>();
+        public static List<DatabaseRole> Roles { get { return roles; } }
+
         private static List<DatabaseSession> sessions = new List<DatabaseSession>();
+        public static List<DatabaseSession> Sessions { get { return sessions; } }
+
         private static List<DatabaseScheme> schemes = new List<DatabaseScheme>();
+        public static List<DatabaseScheme> Schemes { get { return schemes; } }
+
         private static List<DatabaseAnnotator> annotators = new List<DatabaseAnnotator>();
+        public static List<DatabaseAnnotator> Annotators { get { return annotators; } }
 
         #region CONNECT AND AUTH
 
@@ -173,8 +182,7 @@ namespace ssi
                 database = Client.GetDatabase(databaseName);
 
                 UpdateDatabaseLocalLists();
-
-
+            
             }
 
             return true;
@@ -184,6 +192,7 @@ namespace ssi
         static public void UpdateDatabaseLocalLists()
         {
             //Fill the lists each time we change the database, so references are solved only once.
+            streams = GetStreams();
             roles = GetRoles();
             sessions = GetSessions();
             schemes = GetSchemes();
@@ -225,14 +234,12 @@ namespace ssi
                 {
                     if ((roles[i]["role"].ToString() == "root" || roles[i]["role"].ToString() == "dbOwner" && roles[i]["db"] == db || (roles[i]["role"].ToString() == "userAdminAnyDatabase" || roles[i]["role"].ToString() == "dbAdminAnyDatabase")) && auth <= 4) { auth = 4; }
                     else if ((roles[i]["role"].ToString() == "dbAdmin" && roles[i]["db"] == db) && auth <= 3) { auth = 3; }
-                    else if ((roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db  && auth <= 2)) { auth = 2; }
-                    else if ((roles[i]["role"].ToString() == "read" && roles[i]["db"] == db && auth <= 1)) { auth = 1; }
-                    else if ((roles[i]["role"].ToString() == "readAnyDatabase")  && auth <= 0) { auth = 0; }
+                    else if ((roles[i]["role"].ToString() == "readWriteAnyDatabase" || roles[i]["role"].ToString() == "readWrite" && roles[i]["db"] == db || roles[i]["role"].ToString() == "read" && roles[i]["db"] == db) && auth <= 2) { auth = 2; }
+                    else if ((roles[i]["role"].ToString() == "readAnyDatabase") && auth <= 1) { auth = 1; }
                 }
             }
-            catch (Exception e)
-            {
-            }
+            catch 
+            { }
 
             return auth;
         }
@@ -267,7 +274,7 @@ namespace ssi
                 foreach (var c in databases)
                 {
                     string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 0)
+                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 1)
                     {
                         items.Add(db);
                     }
@@ -426,7 +433,7 @@ namespace ssi
             return roles.Any(s => name.Equals(s));
         }
 
-        public static bool StreamTypeExists(string name)
+        public static bool StreamExists(string name)
         {
             if (!IsConnected)
             {
@@ -438,7 +445,7 @@ namespace ssi
                 return false;
             }
 
-            List<string> roles = GetStreamTypesAll();
+            List<string> roles = GetStreamAll();
             return roles.Any(s => name.Equals(s));
         }
 
@@ -456,28 +463,6 @@ namespace ssi
 
             List<string> subjects = GetSubjectsAll();
             return subjects.Any(s => name.Equals(s));
-        }
-
-        public static bool StreamExists(string name, string session)
-        {
-            if (!IsConnected)
-            {
-                return false;
-            }
-
-            if (name == null || name == "")
-            {
-                return false;
-            }
-
-            ObjectId sessionId = new ObjectId();
-            if (!GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, session))
-            {
-                return false;
-            }
-
-            List<BsonDocument> streams = GetCollection(DatabaseDefinitionCollections.Streams);
-            return streams.Any(s => name.Equals(s["name"].AsString) && sessionId.Equals(s["session_id"].AsObjectId));
         }
 
         public static bool AnnotationExists(ObjectId annotatorId, ObjectId sessionId, ObjectId roleId, ObjectId schemeId)
@@ -628,7 +613,7 @@ namespace ssi
             return items;
         }
 
-        public static List<DatabaseScheme> GetSchemes(bool onlyValid = true)
+        private static List<DatabaseScheme> GetSchemes(bool onlyValid = true)
         {
 
             List<BsonDocument> schemes = GetCollection(DatabaseDefinitionCollections.Schemes, onlyValid);
@@ -638,11 +623,12 @@ namespace ssi
                 items.Add(new DatabaseScheme()
                 {
                     Id = scheme["_id"].AsObjectId,
-                    Name = scheme["name"].AsString
+                    Name = scheme["name"].AsString,
+                    Type = (AnnoScheme.TYPE) Enum.Parse(typeof(AnnoScheme.TYPE), scheme["type"].AsString)
                 });
             }
 
-            return items;
+            return items.OrderBy(i => i.Name).ToList();
         }
 
         public static List<string> GetSchemesAll()
@@ -650,7 +636,7 @@ namespace ssi
             return GetCollectionField(DatabaseDefinitionCollections.Schemes, "name", false);
         }
 
-        public static List<DatabaseRole> GetRoles(bool onlyValid = true)
+        private static List<DatabaseRole> GetRoles(bool onlyValid = true)
         {
             List<BsonDocument> roles = GetCollection(DatabaseDefinitionCollections.Roles, onlyValid);
             List<DatabaseRole> items = new List<DatabaseRole>();
@@ -658,11 +644,12 @@ namespace ssi
             {
                 items.Add(new DatabaseRole() {
                     Id = role["_id"].AsObjectId,
-                    Name = role["name"].AsString
+                    Name = role["name"].AsString,
+                    HasStreams = role["hasStreams"].AsBoolean,
                 });
             }
-
-            return items;
+           
+            return items.OrderBy(i => i.Name).ToList();
         }
 
         public static List<string> GetSubjects()
@@ -675,7 +662,7 @@ namespace ssi
             return GetCollectionField(DatabaseDefinitionCollections.Subjects, "name", false);
         }
 
-        public static List<DatabaseAnnotator> GetAnnotators(bool onlyValid = true)
+        private static List<DatabaseAnnotator> GetAnnotators(bool onlyValid = true)
         {
             List<BsonDocument> annotators = GetCollection(DatabaseDefinitionCollections.Annotators, onlyValid);
             List<DatabaseAnnotator> items = new List<DatabaseAnnotator>();
@@ -694,25 +681,33 @@ namespace ssi
                 });
             }
 
-            return items;
+            return items.OrderBy(i => i.Name).ToList();
         }
 
-        public static List<string> GetAnnotatorsFull()
+        public static List<string> GetStreamAll()
         {
-            return GetCollectionField(DatabaseDefinitionCollections.Annotators, "fullname");
+            return GetCollectionField(DatabaseDefinitionCollections.Streams, "name", false);
         }
 
-        public static List<string> GetStreamTypesAll()
+        private static List<DatabaseStream> GetStreams(bool onlyValid = true)
         {
-            return GetCollectionField(DatabaseDefinitionCollections.StreamTypes, "name", false);
+                List<BsonDocument> streamTypes = GetCollection(DatabaseDefinitionCollections.Streams, onlyValid);
+                List<DatabaseStream> items = new List<DatabaseStream>();
+                foreach (BsonDocument streamType in streamTypes)
+                {
+                    items.Add(new DatabaseStream()
+                    {
+                        Id = streamType["_id"].AsObjectId,
+                        Name = streamType["name"].AsString,
+                        FileExt = streamType["fileExt"].AsString,
+                        Type = streamType["type"].AsString
+                    });
+                }
+
+            return items.OrderBy(i => i.Name).ToList();
         }
 
-        public static List<string> GetStreamTypes()
-        {
-            return GetCollectionField(DatabaseDefinitionCollections.StreamTypes, "name");
-        }
-
-        public static List<DatabaseSession> GetSessions(bool onlyValid = true)
+        private static List<DatabaseSession> GetSessions(bool onlyValid = true)
         {
             List<BsonDocument> sessions = GetCollection(DatabaseDefinitionCollections.Sessions, onlyValid);
             List<DatabaseSession> items = new List<DatabaseSession>();
@@ -728,12 +723,9 @@ namespace ssi
                 });
             }
 
-            return items;
-        }
+            List<DatabaseSession> bla = items.OrderBy(i => i.Name).ToList();
 
-        public static List<string> GetStreams()
-        {
-            return GetCollectionField(DatabaseDefinitionCollections.Streams, "name");
+            return items.OrderBy(i => i.Name).ToList();
         }
 
         public static string SelectCollectionField(string title, string collection, string field)
@@ -775,7 +767,7 @@ namespace ssi
 
         public static string SelectStreamType()
         {
-            return SelectCollectionField("Select stream type", DatabaseDefinitionCollections.StreamTypes, "name");
+            return SelectCollectionField("Select stream type", DatabaseDefinitionCollections.Streams, "name");
         }
 
         #endregion
@@ -890,7 +882,6 @@ namespace ssi
             database.CreateCollection(DatabaseDefinitionCollections.Schemes);
             database.CreateCollection(DatabaseDefinitionCollections.Sessions);
             database.CreateCollection(DatabaseDefinitionCollections.Streams);
-            database.CreateCollection(DatabaseDefinitionCollections.StreamTypes);
             database.CreateCollection(DatabaseDefinitionCollections.Subjects);
 
             AddOrUpdateDBMeta(meta);
@@ -976,7 +967,7 @@ namespace ssi
             {
                 adminDatabase.RunCommand<BsonDocument>(createUser);
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
@@ -1010,7 +1001,7 @@ namespace ssi
                 {
                     database.RunCommand<BsonDocument>(dropuser);
                 }
-                catch (Exception ex)
+                catch 
                 {
                     return false;
                 }
@@ -1046,7 +1037,7 @@ namespace ssi
             {
                 database.RunCommand<BsonDocument>(changepw);
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
@@ -1081,7 +1072,7 @@ namespace ssi
                     } } };
                 admindatabase.RunCommand<BsonDocument>(updateroles);
             }
-            catch (Exception ex)
+            catch 
             {
                 return false;
             }
@@ -1116,7 +1107,7 @@ namespace ssi
                     } } };
                 admindatabase.RunCommand<BsonDocument>(updateroles);
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
@@ -1191,7 +1182,8 @@ namespace ssi
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.IsUpsert = true;
 
-            var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).ReplaceOne(filter, document, updateOptions);
+            ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).ReplaceOne(filter, document, updateOptions);            
+            annotators = GetAnnotators();            
 
             RevokeUserRole(annotator.Name, "readWrite", databaseName);
             RevokeUserRole(annotator.Name, "dbAdmin", databaseName);
@@ -1307,6 +1299,8 @@ namespace ssi
             string user = result["name"].AsString;
             var del = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).DeleteOne(filter);
 
+            annotators = GetAnnotators();
+
             RevokeUserRole(user, "read", databaseName);
             RevokeUserRole(user, "readWrite", databaseName);
             RevokeUserRole(user, "dbAdmin", databaseName);
@@ -1322,6 +1316,7 @@ namespace ssi
 
             BsonDocument document = new BsonDocument {
                     {"name",  role.Name},
+                    {"hasStreams",  role.HasStreams},
                     {"isValid",  true}
             };
 
@@ -1331,6 +1326,7 @@ namespace ssi
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles).ReplaceOne(filter, document, updateOptions);
+            roles = GetRoles();
 
             return true;
         }
@@ -1388,32 +1384,39 @@ namespace ssi
             var update = Builders<BsonDocument>.Update.Set("isValid", false);
             collection.UpdateOne(filter, update);
 
+            roles = GetRoles();
+
             return true;
         }
 
-        public static bool GetStreamType(ref DatabaseStreamType streamType)
+        public static bool GetStream(ref DatabaseStream stream)
         {
             if (!IsConnected && !IsDatabase)
             {
                 return false;
             }
 
-            if (!StreamTypeExists(streamType.Name))
+            if (!StreamExists(stream.Name))
             {
                 return false;
             }
 
             {
                 var builder = Builders<BsonDocument>.Filter;
-                var filter = builder.Eq("name", streamType.Name);
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes).Find(filter).Single();
+                var filter = builder.Eq("name", stream.Name);
+                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).Find(filter).Single();
                 if (document != null)
                 {
                     BsonElement value;
-                    streamType.Type = "";
+                    stream.FileExt = "";
+                    if (document.TryGetElement("fileExt", out value))
+                    {
+                        stream.FileExt = document["fileExt"].ToString();
+                    }
+                    stream.Type = "";
                     if (document.TryGetElement("type", out value))
                     {
-                        streamType.Type = document["type"].ToString();
+                        stream.Type = document["type"].ToString();
                     }
                 }
             }
@@ -1421,16 +1424,17 @@ namespace ssi
             return true;
         }
 
-        private static bool AddOrUpdateStreamType(string name, DatabaseStreamType streamType)
+        private static bool AddOrUpdateStream(string name, DatabaseStream stream)
         {
-            if (streamType.Name == "")
+            if (stream.Name == "")
             {
                 return false;
             }
 
             BsonDocument document = new BsonDocument {
-                    {"name",  streamType.Name},
-                    {"type",  streamType.Type},
+                    {"name",  stream.Name},
+                    {"fileExt",  stream.FileExt},
+                    {"type",  stream.Type},
                     {"isValid",  true}
             };
 
@@ -1439,63 +1443,66 @@ namespace ssi
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.IsUpsert = true;
 
-            var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes).ReplaceOne(filter, document, updateOptions);
+            ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).ReplaceOne(filter, document, updateOptions);            
+            streams = GetStreams();            
 
             return true;
         }
 
-        public static bool AddStreamType(DatabaseStreamType streamType)
+        public static bool AddStream(DatabaseStream stream)
         {
             if (!IsConnected && !IsDatabase)
             {
                 return false;
             }
 
-            if (StreamTypeExists(streamType.Name))
+            if (StreamExists(stream.Name))
             {
                 return false;
             }
 
-            return AddOrUpdateStreamType(streamType.Name, streamType);
+            return AddOrUpdateStream(stream.Name, stream);
         }
 
-        public static bool UpdateStreamType(string name, DatabaseStreamType streamType)
+        public static bool UpdateStream(string name, DatabaseStream stream)
         {
             if (!IsConnected && !IsDatabase)
             {
                 return false;
             }
 
-            if (!StreamTypeExists(name))
+            if (!StreamExists(name))
             {
                 return false;
             }
 
-            if (name != streamType.Name && StreamTypeExists(streamType.Name))
+            if (name != stream.Name && StreamExists(stream.Name))
             {
                 return false;
             }
 
-            return AddOrUpdateStreamType(name, streamType);
+            return AddOrUpdateStream(name, stream);
         }
 
-        public static bool DeleteStreamType(string name)
+        public static bool DeleteStream(string name)
         {
             if (!IsConnected && !IsDatabase)
             {
                 return false;
             }
 
-            if (!StreamTypeExists(name))
+            if (!StreamExists(name))
             {
                 return false;
             }
 
-            var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.StreamTypes);
+            var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", name);
             var update = Builders<BsonDocument>.Update.Set("isValid", false);
             collection.UpdateOne(filter, update);
+
+            streams = GetStreams();
 
             return true;
         }
@@ -1565,7 +1572,7 @@ namespace ssi
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.IsUpsert = true;
 
-            var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects).ReplaceOne(filter, document, updateOptions);
+            var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Subjects).ReplaceOne(filter, document, updateOptions);            
 
             return true;
         }
@@ -1577,7 +1584,7 @@ namespace ssi
                 return false;
             }
 
-            if (StreamTypeExists(subject.Name))
+            if (StreamExists(subject.Name))
             {
                 return false;
             }
@@ -1693,7 +1700,9 @@ namespace ssi
             var filter = builder.Eq("name", name);
             UpdateOptions update = new UpdateOptions();
             update.IsUpsert = true;
+
             var result = coll.ReplaceOne(filter, document, update);
+            schemes = GetSchemes();
 
             return true;
         }
@@ -1832,6 +1841,8 @@ namespace ssi
             var update = Builders<BsonDocument>.Update.Set("isValid", false);
             collection.UpdateOne(filter, update);
 
+            schemes = GetSchemes();
+
             return true;
         }
 
@@ -1900,6 +1911,7 @@ namespace ssi
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).ReplaceOne(filter, document, updateOptions);
+            sessions = GetSessions();            
 
             return true;
         }
@@ -1957,234 +1969,235 @@ namespace ssi
             var update = Builders<BsonDocument>.Update.Set("isValid", false);
             collection.UpdateOne(filter, update);
 
-            return true;
-        }
-
-        public static List<DatabaseStream> GetSessionStreams(DatabaseSession session)
-        {
-            List<DatabaseStream> items = new List<DatabaseStream>();
-
-            if (IsConnected && IsDatabase)
-            {
-                ObjectId sessionId = new ObjectId();
-                if (GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, session.Name))
-                {
-                    IMongoCollection<BsonDocument> collection = Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
-                    List<BsonDocument> streams = collection.Find(item => item["session_id"] == sessionId).ToList();
-                    foreach (BsonDocument document in streams)
-                    {
-                        DatabaseStream stream = new DatabaseStream() { Name = document["name"].ToString(), Session = session.Name };
-                        GetStream(ref stream);
-                        items.Add(stream);
-                    }
-                }
-            }
-
-            return items;
-        }
-
-        public static bool GetStream(ref DatabaseStream stream)
-        {
-            if (!IsConnected && !IsDatabase)
-            {
-                return false;
-            }
-
-            if (!StreamExists(stream.Name, stream.Session))
-            {
-                return false;
-            }
-
-            {
-                var builder = Builders<BsonDocument>.Filter;
-                ObjectId sessionId = new ObjectId();
-                GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, stream.Session);
-                var filter = builder.And(new FilterDefinition<BsonDocument>[] { builder.Eq("name", stream.Name), builder.Eq("session_id", sessionId) });
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).Find(filter).Single();
-                if (document != null)
-                {
-                    BsonElement value;
-
-                    string role = "";
-                    if (document.TryGetElement("role_id", out value))
-                    {
-                        if (document["role_id"].IsObjectId)
-                        {
-                            GetObjectName(ref role, DatabaseDefinitionCollections.Roles, document["role_id"].AsObjectId);
-                        }
-                    }
-                    stream.Role = role;
-
-                    string subject = "";
-                    if (document.TryGetElement("subject_id", out value))
-                    {
-                        if (document["subject_id"].IsObjectId)
-                        {
-                            GetObjectName(ref subject, DatabaseDefinitionCollections.Subjects, document["subject_id"].AsObjectId);
-                        }
-                    }
-                    stream.Subject = subject;
-
-                    string streamName = "";
-                    string streamType = "";
-                    if (document.TryGetElement("mediatype_id", out value))
-                    {
-                        if (document["mediatype_id"].IsObjectId)
-                        {
-                            GetObjectName(ref streamName, DatabaseDefinitionCollections.StreamTypes, document["mediatype_id"].AsObjectId);
-                            GetObjectField(ref streamType, DatabaseDefinitionCollections.StreamTypes, document["mediatype_id"].AsObjectId, "type");
-                        }
-                    }
-                    stream.StreamName = streamName;
-                    stream.StreamType = streamType;
-
-                    stream.URL = "";
-                    if (document.TryGetElement("url", out value))
-                    {
-                        stream.URL = document["url"].ToString();
-                    }
-
-                    stream.ServerAuth = false;
-                    if (document.TryGetElement("requiresAuth", out value))
-                    {
-                        stream.ServerAuth = document["requiresAuth"].AsBoolean;
-                    }
-                }
-            }
+            sessions = GetSessions();
 
             return true;
         }
 
-        private static bool AddOrUpdateStream(string name, DatabaseStream stream)
-        {
-            if (!IsConnected && !IsDatabase)
-            {
-                return false;
-            }
+        //public static List<DatabaseStream> GetSessionStreams(DatabaseSession session)
+        //{
+        //    List<DatabaseStream> items = new List<DatabaseStream>();
 
-            ObjectId sessionId = new ObjectId();
-            if (!GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, stream.Session))
-            {
-                return false;
-            }
+        //    if (IsConnected && IsDatabase)
+        //    {
+        //        ObjectId sessionId = new ObjectId();
+        //        if (GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, session.Name))
+        //        {
+        //            IMongoCollection<BsonDocument> collection = Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
+        //            List<BsonDocument> streams = collection.Find(item => item["session_id"] == sessionId).ToList();
+        //            foreach (BsonDocument document in streams)
+        //            {
+        //                DatabaseStream stream = new DatabaseStream() { Name = document["name"].ToString(), Session = session.Name };
+        //                GetStream(ref stream);
+        //                items.Add(stream);
+        //            }
+        //        }
+        //    }
 
-            ObjectId roleId = new ObjectId();
-            if (stream.Role != null && stream.Role != "" && !GetObjectID(ref roleId, DatabaseDefinitionCollections.Roles, stream.Role))
-            {
-                return false;
-            }
+        //    return items;
+        //}
 
-            ObjectId streamTypeId = new ObjectId();
-            if (stream.StreamName != null && stream.StreamName != "" && !GetObjectID(ref streamTypeId, DatabaseDefinitionCollections.StreamTypes, stream.StreamName))
-            {
-                return false;
-            }
+        //public static bool GetStream(ref DatabaseStream stream)
+        //{
+        //    if (!IsConnected && !IsDatabase)
+        //    {
+        //        return false;
+        //    }
 
-            ObjectId subjectId = new ObjectId();
-            if (stream.Subject != null && stream.Subject != "" && !GetObjectID(ref subjectId, DatabaseDefinitionCollections.Subjects, stream.Subject))
-            {
-                return false;
-            }
+        //    if (!StreamExists(stream.Name, stream.Session))
+        //    {
+        //        return false;
+        //    }
 
-            {
-                var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
-                var builder = Builders<BsonDocument>.Filter;
-                var filter = builder.And(new FilterDefinition<BsonDocument>[] { builder.Eq("name", name), builder.Eq("session_id", sessionId) });
-                UpdateOptions updateOptions = new UpdateOptions();
-                updateOptions.IsUpsert = true;
+        //    {
+        //        var builder = Builders<BsonDocument>.Filter;
+        //        ObjectId sessionId = new ObjectId();
+        //        GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, stream.Session);
+        //        var filter = builder.And(new FilterDefinition<BsonDocument>[] { builder.Eq("name", stream.Name), builder.Eq("session_id", sessionId) });
+        //        var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).Find(filter).Single();
+        //        if (document != null)
+        //        {
+        //            BsonElement value;
 
-                BsonDocument document = new BsonDocument
-                {
-                    { "name", stream.Name },
-                    { "url", stream.URL == null ? "" : stream.URL },
-                    { "requiresAuth", stream.ServerAuth},
-                    { "session_id", sessionId },
-                    { "mediatype_id", streamTypeId },
-                    { "role_id", roleId },
-                    { "subject_id", subjectId }
-                };
+        //            string role = "";
+        //            if (document.TryGetElement("role_id", out value))
+        //            {
+        //                if (document["role_id"].IsObjectId)
+        //                {
+        //                    GetObjectName(ref role, DatabaseDefinitionCollections.Roles, document["role_id"].AsObjectId);
+        //                }
+        //            }
+        //            stream.Role = role;
 
-                collection.ReplaceOne(filter, document, updateOptions);
-            }
+        //            string subject = "";
+        //            if (document.TryGetElement("subject_id", out value))
+        //            {
+        //                if (document["subject_id"].IsObjectId)
+        //                {
+        //                    GetObjectName(ref subject, DatabaseDefinitionCollections.Subjects, document["subject_id"].AsObjectId);
+        //                }
+        //            }
+        //            stream.Subject = subject;
 
-            return true;
-        }
+        //            string streamName = "";
+        //            string streamType = "";
+        //            if (document.TryGetElement("mediatype_id", out value))
+        //            {
+        //                if (document["mediatype_id"].IsObjectId)
+        //                {
+        //                    GetObjectName(ref streamName, DatabaseDefinitionCollections.StreamTypes, document["mediatype_id"].AsObjectId);
+        //                    GetObjectField(ref streamType, DatabaseDefinitionCollections.StreamTypes, document["mediatype_id"].AsObjectId, "type");
+        //                }
+        //            }
+        //            stream.StreamName = streamName;
+        //            stream.StreamType = streamType;
 
-        public static bool AddStream(DatabaseStream stream)
-        {
-            if (!IsConnected && !IsDatabase)
-            {
-                return false;
-            }
+        //            stream.URL = "";
+        //            if (document.TryGetElement("url", out value))
+        //            {
+        //                stream.URL = document["url"].ToString();
+        //            }
 
-            if (StreamExists(stream.Name, stream.Session))
-            {
-                return false;
-            }
+        //            stream.ServerAuth = false;
+        //            if (document.TryGetElement("requiresAuth", out value))
+        //            {
+        //                stream.ServerAuth = document["requiresAuth"].AsBoolean;
+        //            }
+        //        }
+        //    }
 
-            return AddOrUpdateStream(stream.Name, stream);
-        }
+        //    return true;
+        //}
 
-        public static bool UpdateStream(string name, DatabaseStream stream)
-        {
-            if (!IsConnected && !IsDatabase)
-            {
-                return false;
-            }
+        //private static bool AddOrUpdateStream(string name, DatabaseStream stream)
+        //{
+        //    if (!IsConnected && !IsDatabase)
+        //    {
+        //        return false;
+        //    }
 
-            if (!StreamExists(name, stream.Session))
-            {
-                return false;
-            }
+        //    ObjectId sessionId = new ObjectId();
+        //    if (!GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, stream.Session))
+        //    {
+        //        return false;
+        //    }
 
-            if (name != stream.Name && StreamExists(stream.Name, stream.Session))
-            {
-                return false;
-            }
+        //    ObjectId roleId = new ObjectId();
+        //    if (stream.Role != null && stream.Role != "" && !GetObjectID(ref roleId, DatabaseDefinitionCollections.Roles, stream.Role))
+        //    {
+        //        return false;
+        //    }
 
-            return AddOrUpdateStream(name, stream);
-        }
+        //    ObjectId streamTypeId = new ObjectId();
+        //    if (stream.StreamName != null && stream.StreamName != "" && !GetObjectID(ref streamTypeId, DatabaseDefinitionCollections.StreamTypes, stream.StreamName))
+        //    {
+        //        return false;
+        //    }
 
-        public static bool DeleteStream(DatabaseStream stream)
-        {
-            if (!IsConnected && !IsDatabase)
-            {
-                return false;
-            }
+        //    ObjectId subjectId = new ObjectId();
+        //    if (stream.Subject != null && stream.Subject != "" && !GetObjectID(ref subjectId, DatabaseDefinitionCollections.Subjects, stream.Subject))
+        //    {
+        //        return false;
+        //    }
 
-            if (!StreamExists(stream.Name, stream.Session))
-            {
-                return false;
-            }
+        //    {
+        //        var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
+        //        var builder = Builders<BsonDocument>.Filter;
+        //        var filter = builder.And(new FilterDefinition<BsonDocument>[] { builder.Eq("name", name), builder.Eq("session_id", sessionId) });
+        //        UpdateOptions updateOptions = new UpdateOptions();
+        //        updateOptions.IsUpsert = true;
 
-            ObjectId sessionId = new ObjectId();
-            if (!GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, stream.Session))
-            {
-                return false;
-            }
+        //        BsonDocument document = new BsonDocument
+        //        {
+        //            { "name", stream.Name },
+        //            { "url", stream.URL == null ? "" : stream.URL },
+        //            { "requiresAuth", stream.ServerAuth},
+        //            { "session_id", sessionId },
+        //            { "mediatype_id", streamTypeId },
+        //            { "role_id", roleId },
+        //            { "subject_id", subjectId }
+        //        };
 
-            var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
-            var builder = Builders<BsonDocument>.Filter;
-            var filter = builder.And(new FilterDefinition<BsonDocument>[] { builder.Eq("name", stream.Name), builder.Eq("session_id", sessionId) });
-            collection.DeleteOne(filter);
+        //        collection.ReplaceOne(filter, document, updateOptions);
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
+
+        //public static bool AddStream(DatabaseStream stream)
+        //{
+        //    if (!IsConnected && !IsDatabase)
+        //    {
+        //        return false;
+        //    }
+
+        //    if (StreamExists(stream.Name, stream.Session))
+        //    {
+        //        return false;
+        //    }
+
+        //    return AddOrUpdateStream(stream.Name, stream);
+        //}
+
+        //public static bool UpdateStream(string name, DatabaseStream stream)
+        //{
+        //    if (!IsConnected && !IsDatabase)
+        //    {
+        //        return false;
+        //    }
+
+        //    if (!StreamExists(name, stream.Session))
+        //    {
+        //        return false;
+        //    }
+
+        //    if (name != stream.Name && StreamExists(stream.Name, stream.Session))
+        //    {
+        //        return false;
+        //    }
+
+        //    return AddOrUpdateStream(name, stream);
+        //}
+
+        //public static bool DeleteStream(DatabaseStream stream)
+        //{
+        //    if (!IsConnected && !IsDatabase)
+        //    {
+        //        return false;
+        //    }
+
+        //    if (!StreamExists(stream.Name, stream.Session))
+        //    {
+        //        return false;
+        //    }
+
+        //    ObjectId sessionId = new ObjectId();
+        //    if (!GetObjectID(ref sessionId, DatabaseDefinitionCollections.Sessions, stream.Session))
+        //    {
+        //        return false;
+        //    }
+
+        //    var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
+        //    var builder = Builders<BsonDocument>.Filter;
+        //    var filter = builder.And(new FilterDefinition<BsonDocument>[] { builder.Eq("name", stream.Name), builder.Eq("session_id", sessionId) });
+        //    collection.DeleteOne(filter);
+
+        //    return true;
+        //}
 
         #endregion
 
         #region Annotation
 
-        public static bool SaveAnnoList(AnnoList annoList, List<DatabaseStream> linkedStreams = null, bool force = false)
+        public static bool SaveAnnoList(AnnoList annoList, List<string> linkedStreams = null, bool force = false)
         {
             if (!IsConnected && !IsDatabase && !IsSession)
             {
                 return false;
             }
 
-            if (CheckAuthentication() <= 1)
+            if (CheckAuthentication() == 0)
             {
-                MessageBox.Show("Not authorized to store on this database!");
                 return false;
             }
 
@@ -2195,7 +2208,6 @@ namespace ssi
             var annotators = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators);
             var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
             var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
-            var streams = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams);
             var schemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
 
             var builder = Builders<BsonDocument>.Filter;
@@ -2255,6 +2267,7 @@ namespace ssi
                 }
                 annoList.Meta.Annotator = dbuser;
                 annoList.Meta.AnnotatorFullName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", userID);
+                annoList.Source.Database.DataID = new ObjectId();
             }
 
             ObjectId annotatorID;
@@ -2262,12 +2275,14 @@ namespace ssi
             {
                 BsonDocument annotatorDoc = new BsonDocument();
                 annotatorDoc.Add(new BsonElement("name", annoList.Meta.Annotator));
-                annotatorDoc.Add(new BsonElement("fullname", annoList.Meta.AnnotatorFullName));
+                annotatorDoc.Add(new BsonElement("fullname", annoList.Meta.AnnotatorFullName == "" ? annoList.Meta.Annotator : annoList.Meta.AnnotatorFullName));
                 var filter = builder.Eq("name", annoList.Meta.Annotator);
                 UpdateOptions update = new UpdateOptions();
                 update.IsUpsert = true;
                 annotators.ReplaceOne(filter, annotatorDoc, update);
                 annotatorID = annotators.Find(filter).Single()["_id"].AsObjectId;
+
+                DatabaseHandler.annotators = GetAnnotators();
             }
             else
             {
@@ -2294,7 +2309,7 @@ namespace ssi
                 {
                     isLocked = annotationDoc[0]["isLocked"].AsBoolean;
                 }
-                catch (Exception ex) { }
+                catch { }
             }
 
             if (force || !isLocked)
@@ -2319,19 +2334,20 @@ namespace ssi
                 BsonArray streamArray = new BsonArray();
                 if (linkedStreams != null)
                 {
-                    foreach (DatabaseStream dmi in linkedStreams)
+                    foreach (string dmi in linkedStreams)
                     {
                         BsonDocument mediadocument = new BsonDocument();
-                        ObjectId mediaid;
-                        var filtermedia = builder.Eq("name", dmi.Name) & builder.Eq("session_id", sessionID);
-                        var mediadb = streams.Find(filtermedia).ToList();
-                        if (mediadb.Count > 0)
-                        {
-                            mediaid = mediadb[0].GetValue(0).AsObjectId;
-                            BsonElement media_id = new BsonElement("media_id", mediaid);
-                            mediadocument.Add(media_id);
-                            streamArray.Add(mediadocument);
-                        }
+                        //ObjectId mediaid;
+                        //var filtermedia = builder.Eq("name", dmi.Name) & builder.Eq("session_id", sessionID);
+                        //var mediadb = streams.Find(filtermedia).ToList();
+                        //if (mediadb.Count > 0)
+                        //{
+                        //    mediaid = mediadb[0].GetValue(0).AsObjectId;
+                        //    BsonElement media_id = new BsonElement("media_id", mediaid);
+                        //    mediadocument.Add(media_id);
+                        //    streamArray.Add(mediadocument);
+                        //}
+                        streamArray.Add(new BsonString(dmi));
                     }
                 }
 
@@ -2343,7 +2359,7 @@ namespace ssi
                 newAnnotationDoc.Add(date);
                 newAnnotationDoc.Add(isfinished);
                 newAnnotationDoc.Add(islocked);
-                newAnnotationDoc.Add("media", streamArray);
+                newAnnotationDoc.Add("streams", streamArray);
 
                 BsonArray data = new BsonArray();
 
@@ -2380,7 +2396,7 @@ namespace ssi
                 {
                     for (int i = 0; i < annoList.Count; i++)
                     {
-                        data.Add(new BsonDocument { { "score", annoList[i].Label }, { "conf", annoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
+                        data.Add(new BsonDocument { { "score", double.Parse(annoList[i].Label) }, { "conf", annoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                     }
                 }
                 else if (schemeType == AnnoScheme.TYPE.POINT)
@@ -2408,7 +2424,6 @@ namespace ssi
                 newAnnotationDataDoc.Add("labels", data);
 
                 var filterdata = builder.Eq("_id", annoList.Source.Database.DataID);
-
                 var annotationDataDoc = annotationdata.Find(filterdata).ToList();
 
                 if (annotationDataDoc.Count == 0)
@@ -2815,7 +2830,7 @@ namespace ssi
             {
                 ObjectId id = annotation["_id"].AsObjectId;
                 string sessionName = sessions.Find(session => session.Id == annotation["session_id"].AsObjectId).Name;
-                string roleName = roles.Find(role => role.Id == annotation["role_id"].AsObjectId).Name;
+                string roleName = Roles.Find(role => role.Id == annotation["role_id"].AsObjectId).Name;
                 string schemeName = schemes.Find(scheme => scheme.Id == annotation["scheme_id"].AsObjectId).Name;
 
                 DatabaseAnnotator dba = annotators.Find(annotator => annotator.Id == annotation["annotator_id"].AsObjectId);
@@ -2839,7 +2854,7 @@ namespace ssi
                     isFinished = annotation["isFinished"].AsBoolean;
 
                 }
-                catch (Exception ex) { }
+                catch  { }
 
                 bool islocked = false;
                 try
@@ -2847,14 +2862,14 @@ namespace ssi
                     islocked = annotation["isLocked"].AsBoolean;
 
                 }
-                catch (Exception ex) { }
+                catch  { }
 
                 DateTime date = DateTime.Today;
                 try
                 {
                     date = annotation["date"].ToUniversalTime();
                 }
-                catch (Exception ex) { }
+                catch  { }
 
 
                 if (!onlyMe && !onlyUnfinished ||
@@ -2936,26 +2951,12 @@ namespace ssi
         public string Description { get; set; }
         public string Server { get; set; }
         public bool ServerAuth { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
-
-    public class DatabaseStream
-    {
-        public string Name { get; set; }
-
-        public string Session { get; set; }
-
-        public string Role { get; set; }
-
-        public string Subject { get; set; }
-
-        public string StreamName { get; set; }
-
-        public string StreamType { get; set; }
-
-        public string URL { get; set; }
-        public bool ServerAuth { get; set; }
-    }
-
+    
     public class DatabaseSession
     {
         public ObjectId Id { get; set; }
@@ -2963,30 +2964,50 @@ namespace ssi
         public string Language { get; set; }
         public string Location { get; set; }
         public DateTime Date { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class DatabaseUser
     {
         public string Name { get; set; }
         public string Password { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class DatabaseRole
     {
         public ObjectId Id { get; set; }
         public string Name { get; set; }
+        public bool HasStreams { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class DatabaseScheme
     {
         public ObjectId Id { get; set; }
         public string Name { get; set; }
+        public AnnoScheme.TYPE Type { get; set; }
     }
 
-    public class DatabaseStreamType
+    public class DatabaseStream
     {
+        public ObjectId Id { get; set; }
         public string Name { get; set; }
+        public string FileExt { get; set; }
         public string Type { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class DatabaseSubject
@@ -2995,6 +3016,10 @@ namespace ssi
         public string Gender { get; set; }
         public int Age { get; set; }
         public string Culture { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class DatabaseAnnotator
@@ -3005,6 +3030,10 @@ namespace ssi
         public string Role { get; set; }
         public string Email { get; set; }
         public int Expertise { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class DatabaseAnnotation
@@ -3039,7 +3068,6 @@ namespace ssi
         public static string Roles = "Roles";
         public static string Subjects = "Subjects";
         public static string Streams = "Streams";
-        public static string StreamTypes = "StreamTypes";
         public static string Schemes = "Schemes";
         public static string Meta = "Meta";
     }

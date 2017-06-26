@@ -15,7 +15,10 @@
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0" Background="Transparent" Name="menu">
-            <MenuItem Header="File">
+            <Button Name="showSettingsMenu" Background="Transparent" BorderBrush="Transparent">
+                <Image Source="/Resources/settings.png" Width="16"></Image>
+            </Button>
+            <MenuItem Header="FILE">
                 <MenuItem Header="Load Files (add to workspace)" Name="loadFilesMenu" />
                 <MenuItem Header="Load Project (clear workspace)" Name="fileLoadProjectMenu" />
                 <MenuItem Header="Save Project" Name="fileSaveProjectMenu" />
@@ -33,7 +36,7 @@
                     </MenuItem>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="Database">
+            <MenuItem Header="DATABASE">
                 <MenuItem Header="Load Session (clear workspace)" Name="databaseLoadSessionMenu" />
                 <MenuItem Header="Administration" Name="databaseAdminMenu">
                     <MenuItem Header="Manage Users" Name="databaseManageUsersMenu" />
@@ -41,20 +44,12 @@
                     <MenuItem Header="Manage Sessions" Name="databaseManageSessionsMenu" />
                     <MenuItem Header="Manage Annotations" Name="databaseManageAnnotationsMenu" />
                 </MenuItem>
-                <MenuItem Header="Cooperative Learning" Name="databaseCMLMenu">
-                    <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" />
-                    <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
-                    <MenuItem Header="Train Models" Name="databaseCMLTrainMenu"/>
-                    <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
-                    <MenuItem Header="Complete Current Session" Name="databaseCMLCompleteStepMenu" Visibility="Collapsed"/>
-                    <MenuItem Header="Complete Multiple Sessions" Name="databaseCMLTransferStepMenu" Visibility="Collapsed"/>
-                </MenuItem>
-                <MenuItem Header="Connection" Name="databaseConnectMenu" />
+                <MenuItem Header="Connect" Name="databaseConnectMenu" />
             </MenuItem>
-            <MenuItem Header="Annotation">
+            <MenuItem Header="ANNOTATION">
                 <MenuItem Header="Save All" Name="annoSaveAllMenu" />
                 <MenuItem Header="Save Selected" Name="annoSaveMenu" InputGestureText="Ctrl+S"/>
-                <MenuItem Header="Save/Export Selected As" Name="annoSaveAsMenu" />
+                <MenuItem Header="Export Selected As" Name="annoExportMenu" />
                 <MenuItem Header="Convert Selected Annotation" Name="convertSelectedTierMenu">
                     <MenuItem Header="To Discrete Annotation" Name="convertAnnoContinuousToDiscreteMenu" />
                     <MenuItem Header="To Signal" Name="convertAnnoToSignalMenu" />
@@ -63,7 +58,13 @@
                     <MenuItem Header="To Continuous Annotation" Name="convertSignalToAnnoContinuousMenu" />
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="Settings" Name="showSettingsMenu" />
+            <MenuItem Header="LEARNING" Name="databaseCMLMenu">
+                <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" />
+                <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
+                <MenuItem Header="Train Models" Name="databaseCMLTrainMenu"/>
+                <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
+                <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu"/>
+            </MenuItem>
             <MenuItem Header="?">
                 <MenuItem Header="Shortcuts"  Name="helpMenu" />
                 <MenuItem Header="Check For Update" Name="updateApplicationMenu" />

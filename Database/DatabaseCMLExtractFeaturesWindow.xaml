@@ -20,7 +20,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="250"></ColumnDefinition>
+            <ColumnDefinition Width="350"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Row="0" Grid.Column="0" Margin="5">
@@ -39,11 +39,47 @@
 
             <Label Grid.Row="0" Grid.Column="0" Content="Database"/>
             <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
-                <ListBox Name="DatabaseBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DataBaseResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+                <ListBox Name="DatabaseBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DatabaseResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
             </DockPanel>
 
-            <Label Content="Sessions" Grid.Row="0" Grid.Column="1" />
-            <ListView Name="SessionsBox"  Grid.Row="1" Grid.Column="1" Margin="0,0,5,0" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" >
+            <Label Content="Streams" Grid.Row="0" Grid.Column="1"/>
+            <Grid Grid.Row="1" Grid.Column="1" Margin="0,0,5,0">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="100"></RowDefinition>
+                </Grid.RowDefinitions>
+               
+                <ListView Name="StreamsBox" Grid.Row="0" SelectionMode="Single" SelectionChanged="StreamsBox_SelectionChanged">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="Auto" Header="Name">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Name" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Ext">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="FileExt" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Type">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Type" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <Label Grid.Row="1">Roles</Label>
+                <ListBox Name="RolesBox" Grid.Row="2" SelectionMode="Extended" ></ListBox>
+
+            </Grid>
+
+            <Label Content="Sessions" Grid.Row="0" Grid.Column="2" />
+            <ListView Name="SessionsBox"  Grid.Row="1" Grid.Column="2" Margin="0,0,5,0" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" >
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -66,42 +102,8 @@
                 </ListView.View>
             </ListView>
 
-            <Label Content="Stream" Grid.Row="0" Grid.Column="2"/>
-            <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="1" Grid.Column="2" SelectionMode="Extended" SelectionChanged="StreamsBox_SelectionChanged">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Width="Auto" Header="File">
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="Name" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Name">
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="StreamName" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Type">
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="StreamType" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Role">
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="Role" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Subject">
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="Subject" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-
             <Grid Grid.Row="2" Grid.ColumnSpan="3" Margin="0,5,5,0" >
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
 
@@ -113,17 +115,13 @@
                 <Label Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Feature chain</Label>
                 <ComboBox Name="ChainPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5"></ComboBox>
 
-                <Label Grid.Row="1" Grid.Column="0" Margin="0,5,0,5">Filename (opt)</Label>
-                <TextBox Name="FilenameTextBox" Grid.Row="1" Grid.Column="1" Margin="0,5,0,5"></TextBox>
-
             </Grid>
 
             <DockPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" LastChildFill="False">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                    <Button Content="Extract" Name="ExtractButton" Click="Extract_Click" IsEnabled="false"/>
-                    <CheckBox Name="ForceCheckBox" Margin="5">Overwrite existing</CheckBox>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <Button Content="Extract" Name="ExtractButton" Click="Extract_Click" IsEnabled="false" Width="75"/>
+                    <CheckBox Name="ForceCheckBox" Margin="5">Force</CheckBox>
                 </StackPanel>
-                <Button Content="Done" DockPanel.Dock="Right" Click="Done_Click"/>
             </DockPanel>
         </Grid>
 
@@ -137,7 +135,7 @@
         </GridSplitter>
 
         <DockPanel Grid.Column="2" LastChildFill="True" Margin="0,0,5,5">
-            <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log:</Label>
+            <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log</Label>
             <TextBox Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" TextWrapping="Wrap"/>
         </DockPanel>
 

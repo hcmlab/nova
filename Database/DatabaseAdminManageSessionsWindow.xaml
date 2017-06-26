@@ -19,13 +19,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*"></ColumnDefinition>
             <ColumnDefinition Width="250*"></ColumnDefinition>
-            <ColumnDefinition Width="250*"></ColumnDefinition>
+            <!--ColumnDefinition Width="250*"></ColumnDefinition-->
         </Grid.ColumnDefinitions>
 
         <Label Grid.Row="0" Grid.Column="0" Content="Databases"/>
@@ -36,10 +35,10 @@
         <Label Content="Sessions" Grid.Row="0" Grid.Column="1" />
         <DockPanel Grid.Row="1" Grid.Column="1" LastChildFill="True" >
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
-                <Button Style="{StaticResource MyButton}" Name="AddSession" Content="+" Click="AddSession_Click" />
-                <Button Style="{StaticResource MyButton}" Name="DeleteSession" Content="-" Click="DeleteSession_Click" />
-                <Button Style="{StaticResource MyButton}" Name="EditSession" Content="edit" Click="EditSession_Click" />
-                <Button Style="{StaticResource MyButton}" Name="CopySession" Content="copy" Click="CopySession_Click" />
+                <Button Style="{StaticResource MyButton}" Name="AddSession" Content="ADD" Click="AddSession_Click" />
+                <Button Style="{StaticResource MyButton}" Name="DeleteSession" Content="REM" Click="DeleteSession_Click" />
+                <Button Style="{StaticResource MyButton}" Name="EditSession" Content="EDIT" Click="EditSession_Click" />
+                <Button Style="{StaticResource MyButton}" Name="CopySession" Content="COPY" Click="CopySession_Click" />
             </StackPanel>
             <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" >
                 <ListView.View>
@@ -71,7 +70,7 @@
             </ListView>
         </DockPanel>
 
-        <Label Content="Streams" Grid.Row="0" Grid.Column="2"/>
+        <!--Label Content="Streams" Grid.Row="0" Grid.Column="2"/>
         <DockPanel Grid.Row="1" Grid.Column="2" LastChildFill="True">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
                 <Button Style="{StaticResource MyButton}" Content="+" Click="AddStream_Click"  />
@@ -116,9 +115,7 @@
                 </ListView.ItemContainerStyle>
             </ListView>
 
-        </DockPanel>
+        </DockPanel-->
         
-        <Button Content="Done" Margin="5" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Name="Ok" Click="Ok_Click" HorizontalAlignment="Right"/>
-
     </Grid>
 </Window>

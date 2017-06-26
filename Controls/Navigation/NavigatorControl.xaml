@@ -28,10 +28,10 @@
             <Button Name="playButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="False">></Button>
             <!--Button Name="fastForwardButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">>></-->
             <Button Name="jumpEndButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">&gt;|</Button>
-            <CheckBox x:Name="followAnnoCheckBox" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Follow Annotation" />
         </StackPanel>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
+            <CheckBox x:Name="followAnnoCheckBox" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Follow Annotation" />
             <CheckBox Name="followplaybox" Height="25" Margin="0,10,10,0" IsChecked="True" Content="Auto Scroll" />
             <CheckBox x:Name="askforlabels" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Force Label" />
             <CheckBox Name="correctionModeCheckBox" Height="25" Margin="0,10,10,0" Visibility="Visible">Correction Mode</CheckBox>

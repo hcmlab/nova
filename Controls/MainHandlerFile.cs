@@ -52,7 +52,7 @@ namespace ssi
             Color foreground,
             Color background)
         {
-            if (filepath == null || filepath.EndsWith("~"))
+            if (filepath == null || filepath.EndsWith("~") || !File.Exists(filepath))
             {
                 return false;
             }
@@ -141,11 +141,6 @@ namespace ssi
                     loaded = true;
                     break;
 
-                case SSI_FILE_TYPE.CSV:
-                    loadCSVFile(filepath, foreground, background);
-                    loaded = true;
-                    break;
-
                 case SSI_FILE_TYPE.AUDIO:
                     Signal signal = loadWAVSignalFile(filepath, foreground, background);
                     IMedia media = loadMediaFile(filepath, MediaType.AUDIO);                    
@@ -168,6 +163,11 @@ namespace ssi
 
                 case SSI_FILE_TYPE.EVENTS:
                     ImportAnnoFromSSIEvents(filepath);
+                    loaded = true;
+                    break;
+
+                case SSI_FILE_TYPE.CSV:
+                    loadCSVFile(filepath, foreground, background);
                     loaded = true;
                     break;
 
@@ -208,14 +208,17 @@ namespace ssi
 
         private void addMedia(IMedia media)
         {
-            double time = Time.TimeFromPixel(signalCursor.X);
-            media.Move(time);
+            media.Play();
+            media.Pause();
             mediaList.Add(media);
+
 
             if (media.GetMediaType() != MediaType.AUDIO)
             {
                 addMediaBox(media);
             }
+
+
 
             control.navigator.playButton.IsEnabled = true;
         }
@@ -228,14 +231,30 @@ namespace ssi
                 return null;
             }
 
-            MediaKit media = new MediaKit(filename, type);
-            // Media media = new Media(filename, type);   
-            media.OnMediaMouseDown += OnMediaMouseDown;
-            media.OnMediaMouseUp += OnMediaMouseUp;
-            media.OnMediaMouseMove += OnMediaMouseMove;
-            addMedia(media);
+       
 
-            return media;
+            if(Mediabackend == MEDIABACKEND.MEDIAKIT)
+            {
+                MediaKit media = new MediaKit(filename, type);
+                media.OnMediaMouseDown += OnMediaMouseDown;
+                media.OnMediaMouseUp += OnMediaMouseUp;
+                media.OnMediaMouseMove += OnMediaMouseMove;
+                addMedia(media);
+                return media;
+            }
+           else if(Mediabackend == MEDIABACKEND.MEDIA)
+            {
+                Media media = new Media(filename, type);
+                media.OnMediaMouseDown += OnMediaMouseDown;
+                media.OnMediaMouseUp += OnMediaMouseUp;
+                media.OnMediaMouseMove += OnMediaMouseMove;
+                addMedia(media);
+                return media;
+            }
+
+
+            return null;
+           
         }
 
         private void loadAnnoFile(string filename)
@@ -288,7 +307,7 @@ namespace ssi
 
         private void loadSignalFile(string filename, Color signalColor, Color backgroundColor)
         {
-            if (!File.Exists(filename))
+            if (!File.Exists(filename) || !File.Exists(filename + "~"))
             {
                 MessageTools.Error("Stream file not found '" + filename + "'");
                 return;
@@ -508,7 +527,7 @@ namespace ssi
             }
         }
 
-        private void saveSelectedAnnoAs()
+        private void exportSelectedAnnoAs()
         {
             if (AnnoTierStatic.Selected.AnnoList != null)
             {
@@ -516,10 +535,10 @@ namespace ssi
                 string path = FileTools.SaveFileDialog(AnnoTierStatic.Selected.AnnoList.Source.File.Name, ".annotation", "Annotation(*.annotation)|*.annotation", AnnoTierStatic.Selected.AnnoList.Source.File.Directory);
                 if (path != null)
                 {
-                    AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;
-                    AnnoTierStatic.Selected.AnnoList.HasChanged = true;
+                    AnnoSource source = AnnoTierStatic.Selected.AnnoList.Source;
+                    AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;                    
                     AnnoTierStatic.Selected.AnnoList.Save();
-                    updateAnnoInfo(AnnoTierStatic.Selected);
+                    AnnoTierStatic.Selected.AnnoList.Source = source;
                 }
             }
         }
@@ -933,7 +952,7 @@ namespace ssi
 
                     if (m == MessageBoxResult.OK)
                     {
-                        saveSelectedAnnoAs();
+                        exportSelectedAnnoAs();
                     }
                 }
 
@@ -975,9 +994,9 @@ namespace ssi
             saveSelectedAnno();
         }
 
-        private void annoSaveAs_Click(object sender, RoutedEventArgs e)
+        private void annoExport_Click(object sender, RoutedEventArgs e)
         {
-            saveSelectedAnnoAs();
+            exportSelectedAnnoAs();
         }
 
         private void fileSaveProject_Click(object sender, RoutedEventArgs e)

@@ -25,11 +25,6 @@
             set { currentPlayPosition = value; }
         }
 
-        public double CurrentPlayPositionPrecise
-        {
-            get { return currentPlayPositionPrecise; }
-            set { currentPlayPositionPrecise = value; }
-        }
 
         public double CurrentSelectPosition
         {
@@ -69,7 +64,7 @@
             }
             else if (pixel > 0)
             {
-                return selectionStart + (pixel / selectionInPixel) * (selectionStop - selectionStart);
+                 return selectionStart + (pixel / selectionInPixel) * (selectionStop - selectionStart);
             }
             else
             {

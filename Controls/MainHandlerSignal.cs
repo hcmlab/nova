@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -178,50 +179,48 @@ namespace ssi
 
         #region EVENTHANDLER
 
+
+        private void signalAndAnnoGrid_Move(double mouseX)
+        {
+            if (AnnoTierStatic.Label != null && Mouse.DirectlyOver.GetType() != AnnoTierStatic.Label.GetType() || AnnoTierStatic.Label == null)
+            {
+                AnnoTierStatic.UnselectLabel();
+
+                signalCursor.X = mouseX;
+                double time = Time.TimeFromPixel(mouseX);
+
+                Move(time);
+
+                if (AnnoTierStatic.Selected != null)
+                {
+                    if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
+                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
+                    {
+                        if (control.annoListControl.annoDataGrid.Items.Count > 0)
+                        {
+                            int position = (int)(Time.CurrentPlayPosition * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
+                            if (position < control.annoListControl.annoDataGrid.Items.Count)
+                            {
+                                jumpToGeometric(position);
+                            }
+                        }
+                    }
+                }
+
+               
+            }
+
+        }
+
+
         private void signalAndAnnoGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                 if (AnnoTierStatic.Label != null && Mouse.DirectlyOver.GetType() != AnnoTierStatic.Label.GetType() || AnnoTierStatic.Label == null)
-                {
-                    AnnoTierStatic.UnselectLabel();
-                    bool is_playing = IsPlaying();
-
-                    if (is_playing)
-                    {
-                        Stop();
-                    }
-
-                    double pos = e.GetPosition(control.signalAndAnnoGrid).X;
-                    signalCursor.X = pos;
-                    Time.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                    Time.CurrentPlayPositionPrecise = Time.TimeFromPixel(signalCursor.X);
-                    mediaList.Move(Time.TimeFromPixel(pos));                    
-                    updatePositionLabels(Time.TimeFromPixel(pos));
-
-                    if (AnnoTierStatic.Selected != null)
-                    {
-                        if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
-                        AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
-                        {
-                            if (control.annoListControl.annoDataGrid.Items.Count > 0)
-                            {
-                                int position = (int)(Time.CurrentPlayPosition * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
-                                if (position < control.annoListControl.annoDataGrid.Items.Count)
-                                {
-                                    jumpToGeometric(position);
-                                }
-                            }
-                        }
-                    }
-
-                    if (is_playing)
-                    {
-                        Play();
-                    }
-                }
+               
+                signalAndAnnoGrid_Move(e.GetPosition(control.signalAndAnnoGrid).X);
             }
         }
 

@@ -559,7 +559,7 @@ namespace ssi
                     }
 
                 }
-                catch (Exception _) { }
+                catch { }
             }
 
             if (AnnoTierStatic.Selected != null)
@@ -602,7 +602,6 @@ namespace ssi
                 control.annoListControl.editComboBox.SelectedItem = item.Label;
 
                 Time.CurrentPlayPosition = item.Start;
-                Time.CurrentPlayPositionPrecise = item.Start;
 
                 mediaList.Move(item.Start);
                 moveSignalCursor(item.Start);

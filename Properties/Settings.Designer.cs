@@ -109,19 +109,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("file1.mp4;file2.stream;file2.stream~")]
-        public string Filenames {
-            get {
-                return ((string)(this["Filenames"]));
-            }
-            set {
-                this["Filenames"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("SessionID")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string LastSessionId {
             get {
                 return ((string)(this["LastSessionId"]));
@@ -133,7 +121,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1:27017")]
+        [global::System.Configuration.DefaultSettingValueAttribute("137.250.171.233:3389")]
         public string DatabaseAddress {
             get {
                 return ((string)(this["DatabaseAddress"]));
@@ -145,7 +133,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("database")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string DatabaseName {
             get {
                 return ((string)(this["DatabaseName"]));
@@ -157,7 +145,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Data")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string DatabaseDirectory {
             get {
                 return ((string)(this["DatabaseDirectory"]));
@@ -488,6 +476,18 @@ namespace ssi.Properties {
             }
             set {
                 this["ConvertToDiscreteDelays"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("null")]
+        public string CMLDefaultTrainer {
+            get {
+                return ((string)(this["CMLDefaultTrainer"]));
+            }
+            set {
+                this["CMLDefaultTrainer"] = value;
             }
         }
     }

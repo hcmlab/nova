@@ -122,7 +122,7 @@ namespace ssi
             }
         }
 
-        private void OnMouseMove(object sender, MouseEventArgs e)
+        public void OnMouseMove(object sender, MouseEventArgs e)
         {
             Point p = e.GetPosition(VideoImage);
             double pixelWidth = VideoImage.Source.Width;
@@ -133,7 +133,7 @@ namespace ssi
             OnMediaMouseMove?.Invoke(this, x, y);
         }
 
-        private void OnMouseDown(object sender, MouseButtonEventArgs e)
+        public void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             Point p = e.GetPosition(VideoImage);
             double pixelWidth = VideoImage.Source.Width;
@@ -144,7 +144,7 @@ namespace ssi
             OnMediaMouseDown?.Invoke (this, x, y);
         }
 
-        private void OnMouseUp(object sender, MouseButtonEventArgs e)
+        public void OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             Point p = e.GetPosition(VideoImage);
             double pixelWidth = VideoImage.Source.Width;

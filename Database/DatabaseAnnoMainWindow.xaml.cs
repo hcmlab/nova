@@ -2,14 +2,47 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Threading;
 
 namespace ssi
 {
+    public class StreamItem
+    {
+        public string Name { get; set; }
+        public bool Exists { get; set; }
+    }
+
+    [ValueConversion(typeof(object), typeof(int))]
+    public class StreamItemColorConverter : IValueConverter
+    {
+        public object Convert(
+            object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            bool exists = (bool)System.Convert.ChangeType(value, typeof(bool));
+
+            if (exists)
+                return +1;
+
+            return -1;
+        }
+
+        public object ConvertBack(
+            object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException("ConvertBack not supported");
+        }
+    }
+
+
     /// <summary>
     /// Interaktionslogik für DatabaseHandlerWindow.xaml
     /// </summary>
@@ -62,28 +95,15 @@ namespace ssi
             else return null;
         }
 
-        public List<DatabaseStream> SelectedStreams()
+        public List<string> SelectedStreams()
         {
-            List<DatabaseStream> selectedStreams = new List<DatabaseStream>();
-
-            if (SessionsBox.SelectedItem != null)
+            List<string> selectedStreams = new List<string>();
+            
+            if (StreamsBox.SelectedItems != null)
             {
-                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
-
-                if (StreamsBox.SelectedItems != null)
+                foreach (StreamItem stream in StreamsBox.SelectedItems)
                 {
-                    foreach (DatabaseStream stream in StreamsBox.SelectedItems)
-                    {
-                        selectedStreams.Add(stream);
-                        foreach (DatabaseStream stream2 in streams)
-                        {
-                            if (stream2.Name == stream.Name + "~")
-                            {
-                                selectedStreams.Add(stream2);
-                            }
-                        }
-                    }
+                    selectedStreams.Add(stream.Name);                    
                 }
             }
 
@@ -115,7 +135,7 @@ namespace ssi
                 DatabaseBox.Items.Add(db);
             }
 
-            Select(DatabaseBox, selectedItem);
+            Select(DatabaseBox, selectedItem);            
         }
 
         private void DatabaseResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -127,41 +147,31 @@ namespace ssi
                 if (DatabaseHandler.GetDBMeta(ref meta)) ServerLoginPanel.Visibility =  meta.ServerAuth? Visibility.Visible : Visibility.Collapsed;
 
                 GetSessions();
-
-               
- 
-                StreamsBox.ItemsSource = null;
+                GetStreams();
+                
                 AnnotationsBox.ItemsSource = null;
+
+                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
+                GetAnnotations(session);
             }
         }
 
         public void GetSessions(string selectedItem = null)
         {
-            List<BsonDocument> sessions = DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Sessions, true);
-
             if (SessionsBox.HasItems)
             {
                 SessionsBox.ItemsSource = null;
             }
 
-            List<DatabaseSession> items = new List<DatabaseSession>();
-            foreach (var c in sessions)
-            {
-                items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), Id = c["_id"].AsObjectId });
-            }
+            List<DatabaseSession> items = DatabaseHandler.Sessions;
             SessionsBox.ItemsSource = items;
 
-            if (StreamsBox.HasItems)
+            if (SessionsBox.HasItems)
             {
-                StreamsBox.ItemsSource = null;
-            }
-
-            if (selectedItem != null)
-            {
-                SessionsBox.SelectedItem = items.Find(item => item.Name == selectedItem);
-                if (SessionsBox.SelectedItem != null)
+                SessionsBox.SelectedIndex = 0;
+                if (selectedItem != null)
                 {
-                    GetStreams((DatabaseSession)SessionsBox.SelectedItem);
+                    SessionsBox.SelectedItem = items.Find(item => item.Name == selectedItem);
                 }
             }
         }
@@ -171,39 +181,62 @@ namespace ssi
             if (SessionsBox.SelectedItem != null)
             {
                 DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                GetStreams(session);
                 GetAnnotations(session);
+                GetStreams();
             }
         }
 
-        private void GetStreams(DatabaseSession session, string selectedItem = null)
+        private void GetStreams(string selectedItem = null)
         {
-            List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
+            List<DatabaseStream> streams = DatabaseHandler.Streams;
+            List<DatabaseRole> roles = DatabaseHandler.Roles;
+
+            string session = "";
+            if (SessionsBox.SelectedItem != null)
+            {
+                session = SessionsBox.SelectedItem.ToString();
+            }
 
             if (StreamsBox.HasItems)
             {
                 StreamsBox.ItemsSource = null;
             }
 
-            List<DatabaseStream> streamsSelection = new List<DatabaseStream>();
+            List<StreamItem> items = new List<StreamItem>();
             foreach (DatabaseStream stream in streams)
             {
-                if (!stream.Name.Contains(".stream~") && !stream.Name.Contains(".stream%7E"))
+                foreach (DatabaseRole role in roles)
                 {
-                    streamsSelection.Add(stream);
+                    if (role.HasStreams)
+                    {
+                        string filename = role.Name + "." + stream.Name + "." + stream.FileExt;
+                        string directory = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session + "\\";
+                        string filepath = directory + filename;
+                        items.Add(new StreamItem() { Name = filename, Exists = File.Exists(filepath) });
+                    }
                 }
             }
 
-            StreamsBox.ItemsSource = streamsSelection;
-
-            if (selectedItem != null)
+            StreamsBox.ItemsSource = items;
+            
+            if (StreamsBox.HasItems)
             {
-                StreamsBox.SelectedItem = streamsSelection.Find(item => item.Name == selectedItem);
+                StreamsBox.SelectedIndex = 0;
+                if (selectedItem != null)
+                {
+                    StreamsBox.SelectedItem = items.Find(item => item.Name == selectedItem);
+                }
             }
+            
         }
 
         public void GetAnnotations(DatabaseSession session)
         {
+            if (session == null)
+            {
+                return;
+            }
+
             Action EmptyDelegate = delegate () { };
             LoadingLabel.Visibility = Visibility.Visible;
             this.UpdateLayout();
@@ -262,7 +295,7 @@ namespace ssi
                 isFinished = annotation["isFinished"].AsBoolean;
                
             }
-            catch (Exception ex) { }
+            catch  { }
 
             bool islocked = false;
             try
@@ -270,14 +303,14 @@ namespace ssi
                 islocked = annotation["isLocked"].AsBoolean;
 
             }
-            catch (Exception ex) { }
+            catch  { }
 
             DateTime date = DateTime.Today;
             try
             {
                 date = annotation["date"].ToUniversalTime();                
             }
-            catch (Exception ex) { }
+            catch  { }
 
             if (!onlyMe && !onlyUnfinished ||
                 onlyMe && !onlyUnfinished && Properties.Settings.Default.MongoDBUser == annotatorName ||
@@ -331,17 +364,16 @@ namespace ssi
                         {
                             anno["isFinished"] = false;
                         }
-                        catch (Exception ex)
+                        catch 
                         { }
 
                             try
                             {
                                 anno["isLocked"] = false;
                             }
-                            catch (Exception ex)
-                            { }
+                            catch { }
 
-                            UpdateOptions uo = new UpdateOptions();
+                        UpdateOptions uo = new UpdateOptions();
                         uo.IsUpsert = true;
 
                         filter = builder.Eq("role_id", roleID) & builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotid_new) & builder.Eq("session_id", sessionID);
@@ -383,7 +415,7 @@ namespace ssi
                         isLocked = result[0]["isLocked"].AsBoolean;
 
                     }
-                    catch (Exception ex) { }
+                    catch  { }
 
                     if (!isLocked)
                     {
@@ -433,18 +465,17 @@ namespace ssi
                     }
 
                     BsonElement value;
-                    if(StreamsBox.Items != null && annotation[0].TryGetElement("media", out value))
+                    if(StreamsBox.Items != null && annotation[0].TryGetElement("streams", out value))
                     {
                         StreamsBox.SelectedItems.Clear();
-                        foreach (BsonDocument doc in annotation[0]["media"].AsBsonArray)
+                        foreach (BsonString doc in annotation[0]["streams"].AsBsonArray)
                         {
-                            string name = "";
-                            DatabaseHandler.GetObjectName(ref name, DatabaseDefinitionCollections.Streams, doc["media_id"].AsObjectId);
-                            foreach (DatabaseStream stream in StreamsBox.Items)
+                            string name = doc.AsString;                            
+                            foreach (StreamItem stream in StreamsBox.Items)
                             {
                                 if (stream.Name == name)
                                 {
-                                    StreamsBox.SelectedItems.Add(stream);
+                                    StreamsBox.SelectedItems.Add(stream.Name);
                                 }
                             }
                         }

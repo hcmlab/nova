@@ -18,6 +18,7 @@ namespace ssi
         {
             int elapsed = (Environment.TickCount - playLastTick);
             Time.CurrentPlayPosition += elapsed / 1000.0;
+
             playLastTick = Environment.TickCount;
 
             if (Time.CurrentPlayPosition > timeline.TotalDuration - 0.5)
@@ -41,7 +42,7 @@ namespace ssi
                         AnnoTierStatic.Label.select(true);
                     }
                 }
-            }
+            }            
 
             foreach (IMedia media in mediaList)
             {
@@ -51,6 +52,7 @@ namespace ssi
                     media.Move(Time.CurrentPlayPosition);
                 }
             }
+
             updatePositionLabels(Time.CurrentPlayPosition);
             signalCursor.X = Time.PixelFromTime(Time.CurrentPlayPosition);
 
@@ -71,6 +73,7 @@ namespace ssi
 
         private void Play()
         {
+
             if (IsPlaying())
             {
                 return;
@@ -80,12 +83,34 @@ namespace ssi
 
             playTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / playSampleRate);
             playLastTick = Environment.TickCount;
-            playTimer.Start();
-            mediaList.Play();
 
-            playIsPlaying = true;
+           
+            {
+                playTimer.Start();
+                mediaList.Play();
 
-            updateControl();
+                playIsPlaying = true;
+                updateControl();
+
+            }
+        }
+
+        private void Move(double time)
+        {
+            bool is_playing = IsPlaying();
+            if (is_playing)
+            {
+                Stop();
+            }
+            
+            Time.CurrentPlayPosition = time;
+            mediaList.Move(time);
+            updatePositionLabels(time);
+
+            if (is_playing)
+            {
+                Play();
+            }
         }
 
         private void Stop()
