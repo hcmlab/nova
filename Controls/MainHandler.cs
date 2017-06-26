@@ -13,7 +13,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "0.9.9.9.4";
+        public static string BuildVersion = "0.9.9.9.5";
         public static MEDIABACKEND Mediabackend = MEDIABACKEND.MEDIAKIT;
 
 

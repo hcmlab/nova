@@ -121,7 +121,7 @@ namespace ssi
                 signal.filePath = filepath;
                 string[] tmp = filepath.Split('\\');
                 signal.fileName = tmp[tmp.Length - 1];
-                signal.name = signal.fileName.Split('.')[0];
+                signal.name =  Path.GetFileNameWithoutExtension(signal.fileName);
 
                 doc.Load(filepath);
 
