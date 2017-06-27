@@ -54,7 +54,7 @@
                     <MenuItem Header="To Discrete Annotation" Name="convertAnnoContinuousToDiscreteMenu" />
                     <MenuItem Header="To Signal" Name="convertAnnoToSignalMenu" />
                 </MenuItem>
-                <MenuItem Header="Convert Selected Signal">
+                <MenuItem Header="Convert Selected Signal" Name="convertSignalMenu">
                     <MenuItem Header="To Continuous Annotation" Name="convertSignalToAnnoContinuousMenu" />
                 </MenuItem>
             </MenuItem>

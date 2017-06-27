@@ -51,7 +51,7 @@ namespace ssi
             control.convertSelectedTierMenu.IsEnabled = hasTier;
             control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && tier.IsContinuous;
             control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsContinuous;
-            control.convertSignalToAnnoContinuousMenu.IsEnabled = hasTrack;
+            control.convertSignalMenu.IsEnabled = hasTrack;
         }
 
         private void tierMenu_MouseEnter(object sender, RoutedEventArgs e)

@@ -27,7 +27,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="DatabaseAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">137.250.171.233:37317</Value>
+      <Value Profile="(Default)">localhost:27017</Value>
     </Setting>
     <Setting Name="DatabaseName" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
