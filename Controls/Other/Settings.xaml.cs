@@ -33,6 +33,7 @@ namespace ssi
             UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateOnStart;
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
+            CMLDirectory.Text = Properties.Settings.Default.CMLDirectory;
         }
 
         public double Uncertainty()
@@ -130,6 +131,22 @@ namespace ssi
                 }
             }
 
+
+            if (Properties.Settings.Default.CMLDirectory != CMLDirectory.Text)
+            {
+                if (Directory.Exists(CMLDirectory.Text))
+                {
+                    Directory.CreateDirectory(CMLDirectory.Text);
+                    Properties.Settings.Default.CMLDirectory = CMLDirectory.Text;
+                    Properties.Settings.Default.Save();
+                }
+                else
+                {
+                    MessageTools.Warning("Directory does not exist '" + CMLDirectory.Text + "'");
+                    return;
+                }
+            }
+
             DialogResult = true;
             Close();
         }
@@ -162,6 +179,30 @@ namespace ssi
             {
                 Directory.CreateDirectory(DownloadDirectory.Text);
                 Process.Start(DownloadDirectory.Text);
+            }
+        }
+
+        private void PickCMLDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.SelectedPath = Properties.Settings.Default.CMLDirectory;
+            dialog.ShowNewFolderButton = true;
+            dialog.Description = "Select the folder where the Cooperative machine learning tools are stored.";
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                CMLDirectory.Text = dialog.SelectedPath;
+            }
+        }
+
+
+        private void ViewCMLDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            if (Directory.Exists(CMLDirectory.Text))
+            {
+                Directory.CreateDirectory(CMLDirectory.Text);
+                Process.Start(CMLDirectory.Text);
             }
         }
     }

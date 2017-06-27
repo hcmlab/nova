@@ -28,7 +28,6 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <Label Content="Databases" Grid.Row="0" Grid.Column="0"/>
@@ -79,17 +78,6 @@
                 <Button Style="{StaticResource MyButton}" Name="EditStreamType" Content="EDIT" Click="EditStreamType_Click"  />
             </StackPanel>
             <ListBox Name="StreamTypesBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
-        </DockPanel>
-                
-
-        <Label Content="Subjects" Grid.Row="0" Grid.Column="5"/>
-        <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="5" >
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
-                <Button Style="{StaticResource MyButton}" Name="AddSubjects" Content="ADD" Click="AddSubject_Click" />
-                <Button Style="{StaticResource MyButton}" Name="DeleteSubject" Content="REM" Click="DeleteSubject_Click"/>
-                <Button Style="{StaticResource MyButton}" Name="EditSubject" Content="EDIT" Click="EditSubject_Click" />
-            </StackPanel>
-            <ListBox x:Name="SubjectsBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
         </DockPanel>
 
     </Grid>

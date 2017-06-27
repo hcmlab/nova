@@ -180,17 +180,26 @@ namespace ssi
         private void GetStreams(string selectedItem = null)
         {
             List<DatabaseStream> streams = DatabaseHandler.Streams;
-            
+
+            List<DatabaseStream> streamsValid = new List<DatabaseStream>();
+            foreach(DatabaseStream stream in streams)
+            {
+                if (getChains(stream).Count > 0)
+                {
+                    streamsValid.Add(stream);
+                }
+            }
+
             if (StreamsBox.HasItems)
             {
                 StreamsBox.ItemsSource = null;
-            }
+            }            
 
-            StreamsBox.ItemsSource = streams;
+            StreamsBox.ItemsSource = streamsValid;
 
             if (selectedItem != null)
             {
-                StreamsBox.SelectedItem = streams.Find(item => item.Name == selectedItem);
+                StreamsBox.SelectedItem = streamsValid.Find(item => item.Name == selectedItem);
             }
         }
 
@@ -252,6 +261,33 @@ namespace ssi
             return true;
         }
 
+        private List<Chain> getChains(DatabaseStream stream)
+        {
+            List<Chain> chains = new List<Chain>();
+
+            string chainDir = Properties.Settings.Default.CMLDirectory +
+                    "\\" + Defaults.CML.ChainFolderName +
+                    "\\" + stream.Type;
+            if (Directory.Exists(chainDir))
+            {
+                string[] chainDirs = Directory.GetDirectories(chainDir);
+                foreach (string searchDir in chainDirs)
+                {
+                    string[] chainFiles = Directory.GetFiles(searchDir, "*." + Defaults.CML.ChainFileExtension);                    
+                    foreach (string chainFile in chainFiles)
+                    {
+                        Chain chain = new Chain() { Path = chainFile };
+                        if (parseChainFile(ref chain))
+                        {
+                            chains.Add(chain);
+                        }
+                    }
+                }         
+            }
+
+            return chains;
+        }
+
         private void StreamsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ChainPathComboBox.Items.Clear();
@@ -260,25 +296,10 @@ namespace ssi
             {
                 DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
 
-                string chainDir = Properties.Settings.Default.DatabaseDirectory + 
-                    "\\" + Defaults.CML.FolderName +
-                    "\\" + Defaults.CML.ChainFolderName + 
-                    "\\" + stream.Type;
-                if (Directory.Exists(chainDir))
-                {
-                    string[] chainDirs = Directory.GetDirectories(chainDir);
-                    foreach (string searchDir in chainDirs)
-                    {
-                        string[] chainFiles = Directory.GetFiles(searchDir, "*." + Defaults.CML.ChainFileExtension);
-                        foreach (string chainFile in chainFiles)
-                        {
-                            Chain chain = new Chain() { Path = chainFile };
-                            if (parseChainFile(ref chain))
-                            {
-                                ChainPathComboBox.Items.Add(chain);
-                            }
-                        }
-                    }
+                List<Chain> chains = getChains(stream);
+                foreach(Chain chain in chains)
+                { 
+                    ChainPathComboBox.Items.Add(chain);                     
                 }
             }  
             

@@ -64,6 +64,13 @@ namespace ssi
             checkForUpdates(false);
         }
 
+        private void updateCML_Click(object sender, RoutedEventArgs e)
+        {
+            updateCML();
+        }
+
+        
+
         public int compareVersion(string Version1, string Version2)
         {
             Regex regex = new Regex(@"([\d]+)");
@@ -96,7 +103,7 @@ namespace ssi
                 try
                 {
                     // Start downloading the file
-                    webClient.DownloadFileAsync(URL, location);
+                    webClient.DownloadFile(URL, location);
                 }
                 catch (Exception ex)
                 {

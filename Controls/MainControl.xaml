@@ -67,7 +67,9 @@
             </MenuItem>
             <MenuItem Header="?">
                 <MenuItem Header="Shortcuts"  Name="helpMenu" />
+                <MenuItem Header="Update CML Tools" Name="updateCMLMenu" />
                 <MenuItem Header="Check For Update" Name="updateApplicationMenu" />
+                
             </MenuItem>
 
         </Menu>

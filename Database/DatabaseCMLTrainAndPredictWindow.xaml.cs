@@ -244,8 +244,7 @@ namespace ssi
                     streamName += "." + streamParts[i];
                 }
 
-                string trainerDir = Properties.Settings.Default.DatabaseDirectory + "\\" +
-                                Defaults.CML.FolderName + "\\" +
+                string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +                                
                                 Defaults.CML.ModelsFolderName + "\\" +
                                 Defaults.CML.ModelsTrainerFolderName + "\\" +
                                 scheme.Type.ToString().ToLower() + "\\" +
@@ -381,8 +380,25 @@ namespace ssi
         public void GetSchemes()
         {
             SchemesBox.Items.Clear();
-            
-            foreach (DatabaseScheme item in DatabaseHandler.Schemes)
+
+            List<DatabaseStream> streams = DatabaseHandler.Streams;
+            List<DatabaseScheme> schemesValid = new List<DatabaseScheme>();
+            List<DatabaseScheme> schemes = DatabaseHandler.Schemes;
+
+            foreach (DatabaseScheme scheme in schemes)
+            {
+                foreach (DatabaseStream stream in streams)
+                {
+                    bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
+                    if (getTrainer(stream, scheme, template).Count > 0)
+                    {
+                        schemesValid.Add(scheme);
+                        break;
+                    }
+                }
+            }
+
+            foreach (DatabaseScheme item in schemesValid)
             {
                 SchemesBox.Items.Add(item.Name);
             }
@@ -416,18 +432,33 @@ namespace ssi
         private void GetStreams()
         {
             List<DatabaseStream> streams = DatabaseHandler.Streams;
+            List<DatabaseStream> streamsValid = new List<DatabaseStream>();
+            List<DatabaseScheme> schemes = DatabaseHandler.Schemes;
+
+            foreach (DatabaseStream stream in streams)
+            {
+                foreach (DatabaseScheme scheme in schemes)
+                {
+                    bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
+                    if (getTrainer(stream, scheme, template).Count > 0)
+                    {
+                        streamsValid.Add(stream);
+                        break;
+                    }
+                }
+            }
 
             if (StreamsBox.HasItems)
             {
                 StreamsBox.ItemsSource = null;
             }
 
-            StreamsBox.ItemsSource = streams;
+            StreamsBox.ItemsSource = streamsValid;
 
             if (StreamsBox.Items.Count > 0)
             {
                 StreamsBox.SelectedIndex = 0;
-                StreamsBox.SelectedItem = streams.Find(item => item.Name == Properties.Settings.Default.CMLDefaultStream);
+                StreamsBox.SelectedItem = streamsValid.Find(item => item.Name == Properties.Settings.Default.CMLDefaultStream);
             }
         }
 
@@ -604,6 +635,77 @@ namespace ssi
             return true;
         }
 
+        private List<Trainer> getTrainer(DatabaseStream stream, DatabaseScheme scheme, bool template)
+        {
+            List<Trainer> trainers = new List<Trainer>();
+
+            string[] streamParts = stream.Name.Split('.');
+            if (streamParts.Length <= 1)
+            {
+                return trainers;
+            }
+            string streamName = streamParts[1];
+            for (int i = 2; i < streamParts.Length - 1; i++)
+            {
+                streamName += "." + streamParts[i];
+            }
+
+            if (template)
+            {
+
+                string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
+                                    Defaults.CML.ModelsFolderName + "\\" +
+                                    Defaults.CML.ModelsTemplatesFolderName + "\\" +
+                                    scheme.Type.ToString().ToLower() + "\\" +
+                                    stream.Type;
+
+                if (Directory.Exists(trainerDir))
+                {
+                    string[] searchDirs = Directory.GetDirectories(trainerDir);
+                    foreach (string searchDir in searchDirs)
+                    {
+                        string[] trainerFiles = Directory.GetFiles(searchDir, "*." + Defaults.CML.TrainerFileExtension);
+                        foreach (string trainerFile in trainerFiles)
+                        {
+                            Trainer trainer = new Trainer() { Path = trainerFile };
+                            if (parseTrainerFile(ref trainer))
+                            {
+                                trainers.Add(trainer);
+                            }
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
+                Defaults.CML.ModelsFolderName + "\\" +
+                Defaults.CML.ModelsTrainerFolderName + "\\" +
+                scheme.Type.ToString().ToLower() + "\\" +
+                stream.Type + "{" +
+                streamName + "}\\" +
+                scheme.Name;
+
+                if (Directory.Exists(trainerDir))
+                {
+                    string[] trainerFiles = Directory.GetFiles(trainerDir, "*." + Defaults.CML.TrainerFileExtension);
+                    foreach (string trainerFile in trainerFiles)
+                    {
+                        Trainer trainer = new Trainer() { Path = trainerFile };
+                        if (parseTrainerFile(ref trainer))
+                        {
+                            trainers.Add(trainer);
+                        }
+                    }
+                }
+
+            }
+
+            return trainers;
+        }
+
+
         private void StreamsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (RolesBox.SelectedItem == null || AnnotatorsBox.SelectedItem == null || SchemesBox.SelectedItem == null)
@@ -625,78 +727,15 @@ namespace ssi
                 bool isDiscrete = scheme.Type == AnnoScheme.TYPE.DISCRETE;
                 FillGapPanel.Visibility = isDiscrete ? Visibility.Visible : Visibility.Collapsed;
                 RemoveLabelPanel.Visibility = isDiscrete ? Visibility.Visible : Visibility.Collapsed;
+    
+                bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
 
-                string trainerDir = "";
-
-                switch (mode)
+                List<Trainer> trainers = getTrainer(stream, scheme, template);
+                foreach (Trainer trainer in trainers)
                 {
-                    case Mode.TRAIN:
-                    case Mode.COMPLETE:
-                    {                        
-                        trainerDir = Properties.Settings.Default.DatabaseDirectory + "\\" +
-                                Defaults.CML.FolderName + "\\" +
-                                Defaults.CML.ModelsFolderName + "\\" +
-                                Defaults.CML.ModelsTemplatesFolderName + "\\" +
-                                scheme.Type.ToString().ToLower() + "\\" +
-                                stream.Type;
-
-                            if (Directory.Exists(trainerDir))
-                            {
-                                string[] searchDirs = Directory.GetDirectories(trainerDir);
-                                foreach (string searchDir in searchDirs)
-                                {
-                                    string[] trainerFiles = Directory.GetFiles(searchDir, "*." + Defaults.CML.TrainerFileExtension);
-                                    foreach (string trainerFile in trainerFiles)
-                                    {
-                                        Trainer trainer = new Trainer() { Path = trainerFile };
-                                        if (parseTrainerFile(ref trainer))
-                                        {
-                                            TrainerPathComboBox.Items.Add(trainer);
-                                        }
-                                    }
-                                }
-                            }
-
-                            break;
-                    }
-                    case Mode.PREDICT:
-                    {
-                            string[] streamParts = stream.Name.Split('.');
-                            if (streamParts.Length <= 1)
-                            {
-                                return;
-                            }
-                            string streamName = streamParts[1];
-                            for (int i = 2; i < streamParts.Length - 1; i++)
-                            {
-                                streamName += "." + streamParts[i];
-                            }
-
-                            trainerDir = Properties.Settings.Default.DatabaseDirectory + "\\" +
-                            Defaults.CML.FolderName + "\\" +
-                            Defaults.CML.ModelsFolderName + "\\" +
-                            Defaults.CML.ModelsTrainerFolderName + "\\" +
-                            scheme.Type.ToString().ToLower() + "\\" +
-                            stream.Type + "{" +
-                            streamName + "}\\" +
-                            scheme.Name;
-
-                            if (Directory.Exists(trainerDir))
-                            {
-                                string[] trainerFiles = Directory.GetFiles(trainerDir, "*." + Defaults.CML.TrainerFileExtension);
-                                foreach (string trainerFile in trainerFiles)
-                                {
-                                    Trainer trainer = new Trainer() { Path = trainerFile };
-                                    if (parseTrainerFile(ref trainer))
-                                    {
-                                        TrainerPathComboBox.Items.Add(trainer);
-                                    }
-                                }
-                            }
-
-                            break;
-                    }
+                    TrainerPathComboBox.Items.Add(trainer);
                 }
+                                  
             }
             
             if (TrainerPathComboBox.Items.Count > 0)

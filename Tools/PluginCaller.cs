@@ -19,14 +19,12 @@ namespace ssi
         bool isLoaded;
         bool IsLoaded { get { return isLoaded; } }
 
-        public const string PLUGIN_FOLDER = "plugins";
-
         public PluginCaller(string dllPath, string typeName)
         {
             isLoaded = true;
   
             dllName = Path.GetFileNameWithoutExtension(dllPath);
-            directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + PLUGIN_FOLDER + "\\" + dllName + "\\";
+            directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\";
 
             Directory.CreateDirectory(directory);
             if (!downloadDll(dllName, false))
@@ -76,7 +74,7 @@ namespace ssi
             {
                 try
                 {
-                    string url = "https://github.com/hcmlab/nova/blob/master/bin/" + PLUGIN_FOLDER + "/" + dllName + "/" + name + ".dll?raw=true";
+                    string url = "https://github.com/hcmlab/nova/blob/master/bin/" + name + ".dll?raw=true";
                     WebClient Client = new WebClient();
 
                     if(isDependency)

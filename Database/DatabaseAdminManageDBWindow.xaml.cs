@@ -26,7 +26,7 @@ namespace ssi
         {
             GetAnnotators();
             GetStreamTypes();
-            GetSubjects();
+            //GetSubjects();
             GetRoles();
             GetSchemes();
         }
@@ -85,19 +85,19 @@ namespace ssi
             Select(AnnotatorsBox, selectedItem);
         }
 
-        public void GetSubjects(string selectedItem = null)
+        //public void GetSubjects(string selectedItem = null)
 
-        {
-            SubjectsBox.Items.Clear();
+        //{
+        //    SubjectsBox.Items.Clear();
 
-            List<string> items = DatabaseHandler.GetSubjects();
-            foreach (string item in items)
-            {
-                SubjectsBox.Items.Add(item);
-            }
+        //    List<string> items = DatabaseHandler.GetSubjects();
+        //    foreach (string item in items)
+        //    {
+        //        SubjectsBox.Items.Add(item);
+        //    }
 
-            Select(SubjectsBox, selectedItem);
-        }
+        //    Select(SubjectsBox, selectedItem);
+        //}
 
         public void GetStreamTypes(string selectedItem = null)
         {
@@ -380,76 +380,6 @@ namespace ssi
                 if (DatabaseHandler.DeleteStream(name))
                 {
                     GetStreamTypes();
-                }
-            }
-        }
-
-
-        private void AddSubject_Click(object sender, RoutedEventArgs e)
-        {
-            Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
-            input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = "" };
-            input["age"] = new UserInputWindow.Input() { Label = "Age", DefaultValue = "0" };
-            input["gender"] = new UserInputWindow.Input() { Label = "Gender", DefaultValue = "" };
-            input["culture"] = new UserInputWindow.Input() { Label = "Culture", DefaultValue = "" };
-            UserInputWindow dialog = new UserInputWindow("Add new subject", input);
-            dialog.ShowDialog();
-            if (dialog.DialogResult == true)
-            {
-                string name = dialog.Result("name");
-                int age = 0;
-                dialog.ResultAsInt("age", out age);
-                string gender = dialog.Result("gender");
-                string culture = dialog.Result("culture");
-                DatabaseSubject subject = new DatabaseSubject() { Name = name, Age = age, Gender = gender, Culture = culture};
-                if (DatabaseHandler.AddSubject(subject))
-                {
-                    GetSubjects(dialog.Result("name"));
-                }
-            }
-        }
-
-        private void EditSubject_Click(object sender, RoutedEventArgs e)
-        {
-            if (SubjectsBox.SelectedItem != null)
-            {
-                string name = (string)SubjectsBox.SelectedItem;
-                DatabaseSubject subject = new DatabaseSubject() { Name = name };
-                if (DatabaseHandler.GetSubject(ref subject))
-                {
-                    Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
-                    input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = subject.Name };
-                    input["age"] = new UserInputWindow.Input() { Label = "Age", DefaultValue = subject.Age.ToString() };
-                    input["gender"] = new UserInputWindow.Input() { Label = "Gender", DefaultValue = subject.Gender };
-                    input["culture"] = new UserInputWindow.Input() { Label = "Culture", DefaultValue = subject.Culture };
-                    UserInputWindow dialog = new UserInputWindow("Edit subject", input);
-                    dialog.ShowDialog();
-
-                    if (dialog.DialogResult == true)
-                    {
-                        subject.Name = dialog.Result("name");                        
-                        int age = 0;
-                        dialog.ResultAsInt("age", out age);
-                        subject.Age = age;
-                        subject.Gender = dialog.Result("gender");
-                        subject.Culture = dialog.Result("culture");
-                        if (DatabaseHandler.UpdateSubject(name, subject))
-                        {
-                            GetSubjects(name);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void DeleteSubject_Click(object sender, RoutedEventArgs e)
-        {
-            if (SubjectsBox.SelectedItem != null)
-            {
-                string name = (string)SubjectsBox.SelectedItem;
-                if (DatabaseHandler.DeleteSubject(name))
-                {
-                    GetSubjects();
                 }
             }
         }
