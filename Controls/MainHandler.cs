@@ -193,6 +193,7 @@ namespace ssi
 
             control.helpMenu.Click += helpMenu_Click;
             control.updateApplicationMenu.Click += updateApplication_Click;
+            control.updateCMLMenu.Click += updateCML_Click;
 
             // Navigator
 
@@ -262,12 +263,23 @@ namespace ssi
 
             }
 
+
+
             if (Properties.Settings.Default.DatabaseDirectory == "")
             {                
                 Properties.Settings.Default.DatabaseDirectory = Directory.GetCurrentDirectory() + "\\data";
                 Properties.Settings.Default.Save();
                 Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory);
             }
+
+
+            if (Properties.Settings.Default.CMLDirectory == "")
+            {
+                Properties.Settings.Default.CMLDirectory = Directory.GetCurrentDirectory() + "\\cml";
+                Properties.Settings.Default.Save();
+                Directory.CreateDirectory(Properties.Settings.Default.CMLDirectory);
+            }
+
 
             // Database
 
@@ -287,6 +299,53 @@ namespace ssi
             clearAnnoInfo();
             clearMediaBox();
         }     
+
+
+        private void updateCML()
+        {
+
+            /*
+           * CMLTrain and XMLchain executables are downloaded from the official SSI git repository.
+           * */
+
+            string SSIbinaryGitPath = "https://github.com/hcmlab/ssi/raw/master/bin/x64/vc140/";
+
+            //Download CMLtrain, if not present yet.
+            string cmltrainexe = "cmltrain.exe";
+            string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + cmltrainexe;
+
+            try
+            {
+                DownloadFile(SSIbinaryGitPath + cmltrainexe, cmltrainexePath);
+            }
+            catch { }
+
+
+            //Download xmlchain, if not present yet.
+            string xmlchainexe = "xmlchain.exe";
+            string xmlchainexePath = AppDomain.CurrentDomain.BaseDirectory + xmlchainexe;
+
+            DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
+
+            if(File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath))
+            {
+
+                long sizexmlchain = new System.IO.FileInfo(xmlchainexePath).Length;
+                long sizecmltrain = new System.IO.FileInfo(cmltrainexePath).Length;
+
+                if (sizexmlchain == 0 || sizecmltrain == 0)
+                {
+                    if (File.Exists(xmlchainexePath)) File.Delete(xmlchainexePath);
+                    if (File.Exists(cmltrainexePath)) File.Delete(cmltrainexePath);
+                    MessageBox.Show("Could not update CMLtrain.exe and XMLchain.exe");
+                }
+                else MessageBox.Show("Successfully updated CMLtrain.exe and XMLchain.exe");
+            }
+
+        }
+
+
+
 
         private void signalAndAnnoControlSizeChanged(object sender, SizeChangedEventArgs e)
         {

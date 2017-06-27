@@ -38,7 +38,6 @@ namespace ssi
 
         public class CML
         {            
-            public static string FolderName = "cml";
             public static string ChainFolderName = "chains";
             public static string ChainFileExtension = "chain";
             public static string ModelsFolderName = "models";

@@ -121,7 +121,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("137.250.171.233:3389")]
+        [global::System.Configuration.DefaultSettingValueAttribute("137.250.171.233:37317")]
         public string DatabaseAddress {
             get {
                 return ((string)(this["DatabaseAddress"]));
@@ -181,7 +181,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Unknown")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Annotator")]
         public string Annotator {
             get {
                 return ((string)(this["Annotator"]));
@@ -488,6 +488,18 @@ namespace ssi.Properties {
             }
             set {
                 this["CMLDefaultTrainer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CMLDirectory {
+            get {
+                return ((string)(this["CMLDirectory"]));
+            }
+            set {
+                this["CMLDirectory"] = value;
             }
         }
     }

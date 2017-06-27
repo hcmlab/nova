@@ -72,6 +72,8 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -103,8 +105,17 @@
                         </StackPanel>
                         <TextBox Name="DownloadDirectory" Margin="5,0,5,5" DockPanel.Dock="Left"/>
                     </DockPanel>
-                    <CheckBox Grid.Row="8" Name="DBConnnect" Margin="5,0,5,5">Connect to database at start up</CheckBox>
-                    <CheckBox Grid.Row="9" Name="OverwriteAnnotation" Margin="5,0,5,5">Always ask before overwriting an annotation</CheckBox>
+
+                    <Label Grid.Row="8" Content="CML directory:"/>
+                    <DockPanel Grid.Row="9" LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Name="PickCMLDirectory" Margin="5,0,5,5" Click="PickCMLDirectory_Click">Pick</Button>
+                            <Button Name="ViewCMLDirectory" Margin="5,0,5,5" Click="ViewCMLDirectory_Click">View</Button>
+                        </StackPanel>
+                        <TextBox Name="CMLDirectory" Margin="5,0,5,5" DockPanel.Dock="Left"/>
+                    </DockPanel>
+                    <CheckBox Grid.Row="10" Name="DBConnnect" Margin="5,0,5,5">Connect to database at start up</CheckBox>
+                    <CheckBox Grid.Row="11" Name="OverwriteAnnotation" Margin="5,0,5,5">Always ask before overwriting an annotation</CheckBox>
                     
                 </Grid>
             </TabItem>
