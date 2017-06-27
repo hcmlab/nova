@@ -121,7 +121,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("137.250.171.233:37317")]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost:27017")]
         public string DatabaseAddress {
             get {
                 return ((string)(this["DatabaseAddress"]));
