@@ -6,7 +6,17 @@
         xmlns:local="clr-namespace:ssi"
           xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
         mc:Ignorable="d"
-        Title="AnnoScheme" Height="400" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+        Title="New Discrete Scheme" Height="450" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="MyButton" >
+            <Setter Property="Margin" Value="2,0,2,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100"></RowDefinition>
@@ -25,13 +35,13 @@
             <Label FontSize="16" Foreground="White" Content="Drag an existing scheme file here" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="-1" />
         </Border>
 
-        <Label Grid.Row="1" Grid.Column="0" Margin="5" >Scheme name:</Label>
+        <Label Grid.Row="1" Grid.Column="0" Margin="5" >Scheme name</Label>
         <TextBox x:Name="schemeNameTextField" Grid.Row="1" Grid.Column="1" Margin="5" />
 
-        <Label Name="Colorlabel" Grid.Row="2" Grid.Column="0" Margin="5" >Background color:</Label>
+        <Label Name="Colorlabel" Grid.Row="2" Grid.Column="0" Margin="5" >Background color</Label>
         <p:ColorPicker Name="backroundColorPicket" Grid.Row="2" Grid.Column="1" Margin="5" BorderBrush="DarkGray" Background="Transparent" />
 
-        <Label Grid.Row="3" Grid.Column="0" Margin="5">Label names:</Label>
+        <Label Grid.Row="3" Grid.Column="0" Margin="5">Label names</Label>
         <ListView Name="LabelsListBox" Grid.Row="3" Grid.Column="1" Margin="5,5,5,0" SelectionMode="Single">
             <ListView.View>
                 <GridView>
@@ -59,8 +69,8 @@
         </ListView>
 
         <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Name="AddLabel" FontSize="30" Content="+" Grid.Column="0" Click="AddLabel_Click" Background="Transparent" BorderThickness="0" Visibility="Visible" />
-            <Button Name="DeleteLabel" FontSize="30" Content="-" Grid.Column="0" Click="DeleteLabel_Click" Background="Transparent" BorderThickness="0" Visibility="Visible" />
+            <Button Style="{StaticResource MyButton}" Name="AddLabel" Content="ADD" Click="AddLabel_Click"/>
+            <Button Style="{StaticResource MyButton}" Name="DeleteLabel" Content="REM" Click="DeleteLabel_Click"/>
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Right">

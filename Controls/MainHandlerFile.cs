@@ -537,7 +537,7 @@ namespace ssi
                 {
                     AnnoSource source = AnnoTierStatic.Selected.AnnoList.Source;
                     AnnoTierStatic.Selected.AnnoList.Source.File.Path = path;                    
-                    AnnoTierStatic.Selected.AnnoList.Save();
+                    AnnoTierStatic.Selected.AnnoList.Save(null, true);
                     AnnoTierStatic.Selected.AnnoList.Source = source;
                 }
             }

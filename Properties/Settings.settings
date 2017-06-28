@@ -104,7 +104,7 @@
     <Setting Name="ContinuousHotkeysNumber" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">5</Value>
     </Setting>
-    <Setting Name="ContinuousDeactiveMouse" Type="System.Boolean" Scope="User">
+    <Setting Name="LiveModeActivateMouse" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="ConvertToDiscreteClasses" Type="System.String" Scope="User">

@@ -138,10 +138,10 @@ namespace ssi
             control.annoTierControl.MouseDown += annoTierControl_MouseDown;
             control.annoTierControl.MouseMove += annoTierControl_MouseMove;
             control.annoTierControl.MouseRightButtonUp += annoTierControl_MouseRightButtonUp;
-            control.annoContinuousModeCheckBox.Checked += annoContinuousMode_Changed;
-            control.annoContinuousModeCheckBox.Unchecked += annoContinuousMode_Changed;
-            control.annoContinuousModeDeactiveMouse.Checked += annoContinuousModeDeactiveMouse_Checked;
-            control.annoContinuousModeDeactiveMouse.Unchecked += annoContinuousModeDeactiveMouse_Unchecked;
+            control.annoLiveModeCheckBox.Checked += annoLiveMode_Changed;
+            control.annoLiveModeCheckBox.Unchecked += annoLiveMode_Changed;
+            control.annoLiveModeActivateMouse.Checked += annoLiveModeActiveMouse_Checked;
+            control.annoLiveModeActivateMouse.Unchecked += annoLiveModeActiveMouse_Unchecked;
 
             // Geometric
 
@@ -191,7 +191,8 @@ namespace ssi
 
             control.showSettingsMenu.Click += showSettings_Click;
 
-            control.helpMenu.Click += helpMenu_Click;
+            control.helpDocumentationMenu.Click += helpDocumentationMenu_Click;
+            control.helpShortcutsMenu.Click += helpShortcutsMenu_Click;
             control.updateApplicationMenu.Click += updateApplication_Click;
             control.updateCMLMenu.Click += updateCML_Click;
 
@@ -204,7 +205,6 @@ namespace ssi
             control.navigator.playButton.Click += navigatorPlay_Click;
             control.navigator.jumpEndButton.Click += navigatorJumpEnd_Click;
             control.navigator.followAnnoCheckBox.Unchecked += navigatorFollowAnno_Unchecked;
-            control.navigator.correctionModeCheckBox.Click += navigatorCorrectionMode_Click;
 
             // Timeline
 
@@ -298,8 +298,7 @@ namespace ssi
             clearSignalInfo();
             clearAnnoInfo();
             clearMediaBox();
-        }     
-
+        }
 
         private void updateCML()
         {
@@ -476,7 +475,7 @@ namespace ssi
 
         public void loadFiles()
         {
-            string[] filenames = FileTools.OpenFileDialog("Viewable files (*.stream,*.annotation;*.wav,*.avi,*.wmv)|*.stream;*.annotation;*.wav;*.avi;*.wmv;*mp4;*mpg;*mkv;*vui|Signal files (*.stream)|*.stream|Annotation files (*.annotation)|*annotation;*.anno|Wave files (*.wav)|*.wav|Video files(*.avi,*.wmv,*.mp4;*.mov)|*.avi;*.wmv;*.mp4;*.mov|All files (*.*)|*.*", true);
+            string[] filenames = FileTools.OpenFileDialog("Viewable files|*.stream;*.csv;*.annotation;*.wav;*.avi;*.wmv;*mp4;*mpg;*mkv|Signal files (*.stream,*.csv)|*.stream;*.csv|Annotation files (*.annotation)|*annotation|Wave files (*.wav)|*.wav|Video files(*.avi,*.wmv,*.mp4;*.mov)|*.avi;*.wmv;*.mp4;*.mov|All files (*.*)|*.*", true);
             if (filenames != null)
             {
                 control.Cursor = Cursors.Wait;

@@ -5,7 +5,7 @@
     SizeToContent="Height"
     WindowStyle="ToolWindow"
     WindowStartupLocation="CenterScreen"
-    Title="Input" Height="Auto" Width="300" >
+    Title="New Free Scheme" Height="Auto" Width="300" >
 
     <Grid>
         

@@ -12,7 +12,7 @@ namespace ssi
         {
             if (!this.control.annoListControl.editTextBox.IsFocused)
             {
-                if (e.KeyboardDevice.IsKeyDown(Key.Space) && mediaList.Count > 0)
+                if (e.KeyboardDevice.IsKeyDown(Key.Space))
                 {
                     if (IsPlaying())
                     {
@@ -130,7 +130,7 @@ namespace ssi
                     double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
                     signalCursor.X = pos;
 
-                    if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true)
+                    if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.autoScrollCheckBox.IsChecked == true)
                     {
                         double factor = (((timeline.CurrentPlayPosition - timeline.SelectionStart) / (timeline.SelectionStop - timeline.SelectionStart)));
                         control.timeLineControl.rangeSlider.followmedia = true;
@@ -139,7 +139,7 @@ namespace ssi
                         if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
                         signalCursor.X = 1;
                     }
-                    else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
+                    else if (control.navigator.autoScrollCheckBox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
 
                     double time = Time.TimeFromPixel(pos);
                     updatePositionLabels(time);
@@ -191,7 +191,7 @@ namespace ssi
                     double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
                     signalCursor.X = pos;
 
-                    if (Time.CurrentPlayPosition < Time.SelectionStart && Time.SelectionStart > 0 && control.navigator.followplaybox.IsChecked == true)
+                    if (Time.CurrentPlayPosition < Time.SelectionStart && Time.SelectionStart > 0 && control.navigator.autoScrollCheckBox.IsChecked == true)
                     {
                         double factor = (((timeline.SelectionStop - timeline.CurrentPlayPosition) / (timeline.SelectionStop - timeline.SelectionStart)));
                         control.timeLineControl.rangeSlider.followmedia = true;
@@ -200,7 +200,7 @@ namespace ssi
                         if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
                         signalCursor.X = Time.PixelFromTime(Time.SelectionStop);
                     }
-                    else if (control.navigator.followplaybox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
+                    else if (control.navigator.autoScrollCheckBox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
 
                     double time = Time.TimeFromPixel(pos);
                     if (time != 0)
@@ -411,24 +411,19 @@ namespace ssi
                     }
                 }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.M))
+                if (e.KeyboardDevice.IsKeyDown(Key.L))
                 {
                     if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
-                    {
-                        
-                        if (control.annoContinuousModeCheckBox.IsChecked == true)
+                    {                       
+                        if (control.annoLiveModeCheckBox.IsChecked == true)
                         {
-                            AnnoTierStatic.Selected.ContinuousAnnoMode(true);
-                            control.annoContinuousModeCheckBox.IsChecked = false;
-                           
-
+                            AnnoTierStatic.Selected.LiveAnnoMode(true);
+                            control.annoLiveModeCheckBox.IsChecked = false;
                         }
-
                         else
                         {
-                            control.annoContinuousModeCheckBox.IsChecked = true;
-                            AnnoTierStatic.Selected.ContinuousAnnoMode(false);
-                           
+                            control.annoLiveModeCheckBox.IsChecked = true;
+                            AnnoTierStatic.Selected.LiveAnnoMode(false);                           
                         }
                     }
                     isKeyDown = true;
@@ -436,23 +431,17 @@ namespace ssi
                 }
 
 
-                if (e.KeyboardDevice.IsKeyDown(Key.N))
+                if (e.KeyboardDevice.IsKeyDown(Key.M))
                 {
                     if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
                     {
-
-                        if (control.annoContinuousModeDeactiveMouse.IsChecked == true)
+                        if (control.annoLiveModeActivateMouse.IsChecked == true)
                         {
-                            
-                            control.annoContinuousModeDeactiveMouse.IsChecked = false;
-
-
+                            control.annoLiveModeActivateMouse.IsChecked = false;
                         }
-
                         else
                         {
-                            control.annoContinuousModeDeactiveMouse.IsChecked = true;
-
+                            control.annoLiveModeActivateMouse.IsChecked = true;
                         }
                     }
                     isKeyDown = true;
