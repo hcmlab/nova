@@ -91,6 +91,7 @@ namespace ssi
                             LoadDataV2a(signal, fs_data, delims);
                             fs_data.Close();
 
+                            signal.minmax();
                             signal.loaded = true;
                         }
                     }

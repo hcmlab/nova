@@ -27,14 +27,14 @@ namespace ssi
             }
             else
             {
-                if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.followplaybox.IsChecked == true)
+                if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.autoScrollCheckBox.IsChecked == true)
                 {
                     double factor = (((Time.CurrentPlayPosition - Time.SelectionStart) / (Time.SelectionStop - Time.SelectionStart)));
 
                     control.timeLineControl.rangeSlider.followmedia = true;
                     control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
                 }
-                else if (control.navigator.followplaybox.IsChecked == false)
+                else if (control.navigator.autoScrollCheckBox.IsChecked == false)
                 {
                     control.timeLineControl.rangeSlider.followmedia = false;
                     if (AnnoTierStatic.Label != null)

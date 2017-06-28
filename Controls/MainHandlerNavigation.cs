@@ -37,50 +37,36 @@ namespace ssi
         #region EVENTHANDLER
 
 
-        private void navigatorCorrectionMode_Click(object sender, RoutedEventArgs e)
+        private void annoLiveMode_Changed(object sender, RoutedEventArgs e)
         {
-            if (control.navigator.correctionModeCheckBox.IsChecked == true) AnnoTier.CorrectMode = true;
-            else AnnoTier.CorrectMode = false;
+            control.annoLiveModeActivateMouse.IsChecked = Properties.Settings.Default.LiveModeActivateMouse;
 
-            foreach (AnnoTier a in annoTiers)
-            {
-                a.TimeRangeChanged(timeline);
-            }
-        }
-
-        private void annoContinuousMode_Changed(object sender, RoutedEventArgs e)
-        {
-            control.annoContinuousModeDeactiveMouse.IsChecked = Properties.Settings.Default.ContinuousDeactiveMouse;
-
-            if (AnnoTier.Selected != null && AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-               if (control.annoContinuousModeCheckBox.IsChecked == true)
+            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+               if (control.annoLiveModeCheckBox.IsChecked == true)
                 {
-                    AnnoTierStatic.Selected.ContinuousAnnoMode(false);
-                    control.annoContinuousModeDeactiveMouse.Visibility = Visibility.Visible;
-                    control.annoContinuousModeDeactiveMouseLabel.Visibility = Visibility.Visible;
-                    
+                    AnnoTierStatic.Selected.LiveAnnoMode(false);
+                    control.annoLiveModeActivateMouse.IsEnabled = true;
                 }
                 else
                 {
-                    AnnoTierStatic.Selected.ContinuousAnnoMode(true);
-                    control.annoContinuousModeDeactiveMouse.Visibility = Visibility.Collapsed;
-                    control.annoContinuousModeDeactiveMouseLabel.Visibility = Visibility.Collapsed;
+                    AnnoTierStatic.Selected.LiveAnnoMode(true);
+                    control.annoLiveModeActivateMouse.IsEnabled = false;
                 }
         }
 
 
 
-        private void annoContinuousModeDeactiveMouse_Checked(object sender, RoutedEventArgs e)
+        private void annoLiveModeActiveMouse_Checked(object sender, RoutedEventArgs e)
         {
-            AnnoTier.MouseActive = false;
-            Properties.Settings.Default.ContinuousDeactiveMouse = true;
+            AnnoTierStatic.MouseActive = true;
+            Properties.Settings.Default.LiveModeActivateMouse = true;
             Properties.Settings.Default.Save();
         }
 
-        private void annoContinuousModeDeactiveMouse_Unchecked(object sender, RoutedEventArgs e)
+        private void annoLiveModeActiveMouse_Unchecked(object sender, RoutedEventArgs e)
         {
-            AnnoTier.MouseActive = true;
-            Properties.Settings.Default.ContinuousDeactiveMouse = false;
+            AnnoTierStatic.MouseActive = false;
+            Properties.Settings.Default.LiveModeActivateMouse = false;
             Properties.Settings.Default.Save();
         }
 

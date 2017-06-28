@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="$author-meta$" />
+  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <style type="text/css">code{white-space: pre;}</style>
+</head>
+<body>
+<div id="header">
+<h1 class="title">$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</h1>
+<h2 class="author">$author-meta$</h2>
+<h3 class="date">$date-meta$</h3>
+</div>
+$for(include-before)$ $include-before$ $endfor$ $if(title)$
+<div id="$idprefix$header">
+$if(subtitle)$
+<h1 id="subtitle" class="subtitle">$subtitle$</h1>
+$endif$ $for(author)$
+<h2 id="author" class="author">$author$</h2>
+$endfor$ $if(date)$
+<h3 id="date" class="date">$date$</h3>
+$endif$
+</div>
+$endif$ $if(toc)$
+<div id="$idprefix$TOC">
+$toc$
+</div>
+$endif$ $body$ $for(include-after)$ $include-after$ $endfor$
+</body>
+</html>

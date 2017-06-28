@@ -66,7 +66,8 @@
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu"/>
             </MenuItem>
             <MenuItem Header="?">
-                <MenuItem Header="Shortcuts"  Name="helpMenu" />
+                <MenuItem Header="Documentation"  Name="helpDocumentationMenu" />
+                <MenuItem Header="Shortcuts"  Name="helpShortcutsMenu" />
                 <MenuItem Header="Update CML Tools" Name="updateCMLMenu" />
                 <MenuItem Header="Check For Update" Name="updateApplicationMenu" />
                 
@@ -157,7 +158,8 @@
                             <Button Name="mediaSettingsButton"
                                     Background="Transparent" 
                                     BorderBrush="Transparent"
-                                    BorderThickness="0">
+                                    BorderThickness="0"
+                                    Focusable="False">
                                 <Image Source="/Resources/settings.png" Width="16"></Image>
                             </Button>
                             <TextBlock Name="mediaStatusFileNameLabel" TextTrimming="WordEllipsis"></TextBlock>
@@ -185,7 +187,8 @@
                                         BorderBrush="Transparent"
                                         BorderThickness="0"
                                         Margin="5,0,5,0"
-                                        ToolTip="Close selected annotation tier"/>
+                                        ToolTip="Close selected annotation tier"
+                                        Focusable="False"/>
                         </StackPanel>
 
                     </Grid>
@@ -259,7 +262,8 @@
                                         <Button Name="signalSettingsButton" 
                                                     Background="Transparent" 
                                                     BorderBrush="Transparent"
-                                                    BorderThickness="0">
+                                                    BorderThickness="0"
+                                                    Focusable="False">
                                             <Image Source="/Resources/settings.png" Width="16"></Image>
                                         </Button>
                                         <TextBlock Name="signalStatusFileNameLabel" TextTrimming="WordEllipsis"></TextBlock>
@@ -306,7 +310,8 @@
                                                         BorderBrush="Transparent" 
                                                         BorderThickness="0"
                                                         Margin="5,0,5,0"
-                                                        ToolTip="Close selected signal track"/>
+                                                        ToolTip="Close selected signal track"
+                                                        Focusable="False"/>
                                     </StackPanel>
 
                                 </Grid>
@@ -362,7 +367,8 @@
                                         <Button Name="annoSettingsButton" 
                                                 Background="Transparent" 
                                                 BorderBrush="Transparent"
-                                                BorderThickness="0">
+                                                BorderThickness="0"
+                                                Focusable="False">
                                             <Image Source="/Resources/settings.png" Width="16"></Image>
                                         </Button>
                                         <TextBlock Name="annoStatusFileNameOrOIDLabel" TextTrimming="WordEllipsis"></TextBlock>
@@ -389,11 +395,18 @@
                                                 Grid.Column="1"
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right">
-                                        <Label Name="annoContinuousModeDeactiveMouseLabel" Visibility="Hidden">Deactive Mouse</Label>
-                                        <CheckBox Name="annoContinuousModeDeactiveMouse"  Visibility="Hidden"></CheckBox>
-                                        <CheckBox x:Name="annoContinuousModeCheckBox" Style="{DynamicResource OrangeSwitchStyle}" 
-                                                  ToolTip="Continuous Annotation Mode. Shortcut: M" 
-                                                  Visibility="Hidden"/>
+                                        <Label Name="annoLiveModeCheckBoxLabel" Visibility="Hidden" VerticalAlignment="Center">Live mode</Label>
+                                        <Separator Width="5" Visibility="Hidden"></Separator>
+                                        <CheckBox x:Name="annoLiveModeCheckBox" Style="{DynamicResource OrangeSwitchStyle}" 
+                                                  ToolTip="Toggle live annotation mode. Shortcut: L" 
+                                                  Visibility="Hidden"                                                  
+                                                  Focusable="False"/>
+                                        <Separator Width="10" Visibility="Hidden"></Separator>
+                                        <CheckBox Name="annoLiveModeActivateMouse" 
+                                                  Visibility="Hidden" 
+                                                  VerticalAlignment="Center"
+                                                  IsEnabled="False"
+                                                  ToolTip="Toggle mouse. Shortcut: M">Enable Mouse</CheckBox>
                                         <Separator Width="20" Visibility="Hidden"></Separator>
                                         <TextBlock x:Name="annoPositionLabel" 
                                     		VerticalAlignment="Center" 
@@ -405,7 +418,8 @@
                                     		BorderBrush="Transparent"
                                     		BorderThickness="0"
                                     		Margin="5,0,5,0"
-                                    		ToolTip="Close selected annotation tier"/>
+                                    		ToolTip="Close selected annotation tier"
+                                            Focusable="False"/>
                                     </StackPanel>
 
                                 </Grid>

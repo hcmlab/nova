@@ -18,24 +18,23 @@
 
         <StackPanel Grid.Column="0" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Left">
             <Label  Name="newAnnoFromLabel" Margin="5">New Annnotation: </Label>
-            <Button Name="newAnnoFromFileButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center">File</Button>
-            <Button Name="newAnnoFromDatabaseButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center">Database</Button>
+            <Button Name="newAnnoFromFileButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center" Focusable="False">File</Button>
+            <Button Name="newAnnoFromDatabaseButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center" Focusable="False">Database</Button>
         </StackPanel>
 
         <StackPanel Grid.Column="1" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Center">
-            <Button Name="jumpFrontButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">|&lt;</Button>
+            <Button Name="jumpFrontButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True" Focusable="False">|&lt;</Button>
             <!--Button Name="fastBackwardButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">&lt;&lt;</-->
-            <Button Name="playButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="False">></Button>
+            <Button Name="playButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="False" Focusable="False">></Button>
             <!--Button Name="fastForwardButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">>></-->
-            <Button Name="jumpEndButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">&gt;|</Button>
+            <Button Name="jumpEndButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True" Focusable="False">&gt;|</Button>
         </StackPanel>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
-            <CheckBox x:Name="followAnnoCheckBox" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Follow Annotation" />
-            <CheckBox Name="followplaybox" Height="25" Margin="0,10,10,0" IsChecked="True" Content="Auto Scroll" />
-            <CheckBox x:Name="askforlabels" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Force Label" />
-            <CheckBox Name="correctionModeCheckBox" Height="25" Margin="0,10,10,0" Visibility="Visible">Correction Mode</CheckBox>
-            <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center">Clear</Button>
+            <CheckBox x:Name="followAnnoCheckBox" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Follow Annotation"  Focusable="False"/>
+            <CheckBox Name="autoScrollCheckBox" Height="25" Margin="0,10,10,0" IsChecked="True" Content="Auto Scroll"  Focusable="False"/>
+            <CheckBox x:Name="askforlabels" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Force Label" Focusable="False"/>
+            <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center" Focusable="False">Clear</Button>
         </StackPanel>
 
         <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="statusBar" Margin="0">

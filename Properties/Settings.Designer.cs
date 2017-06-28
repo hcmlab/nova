@@ -434,12 +434,12 @@ namespace ssi.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ContinuousDeactiveMouse {
+        public bool LiveModeActivateMouse {
             get {
-                return ((bool)(this["ContinuousDeactiveMouse"]));
+                return ((bool)(this["LiveModeActivateMouse"]));
             }
             set {
-                this["ContinuousDeactiveMouse"] = value;
+                this["LiveModeActivateMouse"] = value;
             }
         }
         

@@ -147,7 +147,10 @@ namespace ssi
             if (AnnoTierStatic.Selected != null)
             {
                 control.geometricListControl.Visibility = Visibility.Collapsed;
-                control.annoContinuousModeCheckBox.Visibility = Visibility.Collapsed;
+                control.annoLiveModeCheckBox.Visibility = Visibility.Collapsed;
+                control.annoLiveModeCheckBoxLabel.Visibility = Visibility.Collapsed;
+                control.annoLiveModeActivateMouse.Visibility = Visibility.Collapsed;
+
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
@@ -171,7 +174,9 @@ namespace ssi
                     control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     control.annoListControl.editComboBox.IsEnabled = false;
                     control.annoListControl.editTextBox.IsEnabled = false;
-                    control.annoContinuousModeCheckBox.Visibility = Visibility.Visible;
+                    control.annoLiveModeCheckBox.Visibility = Visibility.Visible;
+                    control.annoLiveModeCheckBoxLabel.Visibility = Visibility.Visible;
+                    control.annoLiveModeActivateMouse.Visibility = Visibility.Visible;
                 }
                 else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT)
                 {
@@ -485,7 +490,11 @@ namespace ssi
                 {
                     mediaList.Move(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
                     moveSignalCursor(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
-                    Stop();
+                    if (IsPlaying())
+                    {
+                        Stop();
+                    }
+                  
                 }
             }
 
@@ -493,13 +502,13 @@ namespace ssi
             {
                 isMouseButtonDown = false;
 
-                if (control.navigator.followAnnoCheckBox.IsChecked == true)
-                {
-                    if (!IsPlaying())
-                    {
-                        Play();
-                    }
-                }
+                //if (control.navigator.followAnnoCheckBox.IsChecked == true)
+                //{
+                //    if (!IsPlaying())
+                //    {
+                //        Play();
+                //    }
+                //}
                 if (control.navigator.askforlabels.IsChecked == true)
                 {
                     if (AnnoTierStatic.Selected != null)
