@@ -61,7 +61,7 @@ namespace ssi
 
         private void helpDocumentationMenu_Click(object sender, RoutedEventArgs e)
         {            
-            System.Diagnostics.Process.Start("https://cdn.rawgit.com/hcmlab/nova/3db284e0/docs/index.html");
+            System.Diagnostics.Process.Start("https://rawgit.com/hcmlab/nova/master/docs/index.html");
         }
 
         private void helpShortcutsMenu_Click(object sender, RoutedEventArgs e)
