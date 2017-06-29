@@ -61,9 +61,22 @@
         <li><a href="#installation"><span class="toc-section-number">2</span> Installation</a></li>
         <li><a href="#manual-annotation"><span class="toc-section-number">3</span> Manual Annotation</a><ul>
         <li><a href="#main-interface"><span class="toc-section-number">3.1</span> Main Interface</a></li>
-        <li><a href="#loading-and-removing-files"><span class="toc-section-number">3.2</span> Loading and Removing Files</a></li>
+        <li><a href="#loading-files"><span class="toc-section-number">3.2</span> Loading Files</a></li>
         <li><a href="#creating-an-annotation"><span class="toc-section-number">3.3</span> Creating an Annotation</a></li>
         <li><a href="#editing-an-annotation"><span class="toc-section-number">3.4</span> Editing an Annotation</a></li>
+        </ul></li>
+        <li><a href="#database"><span class="toc-section-number">4</span> Database</a><ul>
+        <li><a href="#file-format"><span class="toc-section-number">4.1</span> File Format</a></li>
+        <li><a href="#administration"><span class="toc-section-number">4.2</span> Administration</a></li>
+        <li><a href="#loading-a-session"><span class="toc-section-number">4.3</span> Loading a Session</a></li>
+        <li><a href="#database-create-annotation"><span class="toc-section-number">4.4</span> Creating an Annotation</a></li>
+        </ul></li>
+        <li><a href="#cooperative-learning"><span class="toc-section-number">5</span> Cooperative Learning</a><ul>
+        <li><a href="#cl-feature-extraction"><span class="toc-section-number">5.1</span> Feature Extraction</a></li>
+        <li><a href="#cl-trainer-templates"><span class="toc-section-number">5.2</span> Trainer Templates</a></li>
+        <li><a href="#annotation-completion"><span class="toc-section-number">5.3</span> Annotation Completion</a></li>
+        <li><a href="#cl-model-training"><span class="toc-section-number">5.4</span> Model Training</a></li>
+        <li><a href="#annotation-prediction"><span class="toc-section-number">5.5</span> Annotation Prediction</a></li>
         </ul></li>
         </ul>
 
@@ -82,7 +95,7 @@
 <p>The latest version of NOVA can be accessed at:</p>
 <p>https://github.com/hcmlab/nova</p>
 <p>Just download or check-out the release branch and start 'nova.exe' (yes, NOVA is available for Windows systems only).</p>
-<p>If you do not see videos on playback, please make also sure you have the right codecs installed. A good choice is the K-lite Codec Pack (You can leave all settings on default, but make sure to not not install any 3rd party software that comes with the installer)</p>
+<p>If you do not see videos on playback, please make also sure you have the right codecs installed. A good choice is the K-lite Codec Pack (You can leave all settings on default, but make sure to not not install any 3rd party software that comes with the installer).</p>
 <h1 id="manual-annotation"><span class="header-section-number">3</span> Manual Annotation</h1>
 <p>In the following we will explain the basic steps to manually create and edit an annotation.</p>
 <h2 id="main-interface"><span class="header-section-number">3.1</span> Main Interface</h2>
@@ -91,10 +104,10 @@
 <img src="pics/manual-interface.png" alt="NOVA&#39;s interface: from top down media, streams and annotations are displayed. On the left a list of annotation items of the selected annotation tier is shown. Time-line and the navigation panel are found at the bottom." id="fig:manual-interface" style="width:100.0%" />
 <p class="caption"><em>NOVA's interface: from top down media, streams and annotations are displayed. On the left a list of annotation items of the selected annotation tier is shown. Time-line and the navigation panel are found at the bottom.</em></p>
 </div>
-<h2 id="loading-and-removing-files"><span class="header-section-number">3.2</span> Loading and Removing Files</h2>
-<p>To add a file the FILE menu can be used. It allows to select multiple media, stream or annotation files at once. Alternatively, files or folders can be dropped from the explorer. NOVA supports all common video formats, audio wave files and SSI stream files, as well as, CSV files, which will be imported as stream files (in the latter case the user has to provide number format and sample rate). The currently selected media, stream or annotation file can be removed by clicking the 'x' in the according status bar. Clicking the 'Clear' button on the right bottom will remove all files at once. The current workspace can be stored to a project file and reloaded at a later point from the FILE menu (or via drag and drop).</p>
+<h2 id="loading-files"><span class="header-section-number">3.2</span> Loading Files</h2>
+<p>To add a file the FILE menu can be used. It allows to select multiple media, stream or annotation files at once. Alternatively, files or folders can be dropped from the explorer. NOVA supports all common video formats, audio wave files and SSI stream files, as well as, CSV files, which will be imported as stream files (in the latter case the user has to provide number format and sample rate). The currently selected media, stream or annotation file can be removed by clicking the 'x' in the according status bar. Clicking the 'Clear' button on the right bottom will remove all files at once. The current workspace can be stored to a project file and reloaded at a later point from the FILE menu (or via drag and drop). Note that in the following we will generally refer to any file that is not annotation as stream.</p>
 <h2 id="creating-an-annotation"><span class="header-section-number">3.3</span> Creating an Annotation</h2>
-<p>After loading at least one media or data stream, new annotations tracks can be added to the project. New annotations are created by clicking the 'File' button (bottom left). Alternatively, annotations can be created from the database, too, see REF. A window pops up, which allows to select a scheme type:</p>
+<p>After loading at least one media or data stream, new annotations tracks can be added to the project. New annotations are created by clicking the 'File' button (bottom left). Alternatively, annotations can be created from the database, too, see <a href="#database-create-annotation">here</a>. A window pops up, which allows to select a scheme type:</p>
 <div class="figure">
 <img src="pics/manual-new-scheme.png" alt="New annotation scheme window." id="fig:manual-new-scheme" style="width:40.0%" />
 <p class="caption"><em>New annotation scheme window.</em></p>
@@ -134,19 +147,88 @@
 <p class="caption"><em>New continuous annotation scheme window.</em></p>
 </div>
 <h2 id="editing-an-annotation"><span class="header-section-number">3.4</span> Editing an Annotation</h2>
-<p>Generally, all media (e.g. videos, but also other signal streams) are displayed in the upper half of the window. All annotation related data is displayed in the lower half of the window. Below the annotation tracks a slider bar is displayed, which allows you to move the displayed clip along the time scale. You can enlarge and shrink the clip by changing the size of the scroll button. If you double-click on the scroll button the whole session is shown (not recommended if you have a lot of labels in your annotation tracks, e.g. when a transcription on word level is loaded). Playback buttons are found on the bottom of the window. Also, you will see a red and a green marker. The red one marks the current playback position (it will move during playback or if you click on a signal track). The green one only moves if you click on an annotation track and helps you to align your labels with the signal tracks.</p>
 <ul>
-<li>Free Annotation Tiers</li>
+<li>Free:</li>
 </ul>
-<p>To place a new segment right click on the start position of the label, keep button pressed and move the cursor to the end position (or vice-versa). Now release the button and a new segment will be added (and selected). If 'Force Label' is active you will be asked to enter label name and confidence. Otherwise it gets the label that was previously used. To edit an existing segment left click inside the segment (the colour of the selected segment will change to blue). If you now move the cursor near the borders two arrows will be displayed and you can change the position by holding down the left mouse button. If you move the cursor towards the center of the segment you can move the whole segment along the track. To change the label hit the 'W' key. Note that you can change the position of a label during playback. If 'Follow Annotation' is active a newly added segment will be immediately played back. Alternatively, you can also jump to a segment by selecting it from the list left to the annotation tiers. It is also possible to select several segments in the list and rename them all at once.</p>
+<p>To place a new segment right click on the start position of the label, keep button pressed and move the cursor to the end position (or vice-versa). Now release the button and a new segment will be added (and selected). If 'Force Label' is active you will be asked to enter label name and confidence. Otherwise it gets the label that was previously used. To edit an existing segment left click inside the segment (the colour of the selected segment will change to blue). If you now move the cursor near the borders two arrows will be displayed and you can change the position by holding down the left mouse button. If you move the cursor towards the centre of the segment you can move the whole segment along the track. To change the label hit the 'W' key. Note that you can change the position of a label during playback. If 'Follow Annotation' is active a newly added segment will be immediately played back. Alternatively, you can also jump to a segment by selecting it from the list left to the annotation tiers. It is also possible to select several segments in the list and rename them all at once.</p>
 <ul>
-<li>Discrete Annotation Tiers</li>
+<li>Discrete:</li>
 </ul>
 <p>Works in the same way as free annotations, but when entering or changing a label a selection dialogue pops up that allows you to select a name from the loaded scheme. Alternatively, you can change the label name of a selected segment by pressing a key between '0' and '9'. For example, if the selected scheme contains three names 'A','B' and 'C' pressing '1' assigns 'A', '2' assigns 'B', and '3' assigns 'C'. Any other numbers and '0' assign the garbage class.</p>
 <ul>
-<li>Continuous Annotation Tiers</li>
+<li>Continuous:</li>
 </ul>
-<p>To change the values in a continuous track hold down the right mouse button and move the cursor to the desired position within the track. You will notice that the values immediately start to follow the cursor. Hitting 'Ctrl' turns on the live annotation mode. Now a white button is displayed at the left border of the current track and only the value at the current playback position (red marker) will follow your vertical mouse movement (horizontal position of the mouse is ignored). It is no longer required to hold down the right mouse button. This is especially handy to annotate during playback. Hitting 'Ctrl' turns off the live annotation mode and brings back the default behaviour.</p>
+<p>To change the values in a continuous track hold down the right mouse button and move the cursor to the desired position within the track. You will notice that the values immediately start to follow the cursor. Hitting 'L' (or switching on the live button in the status bar) turns on the live mode, which no longer requires to hold down the right mouse button. Instead a white button is displayed at the left border of the current track to mark the current value. The height of the white button can either be controlled by the vertical position of the mouse cursor (press key 'M' or activate check box next to live button). Or otherwise by pressing a key between '0' and '9' (see option 'number of levels in live mode' in the SETTINGS). This is especially handy to annotate during playback. Hitting 'L' again turns off the live annotation mode and brings back the default behaviour.</p>
+<p>Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. To save an annotation go to the ANNOTATION menu or press 'Ctrl+S'.</p>
+<h1 id="database"><span class="header-section-number">4</span> Database</h1>
+<p>NOVA allows users to manage and share annotations through a database. To connect to a database open the SETTINGS and select the 'Database' panel. Here you can enter the host IP, port number and user credentials. It also allows you to change the folder to which NOVA downloads media and stream files that are used during the annotation process, as well as, the directory where the cooperative learning definitions and models are stored.</p>
+<h2 id="file-format"><span class="header-section-number">4.1</span> File Format</h2>
+<p>To manage a database with NOVA, you have to follow a certain file structure. Each database is located in a root folder with the name of the database and may consist of one more sessions. All stream files belonging to a session are grouped in sub-folder within the root folder. The name of the folder defines the name of the session. In a session we distinguish between several users, which take a certain role. E.g. thinking of a dyadic conversation, one user could be the expert sharing the knowledge about a certain topic to a novice user. Hence we have two roles: 'expert' and 'novice'. Each file has a unique name defined by the role and the type of recorded channel. E.g. if we have recorded the interaction using close talk microphones and two webcams, we may use the following file structure:</p>
+<pre><code>aria-noxi/
+    067_2016-05-23_Augsburg/
+        expert.close.wav
+        expert.video.mp4
+        novice.close.wav
+        novice.video.mp4
+    068_2016-05-23_Augsburg/
+        expert.close.wav
+        expert.video.mp4
+        novice.close.wav
+        novice.video.mp4    
+    ...</code></pre>
+<h2 id="administration"><span class="header-section-number">4.2</span> Administration</h2>
+<p>TODO: explain how to setup a database</p>
+<h2 id="loading-a-session"><span class="header-section-number">4.3</span> Loading a Session</h2>
+<p>The DATABASE menu allows to load annotation and files for a session (note that this will clear the workspace). In the following window you can select multiple annotations and streams belonging to a certain session of a database. Turn on 'Mine only' to filter only your own annotations and 'Unfinished only' to hide annotations that have already been marked finished. Stream files that are not locally available yet, are displayed in red. If selected NOVA will try to download them before the session is displayed.</p>
+<div class="figure">
+<img src="pics/database-load-session.png" alt="Load session from database window." id="fig:database-load-session" />
+<p class="caption"><em>Load session from database window.</em></p>
+</div>
+<h2 id="database-create-annotation"><span class="header-section-number">4.4</span> Creating an Annotation</h2>
+<p>After loading at least one stream file it is possible to add new annotations to the database by pressing the 'Database' button on the bottom left. You will now be prompted to select a scheme and a role. If an according annotation already exists it will be loaded, otherwise an empty one is created. When the annotation is saved it is automatically written to the database. In case you want to store it on disk use 'Export Selected As' from the ANNOTATION menu. You can also load an existing annotation from another user. As soon as you save the annotation for the first time it will be stored under your name.</p>
+<h1 id="cooperative-learning"><span class="header-section-number">5</span> Cooperative Learning</h1>
+<p>NOVA features tools to considerable speed up the annotation process. The following image illustrates the overall system. (A) Database with recordings of human interaction. (B) NOVA's interface allows to distribute and accomplish annotation tasks among human annotators. (C) At times, Cooperative Learning (CL) can be applied to automatically complete unfinished fractions of the database. Two strategies are available (bottom right box): (I) A session-dependent model is trained on a partly annotated session and applied to complete it. (II) A pool of annotated sessions is used to train a session-independent model and predict labels for the remaining sessions. In both cases, confidence values guide the revision of predicted segments (here marked with a colour gradient).</p>
+<div class="figure">
+<img src="pics/cl-overview.png" alt="Overview of the cooperative learning system integrated in NOVA." id="fig:cl-overview" />
+<p class="caption"><em>Overview of the cooperative learning system integrated in NOVA.</em></p>
+</div>
+<h2 id="cl-feature-extraction"><span class="header-section-number">5.1</span> Feature Extraction</h2>
+<p>TODO: explain how to extract features</p>
+<h2 id="cl-trainer-templates"><span class="header-section-number">5.2</span> Trainer Templates</h2>
+<p>TODO: explain how to create trainer templates</p>
+<h2 id="annotation-completion"><span class="header-section-number">5.3</span> Annotation Completion</h2>
+<p>NOVA allows it to complete a partly finished annotation. Note that NOVA expects that everything before the last annotation item on the tier has been manually annotated. The following image shows a partly finished annotation before completion is applied:</p>
+<div class="figure">
+<img src="pics/cl-completion-before.png" alt="Session before completion." id="fig:cl-completion-before" />
+<p class="caption"><em>Session before completion.</em></p>
+</div>
+<p>Now, call 'Complete Current Annotation' from the LEARNING menu. In the dialogue that pops up you can now select the <a href="#cl-feature-extraction">feature stream</a> to which machine learning should be applied. Only streams are displayed for which at least one <a href="#cl-trainer-templates">trainer template</a> is available. Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold.</p>
+<div class="figure">
+<img src="pics/cl-completion-dialog.png" alt="Annotation completion dialogue." id="fig:cl-completion-dialog" />
+<p class="caption"><em>Annotation completion dialogue.</em></p>
+</div>
+<p>If you are not happy with the completion you are still given the opportunity 'Undo' the changes now. Otherwise, you can now continue to work with the automatically completed annotation.</p>
+<div class="figure">
+<img src="pics/cl-completion-after.png" alt="Session after completion." id="fig:cl-completion-after" />
+<p class="caption"><em>Session after completion.</em></p>
+</div>
+<p>Note that predictions with a low confidence will be marked with a special pattern to guide manual revision. You can change the threshold in the SETTINGS ('Correction certainty level'). Once a label is revised the confidence is automatically set to 1 and it is not longer marked.</p>
+<div class="figure">
+<img src="pics/cl-completion-revise.png" alt="Predictions with a low confidence are marked for revision." id="fig:cl-completion-revise" />
+<p class="caption"><em>Predictions with a low confidence are marked for revision.</em></p>
+</div>
+<h2 id="cl-model-training"><span class="header-section-number">5.4</span> Model Training</h2>
+<p>Once annotations for a number of sessions have been accomplished a 'strong' classification model can be trained. This requires that <a href="#cl-feature-extraction">features</a> have been extracted for the sessions and a compatible <a href="#cl-trainer-templates">trainer template</a> is available. Now choose 'Train Model' from LEARNING and a dialogue pops up. Here you can select a scheme, one or more roles and an annotator. Sessions for which an annotation exists that satisfies the selection are now shown and can be selected. Finally, choose the stream for which a machine learning model should be trained. Note that only those streams are listed for which at least one <a href="#cl-trainer-templates">trainer template</a> is found. By pressing 'Train' model training is started. Switch on 'Force' if you want to override an existing model.</p>
+<div class="figure">
+<img src="pics/cl-training-dialog.png" alt="Model training dialogue." id="fig:cl-training-dialog" />
+<p class="caption"><em>Model training dialogue.</em></p>
+</div>
+<h2 id="annotation-prediction"><span class="header-section-number">5.5</span> Annotation Prediction</h2>
+<p>With a trained model it is now possible to predict annotations for one or more sessions. Therefore choose 'Prediction Annotations' from the LEARNING menu. Once you have selected a scheme, a role and an Annotator those sessions will be listed, which do not have a matching annotation yet. You can turn of the filter by selecting 'Show existing', however, make sure you are not occidentally overriding existing annotations (no undo available!). Finally, select the stream for which a machine learning <a href="#cl-model-training">model</a> has been trained (only streams are listed for which at least one exists). Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold. After pressing 'Predict' annotations will be created based on the chosen model for all sessions that have been selected and stored under your name (if you are an administrator you may also generate annotations for another user).</p>
+<div class="figure">
+<img src="pics/cl-prediction-dialog.png" alt="Annotation prediction dialogue." id="fig:cl-prediction-dialog" />
+<p class="caption"><em>Annotation prediction dialogue.</em></p>
+</div>
             </div>
     </div>
   </div>

@@ -12,6 +12,8 @@ namespace ssi
 {
     public partial class MainHandler
     {
+
+        bool rememberplaying = false;
         private void addAnnoTierFromList(AnnoList annoList)
         {
             double maxdur = 0;
@@ -484,31 +486,20 @@ namespace ssi
                 double time = Time.TimeFromPixel(pos);
                 control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
             }
-            if ((e.RightButton == MouseButtonState.Pressed || e.LeftButton == MouseButtonState.Pressed) && control.navigator.followAnnoCheckBox.IsChecked == true)
+            if ((e.RightButton == MouseButtonState.Pressed || e.LeftButton == MouseButtonState.Pressed) && !IsPlaying())
             {
                 if (mediaList.Count > 0)
                 {
                     mediaList.Move(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
                     moveSignalCursor(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
-                    if (IsPlaying())
-                    {
-                        Stop();
-                    }
-                  
+                    signalCursor.X = (e.GetPosition(control.signalAndAnnoGrid).X);
+                 
                 }
             }
 
             if (e.RightButton == MouseButtonState.Released && isMouseButtonDown == true)
             {
                 isMouseButtonDown = false;
-
-                //if (control.navigator.followAnnoCheckBox.IsChecked == true)
-                //{
-                //    if (!IsPlaying())
-                //    {
-                //        Play();
-                //    }
-                //}
                 if (control.navigator.askforlabels.IsChecked == true)
                 {
                     if (AnnoTierStatic.Selected != null)

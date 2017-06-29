@@ -108,8 +108,7 @@ namespace ssi
             GetDatabases(DatabaseHandler.DatabaseName);
             GetAnnotators();
             GetRoles();
-            GetSchemes();
-            GetStreams();
+            GetSchemes();            
 
             if (mode == Mode.COMPLETE)
             {
@@ -139,6 +138,8 @@ namespace ssi
                 SessionsBox.IsEnabled = false;
             }
 
+            GetStreams();
+
             ApplyButton.Focus();
         }
 
@@ -158,7 +159,7 @@ namespace ssi
                 AnnoList annoList = AnnoList.LoadfromFile("~.annotation");
                 annoList.Source = undoSource;
                 annoList.Meta = undoMeta;
-                annoList.Save();
+                annoList.Save(null, true);
 
                 handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected);
 
@@ -470,6 +471,7 @@ namespace ssi
             {
                 AnnotatorsBox.Items.Add(annotator.FullName);
             }
+            
 
             if (AnnotatorsBox.Items.Count > 0)
             {
@@ -753,6 +755,7 @@ namespace ssi
         private void Annotations_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             GetSessions();
+            GetStreams();
         }
 
         private void ShowAllSessionsCheckBox_Checked(object sender, RoutedEventArgs e)

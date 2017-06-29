@@ -78,6 +78,12 @@ namespace ssi
                         control.mediaVolumeControl.Visibility = Visibility.Collapsed;
                     }
                     control.mediaCloseButton.Visibility = playIsPlaying ? Visibility.Hidden : Visibility.Visible;
+
+                    if (AnnoTierStatic.Selected != null)
+                    {
+                        control.navigator.askforlabels.Visibility = AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE ? Visibility.Visible : Visibility.Collapsed;
+                        control.navigator.askforlabels.IsChecked = AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE ? control.navigator.askforlabels.IsChecked : false;
+                    }
                 }
             }
         }

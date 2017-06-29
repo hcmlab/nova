@@ -31,9 +31,8 @@
         </StackPanel>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
-            <CheckBox x:Name="followAnnoCheckBox" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Follow Annotation"  Focusable="False"/>
             <CheckBox Name="autoScrollCheckBox" Height="25" Margin="0,10,10,0" IsChecked="True" Content="Auto Scroll"  Focusable="False"/>
-            <CheckBox x:Name="askforlabels" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Force Label" Focusable="False"/>
+            <CheckBox x:Name="askforlabels" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Force Label" Focusable="False" Visibility="Collapsed"/>
             <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center" Focusable="False">Clear</Button>
         </StackPanel>
 

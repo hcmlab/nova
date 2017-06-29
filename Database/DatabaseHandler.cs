@@ -681,7 +681,7 @@ namespace ssi
                 });
             }
 
-            return items.OrderBy(i => i.Name).ToList();
+            return items.OrderBy(i => i.FullName).ToList();
         }
 
         public static List<string> GetStreamAll()
@@ -2188,7 +2188,7 @@ namespace ssi
 
             if (force || !isLocked)
             {
-                if (annotationDoc.Count > 0 && Properties.Settings.Default.DatabaseAskBeforeOverwrite)
+                if (annotationDoc.Count > 0 && (Properties.Settings.Default.DatabaseAskBeforeOverwrite && !force))
                 {
                     MessageBoxResult mbres = MessageBox.Show("Save annotation?", "Attention", MessageBoxButton.YesNo);
                     if (mbres == MessageBoxResult.No)

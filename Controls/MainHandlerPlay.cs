@@ -34,13 +34,14 @@ namespace ssi
                     control.timeLineControl.rangeSlider.followmedia = true;
                     control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
                 }
-                else if (control.navigator.autoScrollCheckBox.IsChecked == false)
+                else if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.autoScrollCheckBox.IsChecked == false)
                 {
                     control.timeLineControl.rangeSlider.followmedia = false;
                     if (AnnoTierStatic.Label != null)
                     {
                         AnnoTierStatic.Label.select(true);
                     }
+                    Stop();
                 }
             }            
 
