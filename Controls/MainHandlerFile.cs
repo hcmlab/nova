@@ -518,11 +518,11 @@ namespace ssi
 
         #region SAVE
 
-        private void saveSelectedAnno()
+        private void saveSelectedAnno(bool force = false)
         {
             if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList != null)
             {
-                AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams);
+                AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams, force);
                 updateAnnoInfo(AnnoTierStatic.Selected);
             }
         }

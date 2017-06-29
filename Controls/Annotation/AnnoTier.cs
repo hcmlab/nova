@@ -848,8 +848,6 @@ namespace ssi
                     selectedLabel.Item.Duration = Properties.Settings.Default.DefaultMinSegmentSize;
                     selectedLabel.Item.Stop = selectedLabel.Item.Start + selectedLabel.Item.Duration;
                 }
-
-               
             }
         }
 
@@ -863,8 +861,7 @@ namespace ssi
             if (IsDiscreteOrFree || (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
             {
                 if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
-
-                {
+                { 
                     Point point = e.GetPosition(selectedLabel);
 
                     if (selectedLabel != null)

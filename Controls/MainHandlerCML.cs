@@ -37,7 +37,7 @@ namespace ssi
 
         private void databaseCMLCompleteStep()
         {
-            saveSelectedAnno();
+            saveSelectedAnno(true);
 
             DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.COMPLETE);
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;

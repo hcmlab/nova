@@ -137,7 +137,7 @@ namespace ssi
             AnnoTierStatic.OnTierSegmentChange += changeAnnoTierSegmentHandler;
             control.annoTierControl.MouseDown += annoTierControl_MouseDown;
             control.annoTierControl.MouseMove += annoTierControl_MouseMove;
-            control.annoTierControl.MouseRightButtonUp += annoTierControl_MouseRightButtonUp;
+            control.annoTierControl.MouseUp += annoTierControl_MouseRightButtonUp;
             control.annoLiveModeCheckBox.Checked += annoLiveMode_Changed;
             control.annoLiveModeCheckBox.Unchecked += annoLiveMode_Changed;
             control.annoLiveModeActivateMouse.Checked += annoLiveModeActiveMouse_Checked;
@@ -204,7 +204,6 @@ namespace ssi
             control.navigator.jumpFrontButton.Click += navigatorJumpFront_Click;
             control.navigator.playButton.Click += navigatorPlay_Click;
             control.navigator.jumpEndButton.Click += navigatorJumpEnd_Click;
-            control.navigator.followAnnoCheckBox.Unchecked += navigatorFollowAnno_Unchecked;
 
             // Timeline
 
