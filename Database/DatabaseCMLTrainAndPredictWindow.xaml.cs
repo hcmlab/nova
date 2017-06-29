@@ -327,10 +327,21 @@ namespace ssi
                 
             }
 
+            if (mode == Mode.PREDICT)
+            {
+                foreach (AnnoTier tier in MainHandler.annoTiers)
+                {
+                    if (tier.AnnoList.Source.HasDatabase)
+                    {
+                        handler.ReloadAnnoTierFromDatabase(tier);
+                    }
+                }
+            }
+
+
             if (mode == Mode.COMPLETE)
             {
                 handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected);
-
                 ApplyButton.Content = "Undo";
                 mode = Mode.COMPLETE_UNDO;                
             }

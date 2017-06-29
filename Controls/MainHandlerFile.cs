@@ -1012,7 +1012,7 @@ namespace ssi
         private void exportSamples_Click(object sender, RoutedEventArgs e)
         {
             ExportSamplesWindow window = new ExportSamplesWindow();
-            foreach (AnnoTier tier in this.annoTiers)
+            foreach (AnnoTier tier in annoTiers)
             {
                 if (tier.AnnoList.Source.HasFile && 
                     (tier.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE ||

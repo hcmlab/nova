@@ -50,12 +50,12 @@ namespace ssi
         public Cursor signalCursor = null;
         public Cursor annoCursor = null;
 
-        private List<SignalTrack> signalTracks = new List<SignalTrack>();
-        private List<Signal> signals = new List<Signal>();
-        private List<AnnoTier> annoTiers = new List<AnnoTier>();
-        private List<AnnoList> annoLists = new List<AnnoList>();
-        private MediaList mediaList = new MediaList();
-        private List<MediaBox> mediaBoxes = new List<MediaBox>();
+        public static List<SignalTrack> signalTracks = new List<SignalTrack>();
+        public static List<Signal> signals = new List<Signal>();
+        public static List<AnnoTier> annoTiers = new List<AnnoTier>();
+        public static List<AnnoList> annoLists = new List<AnnoList>();
+        public static MediaList mediaList = new MediaList();
+        public static List<MediaBox> mediaBoxes = new List<MediaBox>();
 
         private bool playIsPlaying = false;
         private double playSampleRate = Defaults.DefaultSampleRate;
