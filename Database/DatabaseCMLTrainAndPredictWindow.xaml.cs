@@ -737,18 +737,20 @@ namespace ssi
                 string schemeName = (string)SchemesBox.SelectedItem;
                 DatabaseScheme scheme = DatabaseHandler.Schemes.Find(s => s.Name == schemeName);
 
-                bool isDiscrete = scheme.Type == AnnoScheme.TYPE.DISCRETE;
-                FillGapPanel.Visibility = isDiscrete ? Visibility.Visible : Visibility.Collapsed;
-                RemoveLabelPanel.Visibility = isDiscrete ? Visibility.Visible : Visibility.Collapsed;
-    
-                bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
-
-                List<Trainer> trainers = getTrainer(stream, scheme, template);
-                foreach (Trainer trainer in trainers)
+                if(scheme != null)
                 {
-                    TrainerPathComboBox.Items.Add(trainer);
+                    bool isDiscrete = scheme.Type == AnnoScheme.TYPE.DISCRETE;
+                    FillGapPanel.Visibility = isDiscrete ? Visibility.Visible : Visibility.Collapsed;
+                    RemoveLabelPanel.Visibility = isDiscrete ? Visibility.Visible : Visibility.Collapsed;
+    
+                    bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
+
+                    List<Trainer> trainers = getTrainer(stream, scheme, template);
+                    foreach (Trainer trainer in trainers)
+                    {
+                        TrainerPathComboBox.Items.Add(trainer);
+                    }
                 }
-                                  
             }
             
             if (TrainerPathComboBox.Items.Count > 0)
