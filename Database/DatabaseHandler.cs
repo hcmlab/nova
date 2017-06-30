@@ -534,6 +534,8 @@ namespace ssi
 
             if (IsConnected)
             {
+                try
+                {
                 MongoClient mongo = Client;
                 IMongoDatabase database = mongo.GetDatabase("admin");
                 IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("system.users");
@@ -543,6 +545,11 @@ namespace ssi
                     items.Add(document["user"].ToString());
                 }
                 items.Sort();
+                }
+                catch
+                {
+                    MessageBox.Show("Not authorized on admin database!");
+                }
             }
 
             return items;

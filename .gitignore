@@ -318,3 +318,6 @@ bin/Splat.dll
 bin/zh-Hant/System.Windows.Interactivity.resources.dll
 bin/zh-Hans/System.Windows.Interactivity.resources.dll
 bin/updater.vshost.exe.manifest
+docs/tex2pdf.1548/input.aux
+*.out
+docs/tex2pdf.456/input.tex
