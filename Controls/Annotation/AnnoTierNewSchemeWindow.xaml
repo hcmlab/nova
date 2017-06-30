@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="New Scheme" ResizeMode="NoResize"
-        SizeToContent="WidthAndHeight"
-        WindowStyle="ToolWindow">
+        Title="New Scheme"  
+        ResizeMode="NoResize"
+        Icon="..\..\Resources\ui.ico"
+        SizeToContent="WidthAndHeight">
     
     <Grid Margin="5,0,5,0">
         <Grid.RowDefinitions>
@@ -21,19 +22,29 @@
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="5">
-            <Separator Height="2" Visibility="Hidden"></Separator>
+        <StackPanel Grid.Row="0" Margin="10">
+            <Separator Height="5" Visibility="Hidden"></Separator>
+            <TextBlock TextAlignment="Left" TextWrapping="Wrap"  HorizontalAlignment="Stretch" FontSize="10" Width="120">
+                Discrete scheme with predefined labels
+            </TextBlock>
+            <Separator Height="15" Visibility="Hidden"></Separator>
             <Button Name="button_discrete" Height="25" Width="120" Content="Discrete" Click="Button_Click"></Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Margin="5">
-            <Separator Height="2" Visibility="Hidden"></Separator>
+        <StackPanel Grid.Row="1" Margin="10">
+            <Separator Height="5" Visibility="Hidden"></Separator>
+            <TextBlock TextAlignment="Left" TextWrapping="Wrap"  HorizontalAlignment="Stretch" FontSize="10" Width="120"><Run Text="Discrete scheme with "/><Run Text=" custom "/><Run Text="labels"/></TextBlock>
+            <Separator Height="15" Visibility="Hidden"></Separator>
             <Button Name="button_free" Height="25" Width="120" Content="Free" Click="Button_Click"></Button>
         </StackPanel>
 
 
-        <StackPanel Grid.Row="2" Margin="5">
-            <Separator Height="2" Visibility="Hidden"></Separator>
+        <StackPanel Grid.Row="2" Margin="10">
+            <Separator Height="5" Visibility="Hidden"></Separator>
+            <TextBlock TextAlignment="Left" TextWrapping="Wrap"  HorizontalAlignment="Stretch" FontSize="10" Width="120">
+                Scheme with continuous values
+            </TextBlock>
+            <Separator Height="15" Visibility="Hidden"></Separator>
             <Button Name="button_continuous" Height="25" Width="120" Content="Continuous" Click="Button_Click"></Button>
         </StackPanel>
 
@@ -43,9 +54,9 @@
             </TextBlock>
         </StackPanel>
 
-        <Image Grid.Row="0" Grid.Column="1" Margin="5" Width="300" Source="/Resources/discrete.png"/>
-        <Image Grid.Row="1" Grid.Column="1" Margin="5" Width="300" Source="/Resources/free.png"/>
-        <Image Grid.Row="2" Grid.Column="1" Margin="5" Width="300" Source="/Resources/continuous.png"/>
+        <Image Grid.Row="0" Grid.Column="1" Margin="10" Width="300" Source="/Resources/discrete.png"/>
+        <Image Grid.Row="1" Grid.Column="1" Margin="10" Width="300" Source="/Resources/free.png"/>
+        <Image Grid.Row="2" Grid.Column="1" Margin="10" Width="300" Source="/Resources/continuous.png"/>
 
         <Grid Grid.Row="3" Grid.Column="1" Margin="5" Visibility="Collapsed">
             <Grid.RowDefinitions>

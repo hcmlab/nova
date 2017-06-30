@@ -53,7 +53,11 @@ namespace ssi
 
             foreach (string db in databases)
             {
-                DatabaseBox.Items.Add(db);
+                if(DatabaseHandler.CheckAuthentication(db) > 2)
+                {
+                    DatabaseBox.Items.Add(db);
+                }
+               
             }
 
             Select(DatabaseBox, selectedItem);
@@ -131,6 +135,20 @@ namespace ssi
             {
                 string db = DatabaseBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(db);
+
+                if (DatabaseHandler.CheckAuthentication(db) > 3)
+                {
+                    AddAnnotator.IsEnabled = true;
+                    DeleteAnnotator.IsEnabled = true;
+                    EditAnnotator.IsEnabled = true;
+                }
+                else
+                {
+                    AddAnnotator.IsEnabled = false;
+                    DeleteAnnotator.IsEnabled = false;
+                    EditAnnotator.IsEnabled = false;
+                }
+
                 Refresh();
             }
         }

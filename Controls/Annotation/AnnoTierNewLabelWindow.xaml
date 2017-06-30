@@ -5,7 +5,7 @@
     SizeToContent="Height"
     WindowStyle="ToolWindow"
     WindowStartupLocation="CenterScreen"
-    Title="Input" Height="Auto" Width="300" >
+    Title=" Annotation"  Height="Auto" Width="300" >
 
     <Grid>
 
@@ -22,7 +22,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Name="infoLabel" Grid.Row="0" Margin="5,5,5,15" TextWrapping="WrapWithOverflow">Info</TextBlock>
+        <TextBlock Name="infoLabel" Grid.Row="0" Margin="10,5,5,15" TextWrapping="WrapWithOverflow">Info</TextBlock>
 
         <Grid Name="continuousSchemeGrid" Grid.Row="1" >
             <Grid.ColumnDefinitions>
@@ -32,7 +32,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Label Grid.Column="0" Grid.Row="0" >Score</Label>
+            <Label Margin="5"  Grid.Column="0" Grid.Row="0" >Score</Label>
             <TextBox Name="scoreTextBox" Grid.Column="1" Grid.Row="0" x:FieldModifier="public" Margin="5"/>
         </Grid>
 
@@ -44,7 +44,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Label Grid.Column="0">Label</Label>
+            <Label Grid.Column="0" Margin="5" >Label</Label>
             <ComboBox Name="labelComboBox" Grid.Column="1" Margin="5"></ComboBox>
         </Grid>
 
@@ -58,7 +58,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Label Grid.Column="0">Label</Label>
+            <Label Margin="5"  Grid.Column="0">Label</Label>
             <TextBox Name="labelTextBox" Grid.Column="1" Margin="5" Grid.ColumnSpan="2"></TextBox>
             <p:ColorPicker Name="colorPicker" Grid.Column="3" Width="40" Margin="5" BorderBrush="Transparent" Background="Transparent"/>
         </Grid>

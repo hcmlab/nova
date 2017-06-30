@@ -44,7 +44,10 @@ namespace ssi
 
             foreach (string db in databases)
             {
-                DatabaseBox.Items.Add(db);
+                if (DatabaseHandler.CheckAuthentication(db) > 2)
+                {
+                    DatabaseBox.Items.Add(db);
+                }
             }
 
             Select(DatabaseBox, selectedItem);
