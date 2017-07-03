@@ -13,7 +13,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "0.9.9.9.5";
+        public static string BuildVersion = "0.9.9.9.6";
         public static MEDIABACKEND Mediabackend = MEDIABACKEND.MEDIAKIT;
 
 
@@ -262,6 +262,15 @@ namespace ssi
 
             }
 
+            string cmltrainexe = "cmltrain.exe";
+            string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + cmltrainexe;
+
+            if (!(File.Exists(cmltrainexePath)))
+            {
+
+                updateCML();
+
+            }
 
 
             if (Properties.Settings.Default.DatabaseDirectory == "")
@@ -299,6 +308,9 @@ namespace ssi
             clearMediaBox();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void updateCML()
         {
 
@@ -325,16 +337,39 @@ namespace ssi
 
             DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
 
-            if(File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath))
+
+
+            //Download libmongoc-1.0.dll, if not present yet.
+            string libmongocdll = "libmongoc-1.0.dll";
+            string libmongocdllPath = AppDomain.CurrentDomain.BaseDirectory + libmongocdll;
+
+            DownloadFile(SSIbinaryGitPath + libmongocdll, libmongocdllPath);
+
+
+            //Download libbson-1.0.dll, if not present yet.
+            string libsondll = "libbson-1.0.dll";
+            string libbsondllPath = AppDomain.CurrentDomain.BaseDirectory + libsondll;
+
+            DownloadFile(SSIbinaryGitPath + libsondll, libbsondllPath);
+
+
+
+
+
+            if (File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath) && File.Exists(libmongocdllPath) && File.Exists(libbsondllPath))
             {
 
                 long sizexmlchain = new System.IO.FileInfo(xmlchainexePath).Length;
                 long sizecmltrain = new System.IO.FileInfo(cmltrainexePath).Length;
+                long sizelibmongocdll = new System.IO.FileInfo(libmongocdllPath).Length;
+                long sizelibsondll = new System.IO.FileInfo(libbsondllPath).Length;
 
-                if (sizexmlchain == 0 || sizecmltrain == 0)
+                if (sizexmlchain == 0 || sizecmltrain == 0 || sizelibmongocdll == 0 || sizelibsondll == 0)
                 {
                     if (File.Exists(xmlchainexePath)) File.Delete(xmlchainexePath);
                     if (File.Exists(cmltrainexePath)) File.Delete(cmltrainexePath);
+                    if (File.Exists(libmongocdllPath)) File.Delete(libmongocdllPath);
+                    if (File.Exists(libbsondllPath)) File.Delete(libbsondllPath);
                     MessageBox.Show("Could not update CMLtrain.exe and XMLchain.exe");
                 }
                 else MessageBox.Show("Successfully updated CMLtrain.exe and XMLchain.exe");
@@ -520,6 +555,12 @@ namespace ssi
                 Properties.Settings.Default.ContinuousHotkeysNumber = int.Parse(s.ContinuousHotkeyLevels());
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();
                 Properties.Settings.Default.Save();
+                
+
+                foreach(AnnoTier tier in AnnoTiers)
+                {
+                    tier.TimeRangeChanged(MainHandler.Time);
+                }
 
                 if (reconnect)
                 {                    

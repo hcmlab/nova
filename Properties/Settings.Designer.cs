@@ -25,7 +25,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("MongoDBUser")]
+        [global::System.Configuration.DefaultSettingValueAttribute("login")]
         public string MongoDBUser {
             get {
                 return ((string)(this["MongoDBUser"]));
@@ -37,7 +37,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("MongoDBPass")]
+        [global::System.Configuration.DefaultSettingValueAttribute("password")]
         public string MongoDBPass {
             get {
                 return ((string)(this["MongoDBPass"]));
