@@ -1,6 +1,6 @@
 % NOVA Documentation
-% Johannes Wagner
-% 06/27/2016
+% 
+% 03/07/2017
 
 # Introduction {#introduction}
 
@@ -43,52 +43,152 @@ After loading at least one media or data stream, new annotations tracks can be a
 
 * Discrete:
 
-Discrete annotations consist of a list of labelled time segments. Each segment has a start and and end time (in seconds) and a name (label). Segments can be of varying length, may overlap and possibly there are gaps between adjacent segments. An annotator cannot change the names of labels and has to assign exactly one label to each segment. If none of the labels is applicable the label "GARBAGE" is always available.
+	Discrete annotations consist of a list of labelled time segments. Each segment has a start and and end time (in seconds) and a name (label). Segments can be of varying length, may overlap and possibly there are gaps between adjacent segments. An annotator cannot change the names of labels and has to assign exactly one label to each segment. If none of the labels is applicable the label "GARBAGE" is always available.
 
-![*Example of a discrete annotation tier.*](pics/manual-types-of-annotation-discrete.png){#fig:manual-types-of-annotation-discrete width=100%}
+	![*Example of a discrete annotation tier.*](pics/manual-types-of-annotation-discrete.png){#fig:manual-types-of-annotation-discrete width=100%}
 
-Scheme name, class names and colours are set in the following dialogue:
+	Scheme name, class names and colours are set in the following dialogue:
 
-![*New discrete annotation scheme window.*](pics/manual-new-scheme-discrete.png){#fig:manual-new-scheme-discrete}
+	![*New discrete annotation scheme window.*](pics/manual-new-scheme-discrete.png){#fig:manual-new-scheme-discrete}
 
 * Free:
 
-Like discrete annotations, but this time annotators are free to choose the label names. This is obviously useful if an annotation task can not easily be reduced to a few labels (for example in case of speech transcriptions). Of course there is the risk that the same phenomenon may be labelled differently (either because a synonym is used or due to misspelling).
+	Like discrete annotations, but this time annotators are free to choose the label names. This is obviously useful if an annotation task can not easily be reduced to a few labels (for example in case of speech transcriptions). Of course there is the risk that the same phenomenon may be labelled differently (either because a synonym is used or due to misspelling).
 
-![*Example of a free annotation tier.*](pics/manual-types-of-annotation-free.png){#fig:manual-types-of-annotation-free width=100%}
+	![*Example of a free annotation tier.*](pics/manual-types-of-annotation-free.png){#fig:manual-types-of-annotation-free width=100%}
 
 * Continuous:
 
-In contrast to discrete annotations, continuous annotations assign numerical values (label score) instead of label names. Also, they have a fixed sample rate, i.e. label scores are assigned in regular intervals. For instance, a sample of 2 Hz means that an annotator has to assign two scores each second. All score values have to be within a fixed interval (defined by a minimum and a maximum score). Optionally, it is possible to quantize the interval into limited steps. The value NAN is assigned when no score is applicable.
+	In contrast to discrete annotations, continuous annotations assign numerical values (label score) instead of label names. Also, they have a fixed sample rate, i.e. label scores are assigned in regular intervals. For instance, a sample of 2 Hz means that an annotator has to assign two scores each second. All score values have to be within a fixed interval (defined by a minimum and a maximum score). Optionally, it is possible to quantize the interval into limited steps. The value NAN is assigned when no score is applicable.
 
-![*Example of a continuous annotation tier.*](pics/manual-types-of-annotation-continuous.png){#fig:manual-types-of-annotation-continuous width=100%}
+	![*Example of a continuous annotation tier.*](pics/manual-types-of-annotation-continuous.png){#fig:manual-types-of-annotation-continuous width=100%}
 
-Scheme name, sample rate, value range and colours are set in the following dialogue:
+	Scheme name, sample rate, value range and colours are set in the following dialogue:
 
-![*New continuous annotation scheme window.*](pics/manual-new-scheme-continuous.png){#fig:manual-new-scheme-continuous}
+	![*New continuous annotation scheme window.*](pics/manual-new-scheme-continuous.png){#fig:manual-new-scheme-continuous}
 
 
 ## Editing an Annotation
 
 * Free:
 
-To place a new segment right click on the start position of the label, keep button pressed and move the cursor to the end position (or vice-versa). Now release the button and a new segment will be added (and selected). If 'Force Label' is active you will be asked to enter label name and confidence. Otherwise it gets the label that was previously used. To edit an existing segment left click inside the segment (the colour of the selected segment will change to blue). If you now move the cursor near the borders two arrows will be displayed and you can change the position by holding down the left mouse button. If you move the cursor towards the centre of the segment you can move the whole segment along the track. To change the label hit the 'W' key. Note that you can change the position of a label during playback. If 'Follow Annotation' is active a newly added segment will be immediately played back. Alternatively, you can also jump to a segment by selecting it from the list left to the annotation tiers. It is also possible to select several segments in the list and rename them all at once.
+	To place a new segment right click on the start position of the label, keep button pressed and move the cursor to the end position (or vice-versa). Now release the button and a new segment will be added (and selected). If 'Force Label' is active you will be asked to enter label name and confidence. Otherwise it gets the label that was previously used. To edit an existing segment left click inside the segment (the colour of the selected segment will change to blue). If you now move the cursor near the borders two arrows will be displayed and you can change the position by holding down the left mouse button. If you move the cursor towards the centre of the segment you can move the whole segment along the track. To change the label hit the 'W' key. Note that you can change the position of a label during playback. If 'Follow Annotation' is active a newly added segment will be immediately played back. Alternatively, you can also jump to a segment by selecting it from the list left to the annotation tiers. It is also possible to select several segments in the list and rename them all at once.
 
 * Discrete:
 
-Works in the same way as free annotations, but when entering or changing a label a selection dialogue pops up that allows you to select a name from the loaded scheme. Alternatively, you can change the label name of a selected segment by pressing a key between '0' and '9'. For example, if the selected scheme contains three names 'A','B' and 'C' pressing '1' assigns 'A', '2' assigns 'B', and '3' assigns 'C'. Any other numbers and '0' assign the garbage class.
+	Works in the same way as free annotations, but when entering or changing a label a selection dialogue pops up that allows you to select a name from the loaded scheme. Alternatively, you can change the label name of a selected segment by pressing a key between '0' and '9'. For example, if the selected scheme contains three names 'A','B' and 'C' pressing '1' assigns 'A', '2' assigns 'B', and '3' assigns 'C'. Any other numbers and '0' assign the garbage class.
 
 * Continuous:
 
-To change the values in a continuous track hold down the right mouse button and move the cursor to the desired position within the track. You will notice that the values immediately start to follow the cursor. Hitting 'L' (or switching on the live button in the status bar) turns on the live mode, which no longer requires to hold down the right mouse button. Instead a white button is displayed at the left border of the current track to mark the current value. The height of the white button can either be controlled by the vertical position of the mouse cursor (press key 'M' or activate check box next to live button). Or otherwise by pressing a key between '0' and '9' (see option 'number of levels in live mode' in the SETTINGS). This is especially handy to annotate during playback. Hitting 'L' again turns off the live annotation mode and brings back the default behaviour.
+	To change the values in a continuous track hold down the right mouse button and move the cursor to the desired position within the track. You will notice that the values immediately start to follow the cursor. Hitting 'L' (or switching on the live button in the status bar) turns on the live mode, which no longer requires to hold down the right mouse button. Instead a white button is displayed at the left border of the current track to mark the current value. The height of the white button can either be controlled by the vertical position of the mouse cursor (press key 'M' or activate check box next to live button). Or otherwise by pressing a key between '0' and '9' (see option 'number of levels in live mode' in the SETTINGS). This is especially handy to annotate during playback. Hitting 'L' again turns off the live annotation mode and brings back the default behaviour.
 
 Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. To save an annotation go to the ANNOTATION menu or press 'Ctrl+S'.
+
+## File Format
+
+An annotation can be saved to a file on disk. Actually, it is stored in two separate files: a header file (.annotation) and a data file (.annotation~) with the same file name. The header contains information about the scheme, while the data file holds the actual annotation data, either in ASCII (default) or in binary format.
+
+* Discrete: 
+
+	.annotation
+
+	A discrete scheme consists of a list of predefined labels represented by a name and an unique identifier (id). Optionally, colour values can be assigned to the background and each label.
+
+	~~~~ xml
+	<?xml version="1.0" ?>
+	<annotation ssi-v="3">
+		<info ftype="ASCII" size="71" />
+		<meta annotator="Annotator"/>
+		<scheme name="laughter" type="DISCRETE" color="#FFEEECE1">
+			<item name="laugh" id="0" color="#FFC0504D" />
+			<item name="speech" id="1" color="#FF1F497D" />
+		</scheme>
+	</annotation>
+	~~~~
+
+	.annotation~
+
+	The data file contains of one segment per line, which are structured as follows:
+	
+	\<beginning of a segment in seconds\> ; \<end of a segment in seconds\> ; \<label id as specified in the header\> ; \<confidence value\>
+
+	~~~~
+	2.96;3.92;1;1    // first segment
+	8;9.72;1;1       // second segment
+	18.8;20.08;1;1   // ...
+	23.91;24.87;1;0.6
+	27.22;28.61;1;0.9
+	29.2;30.41;0;1
+	...
+	~~~~
+
+* Free:
+
+	.annotation
+
+	A free scheme looks similar, but does not define labels: 
+
+	~~~~ xml
+	<?xml version="1.0" ?>
+	<annotation ssi-v="3">
+		<info ftype="ASCII" size="110" />
+		<meta annotator="Annotator"/>
+		<scheme name="transcription" type="FREE" color="#FFFFFFFF"/>
+	</annotation>
+	~~~~
+
+	.annotation~
+
+	In contrast to a discrete scheme, in a free annotation the id field is replaced by a string. The last entry may hold an optional colour label.
+
+	~~~~ 
+	2;2.56;hi;1
+	2.72;3.16;<LAUGH>;1;color=#FFFF0000
+	4.56;5.28;yes;1
+	10.24;11.64;no not at all no no;1
+	12.04;13.4;so what it is exactly;1
+	17.56;18.16;okay;1
+	27.16;27.64;yes;1
+	...
+	~~~~
+
+* Continuous:
+
+	.annotation
+
+	A continuous scheme contains a samplerate (sr) in hz, as well as, the minimum (min) and maximum (max) score. Optionally, min and max can be assigned colours.
+
+	~~~~ xml
+	<?xml version="1.0" ?>
+	<annotation ssi-v="3">
+		<info ftype="ASCII" size="7501" />
+		<meta annotator="Annotator"/>
+		<scheme name="arousal" type="CONTINUOUS" sr="25" min="-1" max="1" mincolor="#FFFFFFFF" maxcolor="#FF4F81BD" />
+	</annotation>
+	~~~~
+
+	.annotation~
+
+	In the according data file each line represents one frame represented by two values:
+	
+	\<score\> ; \<confidence value\>
+	
+	The time stamp (in seconds) of a frame can be referred by dividing the line index by the sample rate given in the header.
+
+	~~~~
+	-0.021;1   // 0 / 25 hz = 0 s
+	-0.017;1   // 1 / 25 hz = 0.04 s
+	-0.016;0.6 // 2 / 25 hz = 0.08 s
+	 0.011;0.4
+	 0;1
+    ...
+	~~~~
 
 # Database
 
 NOVA allows users to manage and share annotations through a database. To connect to a database open the SETTINGS and select the 'Database' panel. Here you can enter the host IP, port number and user credentials. It also allows you to change the folder to which NOVA downloads media and stream files that are used during the annotation process, as well as, the directory where the cooperative learning definitions and models are stored.
 
-## File Format
+## File Structure
 
 To manage a database with NOVA, you have to follow a certain file structure. Each database is located in a root folder with the name of the database and may consist of one more sessions. All stream files belonging to a session are grouped in sub-folder within the root folder. The name of the folder defines the name of the session. In a session we distinguish between several users, which take a certain role. E.g. thinking of a dyadic conversation, one user could be the expert sharing the knowledge about a certain topic to a novice user. Hence we have two roles: 'expert' and 'novice'. Each file has a unique name defined by the role and the type of recorded channel. E.g. if we have recorded the interaction using close talk microphones and two webcams, we may use the following file structure:
 
