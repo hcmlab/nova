@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="MongoDBUser" Type="System.String" Scope="User">
-      <Value Profile="(Default)">MongoDBUser</Value>
+      <Value Profile="(Default)">login</Value>
     </Setting>
     <Setting Name="MongoDBPass" Type="System.String" Scope="User">
-      <Value Profile="(Default)">MongoDBPass</Value>
+      <Value Profile="(Default)">password</Value>
     </Setting>
     <Setting Name="DataServer" Type="System.String" Scope="User">
       <Value Profile="(Default)">sftp.server.yeah</Value>

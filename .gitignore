@@ -321,3 +321,15 @@ bin/updater.vshost.exe.manifest
 docs/tex2pdf.1548/input.aux
 *.out
 docs/tex2pdf.456/input.tex
+*.bkp
+Resources/continuous_new.svg
+Resources/free_new_alt.png
+bin/~.trainer.LibLinear.model
+Resources/schemes.pptx
+bin/~.annotation
+bin/~.trainer.#0.norm
+bin/~.trainer
+bin/~.trainer.LibLinear.option
+Resources/discrete_new_alt.png
+Resources/discrete_new_alt.svg
+Resources/free_new_alt.svg
