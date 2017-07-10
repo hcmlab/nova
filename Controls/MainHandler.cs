@@ -13,7 +13,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "0.9.9.9.6";
+        public static string BuildVersion = "0.9.9.9.7";
         public static MEDIABACKEND Mediabackend = MEDIABACKEND.MEDIAKIT;
 
 
@@ -338,7 +338,10 @@ namespace ssi
             {
                 DownloadFile(SSIbinaryGitPath + cmltrainexe, cmltrainexePath);
             }
-            catch { }
+            catch {
+                MessageBox.Show("Can't update tools, check your internet conenction!");
+                return;
+            }
 
 
             //Download xmlchain, if not present yet.
@@ -346,8 +349,6 @@ namespace ssi
             string xmlchainexePath = AppDomain.CurrentDomain.BaseDirectory + xmlchainexe;
 
             DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
-
-
 
             //Download libmongoc-1.0.dll, if not present yet.
             string libmongocdll = "libmongoc-1.0.dll";
@@ -362,6 +363,12 @@ namespace ssi
 
             DownloadFile(SSIbinaryGitPath + libsondll, libbsondllPath);
 
+            //Download ssiframe.dll, if not present yet.
+            string ssiframedll = "ssiframe.dll";
+            string ssiframedllPath = AppDomain.CurrentDomain.BaseDirectory + ssiframedll;
+
+            DownloadFile(SSIbinaryGitPath + ssiframedll, ssiframedllPath);
+
 
 
 
@@ -373,6 +380,7 @@ namespace ssi
                 long sizecmltrain = new System.IO.FileInfo(cmltrainexePath).Length;
                 long sizelibmongocdll = new System.IO.FileInfo(libmongocdllPath).Length;
                 long sizelibsondll = new System.IO.FileInfo(libbsondllPath).Length;
+                long sizessiframedll = new System.IO.FileInfo(ssiframedllPath).Length;
 
                 if (sizexmlchain == 0 || sizecmltrain == 0 || sizelibmongocdll == 0 || sizelibsondll == 0)
                 {
@@ -380,9 +388,10 @@ namespace ssi
                     if (File.Exists(cmltrainexePath)) File.Delete(cmltrainexePath);
                     if (File.Exists(libmongocdllPath)) File.Delete(libmongocdllPath);
                     if (File.Exists(libbsondllPath)) File.Delete(libbsondllPath);
-                    MessageBox.Show("Could not update CMLtrain.exe and XMLchain.exe");
+                    if (File.Exists(ssiframedllPath)) File.Delete(ssiframedllPath);
+                    MessageBox.Show("Could not update Cooperative Machine Learning Tools");
                 }
-                else MessageBox.Show("Successfully updated CMLtrain.exe and XMLchain.exe");
+                else MessageBox.Show("Successfully updated Cooperative Machine Learning Tools");
             }
 
         }

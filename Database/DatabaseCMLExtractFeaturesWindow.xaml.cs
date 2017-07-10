@@ -119,6 +119,9 @@ namespace ssi
 
             // start feature extraction
 
+            Chain selectedChain = (Chain)ChainPathComboBox.SelectedItem;
+            DatabaseStream selectedstream = (DatabaseStream)StreamsBox.SelectedItem;
+
             if (nFiles > 0)
             {
                 logTextBox.Text += handler.CMLExtractFeature(chain.Path, nParallel, tempInListPath, tempOutListPath, frameStep, leftContext, rightContext);
@@ -134,8 +137,8 @@ namespace ssi
             File.Delete(tempInListPath);
             File.Delete(tempOutListPath);
 
-            Chain selectedChain = (Chain) ChainPathComboBox.SelectedItem;
-            GetStreams(StreamsBox.SelectedItem.ToString());
+            
+            GetStreams(selectedstream);
             foreach(Chain item in ChainPathComboBox.Items)
             {
                 if (item.Name == selectedChain.Name)
@@ -210,7 +213,7 @@ namespace ssi
             Update();
         }    
 
-        private void GetStreams(string selected = null)
+        private void GetStreams(DatabaseStream selected = null)
         {
             List<DatabaseStream> streams = DatabaseHandler.Streams;
 
