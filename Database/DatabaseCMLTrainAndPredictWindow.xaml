@@ -30,6 +30,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -41,7 +42,7 @@
 
             <Label Grid.Row="0" Grid.Column="0" Content="Database"/>
             <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
-                <ListBox Name="DatabaseBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DataBaseResultsBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+                <ListBox Name="DatabasesBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DatabasesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
             </DockPanel>
 
             <Label Grid.Row="0" Grid.Column="1" Content="Annotation"/>
@@ -126,63 +127,84 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Trainer</Label>
-                <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5"></ComboBox>
+                <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"  ></ComboBox>
 
             </Grid>
 
-            <StackPanel Name="PredictOptionsPanel" Grid.Row="3" Grid.ColumnSpan="4" Margin="5">
+            <GroupBox Name="TrainOptionsPanel" Grid.Row="3" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Train">
 
-                <DockPanel       
-                LastChildFill="True"
-                VerticalAlignment="Center">
-                    <CheckBox Name="ConfidenceCheckBox" 
-                          DockPanel.Dock="Left"
-                          VerticalAlignment="Center"
-                          Checked="ConfidenceCheckBox_Checked"
-                          Unchecked="ConfidenceCheckBox_Unchecked"></CheckBox>
-                    <Label>Set confidence to</Label>
-                    <TextBox Name="ConfidenceTextBox"
-                         DockPanel.Dock="Right"                  
-                         IsEnabled="False"
-                         VerticalAlignment="Center">0.0</TextBox>
-                </DockPanel>
+                <Grid>
 
-                <DockPanel Name="FillGapPanel" 
-                LastChildFill="True"
-                VerticalAlignment="Center">
-                    <CheckBox Name="FillGapCheckBox" 
-                          DockPanel.Dock="Left"
-                          VerticalAlignment="Center"
-                          Checked="FillGapCheckBox_Checked"
-                          Unchecked="FillGapCheckBox_Unchecked"></CheckBox>
-                    <Label>Fill gaps smaller than (seconds)</Label>
-                    <TextBox Name="FillGapTextBox"
-                         DockPanel.Dock="Right"                 
-                         IsEnabled="False"
-                         VerticalAlignment="Center">0.5</TextBox>
-                </DockPanel>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                    </Grid.RowDefinitions>
 
-                <DockPanel Name="RemoveLabelPanel"
-                LastChildFill="True"
-                VerticalAlignment="Center">
-                    <CheckBox Name="RemoveLabelCheckBox" 
-                              DockPanel.Dock="Left"
-                              VerticalAlignment="Center"
-                              Checked="RemoveLabelCheckBox_Checked"
-                              Unchecked="RemoveLabelCheckBox_Unchecked"></CheckBox>
-                    <Label>Remove if smaller than (seconds)</Label>
-                    <TextBox Name="RemoveLabelTextBox"
-                         DockPanel.Dock="Right"                  
-                         IsEnabled="False"
-                         VerticalAlignment="Center">0.15</TextBox>
-                </DockPanel>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
 
-            </StackPanel>
+                    <Label Grid.Row="0" Grid.Column="0" >Balance samples</Label>
+                    <ComboBox Name="BalanceComboBox" Grid.Row="0" Grid.Column="1"  VerticalAlignment="Center" SelectedIndex="0">
+                        <ComboBoxItem>none</ComboBoxItem>
+                        <ComboBoxItem>under</ComboBoxItem>
+                        <ComboBoxItem>over</ComboBoxItem>
+                    </ComboBox>
 
-            <DockPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" LastChildFill="False">
+                    <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
+                    <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" Height="20">0</TextBox>
+
+                    <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Right context</Label>
+                    <TextBox Name="RightContextTextBox" Grid.Row="2" Grid.Column="1" Height="20">0</TextBox>
+
+                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Output name</Label>
+                    <TextBox Name="TrainerNameTextBox" Grid.Row="3" Grid.Column="1" Height="20">0</TextBox>
+
+                    <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="4" Grid.Column="2" VerticalAlignment="Center"></Label>
+                    
+                </Grid>
+
+            </GroupBox>
+
+            <GroupBox Name="PredictOptionsPanel" Grid.Row="4" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Predict">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox Name="FillGapCheckBox" Grid.Row="0" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="FillGapCheckBox_Checked" Unchecked="FillGapCheckBox_Unchecked">Fill gaps (s)</CheckBox>
+                    <TextBox Name="FillGapTextBox" Grid.Row="0" Grid.Column="1"  Height="20">0.5</TextBox>
+
+                    <CheckBox Name="RemoveLabelCheckBox" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="RemoveLabelCheckBox_Checked" Unchecked="RemoveLabelCheckBox_Unchecked">Remove (s)</CheckBox>
+                    <TextBox Name="RemoveLabelTextBox" Grid.Row="1" Grid.Column="1"  Height="20">0.15</TextBox>
+
+                    <CheckBox Name="ConfidenceCheckBox" Grid.Row="2" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="ConfidenceCheckBox_Checked" Unchecked="ConfidenceCheckBox_Unchecked">Confidence</CheckBox>
+                    <TextBox Name="ConfidenceTextBox" Grid.Row="2" Grid.Column="1"  Height="20">0.0</TextBox>
+
+                    <Label Name="HelpPredictLabel" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
+
+                </Grid>
+                
+            </GroupBox>
+
+            <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" IsEnabled="false" Width="75"/>
-                    <CheckBox Name="ForceCheckBox" Margin="5">Force</CheckBox>
+                    <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" Width="75" Height="30"/>
+                    <CheckBox Name="ForceCheckBox" Margin="5" VerticalAlignment="Center">Force</CheckBox>
                 </StackPanel>
             </DockPanel>
         </Grid>

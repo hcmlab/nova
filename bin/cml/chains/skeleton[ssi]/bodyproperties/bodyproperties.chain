@@ -1,0 +1,9 @@
+<chain>
+	<meta frameStep="40ms" leftContext="2480ms" rightContext="2480ms"/>
+	<register>
+		<item name="nova"/>
+	</register>
+	<feature>
+		<item create="BodyProperties"/>
+	</feature>
+</chain>

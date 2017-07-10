@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<options readOnly="true">
+    <item name="nfft" type="UINT" num="1" value="2048" lock="false" help="Frame size on which to apply FFT. Must be a power of 2 and should be LARGER than frame size + delta." />
+</options>

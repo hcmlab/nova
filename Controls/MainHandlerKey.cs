@@ -14,6 +14,7 @@ namespace ssi
             {
                 if (e.KeyboardDevice.IsKeyDown(Key.Space))
                 {
+                   
                     if (IsPlaying())
                     {
                         Stop();
@@ -386,7 +387,7 @@ namespace ssi
                         }
                         else
                         {
-                            ReloadAnnoTierFromDatabase(track);                            
+                            ReloadAnnoTierFromDatabase(track, false);                            
                         }
                     }
                     e.Handled = true;

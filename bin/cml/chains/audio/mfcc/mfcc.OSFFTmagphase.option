@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<options readOnly="true">
+    <item name="type" type="INT" num="1" value="0" lock="false" help="0=compute magnitude, 1=compute phase, 2=compute both" />
+    <item name="norm" type="BOOL" num="1" value="false" lock="false" help="Normalise FFT magnitudes to input window length, to obtain spectral densities." />
+    <item name="power" type="BOOL" num="1" value="false" lock="false" help="Square FFT magnitudes to obtain power spectrum." />
+    <item name="dBpsd" type="BOOL" num="1" value="false" lock="false" help="output logarithmic (dB SPL) power spectral density instead of linear magnitude spectrum (you should use a Hann window for analysis in this case). Setting this option also sets 'norm=true' and 'power=true'." />
+    <item name="dBpnorm" type="FLOAT" num="1" value="9.030200e+01" lock="false" help="Value for dB power normalisation when 'dBpsd=true' (in dB SPL). Default is according to MPEG-1, psy I model." />
+</options>

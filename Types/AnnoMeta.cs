@@ -18,6 +18,7 @@ namespace ssi
         public string AnnotatorFullName { get; set; }
 
         public Collection<AnnoTrigger> Trigger { get; set; }
+        public Collection<Pipeline> Pipeline { get; set; }
 
         public AnnoMeta()
         {
@@ -26,6 +27,7 @@ namespace ssi
             Annotator = "";
             AnnotatorFullName = "";
             Trigger = new Collection<AnnoTrigger>();
+            Pipeline = new Collection<Pipeline>();
         }
     }
 }

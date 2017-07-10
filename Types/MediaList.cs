@@ -28,7 +28,8 @@ namespace ssi
             foreach (IMedia media in this)
             {
                 if (media.GetMediaType() == MediaType.VIDEO
-                    || media.GetMediaType() == MediaType.AUDIO)
+                    || media.GetMediaType() == MediaType.AUDIO
+                    || media.GetMediaType() == MediaType.PIPELINE)
                 {
                     media.Play();
                 }
@@ -41,7 +42,8 @@ namespace ssi
             foreach (IMedia media in this)
             {
                 if (media.GetMediaType() == MediaType.VIDEO
-                    || media.GetMediaType() == MediaType.AUDIO)
+                    || media.GetMediaType() == MediaType.AUDIO
+                    || media.GetMediaType() == MediaType.PIPELINE)
                 {
                     media.Pause();
                 }

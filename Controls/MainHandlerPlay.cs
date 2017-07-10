@@ -16,7 +16,7 @@ namespace ssi
 
         private void PlayTimer_Tick(object sender, EventArgs e)
         {
-            int elapsed = (Environment.TickCount - playLastTick);
+            int elapsed = (int) ((Environment.TickCount - playLastTick) * PlayerSpeed);
             Time.CurrentPlayPosition += elapsed / 1000.0;
 
             playLastTick = Environment.TickCount;

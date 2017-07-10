@@ -1,0 +1,13 @@
+<chain>
+	<meta frameStep="10ms" leftContext="10ms" rightContext="10ms"/>
+	<register>
+		<item name="signal"/>
+		<item name="opensmile"/>
+	</register>
+	<filter>
+		<item create="OSPreemphasis"/>
+	</filter>
+	<feature>
+		<item create="OSMfccChain" option="mfcc"/>
+	</feature>
+</chain>

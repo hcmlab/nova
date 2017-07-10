@@ -24,9 +24,9 @@
 
         <StackPanel Grid.Column="1" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Center">
             <Button Name="jumpFrontButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True" Focusable="False">|&lt;</Button>
-            <!--Button Name="fastBackwardButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">&lt;&lt;</-->
+            <Button Name="fastBackwardButton" Visibility="Collapsed" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">&lt;&lt;</Button>
             <Button Name="playButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="False" Focusable="False">></Button>
-            <!--Button Name="fastForwardButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">>></-->
+            <Button Name="fastForwardButton" Width="70" Visibility="Collapsed" Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True">>></Button>
             <Button Name="jumpEndButton" Width="70"  Height="25" Margin="5" VerticalAlignment="Center" IsEnabled="True" Focusable="False">&gt;|</Button>
         </StackPanel>
 

@@ -68,21 +68,37 @@ namespace ssi
 
                 if (currentOrNextItemIndex != -1)
                 {
+                    args.Clear();
+
                     if (position < annoList[currentOrNextItemIndex].Start &&
                         newPosition >= annoList[currentOrNextItemIndex].Start)
                     {
                         args["label"] = annoList[currentOrNextItemIndex].Label;
-                        trigger.call("update", args);
+                        args["time"] = annoList[currentOrNextItemIndex].Start;
+                        args["dur"] = (double)0.0f;
+                        args["state"] = 1;
+                        args["scheme"] = annoList.Scheme.Name;
+                        trigger.call("update_enter", args);
                     }
 
                     if (newPosition > annoList[currentOrNextItemIndex].Stop)
                     {
+
+                        args["label"] = annoList[currentOrNextItemIndex].Label;
+                        args["time"] = annoList[currentOrNextItemIndex].Start;
+                        args["dur"] =  annoList[currentOrNextItemIndex].Duration;
+                        args["scheme"] = annoList.Scheme.Name;
+                        args["state"] = 0;
+                        trigger.call("update_leave", args);
+
+
                         currentOrNextItemIndex++;
                         if (currentOrNextItemIndex >= annoList.Count)
                         {
                             currentOrNextItemIndex = -1;
                         }
                     }
+
                 }
             }
             else

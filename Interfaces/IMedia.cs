@@ -11,6 +11,7 @@ namespace ssi
         SKELETON,
         FACE,
         TRIGGER,
+        PIPELINE,
     };
 
     public interface IMedia

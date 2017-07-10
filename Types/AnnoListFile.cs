@@ -293,37 +293,7 @@ namespace ssi
                 {
                     if (meta.Attributes["role"] != null) list.Meta.Role = meta.Attributes["role"].Value;
                     if (meta.Attributes["annotator"] != null) list.Meta.Annotator = meta.Attributes["annotator"].Value;
-                    if (meta.Attributes["trigger"] != null)
-                    {
-                        string[] triggers = meta.Attributes["trigger"].Value.Split(';');
-                        foreach (string trigger in triggers)
-                        {
-                            try
-                            {
-                                Match match = Regex.Match(trigger, @"([^{]+)\{([^}]*)\}");
-                                if (match.Success && match.Groups.Count == 3)
-                                {
-                                    string dllName = match.Groups[1].Value;
-                                    string arguments = match.Groups[2].Value;
-                                    Dictionary<string, object> args = arguments.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(part => part.Split('='))
-                                        .ToDictionary(split => split[0], split => (object)split[1]);
-                                    PluginCaller pluginCaller = new PluginCaller(dllName + ".dll", dllName);
-                                    AnnoTrigger annoTrigger = new AnnoTrigger(list, pluginCaller, args);
-                                    list.Meta.Trigger.Add(annoTrigger);
-                                }
-                                else
-                                {
-                                    MessageTools.Warning("could not parse trigger '" + trigger + "'");
-                                }
-                            }
-                            catch (Exception)
-                            {
-                                MessageTools.Warning("could not parse trigger '" + trigger + "'");
-                            }
-                        }
-                        
-                    }
+                   
                 }
 
                 XmlNode scheme = annotation.SelectSingleNode("scheme");
@@ -558,10 +528,60 @@ namespace ssi
                         binaryReader.Close();
                     }
                 }
-                //else
-                //{
-                //    MessageBox.Show("Annotation data was not found, load scheme only from '" + filepath + "'");
-                //}
+
+
+                //Plugin logic should be called after parsing
+                if (meta.Attributes["trigger"] != null)
+                {
+                    string[] triggers = meta.Attributes["trigger"].Value.Split(';');
+                    foreach (string trigger in triggers)
+                    {
+                        try
+                        {
+                            Match match = Regex.Match(trigger, @"([^{]+)\{([^}]*)\}");
+                            if (match.Success && match.Groups.Count == 3)
+                            {
+                                string dllName = match.Groups[1].Value;
+                                string arguments = match.Groups[2].Value;
+                                Dictionary<string, object> args = arguments.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(part => part.Split('='))
+                                    .ToDictionary(split => split[0], split => (object)split[1]);
+                                PluginCaller pluginCaller = new PluginCaller(dllName + ".dll", dllName);
+                                AnnoTrigger annoTrigger = new AnnoTrigger(list, pluginCaller, args);
+                                list.Meta.Trigger.Add(annoTrigger);
+                            }
+                            else
+                            {
+                                MessageTools.Warning("could not parse trigger '" + trigger + "'");
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            MessageTools.Warning("could not parse trigger '" + trigger + "'");
+                        }
+                    }
+
+                }
+
+                if (meta.Attributes["pipeline"] != null)
+                {
+                    string[] pipelines = meta.Attributes["pipeline"].Value.Split(';');
+                    foreach (string pipeline in pipelines)
+                    {
+                        try
+                        {
+                                Pipeline pipe = new Pipeline(list, pipeline);
+                                list.Meta.Pipeline.Add(pipe);
+                        }
+                        catch (Exception)
+                        {
+                            MessageTools.Warning("could not parse pipeline '" + pipeline + "'");
+                        }
+                    }
+
+                }
+
+
             }
             catch
             {

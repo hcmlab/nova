@@ -35,7 +35,7 @@ namespace ssi
         #endregion CURSOR
 
         #region EVENTHANDLER
-
+        static double PlayerSpeed = 1.0;
 
         private void annoLiveMode_Changed(object sender, RoutedEventArgs e)
         {
@@ -96,7 +96,21 @@ namespace ssi
             {
                 Play();
             }
-        }     
+        }
+
+        private void fastForwardButton_Click(object sender, RoutedEventArgs e)
+        {
+            PlayerSpeed = PlayerSpeed * 2;
+        }
+
+        private void fastBackwardButton_Click(object sender, RoutedEventArgs e)
+        {
+            PlayerSpeed = PlayerSpeed * 0.5;
+        }
+
+
+
+
 
         private void updateNavigator()
         {

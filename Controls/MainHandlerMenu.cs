@@ -19,6 +19,11 @@ namespace ssi
             bool hasBox = box != null;
             bool isConnected = DatabaseHandler.IsConnected;
             bool isConnectedAndHasSession = isConnected && DatabaseHandler.IsSession;
+            bool hasDatabaseTier = false;
+            if (isConnectedAndHasSession && hasTier && tier.AnnoList.Source.HasDatabase)
+            {
+                hasDatabaseTier = true;
+            }
             int authentication = DatabaseHandler.CheckAuthentication();
 
             // file
@@ -47,6 +52,8 @@ namespace ssi
 
             control.annoSaveAllMenu.IsEnabled = hasTier;
             control.annoSaveMenu.IsEnabled = hasTier;
+            control.annoReloadMenu.IsEnabled = hasTier;
+            control.annoReloadBackupMenu.IsEnabled = hasDatabaseTier;
             control.annoExportMenu.IsEnabled = hasTier;
             control.convertSelectedTierMenu.IsEnabled = hasTier;
             control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && tier.IsContinuous;

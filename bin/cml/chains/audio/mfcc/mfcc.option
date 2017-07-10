@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<options readOnly="true">
+    <item name="deltas_enable" type="UINT" num="1" value="0" lock="false" help="get deltas of MFCC's" />
+</options>

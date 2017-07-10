@@ -188,6 +188,7 @@
     <Compile Include="Tools\Defaults.cs" />
     <Compile Include="Types\AnnoTrigger.cs" />
     <Compile Include="Types\Face.cs" />
+    <Compile Include="Types\Pipeline.cs" />
     <Compile Include="Types\PointList.cs" />
     <Compile Include="Types\PointListItem.cs" />
     <Compile Include="Types\SignalFile.cs" />
@@ -494,7 +495,9 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="App\App.config" />
+    <None Include="App\App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

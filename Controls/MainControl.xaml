@@ -19,8 +19,8 @@
                 <Image Source="/Resources/settings.png" Width="16"></Image>
             </Button>
             <MenuItem Header="FILE">
-                <MenuItem Header="Load Files (add to workspace)" Name="loadFilesMenu" />
-                <MenuItem Header="Load Project (clear workspace)" Name="fileLoadProjectMenu" />
+                <MenuItem Header="Load Files" Name="loadFilesMenu" />
+                <MenuItem Header="Load Project" Name="fileLoadProjectMenu" />
                 <MenuItem Header="Save Project" Name="fileSaveProjectMenu" />
                 <MenuItem Header="Export">
                     <MenuItem Header="To SSI Sample List" Name="exportSamplesMenu" />
@@ -37,7 +37,7 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="DATABASE">
-                <MenuItem Header="Load Session (clear workspace)" Name="databaseLoadSessionMenu" />
+                <MenuItem Header="Load Session" Name="databaseLoadSessionMenu" />
                 <MenuItem Header="Administration" Name="databaseAdminMenu">
                     <MenuItem Header="Manage Users" Name="databaseManageUsersMenu" />
                     <MenuItem Header="Manage Databases" Name="databaseManageDBsMenu" />
@@ -47,14 +47,16 @@
                 <MenuItem Header="Connect" Name="databaseConnectMenu" />
             </MenuItem>
             <MenuItem Header="ANNOTATION">
+                <MenuItem Header="Save" Name="annoSaveMenu" InputGestureText="Ctrl+S"/>
                 <MenuItem Header="Save All" Name="annoSaveAllMenu" />
-                <MenuItem Header="Save Selected" Name="annoSaveMenu" InputGestureText="Ctrl+S"/>
-                <MenuItem Header="Export Selected As" Name="annoExportMenu" />
-                <MenuItem Header="Convert Selected Annotation" Name="convertSelectedTierMenu">
+                <MenuItem Header="Reload" Name="annoReloadMenu" InputGestureText="Ctrl+R"/>
+                <MenuItem Header="Reload From Backup" Name="annoReloadBackupMenu" />
+                <MenuItem Header="Export As" Name="annoExportMenu" />
+                <MenuItem Header="Convert Annotation" Name="convertSelectedTierMenu">
                     <MenuItem Header="To Discrete Annotation" Name="convertAnnoContinuousToDiscreteMenu" />
                     <MenuItem Header="To Signal" Name="convertAnnoToSignalMenu" />
                 </MenuItem>
-                <MenuItem Header="Convert Selected Signal" Name="convertSignalMenu">
+                <MenuItem Header="Convert Signal" Name="convertSignalMenu">
                     <MenuItem Header="To Continuous Annotation" Name="convertSignalToAnnoContinuousMenu" />
                 </MenuItem>
             </MenuItem>
