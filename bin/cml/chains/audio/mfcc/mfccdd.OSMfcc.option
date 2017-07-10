@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<options readOnly="true">
+    <item name="first" type="UINT" num="1" value="0" lock="false" help="The first MFCC to compute." />
+    <item name="last" type="UINT" num="1" value="12" lock="false" help="The last MFCC to compute." />
+    <item name="floor" type="FLOAT" num="1" value="1.000000e-08" lock="false" help="The minimum value allowed for melspectra when taking the log spectrum (this parameter will be forced to 1.0 when htkcompatible=1)." />
+    <item name="lift" type="FLOAT" num="1" value="2.200000e+01" lock="false" help="Parameter for cepstral 'liftering', set this to 0.0 to disable cepstral liftering." />
+    <item name="htk" type="BOOL" num="1" value="false" lock="false" help="Appends the 0-th coefficient at the end instead of placing it as the first element of the output vector." />
+</options>

@@ -272,6 +272,10 @@ namespace ssi
             {                                
                 mediaList.Add(trigger);
             }
+            foreach (Pipeline pipeline in annoList.Meta.Pipeline)
+            {
+                mediaList.Add(pipeline);
+            }
         }
 
         private void loadCSVAnnoFile(string filename, double samplerate = 1, string type = "semicolon", string filter = null)
@@ -507,6 +511,12 @@ namespace ssi
 
         private void loadProject()
         {
+            MessageBoxResult result = MessageBox.Show("The workspace will be cleared. Do you want to continue?", "Question", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
+
             string[] filePath = FileTools.OpenFileDialog("NOVA Project (*.nova)|*.nova", false);
             if (filePath != null && filePath.Length > 0)
             {
@@ -524,6 +534,32 @@ namespace ssi
             {
                 AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams, force);
                 updateAnnoInfo(AnnoTierStatic.Selected);
+            }
+        }
+
+        private void reloadBackupSelectedAnno()
+        {
+            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList != null)
+            {
+                if (AnnoTierStatic.Selected.AnnoList.Source.HasDatabase)
+                {
+                    ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, true);
+                }
+            }
+        }
+
+        private void reloadSelectedAnno()
+        {
+            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList != null)
+            {
+                if (AnnoTierStatic.Selected.AnnoList.Source.HasFile)
+                {
+                    reloadAnnoTierFromFile(AnnoTierStatic.Selected);
+                }
+                else if (AnnoTierStatic.Selected.AnnoList.Source.HasDatabase)
+                {
+                    ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
+                }
             }
         }
 
@@ -992,6 +1028,16 @@ namespace ssi
         private void annoSave_Click(object sender, RoutedEventArgs e)
         {
             saveSelectedAnno();
+        }
+
+        private void annoReload_Click(object sender, RoutedEventArgs e)
+        {
+            reloadSelectedAnno();
+        }
+
+        private void annoReloadBackup_Click(object sender, RoutedEventArgs e)
+        {
+            reloadBackupSelectedAnno();
         }
 
         private void annoExport_Click(object sender, RoutedEventArgs e)

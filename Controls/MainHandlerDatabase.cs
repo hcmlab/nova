@@ -66,163 +66,150 @@ namespace ssi
             databaseConnect();
         }
 
-        private void databaseManage(Window dialog)
-        {
-            if (DatabaseHandler.IsSession)
-            {
-                MessageBoxResult result = MessageBox.Show("Before editing a database the workspace has to be cleared. Do you want to continue?", "Question", MessageBoxButton.YesNo);
-                if (result == MessageBoxResult.No)
-                {
-                    return;
-                }
-                clearWorkspace();
-            }            
-            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            dialog.ShowDialog();
-
-        }
+       
 
         private void databaseManageDBs()
         {           
             DatabaseAdminManageDBWindow dialog = new DatabaseAdminManageDBWindow();
-            databaseManage(dialog);
+            showDialogClearWorkspace(dialog);
         }
 
         private void databaseManageUsers()
         {            
             DatabaseAdminManageUsersWindow dialog = new DatabaseAdminManageUsersWindow();
-            databaseManage(dialog);
+            showDialogClearWorkspace(dialog);
         }
         private void databaseManageSessions()
         {
             DatabaseAdminManageSessionsWindow dialog = new DatabaseAdminManageSessionsWindow();
-            databaseManage(dialog);
+            showDialogClearWorkspace(dialog);
         }
 
         private void databaseManageAnnotations()
         {
             DatabaseAdminManageAnnotationsWindow dialog = new DatabaseAdminManageAnnotationsWindow();
-            databaseManage(dialog);
+            showDialogClearWorkspace(dialog);
         }
         private void databaseLoadSession()
         {
-            clearWorkspace();
+            
 
             DatabaseAnnoMainWindow dialog = new DatabaseAnnoMainWindow();
-            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            dialog.ShowDialog();
+            if(showDialogClearWorkspace(dialog) && (dialog.DialogResult == true))
+            {
 
-            if (dialog.DialogResult == false)
+                Action EmptyDelegate = delegate () { };
+                control.ShadowBox.Visibility = Visibility.Visible;
+                control.UpdateLayout();
+                control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+                System.Collections.IList annotations = dialog.Annotations();           
+                if (annotations != null && annotations.Count > 0)
+                {
+                    List<AnnoList> annoLists = DatabaseHandler.LoadSession(annotations);
+                    if (annoLists != null)
+                    {
+                        foreach (AnnoList annoList in annoLists)
+                        {
+                            addAnnoTierFromList(annoList);
+                        }
+                    }
+                }
+
+                control.ShadowBox.Visibility = Visibility.Collapsed;
+
+                List<string> streams = dialog.SelectedStreams();
+                databaseSessionStreams = streams;
+
+                if (streams != null && streams.Count > 0)
+                {
+                    List<string> streamsAll = new List<string>();
+                    foreach (string stream in streams)
+                    {
+                        if (stream.EndsWith("stream"))
+                        {
+                            streamsAll.Add(stream + "~");
+                        }
+                        streamsAll.Add(stream);
+
+                    }
+
+                    try
+                    {
+                        if (filesToDownload != null)
+                        {
+                            filesToDownload.Clear();
+                        }
+
+                        MainHandler.NumberOfAllCurrentDownloads = streamsAll.Count;
+
+                        foreach (string stream in streamsAll)
+                        {
+                            string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream;
+                            string url = "";
+                            bool requiresAuth = false;
+
+                            DatabaseDBMeta meta = new DatabaseDBMeta()
+                            {
+                                Name = DatabaseHandler.DatabaseName
+                            };
+                            if (!DatabaseHandler.GetDBMeta(ref meta))
+                            {
+                                continue;
+                            }
+                            if (meta.Server == "")
+                            {
+                                continue;
+                            }
+                           
+                            //In case we host our files on nextcloud, the file format is special. For now we only allow self-hosted, but in the future we add an option for nextcloud in general.
+                            if(meta.Server.Contains("https://hcm-lab.de/cloud"))
+                            {
+                                url = meta.Server + "/download?path=%2F" + DatabaseHandler.DatabaseName + "%2F" + DatabaseHandler.SessionName + "&files=" + stream;
+                            }
+                            else
+                            { 
+                                url = meta.Server + '/' + DatabaseHandler.SessionName + '/' + stream;
+                                requiresAuth = meta.ServerAuth;
+                            }
+
+                            string[] split = url.Split(':');
+                            string connection = split[0];                        
+                        
+                            Directory.CreateDirectory(Path.GetDirectoryName(localPath));
+
+                            if (connection == "sftp")
+                            {                            
+                                SFTP(url, localPath);
+                            }
+                            else if (connection == "http" || connection == "https" && requiresAuth == false)
+                            {                            
+                                httpGet(url, localPath);
+                            }
+                            else if (connection == "http" || connection == "https" && requiresAuth == true)
+                            {
+                                httpPost(url, localPath);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
+                    }
+                }
+            }
+        }
+
+        public void ReloadAnnoTierFromDatabase(AnnoTier tier, bool loadBackup)
+        {
+            if (tier == null || tier.AnnoList == null)
             {
                 return;
             }
 
-            Action EmptyDelegate = delegate () { };
-            control.ShadowBox.Visibility = Visibility.Visible;
-            control.UpdateLayout();
-            control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-
-            System.Collections.IList annotations = dialog.Annotations();           
-            if (annotations != null && annotations.Count > 0)
-            {
-                List<AnnoList> annoLists = DatabaseHandler.LoadSession(annotations);
-                if (annoLists != null)
-                {
-                    foreach (AnnoList annoList in annoLists)
-                    {
-                        addAnnoTierFromList(annoList);
-                    }
-                }
-            }
-
-            control.ShadowBox.Visibility = Visibility.Collapsed;
-
-            List<string> streams = dialog.SelectedStreams();
-            databaseSessionStreams = streams;
-
-            if (streams != null && streams.Count > 0)
-            {
-                List<string> streamsAll = new List<string>();
-                foreach (string stream in streams)
-                {
-                    if (stream.EndsWith("stream"))
-                    {
-                        streamsAll.Add(stream + "~");
-                    }
-                    streamsAll.Add(stream);
-
-                }
-
-                try
-                {
-                    if (filesToDownload != null)
-                    {
-                        filesToDownload.Clear();
-                    }
-
-                    MainHandler.NumberOfAllCurrentDownloads = streamsAll.Count;
-
-                    foreach (string stream in streamsAll)
-                    {
-                        string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream;
-                        string url = "";
-                        bool requiresAuth = false;
-
-                        DatabaseDBMeta meta = new DatabaseDBMeta()
-                        {
-                            Name = DatabaseHandler.DatabaseName
-                        };
-                        if (!DatabaseHandler.GetDBMeta(ref meta))
-                        {
-                            continue;
-                        }
-                        if (meta.Server == "")
-                        {
-                            continue;
-                        }
-                           
-                        //In case we host our files on nextcloud, the file format is special. For now we only allow self-hosted, but in the future we add an option for nextcloud in general.
-                        if(meta.Server.Contains("https://hcm-lab.de/cloud"))
-                        {
-                            url = meta.Server + "/download?path=%2F" + DatabaseHandler.DatabaseName + "%2F" + DatabaseHandler.SessionName + "&files=" + stream;
-                        }
-                        else
-                        { 
-                            url = meta.Server + '/' + DatabaseHandler.SessionName + '/' + stream;
-                            requiresAuth = meta.ServerAuth;
-                        }
-
-                        string[] split = url.Split(':');
-                        string connection = split[0];                        
-                        
-                        Directory.CreateDirectory(Path.GetDirectoryName(localPath));
-
-                        if (connection == "sftp")
-                        {                            
-                            SFTP(url, localPath);
-                        }
-                        else if (connection == "http" || connection == "https" && requiresAuth == false)
-                        {                            
-                            httpGet(url, localPath);
-                        }
-                        else if (connection == "http" || connection == "https" && requiresAuth == true)
-                        {
-                            httpPost(url, localPath);
-                        }
-                    }
-                }
-                catch
-                {
-                    MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
-                }
-            }
-     
-        }
-
-        public void ReloadAnnoTierFromDatabase(AnnoTier tier)
-        {
-            if (tier == null)
-            {
+            if (loadBackup && tier.AnnoList.Source.Database.DataBackupOID == AnnoSource.DatabaseSource.ZERO)
+            {                
+                MessageTools.Warning("No backup exists");
                 return;
             }
 
@@ -239,7 +226,7 @@ namespace ssi
             annotation.Annotator = tier.AnnoList.Meta.Annotator;
             annotation.Session = DatabaseHandler.SessionName;
 
-            AnnoList annoList = DatabaseHandler.LoadAnnoList(annotation);
+            AnnoList annoList = DatabaseHandler.LoadAnnoList(annotation, loadBackup);
             double maxdur = 0;
 
             if (annoList != null && annoList.Count > 0 && annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
@@ -303,7 +290,7 @@ namespace ssi
                         Role = role,
                         Scheme = scheme.Name
                     };
-                    annoList = DatabaseHandler.LoadAnnoList(annotation);
+                    annoList = DatabaseHandler.LoadAnnoList(annotation, false);
                     annoList.HasChanged = false;
                 }
                 else

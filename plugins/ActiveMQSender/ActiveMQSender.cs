@@ -43,7 +43,7 @@ namespace ssi
             return null;
         }
 
-        public string update(Dictionary<string, object> parameters)
+        public string update_enter(Dictionary<string, object> parameters)
         {
             try
             { 
@@ -63,6 +63,11 @@ namespace ssi
                 return ex.ToString();
             }
 
+            return null;
+        }
+
+        public string update_leave(Dictionary<string, object> parameters)
+        {
             return null;
         }
 

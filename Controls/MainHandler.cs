@@ -159,6 +159,8 @@ namespace ssi
             control.menu.MouseEnter += tierMenu_MouseEnter;
 
             control.annoSaveMenu.Click += annoSave_Click;
+            control.annoReloadMenu.Click += annoReload_Click;
+            control.annoReloadBackupMenu.Click += annoReloadBackup_Click;
             control.annoExportMenu.Click += annoExport_Click;
             control.annoSaveAllMenu.Click += annoSaveAll_Click;
 
@@ -205,6 +207,10 @@ namespace ssi
             control.navigator.playButton.Click += navigatorPlay_Click;
             control.navigator.jumpEndButton.Click += navigatorJumpEnd_Click;
 
+            control.navigator.fastForwardButton.Click += fastForwardButton_Click;
+            control.navigator.fastBackwardButton.Click += fastBackwardButton_Click;
+
+
             // Timeline
 
             timeline = new Timeline();
@@ -214,6 +220,21 @@ namespace ssi
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += control.timeLineControl.timeTrackSelection.TimeRangeChanged;
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += Time.TimelineChanged;
             control.timeLineControl.rangeSlider.Update();
+
+
+
+            // Database
+
+            control.databaseConnectMenu.Click += DatabaseConnectMenu_Click;
+            if (Properties.Settings.Default.DatabaseAutoLogin)
+            {
+                databaseConnect();
+            }
+            else
+            {
+                updateNavigator();
+            }
+
 
             // Mouse
 
@@ -289,17 +310,6 @@ namespace ssi
             }
 
 
-            // Database
-
-            control.databaseConnectMenu.Click += DatabaseConnectMenu_Click;            
-            if (Properties.Settings.Default.DatabaseAutoLogin)
-            {
-                databaseConnect();
-            }            
-            else
-            {
-                updateNavigator();
-            }
 
             // Clear
 
@@ -521,6 +531,24 @@ namespace ssi
         private void annoSaveAll_Click(object sender, RoutedEventArgs e)
         {
             saveAllAnnos();
+        }
+
+
+        private bool showDialogClearWorkspace(Window dialog)
+        {
+            if (DatabaseHandler.IsSession)
+            {
+                MessageBoxResult result = MessageBox.Show("The workspace will be cleared. Do you want to continue?", "Question", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return false;
+                }
+                clearWorkspace();
+            }
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dialog.ShowDialog();
+            return true;
+
         }
 
         private void showSettings()

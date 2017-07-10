@@ -63,7 +63,9 @@ namespace ssi
 
             public ObjectId OID { get; set; }
 
-            public ObjectId DataID { get; set; }
+            public ObjectId DataOID { get; set; }
+
+            public ObjectId DataBackupOID { get; set; }
 
             public override string ToString()
             {
@@ -73,6 +75,8 @@ namespace ssi
             public DatabaseSource ()
             {
                 OID = ZERO;
+                DataOID = ZERO;
+                DataBackupOID = ZERO;
             }
         }
 

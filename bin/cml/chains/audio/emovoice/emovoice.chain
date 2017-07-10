@@ -1,0 +1,9 @@
+<chain>
+	<meta frameStep="40ms" leftContext="480ms" rightContext="480ms"/>
+	<register>		
+		<item name="emovoice"/>
+	</register>	
+	<feature>
+		<item create="EmoVoiceFeat"/>
+	</feature>
+</chain>

@@ -1,0 +1,9 @@
+<chain>
+	<meta frameStep="40ms"/>		
+	<register>
+		<item name="signal"/>		
+	</register>	
+	<feature>
+		<item create="Mean"/>
+	</feature>
+</chain>

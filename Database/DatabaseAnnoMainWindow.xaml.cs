@@ -221,7 +221,6 @@ namespace ssi
             
             if (StreamsBox.HasItems)
             {
-                StreamsBox.SelectedIndex = 0;
                 if (selectedItem != null)
                 {
                     StreamsBox.SelectedItem = items.Find(item => item.Name == selectedItem);
@@ -475,7 +474,7 @@ namespace ssi
                             {
                                 if (stream.Name == name)
                                 {
-                                    StreamsBox.SelectedItems.Add(stream.Name);
+                                    StreamsBox.SelectedItems.Add(stream);
                                 }
                             }
                         }

@@ -19,28 +19,28 @@ namespace ssi
     {
         private MainHandler handler;
         private Mode mode;
-        private AnnoSource undoSource;
-        private AnnoMeta undoMeta;
 
         public class Trainer
         {
             public string Path { get; set; }
             public string Name { get; set; }
-            public string Left { get; set; }
-            public string Right { get; set; }
+            public string LeftContext { get; set; }
+            public string RightContext { get; set; }
             public string Balance { get; set; }
+
             public override string ToString()
             {
-                return Name + " [ left=" + Left + " right=" + Right + " balance=" + Balance + " ]";
+                return Name;
             }
         }
+
+        private string tempTrainerPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
 
         public enum Mode
         {
             TRAIN,
             PREDICT,
-            COMPLETE,
-            COMPLETE_UNDO,
+            COMPLETE
         }
 
         public DatabaseCMLTrainAndPredictWindow(MainHandler handler, Mode mode)
@@ -51,7 +51,10 @@ namespace ssi
             this.mode = mode;
 
             Loaded += DatabaseCMLTrainAndPredictWindow_Loaded;
-           
+
+            HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.";
+            HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";
+            
             switch (mode)
             {
                 case Mode.COMPLETE:
@@ -61,7 +64,9 @@ namespace ssi
 
                     ShowAllSessionsCheckBox.Visibility = Visibility.Collapsed;
                     PredictOptionsPanel.Visibility = Visibility.Visible;
+                    TrainOptionsPanel.Visibility = Visibility.Visible;
                     ForceCheckBox.Visibility = Visibility.Collapsed;
+                    TrainerNameTextBox.IsEnabled = false;
 
                     ConfidenceCheckBox.IsChecked = Properties.Settings.Default.CMLSetConf;
                     FillGapCheckBox.IsChecked = Properties.Settings.Default.CMLFill;
@@ -79,6 +84,7 @@ namespace ssi
                     ApplyButton.Content = "Train";
                     ShowAllSessionsCheckBox.Visibility = Visibility.Collapsed;
                     PredictOptionsPanel.Visibility = Visibility.Collapsed;
+                    TrainOptionsPanel.Visibility = Visibility.Visible;
                     ForceCheckBox.Visibility = Visibility.Visible;  
                                       
                     break;
@@ -87,8 +93,10 @@ namespace ssi
 
                     Title = "Predict Annotations";
                     ApplyButton.Content = "Predict";
+
                     ShowAllSessionsCheckBox.Visibility = Visibility.Visible;
                     PredictOptionsPanel.Visibility = Visibility.Visible;
+                    TrainOptionsPanel.Visibility = Visibility.Collapsed;                    
                     ForceCheckBox.Visibility = Visibility.Collapsed;
 
                     ConfidenceCheckBox.IsChecked = Properties.Settings.Default.CMLSetConf;
@@ -113,7 +121,7 @@ namespace ssi
             if (mode == Mode.COMPLETE)
             {
                 AnnoList annoList = AnnoTierStatic.Selected.AnnoList;
-                DatabaseBox.IsEnabled = false;
+                DatabasesBox.IsEnabled = false;
                 SchemesBox.SelectedItem = annoList.Scheme.Name;
                 SchemesBox.IsEnabled = false;
                 RolesBox.SelectedItem = annoList.Meta.Role;
@@ -141,41 +149,13 @@ namespace ssi
             GetStreams();
 
             ApplyButton.Focus();
+            Update();
         }
 
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
-            if (TrainerPathComboBox.SelectedItem == null)
-            {
-                MessageTools.Warning("select a trainer first");
-                return;
-            }
-
             Properties.Settings.Default.CMLDefaultTrainer = TrainerPathComboBox.SelectedItem.ToString();
             Properties.Settings.Default.Save();
-
-            if (mode == Mode.COMPLETE_UNDO)
-            {
-                AnnoList annoList = AnnoList.LoadfromFile("~.annotation");
-                annoList.Source = undoSource;
-                annoList.Meta = undoMeta;
-                annoList.Save(null, true);
-
-                handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected);
-
-                ApplyButton.Content = "Complete";
-                mode = Mode.COMPLETE;
-
-                return;
-            }
-
-            if (mode == Mode.COMPLETE)
-            {
-                AnnoList annoList = AnnoTierStatic.Selected.AnnoList;
-                annoList.SaveToFile("~.annotation");
-                undoSource = annoList.Source;
-                undoMeta = annoList.Meta;
-            }
 
             Trainer trainer = (Trainer) TrainerPathComboBox.SelectedItem;
             bool force = mode == Mode.COMPLETE || ForceCheckBox.IsChecked.Value;
@@ -185,13 +165,7 @@ namespace ssi
                 MessageTools.Warning("file does not exist '" + trainer.Path + "'");
                 return;
             }
-
-            if (DatabaseBox.SelectedItem == null || SessionsBox.SelectedItem == null || StreamsBox.SelectedItem == null)
-            {
-                MessageTools.Warning("select database, annotation, session(s) and stream first");
-                return;
-            }
-
+            
             string database = DatabaseHandler.DatabaseName;
 
             DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;                        
@@ -229,6 +203,10 @@ namespace ssi
             string annotatorFullName = (string)AnnotatorsBox.SelectedItem;
             string annotator = DatabaseHandler.Annotators.Find(a => a.FullName == annotatorFullName).Name;
 
+            string trainerLeftContext = LeftContextTextBox.Text;
+            string trainerRightContext = RightContextTextBox.Text;
+            string trainerBalance = ((ComboBoxItem) BalanceComboBox.SelectedItem).Content.ToString();
+
             logTextBox.Text = "";
 
             if (mode == Mode.TRAIN 
@@ -240,7 +218,7 @@ namespace ssi
                     return;
                 }
                 string streamName = streamParts[1];
-                for (int i = 2; i < streamParts.Length - 1; i++)
+                for (int i = 2; i < streamParts.Length; i++)
                 {
                     streamName += "." + streamParts[i];
                 }
@@ -253,8 +231,9 @@ namespace ssi
                                 streamName + "}\\" +
                                 scheme.Name + "\\";
                 Directory.CreateDirectory(trainerDir);
-
-                string trainerOutPath = mode == Mode.COMPLETE ? "~" : trainerDir + trainer.Name;
+                
+                string trainerName = TrainerNameTextBox.Text == "" ? trainer.Name : TrainerNameTextBox.Text;
+                string trainerOutPath = mode == Mode.COMPLETE ? tempTrainerPath : trainerDir + trainerName;
 
                 if (force || !File.Exists(trainerOutPath + ".trainer"))
                 {
@@ -270,9 +249,9 @@ namespace ssi
                         rolesList,
                         annotator,
                         stream.Name,
-                        trainer.Left,
-                        trainer.Right,
-                        trainer.Balance,
+                        trainerLeftContext,
+                        trainerRightContext,
+                        trainerBalance,
                         mode == Mode.COMPLETE);
                 }
                 else
@@ -306,7 +285,7 @@ namespace ssi
                     }                                                          
                     Properties.Settings.Default.Save();
                     
-                    logTextBox.Text += handler.CMLPredictAnnos(mode == Mode.COMPLETE ? "~" : trainer.Path,
+                    logTextBox.Text += handler.CMLPredictAnnos(mode == Mode.COMPLETE ? tempTrainerPath : trainer.Path,
                         Properties.Settings.Default.DatabaseDirectory,
                         Properties.Settings.Default.DatabaseAddress,
                         Properties.Settings.Default.MongoDBUser,
@@ -317,8 +296,8 @@ namespace ssi
                         rolesList,
                         annotator,
                         stream.Name,
-                        trainer.Left,
-                        trainer.Right,
+                        trainerLeftContext,
+                        trainerRightContext,
                         confidence,
                         minGap,
                         minDur,                        
@@ -327,23 +306,17 @@ namespace ssi
                 
             }
 
-            if (mode == Mode.PREDICT)
-            {
-                foreach (AnnoTier tier in MainHandler.annoTiers)
-                {
-                    if (tier.AnnoList.Source.HasDatabase)
-                    {
-                        handler.ReloadAnnoTierFromDatabase(tier);
-                    }
-                }
-            }
-
-
             if (mode == Mode.COMPLETE)
             {
-                handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected);
-                ApplyButton.Content = "Undo";
-                mode = Mode.COMPLETE_UNDO;                
+                handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
+
+                var dir = new DirectoryInfo(Path.GetDirectoryName(tempTrainerPath));
+                foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*"))
+                {
+                    file.Delete();
+                }
+
+                Close();
             }
            
         }
@@ -364,29 +337,31 @@ namespace ssi
 
         public void GetDatabases(string selectedItem = null)
         {
-            DatabaseBox.Items.Clear();
+            DatabasesBox.Items.Clear();
 
             List<string> databases = DatabaseHandler.GetDatabases();
 
             foreach (string db in databases)
             {
-                DatabaseBox.Items.Add(db);
+                DatabasesBox.Items.Add(db);
             }
 
-            Select(DatabaseBox, selectedItem);
+            Select(DatabasesBox, selectedItem);
         }
 
-        private void DataBaseResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DatabasesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DatabaseBox.SelectedItem != null)
+            if (DatabasesBox.SelectedItem != null)
             {
-                string name = DatabaseBox.SelectedItem.ToString();
+                string name = DatabasesBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(name);
                 GetAnnotators();
                 GetRoles();
                 GetSchemes();
-                GetStreams();
+                GetStreams();                
             }
+
+            Update();
         }
 
         public void GetSchemes()
@@ -587,15 +562,15 @@ namespace ssi
                 SessionsBox.ItemsSource = DatabaseHandler.Sessions;
             }
 
-            SessionsBox.SelectAll();
+            if (SessionsBox.HasItems)
+            {
+                SessionsBox.SelectedIndex = 0;
+            }
         } 
 
         private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (SessionsBox.SelectedItem != null)
-            {
-                DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;                
-            }
+        {            
+            Update();
         }    
 
         private bool parseTrainerFile(ref Trainer chain)
@@ -607,35 +582,26 @@ namespace ssi
                 doc.Load(chain.Path);
 
                 chain.Name = Path.GetFileNameWithoutExtension(chain.Path);
+                chain.LeftContext = "0";
+                chain.RightContext = "0";
+                chain.Balance = "none";
 
                 foreach (XmlNode node in doc.SelectNodes("//meta"))
                 {
                     var leftContext = node.Attributes["leftContext"];
                     if (leftContext != null)
                     {
-                        chain.Left = leftContext.Value;
-                    }
-                    else
-                    {
-                        chain.Left = "0";
+                        chain.LeftContext = leftContext.Value;
                     }
                     var rightContext = node.Attributes["rightContext"];
                     if (rightContext != null)
                     {
-                        chain.Right = rightContext.Value;
-                    }
-                    else
-                    {
-                        chain.Right = "0";
+                        chain.RightContext = rightContext.Value;
                     }
                     var balance = node.Attributes["balance"];
                     if (balance != null)
                     {
                         chain.Balance = balance.Value;
-                    }
-                    else
-                    {
-                        chain.Balance = "none";
                     }
                 }
             }
@@ -658,7 +624,7 @@ namespace ssi
                 return trainers;
             }
             string streamName = streamParts[1];
-            for (int i = 2; i < streamParts.Length - 1; i++)
+            for (int i = 2; i < streamParts.Length; i++)
             {
                 streamName += "." + streamParts[i];
             }
@@ -740,9 +706,12 @@ namespace ssi
                 if(scheme != null)
                 {
                     bool isDiscrete = scheme.Type == AnnoScheme.TYPE.DISCRETE;
-                    FillGapPanel.Visibility = isDiscrete ? Visibility.Visible : Visibility.Collapsed;
-                    RemoveLabelPanel.Visibility = isDiscrete ? Visibility.Visible : Visibility.Collapsed;
-    
+
+                    FillGapCheckBox.IsEnabled = isDiscrete;
+                    FillGapTextBox.IsEnabled = isDiscrete;
+                    RemoveLabelCheckBox.IsEnabled = isDiscrete;
+                    RemoveLabelTextBox.IsEnabled = isDiscrete;
+
                     bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
 
                     List<Trainer> trainers = getTrainer(stream, scheme, template);
@@ -757,18 +726,17 @@ namespace ssi
             {
                 TrainerPathComboBox.SelectedIndex = 0;
                 TrainerPathComboBox.SelectedItem = Properties.Settings.Default.CMLDefaultTrainer;
-                ApplyButton.IsEnabled = true;
-            }          
-            else
-            {
-                ApplyButton.IsEnabled = false;
             }
+
+            Update();
         }
 
         private void Annotations_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             GetSessions();
             GetStreams();
+
+            Update();
         }
 
         private void ShowAllSessionsCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -821,6 +789,53 @@ namespace ssi
             Properties.Settings.Default.CMLRemove = false;
             Properties.Settings.Default.Save();
             RemoveLabelTextBox.IsEnabled = false;
+        }
+
+        private void TrainerPathComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TrainerPathComboBox.SelectedItem != null)
+            {
+                Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+                LeftContextTextBox.Text = trainer.LeftContext;
+                RightContextTextBox.Text = trainer.RightContext;
+                BalanceComboBox.SelectedIndex = 0;
+                if (trainer.Balance.ToLower() == "under")
+                {
+                    BalanceComboBox.SelectedIndex = 1;
+                } else if (trainer.Balance.ToLower() == "over")
+                {
+                    BalanceComboBox.SelectedIndex = 2;
+                }
+                string database = "";
+                if (DatabasesBox.SelectedItem != null)
+                {
+                    database = DatabasesBox.SelectedItem.ToString() + ".";
+                }
+                TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database + trainer.Name;
+            }
+        }
+
+        private void Update()
+        {
+            bool enable = false;
+
+            if (TrainerPathComboBox.Items.Count > 0
+                && DatabasesBox.SelectedItem != null 
+                && SessionsBox.SelectedItem != null 
+                && StreamsBox.SelectedItem != null
+                && RolesBox.SelectedItem != null
+                && AnnotatorsBox.SelectedItem != null
+                && SchemesBox.SelectedItem != null)
+            {
+                enable = true;
+            }
+
+            ApplyButton.IsEnabled = enable;
+            TrainOptionsPanel.IsEnabled = enable;
+            PredictOptionsPanel.IsEnabled = enable;
+            ForceCheckBox.IsEnabled = enable;
+            TrainerPathComboBox.IsEnabled = enable;
+
         }
     }
 }
