@@ -345,44 +345,30 @@ namespace ssi
             return dialog.DialogResult.Value;
         }
 
-        public static bool AddSchemeDialog(ref AnnoScheme scheme, double defaultSr = 25.0)
+        public static AnnoScheme AddSchemeDialog(double defaultSr = 25.0)
         {
-            AnnoTierNewSchemeWindow dialog = new AnnoTierNewSchemeWindow();
+            AnnoScheme scheme = null;
+
+            AnnoTierNewSchemeWindow dialog = new AnnoTierNewSchemeWindow(defaultSr);
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.ShowDialog();
 
             if (dialog.DialogResult == true)
-            {                
-                AnnoScheme.TYPE annoType = dialog.Result();
-                scheme.Type = annoType;
-
-                if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            {
+                scheme = dialog.Scheme;
+                if (!dialog.LoadedFromFile)
                 {
-                    scheme.SampleRate = defaultSr;
-                    scheme.MinScore = 0.0;
-                    scheme.MaxScore = 1.0;
-                    scheme.MinOrBackColor = Defaults.Colors.GradientMin;
-                    scheme.MaxOrForeColor = Defaults.Colors.GradientMax;
+                    UpdateSchemeDialog(ref scheme);
                 }
-                else if (scheme.Type == AnnoScheme.TYPE.POINT)
-                {
-                    scheme.SampleRate = defaultSr;
-                    scheme.NumberOfPoints = 1;
-                    scheme.MaxOrForeColor = Colors.Green;
-                }
-
-                return UpdateSchemeDialog(ref scheme);                                
             }
 
-            return false;
+            return scheme;
         }
 
         public void addNewAnnotationFile()
         {
             if (Time.TotalDuration > 0)
-            {
-                AnnoScheme scheme = new AnnoScheme();
-
+            {                
                 double defaultSr = 25.0;
                 foreach (IMedia m in mediaList)
                 {
@@ -393,7 +379,8 @@ namespace ssi
                     }
                 }
 
-                if (AddSchemeDialog(ref scheme, defaultSr))
+                AnnoScheme scheme = AddSchemeDialog(defaultSr);
+                if (scheme != null)
                 {                  
                     AnnoList annoList = new AnnoList() { Scheme = scheme };
                     annoList.Source.StoreToFile = true;

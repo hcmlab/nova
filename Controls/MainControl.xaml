@@ -61,8 +61,9 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="LEARNING" Name="databaseCMLMenu">
-                <MenuItem Header="Merge Annotations" Name="databaseCMLMergeMenu" />
+                <MenuItem Header="Merge Annotations" Name="databaseCMLMergeAnnotationsMenu" />
                 <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
+                <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
                 <MenuItem Header="Train Models" Name="databaseCMLTrainMenu"/>
                 <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu"/>

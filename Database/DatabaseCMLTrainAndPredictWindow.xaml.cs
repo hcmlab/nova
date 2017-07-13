@@ -129,12 +129,16 @@ namespace ssi
             }
 
             if (mode == Mode.COMPLETE ||
-                (mode == Mode.PREDICT && DatabaseHandler.CheckAuthentication() <= 2))
+                mode == Mode.PREDICT)
             {
                 string annotatorName = Properties.Settings.Default.MongoDBUser;
                 string annotatorFullName = DatabaseHandler.Annotators.Find(a => a.Name == annotatorName).FullName;
-                AnnotatorsBox.SelectedItem = annotatorFullName;
-                AnnotatorsBox.IsEnabled = false;
+                AnnotatorsBox.SelectedItem = annotatorFullName;                
+                AnnotatorsBox.IsEnabled = DatabaseHandler.CheckAuthentication() > 2;
+            }
+            else
+            {
+                AnnotatorsBox.SelectedItem = Defaults.CML.GoldStandardFullName;
             }
 
             GetSessions();
@@ -223,13 +227,15 @@ namespace ssi
                     streamName += "." + streamParts[i];
                 }
 
-                string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +                                
+                string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
                                 Defaults.CML.ModelsFolderName + "\\" +
                                 Defaults.CML.ModelsTrainerFolderName + "\\" +
                                 scheme.Type.ToString().ToLower() + "\\" +
+                                scheme.Name + "\\" +
                                 stream.Type + "{" +
                                 streamName + "}\\" +
-                                scheme.Name + "\\";
+                                trainer.Name + "\\";
+                                
                 Directory.CreateDirectory(trainerDir);
                 
                 string trainerName = TrainerNameTextBox.Text == "" ? trainer.Name : TrainerNameTextBox.Text;
@@ -266,19 +272,19 @@ namespace ssi
                 if (true || force)
                 {
                     double confidence = -1.0;
-                    if (ConfidenceTextBox.IsEnabled)
+                    if (ConfidenceCheckBox.IsChecked == true && ConfidenceTextBox.IsEnabled)
                     {
                         double.TryParse(ConfidenceTextBox.Text, out confidence);
                         Properties.Settings.Default.CMLDefaultConf = confidence;
                     }
                     double minGap = 0.0;
-                    if (FillGapTextBox.IsEnabled)
+                    if (FillGapCheckBox.IsChecked == true && FillGapTextBox.IsEnabled)
                     {
                         double.TryParse(FillGapTextBox.Text, out minGap);
                         Properties.Settings.Default.CMLDefaultGap = minGap;
                     }
                     double minDur = 0.0;
-                    if (RemoveLabelTextBox.IsEnabled)
+                    if (RemoveLabelCheckBox.IsChecked == true && RemoveLabelTextBox.IsEnabled)
                     {
                         double.TryParse(RemoveLabelTextBox.Text, out minDur);
                         Properties.Settings.Default.CMLDefaultMinDur = minDur;
@@ -573,35 +579,37 @@ namespace ssi
             Update();
         }    
 
-        private bool parseTrainerFile(ref Trainer chain)
+        private bool parseTrainerFile(ref Trainer trainer, bool isTemplate)
         {
             XmlDocument doc = new XmlDocument();
 
             try
             {
-                doc.Load(chain.Path);
+                doc.Load(trainer.Path);
 
-                chain.Name = Path.GetFileNameWithoutExtension(chain.Path);
-                chain.LeftContext = "0";
-                chain.RightContext = "0";
-                chain.Balance = "none";
+                string[] tokens = trainer.Path.Split('\\');
+
+                trainer.Name = isTemplate ? Path.GetFileNameWithoutExtension(trainer.Path) : tokens[tokens.Length - 2] + " > " + Path.GetFileNameWithoutExtension(trainer.Path);
+                trainer.LeftContext = "0";
+                trainer.RightContext = "0";
+                trainer.Balance = "none";
 
                 foreach (XmlNode node in doc.SelectNodes("//meta"))
                 {
                     var leftContext = node.Attributes["leftContext"];
                     if (leftContext != null)
                     {
-                        chain.LeftContext = leftContext.Value;
+                        trainer.LeftContext = leftContext.Value;
                     }
                     var rightContext = node.Attributes["rightContext"];
                     if (rightContext != null)
                     {
-                        chain.RightContext = rightContext.Value;
+                        trainer.RightContext = rightContext.Value;
                     }
                     var balance = node.Attributes["balance"];
                     if (balance != null)
                     {
-                        chain.Balance = balance.Value;
+                        trainer.Balance = balance.Value;
                     }
                 }
             }
@@ -614,9 +622,17 @@ namespace ssi
             return true;
         }
 
-        private List<Trainer> getTrainer(DatabaseStream stream, DatabaseScheme scheme, bool template)
+        private List<Trainer> getTrainer(DatabaseStream stream, DatabaseScheme scheme, bool isTemplate)
         {
             List<Trainer> trainers = new List<Trainer>();
+
+            if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            {
+                if (stream.SampleRate != scheme.SampleRate)
+                {
+                    return trainers;
+                }
+            }
 
             string[] streamParts = stream.Name.Split('.');
             if (streamParts.Length <= 1)
@@ -629,56 +645,42 @@ namespace ssi
                 streamName += "." + streamParts[i];
             }
 
-            if (template)
+            string trainerDir = null;
+
+            if (isTemplate)
             {
-
-                string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
-                                    Defaults.CML.ModelsFolderName + "\\" +
-                                    Defaults.CML.ModelsTemplatesFolderName + "\\" +
-                                    scheme.Type.ToString().ToLower() + "\\" +
-                                    stream.Type;
-
-                if (Directory.Exists(trainerDir))
-                {
-                    string[] searchDirs = Directory.GetDirectories(trainerDir);
-                    foreach (string searchDir in searchDirs)
-                    {
-                        string[] trainerFiles = Directory.GetFiles(searchDir, "*." + Defaults.CML.TrainerFileExtension);
-                        foreach (string trainerFile in trainerFiles)
-                        {
-                            Trainer trainer = new Trainer() { Path = trainerFile };
-                            if (parseTrainerFile(ref trainer))
-                            {
-                                trainers.Add(trainer);
-                            }
-                        }
-                    }
-                }
-
+                trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
+                    Defaults.CML.ModelsFolderName + "\\" +
+                    Defaults.CML.ModelsTemplatesFolderName + "\\" +
+                    scheme.Type.ToString().ToLower() + "\\" +
+                    stream.Type;
             }
             else
             {
-                string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
-                Defaults.CML.ModelsFolderName + "\\" +
-                Defaults.CML.ModelsTrainerFolderName + "\\" +
-                scheme.Type.ToString().ToLower() + "\\" +
-                stream.Type + "{" +
-                streamName + "}\\" +
-                scheme.Name;
+                trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
+                    Defaults.CML.ModelsFolderName + "\\" +
+                    Defaults.CML.ModelsTrainerFolderName + "\\" +
+                    scheme.Type.ToString().ToLower() + "\\" +
+                    scheme.Name + "\\" +
+                    stream.Type + "{" +
+                    streamName + "}\\";                                
+            }
 
-                if (Directory.Exists(trainerDir))
+            if (Directory.Exists(trainerDir))
+            {
+                string[] searchDirs = Directory.GetDirectories(trainerDir);
+                foreach (string searchDir in searchDirs)
                 {
-                    string[] trainerFiles = Directory.GetFiles(trainerDir, "*." + Defaults.CML.TrainerFileExtension);
+                    string[] trainerFiles = Directory.GetFiles(searchDir, "*." + Defaults.CML.TrainerFileExtension);
                     foreach (string trainerFile in trainerFiles)
                     {
                         Trainer trainer = new Trainer() { Path = trainerFile };
-                        if (parseTrainerFile(ref trainer))
+                        if (parseTrainerFile(ref trainer, isTemplate))
                         {
                             trainers.Add(trainer);
                         }
                     }
                 }
-
             }
 
             return trainers;
@@ -809,9 +811,9 @@ namespace ssi
                 string database = "";
                 if (DatabasesBox.SelectedItem != null)
                 {
-                    database = DatabasesBox.SelectedItem.ToString() + ".";
+                    database = DatabasesBox.SelectedItem.ToString();
                 }
-                TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database + trainer.Name;
+                TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database;
             }
         }
 

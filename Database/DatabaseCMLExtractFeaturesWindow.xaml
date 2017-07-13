@@ -69,6 +69,11 @@
                                     <Binding Path="Type" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Rate">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="SampleRate" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>
@@ -102,7 +107,7 @@
                 </ListView.View>
             </ListView>
 
-            <Grid Grid.Row="2" Grid.ColumnSpan="3" Margin="0,5,5,0" >
+            <Grid Name="ExtractPanel" Grid.Row="2" Grid.ColumnSpan="3" Margin="0,5,5,0" >
                 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -130,8 +135,8 @@
 
             <DockPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <Button Content="Extract" Name="ExtractButton" Click="Extract_Click" Width="75" Height="30"/>
-                    <Label VerticalAlignment="Center">Threads</Label>
+                    <Button Content="Extract" Name="ExtractButton" Click="ExtractOrMerge_Click" Width="75" Height="30"/>
+                    <Label Name="NParallelLabel" VerticalAlignment="Center">Threads</Label>
                     <TextBox Name="NParallelTextBox" Height="20" Width="30" VerticalAlignment="Center">1</TextBox>
                     <CheckBox Name="ForceCheckBox" Margin="5" VerticalAlignment="Center">Force</CheckBox>
                 </StackPanel>

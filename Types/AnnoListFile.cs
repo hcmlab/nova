@@ -27,7 +27,7 @@ namespace ssi
                 sw.WriteLine("<annotation ssi-v=\"3\">");
 
                 sw.WriteLine("    <info ftype=\"" + Source.File.Type.ToString() + "\" size=\"" + this.Count + "\" />");              
-                sw.WriteLine("    <meta annotator=\"" + Properties.Settings.Default.Annotator + "\"/>");
+                sw.WriteLine("    <meta annotator=\"" + Meta.AnnotatorFullName + "\" role=\"" + Meta.Role + "\"/>");
                 if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {
                     sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" min=\"" + this.Scheme.MinScore + "\" max=\"" + this.Scheme.MaxScore + "\" mincolor=\"" + this.Scheme.MinOrBackColor + "\" maxcolor=\"" + this.Scheme.MaxOrForeColor + "\" />");
@@ -531,7 +531,7 @@ namespace ssi
 
 
                 //Plugin logic should be called after parsing
-                if (meta.Attributes["trigger"] != null)
+                if (meta != null && meta.Attributes["trigger"] != null)
                 {
                     string[] triggers = meta.Attributes["trigger"].Value.Split(';');
                     foreach (string trigger in triggers)
@@ -563,7 +563,7 @@ namespace ssi
 
                 }
 
-                if (meta.Attributes["pipeline"] != null)
+                if (meta != null && meta.Attributes["pipeline"] != null)
                 {
                     string[] pipelines = meta.Attributes["pipeline"].Value.Split(';');
                     foreach (string pipeline in pipelines)

@@ -345,7 +345,7 @@ namespace ssi
             databaseManageAnnotations();
         }
 
-        private void databaseCMLMerge_Click(object sender, RoutedEventArgs e)
+        private void databaseCMLMergeAnnotations_Click(object sender, RoutedEventArgs e)
         {
             DatabaseAnnoMergeWindow window = new DatabaseAnnoMergeWindow();
             window.ShowDialog();

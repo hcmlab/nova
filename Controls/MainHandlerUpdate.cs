@@ -8,6 +8,7 @@ using System.Windows;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
+using System.IO;
 
 namespace ssi
 {
@@ -55,9 +56,130 @@ namespace ssi
             }
             catch
             {
-                MessageBox.Show("An Error occured. Please check your Connection!");
+                MessageBox.Show("An Error occured. API limit reached, or no Internet Connection!");
             }
         }
+
+        private async void checkForCMLUpdates(bool silent = false)
+        {
+
+            try
+            {
+            var client = new GitHubClient(new ProductHeaderValue("ssi"));
+            var commits = await client.Repository.Commit.GetAll("hcmlab", "ssi");
+            var first = commits.First();
+            var last = commits.Last();
+            var result = await client.Repository.Commit.Compare("hcmlab", "ssi", last.Sha, first.Sha);
+
+
+            var files = result.Files;
+            bool IsCMLTrainUptodate = false;
+            foreach (var file in files)
+            {
+                if (file.Filename == "bin/x64/vc140/cmltrain.exe")
+                {
+                    if (Properties.Settings.Default.CMLTrainexeGitSha == file.Sha)
+                    {
+                        IsCMLTrainUptodate = true;
+                    }
+                    else
+                    {
+                        Properties.Settings.Default.CMLTrainexeGitSha = file.Sha;
+                        Properties.Settings.Default.Save();
+
+                    } 
+
+                    break;
+                }
+            }
+
+
+            string cmltrainexe = "cmltrain.exe";
+            string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + cmltrainexe;
+            string SSIbinaryGitPath = "https://github.com/hcmlab/ssi/raw/master/bin/x64/vc140/";
+
+            if (!IsCMLTrainUptodate || !(File.Exists(cmltrainexePath)))
+            {
+
+                MessageBoxResult mb = MessageBox.Show("A new version of the Cooperative Machine Learning tools is available, update now?", "Update available", MessageBoxButton.YesNo);
+
+                if (mb == MessageBoxResult.No)
+                {
+                    return;
+                }
+
+                /*
+                * CMLTrain and XMLchain executables are downloaded from the official SSI git repository.
+                 * */
+
+                try
+                {
+                    DownloadFile(SSIbinaryGitPath + cmltrainexe, cmltrainexePath);
+                }
+                catch
+                {
+                    MessageBox.Show("Can't update tools, check your internet conenction!");
+                    return;
+                }
+
+
+                //Download xmlchain, if not present yet.
+                string xmlchainexe = "xmlchain.exe";
+                string xmlchainexePath = AppDomain.CurrentDomain.BaseDirectory + xmlchainexe;
+
+                DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
+
+                //Download libmongoc-1.0.dll, if not present yet.
+                string libmongocdll = "libmongoc-1.0.dll";
+                string libmongocdllPath = AppDomain.CurrentDomain.BaseDirectory + libmongocdll;
+
+                DownloadFile(SSIbinaryGitPath + libmongocdll, libmongocdllPath);
+
+
+                //Download libbson-1.0.dll, if not present yet.
+                string libsondll = "libbson-1.0.dll";
+                string libbsondllPath = AppDomain.CurrentDomain.BaseDirectory + libsondll;
+
+                DownloadFile(SSIbinaryGitPath + libsondll, libbsondllPath);
+
+                //Download ssiframe.dll, if not present yet (cml tools will do this automatically, here we force to overwrite it).
+                string ssiframedll = "ssiframe.dll";
+                string ssiframedllPath = AppDomain.CurrentDomain.BaseDirectory + ssiframedll;
+
+                DownloadFile(SSIbinaryGitPath + ssiframedll, ssiframedllPath);
+
+
+                if (File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath) && File.Exists(libmongocdllPath) && File.Exists(libbsondllPath))
+                {
+
+                    long sizexmlchain = new System.IO.FileInfo(xmlchainexePath).Length;
+                    long sizecmltrain = new System.IO.FileInfo(cmltrainexePath).Length;
+                    long sizelibmongocdll = new System.IO.FileInfo(libmongocdllPath).Length;
+                    long sizelibsondll = new System.IO.FileInfo(libbsondllPath).Length;
+                    long sizessiframedll = new System.IO.FileInfo(ssiframedllPath).Length;
+
+                    if (sizexmlchain == 0 || sizecmltrain == 0 || sizelibmongocdll == 0 || sizelibsondll == 0)
+                    {
+                        if (File.Exists(xmlchainexePath)) File.Delete(xmlchainexePath);
+                        if (File.Exists(cmltrainexePath)) File.Delete(cmltrainexePath);
+                        if (File.Exists(libmongocdllPath)) File.Delete(libmongocdllPath);
+                        if (File.Exists(libbsondllPath)) File.Delete(libbsondllPath);
+                        if (File.Exists(ssiframedllPath)) File.Delete(ssiframedllPath);
+                        MessageBox.Show("Could not update Cooperative Machine Learning Tools");
+                    }
+                    else MessageBox.Show("Successfully updated Cooperative Machine Learning Tools");
+                }
+            }
+
+            else if (!silent) MessageBox.Show("Cooperative Machine Learning Tools are already up to date");
+
+            }
+            catch
+            {
+                MessageBox.Show("An Error occured. API limit reached, or no Internet Connection!");
+            }
+        }
+
 
         private void updateApplication_Click(object sender, RoutedEventArgs e)
         {
@@ -66,7 +188,7 @@ namespace ssi
 
         private void updateCML_Click(object sender, RoutedEventArgs e)
         {
-            updateCML();
+            checkForCMLUpdates(false);
         }
 
         

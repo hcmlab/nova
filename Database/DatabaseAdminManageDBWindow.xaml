@@ -73,11 +73,11 @@
         <Label Content="Streams" Grid.Row="0" Grid.Column="4"/>
         <DockPanel Grid.Row="1" Grid.Column="4" LastChildFill="True">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
-                <Button Style="{StaticResource MyButton}" Name="AddStreamType" Content="ADD" Click="AddStreamType_Click"/>
+                <Button Style="{StaticResource MyButton}" Name="AddStreamType" Content="ADD" Click="AddStream_Click"/>
                 <Button Style="{StaticResource MyButton}" Name="DeleteStreamType" Content="REM" Click="DeleteStreamType_Click"/>
-                <Button Style="{StaticResource MyButton}" Name="EditStreamType" Content="EDIT" Click="EditStreamType_Click"  />
+                <Button Style="{StaticResource MyButton}" Name="EditStreamType" Content="EDIT" Click="EditStream_Click"  />
             </StackPanel>
-            <ListBox Name="StreamTypesBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
+            <ListBox Name="StreamsBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
         </DockPanel>
 
     </Grid>

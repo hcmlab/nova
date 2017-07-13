@@ -105,15 +105,15 @@ namespace ssi
 
         public void GetStreamTypes(string selectedItem = null)
         {
-            StreamTypesBox.Items.Clear();
+            StreamsBox.Items.Clear();
 
             List<DatabaseStream> items = DatabaseHandler.Streams;
             foreach (DatabaseStream item in items)
             {
-                StreamTypesBox.Items.Add(item.Name);
+                StreamsBox.Items.Add(item.Name);
             }
 
-            Select(StreamTypesBox, selectedItem);
+            Select(StreamsBox, selectedItem);
         }
 
         public void GetSchemes(string selectedItem = null)
@@ -341,47 +341,54 @@ namespace ssi
             }
         }
 
-        private void AddStreamType_Click(object sender, RoutedEventArgs e)
+        private void AddStream_Click(object sender, RoutedEventArgs e)
         {
             Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
             input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = "" };
             input["fileExt"] = new UserInputWindow.Input() { Label = "File extension", DefaultValue = "" };
             input["type"] = new UserInputWindow.Input() { Label = "Type", DefaultValue = "" };
+            input["sr"] = new UserInputWindow.Input() { Label = "Sample rate", DefaultValue = "" };
             UserInputWindow dialog = new UserInputWindow("Add new stream type", input);
             dialog.ShowDialog();
             if (dialog.DialogResult == true)
             {
                 string name = dialog.Result("name");
                 string fileExt = dialog.Result("fileExt");
-                string type = dialog.Result("type");
-                DatabaseStream streamType = new DatabaseStream() { Name = name, FileExt = fileExt, Type = type };
+                string type = dialog.Result("type");                
+                double sr = 25.0;
+                double.TryParse(dialog.Result("sr"), out sr);
+                DatabaseStream streamType = new DatabaseStream() { Name = name, FileExt = fileExt, Type = type, SampleRate = sr };
                 if (DatabaseHandler.AddStream(streamType))
                 {
                     GetStreamTypes(dialog.Result("name"));
                 }
             }
         }
-        private void EditStreamType_Click(object sender, RoutedEventArgs e)
+        private void EditStream_Click(object sender, RoutedEventArgs e)
         {
-            if (StreamTypesBox.SelectedItem != null)
+            if (StreamsBox.SelectedItem != null)
             {
-                string name = (string)StreamTypesBox.SelectedItem;
-                DatabaseStream streamType = new DatabaseStream() { Name = name };                
-                if (DatabaseHandler.GetStream(ref streamType))
+                string name = (string)StreamsBox.SelectedItem;
+                DatabaseStream stream = new DatabaseStream() { Name = name };                
+                if (DatabaseHandler.GetStream(ref stream))
                 {
                     Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
-                    input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = streamType.Name };
-                    input["fileExt"] = new UserInputWindow.Input() { Label = "File extension", DefaultValue = streamType.FileExt };                    
-                    input["type"] = new UserInputWindow.Input() { Label = "Type", DefaultValue = streamType.Type };
+                    input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = stream.Name };
+                    input["fileExt"] = new UserInputWindow.Input() { Label = "File extension", DefaultValue = stream.FileExt };                    
+                    input["type"] = new UserInputWindow.Input() { Label = "Type", DefaultValue = stream.Type };
+                    input["sr"] = new UserInputWindow.Input() { Label = "Sample rate", DefaultValue = stream.SampleRate.ToString() };
                     UserInputWindow dialog = new UserInputWindow("Edit stream type", input);
                     dialog.ShowDialog();
 
                     if (dialog.DialogResult == true)
                     {
-                        streamType.Name = dialog.Result("name");
-                        streamType.FileExt = dialog.Result("fileExt");
-                        streamType.Type = dialog.Result("type");
-                        if (DatabaseHandler.UpdateStream(name, streamType))
+                        stream.Name = dialog.Result("name");
+                        stream.FileExt = dialog.Result("fileExt");
+                        stream.Type = dialog.Result("type");
+                        double sr = 25.0;
+                        double.TryParse(dialog.Result("sr"), out sr);
+                        stream.SampleRate = sr;
+                        if (DatabaseHandler.UpdateStream(name, stream))
                         {
                             GetStreamTypes(name);
                         }
@@ -392,9 +399,9 @@ namespace ssi
 
         private void DeleteStreamType_Click(object sender, RoutedEventArgs e)
         {
-            if (StreamTypesBox.SelectedItem != null)
+            if (StreamsBox.SelectedItem != null)
             {
-                string name = (string)StreamTypesBox.SelectedItem;
+                string name = (string)StreamsBox.SelectedItem;
                 if (DatabaseHandler.DeleteStream(name))
                 {
                     GetStreamTypes();
@@ -404,8 +411,8 @@ namespace ssi
 
         private void AddScheme_Click(object sender, RoutedEventArgs e)
         {
-            AnnoScheme scheme = new AnnoScheme();
-            if (MainHandler.AddSchemeDialog(ref scheme))
+            AnnoScheme scheme = MainHandler.AddSchemeDialog();
+            if (scheme != null)
             {
                 if (DatabaseHandler.AddScheme(scheme))
                 {

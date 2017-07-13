@@ -44,6 +44,9 @@ namespace ssi
             public static string ModelsTrainerFolderName = "trainer";
             public static string ModelsTemplatesFolderName = "templates";
             public static string TrainerFileExtension = "trainer";
+            public static string SchemeFolderName = "schemes";
+            public static string GoldStandardFullName = "Gold Standard";
+            public static string StreamTypeNameFeature = "feature";            
         }
 
         public static int SelectionBorderWidth = 7;

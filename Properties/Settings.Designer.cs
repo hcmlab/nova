@@ -502,5 +502,17 @@ namespace ssi.Properties {
                 this["CMLDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("00000000000000")]
+        public string CMLTrainexeGitSha {
+            get {
+                return ((string)(this["CMLTrainexeGitSha"]));
+            }
+            set {
+                this["CMLTrainexeGitSha"] = value;
+            }
+        }
     }
 }

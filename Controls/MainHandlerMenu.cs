@@ -41,7 +41,7 @@ namespace ssi
             control.databaseCMLMenu.IsEnabled = isConnected;
             control.databaseCMLCompleteStepMenu.IsEnabled = isConnectedAndHasSession;
             control.databaseCMLExtractFeaturesMenu.IsEnabled = isConnected && (authentication > 1);
-            control.databaseCMLMergeMenu.IsEnabled = isConnected && (authentication > 2);
+            control.databaseCMLMergeAnnotationsMenu.IsEnabled = isConnected && (authentication > 2);
             control.databaseCMLTrainMenu.IsEnabled = isConnected && (authentication > 1);
             control.databaseCMLPredictMenu.IsEnabled = isConnected && (authentication > 1);
 
