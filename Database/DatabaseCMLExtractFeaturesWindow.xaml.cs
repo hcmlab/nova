@@ -32,19 +32,42 @@ namespace ssi
             }
         }
 
+        public enum Mode
+        {
+            EXTRACT,
+            MERGE,            
+        }
+        Mode mode;
+
         private string tempInListPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
         private string tempOutListPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
 
-        public DatabaseCMLExtractFeaturesWindow(MainHandler handler)
+        public DatabaseCMLExtractFeaturesWindow(MainHandler handler, Mode mode)
         {
-            InitializeComponent();
+            InitializeComponent();            
 
             this.handler = handler;
-            HelpLabel.Content = "Features are extracted every frame over a window that is extended by the left and right context.\r\n1.2s\t= 1.2 Seconds\r\n10ms\t= 10 Milliseconds\r\n500\t= 500 Samples";
+            this.mode = mode;            
+
+            if (mode == Mode.MERGE)
+            {
+                ExtractPanel.Visibility = Visibility.Collapsed;
+                NParallelLabel.Visibility = Visibility.Collapsed;
+                NParallelTextBox.Visibility = Visibility.Collapsed;
+                ExtractButton.Content = "Merge";
+                Title = "Merge Features";
+                StreamsBox.SelectionMode = SelectionMode.Extended;
+            }
+            else
+            {
+                HelpLabel.Content = "Features are extracted every frame over a window that is extended by the left and right context.\r\n1.2s\t= 1.2 Seconds\r\n10ms\t= 10 Milliseconds\r\n500\t= 500 Samples";
+            }
 
             GetDatabases(DatabaseHandler.DatabaseName);
             GetStreams();
             GetRoles();
+
+            Update();
         }
 
         private void Done_Click(object sender, RoutedEventArgs e)
@@ -53,7 +76,7 @@ namespace ssi
             Close();
         }
 
-        private void Extract_Click(object sender, RoutedEventArgs e)
+        private void Extract()
         {
             if (ChainPathComboBox.SelectedItem == null)
             {
@@ -61,7 +84,7 @@ namespace ssi
                 return;
             }
 
-            Chain chain = (Chain) ChainPathComboBox.SelectedItem;
+            Chain chain = (Chain)ChainPathComboBox.SelectedItem;
             bool force = ForceCheckBox.IsChecked.Value;
 
             if (!File.Exists(chain.Path))
@@ -83,6 +106,7 @@ namespace ssi
             int.TryParse(NParallelTextBox.Text, out nParallel);
 
             logTextBox.Text = "";
+
             // prepare lists
 
             int nFiles = 0;
@@ -120,34 +144,190 @@ namespace ssi
             // start feature extraction
 
             Chain selectedChain = (Chain)ChainPathComboBox.SelectedItem;
-            DatabaseStream selectedstream = (DatabaseStream)StreamsBox.SelectedItem;
+            DatabaseStream selectedStream = (DatabaseStream)StreamsBox.SelectedItem;
 
             if (nFiles > 0)
             {
                 logTextBox.Text += handler.CMLExtractFeature(chain.Path, nParallel, tempInListPath, tempOutListPath, frameStep, leftContext, rightContext);
 
-                string type = "feature";
+                string type = Defaults.CML.StreamTypeNameFeature;
                 string name = stream.Name + "." + chain.Name + streamMeta;
                 string ext = "stream";
 
-                DatabaseStream streamType = new DatabaseStream() { Name = name, Type = type, FileExt = ext };
+                double sr = frameStepToSampleRate(frameStep, stream.SampleRate);
+
+                DatabaseStream streamType = new DatabaseStream() { Name = name, Type = type, FileExt = ext, SampleRate = sr };
                 DatabaseHandler.AddStream(streamType);
             }
 
             File.Delete(tempInListPath);
             File.Delete(tempOutListPath);
 
-            
-            GetStreams(selectedstream);
-            foreach(Chain item in ChainPathComboBox.Items)
+            GetStreams(selectedStream);
+            foreach (Chain item in ChainPathComboBox.Items)
             {
                 if (item.Name == selectedChain.Name)
                 {
                     ChainPathComboBox.SelectedItem = item;
                     break;
-                }                
+                }
             }
-            
+
+        }
+
+        private void Merge()
+        {
+            string database = (string)DatabasesBox.SelectedItem;
+
+            var sessions = SessionsBox.SelectedItems;
+            var roles = RolesBox.SelectedItems;
+            var streams = StreamsBox.SelectedItems;
+            bool force = ForceCheckBox.IsChecked.Value;
+
+            string sessionList = "";
+            foreach (DatabaseSession session in sessions)
+            {
+                if (sessionList == "")
+                {
+                    sessionList = session.Name;
+                }
+                else
+                {
+                    sessionList += ";" + session.Name;
+                }
+            }
+
+            string roleList = "";
+            foreach (string role in roles)
+            {
+                if (roleList == "")
+                {
+                    roleList = role;
+                }
+                else
+                {
+                    roleList += ";" + role;
+                }
+            }
+
+            string streamList = "";
+            HashSet<string> mediaNames = new HashSet<string>();
+            HashSet<string> featureNames = new HashSet<string>();
+            double sampleRate = 0;
+            foreach (DatabaseStream stream in streams)
+            {
+                string[] tokens = stream.Name.Split(new char[] { '.' }, 2);
+                mediaNames.Add(tokens[0]);
+                if (tokens.Length > 0)
+                {
+                    featureNames.Add(tokens[1]);
+                }
+
+                if (streamList == "")
+                {
+                    sampleRate = stream.SampleRate;
+                    streamList = stream.Name;
+                }
+                else
+                {
+                    streamList += ";" + stream.Name;
+                }
+            }
+
+
+            string[] arrmedias;
+            arrmedias = mediaNames.ToArray();
+            Array.Sort(arrmedias);
+            mediaNames.Clear();
+            mediaNames.UnionWith(arrmedias);
+
+
+            string medias = "";
+            foreach (string media in mediaNames)
+            {
+                if (medias == "")
+                {
+                    medias = media;
+                }
+                else
+                {
+                    medias += "+" + media;
+                }
+            }
+
+
+            string[] arrstreams;
+            arrstreams = featureNames.ToArray();
+            Array.Sort(arrstreams);
+            featureNames.Clear();
+            featureNames.UnionWith(arrstreams);
+
+            string features = "";
+            foreach (string feature in featureNames)
+            {
+                if (features == "")
+                {
+                    features = feature;
+                }
+                else
+                {
+                    features += "+" + feature;
+                }
+            }
+            string outputName = medias + "." + features;
+
+            string rootDir = Properties.Settings.Default.DatabaseDirectory + "\\" + database;
+
+            logTextBox.Text = handler.CMLMergeFeature(rootDir, sessionList, roleList, streamList, outputName, force);
+
+            string type = Defaults.CML.StreamTypeNameFeature;
+            string name = outputName;
+            string ext = "stream";            
+
+            DatabaseStream streamType = new DatabaseStream() { Name = name, Type = type, FileExt = ext, SampleRate = sampleRate };
+            DatabaseHandler.AddStream(streamType);
+
+            GetStreams(streamType);
+        }
+
+        private void ExtractOrMerge_Click(object sender, RoutedEventArgs e)
+        {
+            if (mode == Mode.MERGE)
+            {
+                Merge();
+            }
+            else
+            {
+                Extract();
+            }            
+        }
+
+        private double frameStepToSampleRate(string frameStep, double oldSampleRate)
+        {
+            double sr = 25.0;
+            if (frameStep.EndsWith("ms"))
+            {
+                if (double.TryParse(frameStep.Remove(frameStep.Length-2), out sr))
+                {
+                    sr = 1000.0 / sr;
+                }
+            }
+            else if (frameStep.EndsWith("s"))
+            {
+                if (double.TryParse(frameStep.Remove(frameStep.Length - 1), out sr))
+                {
+                    sr = 1.0 / sr;
+                }
+            }
+            else
+            {
+                if (double.TryParse(frameStep, out sr))
+                {
+                    sr = oldSampleRate / sr;
+                }
+            }
+
+            return sr;
         }
 
         private void Select(ListBox list, string select)
@@ -220,9 +400,19 @@ namespace ssi
             List<DatabaseStream> streamsValid = new List<DatabaseStream>();
             foreach(DatabaseStream stream in streams)
             {
-                if (getChains(stream).Count > 0)
+                if (mode == Mode.MERGE)
                 {
-                    streamsValid.Add(stream);
+                    if (stream.Type == Defaults.CML.StreamTypeNameFeature)
+                    {
+                        streamsValid.Add(stream);
+                    }
+                }
+                else
+                {
+                    if (getChains(stream).Count > 0)
+                    {
+                        streamsValid.Add(stream);
+                    }
                 }
             }
 
@@ -371,13 +561,31 @@ namespace ssi
         {
             bool enable = false;
 
-            if (ChainPathComboBox.Items.Count > 0
-                && DatabasesBox.SelectedItem != null
+            if (DatabasesBox.SelectedItem != null
                 && SessionsBox.SelectedItem != null
                 && StreamsBox.SelectedItem != null
                 && RolesBox.SelectedItem != null)
             {
-                enable = true;
+                if (mode == Mode.MERGE)
+                {
+                    if (StreamsBox.SelectedItems.Count > 1)
+                    {
+                        enable = true;
+                        double sr = ((DatabaseStream)StreamsBox.SelectedItems[0]).SampleRate;
+                        for (int i = 1; i < StreamsBox.SelectedItems.Count; i++)
+                        {
+                            if (sr != ((DatabaseStream)StreamsBox.SelectedItems[i]).SampleRate)
+                            {
+                                enable = false;
+                                break; 
+                            }
+                        }
+                    }                   
+                }
+                else
+                {
+                    enable = ChainPathComboBox.Items.Count > 0;
+                }
             }
 
             ChainPathComboBox.IsEnabled = enable;

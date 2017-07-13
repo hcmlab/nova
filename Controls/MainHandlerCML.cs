@@ -13,24 +13,28 @@ namespace ssi
     {
         private void databaseCMLExtractFeatures_Click(object sender, RoutedEventArgs e)
         {
-            DatabaseCMLExtractFeaturesWindow dialog = new DatabaseCMLExtractFeaturesWindow(this);
+            DatabaseCMLExtractFeaturesWindow dialog = new DatabaseCMLExtractFeaturesWindow(this, DatabaseCMLExtractFeaturesWindow.Mode.EXTRACT);
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.ShowDialog();
+        }
 
+        private void databaseCMLMergeFeatures_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLExtractFeaturesWindow dialog = new DatabaseCMLExtractFeaturesWindow(this, DatabaseCMLExtractFeaturesWindow.Mode.MERGE);
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dialog.ShowDialog();
         }
 
         private void databaseCMLTrain_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.TRAIN);
             showDialogClearWorkspace(dialog);
-
         }
 
         private void databaseCMLPredict_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.PREDICT);
             showDialogClearWorkspace(dialog);
-
         }
 
         private void databaseCMLCompleteStep()
@@ -45,7 +49,7 @@ namespace ssi
         {
             databaseCMLCompleteStep();
         }
-
+    
 
         public string CMLExtractFeature(string chainPath, int nParallel, string fromPath, string toPath, string frameStep, string leftContext, string rightContext)
         {
@@ -72,6 +76,42 @@ namespace ssi
                 startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\xmlchain.exe";
                 startInfo.Arguments = arguments;
                 result += "\n-------------------------------------------\r\n" + startInfo.FileName + startInfo.Arguments + "\n-------------------------------------------\r\n";
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
+                result += File.ReadAllText(logPath);
+            }
+            catch (Exception ex)
+            {
+                MessageTools.Error(ex.ToString());
+            }
+
+            return result;
+        }
+
+        public string CMLMergeFeature(string rootDir, string sessions, string roles, string inputStreams, string outputStream, bool force)
+        {
+            string result = "";
+            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-merge.log";
+
+            File.Delete(logPath);
+
+            try
+            {
+                string arguments = "--merge -list " + sessions +                    
+                    (force ? " -force " : "") +
+                    " -log " + logPath + " " +
+                    rootDir + " " +
+                    roles + " " +
+                    inputStreams + " " +
+                    outputStream;
+
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\cmltrain.exe";
+                startInfo.Arguments = arguments;
+                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " " + startInfo.Arguments + "\n-------------------------------------------\r\n";
                 process.StartInfo = startInfo;
                 process.Start();
                 process.WaitForExit();

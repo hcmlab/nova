@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Octokit;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -183,13 +185,14 @@ namespace ssi
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
+            control.databaseCMLMergeFeaturesMenu.Click += databaseCMLMergeFeatures_Click;
             control.databaseCMLTrainMenu.Click += databaseCMLTrain_Click;
             control.databaseCMLPredictMenu.Click += databaseCMLPredict_Click;
             control.databaseManageUsersMenu.Click += databaseManageUsers_Click;
             control.databaseManageDBsMenu.Click += databaseManageDBs_Click;
             control.databaseManageSessionsMenu.Click += databaseManageSessions_Click;
             control.databaseManageAnnotationsMenu.Click += databaseManageAnnotations_Click;
-            control.databaseCMLMergeMenu.Click += databaseCMLMerge_Click;
+            control.databaseCMLMergeAnnotationsMenu.Click += databaseCMLMergeAnnotations_Click;
 
             control.showSettingsMenu.Click += showSettings_Click;
 
@@ -269,6 +272,7 @@ namespace ssi
                 Properties.Settings.Default.LastUpdateCheckDate = DateTime.Today.Date;
                 Properties.Settings.Default.Save();
                 checkForUpdates(true);
+                checkForCMLUpdates(true);
             }
 
 
@@ -289,7 +293,7 @@ namespace ssi
             if (!(File.Exists(cmltrainexePath)))
             {
 
-                updateCML();
+                checkForCMLUpdates();
 
             }
 
@@ -321,80 +325,7 @@ namespace ssi
         /// <summary>
         /// 
         /// </summary>
-        private void updateCML()
-        {
-
-            /*
-           * CMLTrain and XMLchain executables are downloaded from the official SSI git repository.
-           * */
-
-            string SSIbinaryGitPath = "https://github.com/hcmlab/ssi/raw/master/bin/x64/vc140/";
-
-            //Download CMLtrain, if not present yet.
-            string cmltrainexe = "cmltrain.exe";
-            string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + cmltrainexe;
-
-            try
-            {
-                DownloadFile(SSIbinaryGitPath + cmltrainexe, cmltrainexePath);
-            }
-            catch {
-                MessageBox.Show("Can't update tools, check your internet conenction!");
-                return;
-            }
-
-
-            //Download xmlchain, if not present yet.
-            string xmlchainexe = "xmlchain.exe";
-            string xmlchainexePath = AppDomain.CurrentDomain.BaseDirectory + xmlchainexe;
-
-            DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
-
-            //Download libmongoc-1.0.dll, if not present yet.
-            string libmongocdll = "libmongoc-1.0.dll";
-            string libmongocdllPath = AppDomain.CurrentDomain.BaseDirectory + libmongocdll;
-
-            DownloadFile(SSIbinaryGitPath + libmongocdll, libmongocdllPath);
-
-
-            //Download libbson-1.0.dll, if not present yet.
-            string libsondll = "libbson-1.0.dll";
-            string libbsondllPath = AppDomain.CurrentDomain.BaseDirectory + libsondll;
-
-            DownloadFile(SSIbinaryGitPath + libsondll, libbsondllPath);
-
-            //Download ssiframe.dll, if not present yet.
-            string ssiframedll = "ssiframe.dll";
-            string ssiframedllPath = AppDomain.CurrentDomain.BaseDirectory + ssiframedll;
-
-            DownloadFile(SSIbinaryGitPath + ssiframedll, ssiframedllPath);
-
-
-
-
-
-            if (File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath) && File.Exists(libmongocdllPath) && File.Exists(libbsondllPath))
-            {
-
-                long sizexmlchain = new System.IO.FileInfo(xmlchainexePath).Length;
-                long sizecmltrain = new System.IO.FileInfo(cmltrainexePath).Length;
-                long sizelibmongocdll = new System.IO.FileInfo(libmongocdllPath).Length;
-                long sizelibsondll = new System.IO.FileInfo(libbsondllPath).Length;
-                long sizessiframedll = new System.IO.FileInfo(ssiframedllPath).Length;
-
-                if (sizexmlchain == 0 || sizecmltrain == 0 || sizelibmongocdll == 0 || sizelibsondll == 0)
-                {
-                    if (File.Exists(xmlchainexePath)) File.Delete(xmlchainexePath);
-                    if (File.Exists(cmltrainexePath)) File.Delete(cmltrainexePath);
-                    if (File.Exists(libmongocdllPath)) File.Delete(libmongocdllPath);
-                    if (File.Exists(libbsondllPath)) File.Delete(libbsondllPath);
-                    if (File.Exists(ssiframedllPath)) File.Delete(ssiframedllPath);
-                    MessageBox.Show("Could not update Cooperative Machine Learning Tools");
-                }
-                else MessageBox.Show("Successfully updated Cooperative Machine Learning Tools");
-            }
-
-        }
+     
 
 
 

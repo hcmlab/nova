@@ -92,7 +92,12 @@ namespace ssi
                
                 if (!Source.HasFile)
                 {
-                  Source.File.Path = FileTools.SaveFileDialog(Scheme.Name, ".annotation", "Annotation(*.annotation)|*.annotation", ""); 
+                    string path = FileTools.SaveFileDialog(Scheme.Name, ".annotation", "Annotation(*.annotation)|*.annotation", "");
+                    if (path == null)
+                    {
+                        return false;
+                    }
+                    Source.File.Path = path;
                 }
               
                 if (Source.HasFile)
