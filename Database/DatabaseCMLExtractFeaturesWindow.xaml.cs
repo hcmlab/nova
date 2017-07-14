@@ -70,6 +70,8 @@ namespace ssi
             Update();
         }
 
+
+
         private void Done_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
@@ -595,6 +597,14 @@ namespace ssi
             FrameStepTextBox.IsEnabled = enable;
             RightContextTextBox.IsEnabled = enable;
 
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Escape)
+            {
+                Close();
+            }
         }
     }
 }

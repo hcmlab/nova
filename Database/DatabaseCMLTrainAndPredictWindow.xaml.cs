@@ -132,8 +132,13 @@ namespace ssi
                 mode == Mode.PREDICT)
             {
                 string annotatorName = Properties.Settings.Default.MongoDBUser;
-                string annotatorFullName = DatabaseHandler.Annotators.Find(a => a.Name == annotatorName).FullName;
-                AnnotatorsBox.SelectedItem = annotatorFullName;                
+                if (DatabaseHandler.Annotators.Find(a => a.Name == annotatorName) != null)
+                {
+                    string annotatorFullName = DatabaseHandler.Annotators.Find(a => a.Name == annotatorName).FullName;
+                    AnnotatorsBox.SelectedItem = annotatorFullName;
+                }
+
+                            
                 AnnotatorsBox.IsEnabled = DatabaseHandler.CheckAuthentication() > 2;
             }
             else
@@ -838,6 +843,15 @@ namespace ssi
             ForceCheckBox.IsEnabled = enable;
             TrainerPathComboBox.IsEnabled = enable;
 
+        }
+
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
         }
     }
 }

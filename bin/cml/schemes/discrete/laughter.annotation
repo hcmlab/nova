@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<annotation ssi-v="3">
+    <info ftype="ASCII" size="0" />    
+    <scheme name="laughter" type="DISCRETE"  color="#FFEEECE1">
+        <item name="LAUGH" id="0" color="#FFC0504D" />
+        <item name="SPEECH" id="1" color="#FF1F497D" />
+    </scheme>
+</annotation>

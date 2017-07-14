@@ -1,7 +1,7 @@
 <chain>
 	<meta frameStep="40ms" leftContext="230ms" rightContext="230ms"/>
 	<register>
-		<item name="nova"/>
+		<item name="bodyfeatures"/>
 	</register>
 	<feature>
 		<item create="FluidityMovement"/>

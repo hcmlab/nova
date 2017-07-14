@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<options readOnly="true">
+<options>
     <item name="first" type="UINT" num="1" value="0" lock="false" help="The first MFCC to compute." />
     <item name="last" type="UINT" num="1" value="12" lock="false" help="The last MFCC to compute." />
     <item name="floor" type="FLOAT" num="1" value="1.000000e-08" lock="false" help="The minimum value allowed for melspectra when taking the log spectrum (this parameter will be forced to 1.0 when htkcompatible=1)." />

@@ -1,7 +1,7 @@
 <chain>
 	<meta frameStep="40ms" leftContext="480ms" rightContext="480ms"/>
 	<register>		
-		<item name="opensmilewrapper"/>
+		<item name="opensmilewrapper" depend="openSmileLib_Release.dll"/>
 	</register>	
 	<feature>
 		<item create="OSWrapper" configFile="gemaps.conf"/>
