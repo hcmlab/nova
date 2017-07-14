@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<trainer ssi-v="5">
+    <info trained="false" seed="1234"/>
+	<register>
+		<item name="liblinear"/>		
+	</register>	
+    <normalize>
+        <item method="Scale" stream="0"/>
+    </normalize>
+    <model create="LibLinear" stream="0" option="linsvm[-s12-c01-B0.1-e0.1]" />
+</trainer>

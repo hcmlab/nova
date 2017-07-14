@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<options>
+    <item name="params" type="CHAR" num="1024" value="" lock="true" help="libsvm parameters (see documentation, overwrites options)" />
+    <item name="svm" type="INT" num="1" value="0" lock="true" help="SVM type (multi-class: 0=C-SVC 1=nu-SVC, regression: 3=epsilon-SVR 4=nu-SVR)" />
+    <item name="kernel" type="INT" num="1" value="2" lock="true" help="Kernel type ( 0=linear: u'*v, 1=polynomial: (gamma*u'*v + coef0)^degree), 2=radial basis function: exp(-gamma*|u-v|^2), 3=sigmoid: tanh(gamma*u'*v + coef0)" />
+    <item name="degree" type="INT" num="1" value="3" lock="true" help="degree" />
+    <item name="gamma" type="DOUBLE" num="1" value="0.000000e+00" lock="true" help="gamma" />
+    <item name="coef0" type="DOUBLE" num="1" value="0.000000e+00" lock="true" help="coef0" />
+    <item name="nu" type="DOUBLE" num="1" value="5.000000e-01" lock="true" help="nu in nu-SVC" />
+    <item name="C" type="DOUBLE" num="1" value="1.000000e+00" lock="true" help="cost in C-SVC" />
+    <item name="eps" type="DOUBLE" num="1" value="1.000000e-03" lock="true" help="set tolerance of termination criterion" />
+    <item name="p" type="DOUBLE" num="1" value="1.000000e-01" lock="true" help="epsilon in loss function of epsilon-SVR" />
+    <item name="shrink" type="INT" num="1" value="1" lock="true" help="whether to use the shrinking heuristics (0=false,1=true)" />
+    <item name="srand" type="UINT" num="1" value="0" lock="true" help="if >0 use fixed seed to initialize random number generator, otherwise timestamp will be used" />
+    <item name="balance" type="INT" num="1" value="0" lock="true" help="balance #samples per class (0=off, 1=remove surplus, 2=create missing)" />
+    <item name="silent" type="BOOL" num="1" value="false" lock="true" help="suppress libsvm messages" />
+</options>

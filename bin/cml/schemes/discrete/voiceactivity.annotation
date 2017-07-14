@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<annotation ssi-v="3">
+    <info ftype="ASCII" size="0" />    
+    <scheme name="voiceactivity" type="DISCRETE"  color="#FFDDD9C3">
+        <item name="VOICE" id="0" color="#FF494429" />
+        <item name="BREATH" id="1" color="#FF124C72" />
+    </scheme>
+</annotation>

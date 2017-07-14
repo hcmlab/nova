@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<options readOnly="true">
+<options>
     <item name="dstScale" type="INT" num="1" value="1" lock="false" help="The target scale, one of the following: 0=linear scale, 1=logarithmic, (see 'logScaleBase'), 2=bark scale, 3=mel frequency scale, 4=musical semi-tone scale" />
     <item name="srcScale" type="INT" num="1" value="0" lock="false" help="The source scale (currently only '0=linear' is supported, all other options (as found for target scale) are experimental." />
     <item name="dstLogScaleBase" type="DOUBLE" num="1" value="2.000000e+00" lock="false" help="The base for log scales (a log base of 2.0 - the default - corresponds to an octave target scale)." />

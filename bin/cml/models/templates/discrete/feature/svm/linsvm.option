@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<options>
+    <item name="params" type="CHAR" num="1024" value="-s 0 -e 0.01 -B 0.1" lock="true" help="liblinear parameters (see documentation)" />
+    <item name="srand" type="UINT" num="1" value="1234" lock="true" help="if >0 use fixed seed to initialize random number generator, otherwise timestamp will be used" />
+    <item name="balance" type="INT" num="1" value="0" lock="true" help="balance #samples per class (0=off, 1=remove surplus, 2=create missing)" />
+    <item name="silent" type="BOOL" num="1" value="true" lock="true" help="suppress library messages" />
+</options>

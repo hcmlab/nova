@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<options readOnly="true">
+<options>
     <item name="type" type="INT" num="1" value="0" lock="false" help="0=compute magnitude, 1=compute phase, 2=compute both" />
     <item name="norm" type="BOOL" num="1" value="false" lock="false" help="Normalise FFT magnitudes to input window length, to obtain spectral densities." />
     <item name="power" type="BOOL" num="1" value="false" lock="false" help="Square FFT magnitudes to obtain power spectrum." />

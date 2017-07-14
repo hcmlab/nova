@@ -333,3 +333,4 @@ bin/~.trainer.LibLinear.option
 Resources/discrete_new_alt.png
 Resources/discrete_new_alt.svg
 Resources/free_new_alt.svg
+*.pyc

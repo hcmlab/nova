@@ -1,7 +1,7 @@
 <chain>
 	<meta frameStep="40ms" leftContext="2480ms" rightContext="2480ms"/>
 	<register>
-		<item name="nova"/>
+		<item name="bodyfeatures"/>
 	</register>
 	<feature>
 		<item create="OAMovement"/>
