@@ -56,7 +56,7 @@ namespace ssi
             InitializeComponent();
 
             serverLogin.Text = Properties.Settings.Default.DataServerLogin;
-            serverPassword.Password = Properties.Settings.Default.DataServerPass;
+            serverPassword.Password = MainHandler.Decode(Properties.Settings.Default.DataServerPass);
             
             GetDatabases(DatabaseHandler.DatabaseName);
 
@@ -67,7 +67,7 @@ namespace ssi
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.DataServerLogin = serverLogin.Text;
-            Properties.Settings.Default.DataServerPass = serverPassword.Password;
+            Properties.Settings.Default.DataServerPass = MainHandler.Encode(serverPassword.Password);
             Properties.Settings.Default.Save();
             
             if (SessionsBox.SelectedItem != null)

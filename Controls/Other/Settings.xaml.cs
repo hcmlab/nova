@@ -28,7 +28,7 @@ namespace ssi
                 DBPort.Text = tokens[1];
             }
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
-            DBPassword.Password = Properties.Settings.Default.MongoDBPass;
+            DBPassword.Password = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
             DBConnnect.IsChecked = Properties.Settings.Default.DatabaseAutoLogin;
             UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateOnStart;
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;

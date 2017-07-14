@@ -58,7 +58,7 @@ namespace ssi
 
         public static bool Connect()
         {
-            return Connect(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.MongoDBPass, Properties.Settings.Default.DatabaseAddress);
+            return Connect(Properties.Settings.Default.MongoDBUser, MainHandler.Decode(Properties.Settings.Default.MongoDBPass), Properties.Settings.Default.DatabaseAddress);
         }
 
         public static bool Connect(string user, string password, string address)
@@ -69,7 +69,7 @@ namespace ssi
             database = null;
 
             Properties.Settings.Default.MongoDBUser = user;
-            Properties.Settings.Default.MongoDBPass = password;
+            Properties.Settings.Default.MongoDBPass = MainHandler.Encode(password);
             Properties.Settings.Default.DatabaseAddress = address;
             Properties.Settings.Default.Save();
 
@@ -622,18 +622,62 @@ namespace ssi
 
         private static List<DatabaseAnnotator> GetAnnotators(bool onlyValid = true)
         {
-            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Annotators, "name", true);
+            //
+            //List<string> names = GetCollectionField(DatabaseDefinitionCollections.Annotators, "name", true);
+            //List<DatabaseAnnotator> items = new List<DatabaseAnnotator>();
+            //foreach (string name in names)
+            //{
+            //    DatabaseAnnotator annotator = new DatabaseAnnotator() { Name = name };
+            //    if (GetAnnotator(ref annotator))
+            //    {
+            //        items.Add(annotator);
+            //    }
+            //}
+
+            //return items.OrderBy(i => i.FullName).ToList();
+
+            List<BsonDocument> annotators = GetCollection(DatabaseDefinitionCollections.Annotators, onlyValid);
             List<DatabaseAnnotator> items = new List<DatabaseAnnotator>();
-            foreach (string name in names)
+            foreach (BsonDocument annotator in annotators)
             {
-                DatabaseAnnotator annotator = new DatabaseAnnotator() { Name = name };
-                if (GetAnnotator(ref annotator))
+                int expertise = 2;
+                if (annotator.Contains("expertise"))
                 {
-                    items.Add(annotator);
+                    try
+                    {
+                        expertise = annotator["expertise"].AsInt32;
+                    }
+                    catch
+                    {//if its saved as string, ignore it. 
+                    }
                 }
+
+                string email = "";
+                if (annotator.Contains("email"))
+                {
+                    email = annotator["email"].AsString;
+                }
+
+                string fullname = "";
+                if (annotator.Contains("fullname"))
+                {
+                    fullname = annotator["fullname"].AsString;
+                }
+
+
+                items.Add(new DatabaseAnnotator()
+                {
+                    Id = annotator["_id"].AsObjectId,
+                    Name = annotator["name"].AsString,
+                    FullName = fullname,
+                    Expertise = expertise,
+                    Email = email
+                });
             }
 
             return items.OrderBy(i => i.FullName).ToList();
+
+
         }
 
         private static List<DatabaseStream> GetStreams(bool onlyValid = true)
@@ -1756,6 +1800,12 @@ namespace ssi
                     if (document.TryGetElement("date", out value))
                     {
                         session.Date = document["date"].ToUniversalTime();
+                    }
+
+                    session.Id = new ObjectId();
+                    if (document.TryGetElement("_id", out value))
+                    {
+                        session.Id = document["_id"].AsObjectId;
                     }
                 }
                 else

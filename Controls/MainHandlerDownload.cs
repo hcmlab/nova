@@ -143,7 +143,7 @@ namespace ssi
             string folder = split2[3].Remove(split2[3].Length - fileName.Length);
 
             string login = Properties.Settings.Default.DataServerLogin;
-            string password = Properties.Settings.Default.DataServerPass;
+            string password = MainHandler.Decode(Properties.Settings.Default.DataServerPass);
 
             lastDownloadFileName = fileName;
 
@@ -217,7 +217,7 @@ namespace ssi
         private async Task httpPost(string URL, string localpath)
         {
             string login = Properties.Settings.Default.DataServerLogin;
-            string password = Properties.Settings.Default.DataServerPass;
+            string password = MainHandler.Decode(Properties.Settings.Default.DataServerPass);
 
             string fileName = Path.GetFileName(localpath);
             if (fileName.EndsWith(".stream%7E"))
