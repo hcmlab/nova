@@ -139,7 +139,7 @@ namespace ssi
                 }
 
                             
-                AnnotatorsBox.IsEnabled = DatabaseHandler.CheckAuthentication() > 2;
+                AnnotatorsBox.IsEnabled = DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.READWRITE;
             }
             else
             {

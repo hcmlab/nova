@@ -19,7 +19,6 @@ namespace ssi
     {
         private MongoClient mongo;
         private IMongoDatabase database;
-        private int authlevel = 0;
         private AnnoList mean = null;
         private AnnoList rms = null;
         private AnnoList merge = null;
@@ -34,10 +33,9 @@ namespace ssi
         {
           
                 mongo = DatabaseHandler.Client;
-                database = DatabaseHandler.Database;
-                authlevel = DatabaseHandler.CheckAuthentication();
+                database = DatabaseHandler.Database;                
 
-                if (authlevel > 2)
+                if (DatabaseHandler.CheckAuthentication() >= DatabaseAuthentication.DBADMIN)
                 {
                     GetSessions();
                 }

@@ -199,9 +199,9 @@ namespace ssi
             annotators = GetAnnotators();
         }
 
-        static public int CheckAuthentication()
+        static public DatabaseAuthentication CheckAuthentication()
         {
-            return CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
+            return (DatabaseAuthentication) CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
         }
 
         static public int CheckAuthentication(string database)
@@ -588,130 +588,6 @@ namespace ssi
             return items;
         }
 
-        private static List<DatabaseScheme> GetSchemes(bool onlyValid = true)
-        {
-            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Schemes, "name", true);
-            List<DatabaseScheme> items = new List<DatabaseScheme>();
-            foreach (string name in names)
-            {
-                DatabaseScheme scheme = new DatabaseScheme() { Name = name };
-                if (GetScheme(ref scheme))
-                {
-                    items.Add(scheme);
-                }
-            }
-
-            return items.OrderBy(i => i.Name).ToList();
-        }
-
-        private static List<DatabaseRole> GetRoles(bool onlyValid = true)
-        {
-            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Roles, "name", true);
-            List<DatabaseRole> items = new List<DatabaseRole>();
-            foreach (string name in names)
-            {
-                DatabaseRole role = new DatabaseRole() { Name = name };
-                if (GetRole(ref role))
-                {
-                    items.Add(role);
-                }
-            }
-
-            return items.OrderBy(i => i.Name).ToList();
-        }
-
-        private static List<DatabaseAnnotator> GetAnnotators(bool onlyValid = true)
-        {
-            //
-            //List<string> names = GetCollectionField(DatabaseDefinitionCollections.Annotators, "name", true);
-            //List<DatabaseAnnotator> items = new List<DatabaseAnnotator>();
-            //foreach (string name in names)
-            //{
-            //    DatabaseAnnotator annotator = new DatabaseAnnotator() { Name = name };
-            //    if (GetAnnotator(ref annotator))
-            //    {
-            //        items.Add(annotator);
-            //    }
-            //}
-
-            //return items.OrderBy(i => i.FullName).ToList();
-
-            List<BsonDocument> annotators = GetCollection(DatabaseDefinitionCollections.Annotators, onlyValid);
-            List<DatabaseAnnotator> items = new List<DatabaseAnnotator>();
-            foreach (BsonDocument annotator in annotators)
-            {
-                int expertise = 2;
-                if (annotator.Contains("expertise"))
-                {
-                    try
-                    {
-                        expertise = annotator["expertise"].AsInt32;
-                    }
-                    catch
-                    {//if its saved as string, ignore it. 
-                    }
-                }
-
-                string email = "";
-                if (annotator.Contains("email"))
-                {
-                    email = annotator["email"].AsString;
-                }
-
-                string fullname = "";
-                if (annotator.Contains("fullname"))
-                {
-                    fullname = annotator["fullname"].AsString;
-                }
-
-
-                items.Add(new DatabaseAnnotator()
-                {
-                    Id = annotator["_id"].AsObjectId,
-                    Name = annotator["name"].AsString,
-                    FullName = fullname,
-                    Expertise = expertise,
-                    Email = email
-                });
-            }
-
-            return items.OrderBy(i => i.FullName).ToList();
-
-
-        }
-
-        private static List<DatabaseStream> GetStreams(bool onlyValid = true)
-        {
-            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Streams, "name", true);                
-            List<DatabaseStream> items = new List<DatabaseStream>();
-            foreach (string name in names)
-            {
-                DatabaseStream stream = new DatabaseStream() { Name = name };
-                if (GetStream(ref stream))
-                {
-                    items.Add(stream);
-                }
-            }
-
-            return items.OrderBy(i => i.Name).ToList();
-        }
-
-        private static List<DatabaseSession> GetSessions(bool onlyValid = true)
-        {
-            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Sessions, "name", true);
-            List<DatabaseSession> items = new List<DatabaseSession>();
-            foreach (string name in names)
-            {
-                DatabaseSession session = new DatabaseSession() { Name = name };
-                if (GetSession(ref session))
-                {
-                    items.Add(session);
-                }
-            }
-
-            return items.OrderBy(i => i.Name).ToList();
-        }
-
         public static string SelectCollectionField(string title, string collection, string field)
         {
             string item = null;
@@ -885,8 +761,8 @@ namespace ssi
                 return false;
             }
 
-            int authLevel = CheckAuthentication();
-            if (authLevel <= 3)
+            DatabaseAuthentication authLevel = CheckAuthentication();
+            if (authLevel <= DatabaseAuthentication.DBADMIN)
             {
                 return false;
             }
@@ -1195,6 +1071,25 @@ namespace ssi
             return true;
         }
 
+
+        private static List<DatabaseAnnotator> GetAnnotators(bool onlyValid = true)
+        {
+
+            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Annotators, "name", true);
+            List<DatabaseAnnotator> items = new List<DatabaseAnnotator>();
+            foreach (string name in names)
+            {
+                DatabaseAnnotator annotator = new DatabaseAnnotator() { Name = name };
+                if (GetAnnotator(ref annotator))
+                {
+                    items.Add(annotator);
+                }
+            }
+
+            return items.OrderBy(i => i.FullName).ToList();
+
+        }
+
         public static bool GetAnnotator(ref DatabaseAnnotator annotator)
         {
             if (!IsConnected && !IsDatabase)
@@ -1202,19 +1097,15 @@ namespace ssi
                 return false;
             }
 
-            {
+            if (CheckAuthentication() > DatabaseAuthentication.DBADMIN) {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("user", annotator.Name);
                 var adminDatabase = Client.GetDatabase("admin");
                 var documents = adminDatabase.GetCollection<BsonDocument>("system.users").Find(filter).ToList();
-                if (documents.Count == 0)
+                if (documents.Count > 0)
                 {
-                    return false;
-                }
-                var document = documents[0];
-                int role = -1;
-                if (document != null)
-                {
+                    var document = documents[0];
+                    int role = -1;
                     BsonArray roles = document["roles"].AsBsonArray;
                     for (int i = 0; i < roles.Count; i++)
                     {
@@ -1223,21 +1114,19 @@ namespace ssi
                             role = Math.Max(role, GetRoleIndex(roles[i]["role"].AsString));
                         }
                     }
+                    annotator.Role = GetRoleString(role);
                 }
-                else
-                {
-                    return false;
-                }
-                annotator.Role = GetRoleString(role);
             }
 
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", annotator.Name);
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filter).Single();
-                if (document != null)
+                var documents = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filter).ToList();
+                if (documents.Count > 0)
                 {
+                    var document = documents[0];
                     BsonElement value;
+                    annotator.Id = document["_id"].AsObjectId;
                     if (document.TryGetElement("fullname", out value))
                     {
                         annotator.FullName = document["fullname"].ToString();
@@ -1334,6 +1223,22 @@ namespace ssi
             return AddOrUpdateRole(role.Name, role);
         }
 
+        private static List<DatabaseRole> GetRoles(bool onlyValid = true)
+        {
+            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Roles, "name", true);
+            List<DatabaseRole> items = new List<DatabaseRole>();
+            foreach (string name in names)
+            {
+                DatabaseRole role = new DatabaseRole() { Name = name };
+                if (GetRole(ref role))
+                {
+                    items.Add(role);
+                }
+            }
+
+            return items.OrderBy(i => i.Name).ToList();
+        }
+
         private static bool GetRole(ref DatabaseRole role)
         {
             if (!IsConnected && !IsDatabase)
@@ -1344,9 +1249,10 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", role.Name);
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles).Find(filter).Single();
-                if (document != null)
+                var documents = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles).Find(filter).ToList();
+                if (documents.Count > 0)
                 {
+                    var document = documents[0];
                     BsonElement value;
                     role.Id = document["_id"].AsObjectId;
                     role.HasStreams = true;
@@ -1407,6 +1313,23 @@ namespace ssi
             return true;
         }
 
+        private static List<DatabaseStream> GetStreams(bool onlyValid = true)
+        {
+            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Streams, "name", true);
+            List<DatabaseStream> items = new List<DatabaseStream>();
+            foreach (string name in names)
+            {
+                DatabaseStream stream = new DatabaseStream() { Name = name };
+                if (GetStream(ref stream))
+                {
+                    items.Add(stream);
+                }
+            }
+
+            return items.OrderBy(i => i.Name).ToList();
+        }
+
+
         public static bool GetStream(ref DatabaseStream stream)
         {
             if (!IsConnected && !IsDatabase)
@@ -1417,10 +1340,12 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", stream.Name);
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).Find(filter).Single();
-                if (document != null)
+                var documents = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).Find(filter).ToList();
+                if (documents.Count > 0)
                 {
+                    var document = documents[0];
                     BsonElement value;
+                    stream.Id = document["_id"].AsObjectId;
                     stream.FileExt = "";
                     if (document.TryGetElement("fileExt", out value))
                     {
@@ -1617,6 +1542,22 @@ namespace ssi
             return AddOrUpdateScheme(scheme.Name, scheme);
         }
 
+        private static List<DatabaseScheme> GetSchemes(bool onlyValid = true)
+        {
+            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Schemes, "name", true);
+            List<DatabaseScheme> items = new List<DatabaseScheme>();
+            foreach (string name in names)
+            {
+                DatabaseScheme scheme = new DatabaseScheme() { Name = name };
+                if (GetScheme(ref scheme))
+                {
+                    items.Add(scheme);
+                }
+            }
+
+            return items.OrderBy(i => i.Name).ToList();
+        }
+
         private static bool GetScheme(ref DatabaseScheme scheme)
         {
             if (!IsConnected && !IsDatabase)
@@ -1627,9 +1568,10 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", scheme.Name);
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes).Find(filter).Single();
-                if (document != null)
+                var documents = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes).Find(filter).ToList();
+                if (documents.Count > 0)
                 {
+                    var document = documents[0];
                     scheme.Id = document["_id"].AsObjectId;
                     scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), document["type"].AsString);
                     scheme.SampleRate = 0;
@@ -1771,6 +1713,21 @@ namespace ssi
             return true;
         }
 
+        private static List<DatabaseSession> GetSessions(bool onlyValid = true)
+        {
+            List<string> names = GetCollectionField(DatabaseDefinitionCollections.Sessions, "name", true);
+            List<DatabaseSession> items = new List<DatabaseSession>();
+            foreach (string name in names)
+            {
+                DatabaseSession session = new DatabaseSession() { Name = name };
+                if (GetSession(ref session))
+                {
+                    items.Add(session);
+                }
+            }
+
+            return items.OrderBy(i => i.Name).ToList();
+        }
 
         public static bool GetSession(ref DatabaseSession session)
         {
@@ -1782,10 +1739,12 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", session.Name);
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).Find(filter).Single();
-                if (document != null)
+                var documents = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).Find(filter).ToList();
+                if (documents.Count > 0)
                 {
-                    BsonElement value;
+                    var document = documents[0];                    
+                    BsonElement value;                    
+                    session.Id = document["_id"].AsObjectId;                    
                     session.Language = "";
                     if (document.TryGetElement("language", out value))
                     {
@@ -1800,12 +1759,6 @@ namespace ssi
                     if (document.TryGetElement("date", out value))
                     {
                         session.Date = document["date"].ToUniversalTime();
-                    }
-
-                    session.Id = new ObjectId();
-                    if (document.TryGetElement("_id", out value))
-                    {
-                        session.Id = document["_id"].AsObjectId;
                     }
                 }
                 else
@@ -2745,6 +2698,15 @@ namespace ssi
         public static string Streams = "Streams";
         public static string Schemes = "Schemes";
         public static string Meta = "Meta";
+    }
+
+    public enum DatabaseAuthentication
+    {
+        NONE = 0,
+        READ = 1,
+        READWRITE = 2,
+        DBADMIN = 3,      
+        ROOT = 4,
     }
 
     #endregion
