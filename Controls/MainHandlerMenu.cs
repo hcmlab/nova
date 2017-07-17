@@ -24,7 +24,7 @@ namespace ssi
             {
                 hasDatabaseTier = true;
             }
-            int authentication = DatabaseHandler.CheckAuthentication();
+            DatabaseAuthentication authentication = DatabaseHandler.CheckAuthentication();
 
             // file
 
@@ -40,13 +40,13 @@ namespace ssi
 
             control.databaseCMLMenu.IsEnabled = isConnected;
             control.databaseCMLCompleteStepMenu.IsEnabled = isConnectedAndHasSession;
-            control.databaseCMLExtractFeaturesMenu.IsEnabled = isConnected && (authentication > 1);
-            control.databaseCMLMergeAnnotationsMenu.IsEnabled = isConnected && (authentication > 2);
-            control.databaseCMLTrainMenu.IsEnabled = isConnected && (authentication > 1);
-            control.databaseCMLPredictMenu.IsEnabled = isConnected && (authentication > 1);
+            control.databaseCMLExtractFeaturesMenu.IsEnabled = isConnected && (authentication > DatabaseAuthentication.READ);
+            control.databaseCMLMergeAnnotationsMenu.IsEnabled = isConnected && (authentication > DatabaseAuthentication.READWRITE);
+            control.databaseCMLTrainMenu.IsEnabled = isConnected && (authentication > DatabaseAuthentication.READ);
+            control.databaseCMLPredictMenu.IsEnabled = isConnected && (authentication > DatabaseAuthentication.READ);
 
-            control.databaseAdminMenu.Visibility = isConnected && (authentication > 2) ? Visibility.Visible : Visibility.Collapsed;
-            control.databaseManageUsersMenu.Visibility = isConnected && (authentication > 3) ? Visibility.Visible : Visibility.Collapsed;             
+            control.databaseAdminMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.READWRITE) ? Visibility.Visible : Visibility.Collapsed;
+            control.databaseManageUsersMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.DBADMIN) ? Visibility.Visible : Visibility.Collapsed;             
 
             // annotation
 

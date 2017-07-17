@@ -24,15 +24,15 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row="0" Margin="5" VerticalAlignment="Center">
-            <Button Name="button_discrete" Height="25" Width="100" Content="Discrete" Click="Button_Click"></Button>
+            <Button Name="button_discrete" Height="25" Width="100" Content="Select" Click="Button_Click"></Button>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Margin="5" VerticalAlignment="Center">
-            <Button Name="button_free" Height="25" Width="100" Content="Free" Click="Button_Click"></Button>
+            <Button Name="button_free" Height="25" Width="100" Content="Select" Click="Button_Click"></Button>
         </StackPanel>
 
         <StackPanel Grid.Row="2" Margin="5" VerticalAlignment="Center">
-            <Button Name="button_continuous" Height="25" Width="100" Content="Continuous" Click="Button_Click"></Button>
+            <Button Name="button_continuous" Height="25" Width="100" Content="Select" Click="Button_Click"></Button>
         </StackPanel>
 
         <StackPanel Grid.Row="3" VerticalAlignment="Center" Visibility="Collapsed">
@@ -42,18 +42,18 @@
         </StackPanel>
 
         <StackPanel Grid.Row="0" Grid.Column="1" Margin="5" >
-            <TextBlock TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center">Scheme with predefined labels</TextBlock>
-            <Image Width="300" Source="/Resources/discrete.png"/>
+            <TextBlock TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center">A new scheme with predefined labels</TextBlock>
+            <Image Height="100" Source="/Resources/discrete_new_alt.png"/>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
-            <TextBlock TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center" Margin="78,0,80,0">Scheme with custom labels</TextBlock>
-            <Image Width="300" Source="/Resources/free.png"/>
+            <TextBlock TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center" Margin="30,0,30,0">A new scheme with custom labels</TextBlock>
+            <Image Height="100" Source="/Resources/free_new_alt.png"/>
         </StackPanel>
 
         <StackPanel Grid.Row="2" Grid.Column="1" Margin="5" >
-            <TextBlock TextAlignment="Left" TextWrapping="Wrap"  HorizontalAlignment="Center">Scheme with continuous values</TextBlock>
-            <Image Width="300" Source="/Resources/continuous.png"/>
+            <TextBlock TextAlignment="Left" TextWrapping="Wrap"  HorizontalAlignment="Center">A new scheme with continuous values</TextBlock>
+            <Image Height="100" Source="/Resources/continuous_new.png"/>
         </StackPanel>
 
         <Grid Grid.Row="3" Grid.Column="1" Margin="5" Visibility="Collapsed">
@@ -89,12 +89,12 @@
         </Grid>
 
         <StackPanel Grid.Row="5" Margin="5" VerticalAlignment="Center">
-            <Button Name="button_cml" Height="25" Width="100" Content="Import" Click="Button_Click"></Button>
+            <Button Name="button_cml" Height="25" Width="100" Content="Select" Click="Button_Click"></Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5,10,5,5" >
-            <TextBlock Name="textblock_cml" TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center">Select a pre-defined scheme</TextBlock>
-            <ComboBox Name="combobox_cml" Width="240"></ComboBox>
+        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5,10,5,5"  Height="100">
+            <TextBlock Name="textblock_cml" TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center">Import an existing scheme</TextBlock>
+            <ComboBox Name="combobox_cml" Width="180"  Margin="0,25,0,25"></ComboBox>
         </StackPanel>
 
     </Grid>
