@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,7 +47,10 @@ namespace ssi
             control.databaseCMLPredictMenu.IsEnabled = isConnected && (authentication > DatabaseAuthentication.READ);
 
             control.databaseAdminMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.READWRITE) ? Visibility.Visible : Visibility.Collapsed;
-            control.databaseManageUsersMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.DBADMIN) ? Visibility.Visible : Visibility.Collapsed;             
+            control.databaseManageUsersMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.DBADMIN) ? Visibility.Visible : Visibility.Collapsed;
+
+
+            control.fusionmenu.Visibility = (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\bayesfusion.exe") == true) ? Visibility.Visible : Visibility.Collapsed;  
 
             // annotation
 

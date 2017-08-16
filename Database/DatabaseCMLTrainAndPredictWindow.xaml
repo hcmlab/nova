@@ -60,7 +60,7 @@
                 <Label Grid.Row="0">Schemes</Label>
                 <ListBox Name="SchemesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="1" SelectionMode="Single" Margin="0,0,5,0"></ListBox>
                 <Label Grid.Row="2">Roles</Label>
-                <ListBox Name="RolesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="3" SelectionMode="Single" Margin="0,0,5,0"></ListBox>
+                <ListBox Name="RolesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
                 <Label Grid.Row="4">Annotators</Label>
                 <ListBox Name="AnnotatorsBox" SelectionChanged="Annotations_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>

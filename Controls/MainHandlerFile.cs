@@ -390,12 +390,21 @@ namespace ssi
                     {
                         try
                         {
-                            double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                            line = sr.ReadLine();
-                            data = line.Split(';');
-                            double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                            samplerate = 1 / (start2 - start);
-                            type = "continuous";
+                            double value;
+                            if (!double.TryParse(data[2], out value))
+                            {
+                                type = "semicolon";
+                            }
+                            else
+                            {
+                                double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                line = sr.ReadLine();
+                                data = line.Split(';');
+                                double start2 = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                samplerate = 1 / (start2 - start);
+
+                                type = "continuous";
+                            }
                         }
                         catch
                         {

@@ -1821,16 +1821,6 @@ namespace ssi
                 return false;
             }
 
-            if (!SessionExists(name))
-            {
-                return false;
-            }
-
-            if (name != session.Name && SessionExists(session.Name))
-            {
-                return false;
-            }
-
             return AddOrUpdateSession(name, session);
         }
 
@@ -2686,6 +2676,9 @@ namespace ssi
 
         public ObjectId Data_id { get; set; }
     }
+
+
+
 
     public static class DatabaseDefinitionCollections
     {

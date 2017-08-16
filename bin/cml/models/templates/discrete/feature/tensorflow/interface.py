@@ -1,4 +1,5 @@
 import sys
+import importlib
 if not hasattr(sys, 'argv'):
 	sys.argv  = ['']
 import tensorflow as tf
@@ -9,6 +10,7 @@ from xml.dom import minidom
 import os
 import shutil
 import time
+import site
 
 def getOptions(opts, vars):
 
@@ -157,7 +159,11 @@ def load(path, opts, vars):
     # copy unique network file
     
     network_tmp = os.path.dirname(path) + '\\' + opts['network'] + '.py'
-    shutil.copy(path + '.' + opts['network'] + '.py', network_tmp);        
+    shutil.copy(path + '.' + opts['network'] + '.py', network_tmp)    
+
+    # reload sys path and import network file
+
+    importlib.reload(site)
     module = __import__(opts['network'])
     os.remove(network_tmp)
 
