@@ -23,8 +23,8 @@
                 <MenuItem Header="Load Project" Name="fileLoadProjectMenu" />
                 <MenuItem Header="Save Project" Name="fileSaveProjectMenu" />
                 <MenuItem Header="Export">
-                    <MenuItem Header="To SSI Sample List" Name="exportSamplesMenu" />
-                    <MenuItem Header="To GeNIe Data Sheet" Name="exportToGenie" />
+                    <MenuItem Header="To SSI Sample List" Name="exportSamplesMenu" Visibility="Collapsed"/>
+                    <MenuItem Header="To GeNIe Data Sheet" Name="exportToGenie" Visibility="Collapsed" />
                     <MenuItem Header="Selected Annotation" Name="exportSelectedTierMenu">
                         <MenuItem Header="To CSV" Name="exportAnnoToCSVMenu" />
                         <MenuItem Header="To XPS" Name="exportTierToXPSMenu" />
@@ -65,6 +65,9 @@
                 <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
                 <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
                 <MenuItem Header="Train Models" Name="databaseCMLTrainMenu"/>
+                <MenuItem Header="Fusion" Name="fusionmenu">
+                    <MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenu"/>
+                </MenuItem>
                 <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu"/>
             </MenuItem>

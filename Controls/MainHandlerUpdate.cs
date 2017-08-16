@@ -101,16 +101,28 @@ namespace ssi
             if (!IsCMLTrainUptodate || !(File.Exists(cmltrainexePath)))
             {
 
-                MessageBoxResult mb = MessageBox.Show("A new version of the Cooperative Machine Learning tools is available, update now?", "Update available", MessageBoxButton.YesNo);
+
+                    MessageBoxResult mb = MessageBox.Show("A new version of the Cooperative Machine Learning tools is available, update now?", "Update available", MessageBoxButton.YesNo);
 
                 if (mb == MessageBoxResult.No)
                 {
                     return;
                 }
 
-                /*
-                * CMLTrain and XMLchain executables are downloaded from the official SSI git repository.
-                 * */
+                string[] fileEntries = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory);
+
+                foreach (string file in fileEntries)
+                {
+                    if (File.Exists(file) && Path.GetFileName(file).StartsWith("ssi") && file.EndsWith("dll"))
+                    {
+                        File.Delete(file);
+                    }
+                }
+
+
+                    /*
+                    * CMLTrain and XMLchain executables are downloaded from the official SSI git repository.
+                     * */
 
                 try
                 {
@@ -129,42 +141,17 @@ namespace ssi
 
                 DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
 
-                //Download libmongoc-1.0.dll, if not present yet.
-                string libmongocdll = "libmongoc-1.0.dll";
-                string libmongocdllPath = AppDomain.CurrentDomain.BaseDirectory + libmongocdll;
-
-                DownloadFile(SSIbinaryGitPath + libmongocdll, libmongocdllPath);
-
-
-                //Download libbson-1.0.dll, if not present yet.
-                string libsondll = "libbson-1.0.dll";
-                string libbsondllPath = AppDomain.CurrentDomain.BaseDirectory + libsondll;
-
-                DownloadFile(SSIbinaryGitPath + libsondll, libbsondllPath);
-
-                //Download ssiframe.dll, if not present yet (cml tools will do this automatically, here we force to overwrite it).
-                string ssiframedll = "ssiframe.dll";
-                string ssiframedllPath = AppDomain.CurrentDomain.BaseDirectory + ssiframedll;
-
-                DownloadFile(SSIbinaryGitPath + ssiframedll, ssiframedllPath);
-
-
-                if (File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath) && File.Exists(libmongocdllPath) && File.Exists(libbsondllPath))
+                if (File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath))
                 {
 
                     long sizexmlchain = new System.IO.FileInfo(xmlchainexePath).Length;
                     long sizecmltrain = new System.IO.FileInfo(cmltrainexePath).Length;
-                    long sizelibmongocdll = new System.IO.FileInfo(libmongocdllPath).Length;
-                    long sizelibsondll = new System.IO.FileInfo(libbsondllPath).Length;
-                    long sizessiframedll = new System.IO.FileInfo(ssiframedllPath).Length;
 
-                    if (sizexmlchain == 0 || sizecmltrain == 0 || sizelibmongocdll == 0 || sizelibsondll == 0)
+                    if (sizexmlchain == 0 || sizecmltrain == 0)
                     {
                         if (File.Exists(xmlchainexePath)) File.Delete(xmlchainexePath);
                         if (File.Exists(cmltrainexePath)) File.Delete(cmltrainexePath);
-                        if (File.Exists(libmongocdllPath)) File.Delete(libmongocdllPath);
-                        if (File.Exists(libbsondllPath)) File.Delete(libbsondllPath);
-                        if (File.Exists(ssiframedllPath)) File.Delete(ssiframedllPath);
+                      
                         MessageBox.Show("Could not update Cooperative Machine Learning Tools");
                     }
                     else MessageBox.Show("Successfully updated Cooperative Machine Learning Tools");

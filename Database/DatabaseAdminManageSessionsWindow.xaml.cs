@@ -160,8 +160,14 @@ namespace ssi
                     string[] tokens = names.Split(';');
                     foreach (string token in tokens)
                     {
-                        session.Name = token;
-                        DatabaseHandler.AddSession(session);                        
+                        DatabaseSession newSession = new DatabaseSession()
+                        {
+                            Name = token,
+                            Date = session.Date,
+                            Language = session.Language,
+                            Location = session.Location
+                        };                                                                    
+                        DatabaseHandler.AddSession(newSession);                        
                     }
 
                     GetSessions(session.Name);

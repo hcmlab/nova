@@ -387,6 +387,7 @@ namespace ssi
             {
                 foreach (DatabaseStream stream in streams)
                 {
+
                     bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
                     if (getTrainer(stream, scheme, template).Count > 0)
                     {

@@ -1,0 +1,306 @@
+﻿<Window x:Class="ssi.DatabaseCMLFusionPredictWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        Title="" Height="600" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown">
+
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="MyButton" >
+            <Setter Property="Margin" Value="2,0,2,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="350"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="0" Margin="3,-9,7,19">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50*"></ColumnDefinition>
+                <ColumnDefinition Width="100*"></ColumnDefinition>
+                <ColumnDefinition Width="100*"></ColumnDefinition>
+                <ColumnDefinition Width="100*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Database"/>
+            <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
+                <ListBox Name="DatabasesBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DatabasesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+            </DockPanel>
+
+            <Label Grid.Row="0" Grid.Column="1" Content="Annotation"/>
+            <Grid Grid.Row="1" Grid.Column="1">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0">Schemes</Label>
+                <ListBox Name="SchemesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="1" SelectionMode="Extended" Margin="0,0,5,0" Height="60" VerticalAlignment="Top"></ListBox>
+
+                <Label Content="Streams" Grid.Row="2" Grid.Column="0"/>
+                <ListView Name="StreamsBox" Grid.Row="3" Grid.Column="0" SelectionMode="Single" SelectionChanged="StreamsBox_SelectionChanged"  Margin="0,0,5,0">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="Auto" Header="Name">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Name" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Ext">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="FileExt" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Type">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Type" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Rate">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="SampleRate" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+
+                <Label Grid.Row="4" Margin="0,5,0,5">Trainer</Label>
+                <DockPanel  Grid.Row="5">
+                    <ComboBox Name="TrainerPathComboBox" Height="20" Width="200"  SelectionChanged="TrainerPathComboBox_SelectionChanged"  Margin="0,5,0,5"/>
+                    <Button Content="Add" Width="30" Height="20" Click="AddItemButton_Click" Margin="0,5,0,5"/>
+                </DockPanel>
+            
+
+
+            </Grid>
+
+
+            <Grid Grid.Row="1" Grid.Column="3">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Content="Sessions" Grid.Row="0" Grid.Column="3" />
+                <DockPanel Grid.Row="1" Margin="0,0,5,0" LastChildFill="True">
+                    <CheckBox Name="ShowAllSessionsCheckBox" DockPanel.Dock="Bottom"  Margin="0,5,0,0" Checked="ShowAllSessionsCheckBox_Checked" Unchecked="ShowAllSessionsCheckBox_Unchecked">Show existing</CheckBox>
+                    <ListView Name="SessionsBox"  SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" DockPanel.Dock="Top">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Width="Auto" Header="Language">
+                                    <GridViewColumn.DisplayMemberBinding>
+                                        <Binding Path="Language" />
+                                    </GridViewColumn.DisplayMemberBinding>
+                                </GridViewColumn>
+                                <GridViewColumn Width="Auto" Header="Location">
+                                    <GridViewColumn.DisplayMemberBinding>
+                                        <Binding Path="Location" />
+                                    </GridViewColumn.DisplayMemberBinding>
+                                </GridViewColumn>
+                                <GridViewColumn Width="Auto" Header="Date">
+                                    <GridViewColumn.DisplayMemberBinding>
+                                        <Binding Path="Date" />
+                                    </GridViewColumn.DisplayMemberBinding>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+
+                <Label Grid.Row="2">Annotator (todo)</Label>
+                <ListBox Name="AnnotatorsBox" SelectionChanged="Annotations_SelectionChanged" SelectionMode="Single" Grid.Row="3" Margin="0,0,5,0"/>
+
+                <Label Grid.Row="4">Network</Label>
+                <ComboBox Name="NetworkBox" Height="20" Width="200"  SelectionChanged="NetworkBox_SelectionChanged" Grid.Row="5"   Margin="0,5,0,5"/>
+            </Grid>
+            <Grid Grid.Row="1" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*"/>
+                    <ColumnDefinition Width="14*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+
+
+
+                <Label Grid.Row="0" Grid.ColumnSpan="2">Roles</Label>
+                <ListBox Name="RolesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="1" SelectionMode="Extended" Margin="0,0,5,0" Grid.ColumnSpan="2"></ListBox>
+
+
+                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,28,0" >Selected Inputs</Label>
+                <Button Height="20" Name="removePair" IsEnabled="False" Background="Transparent" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" Click="Button_Click">REM</Button>
+                <ListView Name="SchemeandClassifierBox"  Grid.Row="3" Grid.Column="0" SelectionMode="Extended"  Margin="0,0,5,0" Grid.ColumnSpan="2" SelectionChanged="SchemeandClassifierBox_SelectionChanged">
+                    <ListView.View>
+                        <GridView >
+                            <GridViewColumn Width="Auto" Header="Scheme">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Name" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Trainer">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Trainer" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Stream">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Stream" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Annotator">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Stream" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+
+
+                </ListView>
+
+            </Grid>
+
+            <Grid Grid.Row="2" Grid.ColumnSpan="4" Margin="0,5,5,0" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+            </Grid>
+
+            <GroupBox Name="TrainOptionsPanel" Grid.Row="3" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Train">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Row="0" Grid.Column="0" >Balance samples</Label>
+                    <ComboBox Name="BalanceComboBox" Grid.Row="0" Grid.Column="1"  VerticalAlignment="Center" SelectedIndex="0">
+                        <ComboBoxItem>none</ComboBoxItem>
+                        <ComboBoxItem>under</ComboBoxItem>
+                        <ComboBoxItem>over</ComboBoxItem>
+                    </ComboBox>
+
+                    <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
+                    <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" Height="20">0</TextBox>
+
+                    <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Right context</Label>
+                    <TextBox Name="RightContextTextBox" Grid.Row="2" Grid.Column="1" Height="20">0</TextBox>
+
+                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Output name</Label>
+                    <TextBox Name="TrainerNameTextBox" Grid.Row="3" Grid.Column="1" Height="20">0</TextBox>
+
+                    <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="4" Grid.Column="2" VerticalAlignment="Center"></Label>
+
+                </Grid>
+
+            </GroupBox>
+
+            <GroupBox Name="PredictOptionsPanel" Grid.Row="4" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Predict">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox Name="FillGapCheckBox" Grid.Row="0" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="FillGapCheckBox_Checked" Unchecked="FillGapCheckBox_Unchecked">Fill gaps (s)</CheckBox>
+                    <TextBox Name="FillGapTextBox" Grid.Row="0" Grid.Column="1"  Height="20">0.5</TextBox>
+
+                    <CheckBox Name="RemoveLabelCheckBox" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="RemoveLabelCheckBox_Checked" Unchecked="RemoveLabelCheckBox_Unchecked">Remove (s)</CheckBox>
+                    <TextBox Name="RemoveLabelTextBox" Grid.Row="1" Grid.Column="1"  Height="20">0.15</TextBox>
+
+                    <CheckBox Name="ConfidenceCheckBox" Grid.Row="2" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="ConfidenceCheckBox_Checked" Unchecked="ConfidenceCheckBox_Unchecked">Confidence</CheckBox>
+                    <TextBox Name="ConfidenceTextBox" Grid.Row="2" Grid.Column="1"  Height="20">-1.0</TextBox>
+
+                    <Label Name="HelpPredictLabel" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
+
+                </Grid>
+
+            </GroupBox>
+
+            <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" LastChildFill="False">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" Width="75" Height="30"/>
+                    <CheckBox Name="ForceCheckBox" Margin="5" VerticalAlignment="Center">Force</CheckBox>
+                </StackPanel>
+            </DockPanel>
+        </Grid>
+
+        <GridSplitter ResizeDirection="Columns"                         
+                          Grid.Column="1" 
+                          Height="Auto"
+                          Width="3"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Margin="0">
+        </GridSplitter>
+
+        <DockPanel Grid.Column="2" LastChildFill="True" Margin="0,0,5,5">
+            <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log</Label>
+            <TextBox Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" TextWrapping="Wrap"/>
+        </DockPanel>
+
+    </Grid>
+
+</Window>
