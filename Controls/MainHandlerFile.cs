@@ -322,8 +322,30 @@ namespace ssi
             {                
                 if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face")
                 {
-                    IMedia media = new Face(filename, signal);
-                    addMedia(media);
+
+                    if(signal.Meta.ContainsKey("type") && signal.Meta["type"] == "openface")
+                    {
+                        IMedia media = new Face(filename, signal, Face.FaceType.OPENFACE);
+                        addMedia(media);
+                    }
+
+                   
+
+                    else if (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect1")
+                    {
+                        IMedia media = new Face(filename, signal, Face.FaceType.KINECT1);
+                        addMedia(media);
+                    }
+
+                    //default case
+                    else
+                    {
+                        IMedia media = new Face(filename, signal, Face.FaceType.KINECT2);
+                        addMedia(media);
+                    }
+
+
+
                 }
                 else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton")
                 {
@@ -676,7 +698,7 @@ namespace ssi
 
         private void ImportAnnoFromElan(string filename)
         {
-            AnnoList[] lists = AnnoList.LoadfromElanFile(filename);
+            List<AnnoList> lists = AnnoList.LoadfromElanFile(filename);
             double maxdur = 0;
 
             if (lists != null)

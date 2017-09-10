@@ -15,12 +15,24 @@ namespace ssi
 {
     public class Face : Image, IMedia, INotifyPropertyChanged
     {
+
+        public enum FaceType
+        {
+            NONE,
+            KINECT1,
+            KINECT2,
+            OPENFACE
+        }
+
         private float KINECT_SMALL_VALUES_BUG_THRES = -10f;
         private float KINECT_LARGE_VALUES_BUG_THRES = 10f;
 
         private string filepath;
         private Signal signal;
         private MediaType type;
+        private FaceType facetype;
+
+
 
         private Color signalColor;
         private Color headColor;
@@ -47,7 +59,7 @@ namespace ssi
             handler?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        public Face(string filepath, Signal signal, int width = 600, int height = 600)
+        public Face(string filepath, Signal signal, FaceType ftype, int width = 600, int height = 600)
         {
             this.filepath = filepath;
             this.signal = signal;
@@ -55,6 +67,7 @@ namespace ssi
             this.height = height;
 
             type = MediaType.FACE;
+            facetype = ftype;
 
             BackColor = Defaults.Colors.Background;
             SignalColor = Defaults.Colors.Foreground;
@@ -69,9 +82,86 @@ namespace ssi
             timer.Interval = TimeSpan.FromMilliseconds(1000.0 / signal.rate);
             timer.Tick += new EventHandler(Draw);
 
-            minMax();
-            scale();
+
+            if(facetype == FaceType.OPENFACE)
+            {
+                minMaxOF();
+                scaleOF();
+            }
+
+            else
+            {
+                minMax();
+                scale();
+            }
+
+          
+
         }
+
+        public void minMaxOF()
+        {
+
+            for (int i = 0; i < 2; i++)
+            {
+                mins[i] = float.MaxValue;
+                maxs[i] = float.MinValue;
+            }
+
+            for (int i = 0; i < signal.number * signal.dim; i++)
+            {
+
+                if(i % signal.dim >= 26 && i % signal.dim <= 161)
+
+                {
+                    int dim = i % 2;
+                    if (mins[dim] > signal.data[i] && signal.data[i] > 0)
+                    {
+                        mins[dim] = signal.data[i];
+                    }
+                    else if (maxs[dim] < signal.data[i])
+                    {
+                        maxs[dim] = signal.data[i];
+                    }
+
+
+                    mins[0] = mins[1] = Math.Min(mins[0], mins[1]);
+                    maxs[0] = maxs[1] = Math.Max(maxs[0], maxs[1]);
+                }
+
+               
+
+
+            }
+        }
+
+        public void scaleOF()
+        {
+            for (int i = 0; i < signal.number * signal.dim; i++)
+            {
+                // negative values are evil, sometimes occur though
+                if (i >= signal.dim && signal.data[i] <= KINECT_SMALL_VALUES_BUG_THRES
+                    && signal.data[i] < KINECT_LARGE_VALUES_BUG_THRES)
+                {
+                    signal.data[i] = signal.data[i - signal.dim];
+                }
+                if (i % signal.dim >= 26 && i % signal.dim <= 161)
+
+                {
+                    int dim = i % 2;
+                    if (maxs[dim] - mins[dim] != 0)
+                    {
+                        signal.data[i] = (signal.data[i] - mins[dim]) / (maxs[dim] - mins[dim]);
+                    }
+                    else
+                    {
+                        signal.data[i] = signal.data[i] - mins[dim];
+                    }
+                }
+            }
+        }
+
+
 
         public void minMax()
         {
@@ -102,6 +192,9 @@ namespace ssi
             mins[0] = mins[1] = Math.Min(mins[0], mins[1]);
             maxs[0] = maxs[1] = Math.Max(maxs[0], maxs[1]);
         }
+
+
+
 
         public void scale()
         {
@@ -139,15 +232,37 @@ namespace ssi
             writeableBmp.Lock();
             writeableBmp.Clear(BackColor);
 
-            if (index < signal.number)
+
+
+            if(facetype == FaceType.KINECT1 || facetype == FaceType.KINECT2)
             {
-                for (uint i = index * signal.dim; i < (index+1) * signal.dim; i += 3)
+                if (index < signal.number)
                 {
-                    double X = signal.data[i] * width;
-                    double Y = height - signal.data[i+1] * height;
-                    writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+                    for (uint i = index * signal.dim; i < (index + 1) * signal.dim; i += 3)
+                    {
+                        double X = signal.data[i] * width;
+                        double Y = height - signal.data[i + 1] * height;
+                        writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+                    }
                 }
             }
+
+            else if (facetype == FaceType.OPENFACE)
+            {
+                if (index < signal.number)
+                {
+                    for (uint i = (index * signal.dim) + 26; i < (index * signal.dim) + 161; i += 2)
+                    {
+                        double X = signal.data[i] > 0 ? signal.data[i]  * width   - width/2: 0;
+                        double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
+                        writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+ 
+                    }
+
+                }
+
+            }
+           
 
             writeableBmp.Unlock();
 

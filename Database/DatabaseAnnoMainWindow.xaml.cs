@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace ssi
@@ -426,7 +427,7 @@ namespace ssi
                     if (DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.READWRITE || Properties.Settings.Default.MongoDBUser == ((DatabaseAnnotation)(AnnotationsBox.SelectedValue)).Annotator)
                     {
                         DeleteAnnotation.Visibility = Visibility.Visible;
-                        CopyAnnotation.Visibility = Visibility.Visible;                       
+                        //CopyAnnotation.Visibility = Visibility.Visible;                       
                     }
                 }
 
@@ -449,7 +450,7 @@ namespace ssi
                     BsonElement value;
                     if(StreamsBox.Items != null && annotation[0].TryGetElement("streams", out value))
                     {
-                        StreamsBox.SelectedItems.Clear();
+                        //StreamsBox.SelectedItems.Clear();
                         foreach (BsonString doc in annotation[0]["streams"].AsBsonArray)
                         {
                             string name = doc.AsString;                            
@@ -569,6 +570,14 @@ namespace ssi
             {
                 DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
                 GetAnnotations(session);
+            }
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
             }
         }
 

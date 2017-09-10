@@ -23,6 +23,9 @@ namespace ssi
 
             signalCursor.MouseDown += annoTierControl_MouseDown;
             annoCursor.MouseDown += annoTierControl_MouseDown;
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += signalCursor.setCurserToTime;
+            control.timeLineControl.rangeSlider.OnTimeRangeChanged += annoCursor.setCurserToTime;
+
 
         }
 

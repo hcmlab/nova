@@ -404,7 +404,10 @@ namespace ssi
 
             if (SchemesBox.Items.Count > 0)
             {
-                SchemesBox.SelectedIndex = 0;
+                if (SchemesBox.SelectedItem == null)
+                {
+                    SchemesBox.SelectedIndex = 0;
+                }
                 SchemesBox.SelectedItem = Properties.Settings.Default.CMLDefaultScheme;
             }
         }
@@ -423,7 +426,11 @@ namespace ssi
 
             if (RolesBox.Items.Count > 0)
             {
-                RolesBox.SelectedIndex = 0;
+
+                if (RolesBox.SelectedItem == null)
+                {
+                    RolesBox.SelectedIndex = 0;
+                }
                 RolesBox.SelectedItem = Properties.Settings.Default.CMLDefaultRole;
             }
         }
@@ -456,7 +463,11 @@ namespace ssi
 
             if (StreamsBox.Items.Count > 0)
             {
-                StreamsBox.SelectedIndex = 0;
+                if(StreamsBox.SelectedItem == null)
+                {
+                    StreamsBox.SelectedIndex = 0;
+                }
+              
                 StreamsBox.SelectedItem = streamsValid.Find(item => item.Name == Properties.Settings.Default.CMLDefaultStream);
             }
         }
@@ -473,7 +484,11 @@ namespace ssi
 
             if (AnnotatorsBox.Items.Count > 0)
             {
-                AnnotatorsBox.SelectedIndex = 0;
+                if(AnnotatorsBox.SelectedItem == null)
+                {
+                    AnnotatorsBox.SelectedIndex = 0;
+                }
+                
                 AnnotatorsBox.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotator;
             }
         }
@@ -522,7 +537,7 @@ namespace ssi
                 List<BsonDocument> annotations = new List<BsonDocument>();
                 foreach (ObjectId roleID in roleIDs)
                 {
-                    var filter = builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("role_id", roleID);                    
+                    var filter = builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("role_id", roleID) & builder.Eq("isFinished", true);                    
                     annotations.AddRange(DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Annotations, true, filter));
                 }
 
@@ -576,7 +591,11 @@ namespace ssi
 
             if (SessionsBox.HasItems)
             {
-                SessionsBox.SelectedIndex = 0;
+                if(SessionsBox.SelectedItem == null)
+                {
+                    SessionsBox.SelectedIndex = 0;
+                }
+               
             }
         } 
 
@@ -732,7 +751,12 @@ namespace ssi
             
             if (TrainerPathComboBox.Items.Count > 0)
             {
-                TrainerPathComboBox.SelectedIndex = 0;
+                if (TrainerPathComboBox.SelectedItem == null)
+                {
+                 
+                        TrainerPathComboBox.SelectedIndex = 0;
+
+                }
                 TrainerPathComboBox.SelectedItem = Properties.Settings.Default.CMLDefaultTrainer;
             }
 
@@ -806,6 +830,8 @@ namespace ssi
                 Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
                 LeftContextTextBox.Text = trainer.LeftContext;
                 RightContextTextBox.Text = trainer.RightContext;
+
+
                 BalanceComboBox.SelectedIndex = 0;
                 if (trainer.Balance.ToLower() == "under")
                 {

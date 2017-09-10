@@ -239,7 +239,7 @@ namespace ssi
                         " -mindur " + minDur +
                         " -username " + username +
                         " -list " + sessions +
-                        " -finished" +
+                     //   " -finished" +
                         ( complete ? " -cooperative" : "" ) +
                         " -log " + logPath;
                 string options = options_no_pass + " -password " + password;

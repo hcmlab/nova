@@ -233,7 +233,7 @@
 
         <DockPanel Grid.Column="2" LastChildFill="True" Margin="0,0,5,5">
             <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log</Label>
-            <TextBox Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" TextWrapping="Wrap"/>
+            <TextBox Name="logTextBox"  DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"  FontFamily="Consolas" TextWrapping="Wrap"/>
         </DockPanel>
 
     </Grid>

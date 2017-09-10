@@ -462,9 +462,9 @@ namespace ssi
         public static Signal LoadWaveFile(string filepath)
         {
             WavHeader Header = new WavHeader();
-            Signal signal = null;            
-
+            Signal signal = null;
             using (FileStream fs = new FileStream(filepath, FileMode.Open, FileAccess.Read))
+
             using (BinaryReader br = new BinaryReader(fs))
             {
                 try
@@ -481,7 +481,18 @@ namespace ssi
                     Header.blockSize = br.ReadUInt16();
                     Header.bit = br.ReadUInt16();
                     Header.dataID = br.ReadBytes(4);
+
+                    /*Check if Headerfile starts with data description or list */
+                    if(Header.dataID[0] == 76 && Header.dataID[1] == 73 && Header.dataID[2] == 83  && Header.dataID[3] == 84)
+                    {
+                       uint offset = br.ReadUInt32();
+                       br.ReadBytes((int)offset);
+                       Header.dataID = br.ReadBytes(4);
+             
+                    }
+
                     Header.dataSize = br.ReadUInt32();
+                    
 
                     double rate = Header.sampleRate;
                     uint dimension = Header.channels;

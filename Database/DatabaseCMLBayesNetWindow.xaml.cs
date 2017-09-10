@@ -205,12 +205,16 @@ namespace ssi
                         AnnoList annolist = DatabaseHandler.LoadAnnoList(anno.Id);
                         annoLists.Add(annolist);
                         logTextBox.Text = logTextBox.Text + "Session: " + session.Name + " Role: " + annolist.Meta.Role + " Scheme: " + annolist.Scheme.Name + "\n";
+
+                      
+                        logTextBox.Focus();
+                        logTextBox.CaretIndex = logTextBox.Text.Length;
+                        logTextBox.ScrollToEnd();
                     }
                 }
-
+                logTextBox.Text = logTextBox.Text + "----------------------------------\n";
                 ExportFrameWiseAnnotations(chunksizeinMS, discretelabels, ";", "REST", datasetDir, annoLists, ishead, session.Name, tempsteps);
 
-                logTextBox.Text = logTextBox.Text + "----------------------------------\n";
                 if (ishead) ishead = false;
             }
 
@@ -494,10 +498,9 @@ namespace ssi
 
             foreach (DatabaseRole item in DatabaseHandler.Roles)
             {
-                if (item.HasStreams)
-                {
+               
                     RolesBox.Items.Add(item.Name);
-                }
+                
             }
 
             if (RolesBox.Items.Count > 0)
@@ -642,7 +645,11 @@ namespace ssi
 
             if (SessionsBox.HasItems)
             {
-                SessionsBox.SelectedIndex = 0;
+                if(SessionsBox.SelectedItem == null)
+                {
+                    SessionsBox.SelectedIndex = 0;
+                }
+                
             }
         }
 
@@ -655,7 +662,13 @@ namespace ssi
                 {
                     TrainerPathComboBox.Items.Add(Path.GetFileNameWithoutExtension(net));
                 }
-            TrainerPathComboBox.SelectedIndex = 0;
+
+
+            if(TrainerPathComboBox.SelectedItem == null)
+            {
+                TrainerPathComboBox.SelectedIndex = 0;
+            }
+        
 
             Update();
         }

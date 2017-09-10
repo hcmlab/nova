@@ -446,22 +446,8 @@ namespace ssi
             // if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
-        private void annoSettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (AnnoTierStatic.Selected != null)
-            {
-                AnnoTierSettingsWindow window = new AnnoTierSettingsWindow();
-                window.DataContext = AnnoTierStatic.Selected;
-                window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                window.ShowDialog();
-                updateAnnoInfo(AnnoTierStatic.Selected);
-                AnnoTierStatic.Selected.AnnoList.HasChanged = true;
-            }
-        }
 
-
-
-        #region EVENTHANDLERS
+        #region EVENTHANDLER
 
         private void annoTierControl_MouseMove(object sender, MouseEventArgs e)
         {
@@ -500,20 +486,46 @@ namespace ssi
             }
         }
 
-
         private void annoTierControl_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (control.navigator.askforlabels.IsChecked == true) AnnoTier.askForLabel = true;
             else AnnoTier.askForLabel = false;
 
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && !Keyboard.IsKeyDown(Key.LeftShift))
             {
-                if (AnnoTierStatic.Label != null)
+
+
+
+                if (AnnoTierStatic.Selected != null)
                 {
-                    AnnoTierStatic.Label.isMoveable = true;
                     AnnoTierStatic.Selected.LeftMouseButtonDown(e);
                 }
+                if (AnnoTierStatic.Label != null)
+
+                {
+                    AnnoTierStatic.Label.isMoveable = true;
+                }
                 geometricCompare.Clear();
+            }
+            else if (e.LeftButton == MouseButtonState.Pressed && Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(false);
+
+                if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS || isMouseButtonDown == false))
+                {
+                    foreach (AnnoTier a in annoTiers)
+                    {
+                        if (a.IsMouseOver)
+                        {
+                            AnnoTier.SelectLabel(null);
+                            AnnoTier.Select(a);
+                            break;
+                        }
+                    }
+                }
+
+                if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.LeftMouseButtonDown(e);
+                isMouseButtonDown = true;
             }
             else if (e.RightButton == MouseButtonState.Pressed && !Keyboard.IsKeyDown(Key.LeftCtrl))
             {
@@ -667,8 +679,20 @@ namespace ssi
             }
         }
 
+        private void annoSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (AnnoTierStatic.Selected != null)
+            {
+                AnnoTierSettingsWindow window = new AnnoTierSettingsWindow();
+                window.DataContext = AnnoTierStatic.Selected;
+                window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                window.ShowDialog();
+                updateAnnoInfo(AnnoTierStatic.Selected);
+                AnnoTierStatic.Selected.AnnoList.HasChanged = true;
+            }
+        }
 
 
-        #endregion EVENTHANDLERS
+        #endregion EVENTHANDLER
     }
 }

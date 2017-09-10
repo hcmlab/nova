@@ -60,8 +60,7 @@ namespace ssi
                         ((AnnoTierSegment)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
                         ((AnnoTierSegment)Undostruct.UiElement).Item.Start = Undostruct.Start;
                         ((AnnoTierSegment)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
-                       
-
+                    
                 }
     
                 else if (Undostruct.Action == ActionType.Move)
@@ -73,6 +72,21 @@ namespace ssi
                     ((AnnoTierSegment)Undostruct.UiElement).Item.Start = Undostruct.Start;
                     ((AnnoTierSegment)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
                    
+                }
+                else if (Undostruct.Action == ActionType.Split)
+                {
+                    //resize element
+                    this.RedoPushInUnDoForSplit(Canvas.GetLeft(Undostruct.UiElement), Undostruct.UiElement, Undostruct.NextUiElement);
+                    Canvas.SetLeft(Undostruct.UiElement, Undostruct.Margin.X);
+                    Undostruct.UiElement.Width = Undostruct.Width;
+
+                    ((AnnoTierSegment)Undostruct.UiElement).Item.Duration = Undostruct.Duration;
+                    ((AnnoTierSegment)Undostruct.UiElement).Item.Start = Undostruct.Start;
+                    ((AnnoTierSegment)Undostruct.UiElement).Item.Stop = Undostruct.Stop;
+
+                    //delete added element
+                    ((AnnoTier)Container).DeleteSegment((AnnoTierSegment)Undostruct.NextUiElement);
+
                 }
             }
 
@@ -128,6 +142,25 @@ namespace ssi
 
                     ChangeRepresentationObject ChangeRepresentationObjectForMove = this.MakeChangeRepresentationObjectForMove(Undostruct.Margin.X, Undostruct.UiElement);
                     _UndoActionsCollection.Push(ChangeRepresentationObjectForMove);
+                }
+                else if (Undostruct.Action == ActionType.Split)
+                {
+                    //resize element
+                    Canvas.SetLeft(Undostruct.UiElement, Undostruct.Margin.X);
+                    Undostruct.UiElement.Width = Undostruct.Width;
+                    Undostruct.Start = ((AnnoTierSegment)Undostruct.UiElement).Item.Start;
+                    Undostruct.Stop = ((AnnoTierSegment)Undostruct.UiElement).Item.Stop;
+
+                    Undostruct.Duration = Undostruct.Stop - Undostruct.Start;
+
+                    //delete added element
+                    AnnoListItem ali = ((AnnoTierSegment)Undostruct.NextUiElement).Item;
+                    ((AnnoTier)Container).AnnoList.AddSorted(ali);
+                    AnnoTierSegment at = ((AnnoTier)Container).AddSegment(ali);
+
+                   
+                    ChangeRepresentationObject ChangeRepresentationObjectForSplit = this.MakeChangeRepresentationObjectForSplit(Undostruct.Margin.X, Undostruct.UiElement, at);
+                    _UndoActionsCollection.Push(ChangeRepresentationObjectForSplit);
                 }
             }
             if (EnableDisableUndoRedoFeature != null)
@@ -192,6 +225,21 @@ namespace ssi
             return ResizeStruct;
         }
 
+        public ChangeRepresentationObject MakeChangeRepresentationObjectForSplit(double pos, FrameworkElement UIelement, FrameworkElement NextUIelement)
+        {
+            ChangeRepresentationObject SplitStruct = new ChangeRepresentationObject();
+            SplitStruct.Action = ActionType.Split;
+            SplitStruct.Margin.X = pos;
+            SplitStruct.Width = UIelement.Width;
+            SplitStruct.Start = ((AnnoTierSegment)UIelement).Item.Start;
+            SplitStruct.Stop = ((AnnoTierSegment)UIelement).Item.Stop;
+            SplitStruct.Duration = ((AnnoTierSegment)UIelement).Item.Duration;
+            SplitStruct.UiElement = UIelement;
+            SplitStruct.NextUiElement = NextUIelement;
+
+            return SplitStruct;
+        }
+
         public void clearUnRedo()
         {
             _UndoActionsCollection.Clear();
@@ -243,6 +291,21 @@ namespace ssi
             _RedoActionsCollection.Push(ResizeStruct);
         }
 
+        public void RedoPushInUnDoForSplit(double pos, FrameworkElement UIelement, FrameworkElement NextUiElement)
+        {
+            ChangeRepresentationObject SplitStruct = new ChangeRepresentationObject();
+            SplitStruct.Action = ActionType.Split;
+            SplitStruct.Margin.X = pos;
+            SplitStruct.Width = UIelement.Width;
+            SplitStruct.Start = ((AnnoTierSegment)UIelement).Item.Start;
+            SplitStruct.Stop = ((AnnoTierSegment)UIelement).Item.Stop;
+            SplitStruct.Duration = ((AnnoTierSegment)UIelement).Item.Duration;
+            SplitStruct.UiElement = UIelement;
+            SplitStruct.NextUiElement = NextUiElement;
+            _RedoActionsCollection.Push(SplitStruct);
+        }
+
+
         #endregion RedoHelperFunctions
 
         public bool IsUndoPossible()
@@ -279,7 +342,8 @@ namespace ssi
         Delete = 0,
         Move = 1,
         Resize = 2,
-        Insert = 3
+        Insert = 3,
+        Split = 4
     }
 
     #endregion enums
@@ -295,6 +359,7 @@ namespace ssi
         public double Stop;
         public double Duration;
         public FrameworkElement UiElement;
+        public FrameworkElement NextUiElement;
     }
 
     #endregion datastructures
