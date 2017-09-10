@@ -3,486 +3,737 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Collections.Generic;
+
 
 namespace ssi
 {
+
     public partial class MainHandler
     {
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (!this.control.annoListControl.editTextBox.IsFocused)
             {
-                if (e.KeyboardDevice.IsKeyDown(Key.Space))
+                int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
+                switch (level)
                 {
-                   
-                    if (IsPlaying())
-                    {
-                        Stop();
-                    }
-                    else
-                    {
-                        Play();
-                    }
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.L))
-                {
-                    if (AnnoTierStatic.Selected != null)
-                    {
-                        databaseCMLCompleteStep();
-                    }
-
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.D0) || e.KeyboardDevice.IsKeyDown(Key.NumPad0))
-                {
-                    if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList != null)
-                    {
-                        if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+                    /*All Modifier keys are pressed*/
+                    case 3:
+                        break;
+                    /*Two Modifier keys are pressed*/
+                    case 2:
+                        break;
+                    /*One Modifier keys are pressed*/
+                    case 1:
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                         {
-                            string label = "GARBAGE";
-                            if (AnnoTierStatic.Label != null)
+                            if (e.KeyboardDevice.IsKeyDown(Key.C))
                             {
-                                AnnoTierStatic.Label.Item.Label = label;
-                                AnnoTierStatic.Label.Item.Color = Colors.Black;
-                                AnnoTierStatic.Label.Item.Confidence = 1.0;
+                                CopySegment();
+
+                                e.Handled = true;
+                            }
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.L))
+                            {
+                                CompleteSession();
+                                e.Handled = true;
+                            }
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.V))
+                            {
+                                PasteSegment();
+                                e.Handled = true;
+                            }
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.X))
+                            {
+                                CutSegment(sender, e);
+                                e.Handled = true;
+                            }
+
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Z))
+                            {
+                                Undo();
+                                e.Handled = true;
+                            }
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Y))
+                            {
+                                Redo();
+                                e.Handled = true;
+                            }
+
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Left))
+                            {
+                                MoveSegmentBorder(false);
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Right))
+                            {
+                                MoveSegmentBorder();
+                                e.Handled = true;
+                            }
+
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
+                        {
+                            if (e.KeyboardDevice.IsKeyDown(Key.Down))
+                            {
+                                CopyLabelToTier();
+                                e.Handled = true;
+                            }
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Up))
+                            {
+                                CopyLabelToTier(false);
+                                e.Handled = true;
                             }
                         }
-                    }
-                    // e.Handled = true;
+                        else if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                        {
+
+                        }
+                            break;
+                    /*No Modifier keys are pressed*/
+                    case 0:
+                        if (((int)e.Key >= 34 && (int)e.Key <= 43) || ((int)e.Key >= 74 && (int)e.Key <= 83)) {
+                            SetLabelForSegment(e);
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.S))
+                        {
+                            SplitSegment(sender, e);
+                            e.Handled = true;
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
+                        {
+                            ChangeTier();
+                            e.Handled = true;
+                        }
+                        if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Up))
+                        {
+                            ChangeTier(false);
+                            e.Handled = true;
+                        }
+
+                        else if (e.KeyboardDevice.IsKeyDown(Key.Left))
+                        {
+                            MoveFrameMedia(false);
+
+                            e.Handled = true;
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.Right))
+                        {
+                            MoveFrameMedia();
+                            e.Handled = true;
+                        }
+
+                        else if (e.KeyboardDevice.IsKeyDown(Key.Space))
+                        {
+                            TogglePlay();
+                            e.Handled = true;
+                        }
+                        break;
+                    default:
+                        break;
                 }
+            }
 
-                if ((e.KeyboardDevice.IsKeyDown(Key.D1) || e.KeyboardDevice.IsKeyDown(Key.D2) || e.KeyboardDevice.IsKeyDown(Key.D3) || e.KeyboardDevice.IsKeyDown(Key.D4) ||
-                    e.KeyboardDevice.IsKeyDown(Key.D5) || e.KeyboardDevice.IsKeyDown(Key.D6) || e.KeyboardDevice.IsKeyDown(Key.D7) || e.KeyboardDevice.IsKeyDown(Key.D8) || e.KeyboardDevice.IsKeyDown(Key.D9) ||
-                    e.KeyboardDevice.IsKeyDown(Key.NumPad1) || e.KeyboardDevice.IsKeyDown(Key.NumPad2) || e.KeyboardDevice.IsKeyDown(Key.NumPad3) || e.KeyboardDevice.IsKeyDown(Key.NumPad4) || e.KeyboardDevice.IsKeyDown(Key.NumPad5) ||
-                    e.KeyboardDevice.IsKeyDown(Key.NumPad6) || e.KeyboardDevice.IsKeyDown(Key.NumPad7) || e.KeyboardDevice.IsKeyDown(Key.NumPad8) || e.KeyboardDevice.IsKeyDown(Key.NumPad9)) && AnnoTierStatic.Selected != null)
+        }
+
+        public void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (!this.control.annoListControl.editTextBox.IsFocused)
+            {
+
+                int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
+
+                switch (level)
                 {
-                    int index = 0;
-                    if (e.Key - Key.D1 < 10 && AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null && AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count > 0) index = Math.Min(AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count - 1, e.Key - Key.D1);
-                    else if (AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null) index = Math.Min(AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count - 1, e.Key - Key.NumPad1);
+                    /*All Modifier keys are pressed*/
+                    case 3:
+                        break;
+                    /*Two Modifier keys are pressed*/
+                    case 2:
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
+                        {
 
-                    if (index >= 0 && AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                        {
+
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.LeftShift) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
+                        {
+                            if (e.KeyboardDevice.IsKeyDown(Key.Right))
+                            {
+                                MoveFrameAnnotation();
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Left))
+                            {
+                                MoveFrameAnnotation(false);
+                                e.Handled = true;
+                           }
+                        }
+                        break;
+                    /*One Modifier keys are pressed*/
+                    case 1:
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                        {
+                            if (e.KeyboardDevice.IsKeyDown(Key.S))
+                            {
+                                saveSelectedAnno();
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.R))
+                            {
+                                ReloadAnnotations();
+                                e.Handled = true;
+                            }
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                        {
+                            if (e.KeyboardDevice.IsKeyDown(Key.R))
+                            {
+                                AlignToSampleRate();
+                            }
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
+                        {
+                            if (e.KeyboardDevice.IsKeyDown(Key.Right))
+                            {
+                                MoveFrameAnnotation();
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Left))
+                            {
+                                MoveFrameAnnotation(false);
+                                e.Handled = true;
+                            }
+                        }
+                        break;
+                    /*No Modifier keys are pressed*/
+                    case 0:
+                        if (e.KeyboardDevice.IsKeyDown(Key.E))
+                        {
+                            SelectSegmentEnd();
+                            e.Handled = true;
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.L))
+                        {
+                            ToggleLiveMode();
+                            e.Handled = true;
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.M))
+                        {
+                            ToggleMouseMode();
+                            e.Handled = true;
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.Q))
+                        {
+                            SelectSegmentStart();
+                            e.Handled = true;
+                        }
+                        
+                        else if ((e.KeyboardDevice.IsKeyDown(Key.W)))
+                        {
+                            CreateOrSelectAnnotation();
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.Back))
+                        {
+                            RemoveSegment(sender, e);
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.Delete))
+                        {
+                            RemoveSegment(sender, e);
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.F5))
+                        {
+                            ReloadAnnotations();
+                            e.Handled = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        public void OnKeyUp(object sender, KeyEventArgs e)
+        {
+            isKeyDown = false;
+        }
+
+        #region Wrapper
+        /*TODO: Check for redundant code within functions with similar functionality*/
+        private void TogglePlay()
+        {
+            if (IsPlaying())
+            {
+                Stop();
+            }
+            else
+            {
+                Play();
+            }
+        }
+
+        private void SplitSegment(object sender, KeyEventArgs e)
+        {
+            if (AnnoTierStatic.Label != null)
+            {
+                AnnoTierStatic.SplitPressed(sender, e);
+            }
+        }
+
+        private void RemoveSegment(object sender, KeyEventArgs e)
+        {
+            if (AnnoTierStatic.Label != null)
+            {
+                AnnoTierStatic.RemoveSegmentPressed(sender, e);
+            }
+        }
+
+        private void SelectSegmentStart()
+        {
+            if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false)
+            {
+                UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
+                Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
+
+                mediaList.Move(Time.TimeFromPixel(relativeLocation.X));
+
+                annoCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
+                signalCursor.X = relativeLocation.X;
+
+                timeline.CurrentSelectPosition = annoCursor.X;
+                timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+                AnnoTierStatic.Label.select(true);
+                isKeyDown = true;
+            }
+        }
+
+        private void SelectSegmentEnd()
+        {
+            if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false)
+            {
+                UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
+                Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
+
+                mediaList.Move(Time.TimeFromPixel(relativeLocation.X + AnnoTierStatic.Label.Width));
+
+                annoCursor.X = relativeLocation.X;
+                signalCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
+
+                timeline.CurrentSelectPosition = annoCursor.X;
+                timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+                AnnoTierStatic.Label.select(true);
+                isKeyDown = true;
+            }
+        }
+
+        private void SetLabelForSegment(KeyEventArgs e)
+        {
+        if (AnnoTierStatic.Selected != null)
+        {
+            if (e.KeyboardDevice.IsKeyDown(Key.D0) || e.KeyboardDevice.IsKeyDown(Key.NumPad0))
+            {
+                if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList != null)
+                {
+                    if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                     {
-                        string label = AnnoTierStatic.Selected.AnnoList.Scheme.Labels.ElementAt(index).Name;
+                        string label = "GARBAGE";
                         if (AnnoTierStatic.Label != null)
                         {
                             AnnoTierStatic.Label.Item.Label = label;
-                            AnnoTierStatic.Selected.DefaultLabel = label;
+                            AnnoTierStatic.Label.Item.Color = Colors.Black;
+                            AnnoTierStatic.Label.Item.Confidence = 1.0;
+                        }
+                    }
+                }
+                // e.Handled = true;
+            }
+            else
+            {
+                int index = 0;
+                if (e.Key - Key.D1 < 10 && AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null && AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count > 0) index = Math.Min(AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count - 1, e.Key - Key.D1);
+                else if (AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null) index = Math.Min(AnnoTierStatic.Selected.AnnoList.Scheme.Labels.Count - 1, e.Key - Key.NumPad1);
 
-                            foreach (AnnoScheme.Label lp in AnnoTierStatic.Selected.AnnoList.Scheme.Labels)
+                if (index >= 0 && AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                {
+                    string label = AnnoTierStatic.Selected.AnnoList.Scheme.Labels.ElementAt(index).Name;
+                    if (AnnoTierStatic.Label != null)
+                    {
+                        AnnoTierStatic.Label.Item.Label = label;
+                        AnnoTierStatic.Selected.DefaultLabel = label;
+
+                        foreach (AnnoScheme.Label lp in AnnoTierStatic.Selected.AnnoList.Scheme.Labels)
+                        {
+                            if (label == lp.Name)
                             {
-                                if (label == lp.Name)
-                                {
-                                    AnnoTierStatic.Label.Item.Color = lp.Color;
-                                    AnnoTierStatic.Label.Item.Confidence = 1.0;
-                                    AnnoTierStatic.Selected.DefaultColor = lp.Color;
+                                AnnoTierStatic.Label.Item.Color = lp.Color;
+                                AnnoTierStatic.Label.Item.Confidence = 1.0;
+                                AnnoTierStatic.Selected.DefaultColor = lp.Color;
 
-                                    break;
-                                }
+                                break;
                             }
                         }
                     }
-                    // e.Handled = true;
                 }
+                // e.Handled = true;
+            }
+        }
+        }
 
-                if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+        private void CopyLabelToTier(bool down = true)
+        {
+            if (down)
+            {
+                if (AnnoTierStatic.Label != null)
                 {
-                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false /*&& AnnoTierStatic.Label == null*/)
-                    {
-                        UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
-                        Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
+                    AnnoListItem temp = AnnoTierStatic.Label.Item;
 
-                        mediaList.Move(Time.TimeFromPixel(relativeLocation.X + AnnoTierStatic.Label.Width));
-
-                        if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                        {
-                            annoCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
-                        }
-                        else signalCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
-
-                        timeline.CurrentSelectPosition = annoCursor.X;
-                        timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                        AnnoTierStatic.Label.select(true);
-                        isKeyDown = true;
-                    }
-                    e.Handled = true;
-                }
-                else if (e.KeyboardDevice.IsKeyDown(Key.Right) && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !isKeyDown)
-                {
-                    isKeyDown = true;
-                    if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.Focus();
-                    int i = 0;
-                    double fps = 1.0 / 25.0;
-                    foreach (IMedia media in mediaList)
-                    {
-                        if (media.GetMediaType() == MediaType.VIDEO) break;
-                        i++;
-                    }
-
-                    if (i < mediaList.Count)
-                    {
-                        fps = 1.0 / mediaList[i].GetSampleRate();
-                    }
-
-                    mediaList.Move(Time.TimeFromPixel(signalCursor.X) + fps);
-                    timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X) + fps;
-                    double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
-                    signalCursor.X = pos;
-
-                    if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.autoScrollCheckBox.IsChecked == true)
-                    {
-                        double factor = (((timeline.CurrentPlayPosition - timeline.SelectionStart) / (timeline.SelectionStop - timeline.SelectionStart)));
-                        control.timeLineControl.rangeSlider.followmedia = true;
-                        control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
-
-                        if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
-                        signalCursor.X = 1;
-                    }
-                    else if (control.navigator.autoScrollCheckBox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
-
-                    double time = Time.TimeFromPixel(pos);
-                    updatePositionLabels(time);
-                    control.annoTierControl.currentTime = time;
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
-                {
-                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false /*&& AnnoTierStatic.Label == null*/)
-                    {
-                        UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
-                        Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
-
-                        mediaList.Move(Time.TimeFromPixel(relativeLocation.X));
-
-                        if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                        {
-                            annoCursor.X = relativeLocation.X;
-                        }
-                        else signalCursor.X = relativeLocation.X;
-
-                        timeline.CurrentSelectPosition = annoCursor.X;
-                        timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                        AnnoTierStatic.Label.select(true);
-                        isKeyDown = true;
-                    }
-                    e.Handled = true;
-                }
-                else if (e.KeyboardDevice.IsKeyDown(Key.Left) && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !isKeyDown)
-                {
-                    isKeyDown = true;
-                    if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.Focus();
-                    int i = 0;
-                    double fps = 1.0 / 25.0;
-                    foreach (IMedia im in mediaList)
-                    {
-                        if (im.GetMediaType() == MediaType.VIDEO) break;
-                        i++;
-                    }
-
-                    if (i < mediaList.Count)
-                    {
-                        fps = 1.0 / mediaList[i].GetSampleRate();
-                    }
-
-                    mediaList.Move(Time.TimeFromPixel(signalCursor.X) - fps);
-                    timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X) - fps;
-                    double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
-                    signalCursor.X = pos;
-
-                    if (Time.CurrentPlayPosition < Time.SelectionStart && Time.SelectionStart > 0 && control.navigator.autoScrollCheckBox.IsChecked == true)
-                    {
-                        double factor = (((timeline.SelectionStop - timeline.CurrentPlayPosition) / (timeline.SelectionStop - timeline.SelectionStart)));
-                        control.timeLineControl.rangeSlider.followmedia = true;
-                        control.timeLineControl.rangeSlider.MoveAndUpdate(false, factor);
-
-                        if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
-                        signalCursor.X = Time.PixelFromTime(Time.SelectionStop);
-                    }
-                    else if (control.navigator.autoScrollCheckBox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
-
-                    double time = Time.TimeFromPixel(pos);
-                    if (time != 0)
-                    {
-                        updatePositionLabels(time);
-                        control.annoTierControl.currentTime = Time.TimeFromPixel(pos);
-                    }
-
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
-                {
                     for (int i = 0; i < annoTiers.Count; i++)
                     {
                         if (annoTiers[i] == AnnoTierStatic.Selected && i + 1 < annoTiers.Count)
                         {
                             AnnoTierStatic.Select(annoTiers[i + 1]);
-                            AnnoTierStatic.SelectLabel(null);
+                            AnnoTier.SelectLabel(null);
+                            if (!AnnoTierStatic.Selected.AnnoList.Contains(temp)) AnnoTierStatic.Selected.NewAnnoCopy(temp.Start, temp.Stop, temp.Label, temp.Color);
+
                             break;
                         }
                     }
-                    e.Handled = true;
                 }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Up))
+            }
+            else
+            {
+                if (AnnoTierStatic.Label != null)
                 {
+                    AnnoListItem temp = AnnoTierStatic.Label.Item;
+
                     for (int i = 0; i < annoTiers.Count; i++)
                     {
                         if (annoTiers[i] == AnnoTierStatic.Selected && i > 0)
                         {
                             AnnoTierStatic.Select(annoTiers[i - 1]);
-                            AnnoTier.SelectLabel(null);
+                            AnnoTierStatic.SelectLabel(null);
+                            if (!AnnoTierStatic.Selected.AnnoList.Contains(temp)) AnnoTierStatic.Selected.NewAnnoCopy(temp.Start, temp.Stop, temp.Label, temp.Color);
                             break;
                         }
                     }
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.C) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
-                {
-                    if (AnnoTierStatic.Label != null)
-                    {
-                        temp_segment = AnnoTierStatic.Label;
-                        AnnoTierStatic.Label.select(false);
-                    }
-
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.X) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
-                {
-                    if (AnnoTierStatic.Label != null)
-                    {
-                        temp_segment = AnnoTierStatic.Label;
-                        AnnoTierStatic.OnKeyDownHandler(sender, e);
-                    }
-
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.V) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
-                {
-                    if (AnnoTierStatic.Selected != null)
-                    {
-                        double start = Time.TimeFromPixel(annoCursor.X);
-                        if (temp_segment != null) AnnoTierStatic.Selected.NewAnnoCopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Color, temp_segment.Item.Confidence);
-                    }
-
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.Z))
-                {
-                    if (AnnoTierStatic.Selected != null)
-                    {
-                        AnnoTierStatic.Selected.UnDoObject.Undo(1);
-                    }
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.Y))
-                {
-                    if (AnnoTierStatic.Selected != null)
-                    {
-                        AnnoTierStatic.Selected.UnDoObject.Redo(1);
-                    }
-
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Down))
-                {
-                    if (AnnoTierStatic.Label != null)
-                    {
-                        AnnoListItem temp = AnnoTierStatic.Label.Item;
-
-                        for (int i = 0; i < annoTiers.Count; i++)
-                        {
-                            if (annoTiers[i] == AnnoTierStatic.Selected && i + 1 < annoTiers.Count)
-                            {
-                                AnnoTierStatic.Select(annoTiers[i + 1]);
-                                AnnoTier.SelectLabel(null);
-                                if (!AnnoTierStatic.Selected.AnnoList.Contains(temp)) AnnoTierStatic.Selected.NewAnnoCopy(temp.Start, temp.Stop, temp.Label, temp.Color);
-
-                                break;
-                            }
-                        }
-                    }
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && e.KeyboardDevice.IsKeyDown(Key.Up))
-                {
-                    if (AnnoTierStatic.Label != null)
-                    {
-                        AnnoListItem temp = AnnoTierStatic.Label.Item;
-
-                        for (int i = 0; i < annoTiers.Count; i++)
-                        {
-                            if (annoTiers[i] == AnnoTierStatic.Selected && i > 0)
-                            {
-                                AnnoTierStatic.Select(annoTiers[i - 1]);
-                                AnnoTierStatic.SelectLabel(null);
-                                if (!AnnoTierStatic.Selected.AnnoList.Contains(temp)) AnnoTierStatic.Selected.NewAnnoCopy(temp.Start, temp.Stop, temp.Label, temp.Color);
-                                break;
-                            }
-                        }
-                    }
-                    e.Handled = true;
                 }
             }
         }
 
-        public void OnKeyDown(object sender, KeyEventArgs e)
+        private void MoveSegmentBorder(bool right = true)
         {
-            if (!control.annoListControl.editTextBox.IsFocused)
+            if (right)
             {
-                if (e.KeyboardDevice.IsKeyDown(Key.S) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false /*&& AnnoTierStatic.Label == null*/)
                 {
-                    saveSelectedAnno();
-                }
-                else if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back))
-                {
-                    if (AnnoTierStatic.Label != null)
+                    UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
+                    Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
+
+                    mediaList.Move(Time.TimeFromPixel(relativeLocation.X + AnnoTierStatic.Label.Width));
+
+                    if (Keyboard.IsKeyDown(Key.LeftShift))
                     {
-                        AnnoTierStatic.OnKeyDownHandler(sender, e);
-                    }
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.R) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
-                {
-                    if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0 && AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate != Properties.Settings.Default.DefaultDiscreteSampleRate)
-                    {
-                        foreach (AnnoListItem ali in AnnoTierStatic.Selected.AnnoList)
-                        {
-                            if (ali.Start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
-                            {
-                                int round = (int)(ali.Start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
-                                ali.Start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
-                            }
-
-                            if (ali.Stop % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
-                            {
-                                int round = (int)(ali.Stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
-                                ali.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
-                            }
-
-                            ali.Duration = ali.Stop - ali.Start;
-                        }
-                        AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate = Properties.Settings.Default.DefaultDiscreteSampleRate;
-                    }
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.R) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.F5))
-                {
-                    AnnoTier track = AnnoTierStatic.Selected;
-                    if (track != null)
-                    {
-                        if (track.AnnoList.Source.HasFile)
-                        {
-                            reloadAnnoTierFromFile(track);
-                        }
-                        else
-                        {
-                            ReloadAnnoTierFromDatabase(track, false);                            
-                        }
-                    }
-                    e.Handled = true;
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.E) && !isKeyDown)
-                {
-                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false)
-                    {
-                        UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
-                        Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
-
-                        mediaList.Move(Time.TimeFromPixel(relativeLocation.X + AnnoTierStatic.Label.Width));
-
-                        annoCursor.X = relativeLocation.X;
-                        signalCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
-
-                        timeline.CurrentSelectPosition = annoCursor.X;
-                        timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                        AnnoTierStatic.Label.select(true);
-                        isKeyDown = true;
-                    }
-                }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.L))
-                {
-                    if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
-                    {                       
-                        if (control.annoLiveModeCheckBox.IsChecked == true)
-                        {
-                            AnnoTierStatic.Selected.LiveAnnoMode(true);
-                            control.annoLiveModeCheckBox.IsChecked = false;
-                        }
-                        else
-                        {
-                            control.annoLiveModeCheckBox.IsChecked = true;
-                            AnnoTierStatic.Selected.LiveAnnoMode(false);                           
-                        }
-                    }
-                    isKeyDown = true;
-                    // e.Handled = true;
-                }
-
-
-                if (e.KeyboardDevice.IsKeyDown(Key.M))
-                {
-                    if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
-                    {
-                        if (control.annoLiveModeActivateMouse.IsChecked == true)
-                        {
-                            control.annoLiveModeActivateMouse.IsChecked = false;
-                        }
-                        else
-                        {
-                            control.annoLiveModeActivateMouse.IsChecked = true;
-                        }
-                    }
-                    isKeyDown = true;
-                    // e.Handled = true;
-                }
-
-
-                if (e.KeyboardDevice.IsKeyDown(Key.Q) && !isKeyDown)
-                {
-                    if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false)
-                    {
-                        UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
-                        Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
-
-                        mediaList.Move(Time.TimeFromPixel(relativeLocation.X));
-
                         annoCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
-                        signalCursor.X = relativeLocation.X;
-
-                        timeline.CurrentSelectPosition = annoCursor.X;
-                        timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                        AnnoTierStatic.Label.select(true);
-                        isKeyDown = true;
                     }
+                    else signalCursor.X = relativeLocation.X + AnnoTierStatic.Label.Width;
+
+                    timeline.CurrentSelectPosition = annoCursor.X;
+                    timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+                    AnnoTierStatic.Label.select(true);
+                    isKeyDown = true;
+                }
+            }
+            else
+            {
+                if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false /*&& AnnoTierStatic.Label == null*/)
+                {
+                    UIElement container = VisualTreeHelper.GetParent(AnnoTierStatic.Label) as UIElement;
+                    Point relativeLocation = AnnoTierStatic.Label.TranslatePoint(new Point(0, 0), container);
+
+                    mediaList.Move(Time.TimeFromPixel(relativeLocation.X));
+
+                    if (Keyboard.IsKeyDown(Key.LeftShift))
+                    {
+                        annoCursor.X = relativeLocation.X;
+                    }
+                    else signalCursor.X = relativeLocation.X;
+
+                    timeline.CurrentSelectPosition = annoCursor.X;
+                    timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+                    AnnoTierStatic.Label.select(true);
+                    isKeyDown = true;
+                }
+            }
+        }
+
+        private void PasteSegment()
+        {
+ 
+            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+            {
+                double start = Time.TimeFromPixel(annoCursor.X);
+                if (temp_segment != null) AnnoTierStatic.Selected.NewAnnoCopy(start, start + temp_segment.Item.Duration, temp_segment.Item.Label, temp_segment.Item.Color, temp_segment.Item.Confidence);
+            }
+
+        }
+
+        private void CutSegment(object sender, KeyEventArgs e)
+        {
+            if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+            {
+                temp_segment = AnnoTierStatic.Label;
+                AnnoTierStatic.RemoveSegmentPressed(sender, e);
+            }
+        }
+
+        private void CopySegment()
+        {
+            if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+            {
+                temp_segment = AnnoTierStatic.Label;
+                AnnoTierStatic.Label.select(false);
+            }
+        }
+
+        private void MoveFrameAnnotation(bool right = true)
+        {
+  
+            double lowest_sr = Properties.Settings.Default.DefaultDiscreteSampleRate <= 0 ? 25 : Properties.Settings.Default.DefaultDiscreteSampleRate;
+
+            foreach (IMedia im in mediaList)
+            {
+                if (im.GetSampleRate() < lowest_sr)
+                {
+                    lowest_sr = im.GetSampleRate();
+                }
+            }
+
+            double fps = 1.0 / lowest_sr;
+
+            if (right)
+            {
+                 mediaList.Move(Time.TimeFromPixel(signalCursor.X) + fps);
+
+                if (Keyboard.IsKeyDown(Key.LeftShift))
+                {
+                    annoCursor.X = annoCursor.X + Time.PixelFromTime(fps);
+                }
+                else signalCursor.X = signalCursor.X + Time.PixelFromTime(fps);
+
+                timeline.CurrentSelectPosition = annoCursor.X;
+                timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+
+                if (AnnoTierStatic.Label != null)
+                {
+                    double start = annoCursor.X;
+                    double end = signalCursor.X;
+
+                    if (Keyboard.IsKeyDown(Key.LeftShift))
+                    {
+                        start = signalCursor.X;
+                        end = annoCursor.X;
+                    }
+                    if (end > start)
+                    {
+                        AnnoTierStatic.Label.resize_right(Time.PixelFromTime(fps));
+                    }
+                    else
+                    {
+                        AnnoTierStatic.Label.resize_left(Time.PixelFromTime(fps));
+                    }
+                    AnnoTierStatic.Label.select(true);
                 }
 
-                if ((e.KeyboardDevice.IsKeyDown(Key.W) && !isKeyDown && AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree) && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !isKeyDown)
+                isKeyDown = true;
+            }
+            else
+            {
+               
+                mediaList.Move(Time.TimeFromPixel(signalCursor.X) - fps);
+                if (Keyboard.IsKeyDown(Key.LeftShift))
                 {
-                    if (AnnoTierStatic.Label == null && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                    annoCursor.X = annoCursor.X - Time.PixelFromTime(fps);
+                }
+                else
+                {
+                    signalCursor.X = signalCursor.X - Time.PixelFromTime(fps);
+                }
+
+                timeline.CurrentSelectPosition = annoCursor.X;
+                timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+
+                double start = annoCursor.X;
+                double end = signalCursor.X;
+
+                if (Keyboard.IsKeyDown(Key.LeftShift))
+                {
+                    start = signalCursor.X;
+                    end = annoCursor.X;
+                }
+
+                if (AnnoTierStatic.Label != null)
+                {
+                    if (end > start)
+                    {
+                        AnnoTierStatic.Label.resize_right(-Time.PixelFromTime(fps));
+                    }
+                    else
+                    {
+                        AnnoTierStatic.Label.resize_left(-Time.PixelFromTime(fps));
+                    }
+                    AnnoTierStatic.Label.select(true);
+                }
+
+                isKeyDown = true;
+            }
+        }
+
+        private void MoveFrameMedia(bool right = true)
+        {
+            if (right)
+            {
+                isKeyDown = true;
+                if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.Focus();
+                int i = 0;
+                double fps = 1.0 / 25.0;
+                foreach (IMedia media in mediaList)
+                {
+                    if (media.GetMediaType() == MediaType.VIDEO) break;
+                    i++;
+                }
+
+                if (i < mediaList.Count)
+                {
+                    fps = 1.0 / mediaList[i].GetSampleRate();
+                }
+
+                mediaList.Move(Time.TimeFromPixel(signalCursor.X) + fps);
+                timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X) + fps;
+                double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
+                signalCursor.X = pos;
+
+                if (Time.CurrentPlayPosition >= Time.SelectionStop && control.navigator.autoScrollCheckBox.IsChecked == true)
+                {
+                    double factor = (((timeline.CurrentPlayPosition - timeline.SelectionStart) / (timeline.SelectionStop - timeline.SelectionStart)));
+                    control.timeLineControl.rangeSlider.followmedia = true;
+                    control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
+
+                    if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
+                    signalCursor.X = 1;
+                }
+                else if (control.navigator.autoScrollCheckBox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
+
+                double time = Time.TimeFromPixel(pos);
+                updatePositionLabels(time);
+                control.annoTierControl.currentTime = time;
+            }
+            else
+            {
+                isKeyDown = true;
+                if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.Focus();
+                int i = 0;
+                double fps = 1.0 / 25.0;
+                foreach (IMedia im in mediaList)
+                {
+                    if (im.GetMediaType() == MediaType.VIDEO) break;
+                    i++;
+                }
+
+                if (i < mediaList.Count)
+                {
+                    fps = 1.0 / mediaList[i].GetSampleRate();
+                }
+
+                mediaList.Move(Time.TimeFromPixel(signalCursor.X) - fps);
+                timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X) - fps;
+                double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
+                signalCursor.X = pos;
+
+                if (Time.CurrentPlayPosition < Time.SelectionStart && Time.SelectionStart > 0 && control.navigator.autoScrollCheckBox.IsChecked == true)
+                {
+                    double factor = (((timeline.SelectionStop - timeline.CurrentPlayPosition) / (timeline.SelectionStop - timeline.SelectionStart)));
+                    control.timeLineControl.rangeSlider.followmedia = true;
+                    control.timeLineControl.rangeSlider.MoveAndUpdate(false, factor);
+
+                    if (timeline.SelectionStop - timeline.SelectionStart < 1) timeline.SelectionStart = timeline.SelectionStop - 1;
+                    signalCursor.X = Time.PixelFromTime(Time.SelectionStop);
+                }
+                else if (control.navigator.autoScrollCheckBox.IsChecked == false) control.timeLineControl.rangeSlider.followmedia = false;
+
+                double time = Time.TimeFromPixel(pos);
+                if (time != 0)
+                {
+                    updatePositionLabels(time);
+                    control.annoTierControl.currentTime = Time.TimeFromPixel(pos);
+                }
+            }
+        }
+
+        private void ToggleLiveMode()
+        {
+            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
+            {
+                if (control.annoLiveModeCheckBox.IsChecked == true)
+                {
+                    AnnoTierStatic.Selected.LiveAnnoMode(true);
+                    control.annoLiveModeCheckBox.IsChecked = false;
+                }
+                else
+                {
+                    control.annoLiveModeCheckBox.IsChecked = true;
+                    AnnoTierStatic.Selected.LiveAnnoMode(false);
+                }
+            }
+            isKeyDown = true;
+
+        }
+
+        private void ToggleMouseMode()
+        {
+            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsContinuous)
+            {
+                if (control.annoLiveModeActivateMouse.IsChecked == true)
+                {
+                    control.annoLiveModeActivateMouse.IsChecked = false;
+                }
+                else
+                {
+                    control.annoLiveModeActivateMouse.IsChecked = true;
+                }
+            }
+            isKeyDown = true;
+        }
+
+        private void CreateOrSelectAnnotation()
+        {
+            if (AnnoTierStatic.Selected != null)
+            {
+
+                if (AnnoTierStatic.Selected.IsDiscreteOrFree)
+                {
+
+
+                    if (AnnoTierStatic.Label == null && !Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
                         AnnoTierStatic.Selected.NewAnnoKey();
                     }
-                    else if (!e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                    else if (!Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
                         ShowLabelBox();
                     }
                     if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(true);
                     isKeyDown = true;
                 }
-                else if ((e.KeyboardDevice.IsKeyDown(Key.W) && AnnoTierStatic.Selected != null) && !AnnoTierStatic.Selected.IsDiscreteOrFree && !e.KeyboardDevice.IsKeyDown(Key.LeftAlt) && !e.KeyboardDevice.IsKeyDown(Key.LeftShift))
+                else
                 {
                     if (AnnoTierStatic.Label != null)
                     {
@@ -492,135 +743,103 @@ namespace ssi
 
                     isKeyDown = true;
                 }
-                if (e.KeyboardDevice.IsKeyDown(Key.Right) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt) /*&& !isKeyDown*/)
+            }
+        }
+
+        private void ReloadAnnotations()
+        {
+            AnnoTier track = AnnoTierStatic.Selected;
+            if (track != null)
+            {
+                if (track.AnnoList.Source.HasFile)
                 {
-                    int i = 0;
-                    double fps = 1.0 / 30.0;
-                    foreach (IMedia im in mediaList)
-                    {
-                        if (im.GetMediaType() == MediaType.VIDEO)
-                        {
-                            break;
-                        }
-                        i++;
-                    }
-
-                    if (i < mediaList.Count)
-                    {
-                        fps = 1.0 / mediaList[i].GetSampleRate();
-                    }
-
-                    //In case no media is loaded it takes the sr of the first loaded signal
-                    else
-                    {
-                        if (signals.Count > 0)
-                        {
-                            fps = 1.0 / signals[0].rate;
-                        }
-                    }
-
-                    mediaList.Move(Time.TimeFromPixel(signalCursor.X) + fps);
-
-                    if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                    {
-                        annoCursor.X = annoCursor.X + Time.PixelFromTime(fps);
-                    }
-                    else signalCursor.X = signalCursor.X + Time.PixelFromTime(fps);
-
-                    timeline.CurrentSelectPosition = annoCursor.X;
-                    timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-
-                    if (AnnoTierStatic.Label != null)
-                    {
-                        double start = annoCursor.X;
-                        double end = signalCursor.X;
-
-                        if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                        {
-                            start = signalCursor.X;
-                            end = annoCursor.X;
-                        }
-                        if (end > start)
-                        {
-                            AnnoTierStatic.Label.resize_right(Time.PixelFromTime(fps));
-                        }
-                        else
-                        {
-                            AnnoTierStatic.Label.resize_left(Time.PixelFromTime(fps));
-                        }
-                        AnnoTierStatic.Label.select(true);
-                    }
-
-                    isKeyDown = true;
-                    e.Handled = true;
+                    reloadAnnoTierFromFile(track);
                 }
-
-                if (e.KeyboardDevice.IsKeyDown(Key.Left) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt)/* && !isKeyDown*/)
+                else
                 {
-                    int i = 0;
-                    double fps = 1.0 / 30.0;
-                    foreach (IMedia im in mediaList)
-                    {
-                        if (im.GetMediaType() == MediaType.VIDEO)
-                        {
-                            break;
-                        }
-                        i++;
-                    }
-
-                    if (i < mediaList.Count)
-                    {
-                        fps = 1.0 / mediaList[i].GetSampleRate();
-                    }
-
-                    mediaList.Move(Time.TimeFromPixel(signalCursor.X) - fps);
-                    if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                    {
-                        annoCursor.X = annoCursor.X - Time.PixelFromTime(fps);
-                    }
-                    else
-                    {
-                        signalCursor.X = signalCursor.X - Time.PixelFromTime(fps);
-                    }
-
-                    timeline.CurrentSelectPosition = annoCursor.X;
-                    timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-
-                    double start = annoCursor.X;
-                    double end = signalCursor.X;
-
-                    if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                    {
-                        start = signalCursor.X;
-                        end = annoCursor.X;
-                    }
-
-                    if (AnnoTierStatic.Label != null)
-                    {
-                        if (end > start)
-                        {
-                            AnnoTierStatic.Label.resize_right(-Time.PixelFromTime(fps));
-                        }
-                        else
-                        {
-                            AnnoTierStatic.Label.resize_left(-Time.PixelFromTime(fps));
-                        }
-                        AnnoTierStatic.Label.select(true);
-                    }
-
-                    isKeyDown = true;
-                    e.Handled = true;
-                }
-                else if (!e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
-                {
-                    AnnoTierStatic.OnKeyDownHandler(sender, e);
+                    ReloadAnnoTierFromDatabase(track, false);
                 }
             }
         }
 
-        public void OnKeyUp(object sender, KeyEventArgs e)
+        private void ChangeTier(bool down = true)
         {
-            isKeyDown = false;
+            if (down)
+            {
+                for (int i = 0; i < annoTiers.Count; i++)
+                {
+                    if (annoTiers[i] == AnnoTierStatic.Selected && i + 1 < annoTiers.Count)
+                    {
+                        AnnoTierStatic.Select(annoTiers[i + 1]);
+                        AnnoTierStatic.SelectLabel(null);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < annoTiers.Count; i++)
+                {
+                    if (annoTiers[i] == AnnoTierStatic.Selected && i > 0)
+                    {
+                        AnnoTierStatic.Select(annoTiers[i - 1]);
+                        AnnoTier.SelectLabel(null);
+                        break;
+                    }
+                }
+            }
         }
+
+        private void CompleteSession()
+        {
+            if (AnnoTierStatic.Selected != null)
+            {
+                databaseCMLCompleteStep();
+            }
+        }
+
+        private void Undo()
+        {
+            if (AnnoTierStatic.Selected != null)
+            {
+                AnnoTierStatic.Selected.UnDoObject.Undo(1);
+            }
+        }
+
+        private void Redo()
+        {
+            if (AnnoTierStatic.Selected != null)
+            {
+                AnnoTierStatic.Selected.UnDoObject.Redo(1);
+            }
+        }
+
+        private void AlignToSampleRate()
+        {
+            if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0 && AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate != Properties.Settings.Default.DefaultDiscreteSampleRate)
+            {
+                foreach (AnnoListItem ali in AnnoTierStatic.Selected.AnnoList)
+                {
+                    if (ali.Start % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                    {
+                        int round = (int)(ali.Start / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                        ali.Start = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                    }
+
+                    if (ali.Stop % (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) != 0)
+                    {
+                        int round = (int)(ali.Stop / (1 / Properties.Settings.Default.DefaultDiscreteSampleRate) + 0.5);
+                        ali.Stop = round * (1 / Properties.Settings.Default.DefaultDiscreteSampleRate);
+                    }
+
+                    ali.Duration = ali.Stop - ali.Start;
+                }
+                AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate = Properties.Settings.Default.DefaultDiscreteSampleRate;
+            }
+        }
+
+
+        #endregion Wrapper
+
     }
 }

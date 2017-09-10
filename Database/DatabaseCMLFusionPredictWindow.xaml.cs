@@ -852,7 +852,11 @@ namespace ssi
                     {
                         NetworkBox.Items.Add(Path.GetFileNameWithoutExtension(network));
                     }
-                    NetworkBox.SelectedIndex = 0;
+                    if(NetworkBox.SelectedItem == null)
+                    {
+                        NetworkBox.SelectedIndex = 0;
+                    }
+                 
 
 
 
@@ -861,7 +865,11 @@ namespace ssi
 
             if (TrainerPathComboBox.Items.Count > 0)
             {
-                TrainerPathComboBox.SelectedIndex = 0;
+                if (TrainerPathComboBox.SelectedItem == null)
+                {
+                    TrainerPathComboBox.SelectedIndex = 0;
+                }
+              
                 TrainerPathComboBox.SelectedItem = Properties.Settings.Default.CMLDefaultTrainer;
             }
 

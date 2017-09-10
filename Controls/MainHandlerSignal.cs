@@ -217,7 +217,7 @@ namespace ssi
 
         private void signalAndAnnoGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && !Keyboard.IsKeyDown(Key.LeftShift))
             {
                
                 signalAndAnnoGrid_Move(e.GetPosition(control.signalAndAnnoGrid).X);

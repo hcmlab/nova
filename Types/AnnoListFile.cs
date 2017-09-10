@@ -844,38 +844,42 @@ namespace ssi
             return list;
         }
 
-        public static AnnoList[] LoadfromElanFile(String filepath)
+        public static List<AnnoList> LoadfromElanFile(String filepath)
         {
-            AnnoList[] list = new AnnoList[1];
+            List<AnnoList> list = new List<AnnoList>();
 
             try
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(filepath);
-                XmlNode time_order = doc.DocumentElement.ChildNodes[1];
+
+
+                //Get time order references
+
+                XmlNode time_order = doc.SelectSingleNode("//TIME_ORDER");
                 List<KeyValuePair<string, string>> time_order_list = new List<KeyValuePair<string, string>>();
                 foreach (XmlNode node in time_order.ChildNodes)
                 {
                     time_order_list.Add(new KeyValuePair<string, string>(node.Attributes[0].Value.ToString(), node.Attributes[1].Value.ToString()));
                 }
 
-                int numberoftracks = 0;
-                foreach (XmlNode tier in doc.SelectNodes("//TIER"))
-                {
-                    numberoftracks++;
-                }
 
-                list = new AnnoList[numberoftracks];
+                //Get number of tiers
 
                 int i = 0;
                 foreach (XmlNode tier in doc.SelectNodes("//TIER"))
                 {
+                    AnnoList al = new AnnoList();
+                    AnnoScheme scheme = new AnnoScheme();
+                    scheme.Type = AnnoScheme.TYPE.DISCRETE;
+                    
+                
                     string tierid;
                     if (tier.Attributes.Count == 2) tierid = tier.Attributes[1].Value.ToString();
                     else tierid = tier.Attributes[2].Value.ToString();
 
-                    list[i] = new AnnoList();
-                    list[i].Source.File.Path = filepath;
+                    al = new AnnoList();
+                    al.Source.File.Path = filepath;
 
                     foreach (XmlNode annotation in tier.ChildNodes)
                     {
@@ -892,12 +896,22 @@ namespace ssi
                         endtmp = (from kvp in time_order_list where kvp.Key == alignable_annotation.Attributes.GetNamedItem("TIME_SLOT_REF2").Value.ToString() select kvp.Value).ToList()[0];
                         end = double.Parse(endtmp, CultureInfo.InvariantCulture) / 1000;
                         label = alignable_annotation.FirstChild.InnerText;
+                        AnnoScheme.Label l = new AnnoScheme.Label(label, Colors.Black);
+
+                        if (scheme.Labels.Find(x => x.Name == label) == null) scheme.Labels.Add(l);
+
+                      
+
                         duration = end - start;
-                        list[i].AddSorted(new AnnoListItem(start, duration, label, "", Colors.Black));
-                        list[i].Scheme.Name = tierid;
+                        al.AddSorted(new AnnoListItem(start, duration, label, "", Colors.Black));
+                        al.Scheme.Name = tierid;
+                       
                         //The tier is used as metainformation as well. Might be changed if thats relevant in the future
                     }
                     i++;
+
+                    al.Scheme = scheme;
+                    list.Add(al);
                 }
             }
             catch (Exception ex)

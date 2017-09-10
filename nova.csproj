@@ -105,6 +105,9 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="TableView">
+      <HintPath>References\TableView.dll</HintPath>
+    </Reference>
     <Reference Include="Tamir.SharpSSH">
       <HintPath>References\Tamir.SharpSSH.dll</HintPath>
     </Reference>

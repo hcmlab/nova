@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Load Session" Height="700" Width="1000">
+        Title="Load Session" Height="700" Width="1000" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <Style x:Key="StreamItemColorStyle" TargetType="{x:Type ListViewItem}">
@@ -95,7 +95,7 @@
                     <Label Content="Annotations" />
                     <StackPanel Orientation="Horizontal"  HorizontalAlignment="Right">
                         <!--<Button Name="AddAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="AddAnnotation_Click" Visibility="Collapsed" />-->
-                        <Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="ADD" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" />
+                        <!--Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="COPY" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" /-->
                         <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="REM" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed" />
                     </StackPanel>
                 </DockPanel>

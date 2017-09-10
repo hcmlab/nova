@@ -101,17 +101,22 @@ namespace ssi
             }
         }
 
-        static public void OnKeyDownHandler(object sender, KeyEventArgs e)
+        static public void RemoveSegmentPressed(object sender, KeyEventArgs e)
         {
-            if (e.KeyboardDevice.IsKeyDown(Key.Delete) || e.KeyboardDevice.IsKeyDown(Key.Back) || (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.X)))
+            if (selectedLabel != null && selectedTier != null/* && GetSelectedTrack().isDiscrete*/)
             {
-                if (selectedLabel != null && selectedTier != null/* && GetSelectedTrack().isDiscrete*/)
-                {
-                    AnnoTierSegment tmp = selectedLabel;
-                    UnselectLabel();
-                    selectedTier.RemoveSegment(tmp);
-                }
+                AnnoTierSegment tmp = selectedLabel;
+                UnselectLabel();
+                selectedTier.RemoveSegment(tmp);
             }
+
+        }
+
+        static public void SplitPressed(object sender, KeyEventArgs e)
+        {
+            AnnoTierSegment tmp = selectedLabel;
+            UnselectLabel();
+            selectedTier.SplitSegment(tmp);
         }
 
         static public void FireOnMove(double pos)
@@ -465,6 +470,16 @@ namespace ssi
             s.Tier.segments.Remove(s);
         }
 
+        public void SplitSegment(AnnoTierSegment s)
+        {
+            AnnoListItem second_segment = new AnnoListItem(MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition), s.Item.Stop - MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition), s.Item.Label, s.Item.Meta, s.Item.Color, s.Item.Confidence, s.Item.isGeometric, s.Item.Points);
+            AnnoTierSegment second_s = AddSegment(second_segment);
+            ChangeRepresentationObject RememberSplit = UnDoObject.MakeChangeRepresentationObjectForSplit(GetLeft(s), (FrameworkElement)s, (FrameworkElement)second_s);
+            UnDoObject.InsertObjectforUndoRedo(RememberSplit);
+            s.Item.Duration = MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition) - s.Item.Start;
+            AnnoList.AddSorted(second_segment);
+        }
+
         public void InitContinousValues(double sr)
         {
             //add markers
@@ -708,48 +723,14 @@ namespace ssi
             }
         }
 
-        public void LeftMouseButtonDown(MouseButtonEventArgs e)
-        {
-            base.OnMouseLeftButtonDown(e);
-            UnselectLabel();
-            this.Select(true);
-
-            // change track
-            if (selectedTier != this)
-            {
-                AnnoTier.Select(this);
-            }
-
-            if (IsDiscreteOrFree || (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
-            {
-                // check for segment selection
-
-                foreach (AnnoTierSegment s in segments)
-                {
-                    if (s.IsMouseOver)
-                    {
-                        SelectLabel(s);
-                        this.Select(true);
-                        break;
-                    }
-                }
-            }
-        }
-
-        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
-        {
-            LeftMouseButtonDown(e);
-
-        }
-
-        public void RightMouseButtonDown(MouseButtonEventArgs e)
+        public void SelectAnno(MouseButtonEventArgs e)
         {
             dx = 0;
 
             UnselectLabel();
             this.Select(true);
 
-            base.OnMouseRightButtonDown(e);
+            //base.OnMouseRightButtonDown(e);
 
             double start = MainHandler.Time.TimeFromPixel(e.GetPosition(this).X);
 
@@ -795,7 +776,7 @@ namespace ssi
                 selectedLabel.Item.Stop = selectedLabel.Item.Start + selectedLabel.Item.Duration;
             }
             else if (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift) && stop < MainHandler.Time.TotalDuration)
-            {                    
+            {
                 AnnoListItem temp = new AnnoListItem(start, len, "", "", Colors.Black);
                 AnnoTierSegment segment = new AnnoTierSegment(temp, this);
                 segment.Width = 1;
@@ -805,6 +786,64 @@ namespace ssi
                 SelectLabel(segment);
                 this.Select(true);
             }
+        }
+
+        
+
+
+        public void LeftMouseButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseLeftButtonDown(e);
+
+            if (IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                SelectAnno(e);
+            }
+            else
+            {
+                UnselectLabel();
+                this.Select(true);
+
+                // change track
+                if (selectedTier != this)
+                {
+                    AnnoTier.Select(this);
+                }
+
+
+                else if (IsDiscreteOrFree || (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
+                {
+                    // check for segment selection
+
+                    foreach (AnnoTierSegment s in segments)
+                    {
+                        if (s.IsMouseOver)
+                        {
+                            SelectLabel(s);
+                            this.Select(true);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+        }
+
+
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
+            if(!Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                LeftMouseButtonDown(e);
+            }
+
+           
+        }
+
+        public void RightMouseButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseRightButtonDown(e);
+            SelectAnno(e);
         }
 
         public int GetClosestContinuousIndex(double nearestitem)
@@ -860,7 +899,7 @@ namespace ssi
 
             if (IsDiscreteOrFree || (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift)))
             {
-                if (e.RightButton == MouseButtonState.Pressed /*&& this.is_selected*/)
+                if (e.RightButton == MouseButtonState.Pressed ||(e.LeftButton == MouseButtonState.Pressed && Keyboard.IsKeyDown(Key.LeftShift))/*&& this.is_selected*/)
                 { 
                     Point point = e.GetPosition(selectedLabel);
 
@@ -1119,6 +1158,8 @@ namespace ssi
         public void TimeRangeChanged(Timeline time)
         {
             this.Width = time.SelectionInPixel;
+
+            
 
             //segments can happen in both, discrete and continuous annotations, so we check them in any case
             foreach (AnnoTierSegment s in segments)

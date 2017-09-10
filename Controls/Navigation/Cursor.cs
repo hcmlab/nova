@@ -9,9 +9,13 @@ namespace ssi
     public class Cursor : Adorner
     {
         private double x_pos = 0;
+        private double minVisibleTime = 0;
+        private double maxVisibleTime = 0;
+        private double time = 0;
         private bool signal_loaded = false;
 
         public OnCursorChangeEvent OnCursorChange;
+         
 
         public double X
         {
@@ -19,6 +23,11 @@ namespace ssi
             set
             {
                 x_pos = value;
+                double currentTime = MainHandler.Time.TimeFromPixel(x_pos);
+                if (currentTime > minVisibleTime && currentTime < maxVisibleTime) 
+                {
+                    time = MainHandler.Time.TimeFromPixel(x_pos);
+                }
                 this.InvalidateVisual();
                 if (OnCursorChange != null)
                 {
@@ -27,6 +36,7 @@ namespace ssi
             }
         }
 
+
         public bool signalLoaded
         {
             get { return signal_loaded; }
@@ -34,6 +44,13 @@ namespace ssi
             {
                 signal_loaded = value;
             }
+        }
+
+        public void setCurserToTime(Timeline currentTimeLine)
+        {
+            minVisibleTime = currentTimeLine.SelectionStart;
+            maxVisibleTime = currentTimeLine.SelectionStop;
+            X = MainHandler.Time.PixelFromTime(time);
         }
 
         private Pen pen = null;
