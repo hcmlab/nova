@@ -581,5 +581,25 @@ namespace ssi
             }
         }
 
+        private bool UserFilter(object item)
+        {
+            if (String.IsNullOrEmpty(searchTextBox.Text))
+                return true;
+            else
+                return (((item as DatabaseAnnotation).Scheme.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0) 
+                    || (item as DatabaseAnnotation).AnnotatorFullName.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0 
+                    || (item as DatabaseAnnotation).Annotator.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0
+                    || (item as DatabaseAnnotation).Role.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (AnnotationsBox.ItemsSource != null)
+            {
+                CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(AnnotationsBox.ItemsSource);
+                view.Filter = UserFilter;
+                CollectionViewSource.GetDefaultView(AnnotationsBox.ItemsSource).Refresh();
+            }
+        }
     }
 }
