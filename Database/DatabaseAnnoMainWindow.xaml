@@ -91,8 +91,18 @@
             </DockPanel>
 
             <DockPanel Grid.Column="2" Grid.Row="0"  Margin="10">
-                <DockPanel HorizontalAlignment="Stretch" DockPanel.Dock="Top" Margin="-3,0,0,0">
+                <DockPanel HorizontalAlignment="Stretch" DockPanel.Dock="Top" >
                     <Label Content="Annotations" />
+                    <DockPanel Grid.Row="0" Margin="0,5,0,0" Opacity="0.3" LastChildFill="True"  DockPanel.Dock="Right">
+                        <Image Source="/Resources/search.png" Width="18" DockPanel.Dock="Left"></Image>
+                        <TextBox x:Name="searchTextBox" TextChanged="searchTextBox_TextChanged" DockPanel.Dock="Right" Width="100">
+                            <TextBox.Resources>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="CornerRadius" Value="3"/>
+                                </Style>
+                            </TextBox.Resources>
+                        </TextBox>
+                    </DockPanel>
                     <StackPanel Orientation="Horizontal"  HorizontalAlignment="Right">
                         <!--<Button Name="AddAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="AddAnnotation_Click" Visibility="Collapsed" />-->
                         <!--Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="COPY" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" /-->
