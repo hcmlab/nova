@@ -213,14 +213,29 @@ namespace ssi
 
         private void copyAnnotation(List<AnnoList> al)
         {
+            if(al.Count > 0)
+            {
+
+           
+
             bool isSaved = false;
             string originalScheme = al[0].Scheme.Name;
             string originalFullname = al[0].Meta.AnnotatorFullName;
 
-            AnnoList newList = al[0];
-            newList.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
-            newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
-            newList.Source.StoreToDatabase = true;
+            AnnoList newList = new AnnoList();
+
+            foreach(AnnoListItem ali in al[0])
+            {
+               newList.AddSorted(ali);
+            }
+
+                newList.Scheme = al[0].Scheme;
+                newList.Meta = al[0].Meta;
+                newList.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
+                newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
+                newList.Source.StoreToDatabase = true;
+                newList.Source.Database.Session = al[0].Source.Database.Session;
+                newList.HasChanged = true;
 
 
             if (newList != null)
@@ -231,6 +246,9 @@ namespace ssi
             Ok.IsEnabled = true;
             if(isSaved)
             MessageBox.Show("Annotation: " + originalScheme + " from Annotator: " + originalFullname + " has been copied to Annotator: " + newList.Meta.AnnotatorFullName);
+
+            GetAnnotations();
+            }
         }
 
         private void rootMeanSquare(List<AnnoList> al)
@@ -238,11 +256,19 @@ namespace ssi
             bool isSaved = false;
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
-            AnnoList newList = al[0];
+            AnnoList newList = new AnnoList();
+            foreach (AnnoListItem ali in al[0])
+            {
+                newList.AddSorted(ali);
+            }
+
+            newList.Scheme = al[0].Scheme;
+            newList.Meta = al[0].Meta;
             newList.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
             newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
             newList.Source.StoreToDatabase = true;
             newList.Source.Database.Session = al[0].Source.Database.Session;
+            newList.HasChanged = true;
 
             int minSize = int.MaxValue;
 
@@ -274,6 +300,7 @@ namespace ssi
             }
             if(isSaved) MessageBox.Show("The annotations have been merged");
             Ok.IsEnabled = true;
+            GetAnnotations();
         }
 
         private void calculateMean(List<AnnoList> al)
@@ -281,11 +308,19 @@ namespace ssi
             bool isSaved = false;
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
-            AnnoList newList = al[0];
+            AnnoList newList = new AnnoList();
+            foreach (AnnoListItem ali in al[0])
+            {
+                newList.AddSorted(ali);
+            }
+
+            newList.Scheme = al[0].Scheme;
+            newList.Meta = al[0].Meta;
             newList.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
             newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
             newList.Source.StoreToDatabase = true;
             newList.Source.Database.Session = al[0].Source.Database.Session;
+            newList.HasChanged = true;
 
             int minSize = int.MaxValue;
 
@@ -317,6 +352,7 @@ namespace ssi
 
             if (isSaved) MessageBox.Show("The annotations have been merged");
             Ok.IsEnabled = true;
+            GetAnnotations();
         }
 
         private void handleButtons(bool discrete)
@@ -471,13 +507,14 @@ namespace ssi
                 cont.Add(ali);
             }
 
-            AnnoList result = new AnnoList();
-            result.Scheme = al[0].Scheme;
-            result.Meta = al[0].Meta;
-            result.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
-            result.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == result.Meta.AnnotatorFullName).Name;
-            result.Source.StoreToDatabase = true;
-            result.Source.Database.Session = al[0].Source.Database.Session;
+            AnnoList newList = new AnnoList();
+            newList.Scheme = al[0].Scheme;
+            newList.Meta = al[0].Meta;
+            newList.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
+            newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
+            newList.Source.StoreToDatabase = true;
+            newList.Source.Database.Session = al[0].Source.Database.Session;
+            newList.HasChanged = true;
 
             for (int i = 0; i < cont.Count - 1; i++)
             {
@@ -495,18 +532,20 @@ namespace ssi
 
                 AnnoListItem ali = new AnnoListItem(start, dur, cont[i].Label, "", Colors.Black, conf);
 
-                if (ali.Label != restclass) result.Add(ali);
+                if (ali.Label != restclass) newList.Add(ali);
             }
            
 
-            if (result != null)
+            if (newList != null)
             {
-                isSaved =  result.Save(null, false, true);
+                isSaved =  newList.Save(null, false, true);
             }
 
             if(isSaved) MessageBox.Show("Annotations have been merged");
 
             Ok.IsEnabled = true;
+
+            GetAnnotations();
 
 
         }

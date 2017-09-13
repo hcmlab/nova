@@ -82,7 +82,7 @@ namespace ssi
         {
             bool saved = false;
 
-            if (!force && !HasChanged)
+            if ((!force && !HasChanged))
             {
                 return true;
             }
