@@ -2036,7 +2036,7 @@ namespace ssi
             {
                 if (annotationDoc.Count > 0 && (Properties.Settings.Default.DatabaseAskBeforeOverwrite && !force))
                 {
-                    MessageBoxResult mbres = MessageBox.Show("Save annotation?", "Attention", MessageBoxButton.YesNo);
+                    MessageBoxResult mbres = MessageBox.Show("Overwrite existing annotation?", "Attention", MessageBoxButton.YesNo);
                     if (mbres == MessageBoxResult.No)
                     {
                         return false;
