@@ -297,7 +297,7 @@ namespace ssi
                                     {
                                         continuousTierEllipse.Visibility = Visibility.Visible;
 
-                                       Point relativePoint = continuousTierEllipse.TransformToAncestor(this).Transform(new Point(0, 0));
+                                        Point relativePoint = continuousTierEllipse.TransformToAncestor(this).Transform(new Point(0, 0));
                                         double yPos = relativePoint.Y + continuousTierEllipse.Height / 2;
 
                                         if ((this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 && Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver)) && MouseActive)
@@ -307,11 +307,38 @@ namespace ssi
                                         double fac =  1 + (1 / (numberOfLevels - 1));
                                         double segmentHeight = (this.ActualHeight / numberOfLevels);
 
+
+                                       
+
                                         for (int i=0; i< numberOfLevels; i++)
                                         {
-                                            if (Keyboard.IsKeyDown(Key.D1 + i) )
-                                                yPos =  (numberOfLevels - (i* fac))  * segmentHeight;
+                                            if (Keyboard.IsKeyDown(Key.D1 + i))
+                                            {
+                                                yPos = (numberOfLevels - (i * fac)) * segmentHeight;
+                                            }
+
+
+
+
                                         }
+
+                                        //todo
+                                        double step = 1.0;
+                                        if (Keyboard.IsKeyDown(Key.Up) && Keyboard.IsKeyDown(Key.LeftAlt))
+                                        {
+                                     
+
+                                            yPos = (yPos - step >= 0) ? yPos - step : yPos;  
+
+
+                                        }
+
+                                        else if (Keyboard.IsKeyDown(Key.Down) && Keyboard.IsKeyDown(Key.LeftAlt))
+                                        {
+                                            yPos = (yPos + step <= this.ActualHeight) ? yPos + step : yPos;
+
+                                        }
+
 
                                         double normal = 1.0 - (yPos / this.ActualHeight);
                                         double normalized = (normal * range) + anno.Scheme.MinScore;
