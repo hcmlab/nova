@@ -5,7 +5,6 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -17,34 +16,24 @@ namespace ssi
     /// </summary>
     public partial class DatabaseAnnoMergeWindow : System.Windows.Window
     {
-        private MongoClient mongo;
-        private IMongoDatabase database;
-        private AnnoList mean = null;
-        private AnnoList rms = null;
-        private AnnoList merge = null;
 
         public DatabaseAnnoMergeWindow()
         {
             InitializeComponent();
-            ConnecttoDB();
+ 
+            if (DatabaseHandler.CheckAuthentication() >= DatabaseAuthentication.DBADMIN)
+            {
+                GetDatabases(DatabaseHandler.DatabaseName);
+                GetSessions();
+            }
+            else
+            {
+                MessageBox.Show("Sorry, you are not authorized on the database to perform this step!");
+                this.Close();
+            }
         }
 
-        private void ConnecttoDB()
-        {
-          
-                mongo = DatabaseHandler.Client;
-                database = DatabaseHandler.Database;                
 
-                if (DatabaseHandler.CheckAuthentication() >= DatabaseAuthentication.DBADMIN)
-                {
-                    GetSessions();
-                }
-                else
-                {
-                    MessageBox.Show("Sorry, you are not authorized on the database to perform this step!");
-                    this.Close();
-                }
-        }
 
         private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -54,9 +43,6 @@ namespace ssi
                 Properties.Settings.Default.Save();
 
                 GetAnnotationSchemes();
-                // GetRoles();
-
-                //GetAnnotations();
             }
         }
 
@@ -72,16 +58,18 @@ namespace ssi
             this.Close();
         }
 
-
         public void GetSessions()
 
         {
-            var sessioncollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var sessioncollection = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
             var sessions = sessioncollection.Find(_ => true).ToList();
 
             if (sessions.Count > 0)
             {
-                if (SessionsResultsBox.Items != null) SessionsResultsBox.Items.Clear();
+                if (SessionsResultsBox.HasItems)
+                {
+                    SessionsResultsBox.ItemsSource = null;
+                }
                 List<DatabaseSession> items = new List<DatabaseSession>();
                 foreach (var c in sessions)
                 {
@@ -108,16 +96,15 @@ namespace ssi
         public void GetAnnotations(bool onlyme = false)
 
         {
-           
             AnnotationResultBox.ItemsSource = null;
             //  AnnotationResultBox.Items.Clear();
             List<DatabaseAnnotation> items = new List<DatabaseAnnotation>();
             List<string> Collections = new List<string>();
 
-            var sessions = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
-            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
-            var annotationschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
-            var roles = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+            var sessions = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
+            var annotations = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var annotationschemes = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
+            var roles = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
 
             var builder = Builders<BsonDocument>.Filter;
 
@@ -148,37 +135,36 @@ namespace ssi
                 if (result2.ElementCount > 0) roleid = result2.GetValue(0).AsObjectId;
             }
 
-            DatabaseSession session = (DatabaseSession) SessionsResultsBox.SelectedItem;
-            ObjectId sessionid = GetObjectID(mongo.GetDatabase(Properties.Settings.Default.DatabaseName), DatabaseDefinitionCollections.Sessions, "name", session.Name);
+
+            if ((DatabaseSession)SessionsResultsBox.SelectedItem == null) SessionsResultsBox.SelectedIndex = 0;
+
+            DatabaseSession session = (DatabaseSession)SessionsResultsBox.SelectedItem;
+
+
+            ObjectId sessionid = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", session.Name);
             var filter = builder.Eq("session_id", sessionid);
             var annos = annotations.Find(filter).ToList();
-
-           
 
             foreach (var anno in annos)
             {
                 var filtera = builder.Eq("_id", anno["role_id"]);
-                var roledb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles).Find(filtera).Single();
+                var roledb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles).Find(filtera).Single();
                 string rolename = roledb.GetValue(1).ToString();
 
                 var filterb = builder.Eq("_id", anno["scheme_id"]);
-                var annotdb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes).Find(filterb).Single();
+                var annotdb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes).Find(filterb).Single();
                 string annoschemename = annotdb.GetValue(1).ToString();
                 string type = annotdb.GetValue(2).ToString();
 
                 var filterc = builder.Eq("_id", anno["annotator_id"]);
-                var annotatdb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filterc).Single();
+                var annotatdb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filterc).Single();
                 string annotatorname = annotatdb.GetValue(1).ToString();
                 string annotatornamefull = annotatdb.GetValue(2).ToString();
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session=  session.Name});
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = session.Name });
                 }
-                //else if (result.ElementCount == 0 && result2.ElementCount > 0 && annos["role_id"].AsObjectId == roleid)
-                //{
-                //    items.Add(new DatabaseAnno() { Role = rolename, AnnoScheme.AnnoType = annoschemename, Annotator = annotatorname });
-                //}
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
                     items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = session.Name });
@@ -190,8 +176,7 @@ namespace ssi
 
         public void GetAnnotationSchemes()
         {
-  
-            var annoschemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
+            var annoschemes = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var annosch = annoschemes.Find(_ => true).ToList();
 
             if (annosch.Count > 0)
@@ -207,7 +192,7 @@ namespace ssi
 
         public void GetRoles()
         {
-            var rolesdb = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
+            var rolesdb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
             var roles = rolesdb.Find(_ => true).ToList();
 
             if (roles.Count > 0)
@@ -218,6 +203,7 @@ namespace ssi
                 {
                     RolesBox.Items.Add(c["name"]);
                 }
+                if(RolesBox.SelectedIndex == -1) RolesBox.SelectedIndex = 0;
             }
         }
 
@@ -230,21 +216,29 @@ namespace ssi
             GetAnnotations();
         }
 
-        private AnnoList rootMeanSquare(List<AnnoList> al)
+        private void rootMeanSquare(List<AnnoList> al)
         {
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
             AnnoList merge = al[0];
-            merge.Meta.Annotator = "RootMeanSquare";
-            merge.Meta.AnnotatorFullName = "RootMeanSquare";
+            merge.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
+            merge.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == merge.Meta.AnnotatorFullName).Name;
             merge.Source.StoreToDatabase = true;
             merge.Source.Database.Session = al[0].Source.Database.Session;
 
-            double[] array = new double[al[0].Count];
+            int minSize = int.MaxValue;
 
             foreach (AnnoList a in al)
             {
-                for (int i = 0; i < a.Count; i++)
+                if (a.Count < minSize) minSize = a.Count;
+            }
+
+
+            double[] array = new double[minSize];
+
+            foreach (AnnoList a in al)
+            {
+                for (int i = 0; i < minSize; i++)
                 {
                     array[i] = array[i] + double.Parse(a[i].Label) * double.Parse(a[i].Label);
                 }
@@ -257,24 +251,30 @@ namespace ssi
             merge.Scheme.SampleRate = 1 / (merge[0].Stop - merge[0].Start);
             MessageBox.Show("Median of all Annotations has been calculated");
             Ok.IsEnabled = true;
-
-            return merge;
+            if (merge != null) merge.Save(null, false, true);
         }
 
-        private AnnoList calculateMean(List<AnnoList> al)
+        private void calculateMean(List<AnnoList> al)
         {
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
             AnnoList merge = al[0];
-            merge.Meta.Annotator = "Mean";
-            merge.Meta.AnnotatorFullName = "Mean";
+            merge.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
+            merge.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == merge.Meta.AnnotatorFullName).Name;
             merge.Source.StoreToDatabase = true;
             merge.Source.Database.Session = al[0].Source.Database.Session;
 
-            double[] array = new double[al[0].Count];
+            int minSize = int.MaxValue;
+
+            foreach(AnnoList a in al)
+            {
+                if (a.Count < minSize) minSize = a.Count;
+            }
+
+            double[] array = new double[minSize];
             foreach (AnnoList a in al)
             {
-                for (int i = 0; i < a.Count; i++)
+                for (int i = 0; i < minSize; i++)
                 {
                     array[i] = array[i] + double.Parse(a[i].Label);
                 }
@@ -287,22 +287,7 @@ namespace ssi
             merge.Scheme.SampleRate = 1 / (merge[0].Stop - merge[0].Start);
             MessageBox.Show("Mean values of all Annotations have been calculated");
             Ok.IsEnabled = true;
-            return merge;
-        }
-
-        public AnnoList Mean()
-        {
-            return mean;
-        }
-
-        public AnnoList RMS()
-        {
-            return rms;
-        }
-
-        public AnnoList Merge()
-        {
-            return merge;
+            if (merge != null) merge.Save(null, false, true);
         }
 
         private void handleButtons(bool discrete)
@@ -344,7 +329,6 @@ namespace ssi
                 {
                     for (int i = 0; i < length; i++)
                     {
-             
                         double err = double.Parse(al[0][i].Label) - double.Parse(al[1][i].Label);
                         if (err > maxerr) maxerr = err;
                         if (err < minerr) minerr = err;
@@ -422,7 +406,7 @@ namespace ssi
             return result;
         }
 
-        private AnnoList MergeDiscreteLists(List<AnnoList> al, string restclass = "Rest")
+        private void MergeDiscreteLists(List<AnnoList> al, string restclass = "Rest")
         {
             AnnoList cont = new AnnoList();
             cont.Scheme = al[0].Scheme;
@@ -458,8 +442,8 @@ namespace ssi
             AnnoList result = new AnnoList();
             result.Scheme = al[0].Scheme;
             result.Meta = al[0].Meta;
-            result.Meta.Annotator = "Merge";
-            result.Meta.AnnotatorFullName = "Merge";
+            result.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
+            result.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == result.Meta.AnnotatorFullName).Name;
             result.Source.StoreToDatabase = true;
             result.Source.Database.Session = al[0].Source.Database.Session;
 
@@ -484,11 +468,11 @@ namespace ssi
             MessageBox.Show("Annotations have been merged");
             Ok.IsEnabled = true;
 
-            return result;
+            if (result != null)
+            {
+                result.Save(null, false, true);
+            }
         }
-
-
-
 
         private double FleissKappa(List<AnnoList> annolists, string restclass)
         {
@@ -741,8 +725,6 @@ namespace ssi
             return alpha;
         }
 
-
-
         #region Helper Functions
 
         private Matrix<double> SpearmanCorrelationMatrix(double[][] data)
@@ -847,20 +829,14 @@ namespace ssi
             return Math.Sqrt(variance);
         }
 
-        #endregion
-
-
-
-
-
-
+        #endregion Helper Functions
 
         private void CalculateMedian_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
 
             List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            mean = calculateMean(al);
+            calculateMean(al);
         }
 
         private void RolesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -873,7 +849,7 @@ namespace ssi
             Ok.IsEnabled = false;
 
             List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            rms = rootMeanSquare(al);
+            rootMeanSquare(al);
         }
 
         private void CalculateRMSE_Click(object sender, RoutedEventArgs e)
@@ -943,8 +919,68 @@ namespace ssi
         {
             string restclass = "Rest";
             List<AnnoList> convertedlists = convertAnnoListsToMatrix(restclass);
+            MergeDiscreteLists(convertedlists, restclass);
+        }
 
-            merge = MergeDiscreteLists(convertedlists, restclass);
+        public void GetDatabases(string selectedItem = null)
+        {
+            DatabasesBox.Items.Clear();
+
+            List<string> databases = DatabaseHandler.GetDatabases(DatabaseAuthentication.DBADMIN);
+
+            foreach (string db in databases)
+            {
+                DatabasesBox.Items.Add(db);
+            }
+
+            Select(DatabasesBox, selectedItem);
+        }
+
+        private void Select(ListBox list, string select)
+        {
+            if (select != null)
+            {
+                foreach (string item in list.Items)
+                {
+                    if (item == select)
+                    {
+                        list.SelectedItem = item;
+                    }
+                }
+            }
+        }
+
+        private void DatabasesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DatabasesBox.SelectedItem != null)
+            {
+                string name = DatabasesBox.SelectedItem.ToString();
+                DatabaseHandler.ChangeDatabase(name);
+
+            }
+            GetAnnotators();
+            GetSessions();
+            GetRoles();
+        }
+
+        public void GetAnnotators()
+        {
+            AnnotatorsBox.Items.Clear();
+
+            foreach (DatabaseAnnotator annotator in DatabaseHandler.Annotators)
+            {
+                AnnotatorsBox.Items.Add(annotator.FullName);
+            }
+
+            if (AnnotatorsBox.Items.Count > 0)
+            {
+                if (AnnotatorsBox.SelectedItem == null)
+                {
+                    AnnotatorsBox.SelectedIndex = 0;
+                }
+
+                AnnotatorsBox.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotator;
+            }
         }
     }
 }

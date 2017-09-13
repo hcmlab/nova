@@ -35,6 +35,7 @@ namespace ssi
         }
 
         private string tempTrainerPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+        int TrainerPathComboBoxindex = -1;
 
         public enum Mode
         {
@@ -42,6 +43,7 @@ namespace ssi
             PREDICT,
             COMPLETE
         }
+
 
         public DatabaseCMLTrainAndPredictWindow(MainHandler handler, Mode mode)
         {
@@ -719,6 +721,8 @@ namespace ssi
                 return;
             }
 
+            TrainerPathComboBoxindex = TrainerPathComboBox.SelectedIndex;
+
             TrainerPathComboBox.Items.Clear();
 
             if (StreamsBox.SelectedItem != null)
@@ -751,12 +755,17 @@ namespace ssi
             
             if (TrainerPathComboBox.Items.Count > 0)
             {
-                if (TrainerPathComboBox.SelectedItem == null)
+                if (TrainerPathComboBox.SelectedIndex == -1)
                 {
-                 
-                        TrainerPathComboBox.SelectedIndex = 0;
+
+                    TrainerPathComboBox.SelectedIndex = 0;
+                    TrainerPathComboBoxindex = TrainerPathComboBox.SelectedIndex;
 
                 }
+
+                else TrainerPathComboBox.SelectedIndex = TrainerPathComboBoxindex;
+
+
                 TrainerPathComboBox.SelectedItem = Properties.Settings.Default.CMLDefaultTrainer;
             }
 

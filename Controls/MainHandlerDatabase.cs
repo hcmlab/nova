@@ -350,27 +350,7 @@ namespace ssi
             DatabaseAnnoMergeWindow window = new DatabaseAnnoMergeWindow();
             window.ShowDialog();
 
-            if(window.DialogResult == true)
-            { 
-
-                AnnoList rms = window.RMS();
-                AnnoList median = window.Mean();
-                AnnoList merge = window.Merge();
-                if (rms != null)
-                {
-                    rms.Save();
-                }
-                if (median != null)
-                {
-                    median.Save();
-                }
-
-                if (merge != null)
-                {
-                    merge.Save();
-                }
-
-            }
+         
         }
 
 
