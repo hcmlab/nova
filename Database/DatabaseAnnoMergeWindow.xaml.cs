@@ -283,7 +283,9 @@ namespace ssi
             {
                 for (int i = 0; i < minSize; i++)
                 {
-                    array[i] = array[i] + double.Parse(a[i].Label) * double.Parse(a[i].Label);
+                    double label = double.Parse(a[i].Label);
+
+                    array[i] = array[i] + label * label;
                 }
             }
 
