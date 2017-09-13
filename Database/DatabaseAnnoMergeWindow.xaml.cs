@@ -16,11 +16,10 @@ namespace ssi
     /// </summary>
     public partial class DatabaseAnnoMergeWindow : System.Windows.Window
     {
-
         public DatabaseAnnoMergeWindow()
         {
             InitializeComponent();
- 
+
             if (DatabaseHandler.CheckAuthentication() >= DatabaseAuthentication.DBADMIN)
             {
                 GetDatabases(DatabaseHandler.DatabaseName);
@@ -32,8 +31,6 @@ namespace ssi
                 this.Close();
             }
         }
-
-
 
         private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -135,11 +132,9 @@ namespace ssi
                 if (result2.ElementCount > 0) roleid = result2.GetValue(0).AsObjectId;
             }
 
-
             if ((DatabaseSession)SessionsResultsBox.SelectedItem == null) SessionsResultsBox.SelectedIndex = 0;
 
             DatabaseSession session = (DatabaseSession)SessionsResultsBox.SelectedItem;
-
 
             ObjectId sessionid = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", session.Name);
             var filter = builder.Eq("session_id", sessionid);
@@ -203,7 +198,7 @@ namespace ssi
                 {
                     RolesBox.Items.Add(c["name"]);
                 }
-                if(RolesBox.SelectedIndex == -1) RolesBox.SelectedIndex = 0;
+                if (RolesBox.SelectedIndex == -1) RolesBox.SelectedIndex = 0;
             }
         }
 
@@ -216,15 +211,38 @@ namespace ssi
             GetAnnotations();
         }
 
+        private void copyAnnotation(List<AnnoList> al)
+        {
+            bool isSaved = false;
+            string originalScheme = al[0].Scheme.Name;
+            string originalFullname = al[0].Meta.AnnotatorFullName;
+
+            AnnoList newList = al[0];
+            newList.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
+            newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
+            newList.Source.StoreToDatabase = true;
+
+
+            if (newList != null)
+            {
+                isSaved =  newList.Save(null, false, true);
+            }
+
+            Ok.IsEnabled = true;
+            if(isSaved)
+            MessageBox.Show("Annotation: " + originalScheme + " from Annotator: " + originalFullname + " has been copied to Annotator: " + newList.Meta.AnnotatorFullName);
+        }
+
         private void rootMeanSquare(List<AnnoList> al)
         {
+            bool isSaved = false;
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
-            AnnoList merge = al[0];
-            merge.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
-            merge.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == merge.Meta.AnnotatorFullName).Name;
-            merge.Source.StoreToDatabase = true;
-            merge.Source.Database.Session = al[0].Source.Database.Session;
+            AnnoList newList = al[0];
+            newList.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
+            newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
+            newList.Source.StoreToDatabase = true;
+            newList.Source.Database.Session = al[0].Source.Database.Session;
 
             int minSize = int.MaxValue;
 
@@ -232,7 +250,6 @@ namespace ssi
             {
                 if (a.Count < minSize) minSize = a.Count;
             }
-
 
             double[] array = new double[minSize];
 
@@ -246,27 +263,33 @@ namespace ssi
 
             for (int i = 0; i < array.Length; i++)
             {
-                merge[i].Label = System.Math.Sqrt(array[i] / numberoftracks).ToString();
+                newList[i].Label = System.Math.Sqrt(array[i] / numberoftracks).ToString();
             }
-            merge.Scheme.SampleRate = 1 / (merge[0].Stop - merge[0].Start);
-            MessageBox.Show("Median of all Annotations has been calculated");
+            newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
+            
+           
+            if (newList != null)
+            {
+                isSaved =  newList.Save(null, false, true);
+            }
+            if(isSaved) MessageBox.Show("The annotations have been merged");
             Ok.IsEnabled = true;
-            if (merge != null) merge.Save(null, false, true);
         }
 
         private void calculateMean(List<AnnoList> al)
         {
+            bool isSaved = false;
             int numberoftracks = AnnotationResultBox.SelectedItems.Count;
 
-            AnnoList merge = al[0];
-            merge.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
-            merge.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == merge.Meta.AnnotatorFullName).Name;
-            merge.Source.StoreToDatabase = true;
-            merge.Source.Database.Session = al[0].Source.Database.Session;
+            AnnoList newList = al[0];
+            newList.Meta.AnnotatorFullName = (string)AnnotatorsBox.SelectedItem;
+            newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
+            newList.Source.StoreToDatabase = true;
+            newList.Source.Database.Session = al[0].Source.Database.Session;
 
             int minSize = int.MaxValue;
 
-            foreach(AnnoList a in al)
+            foreach (AnnoList a in al)
             {
                 if (a.Count < minSize) minSize = a.Count;
             }
@@ -282,12 +305,18 @@ namespace ssi
 
             for (int i = 0; i < array.Length; i++)
             {
-                merge[i].Label = (array[i] / numberoftracks).ToString();
+                newList[i].Label = (array[i] / numberoftracks).ToString();
             }
-            merge.Scheme.SampleRate = 1 / (merge[0].Stop - merge[0].Start);
+            newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
             MessageBox.Show("Mean values of all Annotations have been calculated");
             Ok.IsEnabled = true;
-            if (merge != null) merge.Save(null, false, true);
+            if (newList != null)
+            {
+                isSaved = newList.Save(null, false, true);
+            }
+
+            if (isSaved) MessageBox.Show("The annotations have been merged");
+            Ok.IsEnabled = true;
         }
 
         private void handleButtons(bool discrete)
@@ -312,6 +341,8 @@ namespace ssi
                 CalculateCronbach.IsEnabled = true;
                 CalculateMergeDiscrete.IsEnabled = false;
             }
+
+            Copy.IsEnabled = true;
         }
 
         private void RMSE(List<AnnoList> al)
@@ -410,6 +441,7 @@ namespace ssi
         {
             AnnoList cont = new AnnoList();
             cont.Scheme = al[0].Scheme;
+            bool isSaved = false;
 
             for (int i = 0; i < al[0].Count; i++)
             {
@@ -465,13 +497,18 @@ namespace ssi
 
                 if (ali.Label != restclass) result.Add(ali);
             }
-            MessageBox.Show("Annotations have been merged");
-            Ok.IsEnabled = true;
+           
 
             if (result != null)
             {
-                result.Save(null, false, true);
+                isSaved =  result.Save(null, false, true);
             }
+
+            if(isSaved) MessageBox.Show("Annotations have been merged");
+
+            Ok.IsEnabled = true;
+
+
         }
 
         private double FleissKappa(List<AnnoList> annolists, string restclass)
@@ -956,7 +993,6 @@ namespace ssi
             {
                 string name = DatabasesBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(name);
-
             }
             GetAnnotators();
             GetSessions();
@@ -981,6 +1017,13 @@ namespace ssi
 
                 AnnotatorsBox.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotator;
             }
+        }
+
+        private void Copy_Click(object sender, RoutedEventArgs e)
+        {
+            Ok.IsEnabled = false;
+            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+            copyAnnotation(al);
         }
     }
 }

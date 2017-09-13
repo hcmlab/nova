@@ -117,6 +117,9 @@
                     <Label Content="Continuous Stats"/>
                     <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error. Calculates the error between two annotations" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" />
                     <Button x:Name="CalculateCronbach" ToolTip="Cronbachs α" Content="Cronbachs α" Grid.Column="0" Click="CalculateCronbach_Click" IsEnabled="False" />
+                    <Separator Height="30" Visibility="Hidden"></Separator>
+                    <Label Content="Reassign"/>
+                    <Button x:Name="Copy" ToolTip="assign annotation to another annotator" Content="Copy" Grid.Column="0" Click="Copy_Click" IsEnabled="False" />
                     <Label>Assign to</Label>
                     <ListBox Name="AnnotatorsBox"  SelectionMode="Single" Height="199" Margin="0,0,5,0"/>
                 </StackPanel>
