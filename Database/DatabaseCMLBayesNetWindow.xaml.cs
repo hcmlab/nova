@@ -21,6 +21,8 @@ namespace ssi
 
         private string tempTrainerPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
 
+        int TrainerPathComboBoxindex = -1;
+
         public enum Mode
         {
             TRAIN,
@@ -68,7 +70,8 @@ namespace ssi
                 case Mode.TRAIN:
 
                     Title = "Train Bayesian Network (beta)";
-                    ApplyButton.Content = "Train";
+                    ApplyButton.Content = "Create Samples";
+                    ApplyButton2.Content = "Train";
                     ShowAllSessionsCheckBox.Visibility = Visibility.Collapsed;
                     PredictOptionsPanel.Visibility = Visibility.Collapsed;
                     TrainOptionsPanel.Visibility = Visibility.Visible;
@@ -145,6 +148,26 @@ namespace ssi
             Update();
         }
 
+        private void Apply2_Click(object sender, RoutedEventArgs e)
+        {
+            string networkrDir = Properties.Settings.Default.CMLDirectory + "\\" +
+                 Defaults.CML.FusionFolderName + "\\" +
+                 Defaults.CML.FusionBayesianNetworkFolderName + "\\" + TrainerPathComboBox.SelectedItem + ".xdsl";
+
+            string datasetDir = Properties.Settings.Default.CMLDirectory + "\\" +
+               Defaults.CML.FusionFolderName + "\\" +
+               Defaults.CML.FusionBayesianNetworkFolderName + "\\" + TrainerPathComboBox.SelectedItem + ".txt";
+
+            int tempsteps;
+            int.TryParse(timestepsbox.Text, out tempsteps);
+
+            string[] discretelabels = classesbox.Text.Split(';');
+            bool isdynamic = tempsteps > 0 ? true : false;
+
+
+            logTextBox.Text += handler.CMLTrainBayesianNetwork(networkrDir, datasetDir, isdynamic);
+        }
+
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.CMLDefaultTrainer = TrainerPathComboBox.SelectedItem.ToString();
@@ -178,8 +201,9 @@ namespace ssi
 
             if (File.Exists(datasetDir) && ForceCheckBox.IsChecked == false)
             {
-                logTextBox.Text = "dataset exists, skip.\n";
-                logTextBox.Text += handler.CMLTrainBayesianNetwork(networkrDir, datasetDir, isdynamic);
+               // logTextBox.Text = "dataset exists, skip.\n";
+                logTextBox.Text += "\nData sheet exits, check force to overwrite";
+              //  logTextBox.Text += handler.CMLTrainBayesianNetwork(networkrDir, datasetDir, isdynamic);
                 return;
             }
 
@@ -218,8 +242,8 @@ namespace ssi
                 if (ishead) ishead = false;
             }
 
-           
-            logTextBox.Text += handler.CMLTrainBayesianNetwork(networkrDir, datasetDir, isdynamic);
+
+            logTextBox.Text += "\nCreating Data sheet successful\nHit train to train the network or use it in GenIE";
 
             //List<AnnoList> annoLists = new List<AnnoList>();
             //    foreach (string role in RolesBox.SelectedItems)
@@ -487,7 +511,7 @@ namespace ssi
 
             if (SchemesBox.Items.Count > 0)
             {
-                SchemesBox.SelectedIndex = 0;
+                if(SchemesBox.SelectedIndex == -1) SchemesBox.SelectedIndex = 0;
                 SchemesBox.SelectedItem = Properties.Settings.Default.CMLDefaultScheme;
             }
         }
@@ -505,7 +529,7 @@ namespace ssi
 
             if (RolesBox.Items.Count > 0)
             {
-                RolesBox.SelectedIndex = 0;
+                if (RolesBox.SelectedIndex == -1)  RolesBox.SelectedIndex = 0;
                 RolesBox.SelectedItem = Properties.Settings.Default.CMLDefaultRole;
             }
         }
@@ -655,6 +679,7 @@ namespace ssi
 
         private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            TrainerPathComboBoxindex = TrainerPathComboBox.SelectedIndex;
             TrainerPathComboBox.Items.Clear();
             List<string> nets = getBayesianNetworks();
             foreach (string net in nets)
@@ -664,11 +689,18 @@ namespace ssi
                 }
 
 
-            if(TrainerPathComboBox.SelectedItem == null)
+            if (TrainerPathComboBoxindex == -1)
             {
                 TrainerPathComboBox.SelectedIndex = 0;
+                TrainerPathComboBoxindex = TrainerPathComboBox.SelectedIndex;
             }
-        
+
+            else
+            {
+                TrainerPathComboBox.SelectedIndex = TrainerPathComboBoxindex;
+            }
+
+
 
             Update();
         }
@@ -786,6 +818,7 @@ namespace ssi
             }
 
             ApplyButton.IsEnabled = enable;
+            ApplyButton2.IsEnabled = enable;
             TrainOptionsPanel.IsEnabled = enable;
             PredictOptionsPanel.IsEnabled = enable;
             ForceCheckBox.IsEnabled = enable;

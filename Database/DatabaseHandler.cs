@@ -264,7 +264,7 @@ namespace ssi
             return databases.Any(s => name.Equals(s));
         }
 
-        public static List<string> GetDatabases()
+        public static List<string> GetDatabases(DatabaseAuthentication level = DatabaseAuthentication.READWRITE)
         {
             List<string> items = new List<string>();
 
@@ -274,7 +274,7 @@ namespace ssi
                 foreach (var c in databases)
                 {
                     string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) > 1)
+                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && CheckAuthentication(db) >= (int)level)
                     {
                         items.Add(db);
                     }
@@ -1916,7 +1916,7 @@ namespace ssi
             return data;
         }
 
-        public static bool SaveAnnoList(AnnoList annoList, List<string> linkedStreams = null, bool force = false)
+        public static bool SaveAnnoList(AnnoList annoList, List<string> linkedStreams = null, bool force = false, bool keepOriginalAnnotator = false)
         {
             if (!IsConnected && !IsDatabase && !IsSession)
             {
@@ -1960,11 +1960,15 @@ namespace ssi
 
             // handle super users or if annotation is owned by another user
 
-            if (!(dbuser == "system" ||
-                annoList.Meta.Annotator == "RootMeanSquare" ||
-                annoList.Meta.Annotator == "Mean" ||
-                annoList.Meta.Annotator == "Merge")
-                && annoList.Meta.Annotator != dbuser)
+            //if (!(dbuser == "system" ||
+            //    annoList.Meta.Annotator == "RootMeanSquare" ||
+            //    annoList.Meta.Annotator == "Mean" ||
+            //    annoList.Meta.Annotator == "Merge")
+            //    && annoList.Meta.Annotator != dbuser)
+
+
+            if(!keepOriginalAnnotator)
+
             {
                 ObjectId userID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", dbuser);
                 if (AnnotationExists(userID, sessionID, roleID, schemeID))
@@ -2432,15 +2436,15 @@ namespace ssi
                 // load scheme and data
 
                 var filterData = builder.Eq("_id", dataID);
-                BsonDocument annotationDataDoc = annotationsData.Find(filterData).Single();
-                loadAnnoListSchemeAndData(ref annoList, scheme, annotationDataDoc);                
+                var annotationDataDoc = annotationsData.Find(filterData).ToList();
+                if(annotationDataDoc.Count > 0) loadAnnoListSchemeAndData(ref annoList, scheme, annotationDataDoc[0]);                
 
                 // update source
 
                 annoList.Source.Database.OID = annotationDoc["_id"].AsObjectId;
                 annoList.Source.Database.DataOID = dataID;
                 annoList.Source.Database.DataBackupOID = dataBackupID;
-                annoList.Source.Database.Session = sessionName;
+                annoList.Source.Database.Session = annotation.Session;
 
                 return annoList;
             }

@@ -131,7 +131,7 @@
                 </ListView>
             </DockPanel>
 
-            
+
             <Grid Grid.Row="2" Grid.ColumnSpan="4" Margin="0,5,5,0" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -216,8 +216,9 @@
             <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" LastChildFill="False">
 
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" Width="75" Height="30"/>
-                    <CheckBox Name="ForceCheckBox" Margin="5" VerticalAlignment="Center">Force</CheckBox>
+                    <Button Content="Apply" x:Name="ApplyButton" Click="Apply_Click" Width="85" Height="30"/>
+                    <Button Content="Train" x:Name="ApplyButton2" Click="Apply2_Click" Width="85" Margin="15,0" Height="30"/>
+                    <CheckBox x:Name="ForceCheckBox" Margin="5" VerticalAlignment="Center" Content="Force"/>
                 </StackPanel>
             </DockPanel>
         </Grid>
