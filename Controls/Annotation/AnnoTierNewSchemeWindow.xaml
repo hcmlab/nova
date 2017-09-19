@@ -9,93 +9,57 @@
         ResizeMode="NoResize"
         Icon="..\..\Resources\ui.ico"
         SizeToContent="WidthAndHeight">
-    
-    <Grid Margin="5,0,5,0">
+
+    <Grid Margin="5">
+
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="5" VerticalAlignment="Center">
-            <Button Name="button_discrete" Height="25" Width="100" Content="Select" Click="Button_Click"></Button>
+        <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
+
+            <RadioButton Name="discreteRadioButton" GroupName="Scheme" IsChecked="True" VerticalContentAlignment="Center">
+                <StackPanel>
+                    <Label>Create a scheme with predefined labels</Label>
+                    <Image Width="300" Source="/Resources/discrete.png"/>
+                </StackPanel>
+            </RadioButton>
+
+            <RadioButton Name="freeRadioButton" GroupName="Scheme" VerticalContentAlignment="Center">
+                <StackPanel>
+                    <Label>Create a scheme with custom labels</Label>
+                    <Image Width="300" Source="/Resources/free.png"/>
+                </StackPanel>
+            </RadioButton>
+
+            <RadioButton Name="continuousRadioButton" GroupName="Scheme" VerticalContentAlignment="Center">
+                <StackPanel>
+                    <Label>Create a scheme with continuous values</Label>
+                    <Image Width="300" Source="/Resources/continuous.png" Margin="0,0,0,5"/>
+                </StackPanel>
+            </RadioButton>
+
+            <Separator Name="cmlSeparator" Height="20"></Separator>
+            
+            <RadioButton Name="cmlRadioButton" GroupName="Scheme" VerticalContentAlignment="Center" HorizontalContentAlignment="Stretch">
+                <StackPanel>
+                    <Label>Import an existing scheme (from CML folder)</Label>
+                    <ComboBox Name="cmlCombobox"></ComboBox>
+                </StackPanel>
+            </RadioButton>
+
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Margin="5" VerticalAlignment="Center">
-            <Button Name="button_free" Height="25" Width="100" Content="Select" Click="Button_Click"></Button>
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Margin="5" VerticalAlignment="Center">
-            <Button Name="button_continuous" Height="25" Width="100" Content="Select" Click="Button_Click"></Button>
-        </StackPanel>
-
-        <StackPanel Grid.Row="3" VerticalAlignment="Center" Visibility="Collapsed">
-            <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                Geometric Annotations
-            </TextBlock>
-        </StackPanel>
-
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="5" >
-            <TextBlock TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center">A new scheme with predefined labels</TextBlock>
-            <Image Height="100" Source="/Resources/discrete_new_alt.png"/>
-        </StackPanel>
-
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
-            <TextBlock TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center" Margin="30,0,30,0">A new scheme with custom labels</TextBlock>
-            <Image Height="100" Source="/Resources/free_new_alt.png"/>
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5" >
-            <TextBlock TextAlignment="Left" TextWrapping="Wrap"  HorizontalAlignment="Center">A new scheme with continuous values</TextBlock>
-            <Image Height="100" Source="/Resources/continuous_new.png"/>
-        </StackPanel>
-
-        <Grid Grid.Row="3" Grid.Column="1" Margin="5" Visibility="Collapsed">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-
-            <Button Name="button_point" Grid.Column="0" Grid.Row="0" Margin="5" Click="Button_Click" ToolTip="Create Point Annotations">
-                <TextBlock TextAlignment="Center" TextWrapping="Wrap"> 
-                    Points
-                </TextBlock>
-            </Button>
-            <Button IsEnabled="False" Name="button_polygon" Grid.Column="1" Grid.Row="0" Margin="5" Click="Button_Click" ToolTip="Coming soon">
-                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                    Polygon
-                </TextBlock>
-            </Button>
-            <Button IsEnabled="False" Name="button_graph" Grid.Column="0" Grid.Row="1" Margin="5" Click="Button_Click" ToolTip="Coming soon">
-                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                    Graph
-                </TextBlock>
-            </Button>
-            <Button IsEnabled="False" Name="button_segmentation" Grid.Column="1" Grid.Row="1" Margin="5" Click="Button_Click" ToolTip="Coming soon">
-                <TextBlock TextAlignment="Center" TextWrapping="Wrap">
-                    Segmentation
-                </TextBlock>
-            </Button>
-        </Grid>
-
-        <StackPanel Grid.Row="5" Margin="5" VerticalAlignment="Center">
-            <Button Name="button_cml" Height="25" Width="100" Content="Select" Click="Button_Click"></Button>
-        </StackPanel>
-
-        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5,10,5,5"  Height="100">
-            <TextBlock Name="textblock_cml" TextAlignment="Left" TextWrapping="Wrap" HorizontalAlignment="Center">Import an existing scheme</TextBlock>
-            <ComboBox Name="combobox_cml" Width="180"  Margin="0,25,0,25"></ComboBox>
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right">
+            <Button Name="OkButton" Content="OK" Margin="5" Click="OkButton_Click"></Button>
+            <Button Name="CancelButton" Content="Cancel" Margin="5" Click="CancelButton_Click"></Button>
         </StackPanel>
 
     </Grid>
+      
+    
 </Window>

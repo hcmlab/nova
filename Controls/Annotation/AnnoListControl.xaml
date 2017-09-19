@@ -30,15 +30,9 @@
                 </Grid.RowDefinitions>
 
                 
-                <DockPanel Grid.Row="1" Margin="0,5,0,0" Opacity="0.3" LastChildFill="True">
-                    <Image Source="/Resources/search.png" Width="18" DockPanel.Dock="Left"></Image>
-                    <TextBox x:Name="searchTextBox" TextChanged="searchTextBox_TextChanged" DockPanel.Dock="Right" Margin="2,0,0,0">
-                        <TextBox.Resources>
-                            <Style TargetType="{x:Type Border}">
-                                <Setter Property="CornerRadius" Value="3"/>
-                            </Style>
-                        </TextBox.Resources>
-                    </TextBox>
+                <DockPanel Grid.Row="1" Margin="0,5,0,0" LastChildFill="True">
+                    <Image Source="/Resources/search_small.png" Width="15" DockPanel.Dock="Left"></Image>
+                    <TextBox x:Name="searchTextBox" TextChanged="searchTextBox_TextChanged" DockPanel.Dock="Right" Margin="2,0,0,0"/>
                 </DockPanel>
 
                 <ListView Name="annoDataGrid" Grid.Row="0" >
@@ -101,13 +95,7 @@
             </Grid.RowDefinitions>
 
             <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5" >Relabel</Button>
-            <TextBox Name="editTextBox" Grid.Column="1" Grid.Row="0" Margin="5,5,7,5">
-                <TextBox.Resources>
-                <Style TargetType="{x:Type Border}">
-                    <Setter Property="CornerRadius" Value="3"/>
-                </Style>
-                </TextBox.Resources>
-            </TextBox>
+            <TextBox Name="editTextBox" Grid.Column="1" Grid.Row="0" Margin="5,5,7,5"/>
             <ComboBox Name="editComboBox" Grid.Column="1" Grid.Row="0" Margin="5" Visibility="Collapsed">
                 <ComboBox.Resources>
                     <Style TargetType="{x:Type Border}">

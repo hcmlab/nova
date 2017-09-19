@@ -72,7 +72,7 @@
             <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
 
 
-            <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Multiple"  DockPanel.Dock="Top">
+            <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended"  DockPanel.Dock="Top">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
@@ -105,18 +105,18 @@
                     <Label Content="Discrete Merge"/>
                     <Button x:Name="CalculateMergeDiscrete"  Content="Merge" Grid.Column="0" Click="CalculateMergeDiscrete_Click" IsEnabled="False" />
 
-                    <Label Content="Discrete Stats" />
+                    <!--<Label Content="Discrete Stats" />
                     <Button x:Name="CalculateFleissKappa"  ToolTip="Calculate Fleiss' κ" Content="Fleiss κ" Grid.Column="0" Click="CalculateFleissKappa_Click" IsEnabled="False" />
-                    <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens κ" Content="Cohens κ" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False"/>
+                    <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens κ" Content="Cohens κ" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False"/>-->
                 </StackPanel>
 
                 <StackPanel Grid.Row="1">
                     <Label Content="Continuous Merge"/>
                     <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="RMS" Grid.Column="0" Click="RMS_Click" IsEnabled="False" />
                     <Button Name="CalculateMedian"  Content="Mean" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False"/>
-                    <Label Content="Continuous Stats"/>
+                    <!--<Label Content="Continuous Stats"/>
                     <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error. Calculates the error between two annotations" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" />
-                    <Button x:Name="CalculateCronbach" ToolTip="Cronbachs α" Content="Cronbachs α" Grid.Column="0" Click="CalculateCronbach_Click" IsEnabled="False" />
+                    <Button x:Name="CalculateCronbach" ToolTip="Cronbachs α" Content="Cronbachs α" Grid.Column="0" Click="CalculateCronbach_Click" IsEnabled="False" />-->
                     <Separator Height="30" Visibility="Hidden"></Separator>
                     <Label Content="Reassign"/>
                     <Button x:Name="Copy" ToolTip="assign annotation to another annotator" Content="Copy" Grid.Column="0" Click="Copy_Click" IsEnabled="False" />
@@ -131,7 +131,11 @@
 
 
 
-
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="4">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10">
+                <Label Name="Stats">Statistics</Label>
+            </StackPanel>
+        </StackPanel>
 
         <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Vertical">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
