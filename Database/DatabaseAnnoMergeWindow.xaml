@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Annotation Merge and statistics" Height="700" Width="1000">
+        Title="Annotation Merge / Copy" Height="700" Width="1000">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
@@ -24,13 +24,8 @@
             <ListBox Name="DatabasesBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DatabasesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
         </DockPanel>
 
-
-
         <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
             <Label Content="Sessions" DockPanel.Dock="Top" Margin="-3,0,0,0" />
-
-
-
             <ListView Name="SessionsResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  DockPanel.Dock="Top">
                 <ListView.View>
                     <GridView>
@@ -97,32 +92,42 @@
         <DockPanel Grid.Column="4" Grid.Row="0" Margin="10">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition Height="Auto" MinHeight="462"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0">
-                    <Label Content="Discrete Merge"/>
-                    <Button x:Name="CalculateMergeDiscrete"  Content="Merge" Grid.Column="0" Click="CalculateMergeDiscrete_Click" IsEnabled="False" />
+                <Label Content="Merge/Copy" Margin="-3,0,0,0" />
+                
+                <StackPanel Grid.Row="1">
 
+                    <Separator Height="10" Visibility="Hidden"></Separator>
+
+                    <Label Content="Discrete Merge"/>
+                    <Button x:Name="CalculateMergeDiscrete"  Content="Majority" Grid.Column="0" Click="CalculateMergeDiscrete_Click" IsEnabled="False" />
+
+                    <Separator Height="10" Visibility="Hidden"></Separator>
+                    
                     <!--<Label Content="Discrete Stats" />
                     <Button x:Name="CalculateFleissKappa"  ToolTip="Calculate Fleiss' κ" Content="Fleiss κ" Grid.Column="0" Click="CalculateFleissKappa_Click" IsEnabled="False" />
                     <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens κ" Content="Cohens κ" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False"/>-->
-                </StackPanel>
 
-                <StackPanel Grid.Row="1">
                     <Label Content="Continuous Merge"/>
                     <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="RMS" Grid.Column="0" Click="RMS_Click" IsEnabled="False" />
                     <Button Name="CalculateMedian"  Content="Mean" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False"/>
-                    <!--<Label Content="Continuous Stats"/>
-                    <Button x:Name="CalculateRMSE" ToolTip="Root-Mean-Square Error. Calculates the error between two annotations" Content="RMS Error" Grid.Column="0" Click="CalculateRMSE_Click" IsEnabled="False" />
-                    <Button x:Name="CalculateCronbach" ToolTip="Cronbachs α" Content="Cronbachs α" Grid.Column="0" Click="CalculateCronbach_Click" IsEnabled="False" />-->
-                    <Separator Height="30" Visibility="Hidden"></Separator>
-                    <Label Content="Reassign"/>
+
+                    <Separator Height="10" Visibility="Hidden"></Separator>
+                    <Label Content="Copy"/>
                     <Button x:Name="Copy" ToolTip="assign annotation to another annotator" Content="Copy" Grid.Column="0" Click="Copy_Click" IsEnabled="False" />
-                    <Label>Assign to</Label>
-                    <ListBox Name="AnnotatorsBox"  SelectionMode="Single" Height="199" Margin="0,0,5,0"/>
+
+                    <Separator Height="10" Visibility="Hidden"></Separator>
+
                 </StackPanel>
+
+                <DockPanel Grid.Row="2" LastChildFill="True">
+                    <Label DockPanel.Dock="Top">Assign to</Label>
+                    <ListBox Name="AnnotatorsBox" SelectionMode="Single" Margin="0,0,5,0" DockPanel.Dock="Bottom"/>
+                </DockPanel>
 
             </Grid>
         </DockPanel>
@@ -133,7 +138,7 @@
 
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="4">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10">
-                <Label Name="Stats">Statistics</Label>
+                <Label Name="Stats"></Label>
             </StackPanel>
         </StackPanel>
 
