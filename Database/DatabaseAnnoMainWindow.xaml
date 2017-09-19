@@ -93,23 +93,17 @@
             <DockPanel Grid.Column="2" Grid.Row="0"  Margin="10">
                 <DockPanel HorizontalAlignment="Stretch" DockPanel.Dock="Top" >
                     <Label Content="Annotations" />
-                    <DockPanel Grid.Row="0" Margin="0,5,0,0" Opacity="0.3" LastChildFill="True"  DockPanel.Dock="Right">
-                        <Image Source="/Resources/search.png" Width="18" DockPanel.Dock="Left"></Image>
-                        <TextBox x:Name="searchTextBox" TextChanged="searchTextBox_TextChanged" DockPanel.Dock="Right" Width="100">
-                            <TextBox.Resources>
-                                <Style TargetType="{x:Type Border}">
-                                    <Setter Property="CornerRadius" Value="3"/>
-                                </Style>
-                            </TextBox.Resources>
-                        </TextBox>
-                    </DockPanel>
-                    <StackPanel Orientation="Horizontal"  HorizontalAlignment="Right">
+                    <StackPanel Grid.Row="0" Margin="0,5,0,0" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
                         <!--<Button Name="AddAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="AddAnnotation_Click" Visibility="Collapsed" />-->
                         <!--Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="COPY" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" /-->
-                        <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="REM" Height="25"  Click="DeleteAnnotation_Click" Visibility="Collapsed" />
+                        <Button Name="DeleteAnnotation" BorderBrush="Transparent" Background="Transparent" Content="REM" Click="DeleteAnnotation_Click"/>
                     </StackPanel>
                 </DockPanel>
-                <StackPanel Orientation="Vertical" Margin="10" DockPanel.Dock="Bottom">
+                <StackPanel Orientation="Vertical" Margin="0,5,0,0" DockPanel.Dock="Bottom">
+                    <DockPanel LastChildFill="True">
+                        <Image Source="/Resources/search_small.png" DockPanel.Dock="Left" Height="15"></Image>
+                        <TextBox x:Name="searchTextBox" DockPanel.Dock="Right" TextChanged="searchTextBox_TextChanged" Margin="5,0,0,0"></TextBox>
+                    </DockPanel>
                     <CheckBox Name="showonlymine" Content="Mine only" Checked="showOnlyMine_Checked" Unchecked="showOnlyMine_Unchecked" />
                     <CheckBox Name="showOnlyUnfinished" Content="Unfinished only" Checked="showOnlyUnfinished_Checked" Unchecked="showOnlyUnfinished_Unchecked" />
                 </StackPanel>

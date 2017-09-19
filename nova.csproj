@@ -542,9 +542,7 @@
     <Content Include="EVRPresenter64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Resources\continuous_new.png" />
-    <Resource Include="Resources\discrete_new_alt.png" />
-    <Resource Include="Resources\free_new_alt.png" />
+    <Resource Include="Resources\search_small.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\Packages\Fody.1.28.3\build\Fody.targets" Condition="Exists('..\..\Packages\Fody.1.28.3\build\Fody.targets')" />

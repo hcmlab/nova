@@ -53,32 +53,29 @@ namespace ssi
                     {
                         AnnoScheme.TYPE type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), System.IO.Path.GetFileName(schemeDir).ToUpper());
                         CMLScheme cmlScheme = new CMLScheme() { Path = schemeFile, Name = System.IO.Path.GetFileNameWithoutExtension(schemeFile), Type = type };
-                        combobox_cml.Items.Add(cmlScheme);
+                        cmlCombobox.Items.Add(cmlScheme);
                     }
                 }
             }
 
-            if (combobox_cml.Items.Count > 0)
+            if (cmlCombobox.Items.Count > 0)
             {
-                combobox_cml.SelectedIndex = 0;
+                cmlCombobox.SelectedIndex = 0;
             }
             else
             {
-                combobox_cml.Visibility = Visibility.Collapsed;
-                button_cml.Visibility = Visibility.Collapsed;
-                textblock_cml.Visibility = Visibility.Collapsed;
+                cmlCombobox.Visibility = Visibility.Collapsed;
+                cmlSeparator.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
 
-            string name = (sender as Button).Name.ToString();
-
-            if (name == "button_cml")
+            if (cmlRadioButton.IsChecked == true)
             {
-                CMLScheme cmlScheme = (CMLScheme)combobox_cml.SelectedItem;
+                CMLScheme cmlScheme = (CMLScheme)cmlCombobox.SelectedItem;
                 Scheme = AnnoList.LoadfromFile(cmlScheme.Path).Scheme;
                 LoadedFromFile = true;
             }
@@ -86,29 +83,17 @@ namespace ssi
             {
                 AnnoScheme.TYPE annoType = AnnoScheme.TYPE.FREE;
 
-                switch (name)
+                if (freeRadioButton.IsChecked == true)
                 {
-                    case "button_discrete":
-                        annoType = AnnoScheme.TYPE.DISCRETE;
-                        break;
-                    case "button_free":
-                        annoType = AnnoScheme.TYPE.FREE;
-                        break;
-                    case "button_continuous":
-                        annoType = AnnoScheme.TYPE.CONTINUOUS;
-                        break;
-                    case "button_point":
-                        annoType = AnnoScheme.TYPE.POINT;
-                        break;
-                    case "button_polygon":
-                        annoType = AnnoScheme.TYPE.POLYGON;
-                        break;
-                    case "button_graph":
-                        annoType = AnnoScheme.TYPE.GRAPH;
-                        break;
-                    case "button_segmentation":
-                        annoType = AnnoScheme.TYPE.SEGMENTATION;
-                        break;
+                    annoType = AnnoScheme.TYPE.FREE;
+                }
+                else if (discreteRadioButton.IsChecked == true)
+                {
+                    annoType = AnnoScheme.TYPE.DISCRETE;
+                }
+                else if (continuousRadioButton.IsChecked == true)
+                {
+                    annoType = AnnoScheme.TYPE.CONTINUOUS;
                 }
 
                 Scheme.Type = annoType;
@@ -128,6 +113,11 @@ namespace ssi
             }
         }
 
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
 
+            Close();
+        }
     }
 }

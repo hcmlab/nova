@@ -5,9 +5,12 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace ssi
 {
@@ -16,6 +19,9 @@ namespace ssi
     /// </summary>
     public partial class DatabaseAnnoMergeWindow : System.Windows.Window
     {
+        private bool selectedisContinuous = false;
+        private readonly object syncLock = new object();
+
         public DatabaseAnnoMergeWindow()
         {
             InitializeComponent();
@@ -115,11 +121,11 @@ namespace ssi
                 string type = result.GetValue(2).ToString();
                 if (type == "CONTINUOUS")
                 {
-                    handleButtons(false);
+                    selectedisContinuous = true;
                 }
                 else
                 {
-                    handleButtons(true);
+                    selectedisContinuous = false;
                 }
             }
 
@@ -204,6 +210,34 @@ namespace ssi
 
         private void AnnotationResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (AnnotationResultBox.SelectedItems.Count == 1)
+            {
+                Copy.IsEnabled = true;
+                CalculateMedian.IsEnabled = false;
+                CalculateRMS.IsEnabled = false;
+                CalculateMergeDiscrete.IsEnabled = false;
+
+            }
+            else
+            {
+                
+                handleButtons(!selectedisContinuous);
+                Copy.IsEnabled = false;
+            }
+
+
+
+            if (selectedisContinuous)
+            {
+                List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+                CalculateCronbachWrapper(annolists);
+                CalculateRMSEWrapper(annolists);
+            }
+            else {
+
+                CalculateCohenKappaWrapper();
+
+            };
         }
 
         private void AnnoSchemesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -213,21 +247,18 @@ namespace ssi
 
         private void copyAnnotation(List<AnnoList> al)
         {
-            if(al.Count > 0)
+            if (al.Count > 0)
             {
+                bool isSaved = false;
+                string originalScheme = al[0].Scheme.Name;
+                string originalFullname = al[0].Meta.AnnotatorFullName;
 
-           
+                AnnoList newList = new AnnoList();
 
-            bool isSaved = false;
-            string originalScheme = al[0].Scheme.Name;
-            string originalFullname = al[0].Meta.AnnotatorFullName;
-
-            AnnoList newList = new AnnoList();
-
-            foreach(AnnoListItem ali in al[0])
-            {
-               newList.AddSorted(ali);
-            }
+                foreach (AnnoListItem ali in al[0])
+                {
+                    newList.AddSorted(ali);
+                }
 
                 newList.Scheme = al[0].Scheme;
                 newList.Meta = al[0].Meta;
@@ -237,17 +268,16 @@ namespace ssi
                 newList.Source.Database.Session = al[0].Source.Database.Session;
                 newList.HasChanged = true;
 
+                if (newList != null)
+                {
+                    isSaved = newList.Save(null, false, true);
+                }
 
-            if (newList != null)
-            {
-                isSaved =  newList.Save(null, false, true);
-            }
+                Ok.IsEnabled = true;
+                if (isSaved)
+                    MessageBox.Show("Annotation: " + originalScheme + " from Annotator: " + originalFullname + " has been copied to Annotator: " + newList.Meta.AnnotatorFullName);
 
-            Ok.IsEnabled = true;
-            if(isSaved)
-            MessageBox.Show("Annotation: " + originalScheme + " from Annotator: " + originalFullname + " has been copied to Annotator: " + newList.Meta.AnnotatorFullName);
-
-            GetAnnotations();
+                GetAnnotations();
             }
         }
 
@@ -294,13 +324,12 @@ namespace ssi
                 newList[i].Label = System.Math.Sqrt(array[i] / numberoftracks).ToString();
             }
             newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
-            
-           
+
             if (newList != null)
             {
-                isSaved =  newList.Save(null, false, true);
+                isSaved = newList.Save(null, false, true);
             }
-            if(isSaved) MessageBox.Show("The annotations have been merged");
+            if (isSaved) MessageBox.Show("The annotations have been merged");
             Ok.IsEnabled = true;
             GetAnnotations();
         }
@@ -363,24 +392,16 @@ namespace ssi
             {
                 CalculateMedian.IsEnabled = false;
                 CalculateRMS.IsEnabled = false;
-                CalculateRMSE.IsEnabled = false;
-                CalculateFleissKappa.IsEnabled = true;
-                CalculateCohenKappa.IsEnabled = true;
-                CalculateCronbach.IsEnabled = false;
                 CalculateMergeDiscrete.IsEnabled = true;
             }
             else
             {
                 CalculateMedian.IsEnabled = true;
                 CalculateRMS.IsEnabled = true;
-                CalculateRMSE.IsEnabled = true;
-                CalculateFleissKappa.IsEnabled = false;
-                CalculateCohenKappa.IsEnabled = false;
-                CalculateCronbach.IsEnabled = true;
                 CalculateMergeDiscrete.IsEnabled = false;
             }
 
-            Copy.IsEnabled = true;
+           
         }
 
         private void RMSE(List<AnnoList> al)
@@ -410,9 +431,9 @@ namespace ssi
             else MessageBox.Show("Select RMS Annotation and ONE Reference Annotation. If RMS Annotation is not present, please create it first.");
         }
 
-        private List<AnnoList> convertAnnoListsToMatrix(string restclass)
+        private List<AnnoList> convertAnnoListsToMatrix(List<AnnoList> annolists, string restclass)
         {
-            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+           
 
             List<AnnoList> convertedlists = new List<AnnoList>();
 
@@ -536,20 +557,17 @@ namespace ssi
 
                 if (ali.Label != restclass) newList.Add(ali);
             }
-           
 
             if (newList != null)
             {
-                isSaved =  newList.Save(null, false, true);
+                isSaved = newList.Save(null, false, true);
             }
 
-            if(isSaved) MessageBox.Show("Annotations have been merged");
+            if (isSaved) MessageBox.Show("Annotations have been merged");
 
             Ok.IsEnabled = true;
 
             GetAnnotations();
-
-
         }
 
         private double FleissKappa(List<AnnoList> annolists, string restclass)
@@ -568,7 +586,13 @@ namespace ssi
                 k = classes.Count;
             }
 
-            int N = annolists[0].Count; //Number of Subjects, here Number of Labels.
+            int N = int.MaxValue;
+
+
+            foreach (AnnoList a in annolists)
+            {
+                if (a.Count < N) N = a.Count;
+            }
 
             double[] pj = new double[k];
             double[] Pi = new double[N];
@@ -671,7 +695,14 @@ namespace ssi
                 k = classes.Count;
             }
 
-            int N = annolists[0].Count; //Number of Subjects, here Number of Labels.
+
+            int N = int.MaxValue;
+
+            foreach (AnnoList a in annolists)
+            {
+                if (a.Count < N) N = a.Count;
+            }
+           
 
             double[] pj = new double[k];
             double[] Pi = new double[N];
@@ -761,10 +792,18 @@ namespace ssi
         private double Cronbachsalpha(List<AnnoList> annolists, int decimals)
         {
             int n = annolists.Count;   // n = number of raters, here number of annolists
-            int N = annolists[0].Count; //  Number of Values.
+
+            int N = int.MaxValue;
+
+            foreach (AnnoList a in annolists)
+            {
+                if (a.Count < N) N = a.Count;
+            }
+
 
             double[] varj = new double[n];
             double[] vari = new double[N];
+
 
             double[][] data = new double[n][];
 
@@ -930,16 +969,13 @@ namespace ssi
             rootMeanSquare(al);
         }
 
-        private void CalculateRMSE_Click(object sender, RoutedEventArgs e)
-        {
-            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            RMSE(al);
-        }
+
 
         private void CalculateFleissKappa_Click(object sender, RoutedEventArgs e)
         {
             string restclass = "Rest";
-            List<AnnoList> convertedlists = convertAnnoListsToMatrix(restclass);
+            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+            List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
             double fleisskappa = FleissKappa(convertedlists, restclass);
 
             //Landis and Koch (1977)
@@ -955,48 +991,157 @@ namespace ssi
             MessageBox.Show("Fleiss Kappa: " + fleisskappa.ToString("F3") + ": " + interpretation);
         }
 
+
+        private async Task CalculateCohenKappaWrapper()
+        {
+            if (AnnotationResultBox.SelectedItems.Count > 1)
+            {
+
+                double cohenkappa = 0;
+                double fleisskappa = 0;
+                string interpretation = "";
+           
+                CancellationToken token = new CancellationToken();
+                List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+                await Task.Run(() =>
+                {
+                    lock (syncLock)
+                    {
+                        string restclass = "Rest";
+                     
+                        List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
+                        cohenkappa = CohensKappa(convertedlists, restclass);
+                       // fleisskappa = FleissKappa(convertedlists, restclass);
+                    }
+                    //Landis and Koch (1977)
+                   
+                        if (cohenkappa < 0) interpretation = "Poor agreement";
+                        else if (cohenkappa >= 0.01 && cohenkappa < 0.21) interpretation = "Slight agreement";
+                        else if (cohenkappa >= 0.21 && cohenkappa < 0.41) interpretation = "Fair agreement";
+                        else if (cohenkappa >= 0.41 && cohenkappa < 0.61) interpretation = "Moderate agreement";
+                        else if (cohenkappa >= 0.61 && cohenkappa < 0.81) interpretation = "Substantial agreement";
+                        else if (cohenkappa >= 0.81 && cohenkappa < 1.00) interpretation = "Almost perfect agreement";
+                        else if (cohenkappa == 1.0) interpretation = "Perfect agreement";
+  
+
+                }, token);
+
+                Action EmptyDelegate = delegate () { };
+                //" Fleiss's κ : " + fleisskappa.ToString("F3") +
+                Stats.Content = "Cohen's κ : " + cohenkappa.ToString("F3") +  ": " + interpretation;
+                this.UpdateLayout();
+                this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+            }
+            else
+            {
+                Stats.Content = "";
+            }
+            // MessageBox.Show("Cronbach's alpha: " + cronbachalpha.ToString("F3") + ": " + interpretation);
+        }
+
+
+
         private void CalculateCohenKappa_Click(object sender, RoutedEventArgs e)
         {
-            string restclass = "Rest";
-            List<AnnoList> convertedlists = convertAnnoListsToMatrix(restclass);
-            double cohenkappa = CohensKappa(convertedlists, restclass);
-
-            //Landis and Koch (1977)
-            string interpretation = "";
-            if (cohenkappa < 0) interpretation = "Poor agreement";
-            else if (cohenkappa >= 0.01 && cohenkappa < 0.21) interpretation = "Slight agreement";
-            else if (cohenkappa >= 0.21 && cohenkappa < 0.41) interpretation = "Fair agreement";
-            else if (cohenkappa >= 0.41 && cohenkappa < 0.61) interpretation = "Moderate agreement";
-            else if (cohenkappa >= 0.61 && cohenkappa < 0.81) interpretation = "Substantial agreement";
-            else if (cohenkappa >= 0.81 && cohenkappa < 1.00) interpretation = "Almost perfect agreement";
-            else if (cohenkappa == 1.0) interpretation = "Perfect agreement";
-
-            MessageBox.Show("Cohen's Kappa: " + cohenkappa.ToString("F3") + ": " + interpretation);
+          
         }
 
-        private void CalculateCronbach_Click(object sender, RoutedEventArgs e)
+        private async Task CalculateCronbachWrapper(List<AnnoList> annolists)
         {
-            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-
-            double cronbachalpha = Cronbachsalpha(annolists, 10);
-
-            if (cronbachalpha < 0) cronbachalpha = 0.0; //can happen that it gets a little below 0, this is to avoid confusion.
-
+        
+            double cronbachalpha = 0;
             string interpretation = "";
-            if (cronbachalpha <= 0.5) interpretation = "Unacceptable agreement";
-            else if (cronbachalpha >= 0.51 && cronbachalpha < 0.61) interpretation = "Poor agreement";
-            else if (cronbachalpha >= 0.61 && cronbachalpha < 0.71) interpretation = "Questionable agreement";
-            else if (cronbachalpha >= 0.71 && cronbachalpha < 0.81) interpretation = "Acceptable agreement";
-            else if (cronbachalpha >= 0.81 && cronbachalpha < 0.90) interpretation = "Good agreement";
-            else if (cronbachalpha >= 0.9) interpretation = "Excellent agreement";
+            if (annolists.Count > 1)
+            {
+                CancellationToken token = new CancellationToken();
 
-            MessageBox.Show("Cronbach's alpha: " + cronbachalpha.ToString("F3") + ": " + interpretation);
+                await Task.Run(() =>
+                {
+                    lock (syncLock)
+                    {
+                           cronbachalpha = Cronbachsalpha(annolists, 10);
+                    }
+                 
+
+                    if (cronbachalpha < 0) cronbachalpha = 0.0; //can happen that it gets a little below 0, this is to avoid confusion.
+
+                    if (cronbachalpha <= 0.5) interpretation = "Unacceptable agreement";
+                    else if (cronbachalpha >= 0.51 && cronbachalpha < 0.61) interpretation = "Poor agreement";
+                    else if (cronbachalpha >= 0.61 && cronbachalpha < 0.71) interpretation = "Questionable agreement";
+                    else if (cronbachalpha >= 0.71 && cronbachalpha < 0.81) interpretation = "Acceptable agreement";
+                    else if (cronbachalpha >= 0.81 && cronbachalpha < 0.90) interpretation = "Good agreement";
+                    else if (cronbachalpha >= 0.9) interpretation = "Excellent agreement";
+                }, token);
+
+                Action EmptyDelegate = delegate () { };
+                Stats.Content = "Cronbach's α: " + cronbachalpha.ToString("F3") + ": " + interpretation;
+                this.UpdateLayout();
+                this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+            }
+            else
+            {
+                Stats.Content = "";
+            }
+            // MessageBox.Show("Cronbach's alpha: " + cronbachalpha.ToString("F3") + ": " + interpretation);
         }
+
+        private async Task CalculateRMSEWrapper(List<AnnoList> annolists)
+        {
+            
+
+            if (annolists.Count == 2)
+            {
+                CancellationToken token = new CancellationToken();
+                double mse = 0.0;
+                double rmsd = 0.0;
+                double sum_sq = 0;
+                double minerr = double.MaxValue;
+                double maxerr = 0.0;
+
+                await Task.Run(() =>
+                {
+                    lock (syncLock)
+                    {
+                     
+
+                        if (annolists.Count == 2)
+                        {
+                                int N = int.MaxValue;
+                                foreach (AnnoList a in annolists)
+                                {
+                                    if (a.Count < N) N = a.Count;
+                                }
+
+
+                                for (int i = 0; i < N; i++)
+                                {
+                                    double err = double.Parse(annolists[0][i].Label) - double.Parse(annolists[1][i].Label);
+                                    if (err > maxerr) maxerr = err;
+                                    if (err < minerr) minerr = err;
+                                    sum_sq += (err * err);
+                                }
+
+                                mse = ((double)sum_sq / (double)N);
+                                rmsd = Math.Sqrt(mse);
+                        }
+                    }
+
+                }, token);
+
+                double nrmsd = rmsd / (maxerr - minerr);
+                Action EmptyDelegate = delegate () { };
+                Stats.Content += "  RMSE:  " + rmsd.ToString("F4") + " (NRMSE : " + nrmsd.ToString("F4") + ")";
+                this.UpdateLayout();
+                this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+            }
+        }
+
 
         private void CalculateMergeDiscrete_Click(object sender, RoutedEventArgs e)
         {
             string restclass = "Rest";
-            List<AnnoList> convertedlists = convertAnnoListsToMatrix(restclass);
+            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+            List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
             MergeDiscreteLists(convertedlists, restclass);
         }
 
