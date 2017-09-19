@@ -61,27 +61,25 @@ namespace ssi
             this.Close();
         }
 
-        public void GetSessions()
+        public void GetSessions(string selectedItem = null)
 
         {
-            var sessioncollection = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions);
-            var sessions = sessioncollection.Find(_ => true).ToList();
-
-            if (sessions.Count > 0)
+            if (SessionsResultsBox.HasItems)
             {
-                if (SessionsResultsBox.HasItems)
-                {
-                    SessionsResultsBox.ItemsSource = null;
-                }
-                List<DatabaseSession> items = new List<DatabaseSession>();
-                foreach (var c in sessions)
-                {
-                    items.Add(new DatabaseSession() { Name = c["name"].ToString(), Location = c["location"].ToString(), Language = c["language"].ToString(), Date = c["date"].ToUniversalTime(), Id = c["_id"].AsObjectId });
-                }
-
-                SessionsResultsBox.ItemsSource = items;
+                SessionsResultsBox.ItemsSource = null;
             }
-            else SessionsResultsBox.ItemsSource = null;
+
+            List<DatabaseSession> items = DatabaseHandler.Sessions;
+            SessionsResultsBox.ItemsSource = items;
+
+            if (SessionsResultsBox.HasItems)
+            {
+                SessionsResultsBox.SelectedIndex = 0;
+                if (selectedItem != null)
+                {
+                    SessionsResultsBox.SelectedItem = items.Find(item => item.Name == selectedItem);
+                }
+            }
         }
 
         public ObjectId GetObjectID(IMongoDatabase database, string collection, string value, string attribute)
@@ -576,8 +574,8 @@ namespace ssi
 
             List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
             //add the restclass we introduced in last step.
-            AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
-            classes.Add(rest);
+            //AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
+            //classes.Add(rest);
 
             int k = 0;  //k = number of classes
             //For Discrete Annotations find number of classes, todo, find number of classes on free annotations.
@@ -586,13 +584,7 @@ namespace ssi
                 k = classes.Count;
             }
 
-            int N = int.MaxValue;
-
-
-            foreach (AnnoList a in annolists)
-            {
-                if (a.Count < N) N = a.Count;
-            }
+            int N = annolists[0].Count;
 
             double[] pj = new double[k];
             double[] Pi = new double[N];
@@ -971,27 +963,6 @@ namespace ssi
 
 
 
-        private void CalculateFleissKappa_Click(object sender, RoutedEventArgs e)
-        {
-            string restclass = "Rest";
-            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
-            double fleisskappa = FleissKappa(convertedlists, restclass);
-
-            //Landis and Koch (1977)
-            string interpretation = "";
-            if (fleisskappa < 0) interpretation = "Poor agreement";
-            else if (fleisskappa >= 0.01 && fleisskappa < 0.21) interpretation = "Slight agreement";
-            else if (fleisskappa >= 0.21 && fleisskappa < 0.41) interpretation = "Fair agreement";
-            else if (fleisskappa >= 0.41 && fleisskappa < 0.61) interpretation = "Moderate agreement";
-            else if (fleisskappa >= 0.61 && fleisskappa < 0.81) interpretation = "Substantial agreement";
-            else if (fleisskappa >= 0.81 && fleisskappa < 1.00) interpretation = "Almost perfect agreement";
-            else if (fleisskappa == 1.0) interpretation = "Perfect agreement";
-
-            MessageBox.Show("Fleiss Kappa: " + fleisskappa.ToString("F3") + ": " + interpretation);
-        }
-
-
         private async Task CalculateCohenKappaWrapper()
         {
             if (AnnotationResultBox.SelectedItems.Count > 1)
@@ -1011,24 +982,24 @@ namespace ssi
                      
                         List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
                         cohenkappa = CohensKappa(convertedlists, restclass);
-                       // fleisskappa = FleissKappa(convertedlists, restclass);
+                        fleisskappa = FleissKappa(convertedlists, restclass);
                     }
                     //Landis and Koch (1977)
                    
-                        if (cohenkappa < 0) interpretation = "Poor agreement";
+                        if (cohenkappa <= 0) interpretation = "Poor agreement";
                         else if (cohenkappa >= 0.01 && cohenkappa < 0.21) interpretation = "Slight agreement";
                         else if (cohenkappa >= 0.21 && cohenkappa < 0.41) interpretation = "Fair agreement";
                         else if (cohenkappa >= 0.41 && cohenkappa < 0.61) interpretation = "Moderate agreement";
                         else if (cohenkappa >= 0.61 && cohenkappa < 0.81) interpretation = "Substantial agreement";
                         else if (cohenkappa >= 0.81 && cohenkappa < 1.00) interpretation = "Almost perfect agreement";
-                        else if (cohenkappa == 1.0) interpretation = "Perfect agreement";
+                        else if (cohenkappa >= 1.0) interpretation = "Perfect agreement";
   
 
                 }, token);
 
                 Action EmptyDelegate = delegate () { };
-                //" Fleiss's κ : " + fleisskappa.ToString("F3") +
-                Stats.Content = "Cohen's κ : " + cohenkappa.ToString("F3") +  ": " + interpretation;
+               
+                Stats.Content = "Cohen's κ : " + cohenkappa.ToString("F3") + ": " + interpretation;
                 this.UpdateLayout();
                 this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
             }
@@ -1036,15 +1007,8 @@ namespace ssi
             {
                 Stats.Content = "";
             }
-            // MessageBox.Show("Cronbach's alpha: " + cronbachalpha.ToString("F3") + ": " + interpretation);
         }
 
-
-
-        private void CalculateCohenKappa_Click(object sender, RoutedEventArgs e)
-        {
-          
-        }
 
         private async Task CalculateCronbachWrapper(List<AnnoList> annolists)
         {
