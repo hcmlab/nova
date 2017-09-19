@@ -112,7 +112,7 @@
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
                             <GridViewColumn Width="Auto" Header="Role" DisplayMemberBinding="{Binding Role}" />
-                            <GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Annotator}" />
+                            <GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding AnnotatorFullName}" />
                             <GridViewColumn Width="Auto" Header="Finished">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
