@@ -135,13 +135,40 @@ namespace ssi
                 }
 
 
+
+
+
                 //Download xmlchain, if not present yet.
                 string xmlchainexe = "xmlchain.exe";
                 string xmlchainexePath = AppDomain.CurrentDomain.BaseDirectory + xmlchainexe;
 
+
+
                 DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
 
-                if (File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath))
+
+
+
+                    //Download libmongoc-1.0.dll, if not present yet.
+                    string libmongocdll = "libmongoc-1.0.dll";
+                    string libmongocdllPath = AppDomain.CurrentDomain.BaseDirectory + libmongocdll;
+
+                    DownloadFile(SSIbinaryGitPath + libmongocdll, libmongocdllPath);
+
+
+                    //Download libbson-1.0.dll, if not present yet.
+                    string libsondll = "libbson-1.0.dll";
+                    string libbsondllPath = AppDomain.CurrentDomain.BaseDirectory + libsondll;
+
+                    DownloadFile(SSIbinaryGitPath + libsondll, libbsondllPath);
+
+                    //Download ssiframe.dll, if not present yet (cml tools will do this automatically, here we force to overwrite it).
+                    string ssiframedll = "ssiframe.dll";
+                    string ssiframedllPath = AppDomain.CurrentDomain.BaseDirectory + ssiframedll;
+
+                    DownloadFile(SSIbinaryGitPath + ssiframedll, ssiframedllPath);
+
+                    if (File.Exists(xmlchainexePath) && File.Exists(cmltrainexePath))
                 {
 
                     long sizexmlchain = new System.IO.FileInfo(xmlchainexePath).Length;
