@@ -35,6 +35,7 @@ namespace ssi
         }
 
         private double minRangeInPixel = 1;
+        private double min = 1;
 
         public TimeRangeSlider()
         {
@@ -79,11 +80,17 @@ namespace ssi
             if (MainHandler.Time != null)
             {
 
-                //long newSliderStart = slider.RangeStartSelected;
-                //long newSliderStop = slider.RangeStopSelected;
+    
 
                 MainHandler.Time.SelectionStart = MainHandler.Time.TotalDuration * ((double)slider.RangeStartSelected / (double)slider.RangeStop);
                 MainHandler.Time.SelectionStop = MainHandler.Time.TotalDuration * ((double)slider.RangeStopSelected / (double)slider.RangeStop);
+
+
+
+                //Fix slider < 0 and range < 1second
+                if (MainHandler.Time.SelectionStart < 0) MainHandler.Time.SelectionStart = 0;
+                if (MainHandler.Time.SelectionStop - MainHandler.Time.SelectionStart < min) MainHandler.Time.SelectionStop = MainHandler.Time.SelectionStart + min;
+         
 
 
                 if (followmedia)
