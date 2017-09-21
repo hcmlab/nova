@@ -233,7 +233,7 @@ namespace ssi
             }
             else {
 
-                CalculateCohenKappaWrapper();
+                CalculateKappaWrapper();
 
             };
         }
@@ -963,7 +963,7 @@ namespace ssi
 
 
 
-        private async Task CalculateCohenKappaWrapper()
+        private async Task CalculateKappaWrapper()
         {
             if (AnnotationResultBox.SelectedItems.Count > 1)
             {
@@ -981,25 +981,25 @@ namespace ssi
                         string restclass = "Rest";
                      
                         List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
-                        cohenkappa = CohensKappa(convertedlists, restclass);
+                       // cohenkappa = CohensKappa(convertedlists, restclass);
                         fleisskappa = FleissKappa(convertedlists, restclass);
                     }
                     //Landis and Koch (1977)
                    
-                        if (cohenkappa <= 0) interpretation = "Poor agreement";
-                        else if (cohenkappa >= 0.01 && cohenkappa < 0.21) interpretation = "Slight agreement";
-                        else if (cohenkappa >= 0.21 && cohenkappa < 0.41) interpretation = "Fair agreement";
-                        else if (cohenkappa >= 0.41 && cohenkappa < 0.61) interpretation = "Moderate agreement";
-                        else if (cohenkappa >= 0.61 && cohenkappa < 0.81) interpretation = "Substantial agreement";
-                        else if (cohenkappa >= 0.81 && cohenkappa < 1.00) interpretation = "Almost perfect agreement";
-                        else if (cohenkappa >= 1.0) interpretation = "Perfect agreement";
+                        if (fleisskappa <= 0) interpretation = "Poor agreement";
+                        else if (fleisskappa >= 0.01 && fleisskappa < 0.21) interpretation = "Slight agreement";
+                        else if (fleisskappa >= 0.21 && fleisskappa < 0.41) interpretation = "Fair agreement";
+                        else if (fleisskappa >= 0.41 && fleisskappa < 0.61) interpretation = "Moderate agreement";
+                        else if (fleisskappa >= 0.61 && fleisskappa < 0.81) interpretation = "Substantial agreement";
+                        else if (fleisskappa >= 0.81 && fleisskappa < 1.00) interpretation = "Almost perfect agreement";
+                        else if (fleisskappa >= 1.0) interpretation = "Perfect agreement";
   
 
                 }, token);
 
                 Action EmptyDelegate = delegate () { };
                
-                Stats.Content = "Cohen's κ : " + cohenkappa.ToString("F3") + ": " + interpretation;
+                Stats.Content = "Fleiss' κ : " + fleisskappa.ToString("F3") + ": " + interpretation;
                 this.UpdateLayout();
                 this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
             }
@@ -1079,13 +1079,13 @@ namespace ssi
 
                                 for (int i = 0; i < N; i++)
                                 {
-                                    double err = double.Parse(annolists[0][i].Label) - double.Parse(annolists[1][i].Label);
+                                    double err = double.Parse(annolists[0][i].Label, System.Globalization.NumberStyles.Float) - double.Parse(annolists[1][i].Label, System.Globalization.NumberStyles.Float);
                                     if (err > maxerr) maxerr = err;
                                     if (err < minerr) minerr = err;
                                     sum_sq += (err * err);
                                 }
 
-                                mse = ((double)sum_sq / (double)N);
+                                mse = sum_sq / N;
                                 rmsd = Math.Sqrt(mse);
                         }
                     }
