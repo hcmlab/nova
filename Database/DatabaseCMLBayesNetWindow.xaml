@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="" Height="600" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >
@@ -157,6 +157,8 @@
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -165,18 +167,35 @@
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
+                    <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Name of Dataset file</Label>
+                    <TextBox Name="namebox" Text="filename.txt" Grid.Row="0" Grid.Column="1" Height="20"></TextBox>
+
 
                     <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Chunksize in ms</Label>
                     <TextBox Name="chunksizebox" Text="40" Grid.Row="1" Grid.Column="1" Height="20"></TextBox>
 
-                    <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Classes for discretizing</Label>
-                    <TextBox Name="classesbox" Text="VERYLOW;LOW;MEDIUM;HIGH;VERYHIGH" Grid.Row="2" Grid.Column="1" Height="20"></TextBox>
-
-                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Number of history frames</Label>
-                    <TextBox Name="timestepsbox" Text="0" Grid.Row="3" Grid.Column="1" Height="20"></TextBox>
 
 
-                    <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="4" Grid.Column="2" VerticalAlignment="Center"></Label>
+                    <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Discretisize Continuous values</Label>
+                    <CheckBox Name="discretisizeeckbox" Checked="discretisizeeckbox_Checked"  Unchecked="discretisizeeckbox_Unchecked" Grid.Row="2" Grid.Column="1" Height="20" IsChecked="True"></CheckBox>
+
+
+                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Classes for discretizing</Label>
+                    <TextBox Name="classesbox" Text="VERYLOW;LOW;MEDIUM;HIGH;VERYHIGH" Grid.Row="3" Grid.Column="1" Height="20"></TextBox>
+
+
+
+                    <Label Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Number of history frames</Label>
+                    <TextBox Name="timestepsbox" Text="0" Grid.Row="4" Grid.Column="1" Height="20"></TextBox>
+
+                    <Label Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Nodes in format: role__scheme</Label>
+                    <CheckBox Name="rolecheckbox" Grid.Row="5" Grid.Column="1" Height="20" Checked="rolecheckbox_Checked" Unchecked="rolecheckbox_Unchecked" IsChecked="True"></CheckBox>
+
+                    <Label Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"  Width="130" ToolTip="Only applies for continous annotations">Store role in column</Label>
+                    <CheckBox Name="writerolecheckbox" Grid.Row="5" Grid.Column="1"  HorizontalAlignment="Right" Height="20" IsChecked="True"></CheckBox>
+
+
+                    <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="6" Grid.Column="2" VerticalAlignment="Center"></Label>
 
                 </Grid>
 
