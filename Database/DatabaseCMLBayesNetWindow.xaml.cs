@@ -247,10 +247,7 @@ namespace ssi
             }
 
             logTextBox.Text += "\nCreating Data sheet successful\nHit train to train the network or use it in GenIE";
-
         }
-
- 
 
         private void ExportFrameWiseAnnotationsRolesSeperated(double chunksize, string[] discretizeclasses, string seperator, string restclass, string filepath, List<AnnoList> annoLists, bool ishead, string sessionname, int tempsteps = 0)
         {
@@ -261,8 +258,6 @@ namespace ssi
             double maxdur = double.MaxValue;
 
             string[][] history = new string[annoLists.Count][];
-
-  
 
             List<AnnoScheme> schemes = new List<AnnoScheme>();
             List<string> roles = new List<string>();
@@ -275,7 +270,6 @@ namespace ssi
                     schemes.Add(annoLists[a].Scheme);
                     AnnoList list = annoLists[a];
                     newLists.Add(list);
-                   
                 }
                 if (roles.Find(n => n == annoLists[a].Meta.Role) == null) roles.Add(annoLists[a].Meta.Role);
             }
@@ -294,28 +288,23 @@ namespace ssi
                         headline += newLists[a].Scheme.Name + "_" + (i) + seperator;
                     }
                 }
-
-
             }
-            if(writerolecheckbox.IsChecked == true)
+            if (writerolecheckbox.IsChecked == true)
             {
                 headline += "role" + seperator;
             }
-           
-
 
             for (int a = 0; a < annoLists.Count; a++)
             {
-                double localdur = double.MaxValue;
+                double localdur = 0;
 
                 if (annoLists[a].Count > 0)
                 {
                     localdur = annoLists[a][annoLists[a].Count - 1].Stop * 1000;
                 }
 
-                maxdur = Math.Min(maxdur, localdur);
+                maxdur = Math.Max(maxdur, localdur);
             }
-
 
             try
             {
@@ -328,125 +317,127 @@ namespace ssi
                         //  filetoprint += headline + "\n";
                         file.WriteLine(headline);
                     }
+
                     headline = "";
+
+                    List<AnnoList> newlists = new List<AnnoList>();
+
+                    double targetsr = 1000.0 / chunksize;
+
+                    foreach (AnnoList al in annoLists)
+                    {
+                        if (al.Scheme.Type == AnnoScheme.TYPE.DISCRETE || al.Scheme.Type == AnnoScheme.TYPE.FREE)
+                        {
+                            AnnoList list = ConvertDiscreteAnnoListToContinuousList(al, chunksize, maxdur, restclass);
+                            newlists.Add(list);
+                        }
+                        else if (al.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                        {
+                            if (al.Scheme.SampleRate != targetsr)
+                            {
+                                AnnoList newlist = ResampleContinuousList(al, targetsr);
+                                if (newlist == null)
+                                {
+                                    MessageBox.Show("Samplerates do not fit!");
+                                    return;
+                                }
+                                newlists.Add(newlist);
+                            }
+                            else
+                            {
+                                newlists.Add(al);
+                            }
+                        }
+                    }
+
+                    double minSize = double.MaxValue;
+                    foreach (AnnoList a in newlists)
+                    {
+                        if (a.Count < minSize) minSize = a.Count;
+                    }
+
+                    string discretelabel = "";
+
                     foreach (string role in roles)
                     {
-                        Action EmptyDelegate = delegate () { };
-                        this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-                        while (currenttime < maxdur)
+                        for (int a = 0; a < newlists.Count; a++)
                         {
-                       
-                       
-                            for (int a = 0; a < annoLists.Count; a++)
+                            for (int i = 0; i < tempsteps; i++)
                             {
-                                if (annoLists[a].Meta.Role == role)
+                                if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                                 {
-                                    if (annoLists[a].Count > 0)
+                                    double value;
+                                    double.TryParse(newlists[a][i].Label, out value);
+                                    discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
+                                    history[a][i] = discretelabel;
+                                }
+                                else
+                                {
+                                    history[a][i] = newlists[a][i].Label;
+                                }
+                            }
+                        }
+
+                        for (int i = 0; i < minSize; i++)
+                        {
+                            for (int a = 0; a < newlists.Count; a++)
+                            {
+                                if (newlists[a].Meta.Role == role)
+                                {
+                                    if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                                     {
-                                        for (int i = 0; i < annoLists[a].Count; i++)
-                                        {
-                                            if ((annoLists[a][i].Start * 1000) - (annoLists[a][i].Duration * 1000) < currenttime && annoLists[a][i].Stop * 1000 > currenttime)
-                                            {
-                                                found = true;
+                                        double value;
+                                        double.TryParse(newlists[a][i].Label, out value);
 
-                                                if (annoLists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
-                                                {
-                                                    double value;
-                                                    double.TryParse(annoLists[a][i].Label, out value);
-
-                                                    string discretelabel = discretize(value, annoLists[a].Scheme.MinScore, annoLists[a].Scheme.MaxScore, discretizeclasses);
-                                                    headline += discretelabel + seperator;
-
-                                                    if (tempsteps > 0)
-                                                    {
-                                                        for (int k = 0; k < tempsteps; k++)
-                                                        {
-                                                            headline += history[a][k] + seperator;
-                                                        }
-
-                                                        for (int k = tempsteps - 1; k > 0; k--)
-                                                        {
-                                                            history[a][k] = history[a][k - 1];
-                                                        }
-
-                                                        history[a][0] = discretelabel;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    headline += annoLists[a][i].Label + seperator;
-
-                                                    if (tempsteps > 0)
-                                                    {
-                                                        for (int k = 0; k < tempsteps; k++)
-                                                        {
-                                                            headline += history[a][k] + seperator;
-                                                        }
-
-                                                        for (int k = tempsteps - 1; k > 0; k--)
-                                                        {
-                                                            history[a][k] = history[a][k - 1];
-                                                        }
-
-                                                        history[a][0] = annoLists[a][i].Label;
-                                                    }
-                                                }
-
-                                                break;
-                                            }
-                                            else found = false;
-                                        }
+                                        discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
+                                        headline += discretelabel + seperator;
                                     }
                                     else
                                     {
-                                        found = false;
+                                        headline += newlists[a][i].Label + seperator;
                                     }
-                                    if (!found)
 
+                                    if (tempsteps > 0)
                                     {
-                                        headline += restclass + seperator;
-                                        if (tempsteps > 0)
+                                        for (int k = 0; k < tempsteps; k++)
                                         {
-                                            for (int k = 0; k < tempsteps; k++)
-                                            {
-                                                headline += history[a][k] + seperator;
-                                            }
+                                            headline += history[a][k] + seperator;
+                                        }
 
-                                            for (int k = tempsteps - 1; k > 0; k--)
-                                            {
-                                                history[a][k] = history[a][k - 1];
-                                            }
+                                        for (int k = tempsteps - 1; k > 0; k--)
+                                        {
+                                            history[a][k] = history[a][k - 1];
+                                        }
 
-                                            history[a][0] = restclass;
+                                        if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
+                                        {
+                                            history[a][0] = discretelabel;
+                                        }
+                                        else
+                                        {
+                                            history[a][0] = newlists[a][i].Label;
                                         }
                                     }
-
-                                    this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-                                   
-                                    //  file.WriteLine(headline);
-                                   
-                                  
                                 }
-
-                               
-
                             }
+
+                            Action EmptyDelegate = delegate () { };
+                            this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
                             if (writerolecheckbox.IsChecked == true)
                             {
                                 headline += role.ToUpper() + seperator;
                             }
+
                             headline = headline.Remove(headline.Length - 1);
                             headline = headline + System.Environment.NewLine;
+
                             filetoprint = filetoprint + headline;
                             headline = "";
-                            currenttime += chunksize;
-
-
                         }
 
-                        currenttime = 0;
+                        
                     }
-
                     file.Write(filetoprint);
                 }
             }
@@ -456,13 +447,96 @@ namespace ssi
             }
         }
 
+        private AnnoList ConvertDiscreteAnnoListToContinuousList(AnnoList annolist, double chunksize, double end, string restclass = "Rest")
+        {
+            AnnoList result = new AnnoList();
+            result.Scheme = annolist.Scheme;
+            result.Meta = annolist.Meta;
+            double currentpos = 0;
+
+            bool foundlabel = false;
+
+            while (currentpos < end)
+            {
+                foundlabel = false;
+                foreach (AnnoListItem orgitem in annolist)
+                {
+                    if (orgitem.Start * 1000 < currentpos && orgitem.Stop * 1000 > currentpos)
+                    {
+                        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
+                        result.Add(ali);
+                        foundlabel = true;
+                        break;
+                    }
+                }
+
+                if (foundlabel == false)
+                {
+                    AnnoListItem ali = new AnnoListItem(currentpos, chunksize, restclass);
+                    result.Add(ali);
+                }
+
+                currentpos = currentpos + chunksize;
+            }
+
+            return result;
+        }
+
+        private AnnoList ResampleContinuousList(AnnoList annolist, double targetsr)
+        {
+            double sr = annolist.Scheme.SampleRate;
+
+            if (sr == targetsr)
+            {
+                return annolist;
+            }
+
+            AnnoList result = new AnnoList();
+            result.Scheme = annolist.Scheme;
+            result.Meta = annolist.Meta;
+
+            //upsample
+            if (sr < targetsr)
+            {
+                double factor = targetsr / sr;
+                double round = Math.Round(factor);
+
+                if (factor - round == 0)
+                {
+                    for (int i = 0; i < annolist.Count; i++)
+                    {
+                        for (int j = 0; j < round; j++)
+                        {
+                            AnnoListItem ali = new AnnoListItem(annolist[i].Start + j * (1.0 / round), (1.0 / round), annolist[i].Label);
+
+                            result.Add(ali);
+                        }
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            //downsample
+            else if (sr > targetsr)
+            {
+                double factor = sr / targetsr;
+                double round = Math.Round(factor);
+                for (int i = 0; i < annolist.Count; i = i + (int)round)
+                {
+                    result.Add(annolist[i]);
+                }
+            }
+
+            return result;
+        }
+
         private void ExportFrameWiseAnnotations(double chunksize, string[] discretizeclasses, string seperator, string restclass, string filepath, List<AnnoList> annoLists, bool ishead, string sessionname, int tempsteps = 0)
         {
-            bool found = false;
-            string filetoprint = "";
-            double currenttime = 0;
             string headline = "";
-            double maxdur = double.MaxValue;
+            double maxdur = 0;
 
             string[][] history = new string[annoLists.Count][];
 
@@ -480,14 +554,14 @@ namespace ssi
                         headline += annoLists[a].Meta.Role + "_" + annoLists[a].Scheme.Name + "_" + (i) + seperator;
                     }
                 }
-                double localdur = double.MaxValue;
+                double localdur = 0;
 
                 if (annoLists[a].Count > 0)
                 {
                     localdur = annoLists[a][annoLists[a].Count - 1].Stop * 1000;
                 }
 
-                maxdur = Math.Min(maxdur, localdur);
+                maxdur = Math.Max(maxdur, localdur);
             }
 
             try
@@ -498,111 +572,113 @@ namespace ssi
                     {
                         headline = headline.Remove(headline.Length - 1);
 
-                        //  filetoprint += headline + "\n";
                         file.WriteLine(headline);
                     }
                     headline = "";
 
-                    while (currenttime < maxdur)
+                    List<AnnoList> newlists = new List<AnnoList>();
+
+                    double targetsr = 1000.0 / chunksize;
+
+                    foreach (AnnoList al in annoLists)
                     {
-                        for (int a = 0; a < annoLists.Count; a++)
+                        if (al.Scheme.Type == AnnoScheme.TYPE.DISCRETE || al.Scheme.Type == AnnoScheme.TYPE.FREE)
                         {
-                            if (annoLists[a].Count > 0)
+                            AnnoList list = ConvertDiscreteAnnoListToContinuousList(al, chunksize, maxdur, restclass);
+                            newlists.Add(list);
+                        }
+                        else if (al.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                        {
+                            if (al.Scheme.SampleRate != targetsr)
                             {
-                                for (int i = 0; i < annoLists[a].Count; i++)
+                                AnnoList newlist = ResampleContinuousList(al, targetsr);
+                                if (newlist == null)
                                 {
-                                    if ((annoLists[a][i].Start * 1000) - (annoLists[a][i].Duration * 1000) < currenttime && annoLists[a][i].Stop * 1000 > currenttime)
-                                    {
-                                        found = true;
-
-                                        if (annoLists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
-                                        {
-                                            double value;
-                                            double.TryParse(annoLists[a][i].Label, out value);
-
-                                            string discretelabel = discretize(value, annoLists[a].Scheme.MinScore, annoLists[a].Scheme.MaxScore, discretizeclasses);
-                                            headline += discretelabel + seperator;
-
-                                            if (tempsteps > 0)
-                                            {
-                                                for (int k = 0; k < tempsteps; k++)
-                                                {
-                                                    headline += history[a][k] + seperator;
-                                                }
-
-                                                for (int k = tempsteps - 1; k > 0; k--)
-                                                {
-                                                    history[a][k] = history[a][k - 1];
-                                                }
-
-                                                history[a][0] = discretelabel;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            headline += annoLists[a][i].Label + seperator;
-
-                                            if (tempsteps > 0)
-                                            {
-                                                for (int k = 0; k < tempsteps; k++)
-                                                {
-                                                    headline += history[a][k] + seperator;
-                                                }
-
-                                                for (int k = tempsteps - 1; k > 0; k--)
-                                                {
-                                                    history[a][k] = history[a][k - 1];
-                                                }
-
-                                                history[a][0] = annoLists[a][i].Label;
-                                            }
-                                        }
-
-                                        break;
-                                    }
-                                    else found = false;
+                                    MessageBox.Show("Samplerates do not fit!");
+                                    return;
                                 }
+                                newlists.Add(newlist);
                             }
                             else
                             {
-                                found = false;
+                                newlists.Add(al);
                             }
-                            if (!found)
+                        }
+                    }
 
+                    double minSize = double.MaxValue;
+                    foreach (AnnoList a in newlists)
+                    {
+                        if (a.Count < minSize) minSize = a.Count;
+                    }
+
+                    string discretelabel = "";
+
+                    for (int a = 0; a < newlists.Count; a++)
+                    {
+                        for (int i = 0; i < tempsteps; i++)
+                        {
+                            if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                             {
-                                headline += restclass + seperator;
-                                if (tempsteps > 0)
+                                double value;
+                                double.TryParse(newlists[a][i].Label, out value);
+                                discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
+                                history[a][i] = discretelabel;
+                            }
+                            else
+                            {
+                                history[a][i] = newlists[a][i].Label;
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i < minSize; i++)
+                    {
+                        for (int a = 0; a < newlists.Count; a++)
+                        {
+                            if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
+                            {
+                                double value;
+                                double.TryParse(newlists[a][i].Label, out value);
+
+                                discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
+                                headline += discretelabel + seperator;
+                            }
+                            else
+                            {
+                                headline += newlists[a][i].Label + seperator;
+                            }
+
+                            if (tempsteps > 0)
+                            {
+                                for (int k = 0; k < tempsteps; k++)
                                 {
-                                    for (int k = 0; k < tempsteps; k++)
-                                    {
-                                        headline += history[a][k] + seperator;
-                                    }
+                                    headline += history[a][k] + seperator;
+                                }
 
-                                    for (int k = tempsteps - 1; k > 0; k--)
-                                    {
-                                        history[a][k] = history[a][k - 1];
-                                    }
+                                for (int k = tempsteps - 1; k > 0; k--)
+                                {
+                                    history[a][k] = history[a][k - 1];
+                                }
 
-                                    history[a][0] = restclass;
+                                if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
+                                {
+                                    history[a][0] = discretelabel;
+                                }
+                                else
+                                {
+                                    history[a][0] = newlists[a][i].Label;
                                 }
                             }
                         }
 
                         headline = headline.Remove(headline.Length - 1);
-                        //  file.WriteLine(headline);
-                        headline = headline + System.Environment.NewLine;
-                        filetoprint = filetoprint + headline;
+                        file.WriteLine(headline);
                         headline = "";
-                        currenttime += chunksize;
-                        Action EmptyDelegate = delegate () { };
-
-                        //  progressBar.Value = progressBar.Value + chunksize;
-                        this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-
-                        // Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateProgressDelegate(UpdateProgress), chunksize);
                     }
 
-                    file.Write(filetoprint);
+                    Action EmptyDelegate = delegate () { };
+                    this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 }
             }
             catch (Exception ex)
@@ -1068,7 +1144,7 @@ namespace ssi
 
         private void rolecheckbox_Checked(object sender, RoutedEventArgs e)
         {
-            if(writerolecheckbox != null)
+            if (writerolecheckbox != null)
             {
                 writerolecheckbox.IsEnabled = false;
             }
