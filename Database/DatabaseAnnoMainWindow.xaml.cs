@@ -269,8 +269,9 @@ namespace ssi
             DatabaseHandler.GetObjectName(ref schemeName, DatabaseDefinitionCollections.Schemes, annotation["scheme_id"].AsObjectId);
             string annotatorName = "";
             DatabaseHandler.GetObjectName(ref annotatorName, DatabaseDefinitionCollections.Annotators, annotation["annotator_id"].AsObjectId);
-            string annotatorFullName = "";
-            DatabaseHandler.GetObjectField(ref annotatorFullName, DatabaseDefinitionCollections.Annotators, annotation["annotator_id"].AsObjectId, "fullname");
+            string annotatorFullName = DatabaseHandler.GetUserInfo(annotatorName).Fullname;
+
+            //DatabaseHandler.GetObjectField(ref annotatorFullName, DatabaseDefinitionCollections.Annotators, annotation["annotator_id"].AsObjectId, "fullname");
 
             bool isFinished = false;
             try

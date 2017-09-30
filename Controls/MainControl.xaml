@@ -44,7 +44,10 @@
                     <MenuItem Header="Manage Sessions" Name="databaseManageSessionsMenu" />
                     <MenuItem Header="Manage Annotations" Name="databaseManageAnnotationsMenu" />
                 </MenuItem>
+                <MenuItem Header="Manage Account" Name="databasePasswordMenu" />
                 <MenuItem Header="Connect" Name="databaseConnectMenu" />
+
+
             </MenuItem>
             <MenuItem Header="ANNOTATION">
                 <MenuItem Header="Save" Name="annoSaveMenu" InputGestureText="Ctrl+S"/>

@@ -39,6 +39,10 @@ namespace ssi
         private static List<DatabaseAnnotator> annotators = new List<DatabaseAnnotator>();
         public static List<DatabaseAnnotator> Annotators { get { return annotators; } }
 
+
+        private static List<DatabaseUser> users = new List<DatabaseUser>();
+        public static List<DatabaseUser> Users { get { return users; } }
+
         #region CONNECT AND AUTH
 
         public static string ServerInfo
@@ -197,6 +201,7 @@ namespace ssi
             sessions = GetSessions();
             schemes = GetSchemes();
             annotators = GetAnnotators();
+           
         }
 
         static public DatabaseAuthentication CheckAuthentication()
@@ -510,6 +515,8 @@ namespace ssi
                 var documents = collection.Find(_ => true).ToList();
                 foreach (var document in documents)
                 {
+                       
+
                     items.Add(document["user"].ToString());
                 }
                 items.Sort();
@@ -811,6 +818,9 @@ namespace ssi
                         new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } },
                         new BsonDocument { { "role", "readWrite" }, { "db", "admin" } },
                         new BsonDocument { { "role", "userAdminAnyDatabase" }, { "db", "admin" } },
+                        new BsonDocument { { "role", "changeOwnPasswordCustomDataRole" }, { "db", "admin" } },
+
+
                     } } };
             }
             else
@@ -820,6 +830,8 @@ namespace ssi
                     { "pwd", user.Password },
                     { "roles", new BsonArray {
                         new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } },
+                        new BsonDocument { { "role", "changeOwnPasswordCustomDataRole" }, { "db", "admin" } },
+
                     } } };
             }
 
@@ -881,11 +893,6 @@ namespace ssi
                 return false;
             }
 
-            if (!UserExists(user.Name))
-            {
-                return false;
-            }
-
             if (user.Password == null || user.Password == "")
             {
                 return false;
@@ -896,6 +903,70 @@ namespace ssi
             try
             {
                 database.RunCommand<BsonDocument>(changepw);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+
+
+
+        public static DatabaseUser GetUserInfo(string username)
+        {
+            DatabaseUser dbuser = new DatabaseUser();
+            dbuser.Name = username;
+            return GetUserInfo(dbuser);
+       
+
+        }
+
+
+        public static DatabaseUser GetUserInfo(DatabaseUser dbuser)
+        {
+           
+                var adminDB = client.GetDatabase("admin");
+                var cmd = new BsonDocument("usersInfo", dbuser.Name);
+                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
+            try
+            {
+                var Customdata = (BsonDocument)queryResult[0][0]["customData"];
+
+
+                dbuser.Fullname = Customdata["fullname"].ToString();
+                dbuser.Email = Customdata["email"].ToString();
+                dbuser.Expertise = Customdata["expertise"].AsInt32;
+
+            }
+
+
+            catch {
+                dbuser.Fullname = dbuser.Name;
+                dbuser.Email = "";
+                dbuser.Expertise = 0;
+            };
+
+
+
+            return dbuser;
+        }
+
+
+        public static bool ChangeUserCustomData(DatabaseUser user)
+        {
+            if (!IsConnected)
+            {
+                return false;
+            }
+
+            var database = Client.GetDatabase("admin");
+            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise } } } };
+            try
+            {
+                database.RunCommand<BsonDocument>(updatecustomdata);
             }
             catch
             {
@@ -1031,10 +1102,10 @@ namespace ssi
             }
 
             BsonDocument document = new BsonDocument {
-                        {"name",  annotator.Name},
-                        {"fullname", annotator.FullName == null || annotator.FullName == "" ? annotator.Name : annotator.FullName },
-                        {"email", annotator.Email == null ? "" : annotator.Email },
-                        {"expertise", annotator.Expertise },
+                        {"name",  annotator.Name}
+                        //{"fullname", annotator.FullName == null || annotator.FullName == "" ? annotator.Name : annotator.FullName },
+                        //{"email", annotator.Email == null ? "" : annotator.Email },
+                        //{"expertise", annotator.Expertise },
                     };
 
             var builder = Builders<BsonDocument>.Filter;
@@ -1049,7 +1120,6 @@ namespace ssi
             RevokeUserRole(annotator.Name, "dbAdmin", databaseName);
             RevokeUserRole(annotator.Name, "readWrite", "admin");
             RevokeUserRole(annotator.Name, "userAdminAnyDatabase", "admin");
-
             if (annotator.Role == "read")
             {
                 GrantUserRole(annotator.Name, "read", databaseName);
@@ -1070,6 +1140,7 @@ namespace ssi
 
             return true;
         }
+
 
 
         private static List<DatabaseAnnotator> GetAnnotators(bool onlyValid = true)
@@ -1127,33 +1198,51 @@ namespace ssi
                     var document = documents[0];
                     BsonElement value;
                     annotator.Id = document["_id"].AsObjectId;
-                    if (document.TryGetElement("fullname", out value))
-                    {
-                        annotator.FullName = document["fullname"].ToString();
-                    }
-                    else
-                    {
-                        annotator.FullName = annotator.Name;
-                    }
-                    if (document.TryGetElement("email", out value))
-                    {
-                        annotator.Email = document["email"].ToString();
-                    }
-                    else
-                    {
-                        annotator.Email = "";
-                    }
-                    annotator.Expertise = 2;
-                    if (document.TryGetElement("expertise", out value))
-                    {
-                        int expertise;
-                        if (int.TryParse(document["expertise"].ToString(), out expertise))
-                        {
-                            annotator.Expertise = expertise;
-                        }
-                    }
                 }
             }
+
+            DatabaseUser user =  DatabaseHandler.GetUserInfo(annotator.Name);
+            annotator.FullName = user.Fullname;
+            annotator.Expertise = user.Expertise;
+            annotator.Email = user.Email;
+
+
+            //{
+            //    var builder = Builders<BsonDocument>.Filter;
+            //    var filter = builder.Eq("name", annotator.Name);
+            //    var documents = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filter).ToList();
+            //    if (documents.Count > 0)
+            //    {
+            //        var document = documents[0];
+            //        BsonElement value;
+            //        annotator.Id = document["_id"].AsObjectId;
+            //        if (document.TryGetElement("fullname", out value))
+            //        {
+            //            annotator.FullName = document["fullname"].ToString();
+            //        }
+            //        else
+            //        {
+            //            annotator.FullName = annotator.Name;
+            //        }
+            //        if (document.TryGetElement("email", out value))
+            //        {
+            //            annotator.Email = document["email"].ToString();
+            //        }
+            //        else
+            //        {
+            //            annotator.Email = "";
+            //        }
+            //        annotator.Expertise = 2;
+            //        if (document.TryGetElement("expertise", out value))
+            //        {
+            //            int expertise;
+            //            if (int.TryParse(document["expertise"].ToString(), out expertise))
+            //            {
+            //                annotator.Expertise = expertise;
+            //            }
+            //        }
+            //    }
+           // }
 
             return true;
         }
@@ -1958,14 +2047,6 @@ namespace ssi
                 schemeType = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), type);
             }
 
-            // handle super users or if annotation is owned by another user
-
-            //if (!(dbuser == "system" ||
-            //    annoList.Meta.Annotator == "RootMeanSquare" ||
-            //    annoList.Meta.Annotator == "Mean" ||
-            //    annoList.Meta.Annotator == "Merge")
-            //    && annoList.Meta.Annotator != dbuser)
-
 
             if(!keepOriginalAnnotator)
 
@@ -1980,7 +2061,7 @@ namespace ssi
                     }
                 }
                 annoList.Meta.Annotator = dbuser;
-                annoList.Meta.AnnotatorFullName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", userID);
+                annoList.Meta.AnnotatorFullName = GetUserInfo(dbuser).Fullname; //   FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", userID);
                 annoList.Source.Database.DataOID = new ObjectId();
             }
 
@@ -1991,7 +2072,7 @@ namespace ssi
             {
                 BsonDocument annotatorDoc = new BsonDocument();
                 annotatorDoc.Add(new BsonElement("name", annoList.Meta.Annotator));
-                annotatorDoc.Add(new BsonElement("fullname", annoList.Meta.AnnotatorFullName == "" ? annoList.Meta.Annotator : annoList.Meta.AnnotatorFullName));
+                //annotatorDoc.Add(new BsonElement("fullname", annoList.Meta.AnnotatorFullName == "" ? annoList.Meta.Annotator : annoList.Meta.AnnotatorFullName));
                 var filter = builder.Eq("name", annoList.Meta.Annotator);
                 UpdateOptions update = new UpdateOptions();
                 update.IsUpsert = true;
@@ -2121,7 +2202,9 @@ namespace ssi
 
             ObjectId annotatorID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", annotator);
             string annotatorName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "name", annotatorID);
-            string annotatorFullName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatorID);
+            DatabaseHandler.GetUserInfo(annotator);
+            //string annotatorFullName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatorID);
+            string annotatorFullName = DatabaseHandler.GetUserInfo(annotator).Fullname;
 
             ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, "name", session);
             string sessionName = FetchDBRef(DatabaseDefinitionCollections.Sessions, "name", sessionID);
@@ -2602,6 +2685,13 @@ namespace ssi
     {
         public string Name { get; set; }
         public string Password { get; set; }
+
+        public string Fullname { get; set; }
+
+        public string Email { get; set; }
+
+        public int Expertise { get; set; }
+
         public override string ToString()
         {
             return Name;

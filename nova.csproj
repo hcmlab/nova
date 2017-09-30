@@ -172,6 +172,9 @@
     <Compile Include="Database\DatabaseAdminManageUsersWindow.xaml.cs">
       <DependentUpon>DatabaseAdminManageUsersWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseUserManageWindow.xaml.cs">
+      <DependentUpon>DatabaseUserManageWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseAdminUserWindow.xaml.cs">
       <DependentUpon>DatabaseAdminUserWindow.xaml</DependentUpon>
     </Compile>
@@ -389,6 +392,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Database\DatabaseAdminManageUsersWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Database\DatabaseUserManageWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

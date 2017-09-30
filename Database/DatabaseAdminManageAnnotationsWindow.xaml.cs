@@ -132,5 +132,34 @@ namespace ssi
             DatabaseAnnotation anno = (DatabaseAnnotation)((CheckBox)sender).DataContext;
             ChangeLockedState(anno.Id, true);
         }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
+        }
+
+        private bool UserFilter(object item)
+        {
+            if (String.IsNullOrEmpty(searchTextBox.Text))
+                return true;
+            else
+                return (((item as DatabaseAnnotation).Scheme.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                    || (item as DatabaseAnnotation).AnnotatorFullName.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0
+                    || (item as DatabaseAnnotation).Annotator.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0
+                    || (item as DatabaseAnnotation).Role.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (AnnotationsBox.ItemsSource != null)
+            {
+                System.Windows.Data.CollectionView view = (System.Windows.Data.CollectionView)System.Windows.Data.CollectionViewSource.GetDefaultView(AnnotationsBox.ItemsSource);
+                view.Filter = UserFilter;
+                System.Windows.Data.CollectionViewSource.GetDefaultView(AnnotationsBox.ItemsSource).Refresh();
+            }
+        }
     }
 }

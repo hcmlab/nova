@@ -74,9 +74,15 @@ namespace ssi
         {
             if (UsersBox.SelectedItem != null)
             {
-                string name = (string)UsersBox.SelectedItem;
+                DatabaseUser blankuser = new DatabaseUser()
+                {
+                    Name = (string)UsersBox.SelectedItem
+                };
 
-                DatabaseAdminUserWindow dialog = new DatabaseAdminUserWindow(name);
+                blankuser = DatabaseHandler.GetUserInfo(blankuser);
+
+
+                DatabaseAdminUserWindow dialog = new DatabaseAdminUserWindow(blankuser.Name,blankuser.Fullname,blankuser.Email,blankuser.Expertise);
                 dialog.ShowDialog();
 
                 if (dialog.DialogResult == true)
@@ -84,13 +90,24 @@ namespace ssi
                     DatabaseUser user = new DatabaseUser()
                     {
                         Name = dialog.GetName(),
+                        Fullname = dialog.GetFullName(),
+                        Email = dialog.Getemail(),
+                        Expertise = dialog.GetExpertise(),
                         Password = dialog.GetPassword()
                     };
 
-                    if (DatabaseHandler.ChangeUserPassword(user))
+                    DatabaseHandler.ChangeUserCustomData(user);
+
+                    if(user.Password != "")
                     {
-                        GetUsers();
+                        if (DatabaseHandler.ChangeUserPassword(user))
+                        {
+                           
+                        }
                     }
+
+                    GetUsers();
+
                 }
             }
         }
