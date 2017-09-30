@@ -1,0 +1,60 @@
+﻿<Window x:Class="ssi.DatabaseUserManageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        mc:Ignorable="d"
+        Title="Manage User Info" SizeToContent="Height" Width="300" ResizeMode="NoResize">
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="Login:" Grid.Row="0" Grid.Column="0" Margin="5"></Label>
+        <TextBox Name="NameField" Grid.Row="0" Grid.Column="1" Margin="5" IsEnabled="True"></TextBox>
+
+        <Label Content="Full Name:" Grid.Row="1" Grid.Column="0" Margin="5"></Label>
+        <TextBox Name="FullNameField" Grid.Row="1" Grid.Column="1" Margin="5" IsEnabled="True"></TextBox>
+
+
+        <Label Content="Email:" Grid.Row="2" Grid.Column="0" Margin="5"></Label>
+        <TextBox Name="Emailfield" Grid.Row="2" Grid.Column="1" Margin="5" IsEnabled="True"></TextBox>
+        
+        <Label Content="Expertise:" Grid.Row="3" Grid.Column="0" Margin="5"></Label>
+        <ComboBox Name="Expertisefield" Grid.Row="3" Grid.Column="1" Margin="5" IsEnabled="True">
+            <ComboBoxItem>0</ComboBoxItem>
+            <ComboBoxItem>1</ComboBoxItem>
+            <ComboBoxItem>2</ComboBoxItem>
+            <ComboBoxItem>3</ComboBoxItem>
+            <ComboBoxItem>4</ComboBoxItem>
+            <ComboBoxItem>5</ComboBoxItem>
+        </ComboBox>
+
+        <Label Content="Current Password:" Grid.Row="4" Grid.Column="0" Margin="5"></Label>
+        <PasswordBox Name="CurrentPasswordField" Grid.Row="4" Grid.Column="1" Password="" Margin="5"></PasswordBox>
+
+        <Label Content="New Password:" Grid.Row="5" Grid.Column="0" Margin="5"></Label>
+        <PasswordBox Name="PasswordField" Grid.Row="5" Grid.Column="1" Password="" Margin="5"></PasswordBox>
+
+      
+
+        <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+            <Button Content="OK" Click="OkClick" Margin="5"></Button>
+            <Button Content="Cancel" Click="CancelClick" Margin="5"></Button>
+        </StackPanel>
+
+    </Grid>
+</Window>

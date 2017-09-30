@@ -66,7 +66,54 @@ namespace ssi
             databaseConnect();
         }
 
-       
+
+        private void DatabasePassMenu_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseUser blankuser = new DatabaseUser()
+            {
+                Name = Properties.Settings.Default.MongoDBUser
+            };
+
+            blankuser = DatabaseHandler.GetUserInfo(blankuser);
+
+
+
+
+            DatabaseUserManageWindow dialog = new DatabaseUserManageWindow(blankuser.Name, blankuser.Fullname, blankuser.Email, blankuser.Expertise);
+            dialog.ShowDialog();
+
+            if (dialog.DialogResult == true)
+            {
+                DatabaseUser user = new DatabaseUser()
+                {
+                    Name = dialog.GetName(),
+                    Fullname = dialog.GetFullName(),
+                    Password = dialog.GetPassword(),
+                    Email = dialog.Getemail(),
+                    Expertise = dialog.GetExpertise()
+                };
+
+
+                DatabaseHandler.ChangeUserCustomData(user);
+                   
+
+                if (user.Password != "" && user.Password != null)
+                {
+                    if (DatabaseHandler.ChangeUserPassword(user))
+                    {
+                        MessageBox.Show("Password Change successful!");
+                        Properties.Settings.Default.MongoDBPass = MainHandler.Encode(user.Password);
+                        databaseConnect();
+                    }
+                }
+
+               
+            }
+           
+        }
+        
+
+
 
         private void databaseManageDBs()
         {           
@@ -278,7 +325,9 @@ namespace ssi
 
                 ObjectId annotatid = DatabaseHandler.GetObjectID(DatabaseDefinitionCollections.Annotators, "name", Properties.Settings.Default.MongoDBUser);
                 string annotator = Properties.Settings.Default.MongoDBUser;
-                string annotatorFullName = DatabaseHandler.FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
+               
+
+               // DatabaseHandler.FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
 
                 AnnoList annoList;
                 if (DatabaseHandler.AnnotationExists(annotator, DatabaseHandler.SessionName, role, scheme.Name))
@@ -298,6 +347,7 @@ namespace ssi
                     annoList = new AnnoList();
                     annoList.Meta.Role = role;
                     annoList.Meta.Annotator = annotator;
+                    string annotatorFullName = DatabaseHandler.GetUserInfo(annotator).Fullname;
                     annoList.Meta.AnnotatorFullName = annotatorFullName;
                     annoList.Scheme = scheme;
                     annoList.Source.StoreToDatabase = true;

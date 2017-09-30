@@ -26,29 +26,14 @@
         <Label Content="User:" Grid.Row="0" Grid.Column="0" Margin="5"></Label>
         <ComboBox Name="NameBox" Grid.Row="0" Grid.Column="1" Margin="5"></ComboBox>
 
-        <Label Content="Full name:" Grid.Row="1" Grid.Column="0" Margin="5"></Label>
-        <TextBox Name="FullNameField" Grid.Row="1" Grid.Column="1" Margin="5"></TextBox>
-
-        <Label Content="Email:" Grid.Row="2" Grid.Column="0" Margin="5"></Label>
-        <TextBox Name="EmailField" Grid.Row="2" Grid.Column="1" Margin="5"></TextBox>
-
-        <Label Content="Expertise:" Grid.Row="3" Grid.Column="0" Margin="5"></Label>
-        <ComboBox Name="ExpertiseBox" Grid.Row="3" Grid.Column="1" Margin="5" SelectedIndex="2"> 
-            <ComboBoxItem>0</ComboBoxItem>
-            <ComboBoxItem>1</ComboBoxItem>
-            <ComboBoxItem>2</ComboBoxItem>
-            <ComboBoxItem>3</ComboBoxItem>
-            <ComboBoxItem>4</ComboBoxItem>
-        </ComboBox>
-
-        <Label Content="Role:" Grid.Row="4" Grid.Column="0" Margin="5"></Label>
-        <ComboBox Name="RoleBox" Grid.Row="4" Grid.Column="1" SelectedIndex="1" Margin="5">
+        <Label Content="Role:" Grid.Row="2" Grid.Column="0" Margin="5"></Label>
+        <ComboBox Name="RoleBox" Grid.Row="2" Grid.Column="1" SelectedIndex="1" Margin="5">
             <ComboBoxItem>read</ComboBoxItem>
             <ComboBoxItem>readWrite</ComboBoxItem>
             <ComboBoxItem>dbAdmin</ComboBoxItem>
         </ComboBox>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
             <Button Content="OK" Click="OkClick" Margin="5"></Button>
             <Button Content="Cancel" Click="CancelClick" Margin="5"></Button>
         </StackPanel>

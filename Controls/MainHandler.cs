@@ -230,6 +230,9 @@ namespace ssi
             // Database
 
             control.databaseConnectMenu.Click += DatabaseConnectMenu_Click;
+            control.databasePasswordMenu.Click += DatabasePassMenu_Click;
+
+
             if (Properties.Settings.Default.DatabaseAutoLogin)
             {
                 databaseConnect();
@@ -267,6 +270,7 @@ namespace ssi
             initCursor();
 
             // Update
+            bool alreadycheckedcmlupdate = false;
 
             if (Properties.Settings.Default.CheckUpdateOnStart && Properties.Settings.Default.LastUpdateCheckDate.Date != DateTime.Today.Date)
             {
@@ -274,6 +278,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
                 checkForUpdates(true);
                 checkForCMLUpdates(true);
+                alreadycheckedcmlupdate = true;
             }
 
 
@@ -291,7 +296,7 @@ namespace ssi
             string cmltrainexe = "cmltrain.exe";
             string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + cmltrainexe;
 
-            if (!(File.Exists(cmltrainexePath)))
+            if (!(File.Exists(cmltrainexePath) && !alreadycheckedcmlupdate))
             {
 
                 checkForCMLUpdates();

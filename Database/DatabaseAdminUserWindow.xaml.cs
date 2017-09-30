@@ -23,14 +23,17 @@ namespace ssi
 
     public partial class DatabaseAdminUserWindow : Window
     {
-        public DatabaseAdminUserWindow(string name = null)
+        public DatabaseAdminUserWindow(string name = null, string fullname = null, string email = null, int expertise = 0)
         {
             InitializeComponent();
            
             if (name != null)
-            {                
-                NameField.IsEnabled = false;
+            {
                 NameField.Text = name;
+                NameField.IsEnabled = false;
+                FullNameField.Text = fullname;
+                Emailfield.Text = email;
+                Expertisefield.SelectedIndex = expertise;
                 UserAdminCheckBox.Visibility = Visibility.Hidden;           
             }               
         }
@@ -43,7 +46,24 @@ namespace ssi
         public string GetPassword()
         {
             return PasswordField.Password;
-        }        
+        }
+
+
+        public string GetFullName()
+        {
+            return FullNameField.Text;
+        }
+
+        public string Getemail()
+        {
+            return Emailfield.Text;
+        }
+
+
+        public int GetExpertise()
+        {
+            return Expertisefield.SelectedIndex;
+        }
 
         public bool GetIsUserAdmin()
         {

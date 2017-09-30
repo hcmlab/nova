@@ -38,6 +38,7 @@ namespace ssi
             // database
                          
             control.databaseLoadSessionMenu.IsEnabled = isConnected;
+            control.databasePasswordMenu.IsEnabled = isConnected;
 
             control.databaseCMLMenu.IsEnabled = isConnected;
             control.databaseCMLCompleteStepMenu.IsEnabled = isConnectedAndHasSession;

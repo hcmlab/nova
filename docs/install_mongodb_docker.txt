@@ -1,0 +1,50 @@
+Hint: Default user: "admin" and default password "nova" may/should be replaced.
+
+
+1. Install Docker, then use cmd and install mongodb image:
+
+docker pull mongo:latest  
+docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mongo:latest --auth
+
+2. Create an Admin: 
+
+docker exec -it nova mongo admin
+
+	use admin
+	db.createUser({ user: 'admin', pwd: 'nova', roles: [ { role: "root", db: "admin" } ] }); 
+   
+3. Add Custom Role, so users are allowed to change their own passwords:
+
+docker exec -it nova mongo -u admin -p nova --authenticationDatabase admin 
+
+	use admin
+	db.createRole(
+	   { role: "changeOwnPasswordCustomDataRole",
+		 privileges: [
+			{
+			  resource: { db: "", collection: ""},
+			  actions: [ "changeOwnPassword", "changeOwnCustomData", "viewUser" ]
+			}
+		 ],
+		 roles: []
+	   }
+	)
+4. Add Additional Default users: (gold standard and system):
+	
+	
+	db.createUser({ user: 'gold', pwd: 'nova', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ] }); 	
+	db.createUser({ user: 'system', pwd: 'nova', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ] }); 	
+	
+exit
+	
+5. Test if your server is working:  (optional)
+	
+docker exec -it nova mongo admin  -u admin -p nova --authenticationDatabase admin
+show dbs
+
+
+
+6. Add a webinterface (optional)
+
+pull mongo-express
+docker run -it --rm  --name mongo-express --link nova:mongo -p 8081:8081 -e ME_CONFIG_OPTIONS_EDITORTHEME="ambiance"  -e ME_CONFIG_MONGODB_ADMINUSERNAME="admin" -e ME_CONFIG_MONGODB_ADMINPASSWORD ="nova"  mongo-express

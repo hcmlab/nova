@@ -36,9 +36,7 @@ namespace ssi
                 NameBox.Items.Add(annotator.Name);
                 NameBox.SelectedIndex = 0;
                 NameBox.IsEnabled = false;
-                FullNameField.Text = annotator.FullName;
-                EmailField.Text = annotator.Email;
-                ExpertiseBox.SelectedIndex = annotator.Expertise;
+               
                 foreach (var item in RoleBox.Items)
                 {
                     if (item.ToString().Contains(annotator.Role))
@@ -58,10 +56,8 @@ namespace ssi
             DialogResult = true;
 
             annotator.Name = (string)NameBox.SelectedItem;
-            annotator.FullName = FullNameField.Text;
-            annotator.Email = EmailField.Text;
             annotator.Role = RoleBox.SelectionBoxItem.ToString();
-            annotator.Expertise = ExpertiseBox.SelectedIndex;
+           
 
             Close();
         }
