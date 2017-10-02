@@ -299,7 +299,7 @@ namespace ssi
             if (!(File.Exists(cmltrainexePath) && !alreadycheckedcmlupdate))
             {
 
-                checkForCMLUpdates();
+                checkForCMLUpdates(true);
 
             }
 

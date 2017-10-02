@@ -44,8 +44,7 @@ namespace ssi
             {
                 Properties.Settings.Default.LastSessionId = ((DatabaseSession)(SessionsResultsBox.SelectedValue)).Name;
                 Properties.Settings.Default.Save();
-
-                GetAnnotationSchemes();
+                GetAnnotations();
             }
         }
 
@@ -463,7 +462,8 @@ namespace ssi
             AnnoList result = new AnnoList();
             result.Scheme = annolist.Scheme;
             result.Meta = annolist.Meta;
-            result.Source = annolist.Source;
+            result.Source.StoreToDatabase = true;
+            result.Source.Database.Session = annolist.Source.Database.Session;
             double currentpos = 0;
 
             bool foundlabel = false;
@@ -969,7 +969,7 @@ namespace ssi
             {
 
                 double cohenkappa = 0;
-                double fleisskappa = 0;
+                double kappa = 0;
                 string interpretation = "";
            
                 CancellationToken token = new CancellationToken();
@@ -981,25 +981,29 @@ namespace ssi
                         string restclass = "Rest";
                      
                         List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
-                       // cohenkappa = CohensKappa(convertedlists, restclass);
-                        fleisskappa = FleissKappa(convertedlists, restclass);
+                        cohenkappa = CohensKappa(convertedlists, restclass);
+                       // fleisskappa = FleissKappa(convertedlists, restclass);
                     }
-                    //Landis and Koch (1977)
                    
-                        if (fleisskappa <= 0) interpretation = "Poor agreement";
-                        else if (fleisskappa >= 0.01 && fleisskappa < 0.21) interpretation = "Slight agreement";
-                        else if (fleisskappa >= 0.21 && fleisskappa < 0.41) interpretation = "Fair agreement";
-                        else if (fleisskappa >= 0.41 && fleisskappa < 0.61) interpretation = "Moderate agreement";
-                        else if (fleisskappa >= 0.61 && fleisskappa < 0.81) interpretation = "Substantial agreement";
-                        else if (fleisskappa >= 0.81 && fleisskappa < 1.00) interpretation = "Almost perfect agreement";
-                        else if (fleisskappa >= 1.0) interpretation = "Perfect agreement";
+
+                    kappa = cohenkappa;
+
+
+                        //Landis and Koch (1977)
+                        if (kappa <= 0) interpretation = "Poor agreement";
+                        else if (kappa >= 0.01 && kappa < 0.21) interpretation = "Slight agreement";
+                        else if (kappa >= 0.21 && kappa < 0.41) interpretation = "Fair agreement";
+                        else if (kappa >= 0.41 && kappa < 0.61) interpretation = "Moderate agreement";
+                        else if (kappa >= 0.61 && kappa < 0.81) interpretation = "Substantial agreement";
+                        else if (kappa >= 0.81 && kappa < 1.00) interpretation = "Almost perfect agreement";
+                        else if (kappa >= 1.0) interpretation = "Perfect agreement";
   
 
                 }, token);
 
                 Action EmptyDelegate = delegate () { };
                
-                Stats.Content = "Fleiss' κ : " + fleisskappa.ToString("F3") + ": " + interpretation;
+                Stats.Content = "Cohen's κ : " + kappa.ToString("F3") + ": " + interpretation;
                 this.UpdateLayout();
                 this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
             }
@@ -1144,9 +1148,11 @@ namespace ssi
                 string name = DatabasesBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(name);
             }
+            GetAnnotationSchemes();
             GetAnnotators();
             GetSessions();
             GetRoles();
+            GetAnnotations();
         }
 
         public void GetAnnotators()
