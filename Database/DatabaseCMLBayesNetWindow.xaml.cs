@@ -251,11 +251,10 @@ namespace ssi
 
         private void ExportFrameWiseAnnotationsRolesSeperated(double chunksize, string[] discretizeclasses, string seperator, string restclass, string filepath, List<AnnoList> annoLists, bool ishead, string sessionname, int tempsteps = 0)
         {
-            bool found = false;
+     
             string filetoprint = "";
-            double currenttime = 0;
             string headline = "";
-            double maxdur = double.MaxValue;
+            double maxdur = 0;
 
             string[][] history = new string[annoLists.Count][];
 
@@ -430,15 +429,13 @@ namespace ssi
                             }
 
                             headline = headline.Remove(headline.Length - 1);
-                            headline = headline + System.Environment.NewLine;
-
-                            filetoprint = filetoprint + headline;
+                            file.WriteLine(headline);
                             headline = "";
                         }
 
-                        
+                       
                     }
-                    file.Write(filetoprint);
+                    
                 }
             }
             catch (Exception ex)
