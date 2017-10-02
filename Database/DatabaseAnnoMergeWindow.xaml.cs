@@ -228,7 +228,7 @@ namespace ssi
             {
                 List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
                 CalculateCronbachWrapper(annolists);
-                CalculateRMSEWrapper(annolists);
+               // CalculateRMSEWrapper(annolists);
             }
             else {
 
