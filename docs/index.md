@@ -272,10 +272,10 @@ db.createUser({ user: 'system', pwd: 'PASSWORD2', roles: [ { role: "readWriteAny
 ~~~~			
 
 and test the server:		
-~~~~		
 
+~~~~			
 show dbs
-~~~~		
+~~~~			
 
 ### Connect
 
