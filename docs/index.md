@@ -15,7 +15,7 @@ The **N(On) Verbal Annotator ** (NOVA) offers a graphical interface for machine-
 
 The latest version of NOVA can be accessed at:
 
-https://github.com/hcmlab/nova
+<https://github.com/hcmlab/nova>
 
 Just download or check-out the release branch and start 'nova.exe' (yes, NOVA is available for Windows systems only).
 
@@ -186,9 +186,117 @@ An annotation can be saved to a file on disk. Actually, it is stored in two sepa
 
 # Database
 
-NOVA allows users to manage and share annotations through a database. To connect to a database open the SETTINGS and select the 'Database' panel. Here you can enter the host IP, port number and user credentials. It also allows you to change the folder to which NOVA downloads media and stream files that are used during the annotation process, as well as, the directory where the cooperative learning definitions and models are stored.
+NOVA allows users to manage and share annotations through a database, which requires to set-up a MongoDB server. 
 
-## File Structure
+## Setup MongoDB
+
+We will describe two strategies: a) set up MongoDB with Docker *or* b) set up MongoDB natively.
+
+Hint: Default user: "admin" and default password "PASSWORD" may/should be replaced.
+
+### Install
+
+Install Docker (<https://www.docker.com/>) and run:
+
+~~~~
+docker pull mongo:latest  
+docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mongo:latest --auth
+~~~~
+
+*or*
+
+Install MongoDB (<https://www.mongodb.com/download-center#community>) and run:
+
+~~~~
+mongod --auth
+~~~~
+
+MongoDB now run on 127.0.0.1:27017.
+
+### Configure
+
+We connect to MongoDB:
+
+~~~~
+docker exec -it nova mongo admin
+~~~~
+
+*or*
+
+~~~~
+mongo admin
+~~~~
+
+and add an administrator:
+
+~~~~
+use admin
+db.createUser({ user: 'admin', pwd: 'PASSWORD', roles: [ { role: "root", db: "admin" } ] }); 
+~~~~
+   
+Now ee reconnect:
+
+~~~~
+docker exec -it nova mongo -u admin -p PASSWORD --authenticationDatabase admin 
+~~~~
+
+*or*
+
+~~~~
+mongo -u admin -p PASSWORD --authenticationDatabase admin 
+~~~~
+
+and add a custom role (this will allow users to change their passwords and meta information):
+
+~~~~	
+use admin
+db.createRole(
+   { role: "changeOwnPasswordCustomDataRole",
+	 privileges: [
+		{
+		  resource: { db: "", collection: ""},
+		  actions: [ "changeOwnPassword", "changeOwnCustomData", "viewUser" ]
+		}
+	 ],
+	 roles: []
+   }
+)
+~~~~	
+	
+Finally, we add two default users:
+	
+~~~~		
+db.createUser({ user: 'gold', pwd: 'PASSWORD1', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ] }); 	
+db.createUser({ user: 'system', pwd: 'PASSWORD2', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ] }); 	
+~~~~		
+	
+and test the server:	
+	
+~~~~		
+show dbs
+~~~~		
+
+### Connect
+
+To connect to a MongoDB server, open the settings by clicking the wheel in the menu and switch to the Database tab. Enter the host and port number of the MongoDB server and the user credentials. The dialog allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.
+
+![*Connect database in NOVA.*](pics/database-connect.png){#fig:database-connect}
+
+## Administration
+
+Users with administrative rights can use the 'Administration' sub-menu of the DATABASE menu to create and maintain databases. 
+
+### Manage Users
+
+'Manager Users' allows it to add or edit users.
+
+![*Manage users in NOVA.*](pics/database-manage-users.png){#fig:database-manage-users}
+
+### Manage Databases
+
+'Manager Databases' allows it to add or edit databases.
+
+### Manage Sessions
 
 To manage a database with NOVA, you have to follow a certain file structure. Each database is located in a root folder with the name of the database and may consist of one more sessions. All stream files belonging to a session are grouped in sub-folder within the root folder. The name of the folder defines the name of the session. In a session we distinguish between several users, which take a certain role. E.g. thinking of a dyadic conversation, one user could be the expert sharing the knowledge about a certain topic to a novice user. Hence we have two roles: 'expert' and 'novice'. Each file has a unique name defined by the role and the type of recorded channel. E.g. if we have recorded the interaction using close talk microphones and two webcams, we may use the following file structure:
 
@@ -207,9 +315,7 @@ aria-noxi/
 	...
 ~~~~
 
-## Administration
-
-TODO: explain how to setup a database
+### Manage Annotations
 
 ## Loading a Session
 

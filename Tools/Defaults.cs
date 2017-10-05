@@ -45,7 +45,7 @@ namespace ssi
             public static string ModelsTemplatesFolderName = "templates";
             public static string TrainerFileExtension = "trainer";
             public static string SchemeFolderName = "schemes";
-            public static string GoldStandardFullName = "Gold Standard";
+            public static string GoldStandardFullName = "GOLD STANDARD";
             public static string StreamTypeNameFeature = "feature";
             public static string FusionFolderName = "fusion";
             public static string FusionBayesianNetworkFolderName = "bayesnet";

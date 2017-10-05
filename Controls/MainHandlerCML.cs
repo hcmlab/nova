@@ -31,6 +31,12 @@ namespace ssi
             showDialogClearWorkspace(dialog);
         }
 
+        private void databaseCMLEvaluate_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.EVALUATE);
+            showDialogClearWorkspace(dialog);
+        }
+
         private void databaseCMLPredict_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.PREDICT);
@@ -44,16 +50,7 @@ namespace ssi
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.ShowDialog();
         }
-
-
-        //private void databaseCMLFusionStep()
-        //{
-        //    saveSelectedAnno(true);
-        //    DatabaseCMLFusionPredictWindow dialog = new DatabaseCMLFusionPredictWindow(this, DatabaseCMLFusionPredictWindow.Mode.PREDICT);
-        //    dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        //    dialog.ShowDialog();
-        //}
-
+        
         private void databaseCMLFusionStep()
         {
             saveSelectedAnno(true);
@@ -190,6 +187,53 @@ namespace ssi
                 startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\cmltrain.exe";
                 startInfo.Arguments = "--train " + options + " " + arguments;
                 result += "\n-------------------------------------------\r\n" + startInfo.FileName + " --train " + options_no_pass + " " + arguments + "\n-------------------------------------------\r\n";
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
+                result += File.ReadAllText(logPath);
+            }
+            catch (Exception ex)
+            {
+                MessageTools.Error(ex.ToString());
+            }
+
+            return result;
+        }
+
+        public string CMLEvaluateModel(string evalPath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream)
+        {
+            string result = "";
+
+            string[] split = server.Split(':');
+            string ip = split[0];
+            string port = split[1];
+            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-eval.log";
+
+            File.Delete(logPath);
+
+            try
+            {
+                string options_no_pass = " -username " + username +
+                        " -list " + sessions +
+                        " -log " + logPath;
+                string options = options_no_pass + " -password " + password;
+                string arguments = "\"" + datapath + "\\" + database + "\" " +
+                        ip + " " +
+                        port + " " +
+                        database + " " +
+                        roles + " " +
+                        scheme + " " +
+                        annotator + " " +
+                        "\"" + stream + "\" " +
+                        "\"" + trainerPath + "\" " +
+                        "\"" + evalPath + "\"";
+
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\cmltrain.exe";
+                startInfo.Arguments = "--eval " + options + " " + arguments;
+                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " --eval " + options_no_pass + " " + arguments + "\n-------------------------------------------\r\n";
                 process.StartInfo = startInfo;
                 process.Start();
                 process.WaitForExit();

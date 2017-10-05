@@ -90,7 +90,7 @@
                 </ListView>
             </DockPanel>
 
-            <DockPanel Grid.Column="2" Grid.Row="0"  Margin="10">
+            <DockPanel Grid.Column="2" Grid.Row="0" Margin="10">
                 <DockPanel HorizontalAlignment="Stretch" DockPanel.Dock="Top" >
                     <Label Content="Annotations" />
                     <StackPanel Grid.Row="0" Margin="0,5,0,0" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">

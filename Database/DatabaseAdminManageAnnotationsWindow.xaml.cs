@@ -143,13 +143,14 @@ namespace ssi
 
         private bool UserFilter(object item)
         {
-            if (String.IsNullOrEmpty(searchTextBox.Text))
+            if (string.IsNullOrEmpty(searchTextBox.Text))
                 return true;
             else
                 return (((item as DatabaseAnnotation).Scheme.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                     || (item as DatabaseAnnotation).AnnotatorFullName.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0
                     || (item as DatabaseAnnotation).Annotator.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0
-                    || (item as DatabaseAnnotation).Role.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+                    || (item as DatabaseAnnotation).Role.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0
+                    || (item as DatabaseAnnotation).Session.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)

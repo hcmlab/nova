@@ -188,6 +188,7 @@ namespace ssi
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
             control.databaseCMLMergeFeaturesMenu.Click += databaseCMLMergeFeatures_Click;
             control.databaseCMLTrainMenu.Click += databaseCMLTrain_Click;
+            control.databaseCMLEvaluateMenu.Click += databaseCMLEvaluate_Click;
             control.databaseCMLPredictMenu.Click += databaseCMLPredict_Click;
             control.databaseManageUsersMenu.Click += databaseManageUsers_Click;
             control.databaseManageDBsMenu.Click += databaseManageDBs_Click;
