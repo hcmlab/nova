@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Confusion Matrix" Height="450" Width="400">
+        Title="Confusion Matrix" Height="400" Width="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -24,11 +24,14 @@
 
         <Grid Name="cmGrid" Grid.Row="1"/>
 
-        <StackPanel Orientation="Horizontal" Margin="5" Grid.Row="2" HorizontalAlignment="Right">
-            <Button Content="Copy" Click="CopyClick" Margin="5"></Button>
-            <Button Content="Save" Click="SaveClick" Margin="5"></Button>
-            <Button Content="Close" Click="CloseClick" Margin="5"></Button>
-        </StackPanel>
-        
+        <DockPanel Margin="5" Grid.Row="2" LastChildFill="False">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Left">
+                <CheckBox DockPanel.Dock="Left" VerticalContentAlignment="Center" Margin="5" Checked="MetaChecked" Unchecked="MetaUnchecked">Meta</CheckBox>
+                <Button Content="Copy" Click="CopyClick" Margin="5"></Button>
+                <Button Content="Save" Click="SaveClick" Margin="5"></Button>
+            </StackPanel>
+            <Button DockPanel.Dock="Right" Content="Close" Click="CloseClick" Margin="5"></Button>
+        </DockPanel>
+
     </Grid>
 </Window>

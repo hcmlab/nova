@@ -211,7 +211,7 @@ Install MongoDB (<https://www.mongodb.com/download-center#community>) and run:
 mongod --auth
 ~~~~
 
-MongoDB now run on 127.0.0.1:27017.
+MongoDB now runs on 127.0.0.1:27017.
 
 ### Configure
 
@@ -231,10 +231,10 @@ and add an administrator:
 
 ~~~~
 use admin
-db.createUser({ user: 'admin', pwd: 'PASSWORD', roles: [ { role: "root", db: "admin" } ] }); 
+db.createUser({ user: 'admin', pwd: 'PASSWORD', roles: [ { role: "root", db: "admin" } ],  customData: {fullname: "ADMIN", email: ' ', expertise: NumberInt(0)}}); 
 ~~~~
    
-Now ee reconnect:
+Now we reconnect:
 
 ~~~~
 docker exec -it nova mongo -u admin -p PASSWORD --authenticationDatabase admin 
@@ -266,13 +266,14 @@ db.createRole(
 Finally, we add two default users:
 	
 ~~~~		
-db.createUser({ user: 'gold', pwd: 'PASSWORD1', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ] }); 	
-db.createUser({ user: 'system', pwd: 'PASSWORD2', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ] }); 	
+db.createUser({ user: 'gold', pwd: 'PASSWORD1', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"}], customData: {fullname: 'GOLD STANDARD', email: ' ', expertise: NumberInt(0)}}); 
+
+db.createUser({ user: 'system', pwd: 'PASSWORD2', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ], customData: {fullname: 'SYSTEM', email: ' ', expertise: NumberInt(0)} });
+~~~~			
+
+and test the server:		
 ~~~~		
-	
-and test the server:	
-	
-~~~~		
+
 show dbs
 ~~~~		
 
@@ -284,38 +285,50 @@ To connect to a MongoDB server, open the settings by clicking the wheel in the m
 
 ## Administration
 
-Users with administrative rights can use the 'Administration' sub-menu of the DATABASE menu to create and maintain databases. 
+The 'Administration' sub-menu of the DATABASE menu offers tools to create and maintain databases. Note that most of the functions are only visible to users with administrative rights.
 
 ### Manage Users
 
-'Manager Users' allows it to add or edit users.
+'Manage Users' allows it to add or edit user accounts. Users that have been added to the list can connect to the MongoDB and contribute to one or more databases. 
 
 ![*Manage users in NOVA.*](pics/database-manage-users.png){#fig:database-manage-users}
 
 ### Manage Databases
 
-'Manager Databases' allows it to add or edit databases.
+'Manager Databases' allows it to add or edit databases. After a database has been created, users can be added which makes them to *Annotators* of the database. Depending on their role, they can view ('read') annotations and create own annotations ('readWrite'). Users with administrative rights ('dbAdmin') can also edit the annotations of other users. Annotation *Schemes* define the type of annotations that are available in the database. A database can also have one or more *Roles*. This is useful to distinguish participants in recordings with multiple subjects. It is important to note that each annotator can own exactly one annotation per scheme and role. This means it is not possible to store different versions of an annotation in the database. Finally, a list with streams defines, which kind of data (recorded or extracted) may exist. A stream is defined by name, file extension and sample rate. And it has a type, which defines which kind of machine learning techniques can be applied to it (see later).
+
+![*Manage databases in NOVA.*](pics/database-manage-databases.png){#fig:database-manage-databases}
 
 ### Manage Sessions
 
-To manage a database with NOVA, you have to follow a certain file structure. Each database is located in a root folder with the name of the database and may consist of one more sessions. All stream files belonging to a session are grouped in sub-folder within the root folder. The name of the folder defines the name of the session. In a session we distinguish between several users, which take a certain role. E.g. thinking of a dyadic conversation, one user could be the expert sharing the knowledge about a certain topic to a novice user. Hence we have two roles: 'expert' and 'novice'. Each file has a unique name defined by the role and the type of recorded channel. E.g. if we have recorded the interaction using close talk microphones and two webcams, we may use the following file structure:
+Before adding sessions to a database, it is important to understand the underlying file structure. Each database is located in a root folder with the name of the database and may consist of one more sessions. All stream files belonging to a session are grouped in sub-folder within the root folder. The name of the folder defines the name of the session. In a session we distinguish between several subjects, which take a certain role. E.g. thinking of a dyadic conversation, one user could be the expert sharing the knowledge about a certain topic to a novice user. Hence we have two roles: 'expert' and 'novice'. Each file has a unique name defined by the role and the type of recorded channel. E.g. if we have recorded the interaction using close talk microphones and two webcams, we may use the following file structure:
 
 ~~~~
-aria-noxi/
-	067_2016-05-23_Augsburg/
-		expert.close.wav
-		expert.video.mp4
-		novice.close.wav
-		novice.video.mp4
-	068_2016-05-23_Augsburg/
-		expert.close.wav
-		expert.video.mp4
-		novice.close.wav
-		novice.video.mp4	
+<database-1>/
+	<session-1>/
+		<role-1>.<stream-name-1>.<stream-ext-1>
+		<role-2>.<stream-name-1>.<stream-ext-1>
+		<role-1>.<stream-name-2>.<stream-ext-2>
+		<role-2>.<stream-name-2>.<stream-ext-2>
+		...
+	<session-2>/
+		<role-1>.<stream-name-1>.<stream-ext-1>
+		<role-2>.<stream-name-1>.<stream-ext-1>
+		<role-1>.<stream-name-2>.<stream-ext-2>
+		<role-2>.<stream-name-2>.<stream-ext-2>
+		...
+	...
+<database-1>/
 	...
 ~~~~
 
+Now copy the root folder to NOVA's 'Download directory' (see Settings dialog) and use 'Manage Sessions' to add the session names (i.e. the folders containing the stream data). Make sure the filenames fit the roles and streams in the database.
+
+![*Manage sessions in NOVA.*](pics/database-manage-sessions.png){#fig:database-manage-sessions}
+
 ### Manage Annotations
+
+Finally, 'Manager Annotations' lists all annotations of a database. For each annotation the session, scheme, role and annotator are given.  A search window on the bottom helps to filter
 
 ## Loading a Session
 

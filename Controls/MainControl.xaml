@@ -5,7 +5,7 @@
     Width="Auto"
     Height="Auto"
     Loaded="ControlLoaded"
-    Background="White" >
+    Background="White">
 
     <Grid>
 
