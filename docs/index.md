@@ -232,6 +232,7 @@ and add an administrator:
 ~~~~
 use admin
 db.createUser({ user: 'admin', pwd: 'PASSWORD', roles: [ { role: "root", db: "admin" } ],  customData: {fullname: "ADMIN", email: ' ', expertise: NumberInt(0)}}); 
+exit
 ~~~~
    
 Now we reconnect:
