@@ -283,7 +283,8 @@ docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mo
 <pre><code>mongo admin</code></pre>
 <p>and add an administrator:</p>
 <pre><code>use admin
-db.createUser({ user: &#39;admin&#39;, pwd: &#39;PASSWORD&#39;, roles: [ { role: &quot;root&quot;, db: &quot;admin&quot; } ],  customData: {fullname: &quot;ADMIN&quot;, email: &#39; &#39;, expertise: NumberInt(0)}}); </code></pre>
+db.createUser({ user: &#39;admin&#39;, pwd: &#39;PASSWORD&#39;, roles: [ { role: &quot;root&quot;, db: &quot;admin&quot; } ],  customData: {fullname: &quot;ADMIN&quot;, email: &#39; &#39;, expertise: NumberInt(0)}}); 
+exit</code></pre>
 <p>Now we reconnect:</p>
 <pre><code>docker exec -it nova mongo -u admin -p PASSWORD --authenticationDatabase admin </code></pre>
 <p><em>or</em></p>
