@@ -66,6 +66,8 @@ namespace ssi
             parse(path);
             showMeta();
             showCM();
+
+            metaGrid.Visibility = Visibility.Collapsed;
         }
 
         void showCM()
@@ -283,6 +285,16 @@ namespace ssi
             {
                 File.WriteAllText(path, content);
             }
+        }
+
+        private void MetaChecked(object sender, RoutedEventArgs e)
+        {
+            metaGrid.Visibility = Visibility.Visible;
+        }
+
+        private void MetaUnchecked(object sender, RoutedEventArgs e)
+        {
+            metaGrid.Visibility = Visibility.Collapsed;
         }
 
         private void CloseClick(object sender, RoutedEventArgs e)
