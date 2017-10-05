@@ -104,8 +104,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
         <li><a href="#file-format"><span class="toc-section-number">3.5</span> File Format</a></li>
         </ul></li>
         <li><a href="#database"><span class="toc-section-number">4</span> Database</a><ul>
-        <li><a href="#file-structure"><span class="toc-section-number">4.1</span> File Structure</a></li>
-        <li><a href="#administration"><span class="toc-section-number">4.2</span> Administration</a></li>
+        <li><a href="#setup-mongodb"><span class="toc-section-number">4.1</span> Setup MongoDB</a><ul>
+        <li><a href="#install"><span class="toc-section-number">4.1.1</span> Install</a></li>
+        <li><a href="#configure"><span class="toc-section-number">4.1.2</span> Configure</a></li>
+        <li><a href="#connect"><span class="toc-section-number">4.1.3</span> Connect</a></li>
+        </ul></li>
+        <li><a href="#administration"><span class="toc-section-number">4.2</span> Administration</a><ul>
+        <li><a href="#manage-users"><span class="toc-section-number">4.2.1</span> Manage Users</a></li>
+        <li><a href="#manage-databases"><span class="toc-section-number">4.2.2</span> Manage Databases</a></li>
+        <li><a href="#manage-sessions"><span class="toc-section-number">4.2.3</span> Manage Sessions</a></li>
+        <li><a href="#manage-annotations"><span class="toc-section-number">4.2.4</span> Manage Annotations</a></li>
+        </ul></li>
         <li><a href="#loading-a-session"><span class="toc-section-number">4.3</span> Loading a Session</a></li>
         <li><a href="#database-create-annotation"><span class="toc-section-number">4.4</span> Creating an Annotation</a></li>
         </ul></li>
@@ -131,7 +140,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 <h1 id="installation"><span class="header-section-number">2</span> Installation</h1>
 <p>The latest version of NOVA can be accessed at:</p>
-<p>https://github.com/hcmlab/nova</p>
+<p><a href="https://github.com/hcmlab/nova" class="uri">https://github.com/hcmlab/nova</a></p>
 <p>Just download or check-out the release branch and start 'nova.exe' (yes, NOVA is available for Windows systems only).</p>
 <p>If you do not see videos on playback, please make also sure you have the right codecs installed. A good choice is the K-lite Codec Pack (You can leave all settings on default, but make sure to not not install any 3rd party software that comes with the installer).</p>
 <h1 id="manual-annotation"><span class="header-section-number">3</span> Manual Annotation</h1>
@@ -255,8 +264,65 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ...</code></pre></li>
 </ul>
 <h1 id="database"><span class="header-section-number">4</span> Database</h1>
-<p>NOVA allows users to manage and share annotations through a database. To connect to a database open the SETTINGS and select the 'Database' panel. Here you can enter the host IP, port number and user credentials. It also allows you to change the folder to which NOVA downloads media and stream files that are used during the annotation process, as well as, the directory where the cooperative learning definitions and models are stored.</p>
-<h2 id="file-structure"><span class="header-section-number">4.1</span> File Structure</h2>
+<p>NOVA allows users to manage and share annotations through a database, which requires to set-up a MongoDB server.</p>
+<h2 id="setup-mongodb"><span class="header-section-number">4.1</span> Setup MongoDB</h2>
+<p>We will describe two strategies: a) set up MongoDB with Docker <em>or</em> b) set up MongoDB natively.</p>
+<p>Hint: Default user: &quot;admin&quot; and default password &quot;PASSWORD&quot; may/should be replaced.</p>
+<h3 id="install"><span class="header-section-number">4.1.1</span> Install</h3>
+<p>Install Docker (<a href="https://www.docker.com/" class="uri">https://www.docker.com/</a>) and run:</p>
+<pre><code>docker pull mongo:latest  
+docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mongo:latest --auth</code></pre>
+<p><em>or</em></p>
+<p>Install MongoDB (<a href="https://www.mongodb.com/download-center#community" class="uri">https://www.mongodb.com/download-center#community</a>) and run:</p>
+<pre><code>mongod --auth</code></pre>
+<p>MongoDB now run on 127.0.0.1:27017.</p>
+<h3 id="configure"><span class="header-section-number">4.1.2</span> Configure</h3>
+<p>We connect to MongoDB:</p>
+<pre><code>docker exec -it nova mongo admin</code></pre>
+<p><em>or</em></p>
+<pre><code>mongo admin</code></pre>
+<p>and add an administrator:</p>
+<pre><code>use admin
+db.createUser({ user: &#39;admin&#39;, pwd: &#39;PASSWORD&#39;, roles: [ { role: &quot;root&quot;, db: &quot;admin&quot; } ] }); </code></pre>
+<p>Now ee reconnect:</p>
+<pre><code>docker exec -it nova mongo -u admin -p PASSWORD --authenticationDatabase admin </code></pre>
+<p><em>or</em></p>
+<pre><code>mongo -u admin -p PASSWORD --authenticationDatabase admin </code></pre>
+<p>and add a custom role (this will allow users to change their passwords and meta information):</p>
+<pre><code>use admin
+db.createRole(
+   { role: &quot;changeOwnPasswordCustomDataRole&quot;,
+     privileges: [
+        {
+          resource: { db: &quot;&quot;, collection: &quot;&quot;},
+          actions: [ &quot;changeOwnPassword&quot;, &quot;changeOwnCustomData&quot;, &quot;viewUser&quot; ]
+        }
+     ],
+     roles: []
+   }
+)</code></pre>
+<p>Finally, we add two default users:</p>
+<pre><code>db.createUser({ user: &#39;gold&#39;, pwd: &#39;PASSWORD1&#39;, roles: [ { role: &quot;readWriteAnyDatabase&quot;, db: &quot;admin&quot; }, {&quot;role&quot; : &quot;changeOwnPasswordCustomDataRole&quot;, &quot;db&quot; : &quot;admin&quot;} ] });  
+db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { role: &quot;readWriteAnyDatabase&quot;, db: &quot;admin&quot; }, {&quot;role&quot; : &quot;changeOwnPasswordCustomDataRole&quot;, &quot;db&quot; : &quot;admin&quot;} ] });    </code></pre>
+<p>and test the server:</p>
+<pre><code>show dbs</code></pre>
+<h3 id="connect"><span class="header-section-number">4.1.3</span> Connect</h3>
+<p>To connect to a MongoDB server, open the settings by clicking the wheel in the menu and switch to the Database tab. Enter the host and port number of the MongoDB server and the user credentials. The dialog allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.</p>
+<div class="figure">
+<img src="pics/database-connect.png" alt="Connect database in NOVA." id="fig:database-connect" />
+<p class="caption"><em>Connect database in NOVA.</em></p>
+</div>
+<h2 id="administration"><span class="header-section-number">4.2</span> Administration</h2>
+<p>Users with administrative rights can use the 'Administration' sub-menu of the DATABASE menu to create and maintain databases.</p>
+<h3 id="manage-users"><span class="header-section-number">4.2.1</span> Manage Users</h3>
+<p>'Manager Users' allows it to add or edit users.</p>
+<div class="figure">
+<img src="pics/database-manage-users.png" alt="Manage users in NOVA." id="fig:database-manage-users" />
+<p class="caption"><em>Manage users in NOVA.</em></p>
+</div>
+<h3 id="manage-databases"><span class="header-section-number">4.2.2</span> Manage Databases</h3>
+<p>'Manager Databases' allows it to add or edit databases.</p>
+<h3 id="manage-sessions"><span class="header-section-number">4.2.3</span> Manage Sessions</h3>
 <p>To manage a database with NOVA, you have to follow a certain file structure. Each database is located in a root folder with the name of the database and may consist of one more sessions. All stream files belonging to a session are grouped in sub-folder within the root folder. The name of the folder defines the name of the session. In a session we distinguish between several users, which take a certain role. E.g. thinking of a dyadic conversation, one user could be the expert sharing the knowledge about a certain topic to a novice user. Hence we have two roles: 'expert' and 'novice'. Each file has a unique name defined by the role and the type of recorded channel. E.g. if we have recorded the interaction using close talk microphones and two webcams, we may use the following file structure:</p>
 <pre><code>aria-noxi/
     067_2016-05-23_Augsburg/
@@ -270,8 +336,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
         novice.close.wav
         novice.video.mp4    
     ...</code></pre>
-<h2 id="administration"><span class="header-section-number">4.2</span> Administration</h2>
-<p>TODO: explain how to setup a database</p>
+<h3 id="manage-annotations"><span class="header-section-number">4.2.4</span> Manage Annotations</h3>
 <h2 id="loading-a-session"><span class="header-section-number">4.3</span> Loading a Session</h2>
 <p>The DATABASE menu allows to load annotation and files for a session (note that this will clear the workspace). In the following window you can select multiple annotations and streams belonging to a certain session of a database. Turn on 'Mine only' to filter only your own annotations and 'Unfinished only' to hide annotations that have already been marked finished. Stream files that are not locally available yet, are displayed in red. If selected NOVA will try to download them before the session is displayed.</p>
 <div class="figure">

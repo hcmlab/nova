@@ -26,7 +26,7 @@ namespace ssi
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
-            Title = "(NOn)Verbal Annotator | v" + MainHandler.BuildVersion + " | HCM-Lab, Augsburg University | http://openssi.net";
+            Title = "NOVA | v" + MainHandler.BuildVersion + " | HCM-Lab, Augsburg University | http://openssi.net";
            
         }
 

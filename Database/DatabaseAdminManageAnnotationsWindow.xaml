@@ -34,16 +34,14 @@
 
         <Label Content="Annotations" Grid.Row="0" Grid.Column="1" />
         <DockPanel Grid.Row="1" Grid.Column="1" LastChildFill="True" >
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
-               
-                <Button Style="{StaticResource MyButton}" Name="DeleteSession" Content="REM" Click="DeleteAnnotations_Click" />
-                <DockPanel LastChildFill="True">
-                    <Image Source="/Resources/search_small.png" DockPanel.Dock="Right" Height="15"></Image>
-                    <TextBox x:Name="searchTextBox" DockPanel.Dock="Right" TextChanged="searchTextBox_TextChanged"  Width="100" Margin="5,0,0,0"></TextBox>
+            
+            <DockPanel LastChildFill="True" DockPanel.Dock="Bottom" HorizontalAlignment="Stretch" Margin="5">
+                <Button DockPanel.Dock="Left" Style="{StaticResource MyButton}" Name="DeleteSession" Content="REM" Click="DeleteAnnotations_Click" />
+                <DockPanel DockPanel.Dock="Right" LastChildFill="True">
+                    <Image Source="/Resources/search_small.png" DockPanel.Dock="Left" Height="15"></Image>
+                    <TextBox x:Name="searchTextBox" DockPanel.Dock="Right" TextChanged="searchTextBox_TextChanged" Margin="5,0,0,0"></TextBox>
                 </DockPanel>
-                <!--Button Style="{StaticResource MyButton}" Name="EditSession" Content="edit" Click="EditSession_Click" /-->
-                <!--Button Style="{StaticResource MyButton}" Name="CopySession" Content="copy" Click="CopySession_Click" /-->
-            </StackPanel>
+            </DockPanel>
            
             <ListView Name="AnnotationsBox" SelectionMode="Extended">
                 

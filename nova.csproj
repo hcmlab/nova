@@ -154,6 +154,9 @@
     <Compile Include="Controls\Navigation\TimeRangeSlider.xaml.cs">
       <DependentUpon>TimeRangeSlider.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Other\ConfmatWindow.xaml.cs">
+      <DependentUpon>ConfmatWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Other\QuestionBoxThreeButtons.xaml.cs">
       <DependentUpon>QuestionBoxThreeButtons.xaml</DependentUpon>
     </Compile>
@@ -280,6 +283,10 @@
     <Page Include="Controls\Navigation\TimeRangeSlider.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Other\ConfmatWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Other\ExportSamplesControl.xaml">
       <Generator>MSBuild:Compile</Generator>

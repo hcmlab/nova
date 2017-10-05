@@ -67,6 +67,7 @@
                 <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
                 <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
                 <MenuItem Header="Train Models" Name="databaseCMLTrainMenu"/>
+                <MenuItem Header="Evaluate Models" Name="databaseCMLEvaluateMenu"/>
                 <MenuItem Header="Fusion" Name="fusionmenu">
                     <MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenu"/>
                 </MenuItem>
