@@ -657,9 +657,10 @@ namespace ssi
             {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("name", meta.Name);
-                var document = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Meta).Find(filter).Single();
-                if (document != null)
+                var documents = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Meta).Find(filter).ToList();
+                if (documents.Count > 0)
                 {
+                    var document = documents[0];
                     BsonElement value;
                     meta.Description = "";
                     if (document.TryGetElement("description", out value))
@@ -676,6 +677,10 @@ namespace ssi
                     {
                         meta.ServerAuth = bool.Parse(document["serverAuth"].ToString());
                     }
+                }
+                else
+                {
+                    return false;
                 }
             }
 

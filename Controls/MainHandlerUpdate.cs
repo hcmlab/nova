@@ -56,7 +56,7 @@ namespace ssi
             }
             catch
             {
-                MessageBox.Show("An Error occured. API limit reached, or no Internet Connection!");
+                //MessageBox.Show("An Error occured. API limit reached, or no Internet Connection!");
             }
         }
 
@@ -190,7 +190,7 @@ namespace ssi
             }
             catch
             {
-                MessageBox.Show("An Error occured. API limit reached, or no Internet Connection!");
+                //MessageBox.Show("An Error occured. API limit reached, or no Internet Connection!");
             }
         }
 

@@ -193,6 +193,12 @@ namespace ssi
                         foreach (string stream in streamsAll)
                         {
                             string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream;
+                            if (File.Exists(localPath))
+                            {
+                                loadFile(localPath);
+                                continue;
+                            }
+
                             string url = "";
                             bool requiresAuth = false;
 
@@ -209,6 +215,14 @@ namespace ssi
                                 continue;
                             }
                            
+
+
+                            if(File.Exists(localPath))
+                            {
+
+                            }
+
+
                             //In case we host our files on nextcloud, the file format is special. For now we only allow self-hosted, but in the future we add an option for nextcloud in general.
                             if(meta.Server.Contains("https://hcm-lab.de/cloud"))
                             {
@@ -236,6 +250,11 @@ namespace ssi
                             else if (connection == "http" || connection == "https" && requiresAuth == true)
                             {
                                 httpPost(url, localPath);
+                            }
+
+                            else
+                            {
+                                loadFile(localPath);
                             }
                         }
                     }
