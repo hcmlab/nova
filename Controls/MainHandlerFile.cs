@@ -559,11 +559,11 @@ namespace ssi
 
         #region SAVE
 
-        private void saveSelectedAnno(bool force = false)
+        private void saveSelectedAnno(bool force = false, bool markAsFinished = false)
         {
             if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList != null)
             {
-                AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams, force);
+                AnnoTierStatic.Selected.AnnoList.Save(databaseSessionStreams, force, false, markAsFinished);
                 updateAnnoInfo(AnnoTierStatic.Selected);
             }
         }
@@ -1061,6 +1061,11 @@ namespace ssi
             saveSelectedAnno();
         }
 
+        private void annoSaveAsFinished_Click(object sender, RoutedEventArgs e)
+        {
+            saveSelectedAnno(false, true);
+        }
+
         private void annoReload_Click(object sender, RoutedEventArgs e)
         {
             reloadSelectedAnno();
@@ -1138,6 +1143,11 @@ namespace ssi
         {
             ExportAnnoToSignal();
         }
+
+
+     
+        
+
 
         private void exportTierToXPS_Click(object sender, RoutedEventArgs e)
         {

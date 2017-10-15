@@ -62,7 +62,7 @@ namespace ssi
 
         public static bool Connect()
         {
-            return Connect(Properties.Settings.Default.MongoDBUser, MainHandler.Decode(Properties.Settings.Default.MongoDBPass), Properties.Settings.Default.DatabaseAddress);
+            return Connect(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.MongoDBPass, Properties.Settings.Default.DatabaseAddress);
         }
 
         public static bool Connect(string user, string password, string address)
@@ -73,11 +73,11 @@ namespace ssi
             database = null;
 
             Properties.Settings.Default.MongoDBUser = user;
-            Properties.Settings.Default.MongoDBPass = MainHandler.Encode(password);
+            Properties.Settings.Default.MongoDBPass = password;
             Properties.Settings.Default.DatabaseAddress = address;
             Properties.Settings.Default.Save();
 
-            clientAddress = "mongodb://" + user + ":" + password + "@" + address;
+            clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address;
 
             client = Client;
 
@@ -2010,7 +2010,7 @@ namespace ssi
             return data;
         }
 
-        public static bool SaveAnnoList(AnnoList annoList, List<string> linkedStreams = null, bool force = false, bool keepOriginalAnnotator = false)
+        public static bool SaveAnnoList(AnnoList annoList, List<string> linkedStreams = null, bool force = false, bool markAsFinished = false, bool keepOriginalAnnotator = false)
         {
             if (!IsConnected && !IsDatabase && !IsSession)
             {
@@ -2053,8 +2053,7 @@ namespace ssi
             }
 
 
-            if(!keepOriginalAnnotator)
-
+            if(!keepOriginalAnnotator && annoList.Meta.Annotator != dbuser)
             {
                 ObjectId userID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", dbuser);
                 if (AnnotationExists(userID, sessionID, roleID, schemeID))
@@ -2160,7 +2159,7 @@ namespace ssi
                 newAnnotationDoc.Add(new BsonElement("role_id", roleID));
                 newAnnotationDoc.Add(new BsonElement("scheme_id", schemeID));
                 newAnnotationDoc.Add(new BsonElement("session_id", sessionID));
-                newAnnotationDoc.Add(new BsonElement("isFinished", false));
+                newAnnotationDoc.Add(new BsonElement("isFinished", markAsFinished));
                 newAnnotationDoc.Add(new BsonElement("isLocked", isLocked));
                 newAnnotationDoc.Add(new BsonElement("date", new BsonDateTime(DateTime.Now)));
                 BsonArray streamArray = new BsonArray();
@@ -2559,14 +2558,33 @@ namespace ssi
 
             foreach (var annotation in annotations)
             {
-                ObjectId id = annotation["_id"].AsObjectId;
-                string sessionName = sessions.Find(session => session.Id == annotation["session_id"].AsObjectId).Name;
-                string roleName = Roles.Find(role => role.Id == annotation["role_id"].AsObjectId).Name;
-                string schemeName = schemes.Find(scheme => scheme.Id == annotation["scheme_id"].AsObjectId).Name;
 
-                DatabaseAnnotator dba = annotators.Find(annotator => annotator.Id == annotation["annotator_id"].AsObjectId);
-                string annotatorName = dba.Name;
-                string annotatorFullName = dba.FullName;
+
+
+                ObjectId id = annotation["_id"].AsObjectId;
+
+                ObjectId sessionid = annotation["session_id"].AsObjectId;
+                ObjectId roleid = annotation["role_id"].AsObjectId;
+                ObjectId schemeid = annotation["scheme_id"].AsObjectId;
+                ObjectId annotatorid = annotation["annotator_id"].AsObjectId;
+
+                DatabaseSession session = sessions.Find(s => s.Id == sessionid);
+                DatabaseRole role = Roles.Find(r => r.Id == roleid);
+                DatabaseScheme scheme = schemes.Find(s => s.Id == schemeid);
+                DatabaseAnnotator annotator = annotators.Find(a => a.Id == annotatorid);
+
+                if (session == null || role == null || scheme == null || annotator == null)
+                {
+                    continue;
+                }
+
+                string sessionName = session.Name;
+                string roleName = role.Name;
+                string schemeName = scheme.Name;
+
+            
+                string annotatorName = annotator.Name;
+                string annotatorFullName = annotator.FullName;
 
                 bool isFinished = false;
                 if (annotation.Contains("isFinished"))

@@ -466,6 +466,7 @@ namespace ssi
                     mediaList.Move(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
                     moveSignalCursor(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
                     signalCursor.X = (e.GetPosition(control.signalAndAnnoGrid).X);
+                   
                  
                 }
             }
@@ -692,6 +693,11 @@ namespace ssi
             }
         }
 
+
+        private void removeRemainingSegmentsMenu_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteRemainingSegments();
+        }
 
         #endregion EVENTHANDLER
     }

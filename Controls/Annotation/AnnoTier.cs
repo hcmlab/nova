@@ -63,6 +63,7 @@ namespace ssi
             OnTierChange?.Invoke(selectedTier, null);
         }
 
+
         static public void Unselect()
         {
             if (selectedTier != null)
@@ -156,7 +157,7 @@ namespace ssi
         private int direction;
         private bool annorightdirection = true;   
         private bool isMouseAlreadydown = false;
-
+        private double yPos = 0;
         private List<Line> continuousTierLines = new List<Line>();
         private List<Line> continuousTierMarkers = new List<Line>();
         private Ellipse continuousTierEllipse = new Ellipse();
@@ -245,7 +246,7 @@ namespace ssi
             UnDoObject.Container = this;
 
             double mean = (anno.Scheme.MinScore + anno.Scheme.MaxScore) / 2;
-            double range = anno.Scheme.MaxScore - anno.Scheme.MinScore;
+           
 
             DefaultColor = Defaults.Colors.Foreground;
             DefaultLabel = "";
@@ -284,77 +285,42 @@ namespace ssi
                 {
                     if (anno.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                     {
+
                         InitContinousValues(anno.Scheme.SampleRate);
+                        bool init = false;
+
+                      
+
                         dispatcherTimer.Interval = TimeSpan.FromMilliseconds(20);
                         dispatcherTimer.Tick += new EventHandler(delegate (object s, EventArgs a)
                         {
-                            if (continuousAnnoMode && isSelected)
+                        if (continuousAnnoMode && isSelected)
+                        {
+                            double closestposition = MainHandler.Time.CurrentPlayPosition;
+                            closestIndex = GetClosestContinuousIndex(closestposition);
+                            if (closestIndex > -1)
                             {
-                                double closestposition = MainHandler.Time.CurrentPlayPosition;
-                                closestIndex = GetClosestContinuousIndex(closestposition);
-                                if (closestIndex > -1)
                                 {
-                                    {
-                                        continuousTierEllipse.Visibility = Visibility.Visible;
+                                    continuousTierEllipse.Visibility = Visibility.Visible;
 
-                                        Point relativePoint = continuousTierEllipse.TransformToAncestor(this).Transform(new Point(0, 0));
-                                        double yPos = relativePoint.Y + continuousTierEllipse.Height / 2;
-
-                                        if ((this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 && Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver)) && MouseActive)
-                                            yPos = Mouse.GetPosition(this).Y;
 
                                         double numberOfLevels = Properties.Settings.Default.ContinuousHotkeysNumber;
-                                        double fac =  1 + (1 / (numberOfLevels - 1));
+                                        double fac = 1 + (1 / (numberOfLevels - 1));
                                         double segmentHeight = (this.ActualHeight / numberOfLevels);
 
-
-                                       
-
-                                        for (int i=0; i< numberOfLevels; i++)
+                                        if (!init)
                                         {
-                                            if (Keyboard.IsKeyDown(Key.D1 + i))
-                                            {
-                                                yPos = (numberOfLevels - (i * fac)) * segmentHeight;
-                                            }
-
-
-
-
-                                        }
-
-                                        //todo
-                                        double step = 1.0;
-                                        if (Keyboard.IsKeyDown(Key.Up) && Keyboard.IsKeyDown(Key.LeftAlt))
-                                        {
-                                     
-
-                                            yPos = (yPos - step >= 0) ? yPos - step : yPos;  
-
-
-                                        }
-
-                                        else if (Keyboard.IsKeyDown(Key.Down) && Keyboard.IsKeyDown(Key.LeftAlt))
-                                        {
-                                            yPos = (yPos + step <= this.ActualHeight) ? yPos + step : yPos;
-
+                                            yPos = yPos = (numberOfLevels - ( (int)(numberOfLevels / 2) * fac)) * segmentHeight;
+                                            init = true;
                                         }
 
 
-                                        double normal = 1.0 - (yPos / this.ActualHeight);
-                                        double normalized = (normal * range) + anno.Scheme.MinScore;
-
-                                        continuousTierEllipse.Height = this.ActualHeight / 10;
-                                        continuousTierEllipse.Width = continuousTierEllipse.Height;
-                                        continuousTierEllipse.SetValue(Canvas.TopProperty, (yPos - continuousTierEllipse.Height / 2));
-                                        AnnoList[closestIndex].Label = (normalized).ToString();
-
-                                        for (int i = closestIndexOld; i < closestIndex; i++)
-                                        {
-                                            if (closestIndexOld > -1) AnnoList[i].Label = (normalized).ToString();
+                                        if ((this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 && Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver)) && MouseActive)
+                                        { 
+                                            yPos = Mouse.GetPosition(this).Y;
                                         }
-                                        closestIndexOld = closestIndex;
+                                        UdpateContinuousPosition();
 
-                                        TimeRangeChanged(MainHandler.Time);
                                     }
                                 }
                             }
@@ -385,6 +351,68 @@ namespace ssi
                 }
             }
         }
+
+
+        private void UdpateContinuousPosition()
+        {
+            double range = this.AnnoList.Scheme.MaxScore - this.AnnoList.Scheme.MinScore;
+            double normal = 1.0 - (yPos / this.ActualHeight);
+            double normalized = (normal * range) + this.AnnoList.Scheme.MinScore;
+
+            continuousTierEllipse.Height = this.ActualHeight / 10;
+            continuousTierEllipse.Width = continuousTierEllipse.Height;
+            continuousTierEllipse.SetValue(Canvas.TopProperty, (yPos - continuousTierEllipse.Height / 2));
+            continuousTierEllipse.SetValue(Canvas.LeftProperty, (MainHandler.Time.PixelFromTime(MainHandler.Time.CurrentPlayPosition) - continuousTierEllipse.Width / 2));
+            AnnoList[closestIndex].Label = (normalized).ToString();
+
+            for (int i = closestIndexOld; i < closestIndex; i++)
+            {
+                if (closestIndexOld > -1) AnnoList[i].Label = (normalized).ToString();
+            }
+            closestIndexOld = closestIndex;
+
+            TimeRangeChanged(MainHandler.Time);
+        }
+
+
+        public void continuousSegmentUp()
+        {
+
+            double numberOfLevels = Properties.Settings.Default.ContinuousHotkeysNumber;
+            double fac = 1 + (1 / (numberOfLevels - 1));
+            double segmentHeight = (this.ActualHeight / numberOfLevels);
+
+            double step = fac * segmentHeight;
+            yPos = (yPos - step >= 0) ? yPos - step : yPos;
+
+            
+        }
+
+        public void continuousSegmentDown()
+        {
+
+            double numberOfLevels = Properties.Settings.Default.ContinuousHotkeysNumber;
+            double fac = 1 + (1 / (numberOfLevels - 1));
+            double segmentHeight = (this.ActualHeight / numberOfLevels);
+
+            double step = fac * segmentHeight;
+            yPos = (yPos + step <= this.ActualHeight) ? yPos + step : yPos;
+
+           
+        }
+
+        public void continuousSegmentToPosition(int position)
+        {
+
+            double numberOfLevels = Properties.Settings.Default.ContinuousHotkeysNumber;
+            double fac = 1 + (1 / (numberOfLevels - 1));
+            double segmentHeight = (this.ActualHeight / numberOfLevels);
+
+            yPos = (numberOfLevels - (position * fac)) * segmentHeight;
+
+           
+        }
+
 
         public void ExportToXPS(Uri path, Canvas surface)
         {
@@ -539,10 +567,10 @@ namespace ssi
                 }
             }
 
-            int drawlinesnumber;
-            if (this.ActualWidth == 0) drawlinesnumber = 1000;
-            else if (AnnoList.Count > this.ActualWidth) drawlinesnumber = (int) (this.ActualWidth);
-            else drawlinesnumber = AnnoList.Count;
+            int drawlinesnumber = 1000;
+            //if (this.ActualWidth == 0) drawlinesnumber = 500;
+            //else if (AnnoList.Count > this.ActualWidth) drawlinesnumber = (int) (this.ActualWidth);
+            //else drawlinesnumber = AnnoList.Count;
 
             for (int i = 0; i < drawlinesnumber; i++)
             {
@@ -560,8 +588,8 @@ namespace ssi
 
             continuousTierEllipse.Width = this.ActualHeight / 10;
             continuousTierEllipse.Height = continuousTierEllipse.Width;
-            continuousTierEllipse.Fill = Brushes.WhiteSmoke;
-            continuousTierEllipse.Stroke = Brushes.Black;
+            continuousTierEllipse.Fill = Brushes.Red;
+            continuousTierEllipse.Stroke = Brushes.WhiteSmoke;
             continuousTierEllipse.Visibility = Visibility.Hidden;
             continuousTierEllipse.SetValue(Canvas.LeftProperty, continuousTierEllipse.Width / 2);
             continuousTierEllipse.SetValue(Canvas.TopProperty, this.ActualHeight/2 - continuousTierEllipse.Height / 2);
@@ -620,7 +648,9 @@ namespace ssi
             {
                 dispatcherTimer.Stop();
                 continuousAnnoMode = false;
+                continuousTierEllipse.Visibility = Visibility.Hidden;
             }
+            TimeRangeChanged(MainHandler.Time);
         }
 
         public void NewAnnoKey()
@@ -861,7 +891,14 @@ namespace ssi
         {
             if(!Keyboard.IsKeyDown(Key.LeftShift))
             {
+                if (this.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    double closestposition = MainHandler.Time.TimeFromPixel(e.GetPosition(this).X);
+                    closestIndex = GetClosestContinuousIndex(closestposition);
+                    closestIndexOld = closestIndex;
+                }
                 LeftMouseButtonDown(e);
+               
             }
 
            
@@ -1165,11 +1202,11 @@ namespace ssi
                             }
                             closestIndexOld = closestIndex;
                             TimeRangeChanged(MainHandler.Time);
-                            //  nicer drawing but slower
-                            if (!IsDiscreteOrFree)
-                            {
-                                //TimeRangeChanged(MainHandler.Time);
-                            }
+                            ////  nicer drawing but slower
+                            //if (!IsDiscreteOrFree)
+                            //{
+                            //    //TimeRangeChanged(MainHandler.Time);
+                            //}
                         }
                     }
                 }
@@ -1259,6 +1296,8 @@ namespace ssi
                                 double value = 0.0;
                                 double.TryParse(ali.Label, out value);
                                 double range = AnnoList.Scheme.MaxScore - AnnoList.Scheme.MinScore;
+
+
                                 value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
 
                                 continuousTierLines[i % continuousTierLines.Count].Y1 = (value) * this.ActualHeight;

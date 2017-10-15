@@ -57,11 +57,13 @@ namespace ssi
 
             control.annoSaveAllMenu.IsEnabled = hasTier;
             control.annoSaveMenu.IsEnabled = hasTier;
+            control.annoSaveAsFinishedMenu.IsEnabled = hasTier;
             control.annoReloadMenu.IsEnabled = hasTier;
             control.annoReloadBackupMenu.IsEnabled = hasDatabaseTier;
             control.annoExportMenu.IsEnabled = hasTier;
             control.convertSelectedTierMenu.IsEnabled = hasTier;
             control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && tier.IsContinuous;
+            control.removeRemainingSegmentsMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
             control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsContinuous;
             control.convertSignalMenu.IsEnabled = hasTrack;
         }

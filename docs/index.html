@@ -104,19 +104,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
         <li><a href="#file-format"><span class="toc-section-number">3.5</span> File Format</a></li>
         </ul></li>
         <li><a href="#database"><span class="toc-section-number">4</span> Database</a><ul>
-        <li><a href="#setup-mongodb"><span class="toc-section-number">4.1</span> Setup MongoDB</a><ul>
-        <li><a href="#install"><span class="toc-section-number">4.1.1</span> Install</a></li>
-        <li><a href="#configure"><span class="toc-section-number">4.1.2</span> Configure</a></li>
-        <li><a href="#connect"><span class="toc-section-number">4.1.3</span> Connect</a></li>
-        </ul></li>
-        <li><a href="#administration"><span class="toc-section-number">4.2</span> Administration</a><ul>
-        <li><a href="#manage-users"><span class="toc-section-number">4.2.1</span> Manage Users</a></li>
-        <li><a href="#manage-databases"><span class="toc-section-number">4.2.2</span> Manage Databases</a></li>
-        <li><a href="#manage-sessions"><span class="toc-section-number">4.2.3</span> Manage Sessions</a></li>
-        <li><a href="#manage-annotations"><span class="toc-section-number">4.2.4</span> Manage Annotations</a></li>
-        </ul></li>
-        <li><a href="#loading-a-session"><span class="toc-section-number">4.3</span> Loading a Session</a></li>
-        <li><a href="#database-create-annotation"><span class="toc-section-number">4.4</span> Creating an Annotation</a></li>
+        <li><a href="#setup-mongodb"><span class="toc-section-number">4.1</span> Setup MongoDB</a></li>
+        <li><a href="#general-structure"><span class="toc-section-number">4.2</span> General Structure</a></li>
+        <li><a href="#file-server"><span class="toc-section-number">4.3</span> File Server</a></li>
+        <li><a href="#administration"><span class="toc-section-number">4.4</span> Administration</a></li>
+        <li><a href="#loading-a-session"><span class="toc-section-number">4.5</span> Loading a Session</a></li>
+        <li><a href="#database-create-annotation"><span class="toc-section-number">4.6</span> Creating an Annotation</a></li>
         </ul></li>
         <li><a href="#cooperative-learning"><span class="toc-section-number">5</span> Cooperative Learning</a><ul>
         <li><a href="#cl-feature-extraction"><span class="toc-section-number">5.1</span> Feature Extraction</a></li>
@@ -264,32 +257,28 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ...</code></pre></li>
 </ul>
 <h1 id="database"><span class="header-section-number">4</span> Database</h1>
-<p>NOVA allows users to manage and share annotations through a database, which requires to set-up a MongoDB server.</p>
+<p>To support a collaborative annotation process, NOVA maintains a database back-end, which allows users to load and save annotations from and to a MongoDB running on a central server. This gives involved annotators the possibility to immediately commit changes and follow the annotation progress of the others.</p>
 <h2 id="setup-mongodb"><span class="header-section-number">4.1</span> Setup MongoDB</h2>
-<p>We will describe two strategies: a) set up MongoDB with Docker <em>or</em> b) set up MongoDB natively.</p>
-<p>Hint: Default user: &quot;admin&quot; and default password &quot;PASSWORD&quot; may/should be replaced.</p>
-<h3 id="install"><span class="header-section-number">4.1.1</span> Install</h3>
-<p>Install Docker (<a href="https://www.docker.com/" class="uri">https://www.docker.com/</a>) and run:</p>
+<p>We will describe two strategies: a) set up MongoDB with Docker <em>or</em> b) set up MongoDB natively. In the following, make sure to replace the default password &quot;PASSWORD&quot;.</p>
+<p>First, we install Docker (<a href="https://www.docker.com/" class="uri">https://www.docker.com/</a>) and run:</p>
 <pre><code>docker pull mongo:latest  
 docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mongo:latest --auth</code></pre>
 <p><em>or</em></p>
-<p>Install MongoDB (<a href="https://www.mongodb.com/download-center#community" class="uri">https://www.mongodb.com/download-center#community</a>) and run:</p>
+<p>We install MongoDB (<a href="https://www.mongodb.com/download-center#community" class="uri">https://www.mongodb.com/download-center#community</a>) and run:</p>
 <pre><code>mongod --auth</code></pre>
-<p>MongoDB now runs on 127.0.0.1:27017.</p>
-<h3 id="configure"><span class="header-section-number">4.1.2</span> Configure</h3>
-<p>We connect to MongoDB:</p>
+<p>MongoDB now runs on 127.0.0.1:27017 and we can connect to it:</p>
 <pre><code>docker exec -it nova mongo admin</code></pre>
 <p><em>or</em></p>
 <pre><code>mongo admin</code></pre>
-<p>and add an administrator:</p>
+<p>We add an administrator:</p>
 <pre><code>use admin
 db.createUser({ user: &#39;admin&#39;, pwd: &#39;PASSWORD&#39;, roles: [ { role: &quot;root&quot;, db: &quot;admin&quot; } ],  customData: {fullname: &quot;ADMIN&quot;, email: &#39; &#39;, expertise: NumberInt(0)}}); 
 exit</code></pre>
-<p>Now we reconnect:</p>
+<p>And reconnect afterwards:</p>
 <pre><code>docker exec -it nova mongo -u admin -p PASSWORD --authenticationDatabase admin </code></pre>
 <p><em>or</em></p>
 <pre><code>mongo -u admin -p PASSWORD --authenticationDatabase admin </code></pre>
-<p>and add a custom role (this will allow users to change their passwords and meta information):</p>
+<p>We add a custom role to allow users to change their passwords and update their profile:</p>
 <pre><code>use admin
 db.createRole(
    { role: &quot;changeOwnPasswordCustomDataRole&quot;,
@@ -306,30 +295,15 @@ db.createRole(
 <pre><code>db.createUser({ user: &#39;gold&#39;, pwd: &#39;PASSWORD1&#39;, roles: [ { role: &quot;readWriteAnyDatabase&quot;, db: &quot;admin&quot; }, {&quot;role&quot; : &quot;changeOwnPasswordCustomDataRole&quot;, &quot;db&quot; : &quot;admin&quot;}], customData: {fullname: &#39;GOLD STANDARD&#39;, email: &#39; &#39;, expertise: NumberInt(0)}}); 
 
 db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { role: &quot;readWriteAnyDatabase&quot;, db: &quot;admin&quot; }, {&quot;role&quot; : &quot;changeOwnPasswordCustomDataRole&quot;, &quot;db&quot; : &quot;admin&quot;} ], customData: {fullname: &#39;SYSTEM&#39;, email: &#39; &#39;, expertise: NumberInt(0)} });</code></pre>
-<p>and test the server:</p>
+<p>We can now test the server:</p>
 <pre><code>show dbs</code></pre>
-<h3 id="connect"><span class="header-section-number">4.1.3</span> Connect</h3>
-<p>To connect to a MongoDB server, open the settings by clicking the wheel in the menu and switch to the Database tab. Enter the host and port number of the MongoDB server and the user credentials. The dialog allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.</p>
+<p>To connect to the MongoDB server in NOVA, we open the settings by clicking the wheel in the menu and switch to the 'Database' tab. Here we enter the host and port number of the MongoDB server and the user credentials. The dialog also allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.</p>
 <div class="figure">
-<img src="pics/database-connect.png" alt="Connect database in NOVA." id="fig:database-connect" />
-<p class="caption"><em>Connect database in NOVA.</em></p>
+<img src="pics/database-connect.png" alt="Connect to a database." id="fig:database-connect" />
+<p class="caption"><em>Connect to a database.</em></p>
 </div>
-<h2 id="administration"><span class="header-section-number">4.2</span> Administration</h2>
-<p>The 'Administration' sub-menu of the DATABASE menu offers tools to create and maintain databases. Note that most of the functions are only visible to users with administrative rights.</p>
-<h3 id="manage-users"><span class="header-section-number">4.2.1</span> Manage Users</h3>
-<p>'Manage Users' allows it to add or edit user accounts. Users that have been added to the list can connect to the MongoDB and contribute to one or more databases.</p>
-<div class="figure">
-<img src="pics/database-manage-users.png" alt="Manage users in NOVA." id="fig:database-manage-users" />
-<p class="caption"><em>Manage users in NOVA.</em></p>
-</div>
-<h3 id="manage-databases"><span class="header-section-number">4.2.2</span> Manage Databases</h3>
-<p>'Manager Databases' allows it to add or edit databases. After a database has been created, users can be added which makes them to <em>Annotators</em> of the database. Depending on their role, they can view ('read') annotations and create own annotations ('readWrite'). Users with administrative rights ('dbAdmin') can also edit the annotations of other users. Annotation <em>Schemes</em> define the type of annotations that are available in the database. A database can also have one or more <em>Roles</em>. This is useful to distinguish participants in recordings with multiple subjects. It is important to note that each annotator can own exactly one annotation per scheme and role. This means it is not possible to store different versions of an annotation in the database. Finally, a list with streams defines, which kind of data (recorded or extracted) may exist. A stream is defined by name, file extension and sample rate. And it has a type, which defines which kind of machine learning techniques can be applied to it (see later).</p>
-<div class="figure">
-<img src="pics/database-manage-databases.png" alt="Manage databases in NOVA." id="fig:database-manage-databases" />
-<p class="caption"><em>Manage databases in NOVA.</em></p>
-</div>
-<h3 id="manage-sessions"><span class="header-section-number">4.2.3</span> Manage Sessions</h3>
-<p>Before adding sessions to a database, it is important to understand the underlying file structure. Each database is located in a root folder with the name of the database and may consist of one more sessions. All stream files belonging to a session are grouped in sub-folder within the root folder. The name of the folder defines the name of the session. In a session we distinguish between several subjects, which take a certain role. E.g. thinking of a dyadic conversation, one user could be the expert sharing the knowledge about a certain topic to a novice user. Hence we have two roles: 'expert' and 'novice'. Each file has a unique name defined by the role and the type of recorded channel. E.g. if we have recorded the interaction using close talk microphones and two webcams, we may use the following file structure:</p>
+<h2 id="general-structure"><span class="header-section-number">4.2</span> General Structure</h2>
+<p>A database in NOVA aggregates data recorded within the same experiment. It is basically a collection of recorded stream files (data) and descriptions marking interesting events in the data (annotations). NOVA can handle multiple databases and offers tools to maintain them and incrementally accumulate new data and annotations. Generally, stream files are stored on disk and annotations are stored in a MongoDB. Each database consists of one or more sessions. A session is a single and continuous recording distributed over one or more stream files. Each stream file is assigned to one or more subjects, which are represented as roles (e.g. speaker vs listener). A stream file also has a unique name indicating the source of the recording (e.g. audio or video) and a file extension (e.g. wav or mp4). On disk, a database has the following structure:</p>
 <pre><code>&lt;database-1&gt;/
     &lt;session-1&gt;/
         &lt;role-1&gt;.&lt;stream-name-1&gt;.&lt;stream-ext-1&gt;
@@ -342,24 +316,67 @@ db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { rol
         &lt;role-2&gt;.&lt;stream-name-1&gt;.&lt;stream-ext-1&gt;
         &lt;role-1&gt;.&lt;stream-name-2&gt;.&lt;stream-ext-2&gt;
         &lt;role-2&gt;.&lt;stream-name-2&gt;.&lt;stream-ext-2&gt;
-        ...
-    ...
-&lt;database-1&gt;/
-    ...</code></pre>
-<p>Now copy the root folder to NOVA's 'Download directory' (see Settings dialog) and use 'Manage Sessions' to add the session names (i.e. the folders containing the stream data). Make sure the filenames fit the roles and streams in the database.</p>
+        ...</code></pre>
+<p>In the MongoDB this is reflected by different tables storing the sessions, the roles, and the streams. In addition, also annotators, annotation schemes and annotations are stored. It is important to note that each annotator can own exactly one annotation per scheme and role. This means it is not possible to store different versions of an annotation in the database.</p>
 <div class="figure">
-<img src="pics/database-manage-sessions.png" alt="Manage sessions in NOVA." id="fig:database-manage-sessions" />
-<p class="caption"><em>Manage sessions in NOVA.</em></p>
+<img src="pics/database-structure-general.png" alt="General structure of a database." id="fig:database-structure-general" />
+<p class="caption"><em>General structure of a database.</em></p>
 </div>
-<h3 id="manage-annotations"><span class="header-section-number">4.2.4</span> Manage Annotations</h3>
-<p>Finally, 'Manager Annotations' lists all annotations of a database. For each annotation the session, scheme, role and annotator are given. A search window on the bottom helps to filter</p>
-<h2 id="loading-a-session"><span class="header-section-number">4.3</span> Loading a Session</h2>
+<div class="figure">
+<img src="pics/database-structure-detail.png" alt="Detailed structure of a database." id="fig:database-structure-detail" />
+<p class="caption"><em>Detailed structure of a database.</em></p>
+</div>
+<ul>
+<li>Meta: Meta information about a database, including the data server location, and a description</li>
+<li>Sessions: Stores general information for each recording session, such as location, language and date.</li>
+<li>Annotators: Gives specific users access to the database. or machine!).</li>
+<li>Users: Stores the credentials of all users.</li>
+<li>Roles: Stores the different roles subjects can take on during a recording session (e. g., listener vs speaker).</li>
+<li>Streams: Stores the recorded stream files. Each file is assigned to a media type, a session, a subject and a role. An url is included that points to the location where the file can be downloaded.</li>
+<li>Schemes: Stores the available annotation schemes.</li>
+<li>Annotations: Stores the headers of created annotations. An annotation is linked to an annotator, an annotation scheme, a role and a session. Optionally, a list of stream files is referenced to store which information should be displayed during the annotation process.</li>
+<li>AnnotationData: Contains the actual annotation data (segments or scores) for an annotation. Additionally a Backup is stored for each annotation, allowing the user to go back to the previous version.</li>
+</ul>
+<h2 id="file-server"><span class="header-section-number">4.3</span> File Server</h2>
+<p>Although stream files have to be locally available when displayed in NOVA, it is possible to store the data on a server and let NOVA download them on demand. This is especially useful for large database, where annotators only work on small subsets.</p>
+<p>TODO: add more details how data can be stored to and accessed from a server</p>
+<h2 id="administration"><span class="header-section-number">4.4</span> Administration</h2>
+<p>The 'Administration' sub-menu of the DATABASE menu offers tools to create and maintain databases. Note that most of the functions are only visible to users with administrative rights.</p>
+<ul>
+<li>'Manage Users': add or edit an user account. Users that have been added to the list can connect to the MongoDB and contribute to one or more databases.</li>
+</ul>
+<div class="figure">
+<img src="pics/database-manage-users.png" alt="Manage users." id="fig:database-manage-users" />
+<p class="caption"><em>Manage users.</em></p>
+</div>
+<ul>
+<li>'Manager Databases': add or edit a database. After a database has been created, users can be added which allows them to create and edit annotations. Depending on their role, they can view ('read') annotations and create own annotations ('readWrite'). Users with administrative rights ('dbAdmin') can also edit the annotations of other users.</li>
+</ul>
+<div class="figure">
+<img src="pics/database-manage-databases.png" alt="Manage databases." id="fig:database-manage-databases" />
+<p class="caption"><em>Manage databases.</em></p>
+</div>
+<ul>
+<li>'Manage Sessions': add or edit a session. After a recording is finished, it has to be added to the database first. The name of the session has to match the folder name, where the stream files are stored. Only, stream files that fit the roles and streams in the database will be accessible.</li>
+</ul>
+<div class="figure">
+<img src="pics/database-manage-sessions.png" alt="Manage sessions" id="fig:database-manage-sessions" />
+<p class="caption"><em>Manage sessions</em></p>
+</div>
+<ul>
+<li>'Manage Annotations': lists the annotations of a database. For each annotation the session, scheme, role and annotator are given. A search window on the bottom helps to filter relevant annotations. The dialog only allows to delete annotations. Annotations are either manually created by users or when annotations are merged together. However, they can also be automatically predicted using machine learning tools (see next chapter).</li>
+</ul>
+<div class="figure">
+<img src="pics/database-manage-annotations.png" alt="Manage annotations." id="fig:database-manage-annotations" />
+<p class="caption"><em>Manage annotations.</em></p>
+</div>
+<h2 id="loading-a-session"><span class="header-section-number">4.5</span> Loading a Session</h2>
 <p>The DATABASE menu allows to load annotation and files for a session (note that this will clear the workspace). In the following window you can select multiple annotations and streams belonging to a certain session of a database. Turn on 'Mine only' to filter only your own annotations and 'Unfinished only' to hide annotations that have already been marked finished. Stream files that are not locally available yet, are displayed in red. If selected NOVA will try to download them before the session is displayed.</p>
 <div class="figure">
-<img src="pics/database-load-session.png" alt="Load session from database window." id="fig:database-load-session" />
-<p class="caption"><em>Load session from database window.</em></p>
+<img src="pics/database-load-session.png" alt="Load a session." id="fig:database-load-session" />
+<p class="caption"><em>Load a session.</em></p>
 </div>
-<h2 id="database-create-annotation"><span class="header-section-number">4.4</span> Creating an Annotation</h2>
+<h2 id="database-create-annotation"><span class="header-section-number">4.6</span> Creating an Annotation</h2>
 <p>After loading at least one stream file it is possible to add new annotations to the database by pressing the 'Database' button on the bottom left. You will now be prompted to select a scheme and a role. If an according annotation already exists it will be loaded, otherwise an empty one is created. When the annotation is saved it is automatically written to the database. In case you want to store it on disk use 'Export Selected As' from the ANNOTATION menu. You can also load an existing annotation from another user. As soon as you save the annotation for the first time it will be stored under your name.</p>
 <h1 id="cooperative-learning"><span class="header-section-number">5</span> Cooperative Learning</h1>
 <p>NOVA features tools to considerable speed up the annotation process. The following image illustrates the overall system. (A) Database with recordings of human interaction. (B) NOVA's interface allows to distribute and accomplish annotation tasks among human annotators. (C) At times, Cooperative Learning (CL) can be applied to automatically complete unfinished fractions of the database. Two strategies are available (bottom right box): (I) A session-dependent model is trained on a partly annotated session and applied to complete it. (II) A pool of annotated sessions is used to train a session-independent model and predict labels for the remaining sessions. In both cases, confidence values guide the revision of predicted segments (here marked with a colour gradient).</p>
@@ -367,8 +384,30 @@ db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { rol
 <img src="pics/cl-overview.png" alt="Overview of the cooperative learning system integrated in NOVA." id="fig:cl-overview" />
 <p class="caption"><em>Overview of the cooperative learning system integrated in NOVA.</em></p>
 </div>
+<p>Note that all tasks related to machine learning (ML) are outsourced to Social Signal Interpretation (SSI) framework and executed in a background process. To learn more about SSI please visit the project site:</p>
+<p><a href="http://openssi.net" class="uri">http://openssi.net</a></p>
 <h2 id="cl-feature-extraction"><span class="header-section-number">5.1</span> Feature Extraction</h2>
-<p>TODO: explain how to extract features</p>
+<p>Features can be automatically extracted from the stream files of a database. The type of feature extraction is defined in a SSI chain file. When run through a chain an input stream first passes a number of filter steps, which are applied in-series, i.e. the output of the first filter servers as input for the second filter and so on. Afterwards, the output of the last filter operation is forwarded to each feature component and results are concatenated. For instance, to extract from an audio input the famous Mel-Frequency Cepstral Components (MFCC) we can define the following chain:</p>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;chain&gt;</span>
+    <span class="kw">&lt;meta</span><span class="ot"> frameStep=</span><span class="st">&quot;10ms&quot;</span><span class="ot"> leftContext=</span><span class="st">&quot;10ms&quot;</span><span class="ot"> rightContext=</span><span class="st">&quot;10ms&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;register&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;signal&quot;</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;opensmile&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/register&gt;</span>
+    <span class="kw">&lt;filter&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> create=</span><span class="st">&quot;OSPreemphasis&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/filter&gt;</span>
+    <span class="kw">&lt;feature&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> create=</span><span class="st">&quot;OSMfccChain&quot;</span><span class="ot"> option=</span><span class="st">&quot;mfcc&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/feature&gt;</span>
+<span class="kw">&lt;/chain&gt;</span></code></pre></div>
+<p>Here, the audio stream is first run through a pre-emphasis filter and afterwards MFCC features are extracted over a sliding window of 25 ms with a frame step of 10 ms (timings can be overwritten in NOVA). To configure the MFCC extraction (e. g., the number of coefficients) a separate option file is created (here ’mfcc’). Note that the chain has two dependencies <code>ssisignal.dll</code> and <code>ssiopensmile</code>, which will be automatically downloaded. To learn more about chains, please visit the SSI documentation:</p>
+<p><a href="https://rawgit.com/hcmlab/ssi/master/docs/index.html#xml-basics-transformer-chain" class="uri">https://rawgit.com/hcmlab/ssi/master/docs/index.html#xml-basics-transformer-chain</a></p>
+<p>To use a chain file in NOVA it must be copied to the CML folder <code>cml\chains\&lt;type&gt;\&lt;group&gt;</code>. To start a feature extraction process, we select 'Extract Features' from the 'LEARNING' menu. A dialogue pops up, where we can select the stream for which features will be extracted. All chains matching with the type of the feature (i.e. the <type> sub folder in which the chain is stored equals the type of the stream), are now displayed and can be selected. If wished, left context, frame step, and right context can be set. Finally, we can select the sessions and start the feature extraction. Here, the number of threads defines how many files will be processed in parallel. The file name of the new stream is <code>&lt;old-name&gt;.&lt;chain-name&gt;[left,step,right]</code> and is automatically added to the database. Unless 'Force' is selected, stream files that already exist will not be overriden and feature extraction is skipped for these sessions.</p>
+<div class="figure">
+<img src="pics/cl-feature-dialog.png" alt="Feature extraction." id="fig:cl-feature-dialog" />
+<p class="caption"><em>Feature extraction.</em></p>
+</div>
 <h2 id="cl-trainer-templates"><span class="header-section-number">5.2</span> Trainer Templates</h2>
 <p>TODO: explain how to create trainer templates</p>
 <h2 id="annotation-completion"><span class="header-section-number">5.3</span> Annotation Completion</h2>
@@ -379,8 +418,8 @@ db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { rol
 </div>
 <p>Now, call 'Complete Current Annotation' from the LEARNING menu. In the dialogue that pops up you can now select the <a href="#cl-feature-extraction">feature stream</a> to which machine learning should be applied. Only streams are displayed for which at least one <a href="#cl-trainer-templates">trainer template</a> is available. Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold.</p>
 <div class="figure">
-<img src="pics/cl-completion-dialog.png" alt="Annotation completion dialogue." id="fig:cl-completion-dialog" />
-<p class="caption"><em>Annotation completion dialogue.</em></p>
+<img src="pics/cl-completion-dialog.png" alt="Annotation completion." id="fig:cl-completion-dialog" />
+<p class="caption"><em>Annotation completion.</em></p>
 </div>
 <p>If you are not happy with the completion you are still given the opportunity 'Undo' the changes now. Otherwise, you can now continue to work with the automatically completed annotation.</p>
 <div class="figure">
@@ -395,8 +434,8 @@ db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { rol
 <h2 id="cl-model-training"><span class="header-section-number">5.4</span> Model Training</h2>
 <p>Once annotations for a number of sessions have been accomplished a 'strong' classification model can be trained. This requires that <a href="#cl-feature-extraction">features</a> have been extracted for the sessions and a compatible <a href="#cl-trainer-templates">trainer template</a> is available. Now choose 'Train Model' from LEARNING and a dialogue pops up. Here you can select a scheme, one or more roles and an annotator. Sessions for which an annotation exists that satisfies the selection are now shown and can be selected. Finally, choose the stream for which a machine learning model should be trained. Note that only those streams are listed for which at least one <a href="#cl-trainer-templates">trainer template</a> is found. By pressing 'Train' model training is started. Switch on 'Force' if you want to override an existing model.</p>
 <div class="figure">
-<img src="pics/cl-training-dialog.png" alt="Model training dialogue." id="fig:cl-training-dialog" />
-<p class="caption"><em>Model training dialogue.</em></p>
+<img src="pics/cl-training-dialog.png" alt="Model training." id="fig:cl-training-dialog" />
+<p class="caption"><em>Model training.</em></p>
 </div>
 <h2 id="annotation-prediction"><span class="header-section-number">5.5</span> Annotation Prediction</h2>
 <p>With a trained model it is now possible to predict annotations for one or more sessions. Therefore choose 'Prediction Annotations' from the LEARNING menu. Once you have selected a scheme, a role and an Annotator those sessions will be listed, which do not have a matching annotation yet. You can turn of the filter by selecting 'Show existing', however, make sure you are not occidentally overriding existing annotations (no undo available!). Finally, select the stream for which a machine learning <a href="#cl-model-training">model</a> has been trained (only streams are listed for which at least one model is found). Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold. After pressing 'Predict' annotations will be created based on the chosen model for all sessions that have been selected and stored under your name (if you are an administrator you may also generate annotations for another user).</p>

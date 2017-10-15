@@ -51,10 +51,12 @@
             </MenuItem>
             <MenuItem Header="ANNOTATION">
                 <MenuItem Header="Save" Name="annoSaveMenu" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="Save As Finished" Name="annoSaveAsFinishedMenu"/>
                 <MenuItem Header="Save All" Name="annoSaveAllMenu" />
                 <MenuItem Header="Reload" Name="annoReloadMenu" InputGestureText="Ctrl+R"/>
                 <MenuItem Header="Reload From Backup" Name="annoReloadBackupMenu" />
                 <MenuItem Header="Export As" Name="annoExportMenu" />
+                <MenuItem Header="Remove Segments Right of Marker" Name="removeRemainingSegmentsMenu" InputGestureText="Ctrl+K"/>
                 <MenuItem Header="Convert Annotation" Name="convertSelectedTierMenu">
                     <MenuItem Header="To Discrete Annotation" Name="convertAnnoContinuousToDiscreteMenu" />
                     <MenuItem Header="To Signal" Name="convertAnnoToSignalMenu" />
@@ -73,7 +75,7 @@
                 </MenuItem>
                 <MenuItem Header="Merge / Copy Annotations" Name="databaseCMLMergeAnnotationsMenu" />                
                 <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
-                <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu"/>
+                <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
             <MenuItem Header="?">
                 <MenuItem Header="Documentation"  Name="helpDocumentationMenu" />

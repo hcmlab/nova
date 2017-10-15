@@ -78,7 +78,7 @@ namespace ssi
         public string CMLExtractFeature(string chainPath, int nParallel, string fromPath, string toPath, string frameStep, string leftContext, string rightContext)
         {
             string result = "";
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-extract.log";
+            string logPath = "\"" + AppDomain.CurrentDomain.BaseDirectory + "\\cml-extract.log\"";
 
             File.Delete(logPath);
 
@@ -116,7 +116,7 @@ namespace ssi
         public string CMLMergeFeature(string rootDir, string sessions, string roles, string inputStreams, string outputStream, bool force)
         {
             string result = "";
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-merge.log";
+            string logPath = "\"" + AppDomain.CurrentDomain.BaseDirectory + "\\cml-merge.log\"";
 
             File.Delete(logPath);
 
@@ -156,7 +156,7 @@ namespace ssi
             string[] split = server.Split(':');
             string ip = split[0];
             string port = split[1];
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-train.log";
+            string logPath = "\"" + AppDomain.CurrentDomain.BaseDirectory + "\\cml-train.log\"";
 
             File.Delete(logPath);
 
@@ -207,7 +207,7 @@ namespace ssi
             string[] split = server.Split(':');
             string ip = split[0];
             string port = split[1];
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-eval.log";
+            string logPath = "\"" + AppDomain.CurrentDomain.BaseDirectory + "\\cml-eval.log\"";
 
             File.Delete(logPath);
 
@@ -270,7 +270,7 @@ namespace ssi
             string[] split = server.Split(':');
             string ip = split[0];
             string port = split[1];
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-predict.log";
+            string logPath = "\"" + AppDomain.CurrentDomain.BaseDirectory + "\\cml-predict.log\"";
 
             File.Delete(logPath);
 
@@ -343,7 +343,7 @@ namespace ssi
             string[] split = server.Split(':');
             string ip = split[0];
             string port = split[1];
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-fusion.log";
+            string logPath = "\"" + AppDomain.CurrentDomain.BaseDirectory + "\\cml-fusion.log\"";
 
             File.Delete(logPath);
 
@@ -389,7 +389,7 @@ namespace ssi
         public string CMLTrainBayesianNetwork(string netPath, string datasetpath, bool isdynamic)
         {
             string result = "";
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-bayestrain.log";
+            string logPath = "\"" + AppDomain.CurrentDomain.BaseDirectory + "\\cml-bayestrain.log\"";
 
             if(File.Exists(logPath)) File.Delete(logPath);
 

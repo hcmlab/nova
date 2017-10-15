@@ -13,7 +13,8 @@ namespace ssi
     {
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (!this.control.annoListControl.editTextBox.IsFocused)
+            if (!control.annoListControl.editTextBox.IsFocused
+                && !control.annoListControl.searchTextBox.IsFocused)
             {
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
                 switch (level)
@@ -38,6 +39,12 @@ namespace ssi
                             else if (e.KeyboardDevice.IsKeyDown(Key.L))
                             {
                                 CompleteSession();
+                                e.Handled = true;
+                            }
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.K))
+                            {
+                                DeleteRemainingSegments();
                                 e.Handled = true;
                             }
 
@@ -101,7 +108,15 @@ namespace ssi
                     /*No Modifier keys are pressed*/
                     case 0:
                         if (((int)e.Key >= 34 && (int)e.Key <= 43) || ((int)e.Key >= 74 && (int)e.Key <= 83)) {
-                            SetLabelForSegment(e);
+                            if(AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                            {
+                                SetContinuousLevel(e);
+                            }
+                            else
+                            {
+                                SetLabelForSegment(e);
+                            }
+                           
                         }
                         else if (e.KeyboardDevice.IsKeyDown(Key.S))
                         {
@@ -130,6 +145,25 @@ namespace ssi
                             MoveFrameMedia();
                             e.Handled = true;
                         }
+
+                        else if (e.KeyboardDevice.IsKeyDown(Key.Up))
+                        {
+                            if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                            {
+                                SetContinuousLevelUp();
+                            }
+
+                            e.Handled = true;
+                        }
+                        else if (e.KeyboardDevice.IsKeyDown(Key.Down))
+                        {
+                            if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                            {
+                                SetContinuousLevelDown();
+                            }
+                            e.Handled = true;
+                        }
+
 
                         else if (e.KeyboardDevice.IsKeyDown(Key.Space))
                         {
@@ -475,6 +509,30 @@ namespace ssi
             }
         }
 
+
+        private void SetContinuousLevel(KeyEventArgs e)
+        {
+            if (e.Key - Key.D1 < Properties.Settings.Default.ContinuousHotkeysNumber && e.Key - Key.D1 >= 0)
+            {
+                AnnoTierStatic.Selected.continuousSegmentToPosition(e.Key - Key.D1);
+            }
+        }
+
+        private void SetContinuousLevelUp()
+        {
+         
+               AnnoTierStatic.Selected.continuousSegmentUp();
+            
+        }
+
+        private void SetContinuousLevelDown()
+        {
+
+            AnnoTierStatic.Selected.continuousSegmentDown();
+
+        }
+
+
         private void PasteSegment()
         {
  
@@ -797,6 +855,24 @@ namespace ssi
                 databaseCMLCompleteStep();
             }
         }
+
+        public void DeleteRemainingSegments()
+        {
+            if (AnnoTierStatic.Selected != null)
+            {
+                double selectedtime = MainHandler.Time.TimeFromPixel(annoCursor.X);
+
+                List<AnnoTierSegment> SegmentsToRemove =  AnnoTierStatic.Selected.segments.FindAll(s => s.Item.Start > selectedtime);
+
+                foreach(AnnoTierSegment segment in SegmentsToRemove)
+                {
+                    AnnoTierStatic.Selected.RemoveSegment(segment);
+                }
+            }
+        }
+
+
+        
 
         private void Undo()
         {

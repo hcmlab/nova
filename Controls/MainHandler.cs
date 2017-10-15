@@ -15,7 +15,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "0.9.9.9.9";
+        public static string BuildVersion = "1.0.0.0";
         public static MEDIABACKEND Mediabackend = MEDIABACKEND.MEDIAKIT;
 
 
@@ -161,6 +161,7 @@ namespace ssi
             control.menu.MouseEnter += tierMenu_MouseEnter;
 
             control.annoSaveMenu.Click += annoSave_Click;
+            control.annoSaveAsFinishedMenu.Click += annoSaveAsFinished_Click;
             control.annoReloadMenu.Click += annoReload_Click;
             control.annoReloadBackupMenu.Click += annoReloadBackup_Click;
             control.annoExportMenu.Click += annoExport_Click;
@@ -181,7 +182,9 @@ namespace ssi
             control.convertAnnoContinuousToDiscreteMenu.Click += convertAnnoContinuousToDiscrete_Click;
             control.convertAnnoToSignalMenu.Click += convertAnnoToSignal_Click;
             control.convertSignalToAnnoContinuousMenu.Click += convertSignalToAnnoContinuous_Click;
-            
+            control.removeRemainingSegmentsMenu.Click += removeRemainingSegmentsMenu_Click;
+
+
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
             control.databaseCMLFusionMenu.Click += databaseCMLFusion_Click;
@@ -272,6 +275,7 @@ namespace ssi
 
             // Update
             bool alreadycheckedcmlupdate = false;
+
 
             if (Properties.Settings.Default.CheckUpdateOnStart && Properties.Settings.Default.LastUpdateCheckDate.Date != DateTime.Today.Date)
             {

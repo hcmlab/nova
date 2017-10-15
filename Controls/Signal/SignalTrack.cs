@@ -177,45 +177,84 @@ namespace ssi
             }
             else
             {
-                for (int d = dimension; d <= dimension; d++)
+
+                if(signal.type == Signal.Type.CHAR)
                 {
-                    float zoomFactor = track.zoomLevel * ((signal.max[d] - signal.min[d]) / 10);
-                    float zoomOffset = track.zoomOffset * ((signal.max[d] - signal.min[d]) / 10);
-                    float minVal = signal.min[d] + zoomFactor;
-                    float maxVal = signal.max[d] - zoomFactor;
-                    float offset = minVal;
-                    float scale = (float)height / (maxVal - offset);
-                    offset += zoomOffset;
-                    Point from = new Point(0, height - (signal.data[d] - offset) * scale);
-                    Point to = new Point();
-                    if (width == signal.number)
+                    for (int d = dimension; d <= dimension; d++)
                     {
-                        for (int i = 0; i < signal.number; i++)
-                        {
-                            to.X = i;
-                            to.Y = height - (signal.data[i * signal.dim + d] - offset) * scale;
-                            if (to.Y > height) to.Y = height;
-                            else if (to.Y < 0) to.Y = 0;
-                            dc.DrawLine(pen, from, to);
-                            from.X = to.X;
-                            from.Y = to.Y;
-                        }
+                        float zoomFactor = track.zoomLevel * ((signal.max[d] - signal.min[d]) / 10);
+                        float zoomOffset = track.zoomOffset * ((signal.max[d] - signal.min[d]) / 10);
+                        float minVal = signal.min[d] + zoomFactor;
+                        float maxVal = signal.max[d] - zoomFactor;
+                        float offset = minVal;
+                        float scale = (float)height / (maxVal - offset);
+                        offset += zoomOffset;
+                        Point from = new Point(0, height - (signal.data[d] - offset) * scale);
+                        Point to = new Point();
+
+
+   
+                        
+                            float step = (float)width / (float)signal.number;
+                            for (int i = 0; i < signal.number; i++)
+                            {
+                                to.X = (uint)i * step;
+                                to.Y = height - (signal.data[i * signal.dim + d] - offset) * scale;
+                                if (to.Y > height) to.Y = height;
+                                else if (to.Y < 0) to.Y = 0;
+                                dc.DrawLine(pen, from, to);
+                                from.X = to.X;
+                                from.Y = to.Y;
+                            }
+                        
                     }
-                    else
+
+                }
+
+                else
+                {
+                    for (int d = dimension; d <= dimension; d++)
                     {
-                        float step = (float)width / (float)signal.number;
-                        for (int i = 0; i < signal.number; i++)
+                        float zoomFactor = track.zoomLevel * ((signal.max[d] - signal.min[d]) / 10);
+                        float zoomOffset = track.zoomOffset * ((signal.max[d] - signal.min[d]) / 10);
+                        float minVal = signal.min[d] + zoomFactor;
+                        float maxVal = signal.max[d] - zoomFactor;
+                        float offset = minVal;
+                        float scale = (float)height / (maxVal - offset);
+                        offset += zoomOffset;
+                        Point from = new Point(0, height - (signal.data[d] - offset) * scale);
+                        Point to = new Point();
+                        if (width == signal.number)
                         {
-                            to.X = (uint)i * step;
-                            to.Y = height - (signal.data[i * signal.dim + d] - offset) * scale;
-                            if (to.Y > height) to.Y = height;
-                            else if (to.Y < 0) to.Y = 0;
-                            dc.DrawLine(pen, from, to);
-                            from.X = to.X;
-                            from.Y = to.Y;
+                            for (int i = 0; i < signal.number; i++)
+                            {
+                                to.X = i;
+                                to.Y = height - (signal.data[i * signal.dim + d] - offset) * scale;
+                                if (to.Y > height) to.Y = height;
+                                else if (to.Y < 0) to.Y = 0;
+                                dc.DrawLine(pen, from, to);
+
+                                from.X = to.X;
+                                from.Y = to.Y;
+                            }
+                        }
+                        else
+                        {
+                            float step = (float)width / (float)signal.number;
+                            for (int i = 0; i < signal.number; i++)
+                            {
+                                to.X = (uint)i * step;
+                                to.Y = height - (signal.data[i * signal.dim + d] - offset) * scale;
+                                if (to.Y > height) to.Y = height;
+                                else if (to.Y < 0) to.Y = 0;
+                                dc.DrawLine(pen, from, to);
+                                from.X = to.X;
+                                from.Y = to.Y;
+                            }
                         }
                     }
                 }
+              
             }
         }
 

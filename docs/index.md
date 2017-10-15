@@ -186,17 +186,14 @@ An annotation can be saved to a file on disk. Actually, it is stored in two sepa
 
 # Database
 
-NOVA allows users to manage and share annotations through a database, which requires to set-up a MongoDB server. 
+To support a collaborative annotation process, NOVA maintains a database back-end, which allows users to load and save annotations from and to a MongoDB running on a central server. This gives involved annotators the possibility to immediately commit changes and follow the annotation progress of the others.
+
 
 ## Setup MongoDB
 
-We will describe two strategies: a) set up MongoDB with Docker *or* b) set up MongoDB natively.
+We will describe two strategies: a) set up MongoDB with Docker *or* b) set up MongoDB natively. In the following, make sure to replace the default password "PASSWORD".
 
-Hint: Default user: "admin" and default password "PASSWORD" may/should be replaced.
-
-### Install
-
-Install Docker (<https://www.docker.com/>) and run:
+First, we install Docker (<https://www.docker.com/>) and run:
 
 ~~~~
 docker pull mongo:latest  
@@ -205,17 +202,13 @@ docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mo
 
 *or*
 
-Install MongoDB (<https://www.mongodb.com/download-center#community>) and run:
+We install MongoDB (<https://www.mongodb.com/download-center#community>) and run:
 
 ~~~~
 mongod --auth
 ~~~~
 
-MongoDB now runs on 127.0.0.1:27017.
-
-### Configure
-
-We connect to MongoDB:
+MongoDB now runs on 127.0.0.1:27017 and we can connect to it:
 
 ~~~~
 docker exec -it nova mongo admin
@@ -227,7 +220,7 @@ docker exec -it nova mongo admin
 mongo admin
 ~~~~
 
-and add an administrator:
+We add an administrator:
 
 ~~~~
 use admin
@@ -235,7 +228,7 @@ db.createUser({ user: 'admin', pwd: 'PASSWORD', roles: [ { role: "root", db: "ad
 exit
 ~~~~
    
-Now we reconnect:
+And reconnect afterwards:
 
 ~~~~
 docker exec -it nova mongo -u admin -p PASSWORD --authenticationDatabase admin 
@@ -247,7 +240,7 @@ docker exec -it nova mongo -u admin -p PASSWORD --authenticationDatabase admin
 mongo -u admin -p PASSWORD --authenticationDatabase admin 
 ~~~~
 
-and add a custom role (this will allow users to change their passwords and meta information):
+We add a custom role to allow users to change their passwords and update their profile:
 
 ~~~~	
 use admin
@@ -272,37 +265,19 @@ db.createUser({ user: 'gold', pwd: 'PASSWORD1', roles: [ { role: "readWriteAnyDa
 db.createUser({ user: 'system', pwd: 'PASSWORD2', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ], customData: {fullname: 'SYSTEM', email: ' ', expertise: NumberInt(0)} });
 ~~~~			
 
-and test the server:		
+We can now test the server:		
 
 ~~~~			
 show dbs
 ~~~~			
 
-### Connect
+To connect to the MongoDB server in NOVA, we open the settings by clicking the wheel in the menu and switch to the 'Database' tab. Here we enter the host and port number of the MongoDB server and the user credentials. The dialog also allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.
 
-To connect to a MongoDB server, open the settings by clicking the wheel in the menu and switch to the Database tab. Enter the host and port number of the MongoDB server and the user credentials. The dialog allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.
+![*Connect to a database.*](pics/database-connect.png){#fig:database-connect}
 
-![*Connect database in NOVA.*](pics/database-connect.png){#fig:database-connect}
+## General Structure
 
-## Administration
-
-The 'Administration' sub-menu of the DATABASE menu offers tools to create and maintain databases. Note that most of the functions are only visible to users with administrative rights.
-
-### Manage Users
-
-'Manage Users' allows it to add or edit user accounts. Users that have been added to the list can connect to the MongoDB and contribute to one or more databases. 
-
-![*Manage users in NOVA.*](pics/database-manage-users.png){#fig:database-manage-users}
-
-### Manage Databases
-
-'Manager Databases' allows it to add or edit databases. After a database has been created, users can be added which makes them to *Annotators* of the database. Depending on their role, they can view ('read') annotations and create own annotations ('readWrite'). Users with administrative rights ('dbAdmin') can also edit the annotations of other users. Annotation *Schemes* define the type of annotations that are available in the database. A database can also have one or more *Roles*. This is useful to distinguish participants in recordings with multiple subjects. It is important to note that each annotator can own exactly one annotation per scheme and role. This means it is not possible to store different versions of an annotation in the database. Finally, a list with streams defines, which kind of data (recorded or extracted) may exist. A stream is defined by name, file extension and sample rate. And it has a type, which defines which kind of machine learning techniques can be applied to it (see later).
-
-![*Manage databases in NOVA.*](pics/database-manage-databases.png){#fig:database-manage-databases}
-
-### Manage Sessions
-
-Before adding sessions to a database, it is important to understand the underlying file structure. Each database is located in a root folder with the name of the database and may consist of one more sessions. All stream files belonging to a session are grouped in sub-folder within the root folder. The name of the folder defines the name of the session. In a session we distinguish between several subjects, which take a certain role. E.g. thinking of a dyadic conversation, one user could be the expert sharing the knowledge about a certain topic to a novice user. Hence we have two roles: 'expert' and 'novice'. Each file has a unique name defined by the role and the type of recorded channel. E.g. if we have recorded the interaction using close talk microphones and two webcams, we may use the following file structure:
+A database in NOVA aggregates data recorded within the same experiment. It is basically a collection of recorded stream files (data) and descriptions marking interesting events in the data (annotations). NOVA can handle multiple databases and offers tools to maintain them and incrementally accumulate new data and annotations. Generally, stream files are stored on disk and annotations are stored in a MongoDB. Each database consists of one or more sessions. A session is a single and continuous recording distributed over one or more stream files. Each stream file is assigned to one or more subjects, which are represented as roles (e.g. speaker vs listener). A stream file also has a unique name indicating the source of the recording (e.g. audio or video) and a file extension (e.g. wav or mp4). On disk, a database has the following structure:
 
 ~~~~
 <database-1>/
@@ -318,24 +293,66 @@ Before adding sessions to a database, it is important to understand the underlyi
 		<role-1>.<stream-name-2>.<stream-ext-2>
 		<role-2>.<stream-name-2>.<stream-ext-2>
 		...
-	...
-<database-1>/
-	...
 ~~~~
 
-Now copy the root folder to NOVA's 'Download directory' (see Settings dialog) and use 'Manage Sessions' to add the session names (i.e. the folders containing the stream data). Make sure the filenames fit the roles and streams in the database.
+In the MongoDB this is reflected by different tables storing the sessions, the roles, and the streams. In addition, also annotators, annotation schemes and annotations are stored. It is important to note that each annotator can own exactly one annotation per scheme and role. This means it is not possible to store different versions of an annotation in the database.
 
-![*Manage sessions in NOVA.*](pics/database-manage-sessions.png){#fig:database-manage-sessions}
+![*General structure of a database.*](pics/database-structure-general.png){#fig:database-structure-general}
 
-### Manage Annotations
+![*Detailed structure of a database.*](pics/database-structure-detail.png){#fig:database-structure-detail}
 
-Finally, 'Manager Annotations' lists all annotations of a database. For each annotation the session, scheme, role and annotator are given.  A search window on the bottom helps to filter
+* Meta: Meta information about a database, including the data server location, and
+a description
+* Sessions: Stores general information for each recording session, such as location,
+language and date.
+* Annotators: Gives specific users access to the database.
+or machine!).
+* Users: Stores the credentials of all users.
+* Roles: Stores the different roles subjects can take on during a recording session
+(e. g., listener vs speaker).
+* Streams: Stores the recorded stream files. Each file is assigned to a media type, a
+session, a subject and a role. An url is included that points to the location where the
+file can be downloaded.
+* Schemes: Stores the available annotation schemes.
+* Annotations: Stores the headers of created annotations. An annotation is linked
+to an annotator, an annotation scheme, a role and a session. Optionally, a list of
+stream files is referenced to store which information should be displayed during the
+annotation process.
+* AnnotationData: Contains the actual annotation data (segments or scores) for an
+annotation. Additionally a Backup is stored for each annotation, allowing the user
+to go back to the previous version.
+
+## File Server
+
+Although stream files have to be locally available when displayed in NOVA, it is possible to store the data on a server and let NOVA download them on demand. This is especially useful for large database, where annotators only work on small subsets. 
+
+TODO: add more details how data can be stored to and accessed from a server
+
+## Administration
+
+The 'Administration' sub-menu of the DATABASE menu offers tools to create and maintain databases. Note that most of the functions are only visible to users with administrative rights. 
+
+* 'Manage Users': add or edit an user account. Users that have been added to the list can connect to the MongoDB and contribute to one or more databases. 
+
+![*Manage users.*](pics/database-manage-users.png){#fig:database-manage-users}
+
+* 'Manager Databases': add or edit a database. After a database has been created, users can be added which allows them to create and edit annotations. Depending on their role, they can view ('read') annotations and create own annotations ('readWrite'). Users with administrative rights ('dbAdmin') can also edit the annotations of other users. 
+
+![*Manage databases.*](pics/database-manage-databases.png){#fig:database-manage-databases}
+
+* 'Manage Sessions': add or edit a session. After a recording is finished, it has to be added to the database first. The name of the session has to match the folder name, where the stream files are stored. Only, stream files that fit the roles and streams in the database will be accessible.
+
+![*Manage sessions*](pics/database-manage-sessions.png){#fig:database-manage-sessions}
+
+* 'Manage Annotations': lists the annotations of a database. For each annotation the session, scheme, role and annotator are given. A search window on the bottom helps to filter relevant annotations. The dialog only allows to delete annotations. Annotations are either manually created by users or when annotations are merged together. However, they can also be automatically predicted using machine learning tools (see next chapter).
+
+![*Manage annotations.*](pics/database-manage-annotations.png){#fig:database-manage-annotations}
 
 ## Loading a Session
 
 The DATABASE menu allows to load annotation and files for a session (note that this will clear the workspace). In the following window you can select multiple annotations and streams belonging to a certain session of a database. Turn on 'Mine only' to filter only your own annotations and 'Unfinished only' to hide annotations that have already been marked finished. Stream files that are not locally available yet, are displayed in red. If selected NOVA will try to download them before the session is displayed.
 
-![*Load session from database window.*](pics/database-load-session.png){#fig:database-load-session}
+![*Load a session.*](pics/database-load-session.png){#fig:database-load-session}
 
 ## Creating an Annotation {#database-create-annotation}
 
@@ -347,9 +364,37 @@ NOVA features tools to considerable speed up the annotation process. The followi
 
 ![*Overview of the cooperative learning system integrated in NOVA.*](pics/cl-overview.png){#fig:cl-overview}
 
+Note that all tasks related to machine learning (ML) are outsourced to Social Signal Interpretation (SSI) framework and executed in a background process. To learn more about SSI please visit the project site:
+
+<http://openssi.net>
+
 ## Feature Extraction {#cl-feature-extraction}
 
-TODO: explain how to extract features
+Features can be automatically extracted from the stream files of a database. The type of feature extraction is defined in a SSI chain file. When run through a chain an input stream first passes a number of filter steps, which are applied in-series, i.e. the output of the first filter servers as input for the second filter and so on. Afterwards, the output of the last filter operation is forwarded to each feature component and results are concatenated. For instance, to extract from an audio input the famous Mel-Frequency Cepstral Components (MFCC) we can define the following chain:
+
+``` xml
+<chain>
+	<meta frameStep="10ms" leftContext="10ms" rightContext="10ms"/>
+	<register>
+		<item name="signal"/>
+		<item name="opensmile"/>
+	</register>
+	<filter>
+		<item create="OSPreemphasis"/>
+	</filter>
+	<feature>
+		<item create="OSMfccChain" option="mfcc"/>
+	</feature>
+</chain>
+```
+
+Here, the audio stream is first run through a pre-emphasis filter and afterwards MFCC features are extracted over a sliding window of 25 ms with a frame step of 10 ms (timings can be overwritten in NOVA). To configure the MFCC extraction (e. g., the number of coefficients) a separate option file is created (here ’mfcc’). Note that the chain has two dependencies ``ssisignal.dll`` and ``ssiopensmile``, which will be automatically downloaded. To learn more about chains, please visit the SSI documentation:
+
+<https://rawgit.com/hcmlab/ssi/master/docs/index.html#xml-basics-transformer-chain>
+
+To use a chain file in NOVA it must be copied to the CML folder ``cml\chains\<type>\<group>``. To start a feature extraction process, we select 'Extract Features' from the 'LEARNING' menu. A dialogue pops up, where we can select the stream for which features will be extracted. All chains matching with the type of the feature (i.e. the <type> sub folder in which the chain is stored equals the type of the stream), are now displayed and can be selected. If wished, left context, frame step, and right context can be set. Finally, we can select the sessions and start the feature extraction. Here, the number of threads defines how many files will be processed in parallel. The file name of the new stream is ``<old-name>.<chain-name>[left,step,right]`` and is automatically added to the database. Unless 'Force' is selected, stream files that already exist will not be overriden and feature extraction is skipped for these sessions. 
+
+![*Feature extraction.*](pics/cl-feature-dialog.png){#fig:cl-feature-dialog}
 
 ## Trainer Templates {#cl-trainer-templates}
 
@@ -363,7 +408,7 @@ NOVA allows it to complete a partly finished annotation. Note that NOVA expects 
 
 Now, call 'Complete Current Annotation' from the LEARNING menu. In the dialogue that pops up you can now select the [feature stream](#cl-feature-extraction) to which machine learning should be applied. Only streams are displayed for which at least one [trainer template](#cl-trainer-templates) is available. Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold.
 
-![*Annotation completion dialogue.*](pics/cl-completion-dialog.png){#fig:cl-completion-dialog}
+![*Annotation completion.*](pics/cl-completion-dialog.png){#fig:cl-completion-dialog}
 
 If you are not happy with the completion you are still given the opportunity 'Undo' the changes now. Otherwise, you can now continue to work with the automatically completed annotation.
 
@@ -377,7 +422,7 @@ Note that predictions with a low confidence will be marked with a special patter
 
 Once annotations for a number of sessions have been accomplished a 'strong' classification model can be trained. This requires that [features](#cl-feature-extraction) have been extracted for the sessions and a compatible [trainer template](#cl-trainer-templates) is available. Now choose 'Train Model' from LEARNING and a dialogue pops up. Here you can select a scheme, one or more roles and an annotator. Sessions for which an annotation exists that satisfies the selection are now shown and can be selected. Finally, choose the stream for which a machine learning model should be trained. Note that only those streams are listed for which at least one [trainer template](#cl-trainer-templates) is found. By pressing 'Train' model training is started. Switch on 'Force' if you want to override an existing model.
 
-![*Model training dialogue.*](pics/cl-training-dialog.png){#fig:cl-training-dialog}
+![*Model training.*](pics/cl-training-dialog.png){#fig:cl-training-dialog}
 
 ## Annotation Prediction
 
