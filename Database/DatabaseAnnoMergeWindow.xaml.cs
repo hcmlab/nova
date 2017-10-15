@@ -157,7 +157,9 @@ namespace ssi
                 var filterc = builder.Eq("_id", anno["annotator_id"]);
                 var annotatdb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filterc).Single();
                 string annotatorname = annotatdb.GetValue(1).ToString();
-                string annotatornamefull = annotatdb.GetValue(2).ToString();
+
+                string annotatornamefull =  DatabaseHandler.Annotators.Find(a => a.Name == annotatorname).FullName;
+
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {

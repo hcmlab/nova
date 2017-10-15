@@ -165,7 +165,22 @@ namespace ssi
             dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
             dialog.ShowNewFolderButton = true;
             dialog.Description = "Select the folder where you want to store the media of your databases in.";
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+
+            try
+            {
+                dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
+                result = dialog.ShowDialog();
+
+            }
+
+            catch
+            {
+                dialog.SelectedPath = "";
+                result = dialog.ShowDialog();
+            }
+
+
 
             if (result == System.Windows.Forms.DialogResult.OK)
             {
@@ -184,16 +199,30 @@ namespace ssi
 
         private void PickCMLDirectory_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            dialog.SelectedPath = Properties.Settings.Default.CMLDirectory;
-            dialog.ShowNewFolderButton = true;
-            dialog.Description = "Select the folder where the Cooperative machine learning tools are stored.";
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            
+                var dialog = new System.Windows.Forms.FolderBrowserDialog();
+               
+                dialog.ShowNewFolderButton = true;
+                dialog.Description = "Select the folder where the Cooperative machine learning tools are stored.";
+                System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+            try
+            {
+                dialog.SelectedPath = Properties.Settings.Default.CMLDirectory;
+                result = dialog.ShowDialog();
+               
+            }
+
+            catch
+            {
+                dialog.SelectedPath = "";
+                result = dialog.ShowDialog();
+            }
 
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 CMLDirectory.Text = dialog.SelectedPath;
             }
+
         }
 
 

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Load Session" Height="700" Width="1000" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="Load Session" Height="700" Width="1000" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
 
     <Window.Resources>
         <Style x:Key="StreamItemColorStyle" TargetType="{x:Type ListViewItem}">

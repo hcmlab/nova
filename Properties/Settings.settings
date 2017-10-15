@@ -96,7 +96,7 @@
       <Value Profile="(Default)">0.15</Value>
     </Setting>
     <Setting Name="DatabaseAskBeforeOverwrite" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="LastUpdateCheckDate" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)">1979-01-01</Value>

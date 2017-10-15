@@ -16,9 +16,42 @@ namespace ssi
     {
         WebClient webClient;
    
+        private class MyWebClient : WebClient
+        {
+            protected override WebRequest GetWebRequest(Uri address)
+            {
+                WebRequest w = base.GetWebRequest(address);
+                w.Timeout = 1000;
+                return w;
+            }
+        }
+
+        public bool hasGithubConnection()
+        {
+            try
+            {
+                using (var client = new MyWebClient())
+                {
+                    using (client.OpenRead("https://github.com/"))
+                    {
+                        return true;                    
+                    }
+                }
+            }
+            catch
+            {
+                //MessageTools.Warning("No connection to Github");
+            }
+
+            return false;
+        }
 
         private async void checkForUpdates(bool silent = false)
         {
+            if (!hasGithubConnection())
+            {
+                return;
+            }
             try
             {
                 var client = new GitHubClient(new ProductHeaderValue("nova"));
@@ -56,13 +89,16 @@ namespace ssi
             }
             catch
             {
-                //MessageBox.Show("An Error occured. API limit reached, or no Internet Connection!");
+                MessageBox.Show("API limit reached!");
             }
         }
 
         private async void checkForCMLUpdates(bool silent = false)
         {
-
+            if (!hasGithubConnection())
+            {
+                return;
+            }
             try
             {
             var client = new GitHubClient(new ProductHeaderValue("ssi"));
@@ -190,7 +226,7 @@ namespace ssi
             }
             catch
             {
-                //MessageBox.Show("An Error occured. API limit reached, or no Internet Connection!");
+                MessageBox.Show("API limit reached!");
             }
         }
 
