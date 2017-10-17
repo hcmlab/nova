@@ -1,12 +1,13 @@
-# (NOn)Verbal Annotator
-NOVA is a tool for annotating and analyzing behaviours in social interactions. It allows to load data recorded with the SSI Framework, as well as from external sources. It further makes use of SSI for semi-automated labeling of behaviours for example by automatically detecting specific gestures from a Kinect (or Kinect 2) Sensor or facial expressions from video.
+# (Non)verbal Annotator
+NovA is a tool for annotating and analyzing behaviours in social interactions. It allows to load data recorded with the SSI Framework, as well as from external sources. It further makes use of SSI for semi-automated labeling of behaviours for example by automatically detecting specific gestures from a Kinect (or Kinect 2) Sensor or facial expressions from video.
+
 
 ![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2016/11/nova.png)
 
 
-NovA has been completly reworked with more advanced annotation features. It now allows framewise labeling for a more precise coding experience, and continuous annotations for labeling e.g emotions or social attitudes (see picture below). The interface is more customizable than the last version and allows loading and labeling data of multiple persons.
+NOVA has been completly reworked with more advanced annotation features. It now allows framewise labeling for a more precise coding experience, and continuous annotations for labeling e.g emotions or social attitudes (see picture below). The interface is more customizable than the last version and allows loading and labeling data of multiple persons.
 
-The Annotation format can easily be imported in other tools, like ELAN or Excel. NovA further supports the Import of Discrete Annotation files from ELAN and ANVIL for a seamless workflow. Annotations further can directly be transformed into SSI samplelists for training models.
+The Annotation format can easily be imported in other tools, like ELAN or Excel. NOVA further supports the Import of Discrete Annotation files from ELAN and ANVIL for a seamless workflow. Annotations further can directly be transformed into SSI samplelists for training models.
 Additionally it's now possible to store/load annotations in a local or external MongoDB database for a cooperative workflow (basic support). 
 
 ![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2016/11/cont.png)
@@ -14,20 +15,20 @@ Additionally it's now possible to store/load annotations in a local or external 
 The new reworked version is now online for Download.
 The latest binaries can always be found [here](https://github.com/tobiasbaur/nova/releases) 
 
+## FAQ:
 
-###FAQ:
 
 <strong>Help, I opened a video but it doesn't show up</strong>
 
-Please make sure you installed the according Video Codec on your System. E.g. The K-Lite Codec Pack might be a good solution for most missing codecs.
+Please make sure you installed the according Video Codec on your System. E.g. The K-Lite Codec Pack might be a good solution for most missing codecs. Also make sure you installed a Visual Studio 2015 redistribution package.
 
-<strong>Will NovA run on my Mac/Linux Machine?</strong>
+<strong>Will NOVA run on my Mac/Linux Machine?</strong>
 
-As NovA is an WPF Application it will run on Windows. Nevertheless you can of course use a Virtual Machine to use it.
+As NOVA is an WPF Application it will run on Windows. Nevertheless you can of course use a Virtual Machine to use it.
 
 <strong>I found a bug, can you fix it?</strong>
 
-NovA is  Software under development and is provided “as is”. If you run into any problems or find bugs (or want to contribute to the project) feel free to open an issue here on github.
+NOVA is  Software under development and is provided “as is”. If you run into any problems or find bugs (or want to contribute to the project) feel free to open an issue here on github.
 
 <strong>Is there an example pipeline to automatically create annotations?</strong>
 
@@ -39,9 +40,9 @@ Please feel free to fork or create an issue
 
 
 
-##Publications:
+## Publications:
 
-If you are using NovA for your research please consider giving us a citation:
+If you are using NOVA in your research please consider giving us a citation:
 
  “Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions”, Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagner, Birgit Lugrin, Elisabeth André, Patrick Gebhard, in ACM Transactions on Interactive Intelligent Systems (TiiS) 5.2, 2015
 
