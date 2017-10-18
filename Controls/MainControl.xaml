@@ -78,6 +78,7 @@
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
             <MenuItem Header="?">
+                <MenuItem Header="About"  Name="aboutMenu" />
                 <MenuItem Header="Documentation"  Name="helpDocumentationMenu" />
                 <MenuItem Header="Shortcuts"  Name="helpShortcutsMenu" />
                 <MenuItem Header="Update CML Tools" Name="updateCMLMenu" />
