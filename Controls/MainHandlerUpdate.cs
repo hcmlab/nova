@@ -241,7 +241,15 @@ namespace ssi
             checkForCMLUpdates(false);
         }
 
-        
+
+
+        private void aboutMenu_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human Centered Multimedia 2017\nLead Developers: Tobias Baur & Johannes Wagner\nContact: nova@hcm-lab.de");
+        }
+
+       
+
 
         public int compareVersion(string Version1, string Version2)
         {

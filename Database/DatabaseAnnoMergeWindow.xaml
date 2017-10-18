@@ -113,8 +113,14 @@
                     <Button x:Name="CalculateCohenKappa" ToolTip="Calculate Cohens κ" Content="Cohens κ" Grid.Column="0" Click="CalculateCohenKappa_Click" IsEnabled="False"/>-->
 
                     <Label Content="Continuous Merge"/>
-                    <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="RMS" Grid.Column="0" Click="RMS_Click" IsEnabled="False" />
+                    <Button x:Name="CalculateRMS" ToolTip="Root-Mean-Square" Content="RMS" Grid.Column="0" Click="RMS_Click" IsEnabled="False" Visibility="Collapsed"/>
                     <Button Name="CalculateMedian"  Content="Mean" Grid.Column="0" Click="CalculateMedian_Click" IsEnabled="False"/>
+                    
+                    <Separator Height="10" Visibility="Hidden"></Separator>
+                    <Label Content="Weighting"/>
+                    <RadioButton Name="WeightNone" Content="Equal" Grid.Column="0" IsEnabled="False" IsChecked="True"/>
+                    <RadioButton Name="WeightExpertise" Content="Rater Expertise" Grid.Column="0" IsEnabled="False" IsChecked="False"/>
+
 
                     <Separator Height="10" Visibility="Hidden"></Separator>
                     <Label Content="Copy"/>
@@ -126,7 +132,7 @@
 
                 <DockPanel Grid.Row="2" LastChildFill="True">
                     <Label DockPanel.Dock="Top">Assign to</Label>
-                    <ListBox Name="AnnotatorsBox" SelectionMode="Single" Margin="0,0,5,0" DockPanel.Dock="Bottom"/>
+                    <ListBox Name="AnnotatorsBox" SelectionMode="Single" Margin="0,0,5,0" DockPanel.Dock="Bottom" SelectedItem="GOLD STANDARD"/>
                 </DockPanel>
 
             </Grid>
@@ -138,7 +144,7 @@
 
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="4">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10">
-                <Label Name="Stats"></Label>
+                <Label Name="Stats" MouseEnter="Stats_MouseEnter">Hover to calculate statistics</Label>
             </StackPanel>
         </StackPanel>
 

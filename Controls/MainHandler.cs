@@ -205,6 +205,7 @@ namespace ssi
             control.helpShortcutsMenu.Click += helpShortcutsMenu_Click;
             control.updateApplicationMenu.Click += updateApplication_Click;
             control.updateCMLMenu.Click += updateCML_Click;
+            control.aboutMenu.Click += aboutMenu_Click;
 
             // Navigator
 

@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,10 +22,15 @@ namespace ssi
     {
         private bool selectedisContinuous = false;
         private readonly object syncLock = new object();
+        string defaultlabeltext = "Hover to calculate statistics";
+
+
+        CultureInfo culture = CultureInfo.InvariantCulture;
 
         public DatabaseAnnoMergeWindow()
         {
             InitializeComponent();
+           
 
             if (DatabaseHandler.CheckAuthentication() >= DatabaseAuthentication.DBADMIN)
             {
@@ -215,6 +221,8 @@ namespace ssi
                 CalculateMedian.IsEnabled = false;
                 CalculateRMS.IsEnabled = false;
                 CalculateMergeDiscrete.IsEnabled = false;
+                WeightExpertise.IsEnabled = false;
+                WeightNone.IsEnabled = false;
 
             }
             else
@@ -226,17 +234,6 @@ namespace ssi
 
 
 
-            if (selectedisContinuous)
-            {
-                List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-                CalculateCronbachWrapper(annolists);
-               // CalculateRMSEWrapper(annolists);
-            }
-            else {
-
-                CalculateKappaWrapper();
-
-            };
         }
 
         private void AnnoSchemesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -280,10 +277,36 @@ namespace ssi
             }
         }
 
+
+
+        private double normalizermvalue(double value, AnnoScheme scheme)
+        {
+            if(scheme.MinScore >= 0)
+            {
+                double norm = (value - scheme.MinScore) / (scheme.MaxScore - scheme.MinScore);
+                value = norm * 2 - 1;
+            }
+
+            return value;
+        }
+
+        private double denormalize(double value, AnnoScheme scheme)
+        {
+
+            double norm = value / 2 + 1;
+
+
+
+            double result =  norm *(scheme.MaxScore - scheme.MinScore) + scheme.MinScore;
+            
+
+            return value;
+        }
+
         private void rootMeanSquare(List<AnnoList> al)
         {
             bool isSaved = false;
-            int numberoftracks = AnnotationResultBox.SelectedItems.Count;
+            int numberoftracks = al.Count;
 
             AnnoList newList = new AnnoList();
             foreach (AnnoListItem ali in al[0])
@@ -313,14 +336,14 @@ namespace ssi
                 for (int i = 0; i < minSize; i++)
                 {
                     double label = double.Parse(a[i].Label);
-
                     array[i] = array[i] + label * label;
                 }
             }
 
             for (int i = 0; i < array.Length; i++)
             {
-                newList[i].Label = System.Math.Sqrt(array[i] / numberoftracks).ToString();
+                double sq = System.Math.Sqrt(array[i] / numberoftracks);
+                newList[i].Label = sq.ToString();
             }
             newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
 
@@ -336,7 +359,7 @@ namespace ssi
         private void calculateMean(List<AnnoList> al)
         {
             bool isSaved = false;
-            int numberoftracks = AnnotationResultBox.SelectedItems.Count;
+            int numberoftracks = al.Count;
 
             AnnoList newList = new AnnoList();
             foreach (AnnoListItem ali in al[0])
@@ -373,7 +396,7 @@ namespace ssi
                 newList[i].Label = (array[i] / numberoftracks).ToString();
             }
             newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
-            MessageBox.Show("Mean values of all Annotations have been calculated");
+          
             Ok.IsEnabled = true;
             if (newList != null)
             {
@@ -392,12 +415,16 @@ namespace ssi
                 CalculateMedian.IsEnabled = false;
                 CalculateRMS.IsEnabled = false;
                 CalculateMergeDiscrete.IsEnabled = true;
+                WeightExpertise.IsEnabled = true;
+                WeightNone.IsEnabled = true;
             }
             else
             {
                 CalculateMedian.IsEnabled = true;
                 CalculateRMS.IsEnabled = true;
                 CalculateMergeDiscrete.IsEnabled = false;
+                WeightExpertise.IsEnabled = true;
+                WeightNone.IsEnabled = true;
             }
 
            
@@ -671,6 +698,9 @@ namespace ssi
             fleiss_kappa = (Pd - Pe) / (1.0 - Pe);
 
             return fleiss_kappa;
+
+
+            //todo recheck the formula.
         }
 
         public double CohensKappa(List<AnnoList> annolists, string restclass)
@@ -783,8 +813,12 @@ namespace ssi
             return cohens_kappa;
         }
 
+
+
+
         private double Cronbachsalpha(List<AnnoList> annolists, int decimals)
         {
+
             int n = annolists.Count;   // n = number of raters, here number of annolists
 
             int N = int.MaxValue;
@@ -806,7 +840,7 @@ namespace ssi
                 double[] row = new double[N];
                 for (int j = 0; j < N; j++)
                 {
-                    double inputValue = double.Parse(annolists[i][j].Label);
+                    double inputValue = double.Parse(annolists[i][j].Label, culture.NumberFormat);
                     row[j] = Math.Round(inputValue, decimals);
                 }
 
@@ -829,18 +863,23 @@ namespace ssi
 
             double factor = (n * (n - 1)) / 2.0;
 
+    
+
+
+
             rvec = (rvec - (double)n) / factor;
 
             double alpha = (n * rvec) / (1 + (n - 1) * rvec);
-            //return PearsonCorrelation(annolists[0], annolists[1]);
+
+         
             return alpha;
         }
 
         #region Helper Functions
 
-        private Matrix<double> SpearmanCorrelationMatrix(double[][] data)
+        private MathNet.Numerics.LinearAlgebra.Matrix<double> SpearmanCorrelationMatrix(double[][] data)
         {
-            var m = Matrix<double>.Build.DenseIdentity(data.Length);
+            var m = MathNet.Numerics.LinearAlgebra.Matrix<double>.Build.DenseIdentity(data.Length);
             for (int i = 0; i < data.Length; i++)
                 for (int j = i + 1; j < data.Length; j++)
                 {
@@ -851,7 +890,7 @@ namespace ssi
             return m;
         }
 
-        private double PearsonCorrelation(IEnumerable<Double> xs, IEnumerable<Double> ys)
+        private double PearsonCorrelation(AnnoList xs, AnnoList ys)
         {
             // sums of x, y, x squared etc.
             double sx = 0.0;
@@ -868,8 +907,8 @@ namespace ssi
                 {
                     while (enX.MoveNext() && enY.MoveNext())
                     {
-                        double x = enX.Current;
-                        double y = enY.Current;
+                        double x = double.Parse(enX.Current.Label, culture.NumberFormat);
+                        double y = double.Parse(enY.Current.Label, culture.NumberFormat);
 
                         n += 1;
                         sx += x;
@@ -947,7 +986,21 @@ namespace ssi
             Ok.IsEnabled = false;
 
             List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            calculateMean(al);
+
+
+            if (WeightExpertise.IsChecked == true) //some option
+            {
+                List<AnnoList> multial = multiplyAnnoListsbyExpertise(al);
+                calculateMean(multial);
+            }
+
+            else
+            {
+                calculateMean(al);
+            }
+
+
+          
         }
 
         private void RolesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -955,12 +1008,45 @@ namespace ssi
             GetAnnotations();
         }
 
+
+
+        private List<AnnoList> multiplyAnnoListsbyExpertise(List<AnnoList> lists)
+        {
+            List<AnnoList> multipliedal = new List<AnnoList>();
+
+            foreach (AnnoList a in lists)
+            {
+                int expertise = DatabaseHandler.Annotators.Find(at => at.Name == a.Meta.Annotator).Expertise;
+                if (expertise == 0) expertise = 1;
+                for (int i = 0; i < expertise; i++)
+                {
+                
+                    multipliedal.Add(a);
+                }
+            }
+            return multipliedal;
+        }
+
+
         private void RMS_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
 
             List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            rootMeanSquare(al);
+           
+
+            if (WeightExpertise.IsChecked == true) //some option
+            {
+                List<AnnoList> multial = multiplyAnnoListsbyExpertise(al);
+                rootMeanSquare(multial);
+            }
+
+            else
+            {
+                rootMeanSquare(al);
+            }
+      
+           
         }
 
 
@@ -971,9 +1057,10 @@ namespace ssi
             {
 
                 double cohenkappa = 0;
+                double fleisskappa = 0;
                 double kappa = 0;
                 string interpretation = "";
-           
+
                 CancellationToken token = new CancellationToken();
                 List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
                 await Task.Run(() =>
@@ -984,7 +1071,7 @@ namespace ssi
                      
                         List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
                         cohenkappa = CohensKappa(convertedlists, restclass);
-                       // fleisskappa = FleissKappa(convertedlists, restclass);
+                        // fleisskappa = FleissKappa(convertedlists, restclass);
                     }
                    
 
@@ -1003,15 +1090,24 @@ namespace ssi
 
                 }, token);
 
+
+              
+
+           
+
+
+
                 Action EmptyDelegate = delegate () { };
                
                 Stats.Content = "Cohen's κ : " + kappa.ToString("F3") + ": " + interpretation;
+
+
                 this.UpdateLayout();
                 this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
             }
             else
             {
-                Stats.Content = "";
+                Stats.Content = defaultlabeltext;
             }
         }
 
@@ -1029,7 +1125,7 @@ namespace ssi
                 {
                     lock (syncLock)
                     {
-                           cronbachalpha = Cronbachsalpha(annolists, 10);
+                           cronbachalpha = Cronbachsalpha(annolists, 1);
                     }
                  
 
@@ -1041,19 +1137,58 @@ namespace ssi
                     else if (cronbachalpha >= 0.71 && cronbachalpha < 0.81) interpretation = "Acceptable agreement";
                     else if (cronbachalpha >= 0.81 && cronbachalpha < 0.90) interpretation = "Good agreement";
                     else if (cronbachalpha >= 0.9) interpretation = "Excellent agreement";
+
+                   
+
                 }, token);
+
+
+                double pearsoncorrelation = double.MaxValue;
+                if (annolists.Count == 2)
+                {
+
+                    pearsoncorrelation = PearsonCorrelation(annolists[0], annolists[1]);
+                    interpretation = Pearsoninterpretation(pearsoncorrelation);
+                }
+
+
 
                 Action EmptyDelegate = delegate () { };
                 Stats.Content = "Cronbach's α: " + cronbachalpha.ToString("F3") + ": " + interpretation;
+
+                if(pearsoncorrelation != double.MaxValue)
+                {
+                    Stats.Content = Stats.Content + " | Pearson Correlation r: " + pearsoncorrelation + " " + interpretation;
+                }
+
                 this.UpdateLayout();
                 this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
             }
             else
             {
-                Stats.Content = "";
+                Stats.Content = defaultlabeltext;
             }
             // MessageBox.Show("Cronbach's alpha: " + cronbachalpha.ToString("F3") + ": " + interpretation);
         }
+
+        private string Pearsoninterpretation(double pearsoncorrelation)
+        {
+            string interpretation = "";
+            if (pearsoncorrelation <= -1) interpretation = "perfect downhill (negative) linear relationship";
+            else if (pearsoncorrelation > -1 && pearsoncorrelation <= -0.7) interpretation = "strong downhill (negative) linear relationship";
+            else if (pearsoncorrelation > -0.7 && pearsoncorrelation <= -0.5) interpretation = "moderate downhill (negative) relationship";
+            else if (pearsoncorrelation > -0.5 && pearsoncorrelation <= -0.3) interpretation = "weak downhill (negative) linear relationship";
+            else if (pearsoncorrelation > -0.3 && pearsoncorrelation <= 0.3) interpretation = "no linear relationship";
+            else if (pearsoncorrelation > 0.3 && pearsoncorrelation <= 0.5) interpretation = "weak uphill (positive) linear relationship";
+            else if (pearsoncorrelation > 0.5 && pearsoncorrelation <= 0.7) interpretation = "moderate uphill (positive) relationship";
+            else if (pearsoncorrelation > 0.7 && pearsoncorrelation < 1) interpretation = "strong uphill (positive) linear relationship";
+            else if (pearsoncorrelation >= 1.0) interpretation = "perfect uphill (positive) linear relationship";
+
+            return interpretation;
+        }
+
+
+
 
         private async Task CalculateRMSEWrapper(List<AnnoList> annolists)
         {
@@ -1112,7 +1247,19 @@ namespace ssi
             string restclass = "Rest";
             List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
             List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
-            MergeDiscreteLists(convertedlists, restclass);
+
+            if (WeightExpertise.IsChecked == true) //some option
+            {
+                List<AnnoList> multial = multiplyAnnoListsbyExpertise(convertedlists);
+                MergeDiscreteLists(multial, restclass);
+            }
+
+            else
+            {
+                MergeDiscreteLists(convertedlists, restclass);
+            }
+
+            
         }
 
         public void GetDatabases(string selectedItem = null)
@@ -1182,6 +1329,31 @@ namespace ssi
             Ok.IsEnabled = false;
             List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
             copyAnnotation(al);
+        }
+
+
+        private void calculateStatistics()
+        {
+            if (selectedisContinuous)
+            {
+                List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+                CalculateCronbachWrapper(annolists);
+                // CalculateRMSEWrapper(annolists);
+            }
+            else
+            {
+
+                CalculateKappaWrapper();
+
+            };
+
+        }
+
+
+
+        private void Stats_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            calculateStatistics();
         }
     }
 }
