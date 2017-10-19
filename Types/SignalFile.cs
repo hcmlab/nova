@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Windows;
 using System.Xml;
 
 namespace ssi
@@ -14,7 +15,7 @@ namespace ssi
 
             try
             {
-                Signal.Type type = Signal.Type.FLOAT;
+                Type type = Type.FLOAT;
                 uint dim = 0;
                 double rate = 0;
 
@@ -34,7 +35,7 @@ namespace ssi
                 rate = 1 / step;
 
                 uint number = (uint)lines.Length;
-                uint bytes = Signal.TypeSize[(int)type];
+                uint bytes = TypeSize[(int)type];
 
                 if (dim > 0)
                 {
@@ -108,7 +109,11 @@ namespace ssi
 
         public static Signal LoadStreamFile(string filepath)
         {
+
             Signal signal = new Signal();
+            try
+            {
+               
             if (filepath.EndsWith("~"))
             {
                 filepath = filepath.Remove(filepath.Length - 1);
@@ -116,8 +121,7 @@ namespace ssi
 
             XmlDocument doc = new XmlDocument();
 
-            try
-            {
+         
                 // parse filename
                 signal.filePath = filepath;
                 string[] tmp = filepath.Split('\\');
@@ -171,6 +175,8 @@ namespace ssi
                     return null;
                 }
                 signal.data = new float[signal.dim * signal.number];
+                try { 
+
 
                 if (ftype_s == "ASCII")
                 {
@@ -193,12 +199,25 @@ namespace ssi
                     fs_data.Close();
                 }
 
+                }
+            catch { }
+
+
                 signal.minmax();
                 signal.loaded = true;
             }
             catch (Exception e)
             {
-                MessageTools.Error(filepath + ": " + e.ToString());
+
+
+                MessageBoxResult result = MessageBox.Show("File is corrupted! Should it be deleted?", "Attention", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    File.Delete(filepath);
+                    File.Delete(filepath + "~");
+                }
+
+
                 return null;
             }
 
@@ -539,6 +558,25 @@ namespace ssi
         #endregion
 
         #region EXPORT
+
+        public void ExportToCSV(Uri path, char delim = ';')
+        {
+            using (StreamWriter file = new StreamWriter(path.LocalPath))
+            {
+                for (int i = 0; i < number * dim; i++)
+                {
+                    file.Write(data[i].ToString());
+                    if ((i+1) % dim == 0)
+                    {
+                        file.WriteLine();
+                    }
+                    else
+                    {
+                        file.Write(';');
+                    }
+                }
+            }
+        }
 
         public AnnoList ExportToAnno()
         {

@@ -31,7 +31,7 @@ namespace ssi
         static public double mouseDownPos;
         static public int closestIndex = -1;
         static public int closestIndexOld = 0;
-        public static bool continuousAnnoMode = false;
+        public static bool isLiveAnnoMode = false;
         public static bool askForLabel = false;
         public static AnnoTierSegment objectContainer = null;
         public static bool MouseActive = Properties.Settings.Default.LiveModeActivateMouse;
@@ -294,7 +294,7 @@ namespace ssi
                         dispatcherTimer.Interval = TimeSpan.FromMilliseconds(20);
                         dispatcherTimer.Tick += new EventHandler(delegate (object s, EventArgs a)
                         {
-                        if (continuousAnnoMode && isSelected)
+                        if (isLiveAnnoMode && isSelected)
                         {
                             double closestposition = MainHandler.Time.CurrentPlayPosition;
                             closestIndex = GetClosestContinuousIndex(closestposition);
@@ -434,7 +434,7 @@ namespace ssi
             surface.LayoutTransform = transform;
         }
 
-        public void ExportToPng(Uri path, Canvas surface)
+        public void ExportToPNG(Uri path, Canvas surface)
         {
             if (path == null) return;
             Transform transform = surface.LayoutTransform;
@@ -639,7 +639,7 @@ namespace ssi
             if (!activated)
             {
                 dispatcherTimer.Start();
-                continuousAnnoMode = true;
+                isLiveAnnoMode = true;
 
                 closestIndex = -1;
                 closestIndexOld = closestIndex;
@@ -647,7 +647,7 @@ namespace ssi
             else
             {
                 dispatcherTimer.Stop();
-                continuousAnnoMode = false;
+                isLiveAnnoMode = false;
                 continuousTierEllipse.Visibility = Visibility.Hidden;
             }
             TimeRangeChanged(MainHandler.Time);
@@ -1177,7 +1177,7 @@ namespace ssi
             }
             else if (AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && !Keyboard.IsKeyDown(Key.LeftAlt))
             {
-                if (continuousAnnoMode) continuousTierEllipse.Visibility = Visibility.Visible;
+                if (isLiveAnnoMode) continuousTierEllipse.Visibility = Visibility.Visible;
                 else continuousTierEllipse.Visibility = Visibility.Hidden;
 
                 if (e.RightButton == MouseButtonState.Pressed && this.isSelected)

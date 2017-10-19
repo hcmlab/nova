@@ -27,10 +27,11 @@
                     <MenuItem Header="To GeNIe Data Sheet" Name="exportToGenie" Visibility="Collapsed" />
                     <MenuItem Header="Selected Annotation" Name="exportSelectedTierMenu">
                         <MenuItem Header="To CSV" Name="exportAnnoToCSVMenu" />
-                        <MenuItem Header="To XPS" Name="exportTierToXPSMenu" />
-                        <MenuItem Header="To PNG" Name="exportTierToPNGMenu" />
+                        <MenuItem Header="To XPS" Name="exportAnnoToXPSMenu" />
+                        <MenuItem Header="To PNG" Name="exportAnnoToPNGMenu" />
                     </MenuItem>
                     <MenuItem Header="Selected Signal" Name="exportSelectedTrackMenu">
+                        <MenuItem Header="To CSV" Name="exportSignalToCSVMenu"/>
                         <MenuItem Header="To XPS" Name="exportSignalToXPSMenu" />
                         <MenuItem Header="To PNG" Name="exportSignalToPNGMenu"/>
                     </MenuItem>

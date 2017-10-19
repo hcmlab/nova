@@ -21,18 +21,22 @@ namespace ssi
 
         private void CanceledDownload(string localpath)
         {
+            tokenSource.Dispose();
+            tokenSource = new CancellationTokenSource();
+
             foreach (DownloadStatus d in statusOfDownloads)
             {
-                if (d.active == true && d.File == localpath)
+                if (d.percent < 100.0)
                 {
                     try
                     {
                         if (localpath.EndsWith("~"))
                         {
-                            File.Delete(localpath.Trim('~'));
+                            File.Delete(localpath.Trim('~')); 
                         }
                     }
                     catch { }
+
                     File.Delete(localpath);
                     if (!localpath.EndsWith(".stream~"))
                     {
@@ -40,6 +44,7 @@ namespace ssi
                     }
                     else
                     {
+                        filesToDownload.Remove(localpath);
                         filesToDownload.Remove(localpath.Trim('~'));
                     }
 
@@ -65,7 +70,7 @@ namespace ssi
                     long length = new System.IO.FileInfo(path).Length;
                     if (length == 0)
                     {
-                        if (File.Exists(path)) File.Delete(path);
+                       if (File.Exists(path)) File.Delete(path);
                     }
                     else
                     {
@@ -77,8 +82,7 @@ namespace ssi
                 loadMultipleFilesOrDirectory(files);
                 filesToDownload.Clear();
                 statusOfDownloads.Clear();
-                tokenSource.Dispose();
-                tokenSource = new CancellationTokenSource();
+
             }
         }
 
@@ -177,7 +181,6 @@ namespace ssi
                     control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                     sftp.Connect();
 
-                    tokenSource = new CancellationTokenSource();
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
@@ -272,7 +275,6 @@ namespace ssi
 
                     Console.WriteLine("Downloading File \"{0}\" from \"{1}\" .......\n\n", fileName, URL);
 
-                    tokenSource = new CancellationTokenSource();
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
@@ -351,12 +353,12 @@ namespace ssi
                         }
                     };
 
-                    tokenSource = new CancellationTokenSource();
+                    //tokenSource = new CancellationTokenSource();
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
                     {
-                        token.Register(() => { client.CancelAsync(); CanceledDownload(localpath); return; });
+                        token.Register(() => { client.CancelAsync(); while (client.IsBusy) Thread.Sleep(100); CanceledDownload(localpath); return; });
                         client.DownloadFileAsync(new Uri(URL), localpath);
                     }, token);
                 }

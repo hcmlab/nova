@@ -32,7 +32,7 @@ namespace ssi
             control.fileSaveProjectMenu.IsEnabled = hasTier || hasTrack || hasBox;
             control.exportSamplesMenu.IsEnabled = hasTier && hasTrack;            
             control.exportToGenie.IsEnabled = hasTier;
-            control.exportSelectedTrackMenu.IsEnabled = hasTier;
+            control.exportSelectedTrackMenu.IsEnabled = hasTrack;
             control.exportSelectedTierMenu.IsEnabled = hasTier;
 
             // database

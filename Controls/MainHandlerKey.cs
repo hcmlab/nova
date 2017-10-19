@@ -107,18 +107,7 @@ namespace ssi
                             break;
                     /*No Modifier keys are pressed*/
                     case 0:
-                        if (((int)e.Key >= 34 && (int)e.Key <= 43) || ((int)e.Key >= 74 && (int)e.Key <= 83)) {
-                            if(AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-                            {
-                                SetContinuousLevel(e);
-                            }
-                            else
-                            {
-                                SetLabelForSegment(e);
-                            }
-                           
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.S))
+                        if (e.KeyboardDevice.IsKeyDown(Key.S))
                         {
                             SplitSegment(sender, e);
                             e.Handled = true;
@@ -133,7 +122,6 @@ namespace ssi
                             ChangeTier(false);
                             e.Handled = true;
                         }
-
                         else if (e.KeyboardDevice.IsKeyDown(Key.Left))
                         {
                             MoveFrameMedia(false);
@@ -146,30 +134,41 @@ namespace ssi
                             e.Handled = true;
                         }
 
-                        else if (e.KeyboardDevice.IsKeyDown(Key.Up))
-                        {
-                            if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-                            {
-                                SetContinuousLevelUp();
-                            }
-
-                            e.Handled = true;
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.Down))
-                        {
-                            if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-                            {
-                                SetContinuousLevelDown();
-                            }
-                            e.Handled = true;
-                        }
-
-
                         else if (e.KeyboardDevice.IsKeyDown(Key.Space))
                         {
                             TogglePlay();
                             e.Handled = true;
                         }
+
+                        else if (AnnoTierStatic.Selected != null)
+                        {
+                            if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                            {
+                                if ((e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+                                { 
+                                    SetLabelForSegment(e);                            
+                                }
+                            }
+                            else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && AnnoTierStatic.isLiveAnnoMode)
+                            {                                
+                                if (e.KeyboardDevice.IsKeyDown(Key.Up))
+                                {
+                                    SetContinuousLevelUp();
+                                    e.Handled = true;
+                                }                                
+                                else if (e.KeyboardDevice.IsKeyDown(Key.Down))
+                                {
+                                    SetContinuousLevelDown();
+                                    e.Handled = true;
+                                }
+                                else if ((e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+                                {
+                                    SetContinuousLevel(e);
+                                }
+                            }
+                        }
+
+                      
                         break;
                     default:
                         break;

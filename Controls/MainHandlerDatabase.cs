@@ -190,6 +190,9 @@ namespace ssi
 
                         MainHandler.NumberOfAllCurrentDownloads = streamsAll.Count;
 
+
+                        tokenSource = new CancellationTokenSource();
+
                         foreach (string stream in streamsAll)
                         {
                             string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream;
@@ -214,13 +217,7 @@ namespace ssi
                             {
                                 continue;
                             }
-                           
-
-
-                            if(File.Exists(localPath))
-                            {
-
-                            }
+  
 
 
                             //In case we host our files on nextcloud, the file format is special. For now we only allow self-hosted, but in the future we add an option for nextcloud in general.

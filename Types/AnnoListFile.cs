@@ -216,7 +216,7 @@ namespace ssi
             return true;
         }
 
-        public bool SaveToCSVFile(string delimiter = ";")
+        public bool ExportToCSV(string delimiter = ";")
         {
             string filePath = FileTools.SaveFileDialog(Source.File.Path != "" ? Source.File.Name : DefaultName(), ".csv", "Annotation(*.csv)|*.csv", "");
 

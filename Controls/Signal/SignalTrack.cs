@@ -336,7 +336,7 @@ namespace ssi
             surface.LayoutTransform = transform;
         }
 
-        public void ExportToPng(Uri path, Canvas surface)
+        public void ExportToPNG(Uri path, Canvas surface)
         {
             if (path == null) return;
             Transform transform = surface.LayoutTransform;
@@ -362,6 +362,14 @@ namespace ssi
             }
 
             surface.LayoutTransform = transform;
+        }
+
+        public void ExportToCSV(Uri path, Signal signal)
+        {           
+            if (path != null && signal != null)
+            {
+                signal.ExportToCSV(path);
+            }            
         }
 
         #endregion EXPORT

@@ -101,7 +101,6 @@ namespace ssi
         public MainHandler(MainControl view)
         {
             control = view;
-            control.Drop += controlDrop;
 
             // Shadow box
 
@@ -173,11 +172,12 @@ namespace ssi
 
             control.exportSamplesMenu.Click += exportSamples_Click;
             control.exportToGenie.Click += exportToGenie_Click;
-            control.exportTierToXPSMenu.Click += exportTierToXPS_Click;
-            control.exportTierToPNGMenu.Click += exportTierToPNG_Click;
-            control.exportSignalToXPSMenu.Click += exportSignalToXPS_Click;
-            control.exportSignalToPNGMenu.Click += exportSignalToPNG_Click;
             control.exportAnnoToCSVMenu.Click += exportAnnoToCSV_Click;
+            control.exportAnnoToXPSMenu.Click += exportAnnoToXPS_Click;
+            control.exportAnnoToPNGMenu.Click += exportAnnoToPNG_Click;
+            control.exportSignalToCSVMenu.Click += exportSignalToCSV_Click;
+            control.exportSignalToXPSMenu.Click += exportSignalToXPS_Click;
+            control.exportSignalToPNGMenu.Click += exportSignalToPNG_Click;            
 
             control.convertAnnoContinuousToDiscreteMenu.Click += convertAnnoContinuousToDiscrete_Click;
             control.convertAnnoToSignalMenu.Click += convertAnnoToSignal_Click;
@@ -326,23 +326,35 @@ namespace ssi
             }
 
 
-
             // Clear
 
             clearSignalInfo();
             clearAnnoInfo();
             clearMediaBox();
+
+            // allow drag and drop
+
+            control.Drop += controlDrop;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-     
 
+        public void showShadowBox(string message)
+        {
+            control.Cursor = Cursors.Wait;
+            Action EmptyDelegate = delegate () {};
+            control.ShadowBoxText.Text = message;
+            control.ShadowBox.Visibility = Visibility.Visible;
+            control.UpdateLayout();
+            control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+        }
 
+        public void hideShadowBox()
+        {
+            control.ShadowBox.Visibility = Visibility.Collapsed;
+            control.Cursor = Cursors.Arrow;
+        }
 
-
-        private void signalAndAnnoControlSizeChanged(object sender, SizeChangedEventArgs e)
+        public void signalAndAnnoControlSizeChanged(object sender, SizeChangedEventArgs e)
         {
             timeline.SelectionInPixel = control.signalAndAnnoAdorner.ActualWidth;
             control.timeLineControl.rangeSlider.Update();
