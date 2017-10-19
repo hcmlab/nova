@@ -1,19 +1,16 @@
 ﻿using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
 using System.Windows.Media.Imaging;
 
 namespace ssi
 {
     public partial class MainHandler
     {
+        private bool rememberplaying = false;
 
-        bool rememberplaying = false;
         private void addAnnoTierFromList(AnnoList annoList)
         {
             double maxdur = 0;
@@ -109,15 +106,15 @@ namespace ssi
             control.annoSettingsButton.Visibility = Visibility.Visible;
             control.annoStatusFileNameOrOIDLabel.Text = annoList.Name;
             if (annoList.Source.HasFile)
-            {                
+            {
                 control.annoStatusFileNameOrOIDLabel.ToolTip = annoList.Source.File.Path;
             }
             else if (annoList.Source.HasDatabase)
-            {             
+            {
                 control.annoStatusFileNameOrOIDLabel.ToolTip = annoList.Source.Database.OID;
             }
             else
-            {             
+            {
                 control.annoStatusFileNameOrOIDLabel.ToolTip = "Not saved yet";
             }
 
@@ -160,14 +157,14 @@ namespace ssi
                 {
                     control.geometricListControl.Visibility = Visibility.Visible;
                     control.geometricListControl.Height = control.ActualHeight / 2;
-                }         
+                }
                 else
                 {
-                    foreach(MediaBox media in mediaBoxes)
+                    foreach (MediaBox media in mediaBoxes)
                     {
                         media.Media.GetOverlay().Clear();
                     }
-                }       
+                }
 
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {
@@ -220,7 +217,6 @@ namespace ssi
 
         private void changeAnnoTierSegmentHandler(AnnoTierSegment segment, EventArgs e)
         {
-
             if (IsPlaying())
             {
                 Stop();
@@ -327,11 +323,11 @@ namespace ssi
                 dialog = new AnnoTierNewDiscreteSchemeWindow(ref scheme);
             }
             else if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-            {                
+            {
                 dialog = new AnnoTierNewContinuousSchemeWindow(ref scheme);
             }
             else if (scheme.Type == AnnoScheme.TYPE.POINT)
-            {                
+            {
                 dialog = new AnnoTierNewPointSchemeWindow(ref scheme);
             }
             else
@@ -368,7 +364,7 @@ namespace ssi
         public void addNewAnnotationFile()
         {
             if (Time.TotalDuration > 0)
-            {                
+            {
                 double defaultSr = 25.0;
                 foreach (IMedia m in mediaList)
                 {
@@ -381,7 +377,7 @@ namespace ssi
 
                 AnnoScheme scheme = AddSchemeDialog(defaultSr);
                 if (scheme != null)
-                {                  
+                {
                     AnnoList annoList = new AnnoList() { Scheme = scheme };
                     annoList.Source.StoreToFile = true;
                     annoList.Meta.Annotator = Properties.Settings.Default.Annotator;
@@ -446,7 +442,6 @@ namespace ssi
             // if (maxdur > Properties.Settings.Default.DefaultZoominSeconds && Properties.Settings.Default.DefaultZoominSeconds != 0 && annos.Count != 0 && media_list.Medias.Count == 0) fixTimeRange(Properties.Settings.Default.DefaultZoominSeconds);
         }
 
-
         #region EVENTHANDLER
 
         private void annoTierControl_MouseMove(object sender, MouseEventArgs e)
@@ -466,8 +461,6 @@ namespace ssi
                     mediaList.Move(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
                     moveSignalCursor(Time.TimeFromPixel(e.GetPosition(control.signalAndAnnoGrid).X));
                     signalCursor.X = (e.GetPosition(control.signalAndAnnoGrid).X);
-                   
-                 
                 }
             }
 
@@ -494,9 +487,6 @@ namespace ssi
 
             if (e.LeftButton == MouseButtonState.Pressed && !Keyboard.IsKeyDown(Key.LeftShift))
             {
-
-
-
                 if (AnnoTierStatic.Selected != null)
                 {
                     AnnoTierStatic.Selected.LeftMouseButtonDown(e);
@@ -557,7 +547,6 @@ namespace ssi
                     {
                         geometricCompare.Add(al);
                     }
-
                 }
                 catch { }
             }
@@ -692,7 +681,6 @@ namespace ssi
                 AnnoTierStatic.Selected.AnnoList.HasChanged = true;
             }
         }
-
 
         private void removeRemainingSegmentsMenu_Click(object sender, RoutedEventArgs e)
         {

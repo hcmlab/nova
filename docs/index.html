@@ -101,7 +101,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
         <li><a href="#loading-files"><span class="toc-section-number">3.2</span> Loading Files</a></li>
         <li><a href="#creating-an-annotation"><span class="toc-section-number">3.3</span> Creating an Annotation</a></li>
         <li><a href="#editing-an-annotation"><span class="toc-section-number">3.4</span> Editing an Annotation</a></li>
-        <li><a href="#file-format"><span class="toc-section-number">3.5</span> File Format</a></li>
+        <li><a href="#shortcut-cheat-sheet"><span class="toc-section-number">3.5</span> Shortcut Cheat Sheet</a></li>
+        <li><a href="#file-format"><span class="toc-section-number">3.6</span> File Format</a></li>
         </ul></li>
         <li><a href="#database"><span class="toc-section-number">4</span> Database</a><ul>
         <li><a href="#setup-mongodb"><span class="toc-section-number">4.1</span> Setup MongoDB</a></li>
@@ -192,7 +193,129 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>To change the values in a continuous track hold down the right mouse button and move the cursor to the desired position within the track. You will notice that the values immediately start to follow the cursor. Hitting 'L' (or switching on the live button in the status bar) turns on the live mode, which no longer requires to hold down the right mouse button. Instead a white button is displayed at the left border of the current track to mark the current value. The height of the white button can either be controlled by the vertical position of the mouse cursor (press key 'M' or activate check box next to live button). Or otherwise by pressing a key between '0' and '9' (see option 'number of levels in live mode' in the SETTINGS). This is especially handy to annotate during playback. Hitting 'L' again turns off the live annotation mode and brings back the default behaviour.</p></li>
 </ul>
 <p>Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. To save an annotation go to the ANNOTATION menu or press 'Ctrl+S'.</p>
-<h2 id="file-format"><span class="header-section-number">3.5</span> File Format</h2>
+<h2 id="shortcut-cheat-sheet"><span class="header-section-number">3.5</span> Shortcut Cheat Sheet</h2>
+<p><strong>Universal</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Shorcut</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>arrow key left</td>
+<td>Rewind in small steps</td>
+</tr>
+<tr class="even">
+<td>arrow key right</td>
+<td>Fast forward in small steps</td>
+</tr>
+<tr class="odd">
+<td>space</td>
+<td>Start / Stop autoplay</td>
+</tr>
+<tr class="even">
+<td>T + arrow key up</td>
+<td>Select the annotation tier above the current one</td>
+</tr>
+<tr class="odd">
+<td>T + arrow key down</td>
+<td>Select the annotation tier beneath the current one</td>
+</tr>
+<tr class="even">
+<td>strg + L</td>
+<td>Complete the current session automatically</td>
+</tr>
+<tr class="odd">
+<td>strg + arrow key left</td>
+<td>Setting the media position to the beginning of the currently selected label</td>
+</tr>
+<tr class="even">
+<td>strg + arrow key right</td>
+<td>Setting the media position to the end of the currently selected label</td>
+</tr>
+<tr class="odd">
+<td>alt + arrow key down</td>
+<td>Copying label to the tier below</td>
+</tr>
+<tr class="even">
+<td>alt + arrow key up</td>
+<td>Copying label to the tier above</td>
+</tr>
+<tr class="odd">
+<td>shift + dragging timeline</td>
+<td>Zoom in / out to the current media position</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Free / Discrete Scheme</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Shorcut</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0 - 9</td>
+<td>Setting the label for the selected segment</td>
+</tr>
+<tr class="even">
+<td>S</td>
+<td>Splitting the selected segment in two parts on the green annotation cursor</td>
+</tr>
+<tr class="odd">
+<td>W</td>
+<td>Creating a new label between the green annotation cursor and the red media position cursor</td>
+</tr>
+<tr class="even">
+<td>strg + C</td>
+<td>Copy the currently selected segment</td>
+</tr>
+<tr class="odd">
+<td>strg + K</td>
+<td>Delete all annotations the are on the right side of the green annotation cursor</td>
+</tr>
+<tr class="even">
+<td>strg + V</td>
+<td>Paste a copied segment</td>
+</tr>
+<tr class="odd">
+<td>strg + X</td>
+<td>Cut the selected segment</td>
+</tr>
+<tr class="even">
+<td>strg + Y</td>
+<td>Redo</td>
+</tr>
+<tr class="odd">
+<td>strg + Z</td>
+<td>Undo</td>
+</tr>
+<tr class="even">
+<td>shift + dragging</td>
+<td>Creating a label from start to end position (same as dragg with right mouse)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Continuous Scheme</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Shorcut</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0 - 9</td>
+<td>Setting the level of the selected segment</td>
+</tr>
+</tbody>
+</table>
+<h2 id="file-format"><span class="header-section-number">3.6</span> File Format</h2>
 <p>An annotation can be saved to a file on disk. Actually, it is stored in two separate files: a header file (.annotation) and a data file (.annotation~) with the same file name. The header contains information about the scheme, while the data file holds the actual annotation data, either in ASCII (default) or in binary format.</p>
 <ul>
 <li><p>Discrete:</p>

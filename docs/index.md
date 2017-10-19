@@ -84,6 +84,45 @@ After loading at least one media or data stream, new annotations tracks can be a
 
 Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. To save an annotation go to the ANNOTATION menu or press 'Ctrl+S'.
 
+## Shortcut Cheat Sheet
+
+**Universal**
+
+ Shorcut					Description    
+ -------					------ 
+ arrow key left				Rewind in small steps
+ arrow key right 			Fast forward in small steps
+ space						Start / Stop autoplay
+ T + arrow key up			Select the annotation tier above the current one
+ T + arrow key down			Select the annotation tier beneath the current one
+ strg + L					Complete the current session automatically
+ strg + arrow key left		Setting the media position to the beginning of the currently selected label
+ strg + arrow key right 	Setting the media position to the end of the currently selected label
+ alt +  arrow key down  	Copying label to the tier below
+ alt + arrow key up 		Copying label to the tier above
+ shift + dragging timeline  Zoom in / out to the current media position
+
+**Free / Discrete Scheme**
+
+ Shorcut					Description    
+ -------					------ 
+ 0 - 9						Setting the label for the selected segment
+ S							Splitting the selected segment in two parts on the green annotation cursor
+ W							Creating a new label between the green annotation cursor and the red media position cursor
+ strg + C      				Copy the currently selected segment
+ strg + K					Delete all annotations the are on the right side of the green annotation cursor 
+ strg + V					Paste a copied segment
+ strg + X					Cut the selected segment
+ strg + Y					Redo
+ strg + Z					Undo
+ shift + dragging			Creating a label from start to end position (same as dragg with right mouse)
+
+**Continuous Scheme**
+
+ Shorcut					Description    
+ -------					------ 
+ 0 - 9						Setting the level of the selected segment
+
 ## File Format
 
 An annotation can be saved to a file on disk. Actually, it is stored in two separate files: a header file (.annotation) and a data file (.annotation~) with the same file name. The header contains information about the scheme, while the data file holds the actual annotation data, either in ASCII (default) or in binary format.

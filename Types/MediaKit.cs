@@ -1,6 +1,7 @@
 ﻿using MediaToolkit;
 using MediaToolkit.Model;
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -82,21 +83,28 @@ namespace ssi
             inputFile = new MediaFile { Filename = this.filepath };
             using (var engine = new Engine())
             {
-                engine.GetMetadata(inputFile);
+               engine.GetMetadata(inputFile);
             }
-            if (type == MediaType.VIDEO)
+
+            try
             {
-                sampleRate = inputFile.Metadata.VideoData.Fps;
-                string frameSize = inputFile.Metadata.VideoData.FrameSize;
-                string[] tokens = frameSize.Split('x');
-                int.TryParse(tokens[0], out width);
-                int.TryParse(tokens[1], out height);
-            }
-            else if (type == MediaType.AUDIO)
-            {
-                string[] tokens = inputFile.Metadata.AudioData.SampleRate.Split(' ');
-                double.TryParse(tokens[0], out sampleRate);
-            }
+                if (type == MediaType.VIDEO)
+                {
+                    sampleRate = inputFile.Metadata.VideoData.Fps;
+                    string frameSize = inputFile.Metadata.VideoData.FrameSize;
+                    string[] tokens = frameSize.Split('x');
+                    int.TryParse(tokens[0], out width);
+                    int.TryParse(tokens[1], out height);
+                }
+                else if (type == MediaType.AUDIO)
+                {
+                    string[] tokens = inputFile.Metadata.AudioData.SampleRate.Split(' ');
+                    double.TryParse(tokens[0], out sampleRate);
+                }
+           
+
+         
+           
 
             // add grid
             grid = new Grid();
@@ -119,6 +127,17 @@ namespace ssi
                 Grid.SetColumn(overlayImage, 0);
                 Grid.SetRow(overlayImage, 0);
                 grid.Children.Add(overlayImage);
+            }
+            }
+            catch
+            {
+
+                //MessageBoxResult result = MessageBox.Show("File is corrupted! Should it be deleted?", "Attention", MessageBoxButton.YesNo);
+                //if (result == MessageBoxResult.Yes)
+                //{
+                    File.Delete(inputFile.Filename);
+                //}
+
             }
         }
 
