@@ -404,17 +404,27 @@ namespace ssi
                 {
                     if (result == MessageBoxResult.Yes)
                     {
+
                         foreach (DatabaseSession session in DatabaseHandler.Sessions)
                         {
                             foreach(DatabaseRole role in DatabaseHandler.Roles)
                             {
-                                string ext = DatabaseHandler.Streams.Find(s => s.Name == name).FileExt;
-
-                                File.Delete(Properties.Settings.Default.DatabaseDirectory  + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + "." + ext);
-                                 if(ext == ("stream"))
+                                try
                                 {
-                                    File.Delete(Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + ".stream~");
+                                    string ext = DatabaseHandler.Streams.Find(s => s.Name == name).FileExt;
+
+                                    File.Delete(Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + "." + ext);
+                                    if (ext == ("stream"))
+                                    {
+                                        File.Delete(Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + ".stream~");
+                                    }
                                 }
+
+                                catch
+                                {
+                                    //go on
+                                }
+                                
                             }
                         }
 
