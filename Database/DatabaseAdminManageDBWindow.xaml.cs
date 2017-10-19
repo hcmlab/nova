@@ -1,9 +1,6 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -53,11 +50,10 @@ namespace ssi
 
             foreach (string db in databases)
             {
-                if(DatabaseHandler.CheckAuthentication(db) > 2)
+                if (DatabaseHandler.CheckAuthentication(db) > 2)
                 {
                     DatabaseBox.Items.Add(db);
                 }
-               
             }
 
             Select(DatabaseBox, selectedItem);
@@ -161,7 +157,7 @@ namespace ssi
             dialog.ShowDialog();
 
             if (dialog.DialogResult == true)
-            {                
+            {
                 if (DatabaseHandler.AddDB(meta))
                 {
                     GetDatabases(meta.Name);
@@ -192,7 +188,6 @@ namespace ssi
             }
         }
 
-
         private void DeleteDB_Click(object sender, RoutedEventArgs e)
         {
             if (DatabaseBox.SelectedItem != null)
@@ -219,7 +214,7 @@ namespace ssi
                 DatabaseAnnotator annotator = new DatabaseAnnotator();
                 List<string> names = DatabaseHandler.GetUsers();
 
-                foreach(string name in AnnotatorsBox.Items)
+                foreach (string name in AnnotatorsBox.Items)
                 {
                     names.RemoveAll(s => s == name);
                 }
@@ -227,13 +222,13 @@ namespace ssi
                 DatabaseAdminAnnotatorWindow dialog = new DatabaseAdminAnnotatorWindow(ref annotator, names);
                 dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 dialog.ShowDialog();
-               
+
                 if (dialog.DialogResult == true)
                 {
                     if (DatabaseHandler.AddOrUpdateAnnotator(annotator))
                     {
                         GetAnnotators(annotator.Name);
-                    }                    
+                    }
                 }
             }
         }
@@ -246,28 +241,27 @@ namespace ssi
 
                 DatabaseAnnotator annotator = new DatabaseAnnotator { Name = user };
                 if (DatabaseHandler.GetAnnotator(ref annotator))
-                { 
-
+                {
                     DatabaseAdminAnnotatorWindow dialog = new DatabaseAdminAnnotatorWindow(ref annotator);
                     dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     dialog.ShowDialog();
-                                        
+
                     if (dialog.DialogResult == true)
                     {
                         DatabaseHandler.AddOrUpdateAnnotator(annotator);
                         GetAnnotators();
-                    }                   
+                    }
                 }
             }
         }
 
         private void DeleteAnnotator_Click(object sender, RoutedEventArgs e)
-        {           
+        {
             if (AnnotatorsBox.SelectedItem != null)
             {
                 string user = (string)AnnotatorsBox.SelectedItem;
 
-                MessageBoxResult mb = MessageBox.Show("Delete annotator " + user + "?", "Question", MessageBoxButton.YesNo);                
+                MessageBoxResult mb = MessageBox.Show("Delete annotator " + user + "?", "Question", MessageBoxButton.YesNo);
                 if (mb == MessageBoxResult.Yes)
                 {
                     if (DatabaseHandler.DeleteAnnotator(user))
@@ -277,7 +271,6 @@ namespace ssi
                 }
             }
         }
-
 
         private void AddRole_Click(object sender, RoutedEventArgs e)
         {
@@ -354,7 +347,7 @@ namespace ssi
             {
                 string name = dialog.Result("name");
                 string fileExt = dialog.Result("fileExt");
-                string type = dialog.Result("type");                
+                string type = dialog.Result("type");
                 double sr = 25.0;
                 double.TryParse(dialog.Result("sr"), out sr);
                 DatabaseStream streamType = new DatabaseStream() { Name = name, FileExt = fileExt, Type = type, SampleRate = sr };
@@ -364,17 +357,18 @@ namespace ssi
                 }
             }
         }
+
         private void EditStream_Click(object sender, RoutedEventArgs e)
         {
             if (StreamsBox.SelectedItem != null)
             {
                 string name = (string)StreamsBox.SelectedItem;
-                DatabaseStream stream = new DatabaseStream() { Name = name };                
+                DatabaseStream stream = new DatabaseStream() { Name = name };
                 if (DatabaseHandler.GetStream(ref stream))
                 {
                     Dictionary<string, UserInputWindow.Input> input = new Dictionary<string, UserInputWindow.Input>();
                     input["name"] = new UserInputWindow.Input() { Label = "Name", DefaultValue = stream.Name };
-                    input["fileExt"] = new UserInputWindow.Input() { Label = "File extension", DefaultValue = stream.FileExt };                    
+                    input["fileExt"] = new UserInputWindow.Input() { Label = "File extension", DefaultValue = stream.FileExt };
                     input["type"] = new UserInputWindow.Input() { Label = "Type", DefaultValue = stream.Type };
                     input["sr"] = new UserInputWindow.Input() { Label = "Sample rate", DefaultValue = stream.SampleRate.ToString() };
                     UserInputWindow dialog = new UserInputWindow("Edit stream type", input);
@@ -402,9 +396,34 @@ namespace ssi
             if (StreamsBox.SelectedItem != null)
             {
                 string name = (string)StreamsBox.SelectedItem;
-                if (DatabaseHandler.DeleteStream(name))
+
+                MessageBoxResult result = MessageBox.Show("Do you want to also delete the remaining local files?\nThis can not be undone.", "Attention", MessageBoxButton.YesNoCancel);
+
+                if (result == MessageBoxResult.Cancel) return;
+                else
                 {
-                    GetStreamTypes();
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        foreach (DatabaseSession session in DatabaseHandler.Sessions)
+                        {
+                            foreach(DatabaseRole role in DatabaseHandler.Roles)
+                            {
+                                string ext = DatabaseHandler.Streams.Find(s => s.Name == name).FileExt;
+
+                                File.Delete(Properties.Settings.Default.DatabaseDirectory  + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + "." + ext);
+                                 if(ext == ("stream"))
+                                {
+                                    File.Delete(Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + ".stream~");
+                                }
+                            }
+                        }
+
+                    }
+
+                    if (DatabaseHandler.DeleteStream(name))
+                    {
+                        GetStreamTypes();
+                    }
                 }
             }
         }
@@ -451,7 +470,6 @@ namespace ssi
                 }
             }
         }
-
 
         private void Window_Closed(object sender, EventArgs e)
         {
