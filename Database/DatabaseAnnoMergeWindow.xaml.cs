@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -26,6 +27,9 @@ namespace ssi
 
 
         CultureInfo culture = CultureInfo.InvariantCulture;
+        BackgroundWorker backgroundWorker = new BackgroundWorker();
+
+
 
         public DatabaseAnnoMergeWindow()
         {

@@ -34,7 +34,6 @@ namespace ssi
             set { _followmedia = value; }
         }
 
-        private double minRangeInPixel = 1;
         private double min = 1;
 
         public TimeRangeSlider()
