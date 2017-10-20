@@ -236,7 +236,7 @@ namespace ssi
                 Copy.IsEnabled = false;
             }
 
-
+            Stats.Content = defaultlabeltext;
 
         }
 
@@ -1055,7 +1055,7 @@ namespace ssi
 
 
 
-        private async Task CalculateKappaWrapper()
+        private async Task CalculateKappaWrapper(List<AnnoList> annolists)
         {
             if (AnnotationResultBox.SelectedItems.Count > 1)
             {
@@ -1066,7 +1066,6 @@ namespace ssi
                 string interpretation = "";
 
                 CancellationToken token = new CancellationToken();
-                List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
                 await Task.Run(() =>
                 {
                     lock (syncLock)
@@ -1147,6 +1146,10 @@ namespace ssi
                 }, token);
 
 
+                Action EmptyDelegate = delegate () { };
+                Stats.Content = "Cronbach's α: " + cronbachalpha.ToString("F3") + ": " + interpretation;
+
+
                 double pearsoncorrelation = double.MaxValue;
                 if (annolists.Count == 2)
                 {
@@ -1155,10 +1158,6 @@ namespace ssi
                     interpretation = Pearsoninterpretation(pearsoncorrelation);
                 }
 
-
-
-                Action EmptyDelegate = delegate () { };
-                Stats.Content = "Cronbach's α: " + cronbachalpha.ToString("F3") + ": " + interpretation;
 
                 if(pearsoncorrelation != double.MaxValue)
                 {
@@ -1338,16 +1337,17 @@ namespace ssi
 
         private void calculateStatistics()
         {
+            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
             if (selectedisContinuous)
             {
-                List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+               
                 CalculateCronbachWrapper(annolists);
                 // CalculateRMSEWrapper(annolists);
             }
             else
             {
 
-                CalculateKappaWrapper();
+                CalculateKappaWrapper(annolists);
 
             };
 

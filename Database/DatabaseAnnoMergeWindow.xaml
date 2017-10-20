@@ -144,7 +144,7 @@
 
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="4">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10">
-                <Label Name="Stats">Hover to calculate statistics</Label>
+                <Label  MouseEnter="Stats_MouseEnter" Name="Stats">Hover to calculate statistics</Label>
             </StackPanel>
         </StackPanel>
 
