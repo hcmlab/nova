@@ -677,6 +677,13 @@ namespace ssi
                     {
                         meta.ServerAuth = bool.Parse(document["serverAuth"].ToString());
                     }
+
+                    if (document.TryGetElement("urlFormat", out value))
+                    {
+                        UrlFormat format = UrlFormat.GENERAL;
+                        Enum.TryParse<UrlFormat>(document["urlFormat"].AsString, out format);
+                        meta.UrlFormat = format;
+                    }
                 }
                 else
                 {
@@ -698,7 +705,8 @@ namespace ssi
                 {"name", meta.Name},
                 {"description", meta.Description == null ? "" : meta.Description},
                 {"server", meta.Server == null ? "" : meta.Server},
-                {"serverAuth", meta.ServerAuth.ToString()}
+                {"serverAuth", meta.ServerAuth.ToString()},
+                {"urlFormat", meta.UrlFormat.ToString()}
             };
 
             var builder = Builders<BsonDocument>.Filter;
@@ -2679,12 +2687,20 @@ namespace ssi
 
     #region DATABASE TYPES
 
+    public enum UrlFormat
+    {
+        GENERAL = 0,
+        NEXTCLOUD = 1
+       
+    }
+
     public class DatabaseDBMeta
     {
         public string Name { get; set; }
         public string Description { get; set; }
         public string Server { get; set; }
         public bool ServerAuth { get; set; }
+        public UrlFormat UrlFormat { get; set; }
         public override string ToString()
         {
             return Name;

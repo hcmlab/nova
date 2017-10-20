@@ -219,9 +219,9 @@ namespace ssi
                             }
   
 
-
-                            //In case we host our files on nextcloud, the file format is special. For now we only allow self-hosted, but in the future we add an option for nextcloud in general.
-                            if(meta.Server.Contains("https://hcm-lab.de/cloud"))
+                            //TODO add more servers...
+                            
+                            if(meta.UrlFormat == UrlFormat.NEXTCLOUD)
                             {
                                 url = meta.Server + "/download?path=%2F" + DatabaseHandler.DatabaseName + "%2F" + DatabaseHandler.SessionName + "&files=" + stream;
                             }
@@ -255,9 +255,9 @@ namespace ssi
                             }
                         }
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        MessageBox.Show("Make sure ip, login and password are correct", "Connection to database not possible");
+                        MessageBox.Show("Error: " + e, "Connection to database not possible");
                     }
                 }
             }

@@ -23,6 +23,16 @@ namespace ssi
             DescriptionField.Text = db.Description;
             ServerField.Text = db.Server;
             AuthentificationBox.IsChecked = db.ServerAuth;
+            if (db.UrlFormat == UrlFormat.NEXTCLOUD)
+            {
+                UrlFormatNextCloud.IsChecked = true;
+            }
+
+            else
+            {
+                UrlFormatGeneral.IsChecked = true;
+            }
+            
         }
 
         private void OkClick(object sender, RoutedEventArgs e)
@@ -31,6 +41,7 @@ namespace ssi
             db.Description = DescriptionField.Text;
             db.Server = ServerField.Text;
             db.ServerAuth = AuthentificationBox.IsChecked.Value;
+            db.UrlFormat = UrlFormatGeneral.IsChecked == true ? UrlFormat.GENERAL : UrlFormat.NEXTCLOUD;
 
             DialogResult = true;
             Close();
