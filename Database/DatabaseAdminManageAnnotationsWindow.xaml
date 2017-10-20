@@ -42,8 +42,8 @@
                     <TextBox x:Name="searchTextBox" DockPanel.Dock="Right" TextChanged="searchTextBox_TextChanged" Margin="5,0,0,0"></TextBox>
                 </DockPanel>
             </DockPanel>
-           
-            <ListView Name="AnnotationsBox" SelectionMode="Extended">
+
+            <ListView Name="AnnotationsBox" SelectionMode="Extended" GridViewColumnHeader.Click="AnnotationsBox_Click">
                 
                 <ListView.View>
                     <GridView>
