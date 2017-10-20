@@ -223,32 +223,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <td>T + arrow key down</td>
 <td>Select the annotation tier beneath the current one</td>
 </tr>
-<tr class="even">
-<td>strg + L</td>
-<td>Complete the current session automatically</td>
-</tr>
-<tr class="odd">
-<td>strg + arrow key left</td>
-<td>Setting the media position to the beginning of the currently selected label</td>
-</tr>
-<tr class="even">
-<td>strg + arrow key right</td>
-<td>Setting the media position to the end of the currently selected label</td>
-</tr>
-<tr class="odd">
-<td>alt + arrow key down</td>
-<td>Copying label to the tier below</td>
-</tr>
-<tr class="even">
-<td>alt + arrow key up</td>
-<td>Copying label to the tier above</td>
-</tr>
-<tr class="odd">
-<td>shift + dragging timeline</td>
-<td>Zoom in / out to the current media position</td>
-</tr>
 </tbody>
 </table>
+<p>ctrl + arrow key left Setting the media position to the beginning of the currently selected label ctrl + arrow key right Setting the media position to the end of the currently selected label alt + arrow key down Copying label to the tier below alt + arrow key up Copying label to the tier above shift + dragging timeline Zoom in / out to the current media position</p>
 <p><strong>Free / Discrete Scheme</strong></p>
 <table>
 <thead>
@@ -260,7 +237,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <tbody>
 <tr class="odd">
 <td>0 - 9</td>
-<td>Setting the label for the selected segment</td>
+<td>Setting the label for the selected segment (For discrete schemes)</td>
 </tr>
 <tr class="even">
 <td>S</td>
@@ -268,33 +245,45 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tr>
 <tr class="odd">
 <td>W</td>
-<td>Creating a new label between the green annotation cursor and the red media position cursor</td>
+<td>Creating a new label between the green annotation cursor and the red media position cursor, edit selected segment</td>
 </tr>
 <tr class="even">
-<td>strg + C</td>
+<td>Q</td>
+<td>Move the Signal Cursor to the beginning, the Annotation Cursor to the end of the selected segment</td>
+</tr>
+<tr class="odd">
+<td>E</td>
+<td>Move the Annotation Cursor to the beginning, the Signal Cursor to the end of the selected segment</td>
+</tr>
+<tr class="even">
+<td>ctrl + C</td>
 <td>Copy the currently selected segment</td>
 </tr>
 <tr class="odd">
-<td>strg + K</td>
-<td>Delete all annotations the are on the right side of the green annotation cursor</td>
+<td>ctrl + K</td>
+<td>Delete all annotations that are on the right side of the green annotation cursor</td>
 </tr>
 <tr class="even">
-<td>strg + V</td>
+<td>ctrl + L</td>
+<td>Complete the current session automatically</td>
+</tr>
+<tr class="odd">
+<td>ctrl + V</td>
 <td>Paste a copied segment</td>
 </tr>
-<tr class="odd">
-<td>strg + X</td>
+<tr class="even">
+<td>ctrl + X</td>
 <td>Cut the selected segment</td>
 </tr>
-<tr class="even">
-<td>strg + Y</td>
+<tr class="odd">
+<td>ctrl + Y</td>
 <td>Redo</td>
 </tr>
-<tr class="odd">
-<td>strg + Z</td>
+<tr class="even">
+<td>ctrl + Z</td>
 <td>Undo</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>shift + dragging</td>
 <td>Creating a label from start to end position (same as dragg with right mouse)</td>
 </tr>
@@ -311,7 +300,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <tbody>
 <tr class="odd">
 <td>0 - 9</td>
-<td>Setting the level of the selected segment</td>
+<td>Setting the level of the continuous annotation</td>
+</tr>
+<tr class="even">
+<td>arrow key up</td>
+<td>Setting the level of the continuous annotation up</td>
+</tr>
+<tr class="odd">
+<td>arrow key down</td>
+<td>Setting the level of the continuous annotation down</td>
+</tr>
+<tr class="even">
+<td>L</td>
+<td>Toggle Live Annotation Mode On/Off</td>
+</tr>
+<tr class="odd">
+<td>M</td>
+<td>Toggle Mouse Control On/Off</td>
 </tr>
 </tbody>
 </table>
@@ -441,10 +446,6 @@ db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { rol
         &lt;role-2&gt;.&lt;stream-name-2&gt;.&lt;stream-ext-2&gt;
         ...</code></pre>
 <p>In the MongoDB this is reflected by different tables storing the sessions, the roles, and the streams. In addition, also annotators, annotation schemes and annotations are stored. It is important to note that each annotator can own exactly one annotation per scheme and role. This means it is not possible to store different versions of an annotation in the database.</p>
-<div class="figure">
-<img src="pics/database-structure-general.png" alt="General structure of a database." id="fig:database-structure-general" />
-<p class="caption"><em>General structure of a database.</em></p>
-</div>
 <div class="figure">
 <img src="pics/database-structure-detail.png" alt="Detailed structure of a database." id="fig:database-structure-detail" />
 <p class="caption"><em>Detailed structure of a database.</em></p>
