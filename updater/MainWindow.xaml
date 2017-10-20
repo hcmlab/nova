@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:updater"
         mc:Ignorable="d"
-        Title="Updating NOVA ..." Height="200" Width="400" Background="White">
+        Title="Updating NOVA ..." Height="200" Width="400" Background="White" Icon="ui.ico">
     <Grid>
         <StackPanel>
             <Label Name="labelDownloaded" HorizontalAlignment="Center">...</Label>
