@@ -60,7 +60,7 @@
 
             <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
                 <Label Content="Sessions"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="SessionsBox_SelectionChanged" >
+                <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="SessionsBox_SelectionChanged"  GridViewColumnHeader.Click="SessionsBox_Click" >
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Name">
@@ -107,7 +107,8 @@
                     <CheckBox Name="showonlymine" Content="Mine only" Checked="showOnlyMine_Checked" Unchecked="showOnlyMine_Unchecked" />
                     <CheckBox Name="showOnlyUnfinished" Content="Unfinished only" Checked="showOnlyUnfinished_Checked" Unchecked="showOnlyUnfinished_Unchecked" />
                 </StackPanel>
-                <ListView Name="AnnotationsBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended">
+                <ListView Name="AnnotationsBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended" GridViewColumnHeader.Click="AnnotationsBox_Click"  >
+                    
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
