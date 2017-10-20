@@ -95,9 +95,9 @@ Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. 
  space						Start / Stop autoplay
  T + arrow key up			Select the annotation tier above the current one
  T + arrow key down			Select the annotation tier beneath the current one
- strg + L					Complete the current session automatically
- strg + arrow key left		Setting the media position to the beginning of the currently selected label
- strg + arrow key right 	Setting the media position to the end of the currently selected label
+
+ ctrl + arrow key left		Setting the media position to the beginning of the currently selected label
+ ctrl + arrow key right 	Setting the media position to the end of the currently selected label
  alt +  arrow key down  	Copying label to the tier below
  alt + arrow key up 		Copying label to the tier above
  shift + dragging timeline  Zoom in / out to the current media position
@@ -106,22 +106,29 @@ Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. 
 
  Shorcut					Description    
  -------					------ 
- 0 - 9						Setting the label for the selected segment
+ 0 - 9						Setting the label for the selected segment (For discrete schemes)
  S							Splitting the selected segment in two parts on the green annotation cursor
- W							Creating a new label between the green annotation cursor and the red media position cursor
- strg + C      				Copy the currently selected segment
- strg + K					Delete all annotations the are on the right side of the green annotation cursor 
- strg + V					Paste a copied segment
- strg + X					Cut the selected segment
- strg + Y					Redo
- strg + Z					Undo
+ W							Creating a new label between the green annotation cursor and the red media position cursor, edit selected segment
+ Q							Move the Signal Cursor to the beginning, the Annotation Cursor to the end of the selected segment
+ E							Move the Annotation Cursor to the beginning, the Signal Cursor to the end of the selected segment
+ ctrl + C      				Copy the currently selected segment
+ ctrl + K					Delete all annotations that are on the right side of the green annotation cursor 
+ ctrl + L					Complete the current session automatically
+ ctrl + V					Paste a copied segment
+ ctrl + X					Cut the selected segment
+ ctrl + Y					Redo
+ ctrl + Z					Undo
  shift + dragging			Creating a label from start to end position (same as dragg with right mouse)
 
 **Continuous Scheme**
 
  Shorcut					Description    
  -------					------ 
- 0 - 9						Setting the level of the selected segment
+ 0 - 9						Setting the level of the continuous annotation
+ arrow key up				Setting the level of the continuous annotation up
+ arrow key down				Setting the level of the continuous annotation down
+ L			                Toggle Live Annotation Mode On/Off
+ M							Toggle Mouse Control On/Off
 
 ## File Format
 
@@ -336,7 +343,7 @@ A database in NOVA aggregates data recorded within the same experiment. It is ba
 
 In the MongoDB this is reflected by different tables storing the sessions, the roles, and the streams. In addition, also annotators, annotation schemes and annotations are stored. It is important to note that each annotator can own exactly one annotation per scheme and role. This means it is not possible to store different versions of an annotation in the database.
 
-![*General structure of a database.*](pics/database-structure-general.png){#fig:database-structure-general}
+
 
 ![*Detailed structure of a database.*](pics/database-structure-detail.png){#fig:database-structure-detail}
 
