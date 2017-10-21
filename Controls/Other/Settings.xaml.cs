@@ -234,5 +234,45 @@ namespace ssi
                 Process.Start(CMLDirectory.Text);
             }
         }
+
+        private void DBUser_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DBUser.SelectAll();
+        }
+
+        private void DBPassword_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DBPassword.SelectAll();
+        }
+
+        private void DBHost_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DBHost.SelectAll();
+        }
+
+        private void DBPort_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DBPort.SelectAll();
+        }
+
+        private void DBHost_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            DBHost.SelectAll();
+        }
+
+        private void DBPort_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            DBPort.SelectAll();
+        }
+
+        private void DBUser_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            DBUser.SelectAll();
+        }
+
+        private void DBPassword_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            DBPassword.SelectAll();
+        }
     }
 }

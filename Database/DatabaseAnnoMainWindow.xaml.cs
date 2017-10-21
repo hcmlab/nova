@@ -18,6 +18,12 @@ namespace ssi
     public class StreamItem
     {
         public string Name { get; set; }
+
+        public string Role { get; set; }
+
+        public string Type { get; set; }
+
+        public string Extension { get; set; }
         public bool Exists { get; set; }
     }
 
@@ -100,15 +106,15 @@ namespace ssi
             else return null;
         }
 
-        public List<string> SelectedStreams()
+        public List<StreamItem> SelectedStreams()
         {
-            List<string> selectedStreams = new List<string>();
+            List<StreamItem> selectedStreams = new List<StreamItem>();
             
             if (StreamsBox.SelectedItems != null)
             {
                 foreach (StreamItem stream in StreamsBox.SelectedItems)
                 {
-                    selectedStreams.Add(stream.Name);                    
+                    selectedStreams.Add(stream);                    
                 }
             }
 
@@ -185,6 +191,7 @@ namespace ssi
         {
             if (SessionsBox.SelectedItem != null)
             {
+                searchTextBox.Text = "";
                 DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
                 GetAnnotations(session);
                 GetStreams();
@@ -217,7 +224,7 @@ namespace ssi
                         string filename = role.Name + "." + stream.Name + "." + stream.FileExt;
                         string directory = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session + "\\";
                         string filepath = directory + filename;
-                        items.Add(new StreamItem() { Name = filename, Exists = File.Exists(filepath) });
+                        items.Add(new StreamItem() { Name = filename, Extension = stream.FileExt, Role = role.Name, Type = stream.Name, Exists = File.Exists(filepath) });
                     }
                 }
             }
@@ -672,6 +679,11 @@ namespace ssi
         }
 
         private void SessionsBox_Click(object sender, RoutedEventArgs e)
+        {
+            SortListView(sender, e);
+        }
+
+        private void StreamsBox_Click(object sender, RoutedEventArgs e)
         {
             SortListView(sender, e);
         }
