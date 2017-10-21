@@ -154,6 +154,9 @@
     <Compile Include="Controls\Navigation\TimeRangeSlider.xaml.cs">
       <DependentUpon>TimeRangeSlider.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Other\CMLUpdater.xaml.cs">
+      <DependentUpon>CMLUpdater.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Other\ConfmatWindow.xaml.cs">
       <DependentUpon>ConfmatWindow.xaml</DependentUpon>
     </Compile>
@@ -283,6 +286,10 @@
     <Page Include="Controls\Navigation\TimeRangeSlider.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Other\CMLUpdater.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Other\ConfmatWindow.xaml">
       <SubType>Designer</SubType>
@@ -556,6 +563,7 @@
     <Content Include="EVRPresenter64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Resources\nova_plain.png" />
     <Resource Include="Resources\search_small.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

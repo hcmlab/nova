@@ -80,7 +80,8 @@ namespace ssi
 
         private void helpShortcutsMenu_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Shortcuts:\n\nalt + return to enter fullscreen, esc to close fullscreen\nleftctrl for continuous anno mode, again to close\nalt+click or W on discrete anno to change label/color\nDel on Anno to delete Anno, on tier to delete tier\nalt + right/left to move signalmarker framewise\nshift + alt + right/left to move annomarker framewise\nQ to move signalmarker to start and annomarker to end of selected Segment\nE move annomarker to start and signalmarker to end of selected Segment\na for new Anno between boths markers\nSpace Play/Pause media ", "Quick Reference");
+
+            System.Diagnostics.Process.Start("https://rawgit.com/hcmlab/nova/master/docs/index.html#shortcut-cheat-sheet");
         }
 
 

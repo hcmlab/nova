@@ -92,6 +92,28 @@ namespace ssi
             }
         }
 
+
+        static public void SelectPoint(AnnoTierSegment s)
+        {
+            UnselectLabel();
+            if (s != null)
+            {
+                s.select(true);
+
+                if (objectContainer == null)
+                {
+                    objectContainer = s;
+                }
+                selectedLabel = s;
+                selectedZindex = GetZIndex(selectedLabel);
+                SetZIndex(selectedLabel, selectedZindexMax + 1);
+
+                OnTierSegmentChange?.Invoke(s, null);
+            }
+        }
+
+
+
         static public void UnselectLabel()
         {
             if (selectedLabel != null)
@@ -881,6 +903,16 @@ namespace ssi
                             break;
                         }
                     }
+                }
+
+                else if (IsContinuous)
+                {
+                    double closestposition = MainHandler.Time.TimeFromPixel(e.GetPosition(this).X);
+                    closestIndex = GetClosestContinuousIndex(closestposition);
+                    AnnoListItem item = this.AnnoList[closestIndex];
+                    AnnoTierSegment s = new AnnoTierSegment(item, this);
+                    SelectLabel(s);
+
                 }
             }
             

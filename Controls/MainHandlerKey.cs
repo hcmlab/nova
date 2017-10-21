@@ -434,10 +434,16 @@ namespace ssi
                         if (annoTiers[i] == AnnoTierStatic.Selected && i + 1 < annoTiers.Count)
                         {
                             AnnoTierStatic.Select(annoTiers[i + 1]);
-                            AnnoTier.SelectLabel(null);
-                            if (!AnnoTierStatic.Selected.AnnoList.Contains(temp)) AnnoTierStatic.Selected.NewAnnoCopy(temp.Start, temp.Stop, temp.Label, temp.Color);
-
-                            break;
+                            if(AnnoTierStatic.Selected.IsDiscreteOrFree)
+                            {
+                                AnnoTier.SelectLabel(null);
+                                if (!AnnoTierStatic.Selected.AnnoList.Contains(temp)) {
+                                    AnnoTierStatic.Selected.NewAnnoCopy(temp.Start, temp.Stop, temp.Label, temp.Color);
+                                    break;
+                                }
+                                
+                            }
+                           
                         }
                     }
                 }
@@ -453,9 +459,15 @@ namespace ssi
                         if (annoTiers[i] == AnnoTierStatic.Selected && i > 0)
                         {
                             AnnoTierStatic.Select(annoTiers[i - 1]);
-                            AnnoTierStatic.SelectLabel(null);
-                            if (!AnnoTierStatic.Selected.AnnoList.Contains(temp)) AnnoTierStatic.Selected.NewAnnoCopy(temp.Start, temp.Stop, temp.Label, temp.Color);
-                            break;
+                            if (AnnoTierStatic.Selected.IsDiscreteOrFree)
+                            {
+                                AnnoTierStatic.SelectLabel(null);
+                                if (!AnnoTierStatic.Selected.AnnoList.Contains(temp))
+                                {
+                                    AnnoTierStatic.Selected.NewAnnoCopy(temp.Start, temp.Stop, temp.Label, temp.Color);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }

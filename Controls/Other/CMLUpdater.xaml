@@ -1,0 +1,20 @@
+﻿<Window x:Class="ssi.CMLUpdater"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        mc:Ignorable="d"
+        Title="Updating Cooperative Machine Learning Tools" Height="200" Width="400" Background="White" Icon="../../Resources/ui.ico">
+    <Grid>
+        <StackPanel>
+            <Label Name="labelDownloaded" HorizontalAlignment="Center">...</Label>
+
+            <ProgressBar Name="progressBar" Height="20"></ProgressBar>
+            <Image Source="../../Resources/nova_plain.png" Height="145" Margin="0,0,10,0"/>
+            <Label Name="labelPerc" HorizontalAlignment="Center"></Label>
+            <Label Name="labelSpeed" HorizontalAlignment="Center"></Label>
+        </StackPanel>
+
+    </Grid>
+</Window>

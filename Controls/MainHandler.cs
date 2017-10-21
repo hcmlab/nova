@@ -280,11 +280,12 @@ namespace ssi
 
             if (Properties.Settings.Default.CheckUpdateOnStart && Properties.Settings.Default.LastUpdateCheckDate.Date != DateTime.Today.Date)
             {
+                alreadycheckedcmlupdate = true;
                 Properties.Settings.Default.LastUpdateCheckDate = DateTime.Today.Date;
                 Properties.Settings.Default.Save();
                 checkForUpdates(true);
                 checkForCMLUpdates(true);
-                alreadycheckedcmlupdate = true;
+               
             }
 
 
