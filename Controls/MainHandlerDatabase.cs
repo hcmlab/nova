@@ -165,19 +165,26 @@ namespace ssi
 
                 control.ShadowBox.Visibility = Visibility.Collapsed;
 
-                List<string> streams = dialog.SelectedStreams();
-                databaseSessionStreams = streams;
+                List<StreamItem> streams = dialog.SelectedStreams();
+                databaseSessionStreams = new List<string>();
+
+                foreach (StreamItem stream in streams)
+                {
+                    databaseSessionStreams.Add(stream.Name);
+                }
+
+                   
 
                 if (streams != null && streams.Count > 0)
                 {
                     List<string> streamsAll = new List<string>();
-                    foreach (string stream in streams)
+                    foreach (StreamItem stream in streams)
                     {
-                        if (stream.EndsWith("stream"))
+                        if (stream.Extension == "stream")
                         {
-                            streamsAll.Add(stream + "~");
+                            streamsAll.Add(stream.Name + "~");
                         }
-                        streamsAll.Add(stream);
+                        streamsAll.Add(stream.Name);
 
                     }
 

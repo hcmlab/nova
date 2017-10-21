@@ -89,14 +89,14 @@
                             <ColumnDefinition Width="70"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0">Host:</Label>
-                        <TextBox Grid.Column="1" Name="DBHost" Margin="5,0,5,5" />
+                        <TextBox Grid.Column="1" Name="DBHost" Margin="5,0,5,5" GotKeyboardFocus="DBHost_GotFocus" GotMouseCapture="DBHost_GotMouseCapture" />
                         <Label Grid.Column="2">Port:</Label>
-                        <TextBox Grid.Column="3" Name="DBPort" Margin="5,0,5,5"/>
+                        <TextBox Grid.Column="3" Name="DBPort" Margin="5,0,5,5" Height="21" VerticalAlignment="Bottom" GotKeyboardFocus="DBPort_GotFocus" GotMouseCapture="DBPort_GotMouseCapture" />
                     </Grid>
                     <Label Grid.Row="2" Content="Database user:"/>
-                    <TextBox Grid.Row="3" Name="DBUser" Margin="5,0,5,5"/>
+                    <TextBox Grid.Row="3" Name="DBUser" Margin="5,0,5,5" GotKeyboardFocus="DBUser_GotFocus" GotMouseCapture="DBUser_GotMouseCapture"/>
                     <Label Grid.Row="4" Content="Database password:" />
-                    <PasswordBox Grid.Row="5" Name="DBPassword" Margin="5,0,5,5" />
+                    <PasswordBox Grid.Row="5" Name="DBPassword" Margin="5,0,5,5" GotKeyboardFocus="DBPassword_GotFocus" GotMouseCapture="DBPassword_GotMouseCapture" />
                     <Label Grid.Row="6" Content="Download directory:"/>
                     <DockPanel Grid.Row="7" LastChildFill="True">
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
