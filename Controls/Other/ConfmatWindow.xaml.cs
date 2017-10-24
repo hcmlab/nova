@@ -275,7 +275,7 @@ namespace ssi
 
         private void CopyClick(object sender, RoutedEventArgs e)
         {
-            Clipboard.SetText(content);
+            Clipboard.SetDataObject(content);
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
