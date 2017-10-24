@@ -706,23 +706,33 @@ namespace ssi
 
         private void ImportAnnoFromElan(string filename)
         {
+
+            bool addemptytiers = false;
             List<AnnoList> lists = AnnoList.LoadfromElanFile(filename);
+
+            if (lists.Exists(n => n.Count == 0))
+            {
+                MessageBoxResult mb = MessageBox.Show("At least one tier is empty, should empty tiers be excluded?", "Attention", MessageBoxButton.YesNo);
+                if (mb == MessageBoxResult.No)
+                {
+                    addemptytiers = true;
+                }
+            }
+
             double maxdur = 0;
 
             if (lists != null)
             {
                 foreach (AnnoList list in lists)
                 {
-                    foreach (AnnoListItem it in list)
-                    {
-                        if (it.Stop > maxdur)
-                        {
-                            maxdur = it.Stop;
-                        }
-                    }
+                    if (list.Count > 0) maxdur = list[list.Count - 1].Stop;
 
-                    annoLists.Add(list);
-                    addAnnoTier(list);
+                    if (list.Count > 0 || addemptytiers)
+                    {
+                        annoLists.Add(list);
+                        addAnnoTier(list);
+                    }
+                  
                 }
             }
             updateTimeRange(maxdur);

@@ -59,25 +59,95 @@ namespace ssi
             dialog.ShowDialog();
         }
 
-
-
         private void databaseCMLCompleteStep_Click(object sender, RoutedEventArgs e)
         {
             databaseCMLCompleteStep();
         }
 
-
         private void databaseCMLFusion_Click(object sender, RoutedEventArgs e)
         {
             databaseCMLFusionStep();
         }
+        
+        private string runCMLTool(string tool, string mode, List<object> parameters, Dictionary<string,object> arguments, string logName)
+        {
+            string result = "";
+            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\" + logName + ".log";
 
+            File.Delete(logPath);
 
-      
+            try
+            {
+                StringBuilder optionsBuilder = new StringBuilder();   
+                
+                if (mode != null || mode == "")
+                {
+                    optionsBuilder.Append("--" + mode + " ");
+                }
+                            
+                foreach (KeyValuePair<string, object> arg in arguments)
+                {
+                    optionsBuilder.Append("-" + arg.Key + " ");
+                    if (arg.Value != null)
+                    {
+                        optionsBuilder.Append(arg.Value.ToString() + " ");
+                    }
+                }
+
+                optionsBuilder.Append("-log \"" + logPath + "\" ");
+
+                foreach (object par in parameters)
+                {
+                    optionsBuilder.Append(par.ToString() + " ");
+                }
+
+                string options = optionsBuilder.ToString();
+                string optionsNoPassword = null;
+                if (arguments.ContainsKey("password"))
+                {
+                    optionsNoPassword = options.Replace(arguments["password"].ToString(), "*");
+                }
+                else
+                {
+                    optionsNoPassword = options;
+                }
+
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\" + tool + ".exe";
+                startInfo.Arguments = options;
+                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " " + optionsNoPassword + "\n-------------------------------------------\r\n";
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
+                result += File.ReadAllText(logPath);
+            }
+            catch (Exception ex)
+            {
+                MessageTools.Error(ex.ToString());
+            }
+
+            return result;
+        }
 
         public string CMLExtractFeature(string chainPath, int nParallel, string fromPath, string toPath, string frameStep, string leftContext, string rightContext)
         {
-            string result = "";
+            List<object> parameters = new List<object>();
+            parameters.Add("\"" + chainPath + "\"");
+            parameters.Add("\"" + fromPath + "\"");
+            parameters.Add("\"" + toPath + "\"");
+
+            Dictionary<string, object> arguments = new Dictionary<string, object>();
+            arguments["list"] = null;
+            arguments["parallel"] = nParallel;
+            arguments["step"] = frameStep;
+            arguments["left"] = leftContext;
+            arguments["right"] = rightContext;
+
+            return runCMLTool("xmlchain", null, parameters, arguments, "cml-extract");
+
+            /*string result = "";
             string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-extract.log";
 
             File.Delete(logPath);
@@ -110,12 +180,24 @@ namespace ssi
                 MessageTools.Error(ex.ToString());
             }
 
-            return result;
+            return result;*/
         }
 
         public string CMLMergeFeature(string rootDir, string sessions, string roles, string inputStreams, string outputStream, bool force)
-        {
-            string result = "";
+        {            
+            List<object> parameters = new List<object>();
+            parameters.Add("\"" + rootDir + "\"");
+            parameters.Add("\"" + roles + "\"");
+            parameters.Add("\"" + inputStreams + "\"");
+            parameters.Add("\"" + outputStream + "\"");
+
+            Dictionary<string, object> arguments = new Dictionary<string, object>();
+            arguments["list"] = sessions;
+            if (force)  arguments["force"] = null;            
+
+            return runCMLTool("cmltrain", "merge", parameters, arguments, "cml-merge");
+
+            /* string result = "";
             string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-merge.log";
 
             File.Delete(logPath);
@@ -146,11 +228,39 @@ namespace ssi
                 MessageTools.Error(ex.ToString());
             }
 
-            return result;
+            return result;*/
         }
 
         public string CMLTrainModel(string templatePath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream, string leftContext, string rightContext, string balance, bool complete)
         {
+            string[] split = server.Split(':');
+            string ip = split[0];
+            string port = split[1];
+
+            List<object> parameters = new List<object>();
+            parameters.Add("\"" + datapath + "\\" + database + "\"");
+            parameters.Add(ip);
+            parameters.Add(port);
+            parameters.Add(database);
+            parameters.Add(roles);
+            parameters.Add(scheme);
+            parameters.Add(annotator);
+            parameters.Add("\"" + stream + "\"");
+            parameters.Add("\"" + templatePath + "\"");
+            parameters.Add("\"" + trainerPath + "\"");
+
+            Dictionary <string, object> arguments = new Dictionary<string, object>();
+            arguments["list"] = sessions;
+            arguments["left"] = leftContext;
+            arguments["right"] = rightContext;
+            arguments["balance"] = balance;
+            arguments["username"] = username;
+            arguments["password"] = password;
+            if (complete) arguments["cooperative"] = null;
+
+            return runCMLTool("cmltrain", "train", parameters, arguments, "cml-train");
+
+            /*
             string result = "";
 
             string[] split = server.Split(':');
@@ -197,12 +307,35 @@ namespace ssi
                 MessageTools.Error(ex.ToString());
             }
 
-            return result;
+            return result;*/
         }
 
         public string CMLEvaluateModel(string evalPath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream)
         {
-            string result = "";
+            string[] split = server.Split(':');
+            string ip = split[0];
+            string port = split[1];
+
+            List<object> parameters = new List<object>();
+            parameters.Add("\"" + datapath + "\\" + database + "\"");
+            parameters.Add(ip);
+            parameters.Add(port);
+            parameters.Add(database);
+            parameters.Add(roles);
+            parameters.Add(scheme);
+            parameters.Add(annotator);
+            parameters.Add("\"" + stream + "\"");
+            parameters.Add("\"" + trainerPath + "\"");
+            parameters.Add("\"" + evalPath + "\"");
+
+            Dictionary<string, object> arguments = new Dictionary<string, object>();
+            arguments["list"] = sessions;
+            arguments["username"] = username;
+            arguments["password"] = password;
+
+            return runCMLTool("cmltrain", "eval", parameters, arguments, "cml-eval");
+
+            /*string result = "";
 
             string[] split = server.Split(':');
             string ip = split[0];
@@ -244,7 +377,7 @@ namespace ssi
                 MessageTools.Error(ex.ToString());
             }
 
-            return result;
+            return result;*/
         }
 
         public string CMLPredictAnnos(string trainerPath, 
@@ -265,7 +398,35 @@ namespace ssi
             double minDur,
             bool complete)
         {
-            string result = "";
+
+            string[] split = server.Split(':');
+            string ip = split[0];
+            string port = split[1];
+
+            List<object> parameters = new List<object>();
+            parameters.Add("\"" + datapath + "\\" + database + "\"");
+            parameters.Add(ip);
+            parameters.Add(port);
+            parameters.Add(database);
+            parameters.Add(roles);
+            parameters.Add(scheme);
+            parameters.Add(annotator);
+            parameters.Add("\"" + stream + "\"");
+            parameters.Add("\"" + trainerPath + "\"");
+
+            Dictionary<string, object> arguments = new Dictionary<string, object>();
+            arguments["list"] = sessions;
+            arguments["left"] = leftContext;
+            arguments["right"] = rightContext;
+            arguments["mingap"] = minGap;
+            arguments["mindur"] = minDur;
+            arguments["username"] = username;
+            arguments["password"] = password;
+            if (complete) arguments["cooperative"] = null;
+
+            return runCMLTool("cmltrain", "forward", parameters, arguments, "cml-predict");
+
+            /*string result = "";
 
             string[] split = server.Split(':');
             string ip = split[0];
@@ -313,10 +474,8 @@ namespace ssi
                 MessageTools.Error(ex.ToString());
             }
 
-            return result;
+            return result;*/
         }
-
-
 
         public string CMLPredictFusion(string trainerPaths,
           string datapath,
@@ -384,7 +543,6 @@ namespace ssi
 
             return result;
         }
-
 
         public string CMLTrainBayesianNetwork(string netPath, string datasetpath, bool isdynamic)
         {
