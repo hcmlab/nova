@@ -180,6 +180,7 @@ namespace ssi
         private bool annorightdirection = true;   
         private bool isMouseAlreadydown = false;
         private double yPos = 0;
+        private int level = 2;
         private List<Line> continuousTierLines = new List<Line>();
         private List<Line> continuousTierMarkers = new List<Line>();
         private Ellipse continuousTierEllipse = new Ellipse();
@@ -406,8 +407,8 @@ namespace ssi
 
             double step = fac * segmentHeight;
             yPos = (yPos - step >= 0) ? yPos - step : yPos;
+            if (yPos - step >= 0) level++;
 
-            
         }
 
         public void continuousSegmentDown()
@@ -416,11 +417,13 @@ namespace ssi
             double numberOfLevels = Properties.Settings.Default.ContinuousHotkeysNumber;
             double fac = 1 + (1 / (numberOfLevels - 1));
             double segmentHeight = (this.ActualHeight / numberOfLevels);
-
-            double step = fac * segmentHeight;
-            yPos = (yPos + step <= this.ActualHeight) ? yPos + step : yPos;
-
            
+            double step = fac * segmentHeight;
+            yPos = (yPos + step <= this.ActualHeight) ? yPos + step  : yPos;
+            if (yPos + step <= this.ActualHeight) level--;
+
+
+
         }
 
         public void continuousSegmentToPosition(int position)
@@ -429,7 +432,7 @@ namespace ssi
             double numberOfLevels = Properties.Settings.Default.ContinuousHotkeysNumber;
             double fac = 1 + (1 / (numberOfLevels - 1));
             double segmentHeight = (this.ActualHeight / numberOfLevels);
-
+            level = position;
             yPos = (numberOfLevels - (position * fac)) * segmentHeight;
 
            
@@ -497,9 +500,13 @@ namespace ssi
             }
             else
             {   //it has to be called twice, otherwise there are some weird effects.
+                continuousSegmentToPosition(level);
                 TimeRangeChanged(MainHandler.Time);
                 TimeRangeChanged(MainHandler.Time);
+
             }
+
+
         }
 
         public void Select(bool flag)
@@ -1279,6 +1286,7 @@ namespace ssi
             {
                 if (this.ActualHeight > 0)
                 {
+                    
                     //markers
 
                     if (continuousTierMarkers.Count > 0)
@@ -1294,6 +1302,8 @@ namespace ssi
                             continuousTierMarkers[i].Y2 = continuousTierMarkers[i].Y1;
                             continuousTierMarkers[i].X1 = 0;
                             continuousTierMarkers[i].X2 = this.ActualWidth;
+
+                          
                         }
                     }
 
