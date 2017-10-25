@@ -67,7 +67,7 @@ namespace ssi
                 }
                 else if (result > 0)
                 {
-                    MessageBoxResult mb = MessageBox.Show("Your build version is " + BuildVersion + ". The latest version is  " + LatestGitVersion + ". Do you want to update nova to the latest version? \n\n Release Notes:\n\n " + latest.Body, "Update available!", MessageBoxButton.YesNo);
+                    MessageBoxResult mb = MessageBox.Show("Your build version is " + BuildVersion + ". The latest version is  " + LatestGitVersion + ". Do you want to update nova to the latest version? \n\n Release Notes:\n\n" + latest.Body, "Update available!", MessageBoxButton.YesNo);
                     if (mb == MessageBoxResult.Yes)
                     {
                         string url = "https://github.com/hcmlab/nova/blob/master/bin/updater.exe?raw=true";
