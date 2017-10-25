@@ -171,7 +171,7 @@ namespace ssi
 
         private void signalVolumeControl_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (SignalTrackStatic.Selected != null && SignalTrackStatic.Selected.Signal.Media != null && MediaBoxStatic.Selected.Media.HasAudio())
+            if (SignalTrackStatic.Selected != null && (SignalTrackStatic.Selected.Signal.Media != null || MediaBoxStatic.Selected != null && MediaBoxStatic.Selected.Media.HasAudio()))
             {
                 SignalTrackStatic.Selected.Signal.Media.SetVolume(control.signalVolumeControl.volumeSlider.Value);
             }
