@@ -844,6 +844,41 @@ namespace ssi
             return list;
         }
 
+
+        public static AnnoList ConvertFreetoDiscreteAnnotation(AnnoList list)
+        {
+            if(list.Scheme.Type != AnnoScheme.TYPE.FREE)
+            {
+                return list;
+            }
+
+
+            AnnoList al = new AnnoList();
+            AnnoScheme scheme = new AnnoScheme();
+            scheme.Type = AnnoScheme.TYPE.DISCRETE;
+
+            foreach (AnnoListItem ali in list)
+            {
+                al.Add(ali);
+                if (scheme.Labels.Find(x => x.Name == ali.Label) == null)
+                {
+                    AnnoScheme.Label l = new AnnoScheme.Label(ali.Label, Colors.Black);
+                    scheme.Labels.Add(l);
+                }
+                    
+            }
+
+            scheme.Name = list.Scheme.Name;
+            al.Scheme = scheme;
+            al.Meta = list.Meta;
+ 
+            return al;
+        }
+
+
+
+
+
         public static List<AnnoList> LoadfromElanFile(String filepath)
         {
             List<AnnoList> list = new List<AnnoList>();
@@ -871,6 +906,8 @@ namespace ssi
                 {
                     AnnoList al = new AnnoList();
                     AnnoScheme scheme = new AnnoScheme();
+
+
                     scheme.Type = AnnoScheme.TYPE.FREE;
                     
                 

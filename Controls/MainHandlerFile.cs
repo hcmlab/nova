@@ -1149,7 +1149,25 @@ namespace ssi
 
         private void convertAnnoContinuousToDiscrete_Click(object sender, RoutedEventArgs e)
         {
-            ExportAnnoContinuousToDiscrete();
+            if(AnnoTierStatic.Selected != null)
+            {
+                if(AnnoTierStatic.Selected.AnnoList.Scheme.Type  == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    ExportAnnoContinuousToDiscrete();
+                }
+
+                else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+                {
+
+                   AnnoList newlist = AnnoList.ConvertFreetoDiscreteAnnotation(AnnoTierStatic.Selected.AnnoList);
+                   AnnoTier.Unselect();
+                   addAnnoTierFromList(newlist);
+                }
+               
+               
+
+            }
+          
         }
 
         private void convertSignalToAnnoContinuous_Click(object sender, RoutedEventArgs e)

@@ -62,7 +62,7 @@ namespace ssi
             control.annoReloadBackupMenu.IsEnabled = hasDatabaseTier;
             control.annoExportMenu.IsEnabled = hasTier;
             control.convertSelectedTierMenu.IsEnabled = hasTier;
-            control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && tier.IsContinuous;
+            control.convertAnnoContinuousToDiscreteMenu.IsEnabled = hasTier && (tier.IsContinuous || tier.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE);
             control.removeRemainingSegmentsMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
             control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsContinuous;
             control.convertSignalMenu.IsEnabled = hasTrack;
