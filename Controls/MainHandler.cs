@@ -437,17 +437,18 @@ namespace ssi
 
         private void updatePositionLabels(double time)
         {
+
+            control.signalPositionLabel.Text = FileTools.FormatSeconds(time) + "/" + FileTools.FormatSeconds(timeline.TotalDuration);
             if (SignalTrackStatic.Selected != null && SignalTrackStatic.Selected.Signal != null)
             {
                 Signal signal = SignalTrackStatic.Selected.Signal;
-                control.signalPositionLabel.Text = FileTools.FormatSeconds(time);
                 control.signalStatusValueLabel.Text = signal.Value(time).ToString();
                 control.signalStatusValueMinLabel.Text = "min " + signal.min[signal.ShowDim].ToString();
                 control.signalStatusValueMaxLabel.Text = "max " + signal.max[signal.ShowDim].ToString();
             }
             if (MediaBoxStatic.Selected != null && MediaBoxStatic.Selected.Media != null)
             {
-                control.mediaPositionLabel.Text = "#" + FileTools.FormatFrames(time, MediaBoxStatic.Selected.Media.GetSampleRate());
+                control.mediaPositionLabel.Text = "#" + FileTools.FormatFrames(time, MediaBoxStatic.Selected.Media.GetSampleRate()) + "/" + FileTools.FormatFrames(timeline.TotalDuration, MediaBoxStatic.Selected.Media.GetSampleRate());
             }
         }
 

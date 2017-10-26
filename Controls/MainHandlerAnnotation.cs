@@ -485,6 +485,9 @@ namespace ssi
             if (control.navigator.askforlabels.IsChecked == true) AnnoTier.askForLabel = true;
             else AnnoTier.askForLabel = false;
 
+          
+
+
             if (e.LeftButton == MouseButtonState.Pressed && !Keyboard.IsKeyDown(Key.LeftShift))
             {
                 if (AnnoTierStatic.Selected != null)
@@ -565,11 +568,21 @@ namespace ssi
                 }
                 else
                 {
+                    double pos = e.GetPosition(control.signalAndAnnoGrid).X;
                     annoCursor.X = 0;
-                    double time = Time.TimeFromPixel(0);
+                    double time = Time.TimeFromPixel(pos);
                     annoCursor.Visibility = Visibility.Hidden;
                     control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
                 }
+            }
+
+            else
+            {
+                double pos = e.GetPosition(control.signalAndAnnoGrid).X;
+                annoCursor.X = 0;
+                double time = Time.TimeFromPixel(pos);
+                annoCursor.Visibility = Visibility.Hidden;
+                control.annoPositionLabel.Text = FileTools.FormatSeconds(time);
             }
         }
 
