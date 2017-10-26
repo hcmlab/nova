@@ -2163,11 +2163,17 @@ namespace ssi
                 {
                     newAnnotationDoc.Add(new BsonElement("data_backup_id", annoList.Source.Database.DataBackupOID));
                 }
+
+
+                bool isfinished = annoList.Meta.isFinished;
+                if (markAsFinished) isfinished = true;
+
+
                 newAnnotationDoc.Add(new BsonElement("annotator_id", annotatorID));
                 newAnnotationDoc.Add(new BsonElement("role_id", roleID));
                 newAnnotationDoc.Add(new BsonElement("scheme_id", schemeID));
                 newAnnotationDoc.Add(new BsonElement("session_id", sessionID));
-                newAnnotationDoc.Add(new BsonElement("isFinished", markAsFinished));
+                newAnnotationDoc.Add(new BsonElement("isFinished", isfinished));
                 newAnnotationDoc.Add(new BsonElement("isLocked", isLocked));
                 newAnnotationDoc.Add(new BsonElement("date", new BsonDateTime(DateTime.Now)));
                 BsonArray streamArray = new BsonArray();
@@ -2527,6 +2533,8 @@ namespace ssi
                 annoList.Meta.Annotator = annotation.Annotator;
                 annoList.Meta.AnnotatorFullName = annotation.AnnotatorFullName;
                 annoList.Meta.Role = annotation.Role;
+                annoList.Meta.isLocked = annotation.IsLocked;
+                annoList.Meta.isFinished = annotation.IsFinished;
 
                 // load scheme and data
 

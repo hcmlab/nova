@@ -597,6 +597,7 @@ namespace ssi
             }
 
             int drawlinesnumber = 1000;
+            if (AnnoList.Count < 1000) drawlinesnumber = AnnoList.Count;
             //if (this.ActualWidth == 0) drawlinesnumber = 500;
             //else if (AnnoList.Count > this.ActualWidth) drawlinesnumber = (int) (this.ActualWidth);
             //else drawlinesnumber = AnnoList.Count;
@@ -916,9 +917,13 @@ namespace ssi
                 {
                     double closestposition = MainHandler.Time.TimeFromPixel(e.GetPosition(this).X);
                     closestIndex = GetClosestContinuousIndex(closestposition);
-                    AnnoListItem item = this.AnnoList[closestIndex];
-                    AnnoTierSegment s = new AnnoTierSegment(item, this);
-                    SelectLabel(s);
+                    if(closestIndex != -1)
+                    {
+                        AnnoListItem item = this.AnnoList[closestIndex];
+                        AnnoTierSegment s = new AnnoTierSegment(item, this);
+                        SelectLabel(s);
+                    }
+                   
 
                 }
             }

@@ -17,6 +17,10 @@ namespace ssi
 
         public string AnnotatorFullName { get; set; }
 
+        public bool isFinished { get; set; }
+
+        public bool isLocked { get; set; }
+
         public Collection<AnnoTrigger> Trigger { get; set; }
         public Collection<Pipeline> Pipeline { get; set; }
 
@@ -26,6 +30,8 @@ namespace ssi
             Subject = "";
             Annotator = "";
             AnnotatorFullName = "";
+            isFinished = false;
+            isLocked = false;
             Trigger = new Collection<AnnoTrigger>();
             Pipeline = new Collection<Pipeline>();
         }
