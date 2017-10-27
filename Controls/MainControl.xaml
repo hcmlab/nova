@@ -240,7 +240,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
+                            <RowDefinition Name="signalbar" Height="30" MinHeight="30" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
@@ -271,7 +271,7 @@
 
                                     <StatusBar Grid.Column="0"
                                                    Grid.Row="0"
-                                                   Background="Transparent">
+                                                   Background="Transparent" Name="signalstatusbar" Visibility="Hidden" >
 
                                         <Button Name="signalSettingsButton" 
                                                     Background="Transparent" 
@@ -333,7 +333,7 @@
                             </Border>
 
                             <Border Grid.Column="0"
-                                    Grid.Row="1" 
+                                    Grid.Row="1"  
                                     Background="Transparent">
                                 <local:SignalTrackControl x:Name="signalTrackControl"
                                     VerticalAlignment="Stretch"
@@ -371,12 +371,12 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30"  />
                                     </Grid.RowDefinitions>
 
                                     <StatusBar Grid.Column="0" 
                                     Grid.Row="0"
-                                    Background="Transparent">
+                                    Background="Transparent" Name="annostatusbar" MinHeight="30" Visibility="Hidden">
 
                                         <Button Name="annoSettingsButton" 
                                                 Background="Transparent" 
