@@ -15,9 +15,6 @@
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0" Background="Transparent" Name="menu">
-            <Button Name="showSettingsMenu" Background="Transparent" BorderBrush="Transparent">
-                <Image Source="/Resources/settings.png" Width="16"></Image>
-            </Button>
             <MenuItem Header="FILE">
                 <MenuItem Header="Load Files" Name="loadFilesMenu" />
                 <MenuItem Header="Load Project" Name="fileLoadProjectMenu" />
@@ -77,6 +74,8 @@
                 <MenuItem Header="Merge / Copy Annotations" Name="databaseCMLMergeAnnotationsMenu" />                
                 <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
+            </MenuItem>
+            <MenuItem Header="SETTINGS" Name="showSettingsMenu">
             </MenuItem>
             <MenuItem Header="?">
                 <MenuItem Header="About"  Name="aboutMenu" />
