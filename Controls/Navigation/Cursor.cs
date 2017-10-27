@@ -63,8 +63,7 @@ namespace ssi
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            int toppixel = 20;
-            if (signal_loaded) toppixel = 40;
+            int toppixel = 30;
             drawingContext.DrawLine(pen, new Point(x_pos, toppixel), new Point(x_pos, ((FrameworkElement)this.AdornedElement).ActualHeight - 40));
         }
     }
