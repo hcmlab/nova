@@ -21,7 +21,7 @@ namespace ssi
 
             playLastTick = Environment.TickCount;
 
-            if (Time.CurrentPlayPosition > timeline.TotalDuration - 0.5)
+            if (Time.CurrentPlayPosition >= timeline.TotalDuration)
             {
                 Stop();
             }
