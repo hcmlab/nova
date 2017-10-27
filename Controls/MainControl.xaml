@@ -14,7 +14,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Menu Grid.Row="0" Background="Transparent" Name="menu">
+        <Menu Grid.Row="0" Background="DarkGray" Name="menu">
             <MenuItem Header="FILE">
                 <MenuItem Header="Load Files" Name="loadFilesMenu" />
                 <MenuItem Header="Load Project" Name="fileLoadProjectMenu" />
