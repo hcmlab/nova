@@ -79,6 +79,8 @@ namespace ssi
             control.signalPositionLabel.Text = "00:00:00.00";
             control.signalStatsButton.Visibility = Visibility.Hidden;
             control.signalCloseButton.Visibility = Visibility.Hidden;
+            this.control.signalbar.Height = new GridLength(30);
+            this.control.signalstatusbar.Visibility = Visibility.Hidden;
         }
 
         private void updateSignalTrack(SignalTrack track)

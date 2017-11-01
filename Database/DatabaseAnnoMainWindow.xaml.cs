@@ -307,13 +307,16 @@ namespace ssi
             }
             catch  { }
 
+            bool isOwner = Properties.Settings.Default.MongoDBUser == annotatorName || DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.DBADMIN;
+
+
             if (!onlyMe && !onlyUnfinished ||
                 onlyMe && !onlyUnfinished && Properties.Settings.Default.MongoDBUser == annotatorName ||
                 !onlyMe && onlyUnfinished && !isFinished ||
                 onlyMe && onlyUnfinished && !isFinished && Properties.Settings.Default.MongoDBUser == annotatorName)
             {
 
-                annotations.Add(new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = session.Name, IsFinished = isFinished, IsLocked = islocked, Date = date });
+                annotations.Add(new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = session.Name, IsFinished = isFinished, IsLocked = islocked, Date = date, IsOwner = isOwner });
             }
         }
         

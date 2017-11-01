@@ -362,6 +362,9 @@ namespace ssi
 
                 //else
                 //{
+
+                    this.control.signalbar.Height = new GridLength(control.signalAndAnnoGrid.ActualHeight /2 - 30);
+                    this.control.signalstatusbar.Visibility = Visibility.Visible;
                     signalCursor.signalLoaded = true;
                     annoCursor.signalLoaded = true;
                     addSignalTrack(signal, signalColor, backgroundColor);                  

@@ -43,7 +43,11 @@ namespace ssi
                 DatabaseUser user = new DatabaseUser()
                 {
                     Name = dialog.GetName(),
-                    Password = dialog.GetPassword()
+                    Password = dialog.GetPassword(),
+                    Fullname = dialog.GetFullName(),
+                    Email = dialog.Getemail(),
+                    Expertise = dialog.GetExpertise()
+ 
                 };
 
                 if (DatabaseHandler.AddUser(user, dialog.GetIsUserAdmin()))

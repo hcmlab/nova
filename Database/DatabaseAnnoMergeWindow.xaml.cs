@@ -266,6 +266,7 @@ namespace ssi
                 newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
                 newList.Source.StoreToDatabase = true;
                 newList.Source.Database.Session = al[0].Source.Database.Session;
+                newList.Meta.isFinished = true;
                 newList.HasChanged = true;
 
                 if (newList != null)
@@ -324,6 +325,7 @@ namespace ssi
             newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
             newList.Source.StoreToDatabase = true;
             newList.Source.Database.Session = al[0].Source.Database.Session;
+            newList.Meta.isFinished = true;
             newList.HasChanged = true;
 
             int minSize = int.MaxValue;
@@ -377,6 +379,7 @@ namespace ssi
             newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
             newList.Source.StoreToDatabase = true;
             newList.Source.Database.Session = al[0].Source.Database.Session;
+            newList.Meta.isFinished = true;
             newList.HasChanged = true;
 
             int minSize = int.MaxValue;
@@ -568,6 +571,7 @@ namespace ssi
             newList.Meta.Annotator = DatabaseHandler.Annotators.Find(a => a.FullName == newList.Meta.AnnotatorFullName).Name;
             newList.Source.StoreToDatabase = true;
             newList.Source.Database.Session = al[0].Source.Database.Session;
+            newList.Meta.isFinished = true;
             newList.HasChanged = true;
 
             for (int i = 0; i < cont.Count - 1; i++)
@@ -1128,7 +1132,7 @@ namespace ssi
                 {
                     lock (syncLock)
                     {
-                           cronbachalpha = Cronbachsalpha(annolists, 1);
+                           cronbachalpha = Cronbachsalpha(annolists, 3);
                     }
                  
 

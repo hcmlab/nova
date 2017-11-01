@@ -9,10 +9,10 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        private bool rememberplaying = false;
 
         private void addAnnoTierFromList(AnnoList annoList)
         {
+            this.control.annostatusbar.Visibility = Visibility.Visible;
             double maxdur = 0;
             if (annoList.Count > 0)
             {
@@ -92,6 +92,11 @@ namespace ssi
             control.annoStatusSchemeTypeLabel.Text = "";
             control.annoPositionLabel.Text = "00:00:00.00";
             control.annoCloseButton.Visibility = Visibility.Hidden;
+            control.annoLiveModeActivateMouse.Visibility = Visibility.Hidden;
+            control.annoLiveModeCheckBox.Visibility = Visibility.Hidden;
+            control.annoLiveModeCheckBoxLabel.Visibility = Visibility.Hidden;
+            this.control.annostatusbar.Visibility = Visibility.Hidden;
+
         }
 
         private void updateAnnoInfo(AnnoTier annoTier)

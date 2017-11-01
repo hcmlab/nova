@@ -9,8 +9,11 @@ namespace ssi
 {
     public class Defaults
     {
+
+
         public class Colors
         {
+         
             public static Color Foreground = System.Windows.Media.Colors.Black;
             public static Color Background = System.Windows.Media.Colors.White;            
             public static Color Highlight = System.Windows.Media.Colors.LightGray;
@@ -18,17 +21,21 @@ namespace ssi
             public static Color GradientMin = System.Windows.Media.Colors.White;
             public static Color GradientMax = System.Windows.Media.Colors.LightBlue;
             public static Color Splitter = System.Windows.Media.Colors.WhiteSmoke;
+
         }
 
         public class Brushes
         {
-            public static Brush Foreground = System.Windows.Media.Brushes.Black;
-            public static Brush Background = System.Windows.Media.Brushes.White;
-            public static Brush Highlight = System.Windows.Media.Brushes.LightGray;
-            public static Brush Conceal = System.Windows.Media.Brushes.White;
-            public static Brush GradientMin = System.Windows.Media.Brushes.White;
-            public static Brush GradientMax = System.Windows.Media.Brushes.LightBlue;
-            public static Brush Splitter = System.Windows.Media.Brushes.WhiteSmoke;
+            public static Brush Foreground = new SolidColorBrush(Defaults.Colors.Foreground);
+            public static Brush Background = new SolidColorBrush(Defaults.Colors.Background);
+            public static Brush Highlight = new SolidColorBrush(Defaults.Colors.Highlight);
+            public static Brush Conceal = new SolidColorBrush(Defaults.Colors.Conceal);
+            public static Brush GradientMin = new SolidColorBrush(Defaults.Colors.GradientMin);
+            public static Brush GradientMax = new SolidColorBrush(Defaults.Colors.GradientMax);
+            public static Brush Splitter = new SolidColorBrush(Defaults.Colors.Splitter);
+
+
+
         }
 
         public class Strings
@@ -68,5 +75,10 @@ namespace ssi
             else if (index % 8 == 7) return System.Windows.Media.Colors.LightGray;
             else return System.Windows.Media.Colors.White;
         }
+
+
+      
+
+
     }
 }

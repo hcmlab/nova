@@ -22,11 +22,12 @@ namespace ssi
             InitializeComponent();
 
             view.OnHandlerLoaded += viewHandlerLoaded;
-            CultureInfo ci = new CultureInfo("en-GB");
+            CultureInfo ci = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
             Title = "NOVA | v" + MainHandler.BuildVersion + " | HCM-Lab, Augsburg University | http://openssi.net";
+           
            
         }
 
