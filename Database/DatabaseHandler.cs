@@ -851,6 +851,7 @@ namespace ssi
             try
             {
                 adminDatabase.RunCommand<BsonDocument>(createUser);
+                ChangeUserCustomData(user);
             }
             catch
             {
@@ -2619,15 +2620,16 @@ namespace ssi
                 if (annotation.Contains("date"))
                 { 
                     date = annotation["date"].ToUniversalTime();
-                }                
+                }
 
+                bool isOwner = Properties.Settings.Default.MongoDBUser == annotatorName || DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.DBADMIN;
 
                 if (!onlyMe && !onlyUnfinished ||
                    onlyMe && !onlyUnfinished && Properties.Settings.Default.MongoDBUser == annotatorName ||
                    !onlyMe && onlyUnfinished && !isFinished ||
                    onlyMe && onlyUnfinished && !isFinished && Properties.Settings.Default.MongoDBUser == annotatorName)
                 {
-                    DatabaseAnnotation anno = new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = sessionName, IsFinished = isFinished, IsLocked = islocked, Date = date };
+                    DatabaseAnnotation anno = new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = sessionName, IsFinished = isFinished, IsLocked = islocked, Date = date, IsOwner = isOwner };
                     items.Add(anno);
                 }
             }
@@ -2722,6 +2724,8 @@ namespace ssi
         public string Language { get; set; }
         public string Location { get; set; }
         public DateTime Date { get; set; }
+        public bool hasMatchingAnnotations { get; set; }
+
         public override string ToString()
         {
             return Name;
@@ -2809,7 +2813,10 @@ namespace ssi
 
         public string Session { get; set; }
 
+        public bool IsOwner { get; set; }
+
         public bool IsFinished { get; set; }
+
 
         public bool IsLocked { get; set; }
 

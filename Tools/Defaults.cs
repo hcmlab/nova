@@ -10,13 +10,6 @@ namespace ssi
     public class Defaults
     {
 
-        public enum UIMODE
-        {
-            LIGHT,
-            DARK
-        }
-
-        public static UIMODE Defaultmode = UIMODE.LIGHT;
 
         public class Colors
         {

@@ -576,21 +576,24 @@ namespace ssi
                 List<BsonDocument> annotations = new List<BsonDocument>();
                 foreach (ObjectId roleID in roleIDs)
                 {
-                    var filter = builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("role_id", roleID) & builder.Eq("isFinished", true);                    
+                    var filter = builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("role_id", roleID);                    
                     annotations.AddRange(DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Annotations, true, filter));
                 }
 
-                List<string> sessionNames = new List<string>();
+                List<DatabaseSession> sessionNames = new List<DatabaseSession>();
                 if (mode == Mode.TRAIN || mode == Mode.EVALUATE)
                 {
                     foreach (BsonDocument annotation in annotations)
                     {
                         string sessionName = "";
+                        bool matchingannos = annotation["isFinished"].AsBoolean;
+                            
                         DatabaseHandler.GetObjectName(ref sessionName, DatabaseDefinitionCollections.Sessions, annotation["session_id"].AsObjectId);
-                        if (sessionName != "" && !sessionNames.Contains(sessionName))
+                        if (sessionName != "" && sessionNames.Find(s => s.Name == sessionName) == null)
                         {
-                            sessionNames.Add(sessionName);
+                            sessionNames.Add(new DatabaseSession() { Name = sessionName, hasMatchingAnnotations = matchingannos });
                         }
+                        else if(matchingannos == false) sessionNames.Find(s => s.Name == sessionName).hasMatchingAnnotations = false;
                     }
                 }
                 else
@@ -598,22 +601,24 @@ namespace ssi
                     List<DatabaseSession> allSessions = DatabaseHandler.Sessions;
                     foreach(DatabaseSession s in allSessions)
                     {
-                        sessionNames.Add(s.Name);
+                        s.hasMatchingAnnotations = true;
+                        sessionNames.Add(s);
                     }
                     foreach (BsonDocument annotation in annotations)
                     {
                         string sessionName = "";
                         DatabaseHandler.GetObjectName(ref sessionName, DatabaseDefinitionCollections.Sessions, annotation["session_id"].AsObjectId);
-                        sessionNames.Remove(sessionName);                        
+                        sessionNames.Remove(sessionNames.Find(s => s.Name == sessionName));                        
                     }
                 }
 
                 List<DatabaseSession> sessions = new List<DatabaseSession>();
-                foreach (string sessionName in sessionNames)
+                foreach (DatabaseSession sessionName in sessionNames)
                 {
-                    DatabaseSession session = new DatabaseSession() { Name = sessionName };
+                    DatabaseSession session = sessionName; //  new DatabaseSession() { Name = sessionName, hasMatchingAnnotations = annotations.Find(a => a.is };
                     if (DatabaseHandler.GetSession(ref session))
                     {
+                        session.hasMatchingAnnotations = sessionName.hasMatchingAnnotations;
                         sessions.Add(session);
                     }
                 }

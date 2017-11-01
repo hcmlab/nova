@@ -14,7 +14,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Menu Grid.Row="0" Background="DarkGray" Name="menu">
+        <Menu Grid.Row="0" Background="Transparent" Name="menu">
             <MenuItem Header="FILE">
                 <MenuItem Header="Load Files" Name="loadFilesMenu" />
                 <MenuItem Header="Load Project" Name="fileLoadProjectMenu" />
@@ -63,6 +63,7 @@
                     <MenuItem Header="To Continuous Annotation" Name="convertSignalToAnnoContinuousMenu" />
                 </MenuItem>
             </MenuItem>
+            <MenuItem Header="SETTINGS" Name="showSettingsMenu"/>
             <MenuItem Header="LEARNING" Name="databaseCMLMenu">
                 <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
                 <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
@@ -71,12 +72,12 @@
                 <MenuItem Header="Fusion" Name="fusionmenu">
                     <MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenu"/>
                 </MenuItem>
-                <MenuItem Header="Merge / Copy Annotations" Name="databaseCMLMergeAnnotationsMenu" />                
+                <MenuItem Header="Merge / Copy Annotations" Name="databaseCMLMergeAnnotationsMenu" />
                 <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
-            <MenuItem Header="SETTINGS" Name="showSettingsMenu">
-            </MenuItem>
+
+
             <MenuItem Header="?">
                 <MenuItem Header="About"  Name="aboutMenu" />
                 <MenuItem Header="Documentation"  Name="helpDocumentationMenu" />

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="" Height="600" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="" Height="600" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >
@@ -13,7 +13,30 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
+        <Style x:Key="SessionsItemColorStyle" TargetType="{x:Type ListViewItem}">
+            <Style.Resources>
+                <SolidColorBrush x:Key="ExistsBrush" Color="#FF042271"/>
+                <SolidColorBrush x:Key="IsMissingBrush" Color="Red"/>
+                <local:StreamItemColorConverter x:Key="StreamColorConverter" />
+            </Style.Resources>
+
+            <!-- Stretch the content so that we can right-align values in the Balance column. -->
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+
+            <Style.Triggers>
+                <!-- When a file exists color it green. -->
+                <DataTrigger Binding="{Binding hasMatchingAnnotations, Converter={StaticResource StreamColorConverter}}" Value="+1">
+                    <Setter Property="Foreground" Value="{StaticResource ExistsBrush}" />
+                </DataTrigger>
+                <!-- When a file is missing color it red. -->
+                <DataTrigger Binding="{Binding hasMatchingAnnotations, Converter={StaticResource StreamColorConverter}}" Value="-1">
+                    <Setter Property="Foreground" Value="{StaticResource IsMissingBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
+
+
 
     <Grid>
 
@@ -68,7 +91,8 @@
             <Label Content="Sessions" Grid.Row="0" Grid.Column="3" />
             <DockPanel Grid.Row="1" Grid.Column="3" Margin="0,0,5,0" LastChildFill="True">
                 <CheckBox Name="ShowAllSessionsCheckBox" DockPanel.Dock="Bottom"  Margin="0,5,0,0" Checked="ShowAllSessionsCheckBox_Checked" Unchecked="ShowAllSessionsCheckBox_Unchecked">Show existing</CheckBox>
-                <ListView Name="SessionsBox"  SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" DockPanel.Dock="Top">
+
+                <ListView Name="SessionsBox"  SelectionMode="Extended" ItemContainerStyle="{StaticResource SessionsItemColorStyle}"  SelectionChanged="SessionsBox_SelectionChanged" DockPanel.Dock="Top">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
