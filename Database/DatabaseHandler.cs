@@ -2622,7 +2622,7 @@ namespace ssi
                     date = annotation["date"].ToUniversalTime();
                 }
 
-                bool isOwner = Properties.Settings.Default.MongoDBUser == annotatorName || DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.DBADMIN;
+                bool isOwner = Properties.Settings.Default.MongoDBUser == annotatorName || DatabaseHandler.CheckAuthentication() >= DatabaseAuthentication.DBADMIN;
 
                 if (!onlyMe && !onlyUnfinished ||
                    onlyMe && !onlyUnfinished && Properties.Settings.Default.MongoDBUser == annotatorName ||

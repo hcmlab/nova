@@ -78,6 +78,7 @@ namespace ssi
             }
 
             List<DatabaseAnnotation> items = DatabaseHandler.GetAnnotations();
+            
             AnnotationsBox.ItemsSource = items;           
         }                
 
