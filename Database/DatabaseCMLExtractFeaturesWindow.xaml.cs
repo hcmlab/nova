@@ -150,7 +150,7 @@ namespace ssi
 
             if (nFiles > 0)
             {
-                logTextBox.Text += handler.CMLExtractFeature(chain.Path, nParallel, tempInListPath, tempOutListPath, frameStep, leftContext, rightContext);
+             
 
                 string type = Defaults.CML.StreamTypeNameFeature;
                 string name = stream.Name + "." + chain.Name + streamMeta;
@@ -160,6 +160,13 @@ namespace ssi
 
                 DatabaseStream streamType = new DatabaseStream() { Name = name, Type = type, FileExt = ext, SampleRate = sr };
                 DatabaseHandler.AddStream(streamType);
+                try
+                {
+                    logTextBox.Text += handler.CMLExtractFeature(chain.Path, nParallel, tempInListPath, tempOutListPath, frameStep, leftContext, rightContext);
+                }
+                catch (Exception e) { MessageBox.Show("There was an error in the feature extaction pipeline: " + e); }
+             
+
             }
 
             File.Delete(tempInListPath);

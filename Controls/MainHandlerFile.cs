@@ -383,6 +383,8 @@ namespace ssi
             Signal signal = Signal.LoadWaveFile(filename);
             if (signal != null && signal.loaded)
             {
+                this.control.signalbar.Height = new GridLength(control.signalAndAnnoGrid.ActualHeight / 2 - 30);
+                this.control.signalstatusbar.Visibility = Visibility.Visible;
                 addSignalTrack(signal, signalColor, backgroundColor);
             }
 
