@@ -227,7 +227,7 @@ namespace ssi
             {
                 string[] tokens = stream.Name.Split(new char[] { '.' }, 2);
                 mediaNames.Add(tokens[0]);
-                if (tokens.Length > 0)
+                if (tokens.Length > 1)
                 {
                     featureNames.Add(tokens[1]);
                 }

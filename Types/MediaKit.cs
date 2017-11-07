@@ -131,13 +131,7 @@ namespace ssi
             }
             catch
             {
-
-                //MessageBoxResult result = MessageBox.Show("File is corrupted! Should it be deleted?", "Attention", MessageBoxButton.YesNo);
-                //if (result == MessageBoxResult.Yes)
-                //{
-                    File.Delete(inputFile.Filename);
-                //}
-
+                Console.WriteLine("Cannot open Media file: " + inputFile.Filename);
             }
         }
 
