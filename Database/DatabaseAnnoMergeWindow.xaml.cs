@@ -610,11 +610,13 @@ namespace ssi
             int n = annolists.Count;   // n = number of raters, here number of annolists
 
             List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
-            //add the restclass we introduced in last step.
-            //AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
-            //classes.Add(rest);
+            AnnoScheme.Label rest = new AnnoScheme.Label(restclass, Colors.Black);
+            classes.Add(rest);
 
             int k = 0;  //k = number of classes
+
+
+
             //For Discrete Annotations find number of classes, todo, find number of classes on free annotations.
             if (annolists[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
             {
@@ -676,11 +678,10 @@ namespace ssi
                 double sum = 0;
                 for (int j = 0; j < k; j++)
                 {
-                    sum = sum + Math.Pow(matrix[i, j], 2.0);
+                    sum = sum + (Math.Pow(matrix[i, j], 2.0) - matrix[i, j]);
                 }
 
-                sum = sum - n;
-
+   
                 Pi[i] = (1.0 / (n * (n - 1.0))) * (sum);
             }
 
@@ -692,7 +693,10 @@ namespace ssi
                 Pd = Pd + Pi[i];
             }
 
-            Pd = Pd / N;
+            Pd = (1.0 / (((double)N) * (n * n - 1.0))) * (Pd * (n * n - 1.0));
+
+
+
 
             double Pe = 0;
 
@@ -1061,13 +1065,14 @@ namespace ssi
 
         private async Task CalculateKappaWrapper(List<AnnoList> annolists)
         {
-            if (AnnotationResultBox.SelectedItems.Count > 1)
+            if (annolists.Count > 1)
             {
 
                 double cohenkappa = 0;
                 double fleisskappa = 0;
                 double kappa = 0;
                 string interpretation = "";
+                string kappatype = "";
 
                 CancellationToken token = new CancellationToken();
                 await Task.Run(() =>
@@ -1077,12 +1082,26 @@ namespace ssi
                         string restclass = "Rest";
                      
                         List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
-                        cohenkappa = CohensKappa(convertedlists, restclass);
-                        // fleisskappa = FleissKappa(convertedlists, restclass);
+
+
+                        if(annolists.Count == 2)
+                        {
+                            cohenkappa = CohensKappa(convertedlists, restclass);
+                            kappa = cohenkappa;
+                            kappatype = "Cohen's κ: ";
+                        }
+                        else if (annolists.Count> 2)
+                        {
+                            fleisskappa = FleissKappa(convertedlists, restclass);
+                            kappa = fleisskappa;
+                            kappatype = "Fleiss' κ: ";
+                        }
+
+
                     }
                    
 
-                    kappa = cohenkappa;
+                   
 
 
                         //Landis and Koch (1977)
@@ -1106,7 +1125,7 @@ namespace ssi
 
                 Action EmptyDelegate = delegate () { };
                
-                Stats.Content = "Cohen's κ : " + kappa.ToString("F3") + ": " + interpretation;
+                Stats.Content = kappatype + kappa.ToString("F3") + ": " + interpretation;
 
 
                 this.UpdateLayout();
