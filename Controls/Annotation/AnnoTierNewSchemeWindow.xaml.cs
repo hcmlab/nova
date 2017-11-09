@@ -64,7 +64,7 @@ namespace ssi
             }
             else
             {
-                cmlCombobox.Visibility = Visibility.Collapsed;
+                cmlRadioButton.Visibility = Visibility.Collapsed;
                 cmlSeparator.Visibility = Visibility.Collapsed;
             }
         }
