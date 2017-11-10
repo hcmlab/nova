@@ -144,13 +144,16 @@ namespace ssi
 
                     string[] fileEntries = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory);
 
-                    foreach (string file in fileEntries)
-                    {
-                        if (File.Exists(file) && Path.GetFileName(file).StartsWith("ssi") && file.EndsWith("dll"))
-                        {
-                            File.Delete(file);
-                        }
-                    }
+
+
+                    //find a good solution to update SSI binaries...
+                    //foreach (string file in fileEntries)
+                    //{
+                    //    if (File.Exists(file) && Path.GetFileName(file).StartsWith("ssi") && file.EndsWith("dll"))
+                    //    {
+                    //        File.Delete(file);
+                    //    }
+                    //}
 
 
                     /*
