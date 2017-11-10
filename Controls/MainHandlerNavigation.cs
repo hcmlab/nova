@@ -147,6 +147,8 @@ namespace ssi
             control.navigator.statusBarServer.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
             control.navigator.statusBarDatabase.Content = DatabaseHandler.DatabaseInfo;
             control.navigator.statusBarDatabase.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
+
+            this.control.annostatusbar.Visibility=  annoTiers.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public void updateTimeRange(double duration, SignalTrack track)
