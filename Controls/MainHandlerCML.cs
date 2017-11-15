@@ -146,41 +146,6 @@ namespace ssi
             arguments["right"] = rightContext;
 
             return runCMLTool("xmlchain", null, parameters, arguments, "cml-extract");
-
-            /*string result = "";
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-extract.log";
-
-            File.Delete(logPath);
-
-            try
-            {
-                string arguments = "-list " +
-                    " -parallel " + nParallel +
-                    " -step " + frameStep +
-                    " -left " + leftContext +
-                    " -right " + rightContext +
-                    " -log \"" + logPath + "\"" + " " +
-                    chainPath + " " +
-                    fromPath + " " +
-                    toPath;
-
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\xmlchain.exe";
-                startInfo.Arguments = arguments;
-                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " " + startInfo.Arguments + "\n-------------------------------------------\r\n";
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                result += File.ReadAllText(logPath);
-            }
-            catch (Exception ex)
-            {
-                MessageTools.Error(ex.ToString());
-            }
-
-            return result;*/
         }
 
         public string CMLMergeFeature(string rootDir, string sessions, string roles, string inputStreams, string outputStream, bool force)
@@ -196,39 +161,6 @@ namespace ssi
             if (force)  arguments["force"] = null;            
 
             return runCMLTool("cmltrain", "merge", parameters, arguments, "cml-merge");
-
-            /* string result = "";
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-merge.log";
-
-            File.Delete(logPath);
-
-            try
-            {
-                string arguments = "--merge -list " + sessions +                    
-                    (force ? " -force " : "") +
-                    " -log \"" + logPath + "\"" + " " +
-                    rootDir + " " +
-                    roles + " " +
-                    inputStreams + " " +
-                    outputStream;
-
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\cmltrain.exe";
-                startInfo.Arguments = arguments;
-                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " " + startInfo.Arguments + "\n-------------------------------------------\r\n";
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                result += File.ReadAllText(logPath);    
-            }
-            catch (Exception ex)
-            {
-                MessageTools.Error(ex.ToString());
-            }
-
-            return result;*/
         }
 
         public string CMLTrainModel(string templatePath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream, string leftContext, string rightContext, string balance, bool complete)
@@ -258,56 +190,7 @@ namespace ssi
             arguments["password"] = password;
             if (complete) arguments["cooperative"] = null;
 
-            return runCMLTool("cmltrain", "train", parameters, arguments, "cml-train");
-
-            /*
-            string result = "";
-
-            string[] split = server.Split(':');
-            string ip = split[0];
-            string port = split[1];
-            string logPath =  AppDomain.CurrentDomain.BaseDirectory + "\\cml-train.log";
-
-            File.Delete(logPath);
-
-            try
-            {
-                string options_no_pass = "-left " + leftContext +
-                        " -right " + rightContext +
-                        " -balance " + balance +
-                        " -username " + username +                        
-                        " -list " + sessions +
-                        (complete ? " -cooperative" : "") +
-                        " -log \"" + logPath + "\"";
-                string options = options_no_pass + " -password " + password;
-                string arguments = "\"" + datapath + "\\" + database + "\" " +
-                        ip + " " +
-                        port + " " +
-                        database + " " +
-                        roles + " " +
-                        scheme + " " +
-                        annotator + " " +
-                        "\"" + stream + "\" " +
-                        "\"" + templatePath + "\" " +
-                        "\"" + trainerPath + "\"";
-
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\cmltrain.exe";
-                startInfo.Arguments = "--train " + options + " " + arguments;
-                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " --train " + options_no_pass + " " + arguments + "\n-------------------------------------------\r\n";
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                result += File.ReadAllText(logPath);
-            }
-            catch (Exception ex)
-            {
-                MessageTools.Error(ex.ToString());
-            }
-
-            return result;*/
+            return runCMLTool("cmltrain", "train", parameters, arguments, "cml-train");            
         }
 
         public string CMLEvaluateModel(string evalPath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream)
@@ -334,50 +217,6 @@ namespace ssi
             arguments["password"] = password;
 
             return runCMLTool("cmltrain", "eval", parameters, arguments, "cml-eval");
-
-            /*string result = "";
-
-            string[] split = server.Split(':');
-            string ip = split[0];
-            string port = split[1];
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-eval.log";
-
-            File.Delete(logPath);
-
-            try
-            {
-                string options_no_pass = " -username " + username +
-                        " -list " + sessions +
-                        " -log \"" + logPath + "\"";
-                string options = options_no_pass + " -password " + password;
-                string arguments = "\"" + datapath + "\\" + database + "\" " +
-                        ip + " " +
-                        port + " " +
-                        database + " " +
-                        roles + " " +
-                        scheme + " " +
-                        annotator + " " +
-                        "\"" + stream + "\" " +
-                        "\"" + trainerPath + "\" " +
-                        "\"" + evalPath + "\"";
-
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\cmltrain.exe";
-                startInfo.Arguments = "--eval " + options + " " + arguments;
-                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " --eval " + options_no_pass + " " + arguments + "\n-------------------------------------------\r\n";
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                result += File.ReadAllText(logPath);
-            }
-            catch (Exception ex)
-            {
-                MessageTools.Error(ex.ToString());
-            }
-
-            return result;*/
         }
 
         public string CMLPredictAnnos(string trainerPath, 
@@ -424,57 +263,7 @@ namespace ssi
             arguments["password"] = password;
             if (complete) arguments["cooperative"] = null;
 
-            return runCMLTool("cmltrain", "forward", parameters, arguments, "cml-predict");
-
-            /*string result = "";
-
-            string[] split = server.Split(':');
-            string ip = split[0];
-            string port = split[1];
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-predict.log";
-
-            File.Delete(logPath);
-
-            try
-            {
-                string options_no_pass = "-left " + leftContext +
-                        " -right " + rightContext +
-                        " -confidence " + confidence +
-                        " -mingap " + minGap +
-                        " -mindur " + minDur +
-                        " -username " + username +
-                        " -list " + sessions +
-                     //   " -finished" +
-                        ( complete ? " -cooperative" : "" ) +
-                        " -log \"" + logPath + "\"";
-                string options = options_no_pass + " -password " + password;
-                string arguments = "\"" + datapath + "\\" + database + "\" " +
-                        ip + " " +
-                        port + " " +
-                        database + " " +
-                        roles + " " +
-                        scheme + " " +
-                        annotator + " " +
-                        "\"" + stream + "\" " +
-                        "\"" + trainerPath + "\"";
-
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\cmltrain.exe";
-                startInfo.Arguments = "--forward " + options + " " + arguments;
-                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " --forward " + options_no_pass + " " + arguments + "\n-------------------------------------------\r\n";
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                result += File.ReadAllText(logPath);
-            }
-            catch (Exception ex)
-            {
-                MessageTools.Error(ex.ToString());
-            }
-
-            return result;*/
+            return runCMLTool("cmltrain", "forward", parameters, arguments, "cml-predict");            
         }
 
         public string CMLPredictFusion(string trainerPaths,

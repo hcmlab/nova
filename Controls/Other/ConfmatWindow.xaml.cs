@@ -132,7 +132,7 @@ namespace ssi
                 {
                     for (int j = 0; j < nc; j++)
                     {
-                        double value = counts[i, j] / ((double)total[i]);                        
+                        double value = total[i] == 0 ? 0 : counts[i, j] / ((double)total[i]);                        
                         Label label = new Label() { Content = Math.Round(100*value,1), HorizontalContentAlignment = HorizontalAlignment.Center, VerticalContentAlignment = VerticalAlignment.Center };
                         label.Background = new SolidColorBrush(getColorByOffset(colormap, value));
                         label.Foreground = Brushes.White;
