@@ -88,7 +88,7 @@
                 <ListBox Name="AnnotatorsBox" SelectionChanged="Annotations_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>
 
-            <Label Content="Sessions" Grid.Row="0" Grid.Column="3" />
+            <Label Content="Sessions" Grid.Row="0" Grid.Column="3" ToolTip="Sessions that are not marked as finished appear in red" />
             <DockPanel Grid.Row="1" Grid.Column="3" Margin="0,0,5,0" LastChildFill="True">
                 <CheckBox Name="ShowAllSessionsCheckBox" DockPanel.Dock="Bottom"  Margin="0,5,0,0" Checked="ShowAllSessionsCheckBox_Checked" Unchecked="ShowAllSessionsCheckBox_Unchecked">Show existing</CheckBox>
 

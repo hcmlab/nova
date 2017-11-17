@@ -422,8 +422,6 @@ namespace ssi
         {
             DatabaseAnnoMergeWindow window = new DatabaseAnnoMergeWindow();
             window.ShowDialog();
-
-         
         }
 
 

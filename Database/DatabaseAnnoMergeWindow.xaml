@@ -125,7 +125,7 @@
                     <Separator Height="10" Visibility="Hidden"></Separator>
                     <Label Content="Copy"/>
                     <Button x:Name="Copy" ToolTip="assign annotation to another annotator" Content="Copy" Grid.Column="0" Click="Copy_Click" IsEnabled="False" />
-
+                    <Label Name="Warning" Foreground="Red" Visibility="Collapsed">Only admins can merge!</Label>
                     <Separator Height="10" Visibility="Hidden"></Separator>
 
                 </StackPanel>
@@ -144,7 +144,7 @@
 
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="4">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10">
-                <Label  MouseEnter="Stats_MouseEnter" Name="Stats">Hover to calculate statistics</Label>
+                <Label  MouseEnter="Stats_MouseEnter" Name="Stats">Hover here to calculate correlations</Label>
             </StackPanel>
         </StackPanel>
 
