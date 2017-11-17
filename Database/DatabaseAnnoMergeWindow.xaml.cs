@@ -23,7 +23,7 @@ namespace ssi
     {
         private bool selectedisContinuous = false;
         private readonly object syncLock = new object();
-        string defaultlabeltext = "Hover to calculate statistics";
+        string defaultlabeltext = "Hover here to calculate correlations";
 
 
         CultureInfo culture = CultureInfo.InvariantCulture;
@@ -34,18 +34,12 @@ namespace ssi
         public DatabaseAnnoMergeWindow()
         {
             InitializeComponent();
-           
 
-            if (DatabaseHandler.CheckAuthentication() >= DatabaseAuthentication.DBADMIN)
-            {
-                GetDatabases(DatabaseHandler.DatabaseName);
-                GetSessions();
-            }
-            else
-            {
-                MessageBox.Show("Sorry, you are not authorized on the database to perform this step!");
-                this.Close();
-            }
+           if ((DatabaseHandler.CheckAuthentication() < DatabaseAuthentication.DBADMIN)) Warning.Visibility = Visibility.Visible;
+           GetDatabases(DatabaseHandler.DatabaseName);
+           GetSessions();
+            
+
         }
 
         private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -219,22 +213,38 @@ namespace ssi
 
         private void AnnotationResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (AnnotationResultBox.SelectedItems.Count == 1)
+
+            if ((DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.READWRITE))
             {
-                Copy.IsEnabled = true;
+                if (AnnotationResultBox.SelectedItems.Count == 1)
+                {
+                    Copy.IsEnabled = true;
+                    CalculateMedian.IsEnabled = false;
+                    CalculateRMS.IsEnabled = false;
+                    CalculateMergeDiscrete.IsEnabled = false;
+                    WeightExpertise.IsEnabled = false;
+                    WeightNone.IsEnabled = false;
+
+                }
+                else
+                {
+
+                    handleButtons(!selectedisContinuous);
+                    Copy.IsEnabled = false;
+                }
+            }
+
+            else
+            {
+                Copy.IsEnabled = false;
                 CalculateMedian.IsEnabled = false;
                 CalculateRMS.IsEnabled = false;
                 CalculateMergeDiscrete.IsEnabled = false;
                 WeightExpertise.IsEnabled = false;
                 WeightNone.IsEnabled = false;
+            }
 
-            }
-            else
-            {
-                
-                handleButtons(!selectedisContinuous);
-                Copy.IsEnabled = false;
-            }
+          
 
             Stats.Content = defaultlabeltext;
 
@@ -1292,7 +1302,7 @@ namespace ssi
         {
             DatabasesBox.Items.Clear();
 
-            List<string> databases = DatabaseHandler.GetDatabases(DatabaseAuthentication.DBADMIN);
+            List<string> databases = DatabaseHandler.GetDatabases(DatabaseAuthentication.READWRITE);
 
             foreach (string db in databases)
             {

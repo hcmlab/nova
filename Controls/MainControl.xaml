@@ -72,7 +72,7 @@
                 <MenuItem Header="Fusion" Name="fusionmenu">
                     <MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenu"/>
                 </MenuItem>
-                <MenuItem Header="Merge / Copy Annotations" Name="databaseCMLMergeAnnotationsMenu" />
+                <MenuItem Header="Inter-rater agreement and Merge" Name="databaseCMLMergeAnnotationsMenu" />
                 <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>

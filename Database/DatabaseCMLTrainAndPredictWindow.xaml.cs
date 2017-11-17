@@ -476,6 +476,7 @@ namespace ssi
 
         private void GetStreams()
         {
+
             List<DatabaseStream> streams = DatabaseHandler.Streams;
             List<DatabaseStream> streamsValid = new List<DatabaseStream>();
             List<DatabaseScheme> schemes = DatabaseHandler.Schemes;
@@ -493,6 +494,8 @@ namespace ssi
                 }
             }
 
+            int oldindex = StreamsBox.SelectedIndex;
+
             if (StreamsBox.HasItems)
             {
                 StreamsBox.ItemsSource = null;
@@ -504,7 +507,7 @@ namespace ssi
             {
                 if(StreamsBox.SelectedItem == null)
                 {
-                    StreamsBox.SelectedIndex = 0;
+                    StreamsBox.SelectedIndex = oldindex;
                 }
               
                 StreamsBox.SelectedItem = streamsValid.Find(item => item.Name == Properties.Settings.Default.CMLDefaultStream);
