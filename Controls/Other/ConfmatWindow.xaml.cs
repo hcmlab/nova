@@ -29,7 +29,7 @@ namespace ssi
         int[,] counts = null;        
         int[] total = null;
         double[] acc = null;
-
+  
         GradientStopCollection colormap = null;
 
         private static Color getColorByOffset(GradientStopCollection collection, double offset)
@@ -63,9 +63,9 @@ namespace ssi
             colormap.Add(new GradientStop(Colors.Red, 0.0));
             colormap.Add(new GradientStop(Colors.Blue, 1.0));
 
-            parse(path);
+            bool isMulticlass = parse(path);
             showMeta();
-            showCM();
+            if(isMulticlass) showCM();
 
             metaGrid.Visibility = Visibility.Collapsed;
         }
@@ -201,11 +201,11 @@ namespace ssi
             }
         }
 
-        void parse(string path)
+        bool parse(string path)
         {
             if (!File.Exists(path))
             {
-                return;
+                return false;
             }
 
             content = File.ReadAllText(path);
@@ -213,7 +213,7 @@ namespace ssi
 
             if (lines == null)
             {
-                return;
+                return false;
             }
 
             meta = new Dictionary<string, int>();
@@ -239,10 +239,23 @@ namespace ssi
             
             if (nc <= 0)
             {
-                return;
+                return false;
             }
 
             line++;
+
+            if (lines[line].Contains("correlation: "))
+            {
+                CorrelationLabel.Visibility = Visibility.Visible;
+                CorrelationLabel.Content = lines[line];
+                return false;
+            }
+
+            else
+            {
+
+           
+
             classes = new string[nc];            
             counts = new int[nc,nc];
             acc = new double[nc];
@@ -270,6 +283,9 @@ namespace ssi
                 string[] tokens = lines[line++].Split(';');
                 double.TryParse(tokens[nc + 1], out ua);
                 double.TryParse(tokens[nc + 2], out wa);
+            }
+
+                return true;
             }
         }            
 

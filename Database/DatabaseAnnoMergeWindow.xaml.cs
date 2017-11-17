@@ -394,13 +394,13 @@ namespace ssi
             {
                 for (int i = 0; i < minSize; i++)
                 {
-                    array[i] = array[i] + double.Parse(a[i].Label);
+                    array[i] = array[i] + double.Parse(a[i].Label, CultureInfo.InvariantCulture);
                 }
             }
 
             for (int i = 0; i < array.Length; i++)
             {
-                newList[i].Label = (array[i] / numberoftracks).ToString();
+                newList[i].Label = (array[i] /  ((double)numberoftracks)).ToString();
             }
             newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
           
