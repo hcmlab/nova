@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Confusion Matrix" Height="400" Width="400">
+        Title="Evaluation" Height="400" Width="400" Icon="..\..\Resources\ui.ico">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -23,7 +23,7 @@
         </Grid>
 
         <Grid Name="cmGrid" Grid.Row="1"/>
-
+        <Label Name="CorrelationLabel" Visibility="Collapsed"></Label>
         <DockPanel Margin="5" Grid.Row="2" LastChildFill="False">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Left">
                 <CheckBox DockPanel.Dock="Left" VerticalContentAlignment="Center" Margin="5" Checked="MetaChecked" Unchecked="MetaUnchecked">Meta</CheckBox>

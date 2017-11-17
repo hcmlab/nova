@@ -340,7 +340,7 @@ namespace ssi
 
                                         if ((this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 && Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver)) && MouseActive)
                                         { 
-                                            yPos = Mouse.GetPosition(this).Y;
+                                            yPos = (Mouse.GetPosition(this).Y < 0.0 ?  0.0  : Mouse.GetPosition(this).Y) ;
                                         }
                                         UdpateContinuousPosition();
 
@@ -379,7 +379,8 @@ namespace ssi
         private void UdpateContinuousPosition()
         {
             double range = this.AnnoList.Scheme.MaxScore - this.AnnoList.Scheme.MinScore;
-            double normal = 1.0 - (yPos / this.ActualHeight);
+
+            double normal = 1.0 - ( yPos / this.ActualHeight);
             double normalized = (normal * range) + this.AnnoList.Scheme.MinScore;
 
             continuousTierEllipse.Height = this.ActualHeight / 10;
