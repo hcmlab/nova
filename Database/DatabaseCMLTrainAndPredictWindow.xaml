@@ -90,7 +90,11 @@
 
             <Label Content="Sessions" Grid.Row="0" Grid.Column="3" ToolTip="Sessions that are not marked as finished appear in red" />
             <DockPanel Grid.Row="1" Grid.Column="3" Margin="0,0,5,0" LastChildFill="True">
-                <CheckBox Name="ShowAllSessionsCheckBox" DockPanel.Dock="Bottom"  Margin="0,5,0,0" Checked="ShowAllSessionsCheckBox_Checked" Unchecked="ShowAllSessionsCheckBox_Unchecked">Show existing</CheckBox>
+
+                <StackPanel DockPanel.Dock="Bottom" >
+                    <ComboBox Name="SelectSessionSetComboBox" Margin="0,5,0,0" SelectionChanged="SelectSessionSetComboBox_SelectionChanged"></ComboBox>
+                    <CheckBox Name="ShowAllSessionsCheckBox" Margin="0,5,0,0" Checked="ShowAllSessionsCheckBox_Checked" Unchecked="ShowAllSessionsCheckBox_Unchecked">Show existing</CheckBox>
+                </StackPanel>
 
                 <ListView Name="SessionsBox"  SelectionMode="Extended" ItemContainerStyle="{StaticResource SessionsItemColorStyle}"  SelectionChanged="SessionsBox_SelectionChanged" DockPanel.Dock="Top">
                     <ListView.View>

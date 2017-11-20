@@ -57,6 +57,7 @@ namespace ssi
             public static string FusionFolderName = "fusion";
             public static string FusionBayesianNetworkFolderName = "bayesnet";
             public static string BayesianNetworkextension = "xdsl";
+            public static string SessionSetExtension = "set";
         }
 
         public static int SelectionBorderWidth = 7;
