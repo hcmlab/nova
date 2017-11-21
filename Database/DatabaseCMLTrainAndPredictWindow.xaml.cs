@@ -55,6 +55,8 @@ namespace ssi
             COMPLETE
         }
 
+        private bool handleSelectionChanged = false;
+
         public DatabaseCMLTrainAndPredictWindow(MainHandler handler, Mode mode)
         {
             InitializeComponent();
@@ -131,38 +133,41 @@ namespace ssi
                     RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
 
                     break;
-            }
+            }            
         }
 
         private void DatabaseCMLTrainAndPredictWindow_Loaded(object sender, RoutedEventArgs e)
         {           
-            GetDatabases(DatabaseHandler.DatabaseName);
-            //GetAnnotators();
-            //GetRoles();
-            //GetSchemes();            
+            GetDatabases(DatabaseHandler.DatabaseName);    
 
             if (mode == Mode.COMPLETE)
             {
+
                 AnnoList annoList = AnnoTierStatic.Selected.AnnoList;
                 DatabasesBox.IsEnabled = false;
-                SchemesBox.SelectedItem = annoList.Scheme.Name;
+                DatabaseScheme scheme = ((List<DatabaseScheme>)SchemesBox.ItemsSource).Find(s => s.Name == annoList.Scheme.Name);
+                if (scheme != null)
+                {
+                    SchemesBox.SelectedItem = scheme;
+                }                
                 SchemesBox.IsEnabled = false;
-                RolesBox.SelectedItem = annoList.Meta.Role;
+                DatabaseRole role = ((List <DatabaseRole>) RolesBox.ItemsSource).Find(r => r.Name == annoList.Meta.Role);
+                if (role != null)
+                {
+                    RolesBox.SelectedItem = role;
+                }
                 RolesBox.IsEnabled = false;
 
-                GetSessions();
-                GetStreams();
+                UpdateSelection();
             }
-
+                       
             ApplyButton.Focus();
-            Update();
+
+            handleSelectionChanged = true;
         }
 
         private void Apply_Click(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.CMLDefaultTrainer = TrainerPathComboBox.SelectedItem.ToString();
-            Properties.Settings.Default.Save();
-
+        {       
             Trainer trainer = (Trainer) TrainerPathComboBox.SelectedItem;
             bool force = mode == Mode.COMPLETE || ForceCheckBox.IsChecked.Value;
 
@@ -190,24 +195,23 @@ namespace ssi
                 }
             }
 
-            DatabaseScheme scheme = DatabaseHandler.Schemes.Find(s => s.Name == SchemesBox.SelectedItem.ToString());
+            DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
 
             string rolesList = "";
             var roles = RolesBox.SelectedItems;
-            foreach (string role in roles)
+            foreach (DatabaseRole role in roles)
             {
                 if (rolesList == "")
                 {
-                    rolesList += role;
+                    rolesList += role.Name;
                 }
                 else
                 {
-                    rolesList += ";" + role;
+                    rolesList += ";" + role.Name;
                 }
             }
-
-            string annotatorFullName = (string)AnnotatorsBox.SelectedItem;
-            string annotator = DatabaseHandler.Annotators.Find(a => a.FullName == annotatorFullName).Name;
+            
+            DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
 
             string trainerLeftContext = LeftContextTextBox.Text;
             string trainerRightContext = RightContextTextBox.Text;
@@ -255,7 +259,7 @@ namespace ssi
                         sessionList,
                         scheme.Name,
                         rolesList,
-                        annotator,
+                        annotator.Name,
                         stream.Name,
                         trainerLeftContext,
                         trainerRightContext,
@@ -302,7 +306,7 @@ namespace ssi
                         sessionList,
                         scheme.Name,
                         rolesList,
-                        annotator,
+                        annotator.Name,
                         stream.Name,
                         trainerLeftContext,
                         trainerRightContext,
@@ -328,7 +332,7 @@ namespace ssi
                         sessionList,
                         scheme.Name,
                         rolesList,
-                        annotator,
+                        annotator.Name,
                         stream.Name);
 
                 if (File.Exists(evalOutPath))
@@ -370,7 +374,7 @@ namespace ssi
         }
 
         public void GetDatabases(string selectedItem = null)
-        {
+        {           
             DatabasesBox.Items.Clear();
 
             List<string> databases = DatabaseHandler.GetDatabases();
@@ -380,7 +384,7 @@ namespace ssi
                 DatabasesBox.Items.Add(db);
             }
 
-            Select(DatabasesBox, selectedItem);
+            Select(DatabasesBox, selectedItem);         
         }
 
         private void DatabasesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -389,19 +393,13 @@ namespace ssi
             {
                 string name = DatabasesBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(name);
-                GetAnnotators();
-                GetRoles();
-                GetSchemes();
-                GetStreams();                
             }
 
-            Update();
+            UpdateSelection();
         }
 
         public void GetSchemes()
-        {
-            SchemesBox.Items.Clear();
-
+        {            
             List<DatabaseStream> streams = DatabaseHandler.Streams;
             List<DatabaseScheme> schemesValid = new List<DatabaseScheme>();
             List<DatabaseScheme> schemes = DatabaseHandler.Schemes;
@@ -410,7 +408,6 @@ namespace ssi
             {
                 foreach (DatabaseStream stream in streams)
                 {
-
                     bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
                     if (getTrainer(stream, scheme, template).Count > 0)
                     {
@@ -419,48 +416,50 @@ namespace ssi
                     }
                 }
             }
-
-            foreach (DatabaseScheme item in schemesValid)
-            {
-                SchemesBox.Items.Add(item.Name);
-            }
+            
+            SchemesBox.ItemsSource = schemesValid;
 
             if (SchemesBox.Items.Count > 0)
-            {
+            {                
+                DatabaseScheme scheme = ((List<DatabaseScheme>)SchemesBox.ItemsSource).Find(s => s.Name == Properties.Settings.Default.CMLDefaultScheme);
+                if (scheme != null)
+                {
+                    SchemesBox.SelectedItem = scheme;
+                }
                 if (SchemesBox.SelectedItem == null)
                 {
                     SchemesBox.SelectedIndex = 0;
                 }
-                SchemesBox.SelectedItem = Properties.Settings.Default.CMLDefaultScheme;
+                SchemesBox.ScrollIntoView(SchemesBox.SelectedItem);
             }
         }
 
         public void GetRoles()
         {
-            RolesBox.Items.Clear();
+            RolesBox.ItemsSource = DatabaseHandler.Roles;
             
-            foreach (DatabaseRole item in DatabaseHandler.Roles)
-            {
-                if (item.HasStreams)
-                {
-                    RolesBox.Items.Add(item.Name);
-                }
-            }
-
             if (RolesBox.Items.Count > 0)
             {
-
+                string[] items = Properties.Settings.Default.CMLDefaultRole.Split(';');
+                foreach(string item in items)
+                {
+                    DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == item);
+                    if (role != null)
+                    {
+                        RolesBox.SelectedItems.Add(role);
+                    }
+                }
                 if (RolesBox.SelectedItem == null)
                 {
-                    RolesBox.SelectedIndex = 0;
+                    RolesBox.SelectAll();
                 }
-                RolesBox.SelectedItem = Properties.Settings.Default.CMLDefaultRole;
+
+                RolesBox.ScrollIntoView(RolesBox.SelectedItem);
             }
         }
 
         private void GetStreams()
         {
-
             List<DatabaseStream> streams = DatabaseHandler.Streams;
             List<DatabaseStream> streamsValid = new List<DatabaseStream>();
             List<DatabaseScheme> schemes = DatabaseHandler.Schemes;
@@ -478,56 +477,49 @@ namespace ssi
                 }
             }
 
-            DatabaseStream oldStream = (DatabaseStream) StreamsBox.SelectedItem;
-
-            if (StreamsBox.HasItems)
-            {
-                StreamsBox.ItemsSource = null;
-            }
-
             StreamsBox.ItemsSource = streamsValid;
 
             if (StreamsBox.Items.Count > 0)
             {
-                if(StreamsBox.SelectedItem == null)
+                DatabaseStream stream = ((List<DatabaseStream>)StreamsBox.ItemsSource).Find(s => s.Name == Properties.Settings.Default.CMLDefaultStream);
+                if (stream != null)
                 {
-                    StreamsBox.SelectedItem = oldStream;
+                    StreamsBox.SelectedItem = stream;
                 }
-              
-                StreamsBox.SelectedItem = streamsValid.Find(item => item.Name == Properties.Settings.Default.CMLDefaultStream);
+                if (StreamsBox.SelectedItem == null)
+                {
+                    StreamsBox.SelectedIndex = 0;
+                }
+                StreamsBox.ScrollIntoView(StreamsBox.SelectedItem);
             }
         }
 
         public void GetAnnotators()
         {
-            AnnotatorsBox.Items.Clear();
+            AnnotatorsBox.ItemsSource = DatabaseHandler.Annotators;                         
 
-            foreach (DatabaseAnnotator annotator in DatabaseHandler.Annotators)
+            if (AnnotatorsBox.Items.Count > 0)
             {
-                AnnotatorsBox.Items.Add(annotator.FullName);
-            }
+                string annotatorName = Defaults.CML.GoldStandardName;
 
-            if (mode == Mode.COMPLETE ||
-                mode == Mode.PREDICT)
-            {
-                string annotatorName = Properties.Settings.Default.MongoDBUser;
-                if (DatabaseHandler.Annotators.Find(a => a.Name == annotatorName) != null)
+                if (mode == Mode.COMPLETE ||
+                    mode == Mode.PREDICT)
                 {
-                    string annotatorFullName = DatabaseHandler.Annotators.Find(a => a.Name == annotatorName).FullName;
-                    AnnotatorsBox.SelectedItem = annotatorFullName;
+                    annotatorName = Properties.Settings.Default.MongoDBUser;                    
+                    AnnotatorsBox.IsEnabled = DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.READWRITE;
                 }
 
-                AnnotatorsBox.IsEnabled = DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.READWRITE;
+                DatabaseAnnotator annotator = ((List<DatabaseAnnotator>)AnnotatorsBox.ItemsSource).Find(a => a.Name == annotatorName);
+                if (annotator != null)
+                {
+                    AnnotatorsBox.SelectedItem = annotator;
+                }
+                if (AnnotatorsBox.SelectedItem == null)
+                {
+                    AnnotatorsBox.SelectedIndex = 0;
+                }
+                AnnotatorsBox.ScrollIntoView(AnnotatorsBox.SelectedItem);
             }
-            else
-            {
-                AnnotatorsBox.SelectedItem = Defaults.CML.GoldStandardFullName;
-            }
-            
-            if (AnnotatorsBox.SelectedItem == null)
-            {
-                AnnotatorsBox.SelectedIndex = 0;
-            }                
         }
 
         public void GetSessions()
@@ -535,12 +527,7 @@ namespace ssi
             if (SchemesBox.SelectedItem == null || RolesBox.SelectedItem == null || AnnotatorsBox.SelectedItem == null)
             {
                 return;
-            }
-
-            Properties.Settings.Default.CMLDefaultAnnotator = AnnotatorsBox.SelectedItem.ToString();
-            Properties.Settings.Default.CMLDefaultRole = RolesBox.SelectedItem.ToString();
-            Properties.Settings.Default.CMLDefaultScheme = SchemesBox.SelectedItem.ToString();
-            Properties.Settings.Default.Save();
+            }           
 
             if (SessionsBox.HasItems)
             {
@@ -552,23 +539,17 @@ namespace ssi
             {
                 // show either sessions for which an annotation exists or sessions for which an annotion is missing
 
-                string schemeName = SchemesBox.SelectedItem.ToString();
-                ObjectId schemeID = new ObjectId();
-                DatabaseHandler.GetObjectID(ref schemeID, DatabaseDefinitionCollections.Schemes, schemeName);
+                DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
+                ObjectId schemeID = scheme.Id;
 
                 List<ObjectId> roleIDs = new List<ObjectId>();
-                foreach (var item in RolesBox.SelectedItems)
-                {
-                    string roleName = item.ToString();
-                    ObjectId roleID = new ObjectId();
-                    DatabaseHandler.GetObjectID(ref roleID, DatabaseDefinitionCollections.Roles, roleName);
-                    roleIDs.Add(roleID);
+                foreach (DatabaseRole item in RolesBox.SelectedItems)
+                {                                                            
+                    roleIDs.Add(item.Id);
                 }
 
-                string annotatorFullName = (string)AnnotatorsBox.SelectedItem;
-                string annotatorName = DatabaseHandler.Annotators.Find(a => a.FullName == annotatorFullName).Name;
-                ObjectId annotatorID = new ObjectId();
-                DatabaseHandler.GetObjectID(ref annotatorID, DatabaseDefinitionCollections.Annotators, annotatorName);
+                DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;                                
+                ObjectId annotatorID = annotator.Id;                
 
                 var builder = Builders<BsonDocument>.Filter;
                 List<BsonDocument> annotations = new List<BsonDocument>();
@@ -645,39 +626,11 @@ namespace ssi
                     {
                         SessionsBox.SelectedIndex = 0;
                     }
-                }                                                                     
+                }
             }
 
-            loadSessionSets();
+            LoadSessionSets();
         }
-
-        private void loadSessionSets()
-        {
-            string root = Properties.Settings.Default.DatabaseDirectory + '\\' + DatabaseHandler.DatabaseName;
-            string[] paths = Directory.GetFiles(root, "*." + Defaults.CML.SessionSetExtension);
-
-            SelectSessionSetComboBox.Items.Clear();
-            SelectSessionSetComboBox.Visibility = Visibility.Collapsed;
-
-            if (paths.Length > 0)
-            {
-                SelectSessionSetComboBox.Visibility = Visibility.Visible;
-                foreach (string path in paths)
-                {
-                    SelectSessionSetComboBox.Items.Add(new SessionSet()
-                    {
-                        Path = path,
-                        Name = Path.GetFileNameWithoutExtension(path)
-                    });                
-                }
-            }            
-        }
-
-
-        private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {            
-            Update();
-        }    
 
         private bool parseTrainerFile(ref Trainer trainer, bool isTemplate)
         {
@@ -763,7 +716,7 @@ namespace ssi
                     scheme.Type.ToString().ToLower() + "\\" +
                     scheme.Name + "\\" +
                     stream.Type + "{" +
-                    streamName + "}\\";                                
+                    streamName + "}\\";
             }
 
             if (Directory.Exists(trainerDir))
@@ -786,31 +739,21 @@ namespace ssi
             return trainers;
         }
 
-
-        private void StreamsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void GetTrainers()
         {
             if (RolesBox.SelectedItem == null || AnnotatorsBox.SelectedItem == null || SchemesBox.SelectedItem == null)
             {
                 return;
             }
-
-            Trainer oldTrainer = null;
-            if (TrainerPathComboBox.SelectedItem != null)
-            {
-                oldTrainer = (Trainer)TrainerPathComboBox.SelectedItem;
-            }
+            
             TrainerPathComboBox.ItemsSource = null;
 
             if (StreamsBox.SelectedItem != null)
             {
-                Properties.Settings.Default.CMLDefaultStream = StreamsBox.SelectedItem.ToString();
-                Properties.Settings.Default.Save();
-
                 DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
-                string schemeName = (string)SchemesBox.SelectedItem;
-                DatabaseScheme scheme = DatabaseHandler.Schemes.Find(s => s.Name == schemeName);
+                DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
 
-                if(scheme != null)
+                if (scheme != null)
                 {
                     bool isDiscrete = scheme.Type == AnnoScheme.TYPE.DISCRETE;
 
@@ -820,7 +763,7 @@ namespace ssi
                     RemoveLabelTextBox.IsEnabled = isDiscrete;
 
                     bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
-                    
+
                     List<Trainer> trainers = getTrainer(stream, scheme, template);
                     if (trainers.Count > 0)
                     {
@@ -828,19 +771,10 @@ namespace ssi
                     }
                 }
             }
-            
+
             if (TrainerPathComboBox.Items.Count > 0)
             {
-                Trainer trainer = null;
-
-                if (oldTrainer != null)
-                {
-                    trainer = ((List<Trainer>)TrainerPathComboBox.ItemsSource).Find(t => t.Name == oldTrainer.Name);
-                }
-                if (trainer == null)
-                {
-                    trainer = ((List<Trainer>)TrainerPathComboBox.ItemsSource).Find(t => t.Name == Properties.Settings.Default.CMLDefaultTrainer);
-                }
+                Trainer trainer = ((List<Trainer>)TrainerPathComboBox.ItemsSource).Find(t => t.Name == Properties.Settings.Default.CMLDefaultTrainer);
 
                 if (trainer != null)
                 {
@@ -849,28 +783,126 @@ namespace ssi
                 else
                 {
                     TrainerPathComboBox.SelectedIndex = 0;
-                }                                    
+                }
             }
 
-            Update();
+            if (TrainerPathComboBox.SelectedItem != null)
+            {
+                Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+
+                LeftContextTextBox.Text = trainer.LeftContext;
+                RightContextTextBox.Text = trainer.RightContext;
+
+                BalanceComboBox.SelectedIndex = 0;
+                if (trainer.Balance.ToLower() == "under")
+                {
+                    BalanceComboBox.SelectedIndex = 1;
+                }
+                else if (trainer.Balance.ToLower() == "over")
+                {
+                    BalanceComboBox.SelectedIndex = 2;
+                }
+                string database = "";
+                if (DatabasesBox.SelectedItem != null)
+                {
+                    database = DatabasesBox.SelectedItem.ToString();
+                }
+                TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database;
+
+                TrainerPathLabel.Content = trainer.Path;
+            }
         }
 
-        private void Annotations_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void LoadSessionSets()
         {
-            GetSessions();
+            string root = Properties.Settings.Default.DatabaseDirectory + '\\' + DatabaseHandler.DatabaseName;
+            string[] paths = Directory.GetFiles(root, "*." + Defaults.CML.SessionSetExtension);
+
+            SelectSessionSetComboBox.Items.Clear();
+            SelectSessionSetComboBox.Visibility = Visibility.Collapsed;
+
+            if (paths.Length > 0)
+            {
+                SelectSessionSetComboBox.Visibility = Visibility.Visible;
+                foreach (string path in paths)
+                {
+                    SelectSessionSetComboBox.Items.Add(new SessionSet()
+                    {
+                        Path = path,
+                        Name = Path.GetFileNameWithoutExtension(path)
+                    });                
+                }
+            }            
+        }
+
+        private void UpdateSelection()
+        {
+            SaveSelection();
+
+            GetRoles();
+            GetSchemes();
+            GetAnnotators();
             GetStreams();
+            GetSessions();
+            GetTrainers();
 
-            Update();
+            UpdateGUI();
         }
 
-        private void ShowAllSessionsCheckBox_Checked(object sender, RoutedEventArgs e)
+        private void SaveSelection()
         {
-            GetSessions();
+            if (TrainerPathComboBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultTrainer = ((Trainer)TrainerPathComboBox.SelectedItem).Name;
+            }
+
+            if (AnnotatorsBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultAnnotator = ((DatabaseAnnotator)AnnotatorsBox.SelectedItem).Name;
+            }
+
+            if (RolesBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultRole = "";
+                foreach (DatabaseRole item in RolesBox.SelectedItems)
+                {
+                    Properties.Settings.Default.CMLDefaultRole += item.Name + ";";
+                }
+            }
+
+            if (SchemesBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultScheme = ((DatabaseScheme)SchemesBox.SelectedItem).Name;
+            }
+
+            if (StreamsBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultStream = ((DatabaseStream)StreamsBox.SelectedItem).Name;
+            }
+
+            Properties.Settings.Default.Save();
         }
 
-        private void ShowAllSessionsCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        private void UpdateGUI()
         {
-            GetSessions();
+            bool enable = false;
+
+            if (TrainerPathComboBox.Items.Count > 0
+                && DatabasesBox.SelectedItem != null
+                && SessionsBox.SelectedItem != null
+                && StreamsBox.SelectedItem != null
+                && RolesBox.SelectedItem != null
+                && AnnotatorsBox.SelectedItem != null
+                && SchemesBox.SelectedItem != null)
+            {
+                enable = true;
+            }
+
+            ApplyButton.IsEnabled = enable;
+            TrainOptionsPanel.IsEnabled = enable;
+            PredictOptionsPanel.IsEnabled = enable;
+            ForceCheckBox.IsEnabled = enable;
+            TrainerPathComboBox.IsEnabled = enable;            
         }
 
         private void ConfidenceCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -915,53 +947,14 @@ namespace ssi
             RemoveLabelTextBox.IsEnabled = false;
         }
 
-        private void TrainerPathComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ShowAllSessionsCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            if (TrainerPathComboBox.SelectedItem != null)
-            {
-                Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
-                LeftContextTextBox.Text = trainer.LeftContext;
-                RightContextTextBox.Text = trainer.RightContext;
-
-
-                BalanceComboBox.SelectedIndex = 0;
-                if (trainer.Balance.ToLower() == "under")
-                {
-                    BalanceComboBox.SelectedIndex = 1;
-                } else if (trainer.Balance.ToLower() == "over")
-                {
-                    BalanceComboBox.SelectedIndex = 2;
-                }
-                string database = "";
-                if (DatabasesBox.SelectedItem != null)
-                {
-                    database = DatabasesBox.SelectedItem.ToString();
-                }
-                TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database;
-            }
+            GetSessions();
         }
 
-        private void Update()
+        private void ShowAllSessionsCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            bool enable = false;
-
-            if (TrainerPathComboBox.Items.Count > 0
-                && DatabasesBox.SelectedItem != null 
-                && SessionsBox.SelectedItem != null 
-                && StreamsBox.SelectedItem != null
-                && RolesBox.SelectedItem != null
-                && AnnotatorsBox.SelectedItem != null
-                && SchemesBox.SelectedItem != null)
-            {
-                enable = true;
-            }
-
-            ApplyButton.IsEnabled = enable;
-            TrainOptionsPanel.IsEnabled = enable;
-            PredictOptionsPanel.IsEnabled = enable;
-            ForceCheckBox.IsEnabled = enable;
-            TrainerPathComboBox.IsEnabled = enable;
-
+            GetSessions();
         }
 
 
@@ -971,6 +964,21 @@ namespace ssi
             {
                 Close();
             }
+        }
+
+        private void SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (handleSelectionChanged)
+            {
+                handleSelectionChanged = false;
+                UpdateSelection();
+                handleSelectionChanged = true;
+            }
+        }
+
+        private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateGUI();
         }
 
         private void SelectSessionSetComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

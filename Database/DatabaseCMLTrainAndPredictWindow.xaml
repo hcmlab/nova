@@ -7,12 +7,21 @@
         Title="" Height="600" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
 
     <Window.Resources>
+        
         <Style TargetType="Button" x:Key="MyButton" >
             <Setter Property="Margin" Value="2,0,2,0"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
+
+        <!--<Style TargetType="ListBox" x:Key="MyListBox">
+            <Setter Property="b:UserSelectionChangedBehavior.UserSelectionChanged" Value="OnUserSelectionChanged"/>
+            <i:Interaction.Behaviors>
+                <b:UserSelectionChangedBehavior/>
+            </i:Interaction.Behaviors>
+        </Style>-->
+            
         <Style x:Key="SessionsItemColorStyle" TargetType="{x:Type ListViewItem}">
             <Style.Resources>
                 <SolidColorBrush x:Key="ExistsBrush" Color="#FF042271"/>
@@ -57,10 +66,10 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50*"></ColumnDefinition>
-                <ColumnDefinition Width="100*"></ColumnDefinition>
-                <ColumnDefinition Width="100*"></ColumnDefinition>
-                <ColumnDefinition Width="100*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="Database"/>
@@ -81,11 +90,11 @@
                 </Grid.RowDefinitions>
 
                 <Label Grid.Row="0">Schemes</Label>
-                <ListBox Name="SchemesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="1" SelectionMode="Single" Margin="0,0,5,0"></ListBox>
+                <ListBox Name="SchemesBox" DisplayMemberPath="Name" SelectionChanged="SelectionChanged" Grid.Row="1" SelectionMode="Single" Margin="0,0,5,0"></ListBox>
                 <Label Grid.Row="2">Roles</Label>
-                <ListBox Name="RolesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
+                <ListBox Name="RolesBox" DisplayMemberPath="Name" SelectionChanged="SelectionChanged" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
                 <Label Grid.Row="4">Annotators</Label>
-                <ListBox Name="AnnotatorsBox" SelectionChanged="Annotations_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
+                <ListBox Name="AnnotatorsBox" DisplayMemberPath="FullName" SelectionChanged="SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>
 
             <Label Content="Sessions" Grid.Row="0" Grid.Column="3" ToolTip="Sessions that are not marked as finished appear in red" />
@@ -110,18 +119,18 @@
                                     <Binding Path="Location" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Date">
+                            <!--GridViewColumn Width="Auto" Header="Date">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Date" />
                                 </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
+                            </-->
                         </GridView>
                     </ListView.View>
                 </ListView>
             </DockPanel>
 
             <Label Content="Streams" Grid.Row="0" Grid.Column="2"/>
-            <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="1" Grid.Column="2" SelectionMode="Single" SelectionChanged="StreamsBox_SelectionChanged">
+            <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="1" Grid.Column="2" SelectionMode="Single" SelectionChanged="SelectionChanged">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Name">
@@ -129,6 +138,11 @@
                                 <Binding Path="Name" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Rate">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="SampleRate" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>                        
                         <GridViewColumn Width="Auto" Header="Ext">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="FileExt" />
@@ -139,30 +153,31 @@
                                 <Binding Path="Type" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Rate">
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="SampleRate" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
                     </GridView>
                 </ListView.View>
             </ListView>
 
-            <Grid Grid.Row="2" Grid.ColumnSpan="4" Margin="0,5,5,0" >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                </Grid.RowDefinitions>
+            <GroupBox Grid.Row="2" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Model">
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Trainer</Label>
-                <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"  ></ComboBox>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
 
-            </Grid>
+                    <Label Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Trainer</Label>
+                    <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="SelectionChanged"></ComboBox>
+                    <Label Name="TrainerPathLabel" Grid.Row="0" Grid.Column="2" Margin="0,5,0,5"></Label>
+
+                </Grid>
+
+            </GroupBox>
 
             <GroupBox Name="TrainOptionsPanel" Grid.Row="3" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Train">
 
@@ -245,7 +260,7 @@
         <GridSplitter ResizeDirection="Columns"                         
                           Grid.Column="1" 
                           Height="Auto"
-                          Width="3"
+                          Width="5"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           Margin="0">

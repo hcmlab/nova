@@ -32,9 +32,9 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50*"></ColumnDefinition>
-                <ColumnDefinition Width="100*"></ColumnDefinition>
-                <ColumnDefinition Width="100*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="Database"/>
@@ -59,6 +59,11 @@
                                     <Binding Path="Name" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Rate">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="SampleRate" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>                            
                             <GridViewColumn Width="Auto" Header="Ext">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="FileExt" />
@@ -67,11 +72,6 @@
                             <GridViewColumn Width="Auto" Header="Type">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Type" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Rate">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="SampleRate" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
                         </GridView>
@@ -98,11 +98,11 @@
                                 <Binding Path="Location" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Date">
+                        <!--GridViewColumn Width="Auto" Header="Date">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Date" />
                             </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
+                        </-->
                     </GridView>
                 </ListView.View>
             </ListView>
@@ -146,7 +146,7 @@
         <GridSplitter ResizeDirection="Columns"                         
                           Grid.Column="1" 
                           Height="Auto"
-                          Width="3"
+                          Width="5"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           Margin="0">
