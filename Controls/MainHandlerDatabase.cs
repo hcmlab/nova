@@ -261,13 +261,19 @@ namespace ssi
                                 loadFile(localPath);
                             }
                         }
+
+                       
                     }
                     catch (Exception e)
                     {
                         MessageBox.Show("Error: " + e, "Connection to database not possible");
                     }
                 }
+
+              
             }
+
+           
         }
 
         public void ReloadAnnoTierFromDatabase(AnnoTier tier, bool loadBackup)
@@ -396,6 +402,7 @@ namespace ssi
         private void databaseLoadSession_Click(object sender, RoutedEventArgs e)
         {
             databaseLoadSession();
+            
         }
 
         private void databaseManageDBs_Click(object sender, RoutedEventArgs e)

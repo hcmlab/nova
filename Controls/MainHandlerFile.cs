@@ -41,6 +41,8 @@ namespace ssi
                     }
                 }
             }
+
+         
         }
 
         private bool loadFile(string filepath)
@@ -711,7 +713,7 @@ namespace ssi
 
         private void ImportAnnoFromElan(string filename)
         {
-
+            int annoListnum = annoLists.Count; 
             bool addemptytiers = false;
             List<AnnoList> lists = AnnoList.LoadfromElanFile(filename);
 
@@ -741,7 +743,7 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
-            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            if (annoListnum == 0 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
             {
                 fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
@@ -749,6 +751,7 @@ namespace ssi
 
         private void ImportAnnoFromAnvil(string filename)
         {
+            int annoListnum = annoLists.Count;
             AnnoList[] lists = AnnoList.LoadfromAnvilFile(filename);
             double maxdur = 0;
 
@@ -769,7 +772,7 @@ namespace ssi
                 }
             }
             updateTimeRange(maxdur);
-            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            if (annoListnum == 0 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
             {
                 fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
@@ -777,6 +780,7 @@ namespace ssi
 
         private void ImportAnnoFromSSIEvents(string filename)
         {
+            int annoListnum = annoLists.Count;
             AnnoList anno = AnnoList.LoadFromEventFile(filename);
             double maxdur = 0;
 
@@ -795,7 +799,7 @@ namespace ssi
             }
 
             updateTimeRange(maxdur);
-            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            if (annoListnum == 0 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
             {
                 fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }

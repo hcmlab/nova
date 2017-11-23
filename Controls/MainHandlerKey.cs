@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Collections.Generic;
-
+using System.IO;
 
 namespace ssi
 {
@@ -29,7 +29,12 @@ namespace ssi
                     case 1:
                         if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
                         {
-                            if (e.KeyboardDevice.IsKeyDown(Key.C))
+                            if (e.KeyboardDevice.IsKeyDown(Key.B))
+                            {
+                                reloadBackupSelectedAnno();
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.C))
                             {
                                 CopySegment();
 
@@ -216,7 +221,7 @@ namespace ssi
                     /*One Modifier keys are pressed*/
                     case 1:
                         if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
-                        {
+                        {                            
                             if (e.KeyboardDevice.IsKeyDown(Key.S))
                             {
                                 saveSelectedAnno();
@@ -259,7 +264,7 @@ namespace ssi
                         {
                             ToggleLiveMode();
                             e.Handled = true;
-                        }
+                        }                        
                         else if (e.KeyboardDevice.IsKeyDown(Key.M))
                         {
                             ToggleMouseMode();
@@ -863,7 +868,33 @@ namespace ssi
         {
             if (AnnoTierStatic.Selected != null)
             {
-                databaseCMLCompleteStep();
+                saveSelectedAnno(true);
+                if (AnnoTierStatic.Selected.CMLCompleteTrainOptions != null
+                    && AnnoTierStatic.Selected.CMLCompletePredictOptions != null)
+                {
+                    runCMLProcess("cmltrain", AnnoTierStatic.Selected.CMLCompleteTrainOptions);
+                    runCMLProcess("cmltrain", AnnoTierStatic.Selected.CMLCompletePredictOptions);
+
+                    ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
+
+                    string[] tokens = AnnoTierStatic.Selected.CMLCompleteTrainOptions.Split(' ');
+                    if (tokens.Length > 1)
+                    {
+                        string tempTrainerPath = tokens[tokens.Length - 2];
+                        tempTrainerPath = tempTrainerPath.Trim();
+                        tempTrainerPath = tempTrainerPath.Replace("\"", "");
+                        var dir = new DirectoryInfo(Path.GetDirectoryName(tempTrainerPath));
+                        foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*.trainer*"))
+                        {
+                            file.Delete();
+                        }
+                    }
+                    
+                }
+                else
+                {
+                    databaseCMLCompleteStep();
+                }
             }
         }
 

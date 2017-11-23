@@ -58,9 +58,9 @@ namespace ssi
     {
         private List<DatabaseAnnotation> annotations = new List<DatabaseAnnotation>();
         private CancellationTokenSource cancellation = new CancellationTokenSource();
+
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
-
 
         public DatabaseAnnoMainWindow()
         {
@@ -674,21 +674,6 @@ namespace ssi
                     _lastDirection = direction;
                 }
             }
-        }
-
-        private void AnnotationsBox_Click(object sender, RoutedEventArgs e)
-        {
-            SortListView(sender, e);
-        }
-
-        private void SessionsBox_Click(object sender, RoutedEventArgs e)
-        {
-            SortListView(sender, e);
-        }
-
-        private void StreamsBox_Click(object sender, RoutedEventArgs e)
-        {
-            SortListView(sender, e);
         }
     }
 }

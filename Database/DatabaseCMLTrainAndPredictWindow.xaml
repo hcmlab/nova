@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="" Height="600" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
+        Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
 
     <Window.Resources>
         
@@ -45,8 +45,6 @@
         </Style>
     </Window.Resources>
 
-
-
     <Grid>
 
         <Grid.ColumnDefinitions>
@@ -55,7 +53,18 @@
             <ColumnDefinition Width="350"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="0" Grid.Column="0" Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <TabControl Name="ModeTabControl" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" SelectionChanged="ModeTabControl_SelectionChanged">
+            <TabItem Header="Train" />
+            <TabItem Header="Evaluate" />
+            <TabItem Header="Predict" />
+        </TabControl>
+
+        <Grid Grid.Row="1" Grid.Column="0" Margin="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
@@ -90,22 +99,22 @@
                 </Grid.RowDefinitions>
 
                 <Label Grid.Row="0">Schemes</Label>
-                <ListBox Name="SchemesBox" DisplayMemberPath="Name" SelectionChanged="SelectionChanged" Grid.Row="1" SelectionMode="Single" Margin="0,0,5,0"></ListBox>
+                <ListBox Name="SchemesBox" DisplayMemberPath="Name" SelectionChanged="GeneralBox_SelectionChanged" Grid.Row="1" SelectionMode="Single" Margin="0,0,5,0"></ListBox>
                 <Label Grid.Row="2">Roles</Label>
-                <ListBox Name="RolesBox" DisplayMemberPath="Name" SelectionChanged="SelectionChanged" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
+                <ListBox Name="RolesBox" DisplayMemberPath="Name" SelectionChanged="GeneralBox_SelectionChanged" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
                 <Label Grid.Row="4">Annotators</Label>
-                <ListBox Name="AnnotatorsBox" DisplayMemberPath="FullName" SelectionChanged="SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
+                <ListBox Name="AnnotatorsBox" DisplayMemberPath="FullName" SelectionChanged="GeneralBox_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>
 
             <Label Content="Sessions" Grid.Row="0" Grid.Column="3" ToolTip="Sessions that are not marked as finished appear in red" />
             <DockPanel Grid.Row="1" Grid.Column="3" Margin="0,0,5,0" LastChildFill="True">
 
-                <StackPanel DockPanel.Dock="Bottom" >
-                    <ComboBox Name="SelectSessionSetComboBox" Margin="0,5,0,0" SelectionChanged="SelectSessionSetComboBox_SelectionChanged"></ComboBox>
-                    <CheckBox Name="ShowAllSessionsCheckBox" Margin="0,5,0,0" Checked="ShowAllSessionsCheckBox_Checked" Unchecked="ShowAllSessionsCheckBox_Unchecked">Show existing</CheckBox>
-                </StackPanel>
+                <DockPanel Name="SelectSessionSetComboBoxPanel"  DockPanel.Dock="Bottom" LastChildFill="True">
+                    <Label DockPanel.Dock="Left">Select</Label>
+                    <ComboBox Name="SelectSessionSetComboBox" DockPanel.Dock="Right" Margin="0,5,0,0" SelectionChanged="SelectSessionSetComboBox_SelectionChanged"></ComboBox>
+                </DockPanel>
 
-                <ListView Name="SessionsBox"  SelectionMode="Extended" ItemContainerStyle="{StaticResource SessionsItemColorStyle}"  SelectionChanged="SessionsBox_SelectionChanged" DockPanel.Dock="Top">
+                <ListView Name="SessionsBox"  SelectionMode="Extended" ItemContainerStyle="{StaticResource SessionsItemColorStyle}" SelectionChanged="SessionsBox_SelectionChanged" DockPanel.Dock="Top" GridViewColumnHeader.Click="SortListView">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -130,7 +139,7 @@
             </DockPanel>
 
             <Label Content="Streams" Grid.Row="0" Grid.Column="2"/>
-            <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="1" Grid.Column="2" SelectionMode="Single" SelectionChanged="SelectionChanged">
+            <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="1" Grid.Column="2" SelectionMode="Single" SelectionChanged="GeneralBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Name">
@@ -162,7 +171,6 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -171,8 +179,8 @@
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Trainer</Label>
-                    <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="SelectionChanged"></ComboBox>
+                    <Label Name="TrainerLabel" Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Trainer</Label>
+                    <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="GeneralBox_SelectionChanged"></ComboBox>
                     <Label Name="TrainerPathLabel" Grid.Row="0" Grid.Column="2" Margin="0,5,0,5"></Label>
 
                 </Grid>
@@ -258,6 +266,7 @@
         </Grid>
 
         <GridSplitter ResizeDirection="Columns"                         
+                          Grid.Row="1" 
                           Grid.Column="1" 
                           Height="Auto"
                           Width="5"
@@ -266,7 +275,7 @@
                           Margin="0">
         </GridSplitter>
 
-        <DockPanel Grid.Column="2" LastChildFill="True" Margin="0,0,5,5">
+        <DockPanel Grid.Row="1" Grid.Column="2" LastChildFill="True" Margin="0,0,5,5">
             <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log</Label>
             <TextBox Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" TextWrapping="Wrap"/>
         </DockPanel>

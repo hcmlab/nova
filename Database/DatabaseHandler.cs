@@ -39,7 +39,6 @@ namespace ssi
         private static List<DatabaseAnnotator> annotators = new List<DatabaseAnnotator>();
         public static List<DatabaseAnnotator> Annotators { get { return annotators; } }
 
-
         private static List<DatabaseUser> users = new List<DatabaseUser>();
         public static List<DatabaseUser> Users { get { return users; } }
 
@@ -2556,6 +2555,13 @@ namespace ssi
             return null;
         }
 
+        public static List<DatabaseAnnotation> GetAnnotations(DatabaseScheme scheme, DatabaseRole role, DatabaseAnnotator annotator)
+        {
+            FilterDefinitionBuilder<BsonDocument> builder = Builders<BsonDocument>.Filter;
+            FilterDefinition<BsonDocument> filter = builder.Eq("scheme_id", scheme.Id) & builder.Eq("role_id", role.Id) & builder.Eq("annotator_id", annotator.Id);
+            return GetAnnotations(filter);
+        }
+
         public static List<DatabaseAnnotation> GetAnnotations(FilterDefinition<BsonDocument> filter = null, bool onlyMe = false, bool onlyUnfinished = false)
         {
 
@@ -2575,9 +2581,6 @@ namespace ssi
 
             foreach (var annotation in annotations)
             {
-
-
-
                 ObjectId id = annotation["_id"].AsObjectId;
 
                 ObjectId sessionid = annotation["session_id"].AsObjectId;
@@ -2724,7 +2727,6 @@ namespace ssi
         public string Language { get; set; }
         public string Location { get; set; }
         public DateTime Date { get; set; }
-        public bool hasMatchingAnnotations { get; set; }
 
         public override string ToString()
         {

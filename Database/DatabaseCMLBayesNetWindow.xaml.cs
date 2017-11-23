@@ -252,7 +252,6 @@ namespace ssi
         private void ExportFrameWiseAnnotationsRolesSeperated(double chunksize, string[] discretizeclasses, string seperator, string restclass, string filepath, List<AnnoList> annoLists, bool ishead, string sessionname, int tempsteps = 0)
         {
      
-            string filetoprint = "";
             string headline = "";
             double maxdur = 0;
 

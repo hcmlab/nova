@@ -55,7 +55,7 @@
                 <MenuItem Header="Save As Finished" Name="annoSaveAsFinishedMenu"/>
                 <MenuItem Header="Save All" Name="annoSaveAllMenu" />
                 <MenuItem Header="Reload" Name="annoReloadMenu" InputGestureText="Ctrl+R"/>
-                <MenuItem Header="Reload From Backup" Name="annoReloadBackupMenu" />
+                <MenuItem Header="Reload From Backup" Name="annoReloadBackupMenu" InputGestureText="Ctrl+B"/>
                 <MenuItem Header="Export As" Name="annoExportMenu" />
                 <MenuItem Header="Remove Segments Right of Marker" Name="removeRemainingSegmentsMenu" InputGestureText="Ctrl+K"/>
                 <MenuItem Header="Convert Annotation" Name="convertSelectedTierMenu">
@@ -67,15 +67,13 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="LEARNING" Name="databaseCMLMenu">
+                <MenuItem Header="Rater Agreement / Merge Annotations" Name="databaseCMLMergeAnnotationsMenu" />
                 <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
                 <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
-                <MenuItem Header="Train Models" Name="databaseCMLTrainMenu"/>
-                <MenuItem Header="Evaluate Models" Name="databaseCMLEvaluateMenu"/>
+                <MenuItem Header="Train and Predict" Name="databaseCMLTrainAndPredictMenu"/>
                 <MenuItem Header="Fusion" Name="fusionmenu">
                     <MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenu"/>
                 </MenuItem>
-                <MenuItem Header="Rater Agreement / Merge Annotations" Name="databaseCMLMergeAnnotationsMenu" />
-                <MenuItem Header="Predict Annotations" Name="databaseCMLPredictMenu"/>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
 

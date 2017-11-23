@@ -249,11 +249,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tr>
 <tr class="even">
 <td>Q</td>
-<td>Move the Signal Cursor to the beginning, the Annotation Cursor to the end of the selected segment</td>
+<td>Move signal cursor to the beginning, the annotation cursor to the end of the selected segment</td>
 </tr>
 <tr class="odd">
 <td>E</td>
-<td>Move the Annotation Cursor to the beginning, the Signal Cursor to the end of the selected segment</td>
+<td>Move annotation cursor to the beginning, the signal cursor to the end of the selected segment</td>
 </tr>
 <tr class="even">
 <td>ctrl + C</td>
@@ -268,20 +268,28 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <td>Complete the current session automatically</td>
 </tr>
 <tr class="odd">
-<td>ctrl + V</td>
-<td>Paste a copied segment</td>
+<td>ctrl + R</td>
+<td>Reload current annotation</td>
 </tr>
 <tr class="even">
+<td>ctrl + B</td>
+<td>Reload current annotation from backup</td>
+</tr>
+<tr class="odd">
 <td>ctrl + X</td>
 <td>Cut the selected segment</td>
 </tr>
+<tr class="even">
+<td>ctrl + V</td>
+<td>Paste a copied segment</td>
+</tr>
 <tr class="odd">
 <td>ctrl + Y</td>
-<td>Redo</td>
+<td>Redo last step</td>
 </tr>
 <tr class="even">
 <td>ctrl + Z</td>
-<td>Undo</td>
+<td>Undo last step</td>
 </tr>
 <tr class="odd">
 <td>shift + dragging</td>
@@ -556,13 +564,13 @@ db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { rol
 <p class="caption"><em>Predictions with a low confidence are marked for revision.</em></p>
 </div>
 <h2 id="cl-model-training"><span class="header-section-number">5.4</span> Model Training</h2>
-<p>Once annotations for a number of sessions have been accomplished a 'strong' classification model can be trained. This requires that <a href="#cl-feature-extraction">features</a> have been extracted for the sessions and a compatible <a href="#cl-trainer-templates">trainer template</a> is available. Now choose 'Train Model' from LEARNING and a dialogue pops up. Here you can select a scheme, one or more roles and an annotator. Sessions for which an annotation exists that satisfies the selection are now shown and can be selected. Finally, choose the stream for which a machine learning model should be trained. Note that only those streams are listed for which at least one <a href="#cl-trainer-templates">trainer template</a> is found. By pressing 'Train' model training is started. Switch on 'Force' if you want to override an existing model.</p>
+<p>Once annotations for a number of sessions have been accomplished a 'strong' classification model can be trained. This requires that <a href="#cl-feature-extraction">features</a> have been extracted for the sessions and a compatible <a href="#cl-trainer-templates">trainer template</a> is available. Now choose 'Train and Predict' from LEARNING and a dialogue pops up. Stay within the 'Train' tab. Here you can select a scheme, one or more roles and an annotator. Sessions for which an annotation exists that satisfies the selection are now shown and can be selected. Finally, choose the stream for which a machine learning model should be trained. Note that only those streams are listed for which at least one <a href="#cl-trainer-templates">trainer template</a> is found. By pressing 'Train' model training is started. Switch on 'Force' if you want to override an existing model.</p>
 <div class="figure">
 <img src="pics/cl-training-dialog.png" alt="Model training." id="fig:cl-training-dialog" />
 <p class="caption"><em>Model training.</em></p>
 </div>
 <h2 id="annotation-prediction"><span class="header-section-number">5.5</span> Annotation Prediction</h2>
-<p>With a trained model it is now possible to predict annotations for one or more sessions. Therefore choose 'Prediction Annotations' from the LEARNING menu. Once you have selected a scheme, a role and an Annotator those sessions will be listed, which do not have a matching annotation yet. You can turn of the filter by selecting 'Show existing', however, make sure you are not occidentally overriding existing annotations (no undo available!). Finally, select the stream for which a machine learning <a href="#cl-model-training">model</a> has been trained (only streams are listed for which at least one model is found). Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold. After pressing 'Predict' annotations will be created based on the chosen model for all sessions that have been selected and stored under your name (if you are an administrator you may also generate annotations for another user).</p>
+<p>With a trained model it is now possible to predict annotations for one or more sessions. Therefore choose 'Train and Predict' from the LEARNING menu and switch to the 'Predict' tab. Once you have selected a scheme, a role and an Annotator those sessions will be listed, which do not have a matching annotation yet. You can turn of the filter by selecting 'Show existing', however, make sure you are not occidentally overriding existing annotations (no undo available!). Finally, select the stream for which a machine learning <a href="#cl-model-training">model</a> has been trained (only streams are listed for which at least one model is found). Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold. After pressing 'Predict' annotations will be created based on the chosen model for all sessions that have been selected and stored under your name (if you are an administrator you may also generate annotations for another user).</p>
 <div class="figure">
 <img src="pics/cl-prediction-dialog.png" alt="Annotation prediction dialogue." id="fig:cl-prediction-dialog" />
 <p class="caption"><em>Annotation prediction dialogue.</em></p>

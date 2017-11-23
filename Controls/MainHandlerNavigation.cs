@@ -162,12 +162,7 @@ namespace ssi
             {
                 track.TimeRangeChanged(Time);
             }
-            if (signalTracks.Count == 1
-                && duration > Properties.Settings.Default.DefaultZoomInSeconds
-                && Properties.Settings.Default.DefaultZoomInSeconds != 0)
-            {
-                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
-            }
+            
 
         }
 

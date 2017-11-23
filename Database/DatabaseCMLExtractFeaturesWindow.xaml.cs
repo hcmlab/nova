@@ -2,11 +2,13 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Xml;
 
@@ -18,6 +20,9 @@ namespace ssi
     public partial class DatabaseCMLExtractFeaturesWindow : Window
     {
         private MainHandler handler;
+
+        GridViewColumnHeader _lastHeaderClicked = null;
+        ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
         public class Chain
         {
@@ -513,20 +518,16 @@ namespace ssi
                     "\\" + Defaults.CML.ChainFolderName +
                     "\\" + stream.Type;
             if (Directory.Exists(chainDir))
-            {
-                string[] chainDirs = Directory.GetDirectories(chainDir);
-                foreach (string searchDir in chainDirs)
+            {                
+                string[] chainFiles = Directory.GetFiles(chainDir, "*." + Defaults.CML.ChainFileExtension, SearchOption.AllDirectories);                    
+                foreach (string chainFile in chainFiles)
                 {
-                    string[] chainFiles = Directory.GetFiles(searchDir, "*." + Defaults.CML.ChainFileExtension);                    
-                    foreach (string chainFile in chainFiles)
+                    Chain chain = new Chain() { Path = chainFile };
+                    if (parseChainFile(ref chain))
                     {
-                        Chain chain = new Chain() { Path = chainFile };
-                        if (parseChainFile(ref chain))
-                        {
-                            chains.Add(chain);
-                        }
+                        chains.Add(chain);
                     }
-                }         
+                }                         
             }
 
             return chains;
@@ -560,6 +561,7 @@ namespace ssi
             if (ChainPathComboBox.SelectedItem != null)
             {
                 Chain chain = (Chain) ChainPathComboBox.SelectedItem;
+                ChainPathLabel.Content = chain.Path;
                 LeftContextTextBox.Text = chain.LeftContext;
                 FrameStepTextBox.Text = chain.FrameStep;
                 RightContextTextBox.Text = chain.RightContext;
@@ -611,6 +613,64 @@ namespace ssi
             if(e.Key == Key.Escape)
             {
                 Close();
+            }
+        }
+
+        private void SortListView(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader headerClicked =
+            e.OriginalSource as GridViewColumnHeader;
+            ListSortDirection direction;
+
+            if (headerClicked != null)
+            {
+                if (headerClicked.Role != GridViewColumnHeaderRole.Padding)
+                {
+                    if (headerClicked != _lastHeaderClicked)
+                    {
+                        direction = ListSortDirection.Ascending;
+                    }
+                    else
+                    {
+                        if (_lastDirection == ListSortDirection.Ascending)
+                        {
+                            direction = ListSortDirection.Descending;
+                        }
+                        else
+                        {
+                            direction = ListSortDirection.Ascending;
+                        }
+                    }
+
+                    string header = headerClicked.Column.Header as string;
+                    ICollectionView dataView = CollectionViewSource.GetDefaultView(((ListView)sender).ItemsSource);
+
+                    dataView.SortDescriptions.Clear();
+                    SortDescription sd = new SortDescription(header, direction);
+                    dataView.SortDescriptions.Add(sd);
+                    dataView.Refresh();
+
+
+                    if (direction == ListSortDirection.Ascending)
+                    {
+                        headerClicked.Column.HeaderTemplate =
+                          Resources["HeaderTemplateArrowUp"] as DataTemplate;
+                    }
+                    else
+                    {
+                        headerClicked.Column.HeaderTemplate =
+                          Resources["HeaderTemplateArrowDown"] as DataTemplate;
+                    }
+
+                    // Remove arrow from previously sorted header  
+                    if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
+                    {
+                        _lastHeaderClicked.Column.HeaderTemplate = null;
+                    }
+
+                    _lastHeaderClicked = headerClicked;
+                    _lastDirection = direction;
+                }
             }
         }
     }

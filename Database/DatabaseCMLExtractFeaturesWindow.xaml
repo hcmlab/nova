@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="Extract Features" Height="600" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
+        Title="Extract Features" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >
@@ -50,8 +50,8 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="100"></RowDefinition>
                 </Grid.RowDefinitions>
-               
-                <ListView Name="StreamsBox" Grid.Row="0" SelectionMode="Single" SelectionChanged="StreamsBox_SelectionChanged">
+
+                <ListView Name="StreamsBox" Grid.Row="0" SelectionMode="Single" SelectionChanged="StreamsBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Name">
@@ -84,7 +84,7 @@
             </Grid>
 
             <Label Content="Sessions" Grid.Row="0" Grid.Column="2" />
-            <ListView Name="SessionsBox"  Grid.Row="1" Grid.Column="2" Margin="0,0,5,0" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" >
+            <ListView Name="SessionsBox"  Grid.Row="1" Grid.Column="2" Margin="0,0,5,0" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -123,7 +123,8 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Feature chain</Label>
-                <ComboBox Name="ChainPathComboBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Height="20" SelectionChanged="ChainPathComboBox_SelectionChanged" ></ComboBox>
+                <ComboBox Name="ChainPathComboBox" Grid.Row="0" Grid.Column="1" Height="20" SelectionChanged="ChainPathComboBox_SelectionChanged" ></ComboBox>
+                <Label Name="ChainPathLabel" Grid.Row="0" Grid.Column="2"></Label>
                 <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
                 <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" IsEnabled="False" Height="20"></TextBox>
                 <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Frame step</Label>

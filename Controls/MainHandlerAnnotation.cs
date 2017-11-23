@@ -12,6 +12,8 @@ namespace ssi
 
         private void addAnnoTierFromList(AnnoList annoList)
         {
+
+            int annoListnum = annoLists.Count;
             this.control.annostatusbar.Visibility = Visibility.Visible;
             double maxdur = 0;
             if (annoList.Count > 0)
@@ -24,7 +26,7 @@ namespace ssi
             updateTimeRange(maxdur);
             if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) updateTimeRange(maxdur);
 
-            if (annoLists.Count == 1 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            if (annoListnum == 0 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
             {
                 fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
