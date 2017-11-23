@@ -25,27 +25,14 @@ namespace ssi
             dialog.ShowDialog();
         }
 
-        private void databaseCMLTrain_Click(object sender, RoutedEventArgs e)
+        private void databaseCMLTrainAndPredict_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.TRAIN);
             showDialogClearWorkspace(dialog);
-        }
-
-        private void databaseCMLEvaluate_Click(object sender, RoutedEventArgs e)
-        {
-            DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.EVALUATE);
-            showDialogClearWorkspace(dialog);
-        }
-
-        private void databaseCMLPredict_Click(object sender, RoutedEventArgs e)
-        {
-            DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.PREDICT);
-            showDialogClearWorkspace(dialog);
-        }
+        }        
 
         private void databaseCMLCompleteStep()
-        {
-            saveSelectedAnno(true);
+        {                    
             DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.COMPLETE);
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.ShowDialog();
@@ -61,12 +48,25 @@ namespace ssi
 
         private void databaseCMLCompleteStep_Click(object sender, RoutedEventArgs e)
         {
+            saveSelectedAnno(true);
             databaseCMLCompleteStep();
         }
 
         private void databaseCMLFusion_Click(object sender, RoutedEventArgs e)
         {
             databaseCMLFusionStep();
+        }
+
+        private void runCMLProcess(string tool, string options)
+        {
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.WindowStyle = ProcessWindowStyle.Normal;
+            startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\" + tool + ".exe";
+            startInfo.Arguments = options;
+            process.StartInfo = startInfo;
+            process.Start();
+            process.WaitForExit();
         }
         
         private string runCMLTool(string tool, string mode, List<object> parameters, Dictionary<string,object> arguments, string logName)
@@ -112,16 +112,21 @@ namespace ssi
                     optionsNoPassword = options;
                 }
 
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\" + tool + ".exe";
-                startInfo.Arguments = options;
-                result += "\n-------------------------------------------\r\n" + startInfo.FileName + " " + optionsNoPassword + "\n-------------------------------------------\r\n";
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
+                string filename = AppDomain.CurrentDomain.BaseDirectory + "\\" + tool + ".exe";
+
+                runCMLProcess(tool, options);
+
+                result += "\n-------------------------------------------\r\n" + filename + " " + optionsNoPassword + "\n-------------------------------------------\r\n";
                 result += File.ReadAllText(logPath);
+
+                if (mode == "train" && arguments.ContainsKey("cooperative"))
+                {
+                    AnnoTierStatic.Selected.CMLCompleteTrainOptions = options;
+                }
+                if (mode == "forward" && arguments.ContainsKey("cooperative"))
+                {
+                    AnnoTierStatic.Selected.CMLCompletePredictOptions = options;
+                }
             }
             catch (Exception ex)
             {

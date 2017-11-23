@@ -193,6 +193,9 @@ namespace ssi
             get { return AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE; }
         }
 
+        public string CMLCompleteTrainOptions { get; set; }
+        public string CMLCompletePredictOptions { get; set; }
+
         public bool IsGeometric
         {
             get
@@ -270,7 +273,6 @@ namespace ssi
 
             double mean = (anno.Scheme.MinScore + anno.Scheme.MaxScore) / 2;
            
-
             DefaultColor = Defaults.Colors.Foreground;
             DefaultLabel = "";
 

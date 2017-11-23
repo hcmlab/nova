@@ -17,6 +17,7 @@ namespace ssi
 
         private void addMediaBox(IMedia media)
         {
+            int mediaListCount = mediaList.Count;
             MediaBox box = new MediaBox(media);
             control.mediaBoxControl.Add(box);
 
@@ -29,7 +30,7 @@ namespace ssi
                 if (media.GetLength() > 0)
                 {
                     updateTimeRange(media.GetLength());
-                    if (mediaList.Count == 1
+                    if (mediaListCount == 1
                         && media.GetLength() > Properties.Settings.Default.DefaultZoomInSeconds
                         && Properties.Settings.Default.DefaultZoomInSeconds != 0)
                     {
