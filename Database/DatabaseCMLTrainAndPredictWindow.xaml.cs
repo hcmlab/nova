@@ -626,7 +626,10 @@ namespace ssi
                         DatabaseSession session = DatabaseHandler.Sessions.Find(s => s.Name == annotation.Session);
                         if (session != null)
                         {
-                            sessions.Add(session);
+                            if (!sessions.Contains(session))
+                            {
+                                sessions.Add(session);
+                            }
                         }
                     }
                 }

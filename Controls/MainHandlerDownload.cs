@@ -16,73 +16,77 @@ namespace ssi
     {
         private int numberOfActiveParallelDownloads = 0;
         private List<string> filesToDownload = new List<string>();
+        private List<string> filesToRemove = new List<string>();
         private List<DownloadStatus> statusOfDownloads = new List<DownloadStatus>();
         public static int NumberOfAllCurrentDownloads = 0;
 
-        private void CanceledDownload(string localpath)
-        {
-            tokenSource.Dispose();
-            tokenSource = new CancellationTokenSource();
+        public object Errors { get; private set; }
 
-            foreach (DownloadStatus d in statusOfDownloads)
+        private void CanceledDownload()
+        {
+            numberOfActiveParallelDownloads--;
+
+            if (numberOfActiveParallelDownloads == 0)
             {
-                if (d.percent < 100.0)
+                foreach (DownloadStatus d in statusOfDownloads)
                 {
-                    try
+                    if (d.percent < 100.0)
                     {
-                        if (localpath.EndsWith("~"))
+                        if (d.File.EndsWith("~"))
                         {
-                            File.Delete(localpath.Trim('~')); 
+                            if (!filesToRemove.Contains(d.File.Trim('~')))
+                            {
+                                filesToDownload.Remove(d.File.Trim('~'));
+                                filesToRemove.Add(d.File.Trim('~'));
+                            }
+                        }
+                        if (!filesToRemove.Contains(d.File))
+                        {
+                            filesToDownload.Remove(d.File);
+                            filesToRemove.Add(d.File);
                         }
                     }
-                    catch { }
-
-                    File.Delete(localpath);
-                    if (!localpath.EndsWith(".stream~"))
-                    {
-                        filesToDownload.Remove(localpath);
-                    }
-                    else
-                    {
-                        filesToDownload.Remove(localpath);
-                        filesToDownload.Remove(localpath.Trim('~'));
-                    }
-
-                    numberOfActiveParallelDownloads--;
-                    break;
                 }
-            }
+                statusOfDownloads.Clear();
 
-            Action EmptyDelegate = delegate () { };
-            control.ShadowBoxText.UpdateLayout();
-            control.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-            control.ShadowBoxText.Text = "Loading Data";
-            control.ShadowBox.Visibility = Visibility.Collapsed;
-            control.shadowBoxCancelButton.Visibility = Visibility.Collapsed;
-            control.ShadowBox.UpdateLayout();
-
-            if (numberOfActiveParallelDownloads <= 0)
-            {
                 string[] files = new string[filesToDownload.Count];
                 int i = 0;
                 foreach (string path in filesToDownload)
                 {
-                    long length = new System.IO.FileInfo(path).Length;
-                    if (length == 0)
-                    {
-                       if (File.Exists(path)) File.Delete(path);
-                    }
-                    else
-                    {
-                        files[i] = path;
-                        i++;
-                    }
+                    files[i] = path;
+                    i++;
                 }
+
+                foreach (string file in filesToRemove)
+                {
+                  
+                        try
+                        {
+                            File.Delete(file);
+                        }
+                        catch
+                        {
+                             //here is still a problem with threading.. (process still accesses the file) needs fix TODO
+                            Console.Write("Error");
+                        }
+                   
+                }
+
+                Action EmptyDelegate = delegate () { };
+                control.ShadowBoxText.UpdateLayout();
+                control.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                control.ShadowBoxText.Text = "Loading Data";
+                control.ShadowBox.Visibility = Visibility.Collapsed;
+                control.shadowBoxCancelButton.Visibility = Visibility.Collapsed;
+                control.ShadowBox.UpdateLayout();
 
                 loadMultipleFilesOrDirectory(files);
                 filesToDownload.Clear();
+                filesToRemove.Clear();
                 statusOfDownloads.Clear();
 
+                tokenSource.Dispose();
+                tokenSource = new CancellationTokenSource();
             }
         }
 
@@ -104,7 +108,7 @@ namespace ssi
             //remove empty files here, e.g. non existing ones.
             statusOfDownloads.Remove(statusOfDownloads.Find(dl => dl.File == filePath));
 
-            if (numberOfActiveParallelDownloads <= 0 && NumberOfAllCurrentDownloads <= 0)
+            if (numberOfActiveParallelDownloads == 0 && NumberOfAllCurrentDownloads == 0)
             {
                 Action EmptyDelegate = delegate () { };
                 control.ShadowBoxText.UpdateLayout();
@@ -187,7 +191,7 @@ namespace ssi
                     {
                         if (sftp.Connected)
                         {
-                            token.Register(() => { sftp.Cancel(); iscanceled = true; while (sftp.Connected) Thread.Sleep(100); CanceledDownload(localpath); return; });
+                            token.Register(() => { sftp.Cancel(); iscanceled = true; while (sftp.Connected) Thread.Sleep(100); CanceledDownload(); return; });
                             if (!iscanceled)
                             {
                                 try
@@ -279,7 +283,7 @@ namespace ssi
 
                     await Task.Run(() =>
                     {
-                        token.Register(() => { client.CancelAsync(); CanceledDownload(localpath); return; });
+                        token.Register(() => { client.CancelAsync(); CanceledDownload(); return; });
 
                         //Here we assume that the session is stored as simple ID. (as it is done in the Noxi Database). If the SessionID really is a string, this step is not needed.
                         string resultString = Regex.Match(DatabaseHandler.SessionName, @"\d+").Value;
@@ -354,11 +358,12 @@ namespace ssi
                     };
 
                     //tokenSource = new CancellationTokenSource();
+
                     CancellationToken token = tokenSource.Token;
 
                     await Task.Run(() =>
                     {
-                        token.Register(() => { client.CancelAsync(); while (client.IsBusy) Thread.Sleep(100); CanceledDownload(localpath); return; });
+                        token.Register(() => { client.CancelAsync(); CanceledDownload(); return; });
                         client.DownloadFileAsync(new Uri(URL), localpath);
                     }, token);
                 }
