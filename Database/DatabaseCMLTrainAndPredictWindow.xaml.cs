@@ -861,23 +861,25 @@ namespace ssi
             }
 
             string root = Properties.Settings.Default.DatabaseDirectory + '\\' + DatabaseHandler.DatabaseName;
-            string[] paths = Directory.GetFiles(root, "*." + Defaults.CML.SessionSetExtension);
-          
-            if (paths.Length > 0)
+            if (Directory.Exists(root))
             {
-                foreach (string path in paths)
+                string[] paths = Directory.GetFiles(root, "*." + Defaults.CML.SessionSetExtension);
+
+                if (paths.Length > 0)
                 {
-                    sets.Add(new SessionSet()
+                    foreach (string path in paths)
                     {
-                        Set = SessionSet.Type.FILE,
-                        Path = path,
-                        Name = Path.GetFileNameWithoutExtension(path)
-                    });                
-                }                
+                        sets.Add(new SessionSet()
+                        {
+                            Set = SessionSet.Type.FILE,
+                            Path = path,
+                            Name = Path.GetFileNameWithoutExtension(path)
+                        });
+                    }
+                }
+
+                SelectSessionSetComboBox.ItemsSource = sets;
             }
-
-            SelectSessionSetComboBox.ItemsSource = sets;
-
         }
 
         private void SelectSessionsFromFile(SessionSet set)
