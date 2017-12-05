@@ -19,16 +19,37 @@
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
 
             <Style.Triggers>
-                <!-- When a file exists color it green. -->                
+
+
                 <DataTrigger Binding="{Binding Exists, Converter={StaticResource StreamColorConverter}}" Value="+1">
                     <Setter Property="Foreground" Value="{StaticResource ExistsBrush}" />
+                    <Setter Property="Visibility" Value="Visible"/>
                 </DataTrigger>
-                <!-- When a file is missing color it red. -->
-                <DataTrigger Binding="{Binding Exists, Converter={StaticResource StreamColorConverter}}" Value="-1">
+                
+            
+
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition  Binding="{Binding Exists, Converter={StaticResource StreamColorConverter}}" Value="-1" />
+                        <Condition  Binding="{Binding ElementName=hideMissing,Path=IsChecked}" Value="False" />
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Foreground" Value="{StaticResource IsMissingBrush}" />
-                </DataTrigger>
+                    <Setter Property="Visibility" Value="Visible"/>
+                </MultiDataTrigger>
+
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition  Binding="{Binding Exists, Converter={StaticResource StreamColorConverter}}" Value="-1" />
+                        <Condition  Binding="{Binding ElementName=hideMissing,Path=IsChecked}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Foreground" Value="{StaticResource IsMissingBrush}" />
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </MultiDataTrigger>
+
             </Style.Triggers>
         </Style>
+
+  
     </Window.Resources>
 
     <Grid>
@@ -140,6 +161,8 @@
 
             <DockPanel Grid.Column="3" Grid.Row="0"  Margin="0,0,5,0">
                 <Label Content="Streams"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
+                <CheckBox Name="hideMissing" Content="Hide Missing Streams"  DockPanel.Dock="Bottom"/>
+                
                 <StackPanel Name="ServerLoginPanel"  Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,5,0,0">
                     <DockPanel LastChildFill="True">
                         <Label Content="Username" Width="70" />
@@ -150,6 +173,7 @@
                         <PasswordBox x:FieldModifier="public" x:Name="serverPassword" Margin="0,0,5,0" Height="25" Focusable="True" VerticalContentAlignment="Center" />
                     </DockPanel>
                 </StackPanel>
+                
 
                 <ListView Name="StreamsBox" Grid.Row="0" Grid.Column="0" ItemContainerStyle="{StaticResource StreamItemColorStyle}" ItemsSource="{Binding}" GridViewColumnHeader.Click="SortListView" >
                     <ListView.View>
@@ -181,6 +205,7 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
+            
             </DockPanel>
         </Grid>
 
