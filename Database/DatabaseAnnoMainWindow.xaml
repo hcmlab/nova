@@ -161,7 +161,7 @@
 
             <DockPanel Grid.Column="3" Grid.Row="0"  Margin="0,0,5,0">
                 <Label Content="Streams"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                <CheckBox Name="hideMissing" Content="Hide Missing Streams"  DockPanel.Dock="Bottom"/>
+                <CheckBox Name="hideMissing" Content="Hide Missing Streams"  DockPanel.Dock="Bottom" Checked="hideMissing_Checked" Unchecked="hideMissing_Unchecked"/>
                 
                 <StackPanel Name="ServerLoginPanel"  Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,5,0,0">
                     <DockPanel LastChildFill="True">
