@@ -247,7 +247,20 @@ namespace ssi
             if (lines[line].Contains("correlation: "))
             {
                 CorrelationLabel.Visibility = Visibility.Visible;
-                CorrelationLabel.Content = "Pearson " + lines[line];
+                CorrelationLabel.Content = "Correlation: " + lines[line];
+                return false;
+            }
+
+            if (lines[line].Contains("#metrics"))
+            {
+                CorrelationLabel.Visibility = Visibility.Visible;
+                line++;
+
+                for (int i = line; i < lines.Length; i++)
+                {
+                    CorrelationLabel.Content += "\n" + lines[i];
+                }
+               
                 return false;
             }
 
