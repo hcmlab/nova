@@ -576,6 +576,7 @@
     <Error Condition="!Exists('packages\Fody.1.28.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Fody.1.28.3\build\Fody.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(TargetDir)..\..\..\bin\$(PlatformName)\vc140" xcopy /Y $(TargetDir)$(TargetFileName)  $(TargetDir)..\..\..\bin\$(PlatformName)\vc140</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -84,7 +84,7 @@
             </Grid>
 
             <Label Content="Sessions" Grid.Row="0" Grid.Column="2" />
-            <ListView Name="SessionsBox"  Grid.Row="1" Grid.Column="2" Margin="0,0,5,0" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
+            <ListView Name="SessionsBox" Grid.Row="1" Grid.Column="2" Margin="0,0,5,0" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -108,8 +108,9 @@
             </ListView>
 
             <Grid Name="ExtractPanel" Grid.Row="2" Grid.ColumnSpan="3" Margin="0,5,5,0" >
-                
+
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -126,21 +127,25 @@
                 <ComboBox Name="ChainPathComboBox" Grid.Row="0" Grid.Column="1" Height="20" SelectionChanged="ChainPathComboBox_SelectionChanged" ></ComboBox>
                 <Label Name="ChainPathLabel" Grid.Row="0" Grid.Column="2"></Label>
                 <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
-                <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" IsEnabled="False" Height="20"></TextBox>
+                <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Frame step</Label>
-                <TextBox Name="FrameStepTextBox" Grid.Row="2" Grid.Column="1" IsEnabled="False"  Height="20"></TextBox>
+                <TextBox Name="FrameStepTextBox" Grid.Row="2" Grid.Column="1" IsEnabled="False"  Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Right context</Label>
-                <TextBox Name="RightContextTextBox" Grid.Row="3" Grid.Column="1" IsEnabled="False" Height="20"></TextBox>
+                <TextBox Name="RightContextTextBox" Grid.Row="3" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Name="HelpLabel" Grid.Row="1" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
             </Grid>
 
-            <DockPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" LastChildFill="False">
+            <DockPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" LastChildFill="True">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <Button Content="Extract" Name="ExtractButton" Click="ExtractOrMerge_Click" Width="75" Height="30"/>
                     <Label Name="NParallelLabel" VerticalAlignment="Center">Threads</Label>
                     <TextBox Name="NParallelTextBox" Height="20" Width="30" VerticalAlignment="Center">1</TextBox>
                     <CheckBox Name="ForceCheckBox" Margin="5" VerticalAlignment="Center">Force</CheckBox>
                 </StackPanel>
+                <DockPanel LastChildFill="True" Margin="5">
+                    <Label DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Right">Output name of extracted feature stream</Label>
+                    <TextBox Name="FeatureNameTextBox" Height="20" DockPanel.Dock="Right"></TextBox>
+                </DockPanel>
             </DockPanel>
         </Grid>
 
