@@ -55,13 +55,19 @@
                 <ListView.View>
                     <GridView>
                         
-                        <GridViewColumn Width="70" DisplayMemberBinding="{Binding Label}">
-                            <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="Label" Click="GridViewColumnHeader_Click">Label</GridViewColumnHeader>
-                            </GridViewColumn.Header>
-                        </GridViewColumn>
+                            <GridViewColumn x:Name="LabelColumn" Width="70" DisplayMemberBinding="{Binding Label}">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="Label" Click="GridViewColumnHeader_Click">Label</GridViewColumnHeader>
+                                </GridViewColumn.Header>
+                            </GridViewColumn>
 
-                        <GridViewColumn Width="Auto" Header="From[s]">
+                            <GridViewColumn x:Name="ScoreColumn" Width="70" DisplayMemberBinding="{Binding Score}">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="Score" Click="GridViewColumnHeader_Click">Score</GridViewColumnHeader>
+                                </GridViewColumn.Header>
+                            </GridViewColumn>
+
+                            <GridViewColumn Width="Auto" Header="From[s]">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Start" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>

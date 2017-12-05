@@ -29,6 +29,7 @@ namespace ssi
             switch (scheme.Type)
             {
                 case AnnoScheme.TYPE.CONTINUOUS:
+                    scoreTextBox.Text = item.Score.ToString();
                     infoLabel.Text = "Edit continuous label";                    
                     continuousSchemeGrid.Visibility = Visibility.Visible;                    
                     break;
@@ -60,13 +61,10 @@ namespace ssi
 
             switch (scheme.Type)
             {
-                case AnnoScheme.TYPE.CONTINUOUS:
-                    Result.Label = "0";
+                case AnnoScheme.TYPE.CONTINUOUS:                    
                     double score = 0;
-                    if (double.TryParse(scoreTextBox.Text, out score))
-                    {
-                        Result.Label = scoreTextBox.Text;
-                    }
+                    double.TryParse(scoreTextBox.Text, out score);                    
+                    Result.Score = score;                    
                     break;
 
                 case AnnoScheme.TYPE.DISCRETE:

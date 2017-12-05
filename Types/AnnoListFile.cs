@@ -88,7 +88,7 @@ namespace ssi
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            sw.WriteLine(e.Label + delimiter + e.Confidence);
+                            sw.WriteLine(e.Score + delimiter + e.Confidence);
                         }
                     }
                     else if (Scheme.Type == AnnoScheme.TYPE.FREE)
@@ -167,7 +167,7 @@ namespace ssi
                     {
                         foreach (AnnoListItem e in this)
                         {
-                            bw.Write(float.Parse(e.Label));
+                            bw.Write((float)e.Score);
                             bw.Write((float)e.Confidence);
                         }
                     }
@@ -230,7 +230,7 @@ namespace ssi
 
                     foreach (AnnoListItem e in this)
                     {
-                        sw.WriteLine(e.Start.ToString() + ";" + e.Label + ";" + e.Confidence);
+                        sw.WriteLine(e.Start.ToString() + ";" + e.Score + ";" + e.Confidence);
                     }
                     sw.Close();
 
@@ -407,7 +407,8 @@ namespace ssi
                             string[] data = line.Split(';');
                             if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                             {
-                                string value = data[0];
+                                double value = double.NaN;
+                                double.TryParse(data[0], out value);
                                 double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
                                 AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value, "", Defaults.Colors.Foreground, confidence);
                                 list.Add(e);
@@ -485,7 +486,7 @@ namespace ssi
                         {
                             if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                             {
-                                string value = binaryReader.ReadSingle().ToString();
+                                double value = (double)binaryReader.ReadSingle();
                                 double confidence = (double)binaryReader.ReadSingle();
                                 AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value, "", Defaults.Colors.Foreground, confidence);
                                 list.Add(e);
@@ -767,13 +768,13 @@ namespace ssi
                         list.Scheme.SampleRate = samplerate;
                         string[] data = line.Split(';');
                         double start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                        string label = "";
+                        double score = double.NaN;
                         string tier = "";
                         double confidence = 1.0;
 
                         if (data.Length > 1)
                         {
-                            label = data[1];
+                            double.TryParse(data[1], out score);
                         }
                         if (data.Length > 2)
                         {
@@ -789,15 +790,12 @@ namespace ssi
                             {
                                 list.Scheme.MaxScore = double.Parse(data[4]);
                             }
-                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, label, "Range: " + list.Scheme.MinScore + "-" + list.Scheme.MaxScore, Colors.Black);
+                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, score, "Range: " + list.Scheme.MinScore + "-" + list.Scheme.MaxScore, Colors.Black);
                             list.AddSorted(e);
                         }
-
-                       
-
                         else
                         {
-                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, label, "", Colors.Black, 1);
+                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, score, "", Colors.Black, 1);
                             if (filter == null || tier == filter)
                                 list.AddSorted(e);
                         }
