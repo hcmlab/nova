@@ -957,13 +957,13 @@ namespace ssi
                 return;
             }
 
-            handleSelectionChanged = false;
-
-            SessionsBox.SelectedItems.Clear();
+            handleSelectionChanged = false;            
 
             SessionSet set = (SessionSet)SelectSessionSetComboBox.SelectedItem;
             if (set != null)
             {
+                SessionsBox.SelectedItems.Clear();
+
                 switch (set.Set)
                 {
                     case SessionSet.Type.ALL:
