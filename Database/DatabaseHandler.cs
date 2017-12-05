@@ -1991,7 +1991,7 @@ namespace ssi
             {
                 for (int i = 0; i < annoList.Count; i++)
                 {
-                    data.Add(new BsonDocument { { "score", double.Parse(annoList[i].Label) }, { "conf", annoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
+                    data.Add(new BsonDocument { { "score", annoList[i].Score }, { "conf", annoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
                 }
             }
             else if (schemeType == AnnoScheme.TYPE.POINT)
@@ -2367,12 +2367,12 @@ namespace ssi
 
                     for (int i = 0; i < labels.Count; i++)
                     {
-                        string label = labels[i]["score"].ToString();
+                        double score = labels[i]["score"].ToDouble();
                         string confidence = labels[i]["conf"].ToString();
                         double start = i / annoList.Scheme.SampleRate;
                         double dur = 1 / annoList.Scheme.SampleRate;
 
-                        AnnoListItem ali = new AnnoListItem(start, dur, label, "", Colors.Black, double.Parse(confidence));
+                        AnnoListItem ali = new AnnoListItem(start, dur, score, "", Colors.Black, double.Parse(confidence));
 
                         annoList.Add(ali);
                     }

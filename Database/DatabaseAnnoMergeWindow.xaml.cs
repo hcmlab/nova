@@ -139,9 +139,11 @@ namespace ssi
                 if (result2.ElementCount > 0) roleid = result2.GetValue(0).AsObjectId;
             }
 
-            if ((DatabaseSession)SessionsResultsBox.SelectedItem == null) SessionsResultsBox.SelectedIndex = 0;
+ 
+            if (SessionsResultsBox.SelectedItem == null) SessionsResultsBox.SelectedIndex = 0;
 
-            DatabaseSession session = (DatabaseSession)SessionsResultsBox.SelectedItem;
+            DatabaseSession session = SessionsResultsBox.SelectedItems.Count > 0 ? (DatabaseSession)SessionsResultsBox.SelectedItem : DatabaseHandler.Sessions[0];
+            ;
 
             ObjectId sessionid = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", session.Name);
             var filter = builder.Eq("session_id", sessionid);
@@ -196,16 +198,13 @@ namespace ssi
 
         public void GetRoles()
         {
-            var rolesdb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles);
-            var roles = rolesdb.Find(_ => true).ToList();
-
-            if (roles.Count > 0)
+            if (DatabaseHandler.Roles.Count > 0)
             {
                 if (RolesBox.Items != null) RolesBox.Items.Clear();
 
-                foreach (var c in roles)
+                foreach (var r in DatabaseHandler.Roles)
                 {
-                    RolesBox.Items.Add(c["name"]);
+                    RolesBox.Items.Add(r.Name);
                 }
                 if (RolesBox.SelectedIndex == -1) RolesBox.SelectedIndex = 0;
             }
@@ -351,15 +350,14 @@ namespace ssi
             {
                 for (int i = 0; i < minSize; i++)
                 {
-                    double label = double.Parse(a[i].Label);
+                    double label = a[i].Score;
                     array[i] = array[i] + label * label;
                 }
             }
 
             for (int i = 0; i < array.Length; i++)
             {
-                double sq = System.Math.Sqrt(array[i] / numberoftracks);
-                newList[i].Label = sq.ToString();
+                newList[i].Score = System.Math.Sqrt(array[i] / numberoftracks);                
             }
             newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
 
@@ -404,13 +402,13 @@ namespace ssi
             {
                 for (int i = 0; i < minSize; i++)
                 {
-                    array[i] = array[i] + double.Parse(a[i].Label, CultureInfo.InvariantCulture);
+                    array[i] = array[i] + a[i].Score;
                 }
             }
 
             for (int i = 0; i < array.Length; i++)
             {
-                newList[i].Label = (array[i] /  ((double)numberoftracks)).ToString();
+                newList[i].Score = array[i] / numberoftracks;
             }
             newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
           
@@ -462,7 +460,7 @@ namespace ssi
                 {
                     for (int i = 0; i < length; i++)
                     {
-                        double err = double.Parse(al[0][i].Label) - double.Parse(al[1][i].Label);
+                        double err = al[0][i].Score - al[1][i].Score;
                         if (err > maxerr) maxerr = err;
                         if (err < minerr) minerr = err;
                         sum_sq += err * err;
@@ -862,7 +860,7 @@ namespace ssi
                 double[] row = new double[N];
                 for (int j = 0; j < N; j++)
                 {
-                    double inputValue = double.Parse(annolists[i][j].Label, culture.NumberFormat);
+                    double inputValue = annolists[i][j].Score;
                     row[j] = Math.Round(inputValue, decimals);
                 }
 
@@ -929,8 +927,8 @@ namespace ssi
                 {
                     while (enX.MoveNext() && enY.MoveNext())
                     {
-                        double x = double.Parse(enX.Current.Label, culture.NumberFormat);
-                        double y = double.Parse(enY.Current.Label, culture.NumberFormat);
+                        double x = enX.Current.Score;
+                        double y = enY.Current.Score;
 
                         n += 1;
                         sx += x;
@@ -1256,7 +1254,7 @@ namespace ssi
 
                                 for (int i = 0; i < N; i++)
                                 {
-                                    double err = double.Parse(annolists[0][i].Label, System.Globalization.NumberStyles.Float) - double.Parse(annolists[1][i].Label, System.Globalization.NumberStyles.Float);
+                                    double err = annolists[0][i].Score - annolists[1][i].Score;
                                     if (err > maxerr) maxerr = err;
                                     if (err < minerr) minerr = err;
                                     sum_sq += (err * err);
@@ -1333,10 +1331,10 @@ namespace ssi
                 string name = DatabasesBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(name);
             }
+            GetRoles();
             GetAnnotationSchemes();
             GetAnnotators();
             GetSessions();
-            GetRoles();
             GetAnnotations();
         }
 

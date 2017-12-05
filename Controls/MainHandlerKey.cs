@@ -811,7 +811,7 @@ namespace ssi
                 {
                     if (AnnoTierStatic.Label != null)
                     {
-                        ShowLabelBoxCont();
+                        ShowLabelBoxContinuous();
                         AnnoTierStatic.Label.select(true);
                     }
 

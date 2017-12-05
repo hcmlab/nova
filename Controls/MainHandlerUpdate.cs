@@ -142,16 +142,20 @@ namespace ssi
                         return;
                     }
 
-                    string[] fileEntries = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory);
 
-                    foreach (string file in fileEntries)
+                    MessageBoxResult mb2 = MessageBox.Show("Delete existing dlls?", "Attention", MessageBoxButton.YesNo,MessageBoxImage.Question);
+                    if (mb2 == MessageBoxResult.Yes)
                     {
-                        if (File.Exists(file) && Path.GetFileName(file).StartsWith("ssi") && file.EndsWith("dll"))
+                        string[] fileEntries = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory);
+
+                        foreach (string file in fileEntries)
                         {
-                            File.Delete(file);
+                            if (File.Exists(file) && Path.GetFileName(file).StartsWith("ssi") && file.EndsWith("dll"))
+                            {
+                                File.Delete(file);
+                            }
                         }
                     }
-
 
                     /*
                     * CMLTrain and XMLchain executables are downloaded from the official SSI git repository.

@@ -955,8 +955,7 @@ namespace ssi
 
                 foreach (AnnoListItem ali in AnnoTierStatic.Selected.AnnoList)
                 {
-                    double val = 0;
-                    double.TryParse(ali.Label, out val);
+                    double val = ali.Score;
 
                     for (int i = 0; i < classes.Count; i++)
                     {

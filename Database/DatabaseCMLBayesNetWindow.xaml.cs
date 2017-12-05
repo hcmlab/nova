@@ -364,8 +364,7 @@ namespace ssi
                             {
                                 if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                                 {
-                                    double value;
-                                    double.TryParse(newlists[a][i].Label, out value);
+                                    double value = newlists[a][i].Score;
                                     discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
                                     history[a][i] = discretelabel;
                                 }
@@ -384,8 +383,7 @@ namespace ssi
                                 {
                                     if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                                     {
-                                        double value;
-                                        double.TryParse(newlists[a][i].Label, out value);
+                                        double value = newlists[a][i].Score;
 
                                         discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
                                         headline += discretelabel + seperator;
@@ -503,7 +501,7 @@ namespace ssi
                     {
                         for (int j = 0; j < round; j++)
                         {
-                            AnnoListItem ali = new AnnoListItem(annolist[i].Start + j * (1.0 / round), (1.0 / round), annolist[i].Label);
+                            AnnoListItem ali = new AnnoListItem(annolist[i].Start + j * (1.0 / round), (1.0 / round), annolist[i].Score);
 
                             result.Add(ali);
                         }
@@ -616,8 +614,7 @@ namespace ssi
                         {
                             if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                             {
-                                double value;
-                                double.TryParse(newlists[a][i].Label, out value);
+                                double value = newlists[a][i].Score;
                                 discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
                                 history[a][i] = discretelabel;
                             }
@@ -634,8 +631,7 @@ namespace ssi
                         {
                             if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                             {
-                                double value;
-                                double.TryParse(newlists[a][i].Label, out value);
+                                double value = newlists[a][i].Score;
 
                                 discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
                                 headline += discretelabel + seperator;

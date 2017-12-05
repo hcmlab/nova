@@ -9,6 +9,7 @@ namespace ssi
         private double start;
         private double duration;
         private string label;
+        private double score;
         private string meta;
         private Color color;
         private double confidence;
@@ -72,13 +73,23 @@ namespace ssi
             }
         }
 
-        public String Label
+        public string Label
         {
             get { return label; }
             set
             {
                 label = value;
                 OnPropertyChanged("Label");
+            }
+        }
+
+        public double Score
+        {
+            get { return score; }
+            set
+            {
+                score = value;
+                OnPropertyChanged("Score");
             }
         }
 
@@ -93,7 +104,7 @@ namespace ssi
         }
 
 
-        public String Meta
+        public string Meta
         {
             get { return meta; }
             set
@@ -118,6 +129,26 @@ namespace ssi
             this.start = Math.Max(0, start);
             this.duration = Math.Max(0, duration);
             this.label = label;
+            this.score = double.NaN;
+            this.meta = meta;
+            this.color = color;
+            this.confidence = confidence;
+            this.geometric = geometric;
+            if (geometric)
+            {
+                if (points != null)
+                {
+                    this.points = points;
+                }
+            }
+        }
+
+        public AnnoListItem(double start, double duration, double score, string meta = "", Color color = new Color(), double confidence = 1.0, bool geometric = false, PointList points = null)
+        {
+            this.start = Math.Max(0, start);
+            this.duration = Math.Max(0, duration);
+            this.label = null;
+            this.score = score;
             this.meta = meta;
             this.color = color;
             this.confidence = confidence;

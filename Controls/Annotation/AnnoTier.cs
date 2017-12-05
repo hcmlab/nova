@@ -28,7 +28,6 @@ namespace ssi
 
         static protected int selectedZindex = 0;
         static protected int selectedZindexMax = 0;
-        static public double mouseDownPos;
         static public int closestIndex = -1;
         static public int closestIndexOld = 0;
         public static bool isLiveAnnoMode = false;
@@ -173,6 +172,7 @@ namespace ssi
 
         public int lastLabelIndex;
         public string DefaultLabel;
+        public double DefaultScore;
         public Color DefaultColor;
         private double dx = 0;
         private double lastX;
@@ -274,7 +274,8 @@ namespace ssi
             double mean = (anno.Scheme.MinScore + anno.Scheme.MaxScore) / 2;
            
             DefaultColor = Defaults.Colors.Foreground;
-            DefaultLabel = "";
+            DefaultLabel = null;
+            DefaultScore = double.NaN;
 
             switch (anno.Scheme.Type)
             {
@@ -298,7 +299,7 @@ namespace ssi
 
                 case AnnoScheme.TYPE.CONTINUOUS:
 
-                    DefaultLabel = mean.ToString();
+                    DefaultScore = mean;
                     break;
             }
 
@@ -389,11 +390,11 @@ namespace ssi
             continuousTierEllipse.Width = continuousTierEllipse.Height;
             continuousTierEllipse.SetValue(Canvas.TopProperty, (yPos - continuousTierEllipse.Height / 2));
             continuousTierEllipse.SetValue(Canvas.LeftProperty, (MainHandler.Time.PixelFromTime(MainHandler.Time.CurrentPlayPosition) - continuousTierEllipse.Width / 2));
-            AnnoList[closestIndex].Label = (normalized).ToString();
+            AnnoList[closestIndex].Score = normalized;
 
             for (int i = closestIndexOld; i < closestIndex; i++)
             {
-                if (closestIndexOld > -1) AnnoList[i].Label = (normalized).ToString();
+                if (closestIndexOld > -1) AnnoList[i].Score = normalized;
             }
             closestIndexOld = closestIndex;
 
@@ -594,7 +595,7 @@ namespace ssi
             {
                 for (int i = AnnoList.Count; i < samples; i++)
                 {
-                    AnnoListItem ali = new AnnoListItem(i * delta, delta, mean.ToString("F4"), "", Colors.Black);
+                    AnnoListItem ali = new AnnoListItem(i * delta, delta, mean, "", Colors.Black);
                     AnnoList.Add(ali);
                 }
             }
@@ -867,7 +868,7 @@ namespace ssi
             }
             else if (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift) && stop < MainHandler.Time.TotalDuration)
             {
-                AnnoListItem temp = new AnnoListItem(start, len, "", "", Colors.Black);
+                AnnoListItem temp = new AnnoListItem(start, len, DefaultScore, "", Colors.Black);
                 AnnoTierSegment segment = new AnnoTierSegment(temp, this);
                 segment.Width = 1;
                 annorightdirection = true;
@@ -1241,11 +1242,11 @@ namespace ssi
                             double range = AnnoList.Scheme.MaxScore - AnnoList.Scheme.MinScore;
                             double normal = 1.0 - ((e.GetPosition(this).Y / this.ActualHeight));
                             double normalized = (normal * range) + AnnoList.Scheme.MinScore;
-                            AnnoList[closestIndex].Label = normalized.ToString();
+                            AnnoList[closestIndex].Score = normalized;
 
                             for (int i = closestIndexOld; i < closestIndex; i++)
                             {
-                                AnnoList[i].Label = normalized.ToString();
+                                AnnoList[i].Score = normalized;
                             }
                             closestIndexOld = closestIndex;
                             TimeRangeChanged(MainHandler.Time);
@@ -1342,11 +1343,8 @@ namespace ssi
                                 if (i % continuousTierLines.Count < continuousTierLines.Count - 1 && ali.Stop < time.SelectionStop - ali.Duration) continuousTierLines[i % continuousTierLines.Count].X2 = continuousTierLines[i % continuousTierLines.Count + 1].X1;
                                 else continuousTierLines[i % continuousTierLines.Count].X2 = MainHandler.Time.PixelFromTime(ali.Stop);
 
-                                if (ali.Label == "") ali.Label = "0.5";
-                                double value = 0.0;
-                                double.TryParse(ali.Label, out value);
+                                double value = ali.Score;
                                 double range = AnnoList.Scheme.MaxScore - AnnoList.Scheme.MinScore;
-
 
                                 value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
 
@@ -1386,27 +1384,25 @@ namespace ssi
                                 if (i < continuousTierLines.Count - 1 && AnnoList[index + offset].Stop <= time.SelectionStop) s.X2 = continuousTierLines[i + 1].X1;
                                 else s.X2 = MainHandler.Time.PixelFromTime(AnnoList[index].Start);
 
-                                double median = 0;
+                                double mean = 0;
 
                                 double range = AnnoList.Scheme.MaxScore - AnnoList.Scheme.MinScore;
                                 if (index > 0)
                                 {
                                     for (int k = index - offset; k < index + offset; k++)
                                     {
-                                        double value = 0;
-                                        double.TryParse(AnnoList[k].Label, out value);
+                                        double value = AnnoList[k].Score;
 
                                         value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
 
-                                        median = median + value;
+                                        mean = mean + value;
                                     }
-                                    median = median / (2 * offset);
-                                    s.Y1 = (median) * this.ActualHeight;
+                                    mean = mean / (2 * offset);
+                                    s.Y1 = (mean) * this.ActualHeight;
                                 }
                                 else
                                 {
-                                    double value = median;
-                                    double.TryParse(AnnoList[index].Label, out value);
+                                    double value = AnnoList[index].Score;
                                     value = 1.0 - (value - AnnoList.Scheme.MinScore) / range;
                                     s.Y1 = (value) * this.ActualHeight;
                                 }

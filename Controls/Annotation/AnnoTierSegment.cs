@@ -42,7 +42,7 @@ namespace ssi
             this.isResizeableRight = false;
             this.isMoveable = false;
 
-            this.Inlines.Add(item.Label);
+            this.Inlines.Add(item.Label == null ? "" : item.Label);
             this.FontSize = 12;
             this.TextWrapping = TextWrapping.Wrap;
             if (item.Color != null)

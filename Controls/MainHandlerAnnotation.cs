@@ -183,6 +183,8 @@ namespace ssi
                     control.annoLiveModeCheckBox.Visibility = Visibility.Visible;
                     control.annoLiveModeCheckBoxLabel.Visibility = Visibility.Visible;
                     control.annoLiveModeActivateMouse.Visibility = Visibility.Visible;
+                    control.annoListControl.LabelColumn.Width = 0;
+                    control.annoListControl.ScoreColumn.Width = 70;
                 }
                 else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT)
                 {
@@ -191,16 +193,18 @@ namespace ssi
                     control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     control.annoListControl.editComboBox.IsEnabled = false;
                     control.annoListControl.editTextBox.IsEnabled = false;
+                    control.annoListControl.LabelColumn.Width = 70;
+                    control.annoListControl.ScoreColumn.Width = 0;
                 }
-
-                control.annoListControl.editComboBox.Items.Clear();
-                if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                 {
                     control.annoListControl.editComboBox.IsEnabled = true;
                     control.annoListControl.editComboBox.Visibility = Visibility.Visible;
                     control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
                     control.annoListControl.editTextBox.IsEnabled = false;
                     control.annoListControl.editButton.Visibility = Visibility.Visible;
+                    control.annoListControl.LabelColumn.Width = 70;
+                    control.annoListControl.ScoreColumn.Width = 0;
 
                     if (AnnoTierStatic.Selected.AnnoList.Scheme != null
                         && AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null)
@@ -218,6 +222,8 @@ namespace ssi
                     control.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
                     control.annoListControl.editButton.Visibility = Visibility.Visible;
                     control.annoListControl.editTextBox.IsEnabled = true;
+                    control.annoListControl.LabelColumn.Width = 70;
+                    control.annoListControl.ScoreColumn.Width = 0;
                 }
             }
         }
@@ -278,18 +284,18 @@ namespace ssi
             }
         }
 
-        private void ShowLabelBoxCont()
+        private void ShowLabelBoxContinuous()
         {
             if (AnnoTierStatic.Selected != null)
             {
                 AnnoTierNewLabelWindow dialog = new AnnoTierNewLabelWindow(AnnoTierStatic.Selected.AnnoList.Scheme, AnnoTierStatic.Label.Item);
                 dialog.ShowDialog();
 
-                double value;
+                double value = dialog.Result.Score;
                 double confidence = dialog.Result.Confidence;
                 bool success = false;
 
-                if (dialog.DialogResult == true && double.TryParse(dialog.Result.Label, out value))
+                if (dialog.DialogResult == true)
                 {
                     string valueString = value.ToString();
                     if (value >= AnnoTierStatic.Selected.AnnoList.Scheme.MinScore && value <= AnnoTierStatic.Selected.AnnoList.Scheme.MaxScore)

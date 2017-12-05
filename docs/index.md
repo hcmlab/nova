@@ -19,7 +19,9 @@ The latest version of NOVA can be accessed at:
 
 Just download or check-out the release branch and start 'nova.exe' (yes, NOVA is available for Windows systems only).
 
-If you do not see videos on playback, please make also sure you have the right codecs installed. A good choice is the K-lite Codec Pack (You can leave all settings on default, but make sure to not not install any 3rd party software that comes with the installer).
+If you do not see videos on playback, please make also sure you have the right codecs installed. A good choice is the K-lite Codec Pack <https://www.codecguide.com/download_kl.htm> (You can leave all settings on default, but make sure to not not install any 3rd party software that comes with the installer).
+
+You might also need to install the VC140 Runtime Distributable if it is not installed on your system. <https://www.microsoft.com/en-US/download/details.aspx?id=48145>
 
 # Manual Annotation
 
