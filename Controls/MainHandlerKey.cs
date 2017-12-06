@@ -114,7 +114,15 @@ namespace ssi
                     case 0:
                         if (e.KeyboardDevice.IsKeyDown(Key.S))
                         {
-                            SplitSegment(sender, e);
+                            if (AnnoTierStatic.Label != null)
+                            {
+                                SplitSegment(sender, e);
+                            }
+
+                            else
+                            {
+                                annoCursor.X = signalCursor.X;
+                            }
                             e.Handled = true;
                         }
                         else if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
@@ -321,10 +329,9 @@ namespace ssi
 
         private void SplitSegment(object sender, KeyEventArgs e)
         {
-            if (AnnoTierStatic.Label != null)
-            {
+            
                 AnnoTierStatic.SplitPressed(sender, e);
-            }
+            
         }
 
         private void RemoveSegment(object sender, KeyEventArgs e)

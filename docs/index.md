@@ -109,7 +109,8 @@ Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. 
  Shorcut					Description    
  -------					------ 
  0 - 9						Setting the label for the selected segment (For discrete schemes)
- S							Splitting the selected segment in two parts on the green annotation cursor
+ S (on Segment)			    Splitting the selected segment in two parts on the green annotation cursor
+ S (on Tier) 			    Move green Annotation Cursor to red Signal Cursor
  W							Creating a new label between the green annotation cursor and the red media position cursor, edit selected segment
  Q							Move signal cursor to the beginning, the annotation cursor to the end of the selected segment
  E							Move annotation cursor to the beginning, the signal cursor to the end of the selected segment
