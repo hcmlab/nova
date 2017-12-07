@@ -1,15 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Media;
-using System.Collections;
-using System.Collections.ObjectModel;
 
 namespace ssi
 {
@@ -21,31 +17,40 @@ namespace ssi
         private GridViewColumnHeader listViewSortCol = null;
         private ListViewSortAdorner listViewSortAdorner = null;
 
- 
-
         public AnnoListControl()
         {
             InitializeComponent();
-
-            annoDataGrid.SourceUpdated += AnnoDataGrid_SourceUpdated;
-           
-
         }
 
         private void AnnoDataGrid_SourceUpdated(object sender, DataTransferEventArgs e)
         {
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(annoDataGrid.ItemsSource);
             view.Filter = UserFilter;
+
+            if (AnnoTier.Selected != null && AnnoTier.Selected.IsContinuous)
+            {
+                NaNToDefaultMenu.Visibility = Visibility.Visible;
+            }
+
+            if (AnnoTier.Selected != null && AnnoTier.Selected.IsDiscreteOrFree)
+            {
+                NaNToDefaultMenu.Visibility = Visibility.Collapsed;
+            }
         }
-
-
 
         private bool UserFilter(object item)
         {
             if (String.IsNullOrEmpty(searchTextBox.Text))
                 return true;
-            else
+            else if (AnnoTier.Selected.IsDiscreteOrFree)
+            {
                 return ((item as AnnoListItem).Label.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            else if (AnnoTier.Selected.IsContinuous)
+            {
+                return ((item as AnnoListItem).Score.ToString().IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            else return false;
         }
 
         private void MenuItemDeleteClick(object sender, RoutedEventArgs e)
@@ -68,6 +73,17 @@ namespace ssi
                         }
                     }
                 }
+            }
+            else if (AnnoTierStatic.Selected.IsContinuous)
+            {
+                AnnoListItem[] selected = new AnnoListItem[annoDataGrid.SelectedItems.Count];
+                annoDataGrid.SelectedItems.CopyTo(selected, 0);
+                annoDataGrid.SelectedIndex = -1;
+                foreach (AnnoListItem s in selected)
+                {
+                    s.Score = double.NaN;
+                }
+                AnnoTier.Selected.TimeRangeChanged(MainHandler.Time);
             }
         }
 
@@ -196,12 +212,11 @@ namespace ssi
         private void MenuItemSetConfidenceZeroClick(object sender, RoutedEventArgs e)
         {
             if (annoDataGrid.SelectedItems.Count != 0)
-            {       
+            {
                 foreach (AnnoListItem s in annoDataGrid.SelectedItems)
                 {
                     s.Confidence = 0.0;
                 }
-              
             }
         }
 
@@ -213,7 +228,27 @@ namespace ssi
                 {
                     s.Confidence = 1.0;
                 }
+            }
+        }
 
+        private void MenuItemSetNanClick(object sender, RoutedEventArgs e)
+        {
+            if (AnnoTier.Selected.IsContinuous)
+            {
+                if (annoDataGrid.SelectedItems.Count != 0)
+                {
+                    double mean = (AnnoTier.Selected.AnnoList.Scheme.MinScore + AnnoTier.Selected.AnnoList.Scheme.MaxScore) / 2.0;
+                    foreach (AnnoListItem s in annoDataGrid.SelectedItems)
+                    {
+                        if (double.IsNaN(s.Score))
+                        {
+                            s.Score = mean;
+                        }
+                    }
+
+                    AnnoTier.Selected.TimeRangeChanged(MainHandler.Time);
+                    AnnoTier.Selected.TimeRangeChanged(MainHandler.Time);
+                }
             }
         }
 
@@ -221,11 +256,10 @@ namespace ssi
         {
             GridViewColumnHeader column = (sender as GridViewColumnHeader);
             if (column.Tag != null)
-            {                
+            {
                 string sortBy = column.Tag.ToString();
                 if (sortBy == "Label")
                 {
-
                     if (listViewSortCol != null)
                     {
                         AdornerLayer.GetAdornerLayer(listViewSortCol).Remove(listViewSortAdorner);
@@ -249,25 +283,18 @@ namespace ssi
                     {
                         listViewSortCol = null;
                     }
-                }               
-            }     
+                }
+            }
         }
 
         private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if(annoDataGrid.ItemsSource != null)
+            if (annoDataGrid.ItemsSource != null)
             {
                 CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(annoDataGrid.ItemsSource);
                 view.Filter = UserFilter;
                 CollectionViewSource.GetDefaultView(annoDataGrid.ItemsSource).Refresh();
             }
-           
         }
-
-
-    
     }
-
-
-
 }
