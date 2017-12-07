@@ -35,7 +35,7 @@
                     <TextBox x:Name="searchTextBox" TextChanged="searchTextBox_TextChanged" DockPanel.Dock="Right" Margin="2,0,0,0"/>
                 </DockPanel>
 
-                <ListView Name="annoDataGrid" Grid.Row="0" >
+                <ListView Name="annoDataGrid" Grid.Row="0" SourceUpdated ="AnnoDataGrid_SourceUpdated" >
                 <ListView.ContextMenu>
                     <ContextMenu Name="InvoiceDetailsList" StaysOpen="true">
                         <ContextMenu.BitmapEffect>
@@ -50,7 +50,8 @@
                         <MenuItem Header="Copy Meta Strings Only" Click="MenuItemCopyMetaStringsOnlyClick" />
                         <MenuItem Header="Set Confidence to 0" Click="MenuItemSetConfidenceZeroClick" />
                         <MenuItem Header="Set Confidence to 1" Click="MenuItemSetConfidenceOneClick" />
-                    </ContextMenu>
+                        <MenuItem Name="NaNToDefaultMenu" Header="Set NaN to Mean Value" Click="MenuItemSetNanClick" />
+                        </ContextMenu>
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView>

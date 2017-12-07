@@ -336,10 +336,36 @@ namespace ssi
 
         private void RemoveSegment(object sender, KeyEventArgs e)
         {
+
+            if(AnnoTier.Selected != null && AnnoTier.Selected.IsDiscreteOrFree)
+            {
+
+           
             if (AnnoTierStatic.Label != null)
             {
                 AnnoTierStatic.RemoveSegmentPressed(sender, e);
             }
+
+
+            }
+
+            else if(AnnoTier.Selected != null && AnnoTier.Selected.IsContinuous)
+            {
+               
+
+                AnnoListItem[] selected = new AnnoListItem[control.annoListControl.annoDataGrid.SelectedItems.Count];
+                control.annoListControl.annoDataGrid.SelectedItems.CopyTo(selected, 0);
+                control.annoListControl.annoDataGrid.SelectedIndex = -1;
+                foreach (AnnoListItem s in selected)
+                {
+                    s.Score = double.NaN;
+                }
+                AnnoTier.Selected.TimeRangeChanged(MainHandler.Time);
+
+            }
+           
+
+
         }
 
         private void SelectSegmentStart()
@@ -909,14 +935,34 @@ namespace ssi
         {
             if (AnnoTierStatic.Selected != null)
             {
-                double selectedtime = MainHandler.Time.TimeFromPixel(annoCursor.X);
+               
 
-                List<AnnoTierSegment> SegmentsToRemove =  AnnoTierStatic.Selected.segments.FindAll(s => s.Item.Start > selectedtime);
 
-                foreach(AnnoTierSegment segment in SegmentsToRemove)
+                if(AnnoTier.Selected.IsDiscreteOrFree)
                 {
-                    AnnoTierStatic.Selected.RemoveSegment(segment);
+                    double selectedtime = MainHandler.Time.TimeFromPixel(annoCursor.X);
+                    List<AnnoTierSegment> SegmentsToRemove = AnnoTierStatic.Selected.segments.FindAll(s => s.Item.Start > selectedtime);
+                    foreach (AnnoTierSegment segment in SegmentsToRemove)
+                    {
+                        AnnoTierStatic.Selected.RemoveSegment(segment);
+                    }
                 }
+                else if (AnnoTier.Selected.IsContinuous)
+                {
+                    for(int i=0; i< AnnoTierStatic.Selected.AnnoList.Count; i++)
+                    {
+                        double selectedtime = MainHandler.Time.TimeFromPixel(signalCursor.X);
+                        if (AnnoTierStatic.Selected.AnnoList[i].Start > selectedtime)
+                        {
+                            AnnoTierStatic.Selected.AnnoList[i].Score = double.NaN;
+                        }
+                    }
+
+                    AnnoTier.Selected.TimeRangeChanged(Time);
+
+                }
+
+                
             }
         }
 

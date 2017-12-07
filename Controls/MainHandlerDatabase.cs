@@ -315,7 +315,7 @@ namespace ssi
             AnnoList annoList = DatabaseHandler.LoadAnnoList(annotation, loadBackup);
             double maxdur = 0;
 
-            if (annoList != null && annoList.Count > 0 && annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            if (annoList != null && annoList.Count > 0 && annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoList.Scheme.Type == AnnoScheme.TYPE.FREE)
             {
                 maxdur = annoList[annoList.Count - 1].Stop;
 
@@ -334,6 +334,21 @@ namespace ssi
                 updateTimeRange(maxdur);
 
                 tier.AnnoList.HasChanged = false;          
+            }
+
+            else if (annoList != null && annoList.Count > 0 && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            {
+                maxdur = annoList[annoList.Count - 1].Stop;
+
+                setAnnoList(annoList);
+                tier.AnnoList.Clear();
+                tier.AnnoList = annoList;
+                tier.TimeRangeChanged(Time);
+                updateTimeRange(maxdur);
+                AnnoTier.Selected.TimeRangeChanged(MainHandler.Time);
+
+                tier.AnnoList.HasChanged = false;
+
             }
 
             control.ShadowBox.Visibility = Visibility.Collapsed;
