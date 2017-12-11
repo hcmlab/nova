@@ -927,6 +927,10 @@ namespace ssi
                 {
                     while (enX.MoveNext() && enY.MoveNext())
                     {
+                        if(!double.IsNaN(enX.Current.Score) && !double.IsNaN(enX.Current.Score))
+                        {
+
+                      
                         double x = enX.Current.Score;
                         double y = enY.Current.Score;
 
@@ -936,6 +940,7 @@ namespace ssi
                         sxx += x * x;
                         syy += y * y;
                         sxy += x * y;
+                        }
                     }
                 }
             }
