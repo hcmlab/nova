@@ -46,6 +46,15 @@ namespace ssi
             dialog.ShowDialog();
         }
 
+
+        private void databaseCMLFusionPredictStep()
+        {
+            saveSelectedAnno(true);
+            DatabaseCMLFusionPredictWindow dialog = new DatabaseCMLFusionPredictWindow(this, DatabaseCMLFusionPredictWindow.Mode.TRAIN);
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dialog.ShowDialog();
+        }
+
         private void databaseCMLCompleteStep_Click(object sender, RoutedEventArgs e)
         {
             saveSelectedAnno(true);
@@ -56,6 +65,13 @@ namespace ssi
         {
             databaseCMLFusionStep();
         }
+        private void databaseCMLFusionPredict_Click(object sender, RoutedEventArgs e)
+        {
+            databaseCMLFusionPredictStep();
+        }
+
+
+        
 
         private void runCMLProcess(string tool, string options)
         {

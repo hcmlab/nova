@@ -35,7 +35,7 @@
                     <TextBox x:Name="searchTextBox" TextChanged="searchTextBox_TextChanged" DockPanel.Dock="Right" Margin="2,0,0,0"/>
                 </DockPanel>
 
-                <ListView Name="annoDataGrid" Grid.Row="0" SourceUpdated ="AnnoDataGrid_SourceUpdated" >
+                <ListView Name="annoDataGrid" Grid.Row="0" SourceUpdated ="AnnoDataGrid_SourceUpdated" GridViewColumnHeader.Click="SortListView"  >
                 <ListView.ContextMenu>
                     <ContextMenu Name="InvoiceDetailsList" StaysOpen="true">
                         <ContextMenu.BitmapEffect>
@@ -55,30 +55,24 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView>
-                        
-                            <GridViewColumn x:Name="LabelColumn" Width="70" DisplayMemberBinding="{Binding Label}">
-                                <GridViewColumn.Header>
-                                    <GridViewColumnHeader Tag="Label" Click="GridViewColumnHeader_Click">Label</GridViewColumnHeader>
-                                </GridViewColumn.Header>
+
+                            <GridViewColumn x:Name="LabelColumn" Width="70" Header="Label" DisplayMemberBinding="{Binding Label}">
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ScoreColumn" Width="70" DisplayMemberBinding="{Binding Score}">
-                                <GridViewColumn.Header>
-                                    <GridViewColumnHeader Tag="Score" Click="GridViewColumnHeader_Click">Score</GridViewColumnHeader>
-                                </GridViewColumn.Header>
+                            <GridViewColumn x:Name="ScoreColumn" Header="Score" Width="70" DisplayMemberBinding="{Binding Score}">
                             </GridViewColumn>
 
-                            <GridViewColumn Width="Auto" Header="From[s]">
+                            <GridViewColumn Width="Auto" Header="From">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Start" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="To[s]">
+                        <GridViewColumn Width="Auto" Header="To">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Stop" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Dur[s]">
+                        <GridViewColumn Width="Auto" Header="Duration">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Duration" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>

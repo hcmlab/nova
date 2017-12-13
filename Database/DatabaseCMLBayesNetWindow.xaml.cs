@@ -368,10 +368,15 @@ namespace ssi
                                     discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
                                     history[a][i] = discretelabel;
                                 }
-                                else
-                                {
-                                    history[a][i] = newlists[a][i].Label;
+                                else if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == false)
+                                    {
+                                    history[a][i] = newlists[a][i].Score.ToString();
                                 }
+
+                                    else
+                                    {
+                                        history[a][i] = newlists[a][i].Label;
+                                    }
                             }
                         }
 
@@ -388,7 +393,13 @@ namespace ssi
                                         discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
                                         headline += discretelabel + seperator;
                                     }
-                                    else
+
+                                    else if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == false)
+                                    {
+                                        headline += newlists[a][i].Score + seperator;
+                                    }
+
+                                    else 
                                     {
                                         headline += newlists[a][i].Label + seperator;
                                     }
@@ -409,6 +420,11 @@ namespace ssi
                                         {
                                             history[a][0] = discretelabel;
                                         }
+                                        else if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == false)
+                                        {
+                                            history[a][0] = newlists[a][i].Score.ToString();
+                                        }
+
                                         else
                                         {
                                             history[a][0] = newlists[a][i].Label;
@@ -618,6 +634,12 @@ namespace ssi
                                 discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
                                 history[a][i] = discretelabel;
                             }
+
+                            else if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == false)
+                            {
+                                history[a][i] = newlists[a][i].Score.ToString();
+                            }
+
                             else
                             {
                                 history[a][i] = newlists[a][i].Label;
@@ -636,6 +658,12 @@ namespace ssi
                                 discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
                                 headline += discretelabel + seperator;
                             }
+
+                            else if ((newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == false))
+                            {
+                                headline += newlists[a][i].Score + seperator;
+                            }
+
                             else
                             {
                                 headline += newlists[a][i].Label + seperator;
@@ -657,6 +685,11 @@ namespace ssi
                                 {
                                     history[a][0] = discretelabel;
                                 }
+                                else if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == false)
+                                {
+                                    history[a][0] = newlists[a][i].Score.ToString();
+                                }
+
                                 else
                                 {
                                     history[a][0] = newlists[a][i].Label;
