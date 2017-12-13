@@ -73,6 +73,7 @@
                 <MenuItem Header="Train and Predict" Name="databaseCMLTrainAndPredictMenu"/>
                 <MenuItem Header="Fusion" Name="fusionmenu">
                     <MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenu"/>
+                    <!--<MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenuPredict"/>-->
                 </MenuItem>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>

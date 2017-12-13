@@ -16,6 +16,8 @@ namespace ssi
     {
         private GridViewColumnHeader listViewSortCol = null;
         private ListViewSortAdorner listViewSortAdorner = null;
+        GridViewColumnHeader _lastHeaderClicked = null;
+        ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
         public AnnoListControl()
         {
@@ -252,41 +254,6 @@ namespace ssi
             }
         }
 
-        private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
-        {
-            GridViewColumnHeader column = (sender as GridViewColumnHeader);
-            if (column.Tag != null)
-            {
-                string sortBy = column.Tag.ToString();
-                if (sortBy == "Label")
-                {
-                    if (listViewSortCol != null)
-                    {
-                        AdornerLayer.GetAdornerLayer(listViewSortCol).Remove(listViewSortAdorner);
-                        annoDataGrid.Items.SortDescriptions.Clear();
-                    }
-
-                    if (listViewSortCol == null)
-                    {
-                        listViewSortCol = column;
-                        listViewSortAdorner = new ListViewSortAdorner(listViewSortCol, ListSortDirection.Ascending);
-                        AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
-                        annoDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Ascending));
-                    }
-                    else if (listViewSortAdorner.Direction == ListSortDirection.Ascending)
-                    {
-                        listViewSortAdorner = new ListViewSortAdorner(listViewSortCol, ListSortDirection.Descending);
-                        AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
-                        annoDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Descending));
-                    }
-                    else
-                    {
-                        listViewSortCol = null;
-                    }
-                }
-            }
-        }
-
         private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (annoDataGrid.ItemsSource != null)
@@ -294,6 +261,64 @@ namespace ssi
                 CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(annoDataGrid.ItemsSource);
                 view.Filter = UserFilter;
                 CollectionViewSource.GetDefaultView(annoDataGrid.ItemsSource).Refresh();
+            }
+        }
+
+        private void SortListView(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader headerClicked =
+             e.OriginalSource as GridViewColumnHeader;
+            ListSortDirection direction;
+
+            if (headerClicked != null)
+            {
+                if (headerClicked.Role != GridViewColumnHeaderRole.Padding)
+                {
+                    if (headerClicked != _lastHeaderClicked)
+                    {
+                        direction = ListSortDirection.Ascending;
+                    }
+                    else
+                    {
+                        if (_lastDirection == ListSortDirection.Ascending)
+                        {
+                            direction = ListSortDirection.Descending;
+                        }
+                        else
+                        {
+                            direction = ListSortDirection.Ascending;
+                        }
+                    }
+
+                    string header = headerClicked.Column.Header as string;
+                    ICollectionView dataView = CollectionViewSource.GetDefaultView(((ListView)sender).ItemsSource);
+
+                    dataView.SortDescriptions.Clear();
+                    SortDescription sd = new SortDescription(header, direction);
+                    dataView.SortDescriptions.Add(sd);
+                    dataView.Refresh();
+
+
+                    if (direction == ListSortDirection.Ascending)
+                    {
+                        headerClicked.Column.HeaderTemplate =
+                          Resources["HeaderTemplateArrowUp"] as DataTemplate;
+                    }
+                    else
+                    {
+                        headerClicked.Column.HeaderTemplate =
+                          Resources["HeaderTemplateArrowDown"] as DataTemplate;
+                    }
+
+                    // Remove arrow from previously sorted header  
+                    if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
+                    {
+                        _lastHeaderClicked.Column.HeaderTemplate = null;
+                    }
+
+                    _lastHeaderClicked = headerClicked;
+                    _lastDirection = direction;
+                }
             }
         }
     }

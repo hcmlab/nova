@@ -299,16 +299,21 @@ namespace ssi
             if (mode == Mode.TRAIN 
                 || mode == Mode.COMPLETE)
             {
+                string streamName = "";
                 string[] streamParts = stream.Name.Split('.');
                 if (streamParts.Length <= 1)
                 {
-                    return;
+                    streamName = stream.Name;
                 }
-                string streamName = streamParts[1];
-                for (int i = 2; i < streamParts.Length; i++)
+                else
                 {
-                    streamName += "." + streamParts[i];
+                    streamName = streamParts[1];
+                    for (int i = 2; i < streamParts.Length; i++)
+                    {
+                        streamName += "." + streamParts[i];
+                    }
                 }
+               
 
                 string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
                                 Defaults.CML.ModelsFolderName + "\\" +
@@ -773,17 +778,21 @@ namespace ssi
                     return trainers;
                 }
             }
-
+            string streamName = "";
             string[] streamParts = stream.Name.Split('.');
             if (streamParts.Length <= 1)
             {
-                return trainers;
+                streamName = stream.Name;
             }
-            string streamName = streamParts[1];
-            for (int i = 2; i < streamParts.Length; i++)
+            else
             {
-                streamName += "." + streamParts[i];
+                streamName = streamParts[1];
+                for (int i = 2; i < streamParts.Length; i++)
+                {
+                    streamName += "." + streamParts[i];
+                }
             }
+
 
             string trainerDir = null;
 
