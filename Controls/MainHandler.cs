@@ -15,7 +15,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.1.6";
+        public static string BuildVersion = "1.0.1.7";
         public static MEDIABACKEND Mediabackend = MEDIABACKEND.MEDIAKIT;
 
 
@@ -188,7 +188,7 @@ namespace ssi
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
             control.databaseCMLFusionMenu.Click += databaseCMLFusion_Click;
-            //control.databaseCMLFusionMenuPredict.Click += databaseCMLFusionPredict_Click;
+           // control.databaseCMLFusionMenu.Click += databaseCMLFusionPredict_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
             control.databaseCMLMergeFeaturesMenu.Click += databaseCMLMergeFeatures_Click;
             control.databaseCMLTrainAndPredictMenu.Click += databaseCMLTrainAndPredict_Click;            
