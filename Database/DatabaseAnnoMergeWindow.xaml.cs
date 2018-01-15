@@ -1132,7 +1132,7 @@ namespace ssi
                 }, token);
 
                 Action EmptyDelegate = delegate () { };
-                Stats.Content = "Cronbach's α: " + cronbachalpha.ToString("F3"); 
+                Stats.Content = "Cronbach's α: " + cronbachalpha.ToString("F3");
                 Stats.ToolTip = "Cronbach's α: " + interpretation;
 
                 double spearmancorrelation = double.MaxValue;
@@ -1155,7 +1155,7 @@ namespace ssi
 
                     if (pearsoncorrelation != double.MaxValue)
                     {
-                        Stats.Content = Stats.Content + " | Pearson Correlation r: " + pearsoncorrelation.ToString("F3"); 
+                        Stats.Content = Stats.Content + " | Pearson Correlation r: " + pearsoncorrelation.ToString("F3");
                         Stats.ToolTip = Stats.ToolTip + " | Pearson Correlation r: " + interpretation;
                     }
 
@@ -1268,18 +1268,21 @@ namespace ssi
 
         private void CalculateMergeDiscrete_Click(object sender, RoutedEventArgs e)
         {
-            string restclass = "Rest";
-            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
+            if (AnnotationResultBox.SelectedItems.Count > 1)
+            {
+                string restclass = "Rest";
+                List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+                List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
 
-            if (WeightExpertise.IsChecked == true) //some option
-            {
-                List<AnnoList> multial = multiplyAnnoListsbyExpertise(convertedlists);
-                MergeDiscreteLists(multial, restclass);
-            }
-            else
-            {
-                MergeDiscreteLists(convertedlists, restclass);
+                if (WeightExpertise.IsChecked == true) //some option
+                {
+                    List<AnnoList> multial = multiplyAnnoListsbyExpertise(convertedlists);
+                    MergeDiscreteLists(multial, restclass);
+                }
+                else
+                {
+                    MergeDiscreteLists(convertedlists, restclass);
+                }
             }
         }
 
