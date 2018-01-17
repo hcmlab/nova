@@ -211,11 +211,7 @@ namespace ssi
                         {
                             return;
                         }
-                        if (meta.Server == "")
-                        {
-                            return;
-                        }
-
+     
                         string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\";
 
                         if (meta.UrlFormat == UrlFormat.NEXTCLOUD)
@@ -228,8 +224,19 @@ namespace ssi
                             requiresAuth = meta.ServerAuth;
                         }
 
-                        string[] split = url.Split(':');
-                        string connection = split[0];
+                        string connection = "";
+
+                        if (meta.Server == "")
+                        {
+                            connection = "";
+                        }
+
+                        else
+                        {
+                            string[] split = url.Split(':');
+                            connection = split[0];
+                        }
+                    
 
                         Directory.CreateDirectory(Path.GetDirectoryName(localPath));
 

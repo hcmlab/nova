@@ -43,8 +43,16 @@
                 </StackPanel>
             </RadioButton>
 
+
+            <RadioButton Name="pointRadioButton" GroupName="Scheme" VerticalContentAlignment="Center" Visibility="Collapsed">
+                <StackPanel>
+                    <Label>Create a scheme with geometric points (beta)</Label>
+                    <!--<Image Width="300" Source="/Resources/continuous.png" Margin="0,0,0,5"/>-->
+                </StackPanel>
+            </RadioButton>
+
             <Separator Name="cmlSeparator" Height="20"></Separator>
-            
+
             <RadioButton Name="cmlRadioButton" GroupName="Scheme" VerticalContentAlignment="Center" HorizontalContentAlignment="Stretch">
                 <StackPanel>
                     <Label>Import an existing scheme (from CML folder)</Label>

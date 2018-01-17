@@ -96,6 +96,11 @@ namespace ssi
                     annoType = AnnoScheme.TYPE.CONTINUOUS;
                 }
 
+                else if (pointRadioButton.IsChecked == true)
+                {
+                    annoType = AnnoScheme.TYPE.POINT;
+                }
+
                 Scheme.Type = annoType;
 
                 if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
