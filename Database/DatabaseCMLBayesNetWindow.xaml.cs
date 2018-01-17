@@ -269,12 +269,15 @@ namespace ssi
                     AnnoList list = annoLists[a];
                     newLists.Add(list);
                 }
+
+                history[a] = new string[tempsteps];
+
                 if (roles.Find(n => n == annoLists[a].Meta.Role) == null) roles.Add(annoLists[a].Meta.Role);
             }
 
             for (int a = 0; a < newLists.Count; a++)
             {
-                history[a] = new string[tempsteps];
+               
 
                 if (ishead)
                 {
