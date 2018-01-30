@@ -1128,16 +1128,6 @@ namespace ssi
             RemoveLabelTextBox.IsEnabled = false;
         }
 
-        private void ShowAllSessionsCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            GetSessions();
-        }
-
-        private void ShowAllSessionsCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            GetSessions();
-        }
-
         private void GeneralBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (handleSelectionChanged)

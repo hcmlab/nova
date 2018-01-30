@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -194,6 +195,66 @@ namespace ssi
             }
         }
 
+        private void ImportfromFolder_Click(object sender, RoutedEventArgs e)
+        {
+
+            string path = "";
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
+            dialog.ShowNewFolderButton = true;
+            dialog.Description = "Select the root folder of your sessions.";
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+
+            try
+            {
+                dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
+                result = dialog.ShowDialog();
+
+            }
+
+            catch
+            {
+                dialog.SelectedPath = "";
+                result = dialog.ShowDialog();
+            }
+
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                path = dialog.SelectedPath;
+                DatabaseSession session = new DatabaseSession();
+                DatabaseAdminSessionWindow sessiondialog = new DatabaseAdminSessionWindow(ref session, false);
+                sessiondialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                sessiondialog.ShowDialog();
+
+                if (sessiondialog.DialogResult == true)
+                {
+
+                    foreach (var d in System.IO.Directory.GetDirectories(path))
+                    {
+                        var dir = new DirectoryInfo(d);
+                        var dirName = dir.Name;
+
+                        DatabaseSession newSession = new DatabaseSession()
+                        {
+                            Name = dirName,
+                            Date = session.Date,
+                            Language = session.Language,
+                            Location = session.Location
+                        };
+                        DatabaseHandler.AddSession(newSession);
+                    }
+
+                    GetSessions();
+                }
+
+            }
+
+           
+
+
+        }
+
 
         //private void AddStream_Click(object sender, RoutedEventArgs e)
         //{
@@ -315,7 +376,7 @@ namespace ssi
         //private void GetStreams(DatabaseSession session, string selectedItem = null)
         //{
         //    List<DatabaseStream> streams = DatabaseHandler.GetSessionStreams(session);
-            
+
         //    if (StreamsBox.HasItems)
         //    {
         //        StreamsBox.ItemsSource = null;

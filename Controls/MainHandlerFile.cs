@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 
+
 namespace ssi
 {
     public partial class MainHandler
@@ -98,6 +99,8 @@ namespace ssi
                         break;
 
                     case "wav":
+                    case "mp3":
+                    case "flac":
                         ftype = SSI_FILE_TYPE.AUDIO;
                         break;
 
@@ -139,7 +142,11 @@ namespace ssi
                     break;
 
                 case SSI_FILE_TYPE.AUDIO:
-                    Signal signal = loadWAVSignalFile(filepath, foreground, background);
+
+                    string type = filepath.Substring(index + 1);
+                    Signal signal = null;                    
+                    loadAudioSignalFile(filepath, foreground, background);
+
                     IMedia media = loadMediaFile(filepath, MediaType.AUDIO);                    
                     if (signal != null)
                     {
@@ -374,24 +381,29 @@ namespace ssi
             }
         }
 
-        private Signal loadWAVSignalFile(string filename, Color signalColor, Color backgroundColor)
+
+        private Signal loadAudioSignalFile(string filename, Color signalColor, Color backgroundColor)
         {
+
             if (!File.Exists(filename))
             {
-                MessageTools.Error("Wav file not found '" + filename + "'");
+                MessageTools.Error("Audio file not found '" + filename + "'");
                 return null;
             }
 
-            Signal signal = Signal.LoadWaveFile(filename);
+
+            Signal signal;
+            
+            signal = Signal.LoadAudioFile(filename);            
             if (signal != null && signal.loaded)
             {
                 this.control.signalbar.Height = new GridLength(control.signalAndAnnoGrid.ActualHeight / 2 - 30);
                 this.control.signalstatusbar.Visibility = Visibility.Visible;
                 addSignalTrack(signal, signalColor, backgroundColor);
             }
-
             return signal;
         }
+
 
         private void loadCSVFile(string filename, Color foreground, Color background)
         {

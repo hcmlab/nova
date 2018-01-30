@@ -66,6 +66,15 @@ namespace ssi
             databaseConnect();
         }
 
+        private void databaseUpdate()
+        {
+            DatabaseHandler.UpdateDatabaseLocalLists();
+        }
+
+        private void DatabaseUpdateMenu_Click(object sender, RoutedEventArgs e)
+        {
+            databaseUpdate();
+        }        
 
         private void DatabasePassMenu_Click(object sender, RoutedEventArgs e)
         {
@@ -75,9 +84,6 @@ namespace ssi
             };
 
             blankuser = DatabaseHandler.GetUserInfo(blankuser);
-
-
-
 
             DatabaseUserManageWindow dialog = new DatabaseUserManageWindow(blankuser.Name, blankuser.Fullname, blankuser.Email, blankuser.Expertise);
             dialog.ShowDialog();
@@ -93,10 +99,8 @@ namespace ssi
                     Expertise = dialog.GetExpertise()
                 };
 
-
                 DatabaseHandler.ChangeUserCustomData(user);
-                   
-
+                  
                 if (user.Password != "" && user.Password != null)
                 {
                     if (DatabaseHandler.ChangeUserPassword(user))

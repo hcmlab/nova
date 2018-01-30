@@ -12,16 +12,22 @@ namespace ssi
     {
         private DatabaseSession session;
 
-        public DatabaseAdminSessionWindow(ref DatabaseSession session)
+        public DatabaseAdminSessionWindow(ref DatabaseSession session, bool showname = true)
         {
             InitializeComponent();
 
             this.session = session;
 
+            if(showname == false)
+            {
+                NameField.Visibility = Visibility.Collapsed;
+                NameLabel.Visibility = Visibility.Collapsed;
+            }
+
             NameField.Text = session.Name;
             LanguageField.Text = session.Language;
             LocationField.Text = session.Location;
-            DatePicker.SelectedDate = session.Date;
+            DatePicker.SelectedDate = session.Date.Year == 1 ? DateTime.Today : session.Date;
         }       
 
         public DateTime SessionDate()
@@ -36,7 +42,7 @@ namespace ssi
             session.Name = NameField.Text == "" ? Defaults.Strings.Unkown : NameField.Text;
             session.Language = LanguageField.Text;
             session.Location = LocationField.Text;
-            session.Date = DatePicker.SelectedDate != null ? DatePicker.SelectedDate.Value : new DateTime();
+            session.Date = DatePicker.SelectedDate.Value;
 
             DialogResult = true;
             Close();
