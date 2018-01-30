@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
+        xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
         Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
 
     <Window.Resources>
@@ -61,7 +62,7 @@
                 <Label Grid.Row="0">Schemes</Label>
                 <ListBox Name="SchemesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="1" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
                 <Label Grid.Row="2">Roles</Label>
-                <ListBox Name="RolesBox" SelectionChanged="Annotations_SelectionChanged" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
+                <ListBox Name="RolesBox" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
                 <Label Grid.Row="4">Annotators</Label>
                 <ListBox Name="AnnotatorsBox" SelectionChanged="Annotations_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
                 <Button Content="ADD" Height="20" Click="AddItemButton_Click"  BorderThickness="0" Background="Transparent" HorizontalAlignment="Right" Grid.Row="6" />
@@ -95,6 +96,16 @@
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Annotator" />
                                 </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="140" Header="Classes">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <p:TextBoxEx Text="{Binding Classes}" IsEnabled="true" Width="100" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
@@ -144,7 +155,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Bayesian Network</Label>
-                <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"  ></ComboBox>
+                <ComboBox Name="NetworkSelectionBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"  ></ComboBox>
 
             </Grid>
 
@@ -180,19 +191,17 @@
                     <CheckBox Name="discretisizeeckbox" Checked="discretisizeeckbox_Checked"  Unchecked="discretisizeeckbox_Unchecked" Grid.Row="2" Grid.Column="1" Height="20" IsChecked="True"></CheckBox>
 
 
-                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Classes for discretizing</Label>
-                    <TextBox Name="classesbox" Text="VERYLOW;LOW;MEDIUM;HIGH;VERYHIGH" Grid.Row="3" Grid.Column="1" Height="20"></TextBox>
+                 
 
 
+                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Number of history frames</Label>
+                    <TextBox Name="timestepsbox" Text="0" Grid.Row="3" Grid.Column="1" Height="20"></TextBox>
 
-                    <Label Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Number of history frames</Label>
-                    <TextBox Name="timestepsbox" Text="0" Grid.Row="4" Grid.Column="1" Height="20"></TextBox>
+                    <Label Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Nodes in format: role__scheme</Label>
+                    <CheckBox Name="rolecheckbox" Grid.Row="4" Grid.Column="1" Height="20" Checked="rolecheckbox_Checked" Unchecked="rolecheckbox_Unchecked" IsChecked="False"></CheckBox>
 
-                    <Label Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Only applies for continous annotations">Nodes in format: role__scheme</Label>
-                    <CheckBox Name="rolecheckbox" Grid.Row="5" Grid.Column="1" Height="20" Checked="rolecheckbox_Checked" Unchecked="rolecheckbox_Unchecked" IsChecked="True"></CheckBox>
-
-                    <Label Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"  Width="130" ToolTip="Only applies for continous annotations">Store role in column</Label>
-                    <CheckBox Name="writerolecheckbox" Grid.Row="5" Grid.Column="1"  HorizontalAlignment="Right" Height="20" IsChecked="True"></CheckBox>
+                    <Label Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"  Width="130" ToolTip="Only applies for continous annotations">Store role in column</Label>
+                    <CheckBox Name="writerolecheckbox" Grid.Row="4" Grid.Column="1"  HorizontalAlignment="Right" Height="20" IsChecked="True"></CheckBox>
 
 
                     <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="6" Grid.Column="2" VerticalAlignment="Center"></Label>
@@ -201,37 +210,7 @@
 
             </GroupBox>
 
-            <GroupBox Name="PredictOptionsPanel" Grid.Row="4" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Predict">
-
-                <Grid>
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"></RowDefinition>
-                        <RowDefinition Height="25"></RowDefinition>
-                        <RowDefinition Height="25"></RowDefinition>
-                    </Grid.RowDefinitions>
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-
-                    <CheckBox Name="FillGapCheckBox" Grid.Row="0" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="FillGapCheckBox_Checked" Unchecked="FillGapCheckBox_Unchecked">Fill gaps (s)</CheckBox>
-                    <TextBox Name="FillGapTextBox" Grid.Row="0" Grid.Column="1"  Height="20">0.5</TextBox>
-
-                    <CheckBox Name="RemoveLabelCheckBox" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="RemoveLabelCheckBox_Checked" Unchecked="RemoveLabelCheckBox_Unchecked">Remove (s)</CheckBox>
-                    <TextBox Name="RemoveLabelTextBox" Grid.Row="1" Grid.Column="1"  Height="20">0.15</TextBox>
-
-                    <CheckBox Name="ConfidenceCheckBox" Grid.Row="2" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="ConfidenceCheckBox_Checked" Unchecked="ConfidenceCheckBox_Unchecked">Confidence</CheckBox>
-                    <TextBox Name="ConfidenceTextBox" Grid.Row="2" Grid.Column="1"  Height="20">-1.0</TextBox>
-
-                    <Label Name="HelpPredictLabel" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
-
-                </Grid>
-
-            </GroupBox>
-
+      
             <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" LastChildFill="False">
 
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">

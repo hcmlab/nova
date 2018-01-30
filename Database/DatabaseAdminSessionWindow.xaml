@@ -21,7 +21,7 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Label Content="Name:" Grid.Row="0" Grid.Column="0"></Label>
+        <Label Name="NameLabel" Content="Name:" Grid.Row="0" Grid.Column="0"></Label>
         <TextBox Name="NameField" Text="" Grid.Row="0" Grid.Column="1" Margin="5"/>
 
         <Label Content="Language:" Grid.Row="1" Grid.Column="0"></Label>

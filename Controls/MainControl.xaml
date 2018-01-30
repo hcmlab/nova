@@ -46,8 +46,8 @@
                     <MenuItem Header="Manage Annotations" Name="databaseManageAnnotationsMenu" />
                 </MenuItem>
                 <MenuItem Header="Manage Account" Name="databasePasswordMenu" />
+                <MenuItem Header="Update" Name="databaseUpdateMenu" />
                 <MenuItem Header="Connect" Name="databaseConnectMenu" />
-
 
             </MenuItem>
             <MenuItem Header="ANNOTATION">
@@ -72,8 +72,10 @@
                 <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
                 <MenuItem Header="Train and Predict" Name="databaseCMLTrainAndPredictMenu"/>
                 <MenuItem Header="Fusion" Name="fusionmenu">
-                    <MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenu"/>
-                    <!--<MenuItem Header="Train Bayesian Network" Name="databaseCMLFusionMenuPredict"/>-->
+                    <MenuItem Header="Bayesian Networks" Name="bnmenu">
+                        <MenuItem Header="Train" Name="databaseCMLFusionMenu"/>
+                    <MenuItem Header="Predict" Name="databaseCMLFusionMenuPredict"/>
+                    </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>

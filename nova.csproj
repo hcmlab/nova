@@ -74,6 +74,9 @@
     <Reference Include="MongoDB.Driver.GridFS">
       <HintPath>References\MongoDB.Driver.GridFS.dll</HintPath>
     </Reference>
+    <Reference Include="NAudio">
+      <HintPath>References\NAudio.dll</HintPath>
+    </Reference>
     <Reference Include="Octokit">
       <HintPath>References\Octokit.dll</HintPath>
     </Reference>

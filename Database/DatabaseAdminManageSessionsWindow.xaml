@@ -39,6 +39,7 @@
                 <Button Style="{StaticResource MyButton}" Name="DeleteSession" Content="REM" Click="DeleteSession_Click" />
                 <Button Style="{StaticResource MyButton}" Name="EditSession" Content="EDIT" Click="EditSession_Click" />
                 <Button Style="{StaticResource MyButton}" Name="CopySession" Content="COPY" Click="CopySession_Click" />
+                <Button Style="{StaticResource MyButton}" Name="ImportfromFolder" Content="IMPORT" Click="ImportfromFolder_Click" />
             </StackPanel>
             <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" >
                 <ListView.View>

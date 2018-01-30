@@ -526,5 +526,41 @@ namespace ssi.Properties {
                 this["DBHideMissingStreams"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CMLDefaultChain {
+            get {
+                return ((string)(this["CMLDefaultChain"]));
+            }
+            set {
+                this["CMLDefaultChain"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CMLDefaultAnnotatorPrediction {
+            get {
+                return ((string)(this["CMLDefaultAnnotatorPrediction"]));
+            }
+            set {
+                this["CMLDefaultAnnotatorPrediction"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SettingCMLDefaultBN {
+            get {
+                return ((string)(this["SettingCMLDefaultBN"]));
+            }
+            set {
+                this["SettingCMLDefaultBN"] = value;
+            }
+        }
     }
 }

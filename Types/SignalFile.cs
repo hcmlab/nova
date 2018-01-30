@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Xml;
+using NAudio.Wave;
 
 namespace ssi
 {
@@ -133,11 +134,11 @@ namespace ssi
                 XmlNode node = null;
 
                 node = doc.SelectSingleNode("//info");
-                string ftype_s = node.Attributes["ftype"].Value;
+                string ftype_s = node.Attributes["ftype"].Value.ToUpper();
                 signal.rate = double.Parse(node.Attributes["sr"].Value);
                 signal.dim = uint.Parse(node.Attributes["dim"].Value);
                 signal.bytes = uint.Parse(node.Attributes["byte"].Value);                
-                string type_s = node.Attributes["type"].Value;
+                string type_s = node.Attributes["type"].Value.ToUpper();
                 for (uint i = 0; i < TypeName.Length; i++)
                 {
                     if (type_s == TypeName[i])
@@ -478,60 +479,31 @@ namespace ssi
             return true;
         }
 
-        public static Signal LoadWaveFile(string filepath)
-        {
-            WavHeader Header = new WavHeader();
-            Signal signal = null;
-            using (FileStream fs = new FileStream(filepath, FileMode.Open, FileAccess.Read))
 
-            using (BinaryReader br = new BinaryReader(fs))
+
+        public static Signal LoadAudioFile(string filepath)
+        {
+            Signal signal = null;
+            using (var reader = new AudioFileReader(filepath))
             {
                 try
-                {
-                    Header.riffID = br.ReadBytes(4);
-                    Header.size = br.ReadUInt32();
-                    Header.wavID = br.ReadBytes(4);
-                    Header.fmtID = br.ReadBytes(4);
-                    Header.fmtSize = br.ReadUInt32();
-                    Header.format = br.ReadUInt16();
-                    Header.channels = br.ReadUInt16();
-                    Header.sampleRate = br.ReadUInt32();
-                    Header.bytePerSec = br.ReadUInt32();
-                    Header.blockSize = br.ReadUInt16();
-                    Header.bit = br.ReadUInt16();
-                    Header.dataID = br.ReadBytes(4);
+                {                
+                    int bytesPerSample = (reader.WaveFormat.BitsPerSample / 8);
+                    var samples = (uint) (reader.Length / (bytesPerSample));
+                    var seconds = reader.TotalTime.TotalSeconds;
+                    double rate = reader.WaveFormat.SampleRate;
+                    uint dimension =  (uint) reader.WaveFormat.Channels;
 
-                    /*Check if Headerfile starts with data description or list */
-                    if(Header.dataID[0] == 76 && Header.dataID[1] == 73 && Header.dataID[2] == 83  && Header.dataID[3] == 84)
+                    Signal.Type type = (bytesPerSample == 2)  ? Signal.Type.SHORT : Signal.Type.FLOAT;
+                    signal = new Signal(filepath, rate, dimension, (uint) bytesPerSample, samples, type);
+                 
+                    byte[] bytesBuffer = new byte[reader.Length];                    
+                    int read = reader.Read(bytesBuffer, 0, bytesBuffer.Length);
+                    for (int sampleIndex = 0; sampleIndex < samples * dimension; sampleIndex++)
                     {
-                       uint offset = br.ReadUInt32();
-                       br.ReadBytes((int)offset);
-                       Header.dataID = br.ReadBytes(4);
-             
-                    }
-
-                    Header.dataSize = br.ReadUInt32();
-                    
-
-                    double rate = Header.sampleRate;
-                    uint dimension = Header.channels;
-                    uint samples = Header.dataSize / Header.blockSize;
-
-                    signal = new Signal(filepath, rate, dimension, 2, samples, Signal.Type.FLOAT);
-
-                    if (Header.bit == 16)
-                    {
-                        for (int i = 0; i < samples * dimension; i++)
-                        {
-                            signal.data[i] = ((float)br.ReadInt16()) / 32768.0f;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < samples * dimension; i++)
-                        {
-                            signal.data[i] = br.ReadSingle();
-                        }
+                        //var intSampleValue = (float) BitConverter.ToInt32(bytesBuffer, sampleIndex);
+                        // signal.data[sampleIndex] = (float) (intSampleValue / 32768.0f);
+                        signal.data[sampleIndex] = BitConverter.ToSingle(bytesBuffer, sampleIndex * bytesPerSample);
                     }
 
                     signal.minmax();
@@ -542,18 +514,90 @@ namespace ssi
                 {
                     MessageTools.Error(e.ToString());
                 }
-                if (br != null)
-                {
-                    br.Close();
-                }
-                if (fs != null)
-                {
-                    fs.Close();
-                }
+              
             }
 
             return signal;
         }
+
+
+
+        //public static Signal LoadWaveFile(string filepath)
+        //{
+        //    WavHeader Header = new WavHeader();
+        //    Signal signal = null;
+        //    using (FileStream fs = new FileStream(filepath, FileMode.Open, FileAccess.Read))
+
+        //    using (BinaryReader br = new BinaryReader(fs))
+        //    {
+        //        try
+        //        {
+        //            Header.riffID = br.ReadBytes(4);
+        //            Header.size = br.ReadUInt32();
+        //            Header.wavID = br.ReadBytes(4);
+        //            Header.fmtID = br.ReadBytes(4);
+        //            Header.fmtSize = br.ReadUInt32();
+        //            Header.format = br.ReadUInt16();
+        //            Header.channels = br.ReadUInt16();
+        //            Header.sampleRate = br.ReadUInt32();
+        //            Header.bytePerSec = br.ReadUInt32();
+        //            Header.blockSize = br.ReadUInt16();
+        //            Header.bit = br.ReadUInt16();
+        //            Header.dataID = br.ReadBytes(4);
+
+        //            /*Check if Headerfile starts with data description or list */
+        //            if(Header.dataID[0] == 76 && Header.dataID[1] == 73 && Header.dataID[2] == 83  && Header.dataID[3] == 84)
+        //            {
+        //               uint offset = br.ReadUInt32();
+        //               br.ReadBytes((int)offset);
+        //               Header.dataID = br.ReadBytes(4);
+             
+        //            }
+
+        //            Header.dataSize = br.ReadUInt32();
+                    
+
+        //            double rate = Header.sampleRate;
+        //            uint dimension = Header.channels;
+        //            uint samples = Header.dataSize / Header.blockSize;
+
+        //            signal = new Signal(filepath, rate, dimension, 4, samples, Signal.Type.FLOAT);
+
+        //            if (Header.bit == 16)
+        //            {
+        //                for (int i = 0; i < samples * dimension; i++)
+        //                {
+        //                    signal.data[i] = ((float)br.ReadInt16()) / 32768.0f;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                for (int i = 0; i < samples * dimension; i++)
+        //                {
+        //                    signal.data[i] = br.ReadSingle();
+        //                }
+        //            }
+
+        //            signal.minmax();
+        //            signal.isAudio = true;
+        //            signal.loaded = true;
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            MessageTools.Error(e.ToString());
+        //        }
+        //        if (br != null)
+        //        {
+        //            br.Close();
+        //        }
+        //        if (fs != null)
+        //        {
+        //            fs.Close();
+        //        }
+        //    }
+
+        //    return signal;
+        //}
 
         #endregion
 

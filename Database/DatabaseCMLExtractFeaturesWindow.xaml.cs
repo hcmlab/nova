@@ -24,6 +24,8 @@ namespace ssi
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
+        private bool handleSelectionChanged = false;
+
         public class Chain
         {
             public string Path { get; set; }
@@ -69,112 +71,13 @@ namespace ssi
             }
 
             GetDatabases(DatabaseHandler.DatabaseName);
-            GetStreams();
-            GetRoles();
 
-            Update();
-        }
-
-        private void Done_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
-            Close();
-        }
-
-        private void UpdateFeatureName()
-        {
-            string name = "";
-
-            if (mode == Mode.MERGE)
-            {
-                var streams = StreamsBox.SelectedItems;
-
-                string streamList = "";
-                HashSet<string> mediaNames = new HashSet<string>();
-                HashSet<string> featureNames = new HashSet<string>();
-                double sampleRate = 0;
-                foreach (DatabaseStream stream in streams)
-                {
-                    string[] tokens = stream.Name.Split(new char[] { '.' }, 2);
-                    mediaNames.Add(tokens[0]);
-                    if (tokens.Length > 1)
-                    {
-                        featureNames.Add(tokens[1]);
-                    }
-
-                    if (streamList == "")
-                    {
-                        sampleRate = stream.SampleRate;
-                        streamList = stream.Name;
-                    }
-                    else
-                    {
-                        streamList += ";" + stream.Name;
-                    }
-                }
-
-                string[] arrmedias;
-                arrmedias = mediaNames.ToArray();
-                Array.Sort(arrmedias);
-                mediaNames.Clear();
-                mediaNames.UnionWith(arrmedias);
-
-                string medias = "";
-                foreach (string media in mediaNames)
-                {
-                    if (medias == "")
-                    {
-                        medias = media;
-                    }
-                    else
-                    {
-                        medias += "+" + media;
-                    }
-                }
-
-                string[] arrstreams;
-                arrstreams = featureNames.ToArray();
-                Array.Sort(arrstreams);
-                featureNames.Clear();
-                featureNames.UnionWith(arrstreams);
-
-                string features = "";
-                foreach (string feature in featureNames)
-                {
-                    if (features == "")
-                    {
-                        features = feature;
-                    }
-                    else
-                    {
-                        features += "+" + feature;
-                    }
-                }
-                
-                name = medias + "." + features;
-            }
-            else
-            {
-                if (ChainPathComboBox.SelectedItem != null && StreamsBox.SelectedItem != null)
-                {
-                    DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
-                    Chain chain = (Chain)ChainPathComboBox.SelectedItem;
-
-                    string leftContext = LeftContextTextBox.Text;
-                    string frameStep = FrameStepTextBox.Text;
-                    string rightContext = RightContextTextBox.Text;
-                    string streamMeta = "[" + leftContext + "," + frameStep + "," + rightContext + "]";
-                    
-                    name = stream.Name + "." + chain.Name + streamMeta;;
-                }
-            }
-            
-            FeatureNameTextBox.Text = name;
+            handleSelectionChanged = true;
         }
 
         private void Extract()
         {
-            if (ChainPathComboBox.SelectedItem == null)
+            if (ChainsBox.SelectedItem == null)
             {
                 MessageTools.Warning("select a chain first");
                 return;
@@ -187,7 +90,7 @@ namespace ssi
                 return;
             }
 
-            Chain chain = (Chain)ChainPathComboBox.SelectedItem;
+            Chain chain = (Chain)ChainsBox.SelectedItem;
             bool force = ForceCheckBox.IsChecked.Value;
 
             if (!File.Exists(chain.Path))
@@ -219,15 +122,15 @@ namespace ssi
                 {
                     foreach (DatabaseSession session in sessions)
                     {
-                        foreach (string role in roles)
+                        foreach (DatabaseRole role in roles)
                         {
                             string fromPath = Properties.Settings.Default.DatabaseDirectory + "\\"
                             + database + "\\"
                             + session.Name + "\\"
-                            + role + "." + stream.Name + "." + stream.FileExt;
+                            + role.Name + "." + stream.Name + "." + stream.FileExt;
 
                             string toPath = Path.GetDirectoryName(fromPath) + "\\"
-                            + role + "." + featureName + ".stream";
+                            + role.Name + "." + featureName + ".stream";
 
                             if (force || !File.Exists(toPath))
                             {
@@ -246,7 +149,7 @@ namespace ssi
 
             // start feature extraction
 
-            Chain selectedChain = (Chain)ChainPathComboBox.SelectedItem;
+            Chain selectedChain = (Chain)ChainsBox.SelectedItem;
             DatabaseStream selectedStream = (DatabaseStream)StreamsBox.SelectedItem;
 
             if (nFiles > 0)
@@ -272,11 +175,11 @@ namespace ssi
             File.Delete(tempOutListPath);
 
             GetStreams(selectedStream);
-            foreach (Chain item in ChainPathComboBox.Items)
+            foreach (Chain item in ChainsBox.Items)
             {
                 if (item.Name == selectedChain.Name)
                 {
-                    ChainPathComboBox.SelectedItem = item;
+                    ChainsBox.SelectedItem = item;
                     break;
                 }
             }
@@ -296,7 +199,7 @@ namespace ssi
 
             var sessions = SessionsBox.SelectedItems;
             var roles = RolesBox.SelectedItems;
-            var streams = StreamsBox.SelectedItems;
+            var streams = StreamsBox.SelectedItems;         
             bool force = ForceCheckBox.IsChecked.Value;
 
             string sessionList = "";
@@ -325,18 +228,25 @@ namespace ssi
                 }
             }
 
-            string streamList = "";
-            double sampleRate = 0;
+            string[] streamsNames = new string[streams.Count];
+            int i = 0;
             foreach (DatabaseStream stream in streams)
             {
+                streamsNames[i++] = stream.Name;
+            }            
+            Array.Sort(streamsNames);
+
+            string streamList = "";
+            double sampleRate = ((DatabaseStream)streams[0]).SampleRate;
+            foreach (string stream in streamsNames)
+            {
                 if (streamList == "")
-                {
-                    sampleRate = stream.SampleRate;
-                    streamList = stream.Name;
+                {                    
+                    streamList = stream;
                 }
                 else
                 {
-                    streamList += ";" + stream.Name;
+                    streamList += ";" + stream;
                 }
             }
 
@@ -351,18 +261,6 @@ namespace ssi
             DatabaseHandler.AddStream(streamType);
 
             GetStreams(streamType);
-        }
-
-        private void ExtractOrMerge_Click(object sender, RoutedEventArgs e)
-        {
-            if (mode == Mode.MERGE)
-            {
-                Merge();
-            }
-            else
-            {
-                Extract();
-            }            
         }
 
         private double frameStepToSampleRate(string frameStep, double oldSampleRate)
@@ -393,21 +291,13 @@ namespace ssi
             return sr;
         }
 
-        private void Select(ListBox list, string select)
-        {
-            if (select != null)
-            {
-                foreach (string item in list.Items)
-                {
-                    if (item == select)
-                    {
-                        list.SelectedItem = item;
-                    }
-                }
-            }
-        }
 
-        public void GetDatabases(string selectedItem = null)
+
+
+
+        #region Getter
+
+        public void GetDatabases(string select = null)
         {
             DatabasesBox.Items.Clear();
 
@@ -418,43 +308,27 @@ namespace ssi
                 DatabasesBox.Items.Add(db);
             }
 
-            Select(DatabasesBox, selectedItem);
-        }
-
-        private void DatabaseResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (DatabasesBox.SelectedItem != null)
+            if (select != null)
             {
-                string name = DatabasesBox.SelectedItem.ToString();
-                DatabaseHandler.ChangeDatabase(name);
-                GetSessions();
-                GetStreams();
-                GetRoles();
+                foreach (string item in DatabasesBox.Items)
+                {
+                    if (item == select)
+                    {
+                        DatabasesBox.SelectedItem = item;
+                    }
+                }
             }
-
-            Update();
         }
 
         public void GetSessions()
-        {            
-            if (SessionsBox.HasItems)
-            {
-                SessionsBox.ItemsSource = null;
-            }
-
-            List<DatabaseSession> items = DatabaseHandler.Sessions;            
-            SessionsBox.ItemsSource = items;      
-
-            if (SessionsBox.HasItems)
-            {
-                SessionsBox.SelectedIndex = 0;
-            }
-        } 
-
-        private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Update();
-        }    
+            if (RolesBox.SelectedItem == null)
+            {
+                return;
+            }
+
+            SessionsBox.ItemsSource = DatabaseHandler.Sessions;
+        } 
 
         private void GetStreams(DatabaseStream selected = null)
         {
@@ -479,39 +353,120 @@ namespace ssi
                 }
             }
 
+            List<DatabaseStream> selectedStreams = null;
+            if (mode == Mode.MERGE)
+            {
+                selectedStreams = new List<DatabaseStream>();
+                foreach (DatabaseStream s in StreamsBox.SelectedItems)
+                {
+                    selectedStreams.Add(s);
+                }                
+            }
+
             if (StreamsBox.HasItems)
             {
                 StreamsBox.ItemsSource = null;
             }            
 
             StreamsBox.ItemsSource = streamsValid;
-            if (StreamsBox.HasItems)
-            {                
-                StreamsBox.SelectedIndex = 0;
+
+            if (mode == Mode.MERGE && selectedStreams != null)
+            {
+                foreach (DatabaseStream s in selectedStreams)
+                {
+                    StreamsBox.SelectedItems.Add(s);
+                }
+            }
+
+            if (mode == Mode.EXTRACT && StreamsBox.Items.Count > 0)
+            {
+                DatabaseStream stream = ((List<DatabaseStream>)StreamsBox.ItemsSource).Find(s => s.Name == Properties.Settings.Default.CMLDefaultStream);
+                if (stream != null)
+                {
+                    StreamsBox.SelectedItem = stream;
+                }
+                if (StreamsBox.SelectedItem == null)
+                {
+                    StreamsBox.SelectedIndex = 0;
+                }
                 if (selected != null)
                 {
                     StreamsBox.SelectedItem = selected;
                 }
-            }
+                StreamsBox.ScrollIntoView(StreamsBox.SelectedItem);
+            }            
         }
 
         public void GetRoles()
         {
-            RolesBox.Items.Clear();
+            RolesBox.ItemsSource = DatabaseHandler.Roles;
 
-            foreach (DatabaseRole item in DatabaseHandler.Roles)
+            if (RolesBox.Items.Count > 0)
             {
-                if (item.HasStreams)
+                string[] items = Properties.Settings.Default.CMLDefaultRole.Split(';');
+                foreach (string item in items)
                 {
-                    RolesBox.Items.Add(item.Name);
+                    DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == item);
+                    if (role != null)
+                    {
+                        RolesBox.SelectedItems.Add(role);
+                    }
+                }
+                if (RolesBox.SelectedItem == null)
+                {
+                    RolesBox.SelectAll();
+                }
+
+                RolesBox.ScrollIntoView(RolesBox.SelectedItem);
+            }
+        }
+
+        public void GetChains()
+        {
+            ChainsBox.Items.Clear();
+
+            if (StreamsBox.SelectedItem != null)
+            {
+                DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
+
+                List<Chain> chains = getChains(stream);
+                foreach (Chain chain in chains)
+                {
+                    ChainsBox.Items.Add(chain);
                 }
             }
 
-            if (SessionsBox.HasItems)
+            if (ChainsBox.Items.Count > 0)
             {
-                RolesBox.SelectAll();
-                //RolesBox.SelectedItem = Properties.Settings.Default.CMLDefaultRole;
-            }         
+                Chain chain = null;
+
+                foreach (Chain c in ChainsBox.Items)
+                {
+                    if (c.Name == Properties.Settings.Default.CMLDefaultChain)
+                    {
+                        chain = c;
+                        break;
+                    }
+                }
+                                
+                if (chain != null)
+                {
+                    ChainsBox.SelectedItem = chain;
+                }
+                if (ChainsBox.SelectedItem == null)
+                {
+                    ChainsBox.SelectedIndex = 0;
+                }
+            }
+
+            if (ChainsBox.SelectedItem != null)            
+            {
+                Chain chain = (Chain)ChainsBox.SelectedItem;
+                ChainPathLabel.Content = chain.Path;
+                LeftContextTextBox.Text = chain.LeftContext;
+                FrameStepTextBox.Text = chain.FrameStep;
+                RightContextTextBox.Text = chain.RightContext;
+            }            
         }
 
         private bool parseChainFile(ref Chain chain)
@@ -579,43 +534,26 @@ namespace ssi
             return chains;
         }
 
-        private void StreamsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ChainPathComboBox.Items.Clear();
+        #endregion
 
-            if (StreamsBox.SelectedItem != null)
-            {
-                DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
-
-                List<Chain> chains = getChains(stream);
-                foreach(Chain chain in chains)
-                { 
-                    ChainPathComboBox.Items.Add(chain);                     
-                }
-            }
-
-            if (ChainPathComboBox.Items.Count > 0)
-            {
-                ChainPathComboBox.SelectedIndex = 0;                
-            }
-
-            Update();         
-        }
-
-        private void ChainPathComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (ChainPathComboBox.SelectedItem != null)
-            {
-                Chain chain = (Chain) ChainPathComboBox.SelectedItem;
-                ChainPathLabel.Content = chain.Path;
-                LeftContextTextBox.Text = chain.LeftContext;
-                FrameStepTextBox.Text = chain.FrameStep;
-                RightContextTextBox.Text = chain.RightContext;
-            }
-        }
-
+        #region Update
 
         private void Update()
+        {
+            SaveDefaults();
+
+            GetRoles();            
+            GetStreams();
+            GetSessions();
+            if (mode != Mode.MERGE)
+            {
+                GetChains();
+            }
+
+            UpdateGUI();
+        }
+
+        private void UpdateGUI()
         {
             bool enable = false;
 
@@ -635,18 +573,18 @@ namespace ssi
                             if (sr != ((DatabaseStream)StreamsBox.SelectedItems[i]).SampleRate)
                             {
                                 enable = false;
-                                break; 
+                                break;
                             }
                         }
-                    }                   
+                    }
                 }
                 else
                 {
-                    enable = ChainPathComboBox.Items.Count > 0;
+                    enable = ChainsBox.Items.Count > 0;
                 }
             }
 
-            ChainPathComboBox.IsEnabled = enable;
+            ChainsBox.IsEnabled = enable;
             ForceCheckBox.IsEnabled = enable;
             ExtractButton.IsEnabled = enable;
             LeftContextTextBox.IsEnabled = enable;
@@ -654,16 +592,177 @@ namespace ssi
             RightContextTextBox.IsEnabled = enable;
             FeatureNameTextBox.IsEnabled = enable;
 
-            UpdateFeatureName();           
+            UpdateFeatureName();
+        }
+
+        private void SaveDefaults()
+        {
+            if (RolesBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultRole = "";
+                foreach (DatabaseRole item in RolesBox.SelectedItems)
+                {
+                    Properties.Settings.Default.CMLDefaultRole += item.Name + ";";
+                }
+            }
+
+            if (mode != Mode.MERGE && StreamsBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultStream = ((DatabaseStream)StreamsBox.SelectedItem).Name;
+            }
+
+            if (mode != Mode.MERGE && ChainsBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultChain = ((Chain)ChainsBox.SelectedItem).Name;
+            }
+
+            Properties.Settings.Default.Save();
+        }
+
+        private void UpdateFeatureName()
+        {
+            string name = "";
+
+            if (mode == Mode.MERGE)
+            {
+                var streams = StreamsBox.SelectedItems;
+
+                string streamList = "";
+                HashSet<string> sourceNames = new HashSet<string>();
+                HashSet<string> featureNames = new HashSet<string>();
+                double sampleRate = 0;
+                foreach (DatabaseStream stream in streams)
+                {
+                    string[] tokens = stream.Name.Split(new char[] { '.' }, 2);
+                    sourceNames.Add(tokens[0]);
+                    if (tokens.Length > 1)
+                    {
+                        featureNames.Add(tokens[1]);
+                    }
+
+                    if (streamList == "")
+                    {
+                        sampleRate = stream.SampleRate;
+                        streamList = stream.Name;
+                    }
+                    else
+                    {
+                        streamList += ";" + stream.Name;
+                    }
+                }
+
+                string[] sourceArray;
+                sourceArray = sourceNames.ToArray();
+                Array.Sort(sourceArray);
+                sourceNames.Clear();
+                sourceNames.UnionWith(sourceArray);
+
+                string medias = "";
+                foreach (string media in sourceNames)
+                {
+                    if (medias == "")
+                    {
+                        medias = media;
+                    }
+                    else
+                    {
+                        medias += "+" + media;
+                    }
+                }
+
+                string[] featureStreams;
+                featureStreams = featureNames.ToArray();
+                Array.Sort(featureStreams);
+                featureNames.Clear();
+                featureNames.UnionWith(featureStreams);
+
+                string features = "";
+                foreach (string feature in featureNames)
+                {
+                    if (features == "")
+                    {
+                        features = feature;
+                    }
+                    else
+                    {
+                        features += "+" + feature;
+                    }
+                }
+
+                name = medias + "." + features;
+            }
+            else
+            {
+                if (StreamsBox.SelectedItem != null & ChainsBox.SelectedItem != null && StreamsBox.SelectedItem != null)
+                {
+                    DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
+                    Chain chain = (Chain)ChainsBox.SelectedItem;
+
+                    string leftContext = LeftContextTextBox.Text;
+                    string frameStep = FrameStepTextBox.Text;
+                    string rightContext = RightContextTextBox.Text;
+                    string streamMeta = "[" + leftContext + "," + frameStep + "," + rightContext + "]";
+
+                    name = stream.Name + "." + chain.Name + streamMeta; ;
+                }
+            }
+
+            FeatureNameTextBox.Text = name;
+        }
+
+        #endregion
+
+        #region User
+
+        private void ExtractOrMerge_Click(object sender, RoutedEventArgs e)
+        {
+            if (mode == Mode.MERGE)
+            {
+                Merge();
+            }
+            else
+            {
+                Extract();
+            }
+        }
+
+        private void GenericTextChanged(object sender, TextChangedEventArgs e)
+        {
+            UpdateFeatureName();
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if(e.Key == Key.Escape)
+            if (e.Key == Key.Escape)
             {
                 Close();
             }
         }
+
+        private void GeneralBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (handleSelectionChanged)
+            {
+                handleSelectionChanged = false;
+                Update();
+                handleSelectionChanged = true;
+            }
+        }
+
+        private void DatabaseResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DatabasesBox.SelectedItem != null)
+            {
+                string name = DatabasesBox.SelectedItem.ToString();
+                DatabaseHandler.ChangeDatabase(name);                
+            }
+
+            Update();
+        }
+
+        #endregion
+
+        #region Helper
 
         private void SortListView(object sender, RoutedEventArgs e)
         {
@@ -723,9 +822,7 @@ namespace ssi
             }
         }
 
-        private void GenericTextChanged(object sender, TextChangedEventArgs e)
-        {
-            UpdateFeatureName();
-        }
+        #endregion
+
     }
 }

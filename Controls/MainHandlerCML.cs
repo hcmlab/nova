@@ -41,7 +41,7 @@ namespace ssi
         private void databaseCMLFusionStep()
         {
             saveSelectedAnno(true);
-            DatabaseCMLBayesNetWindow dialog = new DatabaseCMLBayesNetWindow(this, DatabaseCMLBayesNetWindow.Mode.TRAIN);
+            DatabaseCMLBayesNetWindow dialog = new DatabaseCMLBayesNetWindow(this);
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.ShowDialog();
         }
@@ -50,7 +50,7 @@ namespace ssi
         private void databaseCMLFusionPredictStep()
         {
             saveSelectedAnno(true);
-            DatabaseCMLFusionPredictWindow dialog = new DatabaseCMLFusionPredictWindow(this, DatabaseCMLFusionPredictWindow.Mode.TRAIN);
+            DatabaseCMLFusionPredictWindow dialog = new DatabaseCMLFusionPredictWindow(this);
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.ShowDialog();
         }
@@ -287,53 +287,52 @@ namespace ssi
             return runCMLTool("cmltrain", "forward", parameters, arguments, "cml-predict");            
         }
 
-        public string CMLPredictFusion(string trainerPaths,
-          string datapath,
+        public string CMLPredictBayesFusion(string node,
+          string sessionpath,
+          string schemespath,
           string server,
           string username,
           string password,
+          string datapath,
           string database,
-          string sessions,
-          string schemes,
+          string outputscheme,
           string roles,
-          string annotators,
-          string streams,
-          string leftContext,
-          string rightContext,
-          double confidence,
-          double minGap,
-          double minDur,
-          bool complete,
-          string netpath,
-          string outputprediction)
+          string outputannotator,
+          bool tocontinuous,
+          string netpath, float filter)
         {
             string result = "";
 
             string[] split = server.Split(':');
             string ip = split[0];
             string port = split[1];
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\cml-fusion.log";
+            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\" + "cml-fusion.log";
 
             File.Delete(logPath);
+
+            string cont = (tocontinuous == true) ? "true" : "false";
+            string filt = ((filter != -1.0f)  ?  "-filter " + filter : "");
 
 
             try
             {
                 string options_no_pass = " -username " + username +
-                        " -list " + sessions +
+                        " -node " + node +
                         " -log \"" + logPath + "\"" +
-                        " -netpath " + "\"" + netpath + "\"";
+                        " -netpath " + "\"" + netpath + "\" " + filt;
                 string options = options_no_pass + " -password " + password;
-                string arguments = "\"" + datapath + "\\" + database + "\" " +
+                string arguments = "\"" + sessionpath + "\" " +
+                      "\"" + schemespath + "\" " +
+                      "\"" + datapath + "\\" + database + "\" " +
                       ip + " " +
                       port + " " +
                       database + " " +
                       roles + " " +
-                      schemes + " " +
-                      annotators + " " +
-                      "\"" + streams + "\" " +
-                      "\"" + trainerPaths + "\" " +
-                      "\"" + outputprediction + "\"";
+                      outputannotator + " " +
+                      outputscheme + " " +
+                      cont;
+
+
 
                 Process process = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo();

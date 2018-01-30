@@ -51,7 +51,7 @@
                     <RowDefinition Height="100"></RowDefinition>
                 </Grid.RowDefinitions>
 
-                <ListView Name="StreamsBox" Grid.Row="0" SelectionMode="Single" SelectionChanged="StreamsBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
+                <ListView Name="StreamsBox" Grid.Row="0" SelectionMode="Single" SelectionChanged="GeneralBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Name">
@@ -79,12 +79,13 @@
                 </ListView>
 
                 <Label Grid.Row="1">Roles</Label>
-                <ListBox Name="RolesBox" Grid.Row="2" SelectionMode="Extended" ></ListBox>
+                <ListBox Name="RolesBox" DisplayMemberPath="Name" SelectionChanged="GeneralBox_SelectionChanged" Grid.Row="2" SelectionMode="Extended"></ListBox>
+
 
             </Grid>
 
             <Label Content="Sessions" Grid.Row="0" Grid.Column="2" />
-            <ListView Name="SessionsBox" Grid.Row="1" Grid.Column="2" Margin="0,0,5,0" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
+            <ListView Name="SessionsBox" Grid.Row="1" Grid.Column="2" Margin="0,0,5,0" SelectionMode="Extended" SelectionChanged="GeneralBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -124,7 +125,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Feature chain</Label>
-                <ComboBox Name="ChainPathComboBox" Grid.Row="0" Grid.Column="1" Height="20" SelectionChanged="ChainPathComboBox_SelectionChanged" ></ComboBox>
+                <ComboBox Name="ChainsBox" Grid.Row="0" Grid.Column="1" Height="20" SelectionChanged="GeneralBox_SelectionChanged" ></ComboBox>
                 <Label Name="ChainPathLabel" Grid.Row="0" Grid.Column="2"></Label>
                 <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
                 <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>

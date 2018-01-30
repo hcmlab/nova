@@ -2,10 +2,12 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -17,88 +19,38 @@ namespace ssi
     public partial class DatabaseCMLBayesNetWindow : Window
     {
         private MainHandler handler;
-        private Mode mode;
 
         private string tempTrainerPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
 
         private int TrainerPathComboBoxindex = -1;
+        int SheetRows = 0;
 
-        public enum Mode
-        {
-            TRAIN,
-            PREDICT,
-            COMPLETE
-        }
 
         private List<SchemeRoleAnnotator> selectedAnnotations = new List<SchemeRoleAnnotator>();
 
-        public DatabaseCMLBayesNetWindow(MainHandler handler, Mode mode)
+        public DatabaseCMLBayesNetWindow(MainHandler handler)
         {
             InitializeComponent();
 
             this.handler = handler;
-            this.mode = mode;
 
             Loaded += DatabaseCMLTrainAndPredictWindow_Loaded;
 
             HelpTrainLabel.Content = "Filename of the Trainingsset.\r\n\rAnnotations are chunked in frames of this size (in ms).\r\n\rDiscretisize continuous Annotations\r\n\rContinous Annotations are discretized in these classes (seperate by ;)\r\n\rTimesteps (0 for static)\r\n\rIf checked, node format is role__scheme, else annotations are added up ";
-            HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";
-
-            switch (mode)
-            {
-                case Mode.COMPLETE:
-
-                    Title = "Complete Annotation";
-                    ApplyButton.Content = "Complete";
-
-                    ShowAllSessionsCheckBox.Visibility = Visibility.Collapsed;
-                    PredictOptionsPanel.Visibility = Visibility.Visible;
-                    TrainOptionsPanel.Visibility = Visibility.Visible;
-                    ForceCheckBox.Visibility = Visibility.Collapsed;
-                    //TrainerNameTextBox.IsEnabled = false;
-
-                    ConfidenceCheckBox.IsChecked = Properties.Settings.Default.CMLSetConf;
-                    FillGapCheckBox.IsChecked = Properties.Settings.Default.CMLFill;
-                    RemoveLabelCheckBox.IsChecked = Properties.Settings.Default.CMLRemove;
-
-                    ConfidenceTextBox.Text = Properties.Settings.Default.CMLDefaultConf.ToString();
-                    FillGapTextBox.Text = Properties.Settings.Default.CMLDefaultGap.ToString();
-                    RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
-
-                    break;
-
-                case Mode.TRAIN:
-
+       
+       
                     Title = "Train Bayesian Network  ";
                     ApplyButton.Content = "Create Samples";
                     ApplyButton2.Content = "Train";
                     ShowAllSessionsCheckBox.Visibility = Visibility.Collapsed;
-                    PredictOptionsPanel.Visibility = Visibility.Collapsed;
                     TrainOptionsPanel.Visibility = Visibility.Visible;
                     ForceCheckBox.Visibility = Visibility.Visible;
+                   
 
-                    break;
 
-                case Mode.PREDICT:
 
-                    Title = "Predict Annotations";
-                    ApplyButton.Content = "Predict";
 
-                    ShowAllSessionsCheckBox.Visibility = Visibility.Collapsed;
-                    PredictOptionsPanel.Visibility = Visibility.Visible;
-                    TrainOptionsPanel.Visibility = Visibility.Collapsed;
-                    ForceCheckBox.Visibility = Visibility.Collapsed;
 
-                    ConfidenceCheckBox.IsChecked = Properties.Settings.Default.CMLSetConf;
-                    FillGapCheckBox.IsChecked = Properties.Settings.Default.CMLFill;
-                    RemoveLabelCheckBox.IsChecked = Properties.Settings.Default.CMLRemove;
-
-                    ConfidenceTextBox.Text = Properties.Settings.Default.CMLDefaultConf.ToString();
-                    FillGapTextBox.Text = Properties.Settings.Default.CMLDefaultGap.ToString();
-                    RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
-
-                    break;
-            }
         }
 
         private void DatabaseCMLTrainAndPredictWindow_Loaded(object sender, RoutedEventArgs e)
@@ -107,52 +59,46 @@ namespace ssi
             GetAnnotators();
             GetRoles();
             GetSchemes();
-
-            if (mode == Mode.COMPLETE)
-            {
-                AnnoList annoList = AnnoTierStatic.Selected.AnnoList;
-                DatabasesBox.IsEnabled = false;
-                SchemesBox.SelectedItem = annoList.Scheme.Name;
-                SchemesBox.IsEnabled = false;
-                RolesBox.SelectedItem = annoList.Meta.Role;
-                RolesBox.IsEnabled = false;
-            }
-
-            if (mode == Mode.COMPLETE ||
-                mode == Mode.PREDICT)
-            {
-                string annotatorName = Properties.Settings.Default.MongoDBUser;
-                if (DatabaseHandler.Annotators.Find(a => a.Name == annotatorName) != null)
-                {
-                    string annotatorFullName = DatabaseHandler.Annotators.Find(a => a.Name == annotatorName).FullName;
-                    AnnotatorsBox.SelectedItem = annotatorFullName;
-                }
-
-                AnnotatorsBox.IsEnabled = DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.READWRITE;
-            }
-            else
-            {
-                AnnotatorsBox.SelectedItem = Defaults.CML.GoldStandardFullName;
-            }
-
-            //GetSessions();
-
-            if (mode == Mode.COMPLETE)
-            {
-                SessionsBox.UnselectAll();
-                SessionsBox.SelectedItem = DatabaseHandler.Sessions.Find(s => s.Name == DatabaseHandler.SessionName);
-                SessionsBox.IsEnabled = false;
-            }
-
+            parseFiles();
+            GetSessions();
             ApplyButton.Focus();
             Update();
         }
+
+
+        private void parseFiles()
+        {
+            try
+            {
+                string cmlfolderpath = Properties.Settings.Default.CMLDirectory + "\\" +
+                  Defaults.CML.FusionFolderName + "\\" +
+                  Defaults.CML.FusionBayesianNetworkFolderName + "\\";
+
+                string trainingsetpath = cmlfolderpath + "training.set";
+                StreamReader reader = File.OpenText(trainingsetpath);
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string[] items = line.Split(':');
+                    SchemeRoleAnnotator sap = new SchemeRoleAnnotator { Name = items[0], Annotator = items[1], Role = items[2], Classes = Int32.Parse(items[3]) };
+                    AnnotationSelectionBox.Items.Add(sap);
+                }
+
+                AnnotationSelectionBox.SelectAll();
+
+
+            }
+            catch { }
+        }
+
+
+
 
         private void Apply2_Click(object sender, RoutedEventArgs e)
         {
             string networkrDir = Properties.Settings.Default.CMLDirectory + "\\" +
                  Defaults.CML.FusionFolderName + "\\" +
-                 Defaults.CML.FusionBayesianNetworkFolderName + "\\" + TrainerPathComboBox.SelectedItem + ".xdsl";
+                 Defaults.CML.FusionBayesianNetworkFolderName + "\\" + NetworkSelectionBox.SelectedItem + ".xdsl";
 
             string datasetDir = Properties.Settings.Default.CMLDirectory + "\\" +
                Defaults.CML.FusionFolderName + "\\" +
@@ -161,7 +107,6 @@ namespace ssi
             int tempsteps;
             int.TryParse(timestepsbox.Text, out tempsteps);
 
-            string[] discretelabels = classesbox.Text.Split(';');
             bool isdynamic = tempsteps > 0 ? true : false;
 
             logTextBox.Text += handler.CMLTrainBayesianNetwork(networkrDir, datasetDir, isdynamic);
@@ -169,10 +114,15 @@ namespace ssi
 
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.CMLDefaultTrainer = TrainerPathComboBox.SelectedItem.ToString();
+
+            Properties.Settings.Default.SettingCMLDefaultBN = NetworkSelectionBox.SelectedItem.ToString();
+            Properties.Settings.Default.CMLDefaultAnnotator = AnnotatorsBox.SelectedItem.ToString();
+            Properties.Settings.Default.CMLDefaultRole = RolesBox.SelectedItem.ToString();
+            Properties.Settings.Default.CMLDefaultScheme = SchemesBox.SelectedItem.ToString();
+            Properties.Settings.Default.CMLDefaultTrainer = NetworkSelectionBox.SelectedItem.ToString();
             Properties.Settings.Default.Save();
 
-            bool force = mode == Mode.COMPLETE || ForceCheckBox.IsChecked.Value;
+            bool force = ForceCheckBox.IsChecked.Value;
 
             string database = DatabaseHandler.DatabaseName;
 
@@ -182,7 +132,7 @@ namespace ssi
 
             string networkrDir = Properties.Settings.Default.CMLDirectory + "\\" +
                 Defaults.CML.FusionFolderName + "\\" +
-                Defaults.CML.FusionBayesianNetworkFolderName + "\\" + TrainerPathComboBox.SelectedItem + ".xdsl";
+                Defaults.CML.FusionBayesianNetworkFolderName + "\\" + NetworkSelectionBox.SelectedItem + ".xdsl";
 
             string datasetDir = Properties.Settings.Default.CMLDirectory + "\\" +
                Defaults.CML.FusionFolderName + "\\" +
@@ -194,7 +144,6 @@ namespace ssi
             int tempsteps;
             int.TryParse(timestepsbox.Text, out tempsteps);
 
-            string[] discretelabels = classesbox.Text.Split(';');
             bool isdynamic = tempsteps > 0 ? true : false;
 
             if (File.Exists(datasetDir) && ForceCheckBox.IsChecked == false)
@@ -211,10 +160,10 @@ namespace ssi
             foreach (DatabaseSession session in SessionsBox.SelectedItems)
             {
                 List<AnnoList> annoLists = new List<AnnoList>();
-                foreach (SchemeRoleAnnotator item in AnnotationSelectionBox.SelectedItems)
+                foreach (SchemeRoleAnnotator item in AnnotationSelectionBox.Items)
                 {
                     DatabaseRole role = DatabaseHandler.Roles.Find(r => r.Name == item.Role);
-                    DatabaseScheme scheme = DatabaseHandler.Schemes.Find(s => s.Name == item.Name);
+                    DatabaseScheme scheme = DatabaseHandler.Schemes.Find(m => m.Name == item.Name);
                     ObjectId annotatorID = DatabaseHandler.Annotators.Find(a => a.FullName == item.Annotator).Id;
 
                     var builder = Builders<BsonDocument>.Filter;
@@ -223,6 +172,15 @@ namespace ssi
                     foreach (DatabaseAnnotation anno in list)
                     {
                         AnnoList annolist = DatabaseHandler.LoadAnnoList(anno.Id);
+                        if(annolist.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                        {
+                            for(int i=0; i < item.Classes; i++ )
+                            {
+                                annolist.Scheme.Labels.Add(new AnnoScheme.Label("s" +(i+1).ToString(), System.Windows.Media.Colors.Black))
+;                            }
+                           
+                        }
+                       
                         annoLists.Add(annolist);
                         logTextBox.Text = logTextBox.Text + "Session: " + session.Name + " Role: " + annolist.Meta.Role + " Scheme: " + annolist.Scheme.Name + "\n";
 
@@ -235,25 +193,45 @@ namespace ssi
 
                 if (rolecheckbox.IsChecked == true)
                 {
-                    ExportFrameWiseAnnotations(chunksizeinMS, discretelabels, ";", "REST", datasetDir, annoLists, ishead, session.Name, tempsteps);
+                    ExportFrameWiseAnnotations(chunksizeinMS, ';', "REST", datasetDir, annoLists, ishead, session.Name, tempsteps);
                 }
                 else
 
                 {
-                    ExportFrameWiseAnnotationsRolesSeperated(chunksizeinMS, discretelabels, ";", "REST", datasetDir, annoLists, ishead, session.Name, tempsteps);
+                    ExportFrameWiseAnnotationsRolesSeperated(chunksizeinMS, ';', "REST", datasetDir, annoLists, ishead, session.Name, tempsteps);
                 }
 
                 if (ishead) ishead = false;
             }
 
+            string[] pairs = new string[AnnotationSelectionBox.Items.Count];
+            int s = 0;
+            foreach (SchemeRoleAnnotator item in AnnotationSelectionBox.Items)
+            {
+                pairs[s] = item.Name + ":" + item.Annotator + ":" + item.Role + ":" + item.Classes;
+                s++;
+            }
+
+            string cmlfolderpath = Properties.Settings.Default.CMLDirectory + "\\" +
+                  Defaults.CML.FusionFolderName + "\\" +
+                  Defaults.CML.FusionBayesianNetworkFolderName + "\\";
+
+            string trainingsetpath = cmlfolderpath + "training.set";
+
+
+            System.IO.File.WriteAllLines(trainingsetpath, pairs);
+
+
             logTextBox.Text += "\nCreating Data sheet successful\nHit train to train the network or use it in GenIE";
         }
 
-        private void ExportFrameWiseAnnotationsRolesSeperated(double chunksize, string[] discretizeclasses, string seperator, string restclass, string filepath, List<AnnoList> annoLists, bool ishead, string sessionname, int tempsteps = 0)
+        private void ExportFrameWiseAnnotationsRolesSeperated(double chunksize, char seperator, string restclass, string filepath, List<AnnoList> annoLists, bool ishead, string sessionname, int tempsteps = 0)
         {
      
             string headline = "";
             double maxdur = 0;
+          
+            bool skipwarning = false;
 
             string[][] history = new string[annoLists.Count][];
 
@@ -286,7 +264,7 @@ namespace ssi
                     for (int i = 0; i < tempsteps; i++)
                     {
                         history[a][i] = restclass;
-                        headline += newLists[a].Scheme.Name + "_" + (i) + seperator;
+                        headline += newLists[a].Scheme.Name + "_" + (i+1) + seperator;
                     }
                 }
             }
@@ -317,7 +295,12 @@ namespace ssi
 
                         //  filetoprint += headline + "\n";
                         file.WriteLine(headline);
+                        string[] split = headline.Split(seperator);
+                        SheetRows = split.Length;
                     }
+
+             
+
 
                     headline = "";
 
@@ -368,7 +351,7 @@ namespace ssi
                                 if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                                 {
                                     double value = newlists[a][i].Score;
-                                    discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
+                                    discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, newlists[a].Scheme.Labels);
                                     history[a][i] = discretelabel;
                                 }
                                 else if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == false)
@@ -393,7 +376,7 @@ namespace ssi
                                     {
                                         double value = newlists[a][i].Score;
 
-                                        discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
+                                        discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, newlists[a].Scheme.Labels);
                                         headline += discretelabel + seperator;
                                     }
 
@@ -445,7 +428,18 @@ namespace ssi
                             }
 
                             headline = headline.Remove(headline.Length - 1);
-                            file.WriteLine(headline);
+
+                            string[] splitline = headline.Split(seperator);
+
+                            if (splitline.Length == SheetRows)
+                            {
+                                file.WriteLine(headline);
+                            }
+                            else
+                            {
+                                skipwarning = true;
+                            }
+
                             headline = "";
                         }
 
@@ -453,6 +447,8 @@ namespace ssi
                     }
                     
                 }
+
+                if(skipwarning) logTextBox.Text += "Some Annotations are missing. They have been skipped\n";
             }
             catch (Exception ex)
             {
@@ -546,10 +542,12 @@ namespace ssi
             return result;
         }
 
-        private void ExportFrameWiseAnnotations(double chunksize, string[] discretizeclasses, string seperator, string restclass, string filepath, List<AnnoList> annoLists, bool ishead, string sessionname, int tempsteps = 0)
+        private void ExportFrameWiseAnnotations(double chunksize, char seperator, string restclass, string filepath, List<AnnoList> annoLists, bool ishead, string sessionname, int tempsteps = 0)
         {
             string headline = "";
             double maxdur = 0;
+          
+            bool skipwarning = false;
 
             string[][] history = new string[annoLists.Count][];
 
@@ -564,7 +562,7 @@ namespace ssi
                     for (int i = 0; i < tempsteps; i++)
                     {
                         history[a][i] = restclass;
-                        headline += annoLists[a].Meta.Role + "_" + annoLists[a].Scheme.Name + "_" + (i) + seperator;
+                        headline += annoLists[a].Meta.Role + "_" + annoLists[a].Scheme.Name + "_" + (i+1) + seperator;
                     }
                 }
                 double localdur = 0;
@@ -586,7 +584,11 @@ namespace ssi
                         headline = headline.Remove(headline.Length - 1);
 
                         file.WriteLine(headline);
+                        string[] split = headline.Split(seperator);
+                        SheetRows = split.Length;
                     }
+
+
                     headline = "";
 
                     List<AnnoList> newlists = new List<AnnoList>();
@@ -634,7 +636,7 @@ namespace ssi
                             if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
                             {
                                 double value = newlists[a][i].Score;
-                                discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
+                                discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, newlists[a].Scheme.Labels);
                                 history[a][i] = discretelabel;
                             }
 
@@ -658,7 +660,7 @@ namespace ssi
                             {
                                 double value = newlists[a][i].Score;
 
-                                discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, discretizeclasses);
+                                discretelabel = discretize(value, newlists[a].Scheme.MinScore, newlists[a].Scheme.MaxScore, newlists[a].Scheme.Labels);
                                 headline += discretelabel + seperator;
                             }
 
@@ -701,8 +703,21 @@ namespace ssi
                         }
 
                         headline = headline.Remove(headline.Length - 1);
-                        file.WriteLine(headline);
+
+                        string[] splitline = headline.Split(seperator);
+
+                        if (splitline.Length == SheetRows)
+                        {
+                            file.WriteLine(headline);
+                        }
+                        else
+                        {
+                            skipwarning = true;
+                        }
+
                         headline = "";
+
+
                     }
 
                     Action EmptyDelegate = delegate () { };
@@ -715,25 +730,25 @@ namespace ssi
             }
         }
 
-        private string discretize(double value, double MinScore, double MaxScore, string[] classes)
+        private string discretize(double value, double MinScore, double MaxScore, List<AnnoScheme.Label> classes)
         {
-            int numclasses = classes.Length;
+            int numclasses = classes.Count;
 
             double range = MaxScore - MinScore;
 
-            double chunk = range / numclasses;
+            double chunk = range / numclasses; 
 
             for (int i = 0; i < numclasses; i++)
             {
                 if (value >= (MinScore + i * chunk) && value < (MinScore + (i + 1) * chunk))
                 {
-                    return classes[i];
+                    return classes[i].Name;
                 }
             }
 
             //else
 
-            return classes[classes.Length - 1];
+            return classes[classes.Count - 1].Name;
         }
 
         private void Select(ListBox list, string select)
@@ -773,6 +788,7 @@ namespace ssi
                 GetAnnotators();
                 GetRoles();
                 GetSchemes();
+                GetSessions();
             }
 
             Update();
@@ -801,6 +817,7 @@ namespace ssi
                 if (SchemesBox.SelectedIndex == -1) SchemesBox.SelectedIndex = 0;
                 SchemesBox.SelectedItem = Properties.Settings.Default.CMLDefaultScheme;
             }
+            SchemesBox.ScrollIntoView(SchemesBox.SelectedItem);
         }
 
         public void GetRoles()
@@ -833,36 +850,38 @@ namespace ssi
                 AnnotatorsBox.SelectedIndex = 0;
                 AnnotatorsBox.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotator;
             }
+
+            AnnotatorsBox.ScrollIntoView(AnnotatorsBox.SelectedItem);
         }
 
         public void GetSessions()
         {
-            if (AnnotationSelectionBox.SelectedItem == null)
-            {
-                return;
-            }
+            //if (AnnotationSelectionBox.SelectedItem == null)
+            //{
+            //   return;
+            ////}
 
-            Properties.Settings.Default.CMLDefaultAnnotator = AnnotatorsBox.SelectedItem.ToString();
-            Properties.Settings.Default.CMLDefaultRole = RolesBox.SelectedItem.ToString();
-            Properties.Settings.Default.CMLDefaultScheme = SchemesBox.SelectedItem.ToString();
-            Properties.Settings.Default.Save();
 
             if (AnnotationSelectionBox.HasItems)
             {
                 AnnotationSelectionBox.ItemsSource = null;
             }
 
-            if (mode != Mode.COMPLETE
-                && (mode == Mode.TRAIN))
-            {
+          
+            
                 // show sessions for which an annotation exists or is missing
 
                 List<BsonDocument> annotations = new List<BsonDocument>();
 
+            if(AnnotationSelectionBox.Items.Count > 0)
+            {
+
+           
+
                 List<string> sessionNames = new List<string>();
 
                 {
-                    var item = (SchemeRoleAnnotator)AnnotationSelectionBox.SelectedItems[0];
+                    var item = (SchemeRoleAnnotator)AnnotationSelectionBox.Items[0];
                     string schemeName = item.Name;
                     ObjectId schemeID = new ObjectId();
                     DatabaseHandler.GetObjectID(ref schemeID, DatabaseDefinitionCollections.Schemes, schemeName);
@@ -876,7 +895,7 @@ namespace ssi
 
                     var builder = Builders<BsonDocument>.Filter;
 
-                    var filter = builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("role_id", roleID);
+                    var filter = builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID);
 
                     annotations.AddRange(DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Annotations, true, filter));
 
@@ -891,11 +910,11 @@ namespace ssi
                     }
                 }
 
-                for (int i = 1; i < AnnotationSelectionBox.SelectedItems.Count; i++)
+                for (int i = 1; i < AnnotationSelectionBox.Items.Count; i++)
                 {
                     List<BsonDocument> annotationstemp = new List<BsonDocument>();
                     List<string> sessionNamestemp = new List<string>();
-                    var item = (SchemeRoleAnnotator)AnnotationSelectionBox.SelectedItems[i];
+                    var item = (SchemeRoleAnnotator)AnnotationSelectionBox.Items[i];
                     string schemeName = item.Name;
                     ObjectId schemeID = new ObjectId();
                     DatabaseHandler.GetObjectID(ref schemeID, DatabaseDefinitionCollections.Schemes, schemeName);
@@ -909,16 +928,9 @@ namespace ssi
 
                     var builder = Builders<BsonDocument>.Filter;
 
-                    var filter = builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("role_id", roleID);
+                    var filter = builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID);
 
-                    //for(int j=0; j < sessionNames.Count; j++)
-                    //{
-                    //    ObjectId sessionID = new ObjectId();
-                    //    DatabaseHandler.GetObjectID(ref sessionID, DatabaseDefinitionCollections.Sessions, sessionNames[j]);
-                    //    filter = filter | builder.Eq("session_id", sessionID);
-                    //}
-
-                    annotationstemp.AddRange(DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Annotations, true, filter));
+                     annotationstemp.AddRange(DatabaseHandler.GetCollection(DatabaseDefinitionCollections.Annotations, true, filter));
 
                     foreach (BsonDocument annotation in annotationstemp)
                     {
@@ -933,7 +945,7 @@ namespace ssi
                     sessionNames.RemoveAll(thing => !sessionNamestemp.Contains(thing));
                 }
 
-                List<DatabaseSession> sessions = new List<DatabaseSession>();
+            List<DatabaseSession> sessions = new List<DatabaseSession>();
                 foreach (string sessionName in sessionNames)
                 {
                     DatabaseSession session = new DatabaseSession() { Name = sessionName };
@@ -944,13 +956,7 @@ namespace ssi
                 }
 
                 SessionsBox.ItemsSource = sessions.OrderBy(s => s.Name).ToList();
-            }
-            else
-            {
-                // show all sessions
-
-                SessionsBox.ItemsSource = DatabaseHandler.Sessions;
-            }
+           
 
             if (SessionsBox.HasItems)
             {
@@ -959,27 +965,30 @@ namespace ssi
                     SessionsBox.SelectedIndex = 0;
                 }
             }
+            }
+
+
         }
 
         private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            TrainerPathComboBoxindex = TrainerPathComboBox.SelectedIndex;
-            TrainerPathComboBox.Items.Clear();
+            TrainerPathComboBoxindex = NetworkSelectionBox.SelectedIndex;
+            NetworkSelectionBox.Items.Clear();
             List<string> nets = getBayesianNetworks();
             foreach (string net in nets)
                 if (SessionsBox.HasItems)
                 {
-                    TrainerPathComboBox.Items.Add(Path.GetFileNameWithoutExtension(net));
+                    NetworkSelectionBox.Items.Add(Path.GetFileNameWithoutExtension(net));
                 }
 
             if (TrainerPathComboBoxindex == -1)
             {
-                TrainerPathComboBox.SelectedIndex = 0;
-                TrainerPathComboBoxindex = TrainerPathComboBox.SelectedIndex;
+                NetworkSelectionBox.SelectedIndex = 0;
+                TrainerPathComboBoxindex = NetworkSelectionBox.SelectedIndex;
             }
             else
             {
-                TrainerPathComboBox.SelectedIndex = TrainerPathComboBoxindex;
+                NetworkSelectionBox.SelectedIndex = TrainerPathComboBoxindex;
             }
 
             Update();
@@ -1003,6 +1012,8 @@ namespace ssi
                 {
                     networks.Add(network);
                 }
+                NetworkSelectionBox.SelectedItem = Properties.Settings.Default.SettingCMLDefaultBN;
+
                 // }
             }
 
@@ -1011,7 +1022,7 @@ namespace ssi
 
         private void Annotations_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            GetSessions();
+            //GetSessions();
 
             Update();
         }
@@ -1026,53 +1037,13 @@ namespace ssi
             // GetSessions();
         }
 
-        private void ConfidenceCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.CMLSetConf = true;
-            Properties.Settings.Default.Save();
-            ConfidenceTextBox.IsEnabled = true;
-        }
-
-        private void ConfidenceCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.CMLSetConf = false;
-            Properties.Settings.Default.Save();
-            ConfidenceTextBox.IsEnabled = false;
-        }
-
-        private void FillGapCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.CMLFill = true;
-            Properties.Settings.Default.Save();
-            FillGapTextBox.IsEnabled = true;
-        }
-
-        private void FillGapCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.CMLFill = false;
-            Properties.Settings.Default.Save();
-            FillGapTextBox.IsEnabled = false;
-        }
-
-        private void RemoveLabelCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.CMLRemove = true;
-            Properties.Settings.Default.Save();
-            RemoveLabelTextBox.IsEnabled = true;
-        }
-
-        private void RemoveLabelCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.CMLRemove = false;
-            Properties.Settings.Default.Save();
-            RemoveLabelTextBox.IsEnabled = false;
-        }
+        
 
         private void TrainerPathComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (TrainerPathComboBox.SelectedItem != null)
+            if (NetworkSelectionBox.SelectedItem != null)
             {
-                string trainer = (string)TrainerPathComboBox.SelectedItem;
+                string trainer = (string)NetworkSelectionBox.SelectedItem;
 
                 string database = "";
                 if (DatabasesBox.SelectedItem != null)
@@ -1080,7 +1051,7 @@ namespace ssi
                     database = DatabasesBox.SelectedItem.ToString();
                 }
 
-                namebox.Text = TrainerPathComboBox.SelectedItem.ToString() + ".txt";
+                namebox.Text = NetworkSelectionBox.SelectedItem.ToString() + ".txt";
 
                 // TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database;
             }
@@ -1090,7 +1061,7 @@ namespace ssi
         {
             bool enable = false;
 
-            if (TrainerPathComboBox.Items.Count > 0
+            if (NetworkSelectionBox.Items.Count > 0
                 && DatabasesBox.SelectedItem != null
                 && SessionsBox.SelectedItem != null
                 && RolesBox.SelectedItem != null
@@ -1103,9 +1074,8 @@ namespace ssi
             ApplyButton.IsEnabled = enable;
             ApplyButton2.IsEnabled = enable;
             TrainOptionsPanel.IsEnabled = enable;
-            PredictOptionsPanel.IsEnabled = enable;
             ForceCheckBox.IsEnabled = enable;
-            TrainerPathComboBox.IsEnabled = enable;
+            NetworkSelectionBox.IsEnabled = enable;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -1124,13 +1094,15 @@ namespace ssi
                 removePair.IsEnabled = true;
             }
 
-            GetSessions();
+          //  GetSessions();
         }
 
         private void removePair_Click(object sender, RoutedEventArgs e)
         {
             selectedAnnotations.Remove((SchemeRoleAnnotator)AnnotationSelectionBox.SelectedItem);
             AnnotationSelectionBox.Items.Remove(AnnotationSelectionBox.SelectedItem);
+            AnnotationSelectionBox.SelectAll();
+            GetSessions();
         }
 
         private void AddItemButton_Click(object sender, RoutedEventArgs e)
@@ -1139,7 +1111,16 @@ namespace ssi
             {
                 foreach (var role in RolesBox.SelectedItems)
                 {
-                    SchemeRoleAnnotator stp = new SchemeRoleAnnotator() { Name = scheme.ToString(), Role = role.ToString(), Annotator = AnnotatorsBox.SelectedItem.ToString() };
+
+                    int classes = 3; //Default value..
+                    AnnoScheme annoscheme = DatabaseHandler.GetAnnotationScheme(scheme.ToString());
+                    if(annoscheme.Type == AnnoScheme.TYPE.DISCRETE)
+                    {
+                        classes = annoscheme.Labels.Count;
+                    }
+                    
+
+                    SchemeRoleAnnotator stp = new SchemeRoleAnnotator() { Name = scheme.ToString(), Role = role.ToString(), Annotator = AnnotatorsBox.SelectedItem.ToString(), Classes = classes };
 
                     if (selectedAnnotations.Find(item => item.Role == stp.Role && item.Name == stp.Name) == null)
                     {
@@ -1156,18 +1137,12 @@ namespace ssi
 
         private void discretisizeeckbox_Checked(object sender, RoutedEventArgs e)
         {
-            if (classesbox != null)
-            {
-                classesbox.IsEnabled = true;
-            }
+           
         }
 
         private void discretisizeeckbox_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (classesbox != null)
-            {
-                classesbox.IsEnabled = false;
-            }
+        
         }
 
         private void rolecheckbox_Checked(object sender, RoutedEventArgs e)
@@ -1185,6 +1160,8 @@ namespace ssi
                 writerolecheckbox.IsEnabled = true;
             }
         }
+
+      
     }
 
     public class SchemeRoleAnnotator
@@ -1192,5 +1169,6 @@ namespace ssi
         public string Name { get; set; }
         public string Role { get; set; }
         public string Annotator { get; set; }
+        public int Classes { get; set; }
     }
 }
