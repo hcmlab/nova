@@ -69,20 +69,17 @@ namespace ssi
             int index = filepath.LastIndexOf('.');
             if (index > 0)
             {
-                string type = filepath.Substring(index + 1);
+                string type = filepath.Substring(index + 1).ToLower();
                 switch (type)
                 {
                     case "avi":
                     case "wmv":
                     case "mp4":
-                    case "mov":
-                    case "MOV":
+                    case "mov":                    
                     case "m4a":
                     case "mkv":
                     case "divx":
-                    case "mpg":
-                    case "JPG":
-                    case "JPEG":
+                    case "mpg":                    
                     case "PNG":
                     case "jpg":
                     case "png":
@@ -97,7 +94,8 @@ namespace ssi
                     case "anno":
                         ftype = SSI_FILE_TYPE.CSV;
                         break;
-
+                    
+                    case "wma":
                     case "wav":
                     case "mp3":
                     case "flac":

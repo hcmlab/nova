@@ -331,7 +331,9 @@ namespace ssi
 
                 if (force || !File.Exists(trainerOutPath + ".trainer"))
                 {
-                    logTextBox.Text += handler.CMLTrainModel(trainer.Path,
+                    try
+                    {
+                        logTextBox.Text += handler.CMLTrainModel(trainer.Path,
                         trainerOutPath,
                         Properties.Settings.Default.DatabaseDirectory,
                         Properties.Settings.Default.DatabaseAddress,
@@ -347,6 +349,13 @@ namespace ssi
                         trainerRightContext,
                         trainerBalance,
                         mode == Mode.COMPLETE);
+                    }
+
+                    catch(Exception ex)
+                    {
+                        logTextBox.Text += ex;
+                    }
+                    
                 }
                 else
                 {
@@ -378,8 +387,11 @@ namespace ssi
                         Properties.Settings.Default.CMLDefaultMinDur = minDur;
                     }                                                          
                     Properties.Settings.Default.Save();
-                    
-                    logTextBox.Text += handler.CMLPredictAnnos(mode == Mode.COMPLETE ? tempTrainerPath : trainer.Path,
+
+                    try
+                    {
+
+                        logTextBox.Text += handler.CMLPredictAnnos(mode == Mode.COMPLETE ? tempTrainerPath : trainer.Path,
                         Properties.Settings.Default.DatabaseDirectory,
                         Properties.Settings.Default.DatabaseAddress,
                         Properties.Settings.Default.MongoDBUser,
@@ -396,6 +408,12 @@ namespace ssi
                         minGap,
                         minDur,                        
                         mode == Mode.COMPLETE);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        logTextBox.Text += ex;
+                    }
                 }
                 
             }
@@ -403,8 +421,9 @@ namespace ssi
             if (mode == Mode.EVALUATE)
             {
                 string evalOutPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
-
-                logTextBox.Text += handler.CMLEvaluateModel(evalOutPath, 
+                try
+                {
+                    logTextBox.Text += handler.CMLEvaluateModel(evalOutPath, 
                         trainer.Path,
                         Properties.Settings.Default.DatabaseDirectory,
                         Properties.Settings.Default.DatabaseAddress,
@@ -417,12 +436,20 @@ namespace ssi
                         annotator.Name,
                         stream.Name);
 
-                if (File.Exists(evalOutPath))
-                {
-                    ConfmatWindow confmat = new ConfmatWindow(evalOutPath);
-                    confmat.ShowDialog();
-                    File.Delete(evalOutPath);
+                    if (File.Exists(evalOutPath))
+                    {
+                        ConfmatWindow confmat = new ConfmatWindow(evalOutPath);
+                        confmat.ShowDialog();
+                        File.Delete(evalOutPath);
+                    }
                 }
+
+                catch (Exception ex)
+                {
+                    logTextBox.Text += ex;
+                }
+
+               
 
             }
 
