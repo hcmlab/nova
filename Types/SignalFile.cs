@@ -495,17 +495,9 @@ namespace ssi
                     uint dimension =  (uint) reader.WaveFormat.Channels;
 
                     Signal.Type type = (bytesPerSample == 2)  ? Signal.Type.SHORT : Signal.Type.FLOAT;
-                    signal = new Signal(filepath, rate, dimension, (uint) bytesPerSample, (samples/dimension), type);
+                    signal = new Signal(filepath, rate, dimension, (uint) bytesPerSample, (samples/dimension), type);                                     
+                    reader.Read(signal.data, 0, (int)samples);
                  
-                    byte[] bytesBuffer = new byte[reader.Length];                    
-                    int read = reader.Read(bytesBuffer, 0, bytesBuffer.Length);
-                    for (int sampleIndex = 0; sampleIndex < samples; sampleIndex++)
-                    {
-                        //var intSampleValue = (float) BitConverter.ToInt32(bytesBuffer, sampleIndex);
-                        // signal.data[sampleIndex] = (float) (intSampleValue / 32768.0f);
-                        signal.data[sampleIndex] = BitConverter.ToSingle(bytesBuffer, sampleIndex * bytesPerSample);
-                    }
-
                     signal.minmax();
                     signal.isAudio = true;
                     signal.loaded = true;
