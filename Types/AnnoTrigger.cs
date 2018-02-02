@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 
 namespace ssi
 {
     public class AnnoTrigger : IMedia
     {
-        AnnoList annoList;
-        double position;
-        int currentOrNextItemIndex;
-        PluginCaller trigger;
-        Dictionary<string, object> args;
+        private AnnoList annoList;
+        private double position;
+        private int currentOrNextItemIndex;
+        private PluginCaller trigger;
+        private Dictionary<string, object> args;
 
         public AnnoTrigger(AnnoList annoList, PluginCaller trigger, Dictionary<string, object> args)
         {
@@ -65,7 +60,6 @@ namespace ssi
         {
             if (Math.Abs(newPosition - position) <= threshold)
             {
-
                 if (currentOrNextItemIndex != -1)
                 {
                     args.Clear();
@@ -83,14 +77,12 @@ namespace ssi
 
                     if (newPosition > annoList[currentOrNextItemIndex].Stop)
                     {
-
                         args["label"] = annoList[currentOrNextItemIndex].Label;
                         args["time"] = annoList[currentOrNextItemIndex].Start;
-                        args["dur"] =  annoList[currentOrNextItemIndex].Duration;
+                        args["dur"] = annoList[currentOrNextItemIndex].Duration;
                         args["scheme"] = annoList.Scheme.Name;
                         args["state"] = 0;
                         trigger.call("update_leave", args);
-
 
                         currentOrNextItemIndex++;
                         if (currentOrNextItemIndex >= annoList.Count)
@@ -98,7 +90,6 @@ namespace ssi
                             currentOrNextItemIndex = -1;
                         }
                     }
-
                 }
             }
             else
@@ -110,7 +101,7 @@ namespace ssi
         }
 
         public void Clear()
-        { 
+        {
         }
 
         public string GetDirectory()
@@ -121,7 +112,6 @@ namespace ssi
             }
             return "";
         }
-
 
         public string GetFilepath()
         {
@@ -134,7 +124,7 @@ namespace ssi
 
         public double GetLength()
         {
-            return annoList[annoList.Count-1].Stop;
+            return annoList[annoList.Count - 1].Stop;
         }
 
         public MediaType GetMediaType()

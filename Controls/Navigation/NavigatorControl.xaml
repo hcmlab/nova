@@ -17,9 +17,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Column="0" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Left">
-            <Label  Name="newAnnoFromLabel" Margin="5">New Annnotation: </Label>
-            <Button Name="newAnnoFromFileButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center" Focusable="False">File</Button>
-            <Button Name="newAnnoFromDatabaseButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center" Focusable="False">Database</Button>
+            <Button Name="newAnnoButton" Width="80" Height="25" VerticalAlignment="Center" Margin="10,0,0,0" IsEnabled="False" Focusable="False">New Anno</Button>
+            <!--<Button Name="newAnnoFromDatabaseButton" Width="80" Height="25" Margin="5" VerticalAlignment="Center" Focusable="False">Database</Button>-->
         </StackPanel>
 
         <StackPanel Grid.Column="1" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Center">
@@ -31,7 +30,7 @@
         </StackPanel>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
-            <CheckBox Name="autoScrollCheckBox" Height="25" Margin="0,10,10,0" IsChecked="True" Content="Auto Scroll"  Focusable="False"/>
+            <CheckBox Name="autoScrollCheckBox" Height="25" Margin="0,10,10,0" Visibility="Collapsed" IsChecked="True" Content="Auto Scroll"  Focusable="False"/>
             <CheckBox x:Name="askforlabels" Height="25" Margin="0,10,10,0" IsChecked="False" Content="Force Label" Focusable="False" Visibility="Collapsed"/>
             <Button Name="clearButton" Width="70" Height="25" Margin="5" VerticalAlignment="Center" Focusable="False">Clear</Button>
         </StackPanel>

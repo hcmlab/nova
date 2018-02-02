@@ -104,11 +104,12 @@ namespace ssi
 
             string database = DatabaseHandler.DatabaseName;
 
-            string[] sessions = new string[SchemeandAnnotatorBox.Items.Count];
+            string[] sessions = new string[SchemeandAnnotatorBox.SelectedItems.Count];
             int i = 0;
             foreach (DatabaseSession item in SessionsBox.SelectedItems)
             {
                 sessions[i] = item.Name;
+                i++;
             }
 
             string[] schemes = new string[SchemeandAnnotatorBox.Items.Count];
@@ -134,10 +135,28 @@ namespace ssi
             }
 
             Properties.Settings.Default.SettingCMLDefaultBN = NetworkBox.SelectedItem.ToString();
-            Properties.Settings.Default.CMLDefaultRole = RolesBox.SelectedItem.ToString();
-            Properties.Settings.Default.CMLDefaultScheme = SchemeOutputBox.SelectedItem.ToString();
+           
+
+            if (RolesBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultRole = RolesBox.SelectedItem.ToString();
+            }
+
+            if (AnnotatorInputBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultAnnotator = AnnotatorInputBox.SelectedItem.ToString();
+            }
+
+
+            if (SchemeOutputBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultScheme = SchemeOutputBox.SelectedItem.ToString();
+            }
+
+            
             Properties.Settings.Default.CMLDefaultAnnotatorPrediction = AnnotatorsBox.SelectedItem.ToString();
-            Properties.Settings.Default.CMLDefaultAnnotator= AnnotatorInputBox.SelectedItem.ToString();
+
+
             Properties.Settings.Default.Save();
 
             logTextBox.Text = "";

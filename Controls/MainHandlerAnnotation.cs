@@ -376,8 +376,7 @@ namespace ssi
 
         public void addNewAnnotationFile()
         {
-            if (Time.TotalDuration > 0)
-            {
+          
                 double defaultSr = 25.0;
                 foreach (IMedia m in mediaList)
                 {
@@ -396,11 +395,8 @@ namespace ssi
                     annoList.Meta.Annotator = Properties.Settings.Default.Annotator;
                     addAnnoTier(annoList);
                 }
-            }
-            else
-            {
-                MessageTools.Warning("Nothing to annotate, load some data first.");
-            }
+            
+           
         }
 
         public void addAnnoTier(AnnoList anno)
