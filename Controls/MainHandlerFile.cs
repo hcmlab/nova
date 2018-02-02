@@ -88,6 +88,7 @@ namespace ssi
                     case "webm":
 
                         ftype = SSI_FILE_TYPE.VIDEO;
+                        Time.TotalDuration = 1; // This allows to annotate images
                         break;
 
                     case "csv":

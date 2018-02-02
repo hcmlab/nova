@@ -234,7 +234,12 @@ namespace ssi
                             {
                                 saveSelectedAnno();
                             }
-                            else if (e.KeyboardDevice.IsKeyDown(Key.R))
+
+                            else  if (e.KeyboardDevice.IsKeyDown(Key.N))
+                                {
+                                    addNewAnnotation();
+                                }
+                                else if (e.KeyboardDevice.IsKeyDown(Key.R))
                             {
                                 ReloadAnnotations();
                                 e.Handled = true;

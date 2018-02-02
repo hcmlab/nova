@@ -68,7 +68,9 @@ After loading at least one media or data stream, new annotations tracks can be a
 	Scheme name, sample rate, value range and colours are set in the following dialogue:
 
 	![*New continuous annotation scheme window.*](pics/manual-new-scheme-continuous.png){#fig:manual-new-scheme-continuous}
-
+	
+	
+* Import: If you store existing schemes in your (CML)schemes folder, you can select them here
 
 ## Editing an Annotation
 
@@ -114,6 +116,7 @@ Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. 
  W							Creating a new label between the green annotation cursor and the red media position cursor, edit selected segment
  Q							Move signal cursor to the beginning, the annotation cursor to the end of the selected segment
  E							Move annotation cursor to the beginning, the signal cursor to the end of the selected segment
+ ctrl + N					Create new annotation tier
  ctrl + C      				Copy the currently selected segment
  ctrl + K					Delete all annotations that are on the right side of the green annotation cursor 
  ctrl + L					Complete the current session automatically

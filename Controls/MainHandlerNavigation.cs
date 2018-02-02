@@ -79,9 +79,23 @@ namespace ssi
             addNewAnnotationDatabase();
         }
 
-        private void navigatorNewAnnoFromFile_Click(object sender, RoutedEventArgs e)
+        private void navigatorNewAnno_Click(object sender, RoutedEventArgs e)
         {
-            addNewAnnotationFile();
+
+            addNewAnnotation();
+        }
+
+        private void addNewAnnotation()
+        {
+            if (DatabaseHandler.IsConnected && DatabaseHandler.IsSession)
+            {
+                addNewAnnotationDatabase();
+            }
+
+            else
+            {
+                addNewAnnotationFile();
+            }
         }
 
         private void navigatorClearSession_Click(object sender, RoutedEventArgs e)
@@ -140,7 +154,20 @@ namespace ssi
             bool isConnected = DatabaseHandler.IsConnected;
             bool isConnectedAndHasSession = DatabaseHandler.IsConnected && DatabaseHandler.IsSession;
 
-            control.navigator.newAnnoFromDatabaseButton.IsEnabled = isConnectedAndHasSession;
+
+            if (Time.TotalDuration > 0 == true || isConnectedAndHasSession)
+            {
+                control.navigator.newAnnoButton.IsEnabled = true;
+            }
+
+            else
+            {
+                control.navigator.newAnnoButton.IsEnabled = false;
+            }
+
+            
+
+
             control.navigator.statusBarSessionInfo.Foreground = isConnectedAndHasSession ? Brushes.Black : Brushes.DarkGray;
             control.navigator.statusBarSessionInfo.Content = DatabaseHandler.SessionInfo;
             control.navigator.statusBarServer.Content = DatabaseHandler.ServerInfo;

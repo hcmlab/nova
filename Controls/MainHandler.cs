@@ -160,6 +160,7 @@ namespace ssi
             control.menu.MouseEnter += tierMenu_MouseEnter;
 
             control.annoSaveMenu.Click += annoSave_Click;
+            control.annoNewMenu.Click += navigatorNewAnno_Click;
             control.annoSaveAsFinishedMenu.Click += annoSaveAsFinished_Click;
             control.annoReloadMenu.Click += annoReload_Click;
             control.annoReloadBackupMenu.Click += annoReloadBackup_Click;
@@ -208,8 +209,7 @@ namespace ssi
 
             // Navigator
 
-            control.navigator.newAnnoFromFileButton.Click += navigatorNewAnnoFromFile_Click;
-            control.navigator.newAnnoFromDatabaseButton.Click += navigatorNewAnnoFromDatabase_Click;
+            control.navigator.newAnnoButton.Click += navigatorNewAnno_Click;
             control.navigator.clearButton.Click += navigatorClearSession_Click;
             control.navigator.jumpFrontButton.Click += navigatorJumpFront_Click;
             control.navigator.playButton.Click += navigatorPlay_Click;

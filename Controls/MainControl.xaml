@@ -51,6 +51,7 @@
 
             </MenuItem>
             <MenuItem Header="ANNOTATION">
+                <MenuItem Header="New Annotation" Name="annoNewMenu" InputGestureText="Ctrl+N"/>
                 <MenuItem Header="Save" Name="annoSaveMenu" InputGestureText="Ctrl+S"/>
                 <MenuItem Header="Save As Finished" Name="annoSaveAsFinishedMenu"/>
                 <MenuItem Header="Save All" Name="annoSaveAllMenu" />
