@@ -51,11 +51,10 @@ If you are using NOVA in your research please consider giving us a citation:
 
 @article{
   title={Applying Cooperative Machine Learning to Speed Up the Annotation of Social Signals in Large Multi-modal Corpora},
-  author={Johannes Wagner, Tobias Baur, Yue Zhang, Michel F. Valstar, Bj{\''o}rn Schuller, Elisabeth Andr{\'e}},
+  author={Wagner Johannes and Baur, Tobias and Zhang, Yue, and Valstar, Michel F. and Schuller, Bj{\''o}rn and Andr{\'e}, Elisabeth},
   journal={arXiv:1802.02565},
   url={https://arxiv.org/abs/1802.02565},
-  year={2018}
-  
+  year={2018}  
 }
   
 </code></pre>
