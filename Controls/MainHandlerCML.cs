@@ -214,7 +214,7 @@ namespace ssi
             return runCMLTool("cmltrain", "train", parameters, arguments, "cml-train");            
         }
 
-        public string CMLEvaluateModel(string evalPath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream)
+        public string CMLEvaluateModel(string evalPath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream, bool loso)
         {
             string[] split = server.Split(':');
             string ip = split[0];
@@ -236,6 +236,7 @@ namespace ssi
             arguments["list"] = sessions;
             arguments["username"] = username;
             arguments["password"] = password;
+            if (loso) arguments["loso"] = null;
 
             return runCMLTool("cmltrain", "eval", parameters, arguments, "cml-eval");
         }

@@ -2,7 +2,7 @@
 NovA is a tool for annotating and analyzing behaviours in social interactions. It allows to load data recorded with the SSI Framework, as well as from external sources. It further makes use of SSI for semi-automated labeling of behaviours for example by automatically detecting specific gestures from a Kinect (or Kinect 2) Sensor or facial expressions from video.
 
 
-![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2016/11/nova.png)
+![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2018/02/nova.png)
 
 
 NOVA has been completly reworked with more advanced annotation features. It now allows framewise labeling for a more precise coding experience, and continuous annotations for labeling e.g emotions or social attitudes (see picture below). The interface is more customizable than the last version and allows loading and labeling data of multiple persons.
@@ -32,7 +32,7 @@ NOVA is  Software under development and is provided “as is”. If you run into
 
 <strong>Is there an example pipeline to automatically create annotations?</strong>
 
-An example SSI Pipeline for recording a wide range of interessting features will be provided in one of the next updates (as it existed for the old version, but updated for Kinect 2, and some more new features 🙂 ).
+check out https://github.com/hcmlab/kinect2-record for a kinect 2 example recording pipeline.
 
 <strong>I would like to contribute to the project</strong>
 
@@ -43,6 +43,24 @@ Please feel free to fork or create an issue
 ## Publications:
 
 If you are using NOVA in your research please consider giving us a citation:
+
+
+ “Applying Cooperative Machine Learning to Speed Up the Annotation of Social Signals in Large Multi-modal Corpora”, Johannes Wagner, Tobias Baur, Yue Zhang, Michel F. Valstar, Björn Schuller, Elisabeth André, https://arxiv.org/abs/1802.02565
+
+<pre><code>
+
+@article{
+  title={Applying Cooperative Machine Learning to Speed Up the Annotation of Social Signals in Large Multi-modal Corpora},
+  author={Johannes Wagner, Tobias Baur, Yue Zhang, Michel F. Valstar, Bj{\''o}rn Schuller, Elisabeth Andr{\'e}},
+  journal={arXiv:1802.02565},
+  url={https://arxiv.org/abs/1802.02565},
+  year={2018}
+  
+}
+  
+</code></pre>
+
+
 
  “Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions”, Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagner, Birgit Lugrin, Elisabeth André, Patrick Gebhard, in ACM Transactions on Interactive Intelligent Systems (TiiS) 5.2, 2015
 

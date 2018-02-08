@@ -190,6 +190,7 @@ namespace ssi
                     ConfidenceTextBox.Text = Properties.Settings.Default.CMLDefaultConf.ToString();
                     FillGapTextBox.Text = Properties.Settings.Default.CMLDefaultGap.ToString();
                     RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
+                    LosoCheckBox.Visibility = Visibility.Collapsed;
 
                     break;
 
@@ -201,7 +202,8 @@ namespace ssi
 
                     PredictOptionsPanel.Visibility = Visibility.Collapsed;
                     TrainOptionsPanel.Visibility = Visibility.Visible;
-                    ForceCheckBox.Visibility = Visibility.Visible;            
+                    ForceCheckBox.Visibility = Visibility.Visible;
+                    LosoCheckBox.Visibility = Visibility.Collapsed;
 
                     break;
 
@@ -214,6 +216,7 @@ namespace ssi
                     PredictOptionsPanel.Visibility = Visibility.Collapsed;
                     TrainOptionsPanel.Visibility = Visibility.Collapsed;
                     ForceCheckBox.Visibility = Visibility.Collapsed;
+                    LosoCheckBox.Visibility = Visibility.Visible;
 
                     break;
 
@@ -226,6 +229,7 @@ namespace ssi
                     PredictOptionsPanel.Visibility = Visibility.Visible;
                     TrainOptionsPanel.Visibility = Visibility.Collapsed;
                     ForceCheckBox.Visibility = Visibility.Collapsed;
+                    LosoCheckBox.Visibility = Visibility.Collapsed;
 
                     ConfidenceCheckBox.IsChecked = Properties.Settings.Default.CMLSetConf;
                     FillGapCheckBox.IsChecked = Properties.Settings.Default.CMLFill;
@@ -422,7 +426,8 @@ namespace ssi
             {
                 string evalOutPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
                 try
-                {
+
+                {                    
                     logTextBox.Text += handler.CMLEvaluateModel(evalOutPath, 
                         trainer.Path,
                         Properties.Settings.Default.DatabaseDirectory,
@@ -434,7 +439,8 @@ namespace ssi
                         scheme.Name,
                         rolesList,
                         annotator.Name,
-                        stream.Name);
+                        stream.Name,
+                        LosoCheckBox.IsChecked.Value);
 
                     if (File.Exists(evalOutPath))
                     {

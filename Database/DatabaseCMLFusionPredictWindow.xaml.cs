@@ -114,7 +114,7 @@ namespace ssi
 
             string[] schemes = new string[SchemeandAnnotatorBox.Items.Count];
             int s = 0;
-            foreach (SchemeAnnotatorPair item in SchemeandAnnotatorBox.SelectedItems)
+            foreach (SchemeAnnotatorPair item in SchemeandAnnotatorBox.Items)
             {
                 schemes[s] = item.Name + ":" + item.Annotator;
                 s++;

@@ -259,7 +259,8 @@
 
             <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" Width="75" Height="30"/>
+                    <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" Width="75" Margin="5" Height="30"/>
+                    <CheckBox Name="LosoCheckBox" VerticalAlignment="Center" ToolTip="Apply leave-one-session-out cross-validation">Cross-validation</CheckBox>
                     <CheckBox Name="ForceCheckBox" Margin="5" VerticalAlignment="Center">Force</CheckBox>
                 </StackPanel>
             </DockPanel>

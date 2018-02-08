@@ -7,7 +7,7 @@ from tensorflow.python.keras.models import Sequential
 
 conf = {
         #general
-        'n_timesteps' : 5, #should be equal to the number of samples in the left context + 1    
+        'n_timesteps' : 2, #should be equal to the number of samples in the left context + 1    
         'is_regression' : True,
         'dropout_rate' : 0.5,
 
