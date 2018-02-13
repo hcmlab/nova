@@ -63,22 +63,22 @@ namespace ssi
             "BOOL"
         };
 
-        private struct WavHeader
-        {
-            public byte[] riffID;
-            public uint size;
-            public byte[] wavID;
-            public byte[] fmtID;
-            public uint fmtSize;
-            public ushort format;
-            public ushort channels;
-            public uint sampleRate;
-            public uint bytePerSec;
-            public ushort blockSize;
-            public ushort bit;
-            public byte[] dataID;
-            public uint dataSize;
-        }
+        //private struct WavHeader
+        //{
+        //    public byte[] riffID;
+        //    public uint size;
+        //    public byte[] wavID;
+        //    public byte[] fmtID;
+        //    public uint fmtSize;
+        //    public ushort format;
+        //    public ushort channels;
+        //    public uint sampleRate;
+        //    public uint bytePerSec;
+        //    public ushort blockSize;
+        //    public ushort bit;
+        //    public byte[] dataID;
+        //    public uint dataSize;
+        //}
 
         public bool loaded = false;
         private string name = null;
