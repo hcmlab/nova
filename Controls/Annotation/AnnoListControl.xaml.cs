@@ -13,8 +13,7 @@ namespace ssi
     /// </summary>
     public partial class AnnoListControl : UserControl
     {
-        private GridViewColumnHeader listViewSortCol = null;
-        private ListViewSortAdorner listViewSortAdorner = null;
+
         private GridViewColumnHeader _lastHeaderClicked = null;
         private ListSortDirection _lastDirection = ListSortDirection.Ascending;
 

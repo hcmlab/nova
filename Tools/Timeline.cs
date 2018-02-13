@@ -5,7 +5,6 @@
         private double totalDuration = 0;
         private double currentPlayPosition = 0;
         private double currentSelectPosition = 0;
-        private double currentPlayPositionPrecise = 0;
         public event TimelineChanged OnTimelineChanged;
 
         public double TotalDuration
