@@ -738,15 +738,20 @@ namespace ssi
 
             double chunk = range / numclasses; 
 
-            for (int i = 0; i < numclasses; i++)
+            if(double.IsNaN(value))
             {
-                if (value >= (MinScore + i * chunk) && value < (MinScore + (i + 1) * chunk))
+                return "REST";
+            }
+            else
+            {
+                for (int i = 0; i < numclasses; i++)
                 {
-                    return classes[i].Name;
+                    if (value >= (MinScore + i * chunk) && value < (MinScore + (i + 1) * chunk))
+                    {
+                        return classes[i].Name;
+                    }
                 }
             }
-
-            //else
 
             return classes[classes.Count - 1].Name;
         }
