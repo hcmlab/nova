@@ -54,6 +54,7 @@ def train(data,label_score, opts, vars):
         n_input = data[0].dim
         
         if not opts['is_regression']:
+            #adding one output for the restclass
             n_output = int(max(label_score)+1)
         else:
             n_output = 1
@@ -151,14 +152,15 @@ def forward(data, probs_or_score, opts, vars):
                         else:     
                             for i in range(len(pred[0])):
                                 results[fp][i] = pred[0][i]
-
-            mean = np.mean(results, axis=1)
-            std = np.std(results, axis=1)
+            mean = np.mean(results, axis=0)
+            std = np.std(results, axis=0)
             conf = max(0,1-np.mean(std))
 
-            sanity_check(probs_or_score)
-            print(results)
-            probs_or_score[0] = mean[0]
+            #sanity_check(probs_or_score)
+            
+            for i in range(len(mean)):
+                probs_or_score[i] = mean[i]
+            
             
             return conf
         else:
@@ -196,7 +198,9 @@ def save(path, opts, vars):
         
         network_new =  os.path.basename(path) + '.' + opts['network']
         shutil.copy(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')
+
     except Exception as e: 
+
         print_exception(e, 'save')
         exit()
 
@@ -265,15 +269,15 @@ def load(path, opts, vars):
         print('tp: {}'.format(trainerPath))
 
         # parsing trainer to retreive input output
-        xmldoc = minidom.parse(trainerPath)
-        streams = xmldoc.getElementsByTagName('streams')
-        streamItem = streams[0].getElementsByTagName('item')
-        n_input = streamItem[0].attributes['dim'].value
-        print("#input: " + str(n_input))
-    	
-        classes = xmldoc.getElementsByTagName('classes')
-        n_output = len(classes[0].getElementsByTagName('item'))
-        print("#output: " + str(n_output))
+        # xmldoc = minidom.parse(trainerPath)
+        # streams = xmldoc.getElementsByTagName('streams')
+        # streamItem = streams[0].getElementsByTagName('item')
+        # n_input = streamItem[0].attributes['dim'].value
+        # print("#input: " + str(n_input))
+
+        # classes = xmldoc.getElementsByTagName('classes')
+        # n_output = len(classes[0].getElementsByTagName('item'))
+        # print("#output: " + str(n_output))
 
         # copy unique network file
         network_tmp = os.path.dirname(path) + '\\' + opts['network'] + '.py'
