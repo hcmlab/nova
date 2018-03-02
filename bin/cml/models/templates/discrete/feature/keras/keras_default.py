@@ -13,7 +13,7 @@ conf = {
 
         #confidence calculation
         'perma_drop' : False, #uses dropout also during testing
-        'n_fp' : 3, #number of forward passes for each prediction in order to calculate the confidence
+        'n_fp' : 1, #number of forward passes for each prediction in order to calculate the confidence
 
         #compile
         'loss_function' : 'binary_crossentropy',    

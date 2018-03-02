@@ -12,12 +12,16 @@ import shutil
 import time
 import site
 
+
+def getModelType(types, opts, vars):
+    return types.CLASSIFICATION
+
+
 def getOptions(opts, vars):
 
     vars['x'] = None
     vars['y'] = None
     vars['sess'] = None
-
     opts['network'] = ''
     opts['p_drop'] = 0.5
     opts['batch_size'] = 1
@@ -45,7 +49,7 @@ def getBatch(n, x, y):
     return (x_, y_)
 
 
-def train(data, label, score, opts, vars):
+def train(data, label, opts, vars):
 
     n_input = data[0].dim
     n_output = max(label)+1
@@ -106,6 +110,8 @@ def forward(data, probs, opts, vars):
     for i in range (len(pred[0])):
         probs[i] = float(pred[0][i])
 
+    return max(probs)
+
 
 def save(path, opts, vars):
 
@@ -135,7 +141,10 @@ def save(path, opts, vars):
             shutil.copy(fullFileName, dstDir)
     
     network_new =  os.path.basename(path) + '.' + opts['network']
-    os.rename(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')    
+    shutil.copy(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')
+    #os.rename(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')    
+    #shutil.move(dstDir + opts['network'] + '.py', dstDir + network_new + '.py') 
+    #shutil.move(dstDir + opts['network'] + '.py', dstDir + network_new + '.py') 
 
 
 def load(path, opts, vars):

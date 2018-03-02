@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<trainer ssi-v="5">
+    <info trained="false" seed="1234"/>
+	<register>
+		<item name="libsvm"/>		
+	</register>	
+    <normalize>
+        <item method="Scale" stream="0"/>
+    </normalize>
+    <model create="LibSVM" stream="0" option="libsvm[-s3 -t2 -e0.001]" />
+</trainer>

@@ -7,7 +7,7 @@ namespace ssi
     /// </summary>
     public partial class SelectionBox : Window
     {
-        public SelectionBox(string info, string[] comboBoxContent, string textBoxContent)
+        public SelectionBox(string info, string[] comboBoxContent, string textBoxContent, int selectedindex = -1)
         {
             InitializeComponent();
 
@@ -20,6 +20,7 @@ namespace ssi
                     this.comboBox.Items.Add(item);
                 }
                 this.comboBox.Visibility = Visibility.Visible;
+                this.comboBox.SelectedIndex = selectedindex;
             }
             else
             {
