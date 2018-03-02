@@ -428,13 +428,13 @@ namespace ssi
             {
                 bool iscontinouswithtier = regcontnew.IsMatch(line);
 
-               
+
 
                 if ((regcont.IsMatch(line) || iscontinouswithtier))
                 {
                     string[] data = line.Split(';');
 
-                    if(data.Length == 3)
+                    if (data.Length == 3)
                     {
                         try
                         {
@@ -466,8 +466,8 @@ namespace ssi
 
                 }
 
-               
-              
+
+
 
                 sr.Close();
             }
@@ -475,7 +475,21 @@ namespace ssi
 
             if (type == "continuous" || type == "semicolon" || type == "legacy")
             {
-                loadCSVAnnoFile(filename, samplerate, type);
+
+                MessageBoxResult mb = MessageBox.Show("CSV matches Legacy annotation format. Load as Annotation?", "No to load as signal", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                if(mb == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+                else if(mb == MessageBoxResult.Yes)
+                {
+                    loadCSVAnnoFile(filename, samplerate, type);
+                }
+                else
+                {
+                    loadCSVSignalFile(filename, foreground, background);
+                }
+
             }
             else
             {
@@ -488,6 +502,10 @@ namespace ssi
             Signal signal = Signal.LoadCSVFile(filename);
             if (signal != null && signal.loaded)
             {
+                this.control.signalbar.Height = new GridLength(control.signalAndAnnoGrid.ActualHeight / 2 - 30);
+                this.control.signalstatusbar.Visibility = Visibility.Visible;
+                signalCursor.signalLoaded = true;
+                annoCursor.signalLoaded = true;
                 addSignalTrack(signal, signalColor, backgroundColor);
             }
         }

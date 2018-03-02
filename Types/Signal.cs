@@ -289,7 +289,7 @@ namespace ssi
 
         public static bool SelectDataType(string filename, ref Signal.Type type, ref double rate)
         {
-            SelectionBox box = new SelectionBox("Please select data type and sample rate (Hz) for:\r\n" + filename + "'", Signal.TypeName, "0");
+            SelectionBox box = new SelectionBox("Please select data type and sample rate (Hz) for:\r\n" + filename + "'", Signal.TypeName, "1", 9);
             box.ShowDialog();
             box.Close();
 

@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
-<options>
-    <item name="type" type="INT" num="1" value="0" lock="true" help="0=Hann, 1=Hamming, 2=Rectangular, 3=Sine, 4=Gauss, 5=Triangular, 6=Bartlett, 7=Lanczos, 8=Bartlett-Hann 9=Blackmann, 10=Blackmann-Harris" />
-    <item name="offset" type="DOUBLE" num="1" value="0.000000e+00" lock="true" help="This specifies an offset which will be added to the samples after multiplying with the window function." />
-    <item name="gain" type="DOUBLE" num="1" value="1.000000e+00" lock="true" help="This option allows you to specify a scaling factor by which window function (which is by default normalised to max. 1) should be multiplied by." />
-    <item name="sigma" type="DOUBLE" num="1" value="4.000000e-01" lock="true" help="Standard deviation for the Gaussian window." />
-    <item name="alpha" type="DOUBLE" num="1" value="1.600000e-01" lock="true" help="alpha for the Blackmann window." />
-    <item name="sqrt" type="BOOL" num="1" value="false" lock="true" help="use square root of 'winFunc' as actual window function (e.g. to get a root raised cosine window)." />
-    <item name="alphas" type="DOUBLE" num="4" value="0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00" lock="true" help="alphas for Blackmann(-Harris) / Bartlett-Hann windows (optional!)." />
+<options readOnly="true">
+    <item name="type" type="INT" num="1" value="0" lock="false" help="0=Hann, 1=Hamming, 2=Rectangular, 3=Sine, 4=Gauss, 5=Triangular, 6=Bartlett, 7=Lanczos, 8=Bartlett-Hann 9=Blackmann, 10=Blackmann-Harris" />
+    <item name="offset" type="DOUBLE" num="1" value="0.000000e+00" lock="false" help="This specifies an offset which will be added to the samples after multiplying with the window function." />
+    <item name="gain" type="DOUBLE" num="1" value="1.000000e+00" lock="false" help="This option allows you to specify a scaling factor by which window function (which is by default normalised to max. 1) should be multiplied by." />
+    <item name="sigma" type="DOUBLE" num="1" value="4.000000e-01" lock="false" help="Standard deviation for the Gaussian window." />
+    <item name="alpha" type="DOUBLE" num="1" value="1.600000e-01" lock="false" help="alpha for the Blackmann window." />
+    <item name="sqrt" type="BOOL" num="1" value="false" lock="false" help="use square root of 'winFunc' as actual window function (e.g. to get a root raised cosine window)." />
+    <item name="alphas" type="DOUBLE" num="4" value="0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00" lock="false" help="alphas for Blackmann(-Harris) / Bartlett-Hann windows (optional!)." />
 </options>

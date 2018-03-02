@@ -144,6 +144,7 @@ def save(path, opts, vars):
     shutil.copy(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')
     #os.rename(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')    
     #shutil.move(dstDir + opts['network'] + '.py', dstDir + network_new + '.py') 
+    #shutil.move(dstDir + opts['network'] + '.py', dstDir + network_new + '.py') 
 
 
 def load(path, opts, vars):
