@@ -37,6 +37,21 @@ The following image shows NOVA's main interface. On the top, media files are dis
 
 To add a file the FILE menu can be used. It allows to select multiple media, stream or annotation files at once. Alternatively, files or folders can be dropped from the explorer. NOVA supports all common video formats, audio wave files and SSI stream files, as well as, CSV files, which will be imported as stream files (in the latter case the user has to provide number format and sample rate). The currently selected media, stream or annotation file can be removed by clicking the 'x' in the according status bar. Clicking the 'Clear' button on the right bottom will remove all files at once. The current workspace can be stored to a project file and reloaded at a later point from the FILE menu (or via drag and drop). Note that in the following we will generally refer to any file that is not annotation as stream.
 
+### Import CSV Signal Files
+CSV Files can be imported via drag and drop. To be read be NOVA the format should be like in this example:
+
+
+	
+	1.0;0.7;0.0    //First sample with 3 dimensions (e.g. x,y and z direction)
+	0.9;0.8;0.1    //Second sample with 3 dimensions
+	...
+	
+
+Either use semicolons as in the example (;) commas, spaces or tabs between dimensions.
+A dialog shows up, asking for the datatype (most likely FLOAT) and the samplerate in hz. (How many samples represent one second of data). 
+
+
+
 ## Creating an Annotation
 
 After loading at least one media or data stream, new annotations tracks can be added to the project. New annotations are created by clicking the 'File' button (bottom left). Alternatively, annotations can be created from the database, too, see [here](#database-create-annotation). A window pops up, which allows to select a scheme type:
@@ -237,6 +252,8 @@ An annotation can be saved to a file on disk. Actually, it is stored in two sepa
 	 0;1
     ...
 	~~~~
+	
+	
 
 # Database
 

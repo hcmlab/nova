@@ -543,19 +543,34 @@ namespace ssi
             
             if (RolesBox.Items.Count > 0)
             {
-                string[] items = Properties.Settings.Default.CMLDefaultRole.Split(';');
-                foreach(string item in items)
+                if(mode == Mode.COMPLETE)
                 {
-                    DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == item);
+                    DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == AnnoTierStatic.Selected.AnnoList.Meta.Role);
                     if (role != null)
                     {
                         RolesBox.SelectedItems.Add(role);
                     }
                 }
-                if (RolesBox.SelectedItem == null)
+
+                else
                 {
-                    RolesBox.SelectAll();
+                    string[] items = Properties.Settings.Default.CMLDefaultRole.Split(';');
+                    foreach(string item in items)
+                    {
+                        DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == item);
+                        if (role != null)
+                        {
+                            RolesBox.SelectedItems.Add(role);
+                        }
+                    }
+                    if (RolesBox.SelectedItem == null)
+                    {
+                        RolesBox.SelectAll();
+                    }
                 }
+
+
+
 
                 RolesBox.ScrollIntoView(RolesBox.SelectedItem);
             }

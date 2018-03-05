@@ -211,7 +211,7 @@ namespace ssi
             {
 
 
-                MessageBoxResult result = MessageBox.Show("File is corrupted! Should it be deleted?", "Attention", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("File " + filepath + " is corrupted! Should it be deleted?", "Attention", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
                     File.Delete(filepath);
