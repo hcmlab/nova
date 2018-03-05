@@ -244,7 +244,7 @@ namespace ssi
 
                         Directory.CreateDirectory(Path.GetDirectoryName(localPath));
 
-
+                        List<string> streamstoDownload = new List<string>();
                         foreach (string stream in streamsAll)
                         {
 
@@ -257,6 +257,7 @@ namespace ssi
                                 continue;
                             }
 
+                            streamstoDownload.Add(stream);
 
                             Thread.Sleep(100);
                            
@@ -271,7 +272,10 @@ namespace ssi
                             else if (connection == "http" || connection == "https" && requiresAuth == false)
 
                             {
-                                httpGet(lurl, llocal);
+                               int result = httpGetSync(lurl, llocal);
+                               if(result == -1) streamstoDownload.RemoveAt(streamstoDownload.Count - 1);
+
+
                             }
                             else if (connection == "http" || connection == "https" && requiresAuth == true)
                             {
@@ -283,7 +287,40 @@ namespace ssi
                                 loadFile(localPath);
                             }
                         }
-                       
+
+                      
+                        control.ShadowBoxText.UpdateLayout();
+                        control.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                        control.ShadowBoxText.Text = "Loading Data";
+                        control.ShadowBox.Visibility = Visibility.Collapsed;
+                        control.shadowBoxCancelButton.Visibility = Visibility.Collapsed;
+                        control.ShadowBox.UpdateLayout();
+
+
+                        foreach (string stream in streamstoDownload)
+                        {
+                            string llocal = localPath + stream;
+
+                            try
+                            {
+                                long length = new System.IO.FileInfo(llocal).Length;
+                                if (length == 0)
+                                {
+                                    Thread.Sleep(100);
+                                    if (File.Exists(llocal)) File.Delete(llocal);
+                                    continue;
+                                }
+                            }
+                            catch
+                            {
+                            }
+
+                           
+                            loadFile(llocal);
+                        }
+
+
+
                     }
                     catch (Exception e)
                     {

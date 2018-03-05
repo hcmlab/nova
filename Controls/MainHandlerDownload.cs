@@ -110,13 +110,7 @@ namespace ssi
 
             if (numberOfActiveParallelDownloads == 0 && NumberOfAllCurrentDownloads == 0)
             {
-                Action EmptyDelegate = delegate () { };
-                control.ShadowBoxText.UpdateLayout();
-                control.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-                control.ShadowBoxText.Text = "Loading Data";
-                control.ShadowBox.Visibility = Visibility.Collapsed;
-                control.shadowBoxCancelButton.Visibility = Visibility.Collapsed;
-                control.ShadowBox.UpdateLayout();
+            
 
                 string[] files = new string[filesToDownload.Count];
                 int i = 0;
@@ -137,7 +131,34 @@ namespace ssi
                 filesToDownload.Clear();
                 statusOfDownloads.Clear();
                 loadMultipleFilesOrDirectory(files);
+
+                Action EmptyDelegate = delegate () { };
+                control.ShadowBoxText.UpdateLayout();
+                control.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                control.ShadowBoxText.Text = "Loading Data";
+                control.ShadowBox.Visibility = Visibility.Collapsed;
+                control.shadowBoxCancelButton.Visibility = Visibility.Collapsed;
+                control.ShadowBox.UpdateLayout();
             }
+        }
+
+
+        private void FinishedDownloadSync(string filePath)
+        {
+
+            //remove empty files here, e.g. non existing ones.
+            statusOfDownloads.Remove(statusOfDownloads.Find(dl => dl.File == filePath));
+
+           
+                Action EmptyDelegate = delegate () { };
+                control.ShadowBoxText.UpdateLayout();
+                control.ShadowBoxText.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                control.ShadowBoxText.Text = "Loading Data";
+                control.ShadowBox.Visibility = Visibility.Collapsed;
+                control.shadowBoxCancelButton.Visibility = Visibility.Collapsed;
+                control.ShadowBox.UpdateLayout();
+
+            
         }
 
         private async Task SFTP(string url, string localpath)
@@ -307,6 +328,79 @@ namespace ssi
             else await control.Dispatcher.BeginInvoke(new Action<string>(FinishedDownload), DispatcherPriority.Normal, "");
         }
 
+
+        private int httpGetSync(string URL, string localpath)
+        {
+            string fileName = Path.GetFileName(localpath);
+            if (fileName.EndsWith(".stream%7E"))
+            {
+                fileName = fileName.Remove(fileName.Length - 3);
+                fileName = fileName + "~";
+            }
+
+            filesToDownload.Add(localpath);
+            numberOfActiveParallelDownloads++;
+
+            if (!File.Exists(localpath))
+            {
+                DownloadStatus dl = new DownloadStatus();
+                dl.File = localpath;
+                dl.percent = 0.0;
+                dl.active = true;
+                statusOfDownloads.Add(dl);
+
+                try
+                {
+                    Action EmptyDelegate = delegate () { };
+                    control.ShadowBoxText.Text = "Downloading '" + fileName + "'";
+                    control.ShadowBox.Visibility = Visibility.Visible;
+                    //control.shadowBoxCancelButton.Visibility = Visibility.Visible;
+                    control.UpdateLayout();
+                    control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                    // Create a new WebClient instance.
+
+                    WebClient client = new WebClient();
+
+                    client.DownloadProgressChanged += (s, e) =>
+                    {
+                        dl.percent = ((double)e.BytesReceived / (double)e.TotalBytesToReceive) * 100.0;
+                        control.ShadowBoxText.Text =  "Downloading " + fileName + "  (" + dl.percent.ToString("F2") + "%)\n";
+                    };
+
+                    //client.DownloadFileCompleted += (s, e) =>
+                    //{
+                      
+                    //};
+
+                    tokenSource = new CancellationTokenSource();
+
+                    try
+                    {
+                       client.DownloadFileAsync(new Uri(URL), localpath, tokenSource);
+
+                       
+                    }
+                    catch (WebException ex)
+                    {
+
+                        return -1;
+                    }
+                   
+                }
+
+                catch (Exception ex)
+                {
+                    MessageTools.Error(ex.ToString());
+                }
+            }
+
+            return 1;
+           // else control.Dispatcher.BeginInvoke(new Action<string>(FinishedDownload), DispatcherPriority.Normal, "");
+        }
+
+
+
+
         private async Task httpGet(string URL, string localpath)
         {
             string fileName = Path.GetFileName(localpath);
@@ -349,7 +443,28 @@ namespace ssi
                     {
                         try
                         {
-                            control.Dispatcher.BeginInvoke(new Action<string>(FinishedDownload), DispatcherPriority.Normal, localpath);
+                            //control.Dispatcher.BeginInvoke(new Action<string>(FinishedDownload), DispatcherPriority.Normal, localpath);
+
+                            string[] files = new string[filesToDownload.Count];
+                            int i = 0;
+                            foreach (string path in filesToDownload)
+                            {
+                                long length = new System.IO.FileInfo(path).Length;
+                                if (length == 0)
+                                {
+                                    if (File.Exists(path)) File.Delete(path);
+                                }
+                                else
+                                {
+                                    files[i] = path;
+                                    i++;
+                                }
+                            }
+
+                            
+                            loadFile(localpath);
+
+
                         }
                         catch
                         {
