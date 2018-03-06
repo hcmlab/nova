@@ -381,10 +381,15 @@ namespace ssi
             continuousTierEllipse.SetValue(Canvas.TopProperty, (yPos - continuousTierEllipse.Height / 2));
             continuousTierEllipse.SetValue(Canvas.LeftProperty, (MainHandler.Time.PixelFromTime(MainHandler.Time.CurrentPlayPosition) - continuousTierEllipse.Width / 2));
             AnnoList[closestIndex].Score = normalized;
+            AnnoList[closestIndex].Confidence = 1.0;
 
             for (int i = closestIndexOld; i < closestIndex; i++)
             {
-                if (closestIndexOld > -1) AnnoList[i].Score = normalized;
+                if (closestIndexOld > -1)
+                {
+                    AnnoList[i].Score = normalized;
+                    AnnoList[closestIndex].Confidence = 1.0;
+                }
             }
             closestIndexOld = closestIndex;
 
@@ -1203,10 +1208,12 @@ namespace ssi
                             double normal = 1.0 - ((e.GetPosition(this).Y / this.ActualHeight));
                             double normalized = (normal * range) + AnnoList.Scheme.MinScore;
                             AnnoList[closestIndex].Score = normalized;
+                            AnnoList[closestIndex].Confidence = 1.0;
 
                             for (int i = closestIndexOld; i < closestIndex; i++)
                             {
                                 AnnoList[i].Score = normalized;
+                                AnnoList[i].Confidence = 1.0;
                             }
                             closestIndexOld = closestIndex;
                             TimeRangeChanged(MainHandler.Time);
