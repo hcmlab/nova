@@ -21,6 +21,8 @@ namespace ssi
             continuousSchemeGrid.Visibility = Visibility.Collapsed;
             freeSchemeGrid.Visibility = Visibility.Collapsed;
 
+      
+
             Result = item;
             this.scheme = scheme;
             confidenceSlider.Value = item.Confidence;
@@ -29,7 +31,8 @@ namespace ssi
             switch (scheme.Type)
             {
                 case AnnoScheme.TYPE.CONTINUOUS:
-                    scoreTextBox.Text = item.Score.ToString();
+                    if (!double.IsNaN(item.Score)) scoreTextBox.Text = item.Score.ToString();
+                    else scoreTextBox.Text = "";
                     infoLabel.Text = "Edit continuous label";                    
                     continuousSchemeGrid.Visibility = Visibility.Visible;                    
                     break;
@@ -61,10 +64,19 @@ namespace ssi
 
             switch (scheme.Type)
             {
-                case AnnoScheme.TYPE.CONTINUOUS:                    
-                    double score = 0;
-                    double.TryParse(scoreTextBox.Text, out score);                    
-                    Result.Score = score;                    
+                case AnnoScheme.TYPE.CONTINUOUS:
+
+                    if (scoreTextBox.Text == "")
+                    {
+                        Result.Score = double.NaN;
+                    }
+                    else
+                    {
+                        double score = 0;
+                        double.TryParse(scoreTextBox.Text, out score);
+                        Result.Score = score;
+                        
+                    }
                     break;
 
                 case AnnoScheme.TYPE.DISCRETE:

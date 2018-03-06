@@ -1227,9 +1227,19 @@ namespace ssi
             MouseMove(e);
         }
 
+
+        Color InvertMeAColour(Color ColourToInvert)
+        {
+            return Color.FromRgb((byte)~ColourToInvert.R, (byte)~ColourToInvert.G, (byte)~ColourToInvert.B);
+        }
+
         public void TimeRangeChanged(Timeline time)
         {
             this.Width = time.SelectionInPixel;
+
+
+
+            
 
             //segments can happen in both, discrete and continuous annotations, so we check them in any case
             foreach (AnnoTierSegment s in segments)
@@ -1251,6 +1261,10 @@ namespace ssi
 
             if (this.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
             {
+
+                //Color InvertedColor = InvertMeAColour(this.AnnoList.Scheme.MinOrBackColor);
+                SolidColorBrush invertBrush = new SolidColorBrush(Colors.Magenta);
+
                 if (this.ActualHeight > 0)
                 {
                     //markers
@@ -1315,6 +1329,15 @@ namespace ssi
                                     }
 
                                     continuousTierLines[i % continuousTierLines.Count].Visibility = Visibility.Visible;
+
+                                    if(ali.Confidence < Properties.Settings.Default.UncertaintyLevel)
+                                    {
+                                        continuousTierLines[i % continuousTierLines.Count].Stroke = invertBrush;
+                                    }
+                                    else
+                                    {
+                                        continuousTierLines[i % continuousTierLines.Count].Stroke = Brushes.Black;
+                                    }
                                 }
                                 else
                                 {
@@ -1373,6 +1396,17 @@ namespace ssi
                                         value = 1.0 - (AnnoList[index].Score - AnnoList.Scheme.MinScore) / range;
                                         s.Y1 = (value) * this.ActualHeight;
                                         s.Visibility = Visibility.Visible;
+
+                                        if (AnnoList[index].Confidence < Properties.Settings.Default.UncertaintyLevel)
+                                        {
+
+                                            s.Stroke = invertBrush;
+                                        }
+                                        else
+                                        {
+                                            s.Stroke = Brushes.Black;
+                                        }
+
                                     }
 
                                     else

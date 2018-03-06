@@ -288,7 +288,20 @@ namespace ssi
         {
             if (AnnoTierStatic.Selected != null)
             {
-                AnnoTierNewLabelWindow dialog = new AnnoTierNewLabelWindow(AnnoTierStatic.Selected.AnnoList.Scheme, AnnoTierStatic.Label.Item);
+                double start = MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
+                double stop = MainHandler.Time.CurrentPlayPosition;
+
+                if (start > stop)
+                {
+                    double temp = start;
+                    start = stop;
+                    stop = temp;
+                }
+
+
+
+                AnnoListItem newItem = new AnnoListItem(start, stop - start, double.NaN);
+                AnnoTierNewLabelWindow dialog = new AnnoTierNewLabelWindow(AnnoTierStatic.Selected.AnnoList.Scheme, newItem);
                 dialog.ShowDialog();
 
                 double value = dialog.Result.Score;
@@ -297,15 +310,16 @@ namespace ssi
 
                 if (dialog.DialogResult == true)
                 {
-                    string valueString = value.ToString();
-                    if (value >= AnnoTierStatic.Selected.AnnoList.Scheme.MinScore && value <= AnnoTierStatic.Selected.AnnoList.Scheme.MaxScore)
+                   
+                    if (value >= AnnoTierStatic.Selected.AnnoList.Scheme.MinScore && value <= AnnoTierStatic.Selected.AnnoList.Scheme.MaxScore || double.IsNaN(value))
                     {
                         success = true;
                         foreach (AnnoListItem ali in AnnoTierStatic.Selected.AnnoList)
                         {
-                            if (ali.Start >= AnnoTierStatic.Label.Item.Start && ali.Stop <= AnnoTierStatic.Label.Item.Stop)
+                            if (ali.Start >= start  && ali.Stop <= stop)
                             {
-                                ali.Label = valueString;
+                                if(!double.IsNaN(value)) ali.Score = value;
+                                ali.Confidence = confidence;
                             }
                         }
                     }
@@ -510,26 +524,7 @@ namespace ssi
                 }
                 geometricCompare.Clear();
             }
-            else if (e.LeftButton == MouseButtonState.Pressed && Keyboard.IsKeyDown(Key.LeftShift))
-            {
-                if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(false);
-
-                if (AnnoTierStatic.Selected != null && (AnnoTierStatic.Selected.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS || isMouseButtonDown == false))
-                {
-                    foreach (AnnoTier a in annoTiers)
-                    {
-                        if (a.IsMouseOver)
-                        {
-                            AnnoTier.SelectLabel(null);
-                            AnnoTier.Select(a);
-                            break;
-                        }
-                    }
-                }
-
-                if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.LeftMouseButtonDown(e);
-                isMouseButtonDown = true;
-            }
+         
             else if (e.RightButton == MouseButtonState.Pressed && !Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 if (AnnoTierStatic.Label != null) AnnoTierStatic.Label.select(false);
