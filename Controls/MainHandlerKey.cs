@@ -847,11 +847,7 @@ namespace ssi
                 }
                 else
                 {
-                    if (AnnoTierStatic.Label != null)
-                    {
                         ShowLabelBoxContinuous();
-                        AnnoTierStatic.Label.select(true);
-                    }
 
                     isKeyDown = true;
                 }
