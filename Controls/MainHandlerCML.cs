@@ -288,7 +288,7 @@ namespace ssi
             return runCMLTool("cmltrain", "forward", parameters, arguments, "cml-predict");            
         }
 
-        public string CMLPredictBayesFusion(string node,
+        public string CMLPredictBayesFusion(string roleout,
           string sessionpath,
           string schemespath,
           string server,
@@ -318,8 +318,8 @@ namespace ssi
             try
             {
                 string options_no_pass = " -username " + username +
-                        " -node " + node +
                         " -log \"" + logPath + "\"" +
+                        " -role_out \"" + roleout + "\"" +
                         " -netpath " + "\"" + netpath + "\" " + filt;
                 string options = options_no_pass + " -password " + password;
                 string arguments = "\"" + sessionpath + "\" " +

@@ -192,7 +192,7 @@ namespace ssi
 
         private void aboutMenu_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human Centered Multimedia 2017\n Lead Developers: Tobias Baur & Johannes Wagner\nnova@hcm-lab.de");
+            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human Centered Multimedia 2018\n Lead Developers: Tobias Baur & Johannes Wagner\nnova@hcm-lab.de");
         }
 
        

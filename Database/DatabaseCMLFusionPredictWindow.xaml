@@ -66,14 +66,14 @@
                 <Label Grid.Row="2">Schemes</Label>
                 <ListBox Name="SchemesBox" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
 
-               
+
 
                 <Label Grid.Row="4" Margin="0,5,0,5">Annotator</Label>
 
                 <ListBox Name="AnnotatorInputBox" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
                 <Button Content="Add" Width="30" Height="20" Click="AddItemButton_Click" Grid.Row="6" Margin="0,5,0,5"/>
-        
-            
+
+
 
 
             </Grid>
@@ -83,17 +83,18 @@
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="50*"></RowDefinition>
+                    <RowDefinition Height="39*"/>
                     <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="178"></RowDefinition>
                 </Grid.RowDefinitions>
 
-                
+
 
                 <Label Grid.Row="0">Output Annotator</Label>
-                <ListBox Name="AnnotatorsBox" SelectionMode="Single" Grid.Row="1" Margin="0,0,5,0"/>
-                <Label Grid.Row="2">Output Scheme</Label>
-                <ListBox Name="SchemeOutputBox" SelectionMode="Single" Grid.Row="3" Margin="0,0,5,0"/>
+                <ListBox Name="AnnotatorsBox" SelectionMode="Single" Grid.Row="1" Margin="0,0,5,0" Grid.RowSpan="2"/>
+                <Label Grid.Row="3">Output Scheme</Label>
+                <ListBox Name="SchemeOutputBox" SelectionMode="Single" Grid.Row="4" Margin="0,0,5,0"/>
 
 
             </Grid>
@@ -109,13 +110,13 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
- 
+
 
                 </Grid.RowDefinitions>
 
 
 
-               
+
 
 
                 <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,28,0" >Selected Inputs</Label>
@@ -142,29 +143,29 @@
                 <Label Content="Sessions" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" />
 
                 <ListView Name="SessionsBox" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" SelectionMode="Extended">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
-                                <GridViewColumn Width="Auto" Header="Language">
-                                    <GridViewColumn.DisplayMemberBinding>
-                                        <Binding Path="Language" />
-                                    </GridViewColumn.DisplayMemberBinding>
-                                </GridViewColumn>
-                                <GridViewColumn Width="Auto" Header="Location">
-                                    <GridViewColumn.DisplayMemberBinding>
-                                        <Binding Path="Location" />
-                                    </GridViewColumn.DisplayMemberBinding>
-                                </GridViewColumn>
-                                <GridViewColumn Width="Auto" Header="Date">
-                                    <GridViewColumn.DisplayMemberBinding>
-                                        <Binding Path="Date" />
-                                    </GridViewColumn.DisplayMemberBinding>
-                                </GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                   
-                
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Width="Auto" Header="Language">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Language" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Location">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Location" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Date">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Date" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+
 
             </Grid>
 
@@ -203,18 +204,21 @@
 
                     <Label Grid.Row="0" Grid.Column="0" >Network</Label>
                     <ComboBox Name="NetworkBox" Grid.Row="0" Grid.Column="1"  VerticalAlignment="Center" SelectedIndex="0"/>
-                   
+
                     <CheckBox Name="smoothcheckbox" Content="" Grid.Column="0" IsChecked="True"  Grid.Row="1"></CheckBox>
                     <Label Grid.Column="1" Grid.Row="1">Smooth continuous output (only for continuous schemes)</Label>
                     <TextBox Name="WindowSmoothBox" Height="20" Width="30" Grid.Column="2" Grid.Row="1">5.0</TextBox>
                     <Label Grid.Column="3" Grid.Row="1">Window for smoothing in seconds</Label>
+
+                    <ComboBox Name="Outrole" Height="20" Width="30" Grid.Column="0" Grid.Row="2" MinWidth="80" ></ComboBox>
+                    <Label Grid.Column="1" Grid.Row="2">Role of Outputnode (In multi-user models)</Label>
 
 
                 </Grid>
 
             </GroupBox>
 
-            
+
             <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" Width="75" Height="30"/>
