@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace ssi
 {
@@ -911,10 +912,17 @@ namespace ssi
 
                     ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
 
-                    string[] tokens = AnnoTierStatic.Selected.CMLCompleteTrainOptions.Split(' ');
+                    //Make sure Windows User name does not contain spaces, otherwise this caused a crash.
+                    string tempOptions = Regex.Replace(AnnoTierStatic.Selected.CMLCompleteTrainOptions, @"""[^""]+""", m => m.Value.Replace(' ', '|'));
+
+
+                    string[] tokens = tempOptions.Split(' ');
                     if (tokens.Length > 1)
                     {
                         string tempTrainerPath = tokens[tokens.Length - 2];
+                        tempTrainerPath  = Regex.Replace(tempTrainerPath, @"""[^""]+""", m => m.Value.Replace('|', ' '));
+
+
                         tempTrainerPath = tempTrainerPath.Trim();
                         tempTrainerPath = tempTrainerPath.Replace("\"", "");
                         var dir = new DirectoryInfo(Path.GetDirectoryName(tempTrainerPath));
