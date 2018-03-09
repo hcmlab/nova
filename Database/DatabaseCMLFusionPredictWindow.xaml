@@ -211,7 +211,7 @@
                     <Label Grid.Column="3" Grid.Row="1">Window for smoothing in seconds</Label>
 
                     <ComboBox Name="Outrole" Height="20" Width="30" Grid.Column="0" Grid.Row="2" MinWidth="80" ></ComboBox>
-                    <Label Grid.Column="1" Grid.Row="2">Role of Outputnode (In multi-user models)</Label>
+                    <Label Grid.Column="1" Grid.Row="2">Role of Outputnode (only in multi-user models)</Label>
 
 
                 </Grid>

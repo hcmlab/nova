@@ -104,7 +104,7 @@ namespace ssi
 
             string database = DatabaseHandler.DatabaseName;
 
-            string[] sessions = new string[SchemeandAnnotatorBox.SelectedItems.Count];
+            string[] sessions = new string[SessionsBox.SelectedItems.Count];
             int i = 0;
             foreach (DatabaseSession item in SessionsBox.SelectedItems)
             {
