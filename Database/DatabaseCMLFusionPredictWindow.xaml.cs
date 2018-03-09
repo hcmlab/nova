@@ -164,8 +164,8 @@ namespace ssi
             string outputscheme = SchemeOutputBox.SelectedItem.ToString();
 
             string annotator = DatabaseHandler.Annotators.Find(n => n.FullName == Properties.Settings.Default.CMLDefaultAnnotatorPrediction).Name;
-           
 
+            string roleout = Outrole.SelectedItem.ToString();
 
             bool tocontinuous = false;
             DatabaseScheme outscheme = DatabaseHandler.Schemes.Find(n => n.Name == outputscheme);
@@ -187,7 +187,7 @@ namespace ssi
 
 
 
-            logTextBox.Text += handler.CMLPredictBayesFusion(outputscheme, sessionsspath, schemespath, Properties.Settings.Default.DatabaseAddress, Properties.Settings.Default.MongoDBUser, MainHandler.Decode(Properties.Settings.Default.MongoDBPass), Properties.Settings.Default.DatabaseDirectory, database, outputscheme, rolesList, annotator, tocontinuous, netpath, filter);
+            logTextBox.Text += handler.CMLPredictBayesFusion(roleout, sessionsspath, schemespath, Properties.Settings.Default.DatabaseAddress, Properties.Settings.Default.MongoDBUser, MainHandler.Decode(Properties.Settings.Default.MongoDBPass), Properties.Settings.Default.DatabaseDirectory, database, outputscheme, rolesList, annotator, tocontinuous, netpath, filter);
         }
 
         private void Select(ListBox list, string select) 
@@ -260,12 +260,14 @@ namespace ssi
         public void GetRoles()
         {
             RolesBox.Items.Clear();
+            Outrole.Items.Clear();
 
             foreach (DatabaseRole item in DatabaseHandler.Roles)
             {
                 if (item.HasStreams)
                 {
                     RolesBox.Items.Add(item.Name);
+                    Outrole.Items.Add(item.Name);
                 }
             }
 
@@ -273,7 +275,11 @@ namespace ssi
             {
                 RolesBox.SelectedIndex = 0;
                 RolesBox.SelectedItem = Properties.Settings.Default.CMLDefaultRole;
+                Outrole.SelectedIndex = 0;
             }
+
+
+           
         }
 
         public void GetAnnotators()
