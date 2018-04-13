@@ -13,6 +13,12 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
+        <Style TargetType="{x:Type ContentControl}">
+            <Setter Property="ContentStringFormat" 
+            Value="{Binding Resolution, StringFormat=N{0}}" />
+        </Style>
+
+
     </Window.Resources>
 
     <Grid Margin="5">
@@ -39,7 +45,8 @@
                 <Button Style="{StaticResource MyButton}" Name="DeleteSession" Content="REM" Click="DeleteSession_Click" />
                 <Button Style="{StaticResource MyButton}" Name="EditSession" Content="EDIT" Click="EditSession_Click" />
                 <Button Style="{StaticResource MyButton}" Name="CopySession" Content="COPY" Click="CopySession_Click" />
-                <Button Style="{StaticResource MyButton}" Name="ImportfromFolder" Content="IMPORT" Click="ImportfromFolder_Click" />
+                <Button Style="{StaticResource MyButton}" Name="ImportfromFolder" Content="IMPORT SESSIONS" Click="ImportfromFolder_Click" />
+                <Button Style="{StaticResource MyButton}" Name="ImportDuration" Content="IMPORT DURATIONS" Click="ImportDuration_Click" />
             </StackPanel>
             <ListView Name="SessionsBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Extended" SelectionChanged="SessionsBox_SelectionChanged" >
                 <ListView.View>
@@ -54,6 +61,11 @@
                         <GridViewColumn Width="Auto" Header="Location">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Location" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Duration">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="Duration" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
                         <GridViewColumn Width="Auto" Header="Date">

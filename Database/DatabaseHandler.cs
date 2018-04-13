@@ -1857,6 +1857,13 @@ namespace ssi
                     {
                         session.Location = document["location"].ToString();
                     }
+
+                    session.Duration = 0;
+                    if (document.TryGetElement("duration", out value))
+                    {
+                        session.Duration = document["duration"].AsDouble;
+                    }
+
                     session.Date = new DateTime();
                     if (document.TryGetElement("date", out value))
                     {
@@ -1887,6 +1894,7 @@ namespace ssi
                     {"location",  session.Location},
                     {"language",  session.Language},
                     {"date",  new BsonDateTime(date)},
+                    {"duration",  session.Duration},
                     {"isValid",  true}
             };
 
@@ -2728,6 +2736,8 @@ namespace ssi
         public string Location { get; set; }
         public DateTime Date { get; set; }
 
+        public double Duration { get; set; } 
+
         public override string ToString()
         {
             return Name;
@@ -2781,6 +2791,8 @@ namespace ssi
         public string FileExt { get; set; }
         public string Type { get; set; }
         public double SampleRate { get; set; }
+        public double Duration { get; set; }
+
         public override string ToString()
         {
             return Name;

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Xml;
 
 namespace ssi
 {
@@ -200,14 +201,13 @@ namespace ssi
 
             string path = "";
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
             dialog.ShowNewFolderButton = true;
             dialog.Description = "Select the root folder of your sessions.";
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
 
             try
             {
-                dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
+                dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseBox.SelectedItem.ToString();
                 result = dialog.ShowDialog();
 
             }
@@ -240,7 +240,9 @@ namespace ssi
                             Name = dirName,
                             Date = session.Date,
                             Language = session.Language,
-                            Location = session.Location
+                            Location = session.Location,
+                            Duration = session.Duration
+                           
                         };
                         DatabaseHandler.AddSession(newSession);
                     }
@@ -252,6 +254,110 @@ namespace ssi
 
            
 
+
+        }
+
+        private void ImportDuration_Click(object sender, RoutedEventArgs e)
+        {
+            string path = "";
+            var dialog = new System.Windows.Forms.OpenFileDialog();
+            // dialog.Filter = @"|Media Files|*.mp4;*.avi;*.wav;*.mp3*";
+            dialog.Filter = "All Media Types|*.stream;*.mp4;*.avi;*.wav;*.mp3;*.flac";
+           
+
+ 
+
+            // dialog. = "Select the root folder of your sessions.";
+             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+
+            try
+            {
+                dialog.InitialDirectory = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseBox.SelectedItem.ToString();
+                result = dialog.ShowDialog();
+
+            }
+
+            catch
+            {
+                dialog.InitialDirectory = "";
+                result = dialog.ShowDialog();
+            }
+
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+
+                string filename = Path.GetFileName(dialog.FileName);
+                string sessionPath = Path.GetDirectoryName(dialog.FileName);
+                string rootPath = Path.GetDirectoryName(sessionPath);
+
+
+                Media media;
+                System.Collections.IList items;
+
+                if (SessionsBox.SelectedItems.Count == 0)
+                {
+                    items = SessionsBox.Items;
+                }
+                else
+                {
+                    items = SessionsBox.SelectedItems;
+                }
+
+
+                foreach (var session in items)
+                {
+                    string filepath = rootPath + "\\" + ((DatabaseSession)session).Name + "\\" + filename;
+                    try
+                    {
+                        double duration = 0;
+                        if(filepath.EndsWith("stream"))
+                        {
+
+                            XmlDocument doc = new XmlDocument();
+                            doc.Load(filepath);
+                            XmlNode node = doc.SelectSingleNode("//info");
+                            double rate = double.Parse(node.Attributes["sr"].Value);
+                            uint num = 0;
+                            foreach (XmlNode n in doc.SelectNodes("//chunk"))
+                            {
+                                num += uint.Parse(n.Attributes["num"].Value);
+                            }
+
+                               duration = num/ rate;
+                        }
+                        else
+                        {
+                            if (filepath.EndsWith("wav") || filepath.EndsWith("mp3") || filepath.EndsWith("flac"))
+                            {
+                                media = new Media(filepath, MediaType.AUDIO);
+                            }
+                            else
+                            {
+                                media = new Media(filepath, MediaType.VIDEO);
+                            }
+
+
+                            if (media.NaturalDuration.HasTimeSpan)
+                            {
+                                duration = media.NaturalDuration.TimeSpan.TotalSeconds;
+                                media = null;
+                              
+                            }
+                        }
+
+                        duration = Math.Round(duration, 2);
+                        ((DatabaseSession)session).Duration = duration;
+                        DatabaseHandler.UpdateSession(((DatabaseSession)session).Name, ((DatabaseSession)session));
+
+
+                    }
+                    catch { Console.WriteLine("Could not read " + filepath); }
+                   
+                }
+
+                GetSessions();
+            }
 
         }
 
