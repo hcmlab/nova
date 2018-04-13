@@ -89,11 +89,14 @@
                                     <Binding Path="Name" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-
-
                             <GridViewColumn Width="Auto" Header="Language">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Language" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Duration">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Duration" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
                             <GridViewColumn Width="Auto" Header="Location">

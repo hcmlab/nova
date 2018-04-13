@@ -271,6 +271,11 @@ namespace ssi
             if (writerolecheckbox.IsChecked == true)
             {
                 headline += "role" + seperator;
+
+                for (int i = 0; i < tempsteps; i++)
+                {
+                    headline += "role_" + (i + 1) + seperator;
+                }
             }
 
             for (int a = 0; a < annoLists.Count; a++)
@@ -425,6 +430,10 @@ namespace ssi
                             if (writerolecheckbox.IsChecked == true)
                             {
                                 headline += role.ToUpper() + seperator;
+                                for (int j = 0; j < tempsteps; j++)
+                                {
+                                    headline += role.ToUpper() + seperator;
+                                }
                             }
 
                             headline = headline.Remove(headline.Length - 1);

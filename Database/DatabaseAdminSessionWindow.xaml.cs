@@ -27,6 +27,7 @@ namespace ssi
             NameField.Text = session.Name;
             LanguageField.Text = session.Language;
             LocationField.Text = session.Location;
+            DurationField.Text = session.Duration.ToString();
             DatePicker.SelectedDate = session.Date.Year == 1 ? DateTime.Today : session.Date;
         }       
 
@@ -43,6 +44,9 @@ namespace ssi
             session.Language = LanguageField.Text;
             session.Location = LocationField.Text;
             session.Date = DatePicker.SelectedDate.Value;
+            double duration = 0;
+            double.TryParse(DurationField.Text, out duration);
+            session.Duration = duration;
 
             DialogResult = true;
             Close();

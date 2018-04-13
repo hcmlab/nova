@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Web.UI.DataVisualization.Charting;
 
 namespace ssi
 {
@@ -928,6 +929,14 @@ namespace ssi
                 list2[i] = ys[i].Score;
             }
 
+            double mean = Math.Abs(list1.Mean() - list2.Mean());
+
+             double p = MathNet.Numerics.ExcelFunctions.TDist(mean, list1.Count(), 2);
+
+
+
+
+
             double r = Correlation.Pearson(list1, list2);
             return r;
         }
@@ -1151,7 +1160,11 @@ namespace ssi
                     double pearsoncorrelation = double.MaxValue;
 
                     pearsoncorrelation = PearsonCorrelationMathNet(annolists[0], annolists[1]);
-                    interpretation = Pearsoninterpretation(pearsoncorrelation);
+
+                    int N = annolists[0].Count;
+                    if (annolists[1].Count < annolists[0].Count) N = annolists[1].Count;
+
+                    interpretation = Pearsoninterpretation(pearsoncorrelation, N);
 
                     if (pearsoncorrelation != double.MaxValue)
                     {
@@ -1180,20 +1193,36 @@ namespace ssi
             }
         }
 
-        private string Pearsoninterpretation(double pearsoncorrelation)
+        private string Pearsoninterpretation(double r, int N)
         {
             string interpretation = "";
-            if (pearsoncorrelation <= -1) interpretation = "perfect downhill (negative) linear relationship";
-            else if (pearsoncorrelation > -1 && pearsoncorrelation <= -0.7) interpretation = "strong downhill (negative) linear relationship";
-            else if (pearsoncorrelation > -0.7 && pearsoncorrelation <= -0.5) interpretation = "moderate downhill (negative) relationship";
-            else if (pearsoncorrelation > -0.5 && pearsoncorrelation <= -0.3) interpretation = "weak downhill (negative) linear relationship";
-            else if (pearsoncorrelation > -0.3 && pearsoncorrelation <= 0.3) interpretation = "no linear relationship";
-            else if (pearsoncorrelation > 0.3 && pearsoncorrelation <= 0.5) interpretation = "weak uphill (positive) linear relationship";
-            else if (pearsoncorrelation > 0.5 && pearsoncorrelation <= 0.7) interpretation = "moderate uphill (positive) relationship";
-            else if (pearsoncorrelation > 0.7 && pearsoncorrelation < 1) interpretation = "strong uphill (positive) linear relationship";
-            else if (pearsoncorrelation >= 1.0) interpretation = "perfect uphill (positive) linear relationship";
+            if (r <= -1) interpretation = "perfect downhill (negative) linear relationship";
+            else if (r > -1 && r <= -0.7) interpretation = "strong downhill (negative) linear relationship";
+            else if (r > -0.7 && r <= -0.5) interpretation = "moderate downhill (negative) relationship";
+            else if (r > -0.5 && r <= -0.3) interpretation = "weak downhill (negative) linear relationship";
+            else if (r > -0.3 && r <= 0.3) interpretation = "no linear relationship";
+            else if (r > 0.3 && r <= 0.5) interpretation = "weak uphill (positive) linear relationship";
+            else if (r > 0.5 && r <= 0.7) interpretation = "moderate uphill (positive) relationship";
+            else if (r > 0.7 && r < 1) interpretation = "strong uphill (positive) linear relationship";
+            else if (r >= 1.0) interpretation = "perfect uphill (positive) linear relationship";
 
-            return interpretation;
+            //double t = r / (Math.Sqrt((1 - (r * r)) / (N - 2)));
+
+
+
+
+
+            //double t = r * Math.Sqrt(N-2) / (Math.Sqrt((1 - (r * r))));
+
+            //Chart Chart1 = new Chart();
+            //double p = Chart1.DataManipulator.Statistics.TDistribution(t, N - 2, false);
+            //string significance = "";
+
+
+            //if (p < 0.05) significance = p.ToString("F6") + "< 0.05" ;
+            //else  significance = p.ToString("F6") + ">= 0.05";
+
+            return interpretation; // + " " + significance;
         }
 
         private string Spearmaninterpretation(double spearmancorrelation)

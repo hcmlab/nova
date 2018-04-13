@@ -97,6 +97,8 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Printing" />
     <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Web.DataVisualization" />
+    <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Windows.Controls.DataVisualization.Toolkit">
       <HintPath>References\System.Windows.Controls.DataVisualization.Toolkit.dll</HintPath>
     </Reference>
