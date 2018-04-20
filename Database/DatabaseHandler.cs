@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -40,6 +41,8 @@ namespace ssi
         public static List<DatabaseAnnotator> Annotators { get { return annotators; } }
 
         private static List<DatabaseUser> users = new List<DatabaseUser>();
+        private static bool throwOnInvalidBytes;
+
         public static List<DatabaseUser> Users { get { return users; } }
 
         #region CONNECT AND AUTH
@@ -116,7 +119,9 @@ namespace ssi
             {
                 if (client == null)
                 {
-                    client = new MongoClient(clientAddress);
+                    MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
+                    settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);                    
+                    client = new MongoClient(settings);
                 }
                 return client;
             }
