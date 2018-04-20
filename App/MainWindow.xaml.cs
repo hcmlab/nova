@@ -72,27 +72,39 @@ namespace ssi
         private void HandleClArgs(IList<string> args)
         {
             if (args.Count <= 1) return;
-            for (var i = 1; i < args.Count; i++)
-            {
-                try
-                {
+            //for (var i = 1; i < args.Count; i++)
+            //{
+            //    try
+            //    {
 
-                    string filerooted;
-                    if (!Path.IsPathRooted(args[i]))
-                    {
-                        filerooted = Directory.GetCurrentDirectory() + "\\" + args[i];
-                    }
-                    else
-                    {
-                        filerooted = args[i];
-                    }
-                    viewh.loadMultipleFilesOrDirectory(new[] { filerooted });
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
+            //        string filerooted;
+            //        if (!Path.IsPathRooted(args[i]))
+            //        {
+            //            filerooted = Directory.GetCurrentDirectory() + "\\" + args[i];
+            //        }
+            //        else
+            //        {
+            //            filerooted = args[i];
+            //        }
+            //        viewh.loadMultipleFilesOrDirectory(new[] { filerooted });
+            //    }
+            //    catch (Exception)
+            //    {
+            //        // ignored
+            //    }
+            //}
+
+            string path = args[1];
+            for (var i = 2; i < args.Count; i++)
+            {
+                path += " " + args[i];
             }
+            if (!Path.IsPathRooted(path))
+            {
+                path = Directory.GetCurrentDirectory() + "\\" + path;
+            }
+            viewh.loadFile(path);
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

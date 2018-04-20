@@ -484,30 +484,23 @@ namespace ssi
         public static Signal LoadAudioFile(string filepath)
         {
             Signal signal = null;
-            using (var reader = new AudioFileReader(filepath))
-            {
-                try
-                {                
-                    int bytesPerSample = (reader.WaveFormat.BitsPerSample / 8);
-                    var samples = (uint) (reader.Length / (bytesPerSample));
-                    var seconds = reader.TotalTime.TotalSeconds;
-                    double rate = reader.WaveFormat.SampleRate;
-                    uint dimension =  (uint) reader.WaveFormat.Channels;
 
-                    Signal.Type type = (bytesPerSample == 2)  ? Signal.Type.SHORT : Signal.Type.FLOAT;
-                    signal = new Signal(filepath, rate, dimension, (uint) bytesPerSample, (samples/dimension), type);                                     
-                    reader.Read(signal.data, 0, (int)samples);
+            using (var reader = new AudioFileReader(filepath))
+            {            
+                int bytesPerSample = (reader.WaveFormat.BitsPerSample / 8);
+                var samples = (uint) (reader.Length / (bytesPerSample));
+                var seconds = reader.TotalTime.TotalSeconds;
+                double rate = reader.WaveFormat.SampleRate;
+                uint dimension =  (uint) reader.WaveFormat.Channels;
+
+                Signal.Type type = (bytesPerSample == 2)  ? Signal.Type.SHORT : Signal.Type.FLOAT;
+                signal = new Signal(filepath, rate, dimension, (uint) bytesPerSample, (samples/dimension), type);                                     
+                reader.Read(signal.data, 0, (int)samples);
                  
-                    signal.minmax();
-                    signal.isAudio = true;
-                    signal.loaded = true;
-                }
-                catch (Exception e)
-                {
-                    MessageTools.Error(e.ToString());
-                }
-              
-            }
+                signal.minmax();
+                signal.isAudio = true;
+                signal.loaded = true;           
+            }            
 
             return signal;
         }

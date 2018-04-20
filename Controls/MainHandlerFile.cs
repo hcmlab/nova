@@ -46,7 +46,7 @@ namespace ssi
          
         }
 
-        private bool loadFile(string filepath)
+        public bool loadFile(string filepath)
         {
             return loadFile(filepath, Defaults.Colors.Foreground, Defaults.Colors.Background);
         }
@@ -72,11 +72,10 @@ namespace ssi
                 string type = filepath.Substring(index + 1).ToLower();
                 switch (type)
                 {
+                    case "mp4":
                     case "avi":
                     case "wmv":
-                    case "mp4":
-                    case "mov":                    
-                    case "m4a":
+                    case "mov":                                        
                     case "mkv":
                     case "divx":
                     case "mpg":                    
@@ -99,6 +98,7 @@ namespace ssi
                     case "wma":
                     case "wav":
                     case "mp3":
+                    case "m4a":
                     case "flac":
                         ftype = SSI_FILE_TYPE.AUDIO;
                         break;
@@ -136,22 +136,22 @@ namespace ssi
             switch (ftype)
             {
                 case SSI_FILE_TYPE.VIDEO:
-                    loadMediaFile(filepath, MediaType.VIDEO);
-                    loaded = true;
-                    break;
-
                 case SSI_FILE_TYPE.AUDIO:
 
-                    string type = filepath.Substring(index + 1);
-                    Signal signal = null;                    
-                    loadAudioSignalFile(filepath, foreground, background);
-
-                    IMedia media = loadMediaFile(filepath, MediaType.AUDIO);                    
-                    if (signal != null)
+                    if (ftype != SSI_FILE_TYPE.AUDIO)
                     {
-                        signal.Media = media;
+                        loadMediaFile(filepath, MediaType.VIDEO);
                     }
+
+                    Signal signal = loadAudioSignalFile(filepath, foreground, background);
+                    
+                    if (signal != null)
+                    {                        
+                        signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                    }
+                     
                     loaded = true;
+
                     break;
 
                 case SSI_FILE_TYPE.ANNOTATION:
@@ -214,13 +214,10 @@ namespace ssi
             media.Pause();
             mediaList.Add(media);
 
-
             if (media.GetMediaType() != MediaType.AUDIO)
             {
                 addMediaBox(media);
             }
-
-
 
             control.navigator.playButton.IsEnabled = true;
         }
@@ -233,9 +230,7 @@ namespace ssi
                 return null;
             }
 
-       
-
-            if(Mediabackend == MEDIABACKEND.MEDIAKIT)
+            if(MediaBackend == MEDIABACKEND.MEDIAKIT)
             {
                 try
                 {
@@ -246,7 +241,6 @@ namespace ssi
                     addMedia(media);
                     return media;
                 }
-
                 catch
                 {
                     return null;
@@ -254,16 +248,16 @@ namespace ssi
                 }
               
             }
-           else if(Mediabackend == MEDIABACKEND.MEDIA)
+           else if(MediaBackend == MEDIABACKEND.MEDIA)
             {
                 try
                 {
-                Media media = new Media(filename, type);
-                media.OnMediaMouseDown += OnMediaMouseDown;
-                media.OnMediaMouseUp += OnMediaMouseUp;
-                media.OnMediaMouseMove += OnMediaMouseMove;
-                addMedia(media);
-                return media;
+                    Media media = new Media(filename, type);
+                    media.OnMediaMouseDown += OnMediaMouseDown;
+                    media.OnMediaMouseUp += OnMediaMouseUp;
+                    media.OnMediaMouseMove += OnMediaMouseMove;
+                    addMedia(media);
+                    return media;
                 }
 
                 catch
@@ -391,15 +385,24 @@ namespace ssi
             }
 
 
-            Signal signal;
-            
-            signal = Signal.LoadAudioFile(filename);            
+            Signal signal = null;
+
+            try
+            {
+                signal = Signal.LoadAudioFile(filename);
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+
             if (signal != null && signal.loaded)
             {
                 this.control.signalbar.Height = new GridLength(control.signalAndAnnoGrid.ActualHeight / 2 - 30);
                 this.control.signalstatusbar.Visibility = Visibility.Visible;
                 addSignalTrack(signal, signalColor, backgroundColor);
             }
+
             return signal;
         }
 
