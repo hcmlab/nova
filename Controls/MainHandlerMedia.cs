@@ -43,8 +43,6 @@ namespace ssi
 
             MediaBoxStatic.Select(box);
             updateNavigator();
-
-
         }
 
         public void clearMediaBox()
@@ -69,15 +67,13 @@ namespace ssi
                     control.mediaStatusFileNameLabel.Text = Path.GetFileName(media.GetFilepath());
                     control.mediaStatusFileNameLabel.ToolTip = media.GetFilepath();
                     control.mediaStatusSampleRateLabel.Text = media.GetSampleRate().ToString() + " Hz";
+                    control.mediaVolumeControl.Visibility = Visibility.Collapsed;
                     if (media.HasAudio())
                     {
-                        control.mediaVolumeControl.volumeSlider.Value = media.GetVolume();
-                        control.mediaVolumeControl.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        control.mediaVolumeControl.Visibility = Visibility.Collapsed;
-                    }
+                        media.SetVolume(0.0);
+                        //control.mediaVolumeControl.volumeSlider.Value = media.GetVolume();
+                        //control.mediaVolumeControl.Visibility = Visibility.Visible;
+                    }                    
                     control.mediaCloseButton.Visibility = playIsPlaying ? Visibility.Hidden : Visibility.Visible;
 
                     if (AnnoTierStatic.Selected != null)
