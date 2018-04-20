@@ -398,7 +398,7 @@ namespace ssi
                 {
                     if (list.Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                     {
-                        StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.Default);
+                        StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.UTF8);
                         string line = null;
                         double start = 0.0;
 
