@@ -835,6 +835,7 @@ namespace ssi
                         new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } },
                         new BsonDocument { { "role", "readWrite" }, { "db", "admin" } },
                         new BsonDocument { { "role", "userAdminAnyDatabase" }, { "db", "admin" } },
+                        new BsonDocument { { "role", "root" }, { "db", "admin" } },
                         new BsonDocument { { "role", "changeOwnPasswordCustomDataRole" }, { "db", "admin" } },
 
 
@@ -898,6 +899,7 @@ namespace ssi
             }
             else
             {
+                MessageBox.Show("Can't delete Admin User");
                 return false;
             }
 
