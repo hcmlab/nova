@@ -279,7 +279,10 @@ We install MongoDB (<https://www.mongodb.com/download-center#community>) and run
 mongod --auth
 ~~~~
 
+Alternativly, if you want to run MongoDB as a service, see below.
+
 MongoDB now runs on 127.0.0.1:27017 and we can connect to it:
+
 
 ~~~~
 docker exec -it nova mongo admin
@@ -344,7 +347,58 @@ show dbs
 
 To connect to the MongoDB server in NOVA, we open the settings by clicking the wheel in the menu and switch to the 'Database' tab. Here we enter the host and port number of the MongoDB server and the user credentials. The dialog also allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.
 
+
 ![*Connect to a database.*](pics/database-connect.png){#fig:database-connect}
+
+
+### Setting up MongoDB as a service on Windows
+
+If you want MongoDB to run in the background so that it doesn't shut down when you close the console open a Command Prompt as administrator and
+
+Create folders for your database and logs (adjust the path in the following snippets)
+
+~~~~
+mkdir c:\data\db
+mkdir c:\data\log
+~~~~
+
+Create a Config File in 
+
+~~~~
+"C:\Program Files\MongoDB\Server\3.6\mongod.cfg" 
+~~~~
+with the following content:
+
+
+
+~~~~
+systemLog:
+    destination: file
+    path: c:\data\log\mongod.log
+storage:
+    dbPath: c:\data\db
+security:
+   authorization: enabled
+net:
+  port: 27017
+  bindIp: localhost,123.456.789.000
+~~~~
+Replace 123.456.789.000 with the IP the server should be accesible from other clients e.g., your static ip adress and the port to the one you want your server to run on.
+Replace the port with the port you want to run the mongodb on.
+
+Install and start the service
+
+~~~~
+"C:\Program Files\MongoDB\Server\3.6\bin\mongod.exe" --config "C:\Program Files\MongoDB\Server\3.6\mongod.cfg" --install
+
+net start MongoDB
+~~~~
+
+If you didn't get an error you can proceed with the next steps as described above. For other systems than Windows, please take a look at the offical MongoDB documentation.
+
+
+
+
 
 ## General Structure
 
