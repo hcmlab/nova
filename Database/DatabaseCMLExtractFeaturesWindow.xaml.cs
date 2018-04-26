@@ -216,15 +216,15 @@ namespace ssi
             }
 
             string roleList = "";
-            foreach (string role in roles)
+            foreach (var role in roles)
             {
                 if (roleList == "")
                 {
-                    roleList = role;
+                    roleList = ((DatabaseRole) role).Name;
                 }
                 else
                 {
-                    roleList += ";" + role;
+                    roleList += ";" + ((DatabaseRole)role).Name;
                 }
             }
 
