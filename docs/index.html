@@ -107,7 +107,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
         <li><a href="#file-format"><span class="toc-section-number">3.6</span> File Format</a></li>
         </ul></li>
         <li><a href="#database"><span class="toc-section-number">4</span> Database</a><ul>
-        <li><a href="#setup-mongodb"><span class="toc-section-number">4.1</span> Setup MongoDB</a></li>
+        <li><a href="#setup-mongodb"><span class="toc-section-number">4.1</span> Setup MongoDB</a><ul>
+        <li><a href="#setting-up-mongodb-as-a-service-on-windows"><span class="toc-section-number">4.1.1</span> Setting up MongoDB as a service on Windows</a></li>
+        </ul></li>
         <li><a href="#general-structure"><span class="toc-section-number">4.2</span> General Structure</a></li>
         <li><a href="#file-server"><span class="toc-section-number">4.3</span> File Server</a></li>
         <li><a href="#administration"><span class="toc-section-number">4.4</span> Administration</a></li>
@@ -420,6 +422,7 @@ docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mo
 <p><em>or</em></p>
 <p>We install MongoDB (<a href="https://www.mongodb.com/download-center#community" class="uri">https://www.mongodb.com/download-center#community</a>) and run:</p>
 <pre><code>mongod --auth</code></pre>
+<p>Alternativly, if you want to run MongoDB as a service, see below.</p>
 <p>MongoDB now runs on 127.0.0.1:27017 and we can connect to it:</p>
 <pre><code>docker exec -it nova mongo admin</code></pre>
 <p><em>or</em></p>
@@ -456,6 +459,30 @@ db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { rol
 <img src="pics/database-connect.png" alt="Connect to a database." id="fig:database-connect" />
 <p class="caption"><em>Connect to a database.</em></p>
 </div>
+<h3 id="setting-up-mongodb-as-a-service-on-windows"><span class="header-section-number">4.1.1</span> Setting up MongoDB as a service on Windows</h3>
+<p>If you want MongoDB to run in the background so that it doesn't shut down when you close the console open a Command Prompt as administrator and</p>
+<p>Create folders for your database and logs (adjust the path in the following snippets)</p>
+<pre><code>mkdir c:\data\db
+mkdir c:\data\log</code></pre>
+<p>Create a Config File in</p>
+<pre><code>&quot;C:\Program Files\MongoDB\Server\3.6\mongod.cfg&quot; </code></pre>
+<p>with the following content:</p>
+<pre><code>systemLog:
+    destination: file
+    path: c:\data\log\mongod.log
+storage:
+    dbPath: c:\data\db
+security:
+   authorization: enabled
+net:
+  port: 27017
+  bindIp: localhost,123.456.789.000</code></pre>
+<p>Replace 123.456.789.000 with the IP the server should be accesible from other clients e.g., your static ip adress and the port to the one you want your server to run on. Replace the port with the port you want to run the mongodb on.</p>
+<p>Install and start the service</p>
+<pre><code>&quot;C:\Program Files\MongoDB\Server\3.6\bin\mongod.exe&quot; --config &quot;C:\Program Files\MongoDB\Server\3.6\mongod.cfg&quot; --install
+
+net start MongoDB</code></pre>
+<p>If you didn't get an error you can proceed with the next steps as described above. For other systems than Windows, please take a look at the offical MongoDB documentation.</p>
 <h2 id="general-structure"><span class="header-section-number">4.2</span> General Structure</h2>
 <p>A database in NOVA aggregates data recorded within the same experiment. It is basically a collection of recorded stream files (data) and descriptions marking interesting events in the data (annotations). NOVA can handle multiple databases and offers tools to maintain them and incrementally accumulate new data and annotations. Generally, stream files are stored on disk and annotations are stored in a MongoDB. Each database consists of one or more sessions. A session is a single and continuous recording distributed over one or more stream files. Each stream file is assigned to one or more subjects, which are represented as roles (e.g. speaker vs listener). A stream file also has a unique name indicating the source of the recording (e.g. audio or video) and a file extension (e.g. wav or mp4). On disk, a database has the following structure:</p>
 <pre><code>&lt;database-1&gt;/
