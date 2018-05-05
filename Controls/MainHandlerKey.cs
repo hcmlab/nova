@@ -806,6 +806,16 @@ namespace ssi
                     AnnoTierStatic.Selected.LiveAnnoMode(false);
                 }
             }
+
+            else if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+            {
+                double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
+                MainHandler.Time.CurrentSelectPosition = pos;
+                annoCursor.X = pos;
+
+
+            }
+
             isKeyDown = true;
 
         }

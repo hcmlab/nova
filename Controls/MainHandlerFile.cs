@@ -345,7 +345,7 @@ namespace ssi
                         IMedia media = new Face(filename, signal, Face.FaceType.OPENFACE);
                         addMedia(media);
                     }
-                    else if (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect1")
+                    else if (signal.Meta.ContainsKey("type") && (signal.Meta["type"] == "kinect1" || signal.Meta["type"] == "kinect"))
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT1);
                         addMedia(media);
