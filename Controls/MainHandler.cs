@@ -15,7 +15,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.2.4";
+        public static string BuildVersion = "1.0.2.5";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
 
         private static Timeline timeline = null;

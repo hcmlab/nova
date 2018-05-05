@@ -671,6 +671,10 @@ namespace ssi
             TimeRangeChanged(MainHandler.Time);
         }
 
+
+
+
+
         public void NewAnnoKey()
         {
             if (IsDiscreteOrFree)
