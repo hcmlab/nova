@@ -338,6 +338,11 @@ namespace ssi
                             }
 
 
+                            while(!media.NaturalDuration.HasTimeSpan)
+                            {
+                                Thread.Sleep(100);
+                            }
+
                             if (media.NaturalDuration.HasTimeSpan)
                             {
                                 duration = media.NaturalDuration.TimeSpan.TotalSeconds;
