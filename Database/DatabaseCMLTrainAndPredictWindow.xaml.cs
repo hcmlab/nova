@@ -141,7 +141,7 @@ namespace ssi
                     SessionsBox.ScrollIntoView(session);
                 }           
 
-                Update();
+                Update(mode);
             }
 
             ApplyButton.Focus();
@@ -204,6 +204,8 @@ namespace ssi
                     TrainOptionsPanel.Visibility = Visibility.Visible;
                     ForceCheckBox.Visibility = Visibility.Visible;
                     LosoCheckBox.Visibility = Visibility.Collapsed;
+                   
+
 
                     break;
 
@@ -624,17 +626,27 @@ namespace ssi
                 if (mode == Mode.PREDICT)
                 {
                     if (DatabaseHandler.CheckAuthentication() <= DatabaseAuthentication.READWRITE)
-                    {                                            
+                    {
                         annotatorName = Properties.Settings.Default.MongoDBUser;
                         AnnotatorsBox.IsEnabled = false;
                     }
+
+                    else
+                    {
+                        annotatorName = Properties.Settings.Default.CMLDefaultAnnotatorPrediction;
+                    }
+                }
+
+                else if (DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.READWRITE)
+                {
+                    annotatorName = Properties.Settings.Default.CMLDefaultAnnotator;
                 }
 
                 // check for last user
                 DatabaseAnnotator annotator = ((List<DatabaseAnnotator>)AnnotatorsBox.ItemsSource).Find(a => a.Name == annotatorName);
                 if (annotator != null)
                 {
-                    AnnotatorsBox.SelectedItem = annotator;
+                     AnnotatorsBox.SelectedItem = annotator;
                 }
 
                 // check for gold
@@ -1059,9 +1071,9 @@ namespace ssi
 
         #region Update
 
-        private void Update()
+        private void Update(Mode oldmode)
         {
-            SaveDefaults();
+            SaveDefaults(oldmode);
 
             GetRoles();
             GetSchemes();
@@ -1074,17 +1086,23 @@ namespace ssi
             UpdateGUI();
         }
 
-        private void SaveDefaults()
+        private void SaveDefaults(Mode oldmode)
         {
             if (TrainerPathComboBox.SelectedItem != null)
             {
                 Properties.Settings.Default.CMLDefaultTrainer = ((Trainer)TrainerPathComboBox.SelectedItem).Name;
             }
 
-            if (AnnotatorsBox.SelectedItem != null)
+            if (AnnotatorsBox.SelectedItem != null && oldmode != Mode.PREDICT)
             {
                 Properties.Settings.Default.CMLDefaultAnnotator = ((DatabaseAnnotator)AnnotatorsBox.SelectedItem).Name;
             }
+
+            else if (AnnotatorsBox.SelectedItem != null && oldmode == Mode.PREDICT)
+            {
+                Properties.Settings.Default.CMLDefaultAnnotatorPrediction = ((DatabaseAnnotator)AnnotatorsBox.SelectedItem).Name;
+            }
+
 
             if (RolesBox.SelectedItem != null)
             {
@@ -1181,7 +1199,7 @@ namespace ssi
             if (handleSelectionChanged)
             {
                 handleSelectionChanged = false;
-                Update();
+                Update(mode);
                 handleSelectionChanged = true;
             }
         }
@@ -1195,7 +1213,7 @@ namespace ssi
                 LoadSessionSets();
             }
 
-            Update();
+            Update(mode);
         }
 
         private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1222,10 +1240,12 @@ namespace ssi
         {
             if (handleSelectionChanged)
             {
+
+                Mode oldmode = mode;
                 mode = (Mode)ModeTabControl.SelectedIndex;
                 switchMode();
                 LoadSessionSets();
-                Update();
+                Update(oldmode);
             }
         }
 
