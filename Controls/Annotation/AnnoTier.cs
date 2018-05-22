@@ -934,7 +934,7 @@ namespace ssi
         {
             for (int i = 0; i < AnnoList.Count; i++)
             {
-                if (AnnoList[i].Start - nearestitem < 1 / AnnoList.Scheme.SampleRate && AnnoList[i].Start - nearestitem > 0)
+                if (AnnoList[i].Start - nearestitem < 1 / AnnoList.Scheme.SampleRate && AnnoList[i].Start - nearestitem >= 0)
                 {
                     return i;
                 }
@@ -1385,7 +1385,7 @@ namespace ssi
                                 double mean = 0;
 
                                 double range = AnnoList.Scheme.MaxScore - AnnoList.Scheme.MinScore;
-                                if (index > 0)
+                                if (index >= 0)
                                 {
 
                                     //for (int k = index - offset; k < index + offset; k++)
