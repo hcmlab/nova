@@ -300,7 +300,7 @@ namespace ssi
             string cmltrainexe = "cmltrain.exe";
             string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + cmltrainexe;
 
-            if (!(File.Exists(cmltrainexePath) && !alreadycheckedcmlupdate))
+            if (!(File.Exists(cmltrainexePath)) && !alreadycheckedcmlupdate)
             {
 
                 checkForCMLUpdates(true);
