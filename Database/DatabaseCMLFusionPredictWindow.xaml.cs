@@ -264,11 +264,10 @@ namespace ssi
 
             foreach (DatabaseRole item in DatabaseHandler.Roles)
             {
-                if (item.HasStreams)
-                {
+               
                     RolesBox.Items.Add(item.Name);
                     Outrole.Items.Add(item.Name);
-                }
+                
             }
 
             if (RolesBox.Items.Count > 0)
