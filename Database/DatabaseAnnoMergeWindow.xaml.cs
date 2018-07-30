@@ -923,8 +923,20 @@ namespace ssi
             double[] list1 = new double[N];
             double[] list2 = new double[N];
 
+ 
             for (int i = 0; i < N; i++)
             {
+                if(double.IsNaN(xs[i].Score))
+                {
+                    if (i > 0) xs[i].Score = xs[i - 1].Score;
+                    else xs[i].Score = ((xs.Scheme.MaxScore - xs.Scheme.MinScore) / 2.0);
+                }
+                if (double.IsNaN(ys[i].Score))
+                {
+                    if (i > 0) ys[i].Score = ys[i - 1].Score;
+                    else ys[i].Score = ((ys.Scheme.MaxScore - ys.Scheme.MinScore) / 2.0);
+                }
+
                 list1[i] = xs[i].Score;
                 list2[i] = ys[i].Score;
             }
@@ -1120,6 +1132,14 @@ namespace ssi
             }
         }
 
+
+        private double transform_r_to_z(double r, int N)
+        {
+
+            double z = 0.5 * (Math.Log(1 + r) - Math.Log(1-r));
+            return z;
+        }
+
         private async Task CalculateContinuousWrapper(List<AnnoList> annolists)
         {
             double cronbachalpha = 0;
@@ -1140,9 +1160,12 @@ namespace ssi
                     interpretation = Cronbachinterpretation(cronbachalpha);
                 }, token);
 
+                Stats.Content = "Samples: " + annolists[0].Count;
+                Stats.ToolTip = "Samples: " + annolists[0].Count;
+
                 Action EmptyDelegate = delegate () { };
-                Stats.Content = "Cronbach's α: " + cronbachalpha.ToString("F3");
-                Stats.ToolTip = "Cronbach's α: " + interpretation;
+                Stats.Content = Stats.Content + " | Cronbach's α: " + cronbachalpha.ToString("F3");
+                Stats.ToolTip = Stats.ToolTip + " | Cronbach's α: " + interpretation;
 
                 double spearmancorrelation = double.MaxValue;
                 if (annolists.Count == 2)
@@ -1165,11 +1188,12 @@ namespace ssi
                     if (annolists[1].Count < annolists[0].Count) N = annolists[1].Count;
 
                     interpretation = Pearsoninterpretation(pearsoncorrelation, N);
+                    var fisherz = transform_r_to_z(pearsoncorrelation, N);
 
                     if (pearsoncorrelation != double.MaxValue)
                     {
-                        Stats.Content = Stats.Content + " | Pearson Correlation r: " + pearsoncorrelation.ToString("F3");
-                        Stats.ToolTip = Stats.ToolTip + " | Pearson Correlation r: " + interpretation;
+                        Stats.Content = Stats.Content + " | Pearson Correlation r: " + pearsoncorrelation.ToString("F3") + " | Fisher z-score: " + fisherz.ToString("F3");
+                        Stats.ToolTip = Stats.ToolTip + " | Pearson Correlation r: " + interpretation + " | Fisher z-score: " + fisherz.ToString("F3");
                     }
 
                     double nmse = double.MaxValue;
