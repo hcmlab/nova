@@ -138,18 +138,28 @@ namespace ssi
                 case SSI_FILE_TYPE.VIDEO:
                 case SSI_FILE_TYPE.AUDIO:
 
+                    bool loadvideosaudio = true;
                     if (ftype != SSI_FILE_TYPE.AUDIO)
                     {
                         loadMediaFile(filepath, MediaType.VIDEO);
+                        loadvideosaudio = Properties.Settings.Default.DrawVideoWavform;
                     }
 
-                    Signal signal = loadAudioSignalFile(filepath, foreground, background);
+                    if (loadvideosaudio)
+                    {
+                        Signal signal = loadAudioSignalFile(filepath, foreground, background);
                     
-                    if (signal != null)
-                    {                        
-                        signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                        if (signal != null)
+                        {                        
+                            signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                        }
                     }
-                     
+
+                    else
+                    {
+                        loadMediaFile(filepath, MediaType.AUDIO);
+                    }
+
                     loaded = true;
 
                     break;

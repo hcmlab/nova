@@ -562,5 +562,17 @@ namespace ssi.Properties {
                 this["SettingCMLDefaultBN"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DrawVideoWavform {
+            get {
+                return ((bool)(this["DrawVideoWavform"]));
+            }
+            set {
+                this["DrawVideoWavform"] = value;
+            }
+        }
     }
 }
