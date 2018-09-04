@@ -15,7 +15,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.2.9";
+        public static string BuildVersion = "1.0.3.0";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
 
         private static Timeline timeline = null;
@@ -554,6 +554,7 @@ namespace ssi
                 Properties.Settings.Default.CheckUpdateOnStart = s.CheckforUpdatesonStartup();
                 Properties.Settings.Default.ContinuousHotkeysNumber = int.Parse(s.ContinuousHotkeyLevels());
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();
+                Properties.Settings.Default.DrawVideoWavform = s.DrawvideoWavform();
                 Properties.Settings.Default.Save();
                 
 

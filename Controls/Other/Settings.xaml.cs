@@ -20,6 +20,7 @@ namespace ssi
             DefaultZoom.Text = Properties.Settings.Default.DefaultZoomInSeconds.ToString();
             Segmentmindur.Text = Properties.Settings.Default.DefaultMinSegmentSize.ToString();
             Samplerate.Text = Properties.Settings.Default.DefaultDiscreteSampleRate.ToString();
+            DrawwaveformCheckbox.IsChecked = Properties.Settings.Default.DrawVideoWavform;
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
             if (tokens.Length == 2)
@@ -34,6 +35,7 @@ namespace ssi
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
             CMLDirectory.Text = Properties.Settings.Default.CMLDirectory;
+
         }
 
         public double Uncertainty()
@@ -74,6 +76,11 @@ namespace ssi
         public string SampleRate()
         {
             return Samplerate.Text;
+        }
+
+        public bool DrawvideoWavform()
+        {
+            return (DrawwaveformCheckbox.IsChecked == true);
         }
 
         public string ContinuousHotkeyLevels()
