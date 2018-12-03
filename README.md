@@ -57,7 +57,7 @@ If you are using NOVA in your research please consider giving us a citation:
 
 <pre><code>
 
-@article{wagner2018show,
+@article{,
   title={Show Me What You’ve Learned: Applying Cooperative Machine Learning for the Semi-Automated Annotation of Social Signals},
   author={Wagner, Johannes and Baur, Tobias and Schiller, Dominik and Zhang, Yue and Schuller, Bj{\"o}rn and Valstar, Michel and Andr{\'e}, Elisabeth},
   journal={Workshop on explainable AI (XAI) IJCAI / ECAI 2018},
