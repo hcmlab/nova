@@ -14,6 +14,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Web.UI.DataVisualization.Charting;
+using Python.Runtime;
+using System.IO;
 
 namespace ssi
 {
@@ -454,6 +456,28 @@ namespace ssi
             if (normalize) return nsm;
             else return mse;
         }
+
+
+        public double[] PythonInterface(List<AnnoList> al)
+        {
+
+            //var pythonPath = @"C:\\Program Files\\Python36";
+            //var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
+            //Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
+            //PythonEngine.PythonHome += pythonPath;
+
+            ////TODO change path variable to relative 
+            ////TODO add scripts path in front of everything else
+            //PythonEngine.PythonPath += ";C:\\Users\\Alex Heimerl\\Desktop\\nova\\Scripts";
+            //PythonEngine.Initialize();
+
+            InvokePython.imageExplainer("C:\\Users\\Alex Heimerl\\Desktop\\test\\vgg16_pokemon_100.h5", "C:\\Users\\Alex Heimerl\\Desktop\\test\\testblub.png");
+            InvokePython.correlate("test", al[0], al[1]);
+
+            return null;
+
+        }
+
 
         private List<AnnoList> convertAnnoListsToMatrix(List<AnnoList> annolists, string restclass)
         {
@@ -1285,6 +1309,9 @@ namespace ssi
                     {
                         Stats.Content = Stats.Content + " | MSE: " + mse.ToString("F6") + " | NMSE: " + nmse.ToString("F6"); ;
                     }
+
+                    PythonInterface(annolists);
+
                 }
 
                 this.UpdateLayout();

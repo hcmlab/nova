@@ -91,6 +91,10 @@
                 
             </MenuItem>
 
+            <MenuItem Header="XAI">
+                
+            </MenuItem>
+
         </Menu>
 
         <Grid Grid.Row="1" 

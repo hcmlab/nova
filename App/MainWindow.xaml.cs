@@ -27,8 +27,10 @@ namespace ssi
             Thread.CurrentThread.CurrentUICulture = ci;
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
             Title = "NOVA | v" + MainHandler.BuildVersion + " | HCM-Lab, Augsburg University | http://openssi.net";
-           
-           
+
+            //TODO remove
+            InvokePython.imageExplainer("", "");
+
         }
 
         private void viewHandlerLoaded(MainHandler handler)
