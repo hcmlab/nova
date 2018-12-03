@@ -52,16 +52,16 @@ Please feel free to fork or create an issue
 If you are using NOVA in your research please consider giving us a citation:
 
 
- “Applying Cooperative Machine Learning to Speed Up the Annotation of Social Signals in Large Multi-modal Corpora”, Johannes Wagner, Tobias Baur, Yue Zhang, Michel F. Valstar, Björn Schuller, Elisabeth André, 2018, https://arxiv.org/abs/1802.02565
+ “Show Me What You’ve Learned: Applying Cooperative Machine Learning for the Semi-Automated Annotation of Social Signals”, Johannes Wagner, Tobias Baur, Dominik Schiller, Yue Zhang, Björn Schuller, Michel F. Valstar, Elisabeth André in Proceedings of the 27th International Joint Conference on Artificial Intelligence (IJCAI) and the 23rd European Conference on Artificial Intelligence (ECAI), Workshop on Explainable Artificial Intelligence July 13-19, 2018, Stockholm, Sweden 
+ 
 
 <pre><code>
 
-@article{
-  title={Applying Cooperative Machine Learning to Speed Up the Annotation of Social Signals in Large Multi-modal Corpora},
-  author={Wagner, Johannes and Baur, Tobias and Zhang, Yue, and Valstar, Michel F. and Schuller, Bj{\"o}rn and Andr{\'e}, Elisabeth},
-  journal={arXiv:1802.02565},
-  url={https://arxiv.org/abs/1802.02565},
-  year={2018}  
+@article{wagner2018show,
+  title={Show Me What You’ve Learned: Applying Cooperative Machine Learning for the Semi-Automated Annotation of Social Signals},
+  author={Wagner, Johannes and Baur, Tobias and Schiller, Dominik and Zhang, Yue and Schuller, Bj{\"o}rn and Valstar, Michel and Andr{\'e}, Elisabeth},
+  journal={Workshop on explainable AI (XAI) IJCAI / ECAI 2018},
+  pages={171}
 }
   
 </code></pre>
