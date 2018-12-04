@@ -468,7 +468,7 @@ namespace ssi
 
             //TODO change path variable to relative 
             //TODO add scripts path in front of everything else
-            PythonEngine.PythonPath += ";C:\\Users\\Alex Heimerl\\Desktop\\nova\\Scripts";
+            PythonEngine.PythonPath += ";Scripts";
             PythonEngine.Initialize();
 
             Dictionary<string, double> measures = InvokePython.correlate(al[0], al[1]);

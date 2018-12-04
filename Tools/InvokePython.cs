@@ -96,12 +96,14 @@ namespace ssi {
             using (Py.GIL())
             {
                 dynamic sys = PythonEngine.ImportModule("sys");
-                dynamic np = Py.Import("numpy");
                 dynamic spearman = Py.Import("SpearmanR");
                 dynamic kendall = Py.Import("KendallTau");
                 dynamic scriptType = Py.Import("EnumScriptType");
                 //List<dynamic> scripts = new List<dynamic>();
                 string typeT = scriptType.ScriptType.CORRELATION.name;
+
+                dynamic os = Py.Import("os");
+                Console.WriteLine(os.getcwd());
 
 
                 foreach (string sc in scriptsName)
