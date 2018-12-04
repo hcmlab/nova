@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Python.Runtime;
+using System.Diagnostics;
+using System.Threading;
 
 
 namespace ssi {
@@ -14,7 +16,7 @@ namespace ssi {
         public static void imageExplainer(string pathModell, string toExplain)
         {
 
-            var pythonPath = @"C:\\Program Files\\Python36";
+            var pythonPath = @"C:\Program Files\Python36";
             var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
             Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
             PythonEngine.PythonHome += pythonPath;
@@ -38,19 +40,6 @@ namespace ssi {
                 Console.WriteLine(sys.version);
                 Console.WriteLine(os.__file__);
 
-                dynamic testest = Py.Import("C:\\Users\\Alex Heimerl\\Desktop\\nn_mnist");
-
-
-                dynamic test = Py.Import("testasdf");
-
-                var tasdf = test.explain();
-
-                //foreach (string fp in Directory.GetFiles("..\\..\\Scripts", "*.py", SearchOption.TopDirectoryOnly).Where(s => !s.Contains("__init__.py")))
-                //{
-                //    Console.WriteLine(fp);
-                //    //importlib.import_module("..\\..\\Scripts\\"+fp);
-                //    //dynamic test = Py.Import("C:\\Users\\Alex Heimerl\\Desktop\\nova\\Scripts\\test.py");
-                //}
             }
         }
 
@@ -66,18 +55,41 @@ namespace ssi {
 
         }
 
+        //Needed for debugging purposes
+        static void AttachDebugger()
+        {
+            Console.WriteLine("waiting for .NET debugger to attach");
+            while (!Debugger.IsAttached)
+            {
+                Thread.Sleep(100);
+            }
+            Console.WriteLine(".NET debugger is attached");
+
+        }
+
         public static float correlate(string measure, AnnoList anno1, AnnoList anno2)
         {
-            var corr = 0;
+            double corr = 0.0;
+            double tau = 0.0;
+
+            
 
             int nValues = Math.Min(anno1.Count, anno2.Count);
 
-            var anno1Values = new double[nValues];
-            var anno2Values = new double[nValues];
+            double[] anno1Values = new double[nValues];
+            double[] anno2Values = new double[nValues];
             for(int i = 0; i < nValues; i++)
             {
                 anno1Values[i] = anno1[i].Score;
                 anno2Values[i] = anno2[i].Score;
+            }
+
+            List<double> anno1ValuesL = new List<double>();
+            List<double> anno2ValuesL = new List<double>();
+            for (int i = 0; i < nValues; i++)
+            {
+                anno1ValuesL.Add(anno1[i].Score);
+                anno2ValuesL.Add(anno2[i].Score);
             }
 
             //var pythonPath = @"C:\\Program Files\\Python36";
@@ -92,9 +104,26 @@ namespace ssi {
 
             using (Py.GIL())
             {
+                dynamic np = Py.Import("numpy");
                 dynamic spearman = Py.Import("SpearmanR");
+                dynamic kendall = Py.Import("KendallTau");
 
-                corr = spearman.correlate(anno1Values, anno2Values);
+
+                dynamic sys = PythonEngine.ImportModule("sys");
+
+                //Only for cross debugging needed
+                //AttachDebugger();
+
+                //var abc = spearman.print_test();
+                //var testn = np.array(anno1Values);
+                //var whatever = spearman.annoRet(anno1Values);
+                //corr = spearman.correlatetest(anno1Values, anno2Values);
+                //Console.WriteLine(whatever);
+                tau = kendall.correlate(anno1ValuesL, anno2ValuesL);
+                corr = spearman.correlate(anno1ValuesL, anno2ValuesL);
+                
+
+
             }
 
             Console.WriteLine(corr);

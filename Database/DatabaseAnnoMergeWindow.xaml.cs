@@ -461,17 +461,16 @@ namespace ssi
         public double[] PythonInterface(List<AnnoList> al)
         {
 
-            //var pythonPath = @"C:\\Program Files\\Python36";
-            //var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
-            //Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
-            //PythonEngine.PythonHome += pythonPath;
+            var pythonPath = @"C:\\Program Files\\Python36";
+            var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
+            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
+            PythonEngine.PythonHome += pythonPath;
 
-            ////TODO change path variable to relative 
-            ////TODO add scripts path in front of everything else
-            //PythonEngine.PythonPath += ";C:\\Users\\Alex Heimerl\\Desktop\\nova\\Scripts";
-            //PythonEngine.Initialize();
+            //TODO change path variable to relative 
+            //TODO add scripts path in front of everything else
+            PythonEngine.PythonPath += ";C:\\Users\\Alex Heimerl\\Desktop\\nova\\Scripts";
+            PythonEngine.Initialize();
 
-            InvokePython.imageExplainer("C:\\Users\\Alex Heimerl\\Desktop\\test\\vgg16_pokemon_100.h5", "C:\\Users\\Alex Heimerl\\Desktop\\test\\testblub.png");
             InvokePython.correlate("test", al[0], al[1]);
 
             return null;
