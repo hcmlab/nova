@@ -67,22 +67,10 @@ namespace ssi {
 
         }
 
-        public static float correlate(string measure, AnnoList anno1, AnnoList anno2)
+        public static Dictionary<string, double> correlate(AnnoList anno1, AnnoList anno2)
         {
-            double corr = 0.0;
-            double tau = 0.0;
-
-            
 
             int nValues = Math.Min(anno1.Count, anno2.Count);
-
-            double[] anno1Values = new double[nValues];
-            double[] anno2Values = new double[nValues];
-            for(int i = 0; i < nValues; i++)
-            {
-                anno1Values[i] = anno1[i].Score;
-                anno2Values[i] = anno2[i].Score;
-            }
 
             List<double> anno1ValuesL = new List<double>();
             List<double> anno2ValuesL = new List<double>();
@@ -92,43 +80,50 @@ namespace ssi {
                 anno2ValuesL.Add(anno2[i].Score);
             }
 
-            //var pythonPath = @"C:\\Program Files\\Python36";
-            //var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
-            //Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
-            //PythonEngine.PythonHome += pythonPath;
+            List<string> scriptsName = new List<string>();
 
-            ////TODO change path variable to relative 
-            ////TODO add scripts path in front of everything else
-            //PythonEngine.PythonPath += ";C:\\Users\\Alex Heimerl\\Desktop\\nova\\Scripts";
-            //PythonEngine.Initialize();
+            foreach (string fp in Directory.GetFiles("..\\..\\Scripts", "*.py", SearchOption.TopDirectoryOnly).Where(s => !s.Contains("__init__.py")))
+            {
+                Console.WriteLine(Path.GetFileNameWithoutExtension(fp));
+                scriptsName.Add(Path.GetFileNameWithoutExtension(fp));
+            }
+
+            List<double> correlations = new List<double>();
+
+            //Dictionary<string, dynamic> scripts = new Dictionary<string, dynamic>();
+            Dictionary<string, double> measureValueDic= new Dictionary<string, double>();
 
             using (Py.GIL())
             {
+                dynamic sys = PythonEngine.ImportModule("sys");
                 dynamic np = Py.Import("numpy");
                 dynamic spearman = Py.Import("SpearmanR");
                 dynamic kendall = Py.Import("KendallTau");
+                dynamic scriptType = Py.Import("EnumScriptType");
+                //List<dynamic> scripts = new List<dynamic>();
+                string typeT = scriptType.ScriptType.CORRELATION.name;
 
 
-                dynamic sys = PythonEngine.ImportModule("sys");
+                foreach (string sc in scriptsName)
+                {
+                    dynamic temp = Py.Import(sc);
+
+                    Console.WriteLine(sc);
+                    Console.WriteLine(temp.getType());
+                    Console.WriteLine(typeT);
+
+                    if(typeT.Equals((string)temp.getType()))
+                    {
+                        //scripts[sc] = temp;
+                        measureValueDic[sc] = temp.correlate(anno1ValuesL, anno2ValuesL);
+                    }
+                }
 
                 //Only for cross debugging needed
                 //AttachDebugger();
-
-                //var abc = spearman.print_test();
-                //var testn = np.array(anno1Values);
-                //var whatever = spearman.annoRet(anno1Values);
-                //corr = spearman.correlatetest(anno1Values, anno2Values);
-                //Console.WriteLine(whatever);
-                tau = kendall.correlate(anno1ValuesL, anno2ValuesL);
-                corr = spearman.correlate(anno1ValuesL, anno2ValuesL);
                 
-
-
             }
-
-            Console.WriteLine(corr);
-
-            return 0.0f;
+            return measureValueDic;
         }
 
 

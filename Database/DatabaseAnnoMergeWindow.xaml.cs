@@ -458,7 +458,7 @@ namespace ssi
         }
 
 
-        public double[] PythonInterface(List<AnnoList> al)
+        public Dictionary<string, double> PythonInterface(List<AnnoList> al)
         {
 
             var pythonPath = @"C:\\Program Files\\Python36";
@@ -471,9 +471,9 @@ namespace ssi
             PythonEngine.PythonPath += ";C:\\Users\\Alex Heimerl\\Desktop\\nova\\Scripts";
             PythonEngine.Initialize();
 
-            InvokePython.correlate("test", al[0], al[1]);
+            Dictionary<string, double> measures = InvokePython.correlate(al[0], al[1]);
 
-            return null;
+            return measures;
 
         }
 
