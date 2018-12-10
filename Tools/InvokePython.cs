@@ -7,38 +7,43 @@ using System.Threading.Tasks;
 using Python.Runtime;
 using System.Diagnostics;
 using System.Threading;
-
+using System.Drawing;
 
 namespace ssi {
     class InvokePython
     {
 
-        public static void imageExplainer(string pathModell, string toExplain)
+        public static void initPython()
         {
-
-            var pythonPath = @"C:\Program Files\Python36";
+            var pythonPath = @"C:\\Program Files\\Python36";
             var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
             Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
             PythonEngine.PythonHome += pythonPath;
 
             //TODO change path variable to relative 
             //TODO add scripts path in front of everything else
-            PythonEngine.PythonPath += ";C:\\Users\\Alex Heimerl\\Desktop\\nova\\Scripts";
-            //PythonEngine.PythonPath += @";python\scripts\correlations";
+            PythonEngine.PythonPath += ";Scripts";
             PythonEngine.Initialize();
+        }
 
+        public static void imageExplainer(string pathModell, byte[] toExplain)
+        {
             using (Py.GIL())
             {
                 dynamic os = Py.Import("os");
-                dynamic importlib = Py.Import("importlib");
-                //string[] fileEntries = Directory.GetFiles("C:\\Users\\Alex Heimerl\\Desktop\\test");
-                //fileEntries = Directory.GetFiles("..\\");
-                //TODO change Scripts path
                 dynamic sys = Py.Import("sys");
-                Console.WriteLine(os.getcwd());
-                Console.WriteLine(sys.path + "\n");
-                Console.WriteLine(sys.version);
-                Console.WriteLine(os.__file__);
+                //Console.WriteLine(os.getcwd());
+                //Console.WriteLine(sys.path + "\n");
+                //Console.WriteLine(sys.version);
+                //Console.WriteLine(os.__file__);
+                
+                dynamic limeExplainer = Py.Import("LimeExplain");
+
+                //byte[] expImg = limeExplainer.explain(pathModell, toExplain);
+                var expImg = limeExplainer.explain(pathModell, toExplain);
+                ImageConverter imageConverter = new ImageConverter();
+                Image final_img = (Image)imageConverter.ConvertFrom((byte[])expImg);
+                //final_img.Save("test.jpg");
 
             }
         }
@@ -82,15 +87,12 @@ namespace ssi {
 
             List<string> scriptsName = new List<string>();
 
-            foreach (string fp in Directory.GetFiles("..\\..\\Scripts", "*.py", SearchOption.TopDirectoryOnly).Where(s => !s.Contains("__init__.py")))
+            foreach (string fp in Directory.GetFiles("Scripts", "*.py", SearchOption.TopDirectoryOnly).Where(s => !s.Contains("__init__.py")))
             {
                 Console.WriteLine(Path.GetFileNameWithoutExtension(fp));
                 scriptsName.Add(Path.GetFileNameWithoutExtension(fp));
             }
 
-            List<double> correlations = new List<double>();
-
-            //Dictionary<string, dynamic> scripts = new Dictionary<string, dynamic>();
             Dictionary<string, double> measureValueDic= new Dictionary<string, double>();
 
             using (Py.GIL())
@@ -99,7 +101,6 @@ namespace ssi {
                 dynamic spearman = Py.Import("SpearmanR");
                 dynamic kendall = Py.Import("KendallTau");
                 dynamic scriptType = Py.Import("EnumScriptType");
-                //List<dynamic> scripts = new List<dynamic>();
                 string typeT = scriptType.ScriptType.CORRELATION.name;
 
                 dynamic os = Py.Import("os");
@@ -116,7 +117,6 @@ namespace ssi {
 
                     if(typeT.Equals((string)temp.getType()))
                     {
-                        //scripts[sc] = temp;
                         measureValueDic[sc] = temp.correlate(anno1ValuesL, anno2ValuesL);
                     }
                 }
@@ -127,8 +127,6 @@ namespace ssi {
             }
             return measureValueDic;
         }
-
-
 
     }
 }
