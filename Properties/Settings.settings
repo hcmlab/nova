@@ -140,5 +140,8 @@
     <Setting Name="DrawVideoWavform" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="serverhistory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost:27017</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
