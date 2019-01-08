@@ -574,5 +574,17 @@ namespace ssi.Properties {
                 this["DrawVideoWavform"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost:27017")]
+        public string serverhistory {
+            get {
+                return ((string)(this["serverhistory"]));
+            }
+            set {
+                this["serverhistory"] = value;
+            }
+        }
     }
 }

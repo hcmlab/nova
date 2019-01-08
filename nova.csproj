@@ -165,6 +165,8 @@
     <Compile Include="Controls\Other\ConfmatWindow.xaml.cs">
       <DependentUpon>ConfmatWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Other\DropdownItem.cs" />
+    <Compile Include="Controls\Other\DropdownTextBox.cs" />
     <Compile Include="Controls\Other\QuestionBoxThreeButtons.xaml.cs">
       <DependentUpon>QuestionBoxThreeButtons.xaml</DependentUpon>
     </Compile>
