@@ -13,7 +13,7 @@ namespace ssi
 
         public class Colors
         {
-            public static string Theme = "Dark";
+            public static string Theme = "Default";
             public static string Darkmode = "Dark";
 
             public static Color Foreground = System.Windows.Media.Colors.Black;
