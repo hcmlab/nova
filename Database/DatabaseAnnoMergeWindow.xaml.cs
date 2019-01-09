@@ -156,10 +156,15 @@ namespace ssi
                 string type = annotdb.GetValue(2).ToString();
 
                 var filterc = builder.Eq("_id", anno["annotator_id"]);
-                var annotatdb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filterc).Single();
-                string annotatorname = annotatdb.GetValue(1).ToString();
+                var annotatdb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filterc).ToList();
+                string annotatorname = "Deleted User";
+                string annotatornamefull = annotatorname;
+                if (annotatdb.Count > 0)
+                {
+                    annotatorname = annotatdb[0].GetValue(1).ToString();
 
-                string annotatornamefull = DatabaseHandler.Annotators.Find(a => a.Name == annotatorname).FullName;
+                    annotatornamefull = DatabaseHandler.Annotators.Find(a => a.Name == annotatorname).FullName;
+      
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
@@ -168,6 +173,7 @@ namespace ssi
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
                     items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = session.Name });
+                }
                 }
             }
 
