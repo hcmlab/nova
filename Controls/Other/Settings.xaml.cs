@@ -150,7 +150,12 @@ namespace ssi
             {
 
                 if(Properties.Settings.Default.serverhistory == "") Properties.Settings.Default.serverhistory = DBHost.Text + ":" + DBPort.Text;
-                else Properties.Settings.Default.serverhistory = Properties.Settings.Default.serverhistory + ";" + DBHost.Text + ":" + DBPort.Text;
+                else if(!Properties.Settings.Default.serverhistory.Contains(DBHost.Text + ":" + DBPort.Text))
+                {
+                    Properties.Settings.Default.serverhistory = Properties.Settings.Default.serverhistory + ";" + DBHost.Text + ":" + DBPort.Text;
+                }
+
+                   
           
             
             if (Properties.Settings.Default.DatabaseDirectory != DownloadDirectory.Text)                
