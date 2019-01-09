@@ -9,11 +9,13 @@ namespace ssi
 {
     public class Defaults
     {
-
+       
 
         public class Colors
         {
-         
+            public static string Theme = "Dark";
+            public static string Darkmode = "Dark";
+
             public static Color Foreground = System.Windows.Media.Colors.Black;
             public static Color Background = System.Windows.Media.Colors.White;            
             public static Color Highlight = System.Windows.Media.Colors.LightGray;
@@ -21,6 +23,9 @@ namespace ssi
             public static Color GradientMin = System.Windows.Media.Colors.White;
             public static Color GradientMax = System.Windows.Media.Colors.LightBlue;
             public static Color Splitter = System.Windows.Media.Colors.WhiteSmoke;
+            public static Color AppBackground =  (Theme == Darkmode) ?  (Color)ColorConverter.ConvertFromString("#4e4e4e") : System.Windows.Media.Colors.White;
+            public static Color ButtonColor = (Theme == Darkmode) ?  (Color)ColorConverter.ConvertFromString("#6AC0DB") : System.Windows.Media.Colors.LightGray;
+            public static Color ButtonForeColor = (Theme == Darkmode) ? System.Windows.Media.Colors.White : System.Windows.Media.Colors.Black;
 
         }
 
@@ -33,7 +38,12 @@ namespace ssi
             public static Brush GradientMin = new SolidColorBrush(Defaults.Colors.GradientMin);
             public static Brush GradientMax = new SolidColorBrush(Defaults.Colors.GradientMax);
             public static Brush Splitter = new SolidColorBrush(Defaults.Colors.Splitter);
+            public static Brush AppBackground = (Brush)new SolidColorBrush(Defaults.Colors.AppBackground);
+            public static Brush ButtonColor = (Brush)new SolidColorBrush(Defaults.Colors.ButtonColor);
+            public static Brush ButtonForeColor = (Brush)new SolidColorBrush(Defaults.Colors.ButtonForeColor);
 
+
+            
 
 
         }

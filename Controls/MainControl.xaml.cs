@@ -14,6 +14,7 @@ namespace ssi
         {
             InitializeComponent();
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+            this.Background = Defaults.Brushes.AppBackground;
         }
 
         private void ControlLoaded(object sender, RoutedEventArgs e)
