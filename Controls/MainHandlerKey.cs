@@ -918,8 +918,25 @@ namespace ssi
                 if (AnnoTierStatic.Selected.CMLCompleteTrainOptions != null
                     && AnnoTierStatic.Selected.CMLCompletePredictOptions != null)
                 {
-                    runCMLProcess("cmltrain", AnnoTierStatic.Selected.CMLCompleteTrainOptions);
-                    runCMLProcess("cmltrain", AnnoTierStatic.Selected.CMLCompletePredictOptions);
+
+
+                    //(AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                    //   MainHandler.Time.CurrentSelectPosition)
+                    //AnnoTierStatic.Selected.CMLCompleteTrainOptions.Replace(arguments["password"].ToString(), "*");
+
+                    string[] completetrainoptionstemp = AnnoTierStatic.Selected.CMLCompleteTrainOptions.Split(' ');
+                    completetrainoptionstemp[14] = ((AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition : Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition)).ToString(); ;
+                    string completetrainoptions = string.Join(" ", completetrainoptionstemp);
+
+
+                    string[] completepredictoptionstemp = AnnoTierStatic.Selected.CMLCompletePredictOptions.Split(' ');
+                    completepredictoptionstemp[16] = ((AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition : Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition)).ToString(); ;
+                    string completepredictoptions = string.Join(" ", completepredictoptionstemp);
+
+                    
+
+                    runCMLProcess("cmltrain", completetrainoptions);
+                    runCMLProcess("cmltrain", completepredictoptions);
 
                     ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
 
