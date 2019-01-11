@@ -482,7 +482,7 @@ namespace ssi
             double length = 0;
             foreach (AnnoList al in annolists)
             {
-                if (al.ElementAt(al.Count - 1).Stop > length) length = al.ElementAt(al.Count - 1).Stop;
+                if (al.Count > 0 && al.ElementAt(al.Count - 1).Stop > length) length = al.ElementAt(al.Count - 1).Stop;
             }
 
             return length;

@@ -184,7 +184,7 @@ namespace ssi
             return runCMLTool("cmltrain", "merge", parameters, arguments, "cml-merge");
         }
 
-        public string CMLTrainModel(string templatePath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream, string leftContext, string rightContext, string balance, bool complete)
+        public string CMLTrainModel(string templatePath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream, string leftContext, string rightContext, string balance, bool complete, double cmlbegintime)
         {
             string[] split = server.Split(':');
             string ip = split[0];
@@ -209,6 +209,7 @@ namespace ssi
             arguments["balance"] = balance;
             arguments["username"] = username;
             arguments["password"] = password;
+            arguments["cmlbegintime"] = cmlbegintime;
             if (complete) arguments["cooperative"] = null;
 
             return runCMLTool("cmltrain", "train", parameters, arguments, "cml-train");            
@@ -257,7 +258,8 @@ namespace ssi
             double confidence,
             double minGap,
             double minDur,
-            bool complete)
+            bool complete,
+            double cmlbegintime)
         {
 
             string[] split = server.Split(':');
@@ -283,6 +285,7 @@ namespace ssi
             arguments["mindur"] = minDur;
             arguments["username"] = username;
             arguments["password"] = password;
+            arguments["cmlbegintime"] = cmlbegintime;
             if (complete) arguments["cooperative"] = null;
 
             return runCMLTool("cmltrain", "forward", parameters, arguments, "cml-predict");            
