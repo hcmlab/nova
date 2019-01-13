@@ -42,7 +42,7 @@ namespace updater
         {
 
             string url = "https://github.com/hcmlab/nova/releases/download/" + version + "/nova.exe";
-            DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "nova.exe");
+            DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "nova_update.exe");
 
         }
 
@@ -97,12 +97,18 @@ namespace updater
             sw.Reset();
 
             System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
+
+            System.IO.File.Delete(AppDomain.CurrentDomain.BaseDirectory + "nova.exe");
+            System.IO.File.Move(AppDomain.CurrentDomain.BaseDirectory + "nova_update.exe", AppDomain.CurrentDomain.BaseDirectory + "nova.exe");
+
+        
+
             updateProcess.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory +  "nova.exe";
             updateProcess.Start();
 
 
             ProcessStartInfo Info = new ProcessStartInfo();
-            Info.Arguments = "/C choice /C Y /N /D Y /T 3 & Del " + AppDomain.CurrentDomain.BaseDirectory +  "updater.exe";
+            Info.Arguments = "/C choice /C Y /N /D Y /T 3 & Del " + AppDomain.CurrentDomain.BaseDirectory + "updater.exe";
             Info.WindowStyle = ProcessWindowStyle.Hidden;
             Info.CreateNoWindow = true;
             Info.FileName = "cmd.exe";
