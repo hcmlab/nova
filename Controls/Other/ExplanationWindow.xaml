@@ -1,0 +1,50 @@
+﻿<Window x:Class="ssi.Controls.Other.ExplanationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi.Controls.Other"
+        mc:Ignorable="d"
+        Title="ExplanationWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="75*"></ColumnDefinition>
+            <ColumnDefinition Width="25*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25*"></RowDefinition>
+            <RowDefinition Height="25*"></RowDefinition>
+            <RowDefinition Height="25*"></RowDefinition>
+            <RowDefinition Height="25*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Viewbox Grid.Column="0" Grid.RowSpan="4" Margin="10">
+            <Image Name="explanationImage">
+            </Image>
+        </Viewbox>
+        <StackPanel Grid.Column="1" Grid.Row="0">
+            <StackPanel  Name="modelPanel" Width="120" Height="70" Drop="modelPanel_Drop" AllowDrop="True">
+                <StackPanel.Background>
+                    <ImageBrush ImageSource="/Resources/dropmodel2.png"></ImageBrush>
+                </StackPanel.Background>
+            </StackPanel>
+            <TextBlock x:Name="modelLoaded" Margin="39 10 39 0"/>
+        </StackPanel>
+        <Viewbox Grid.Column="1" Grid.Row="1" Grid.RowSpan="2">
+            <StackPanel>
+                
+            </StackPanel>
+        </Viewbox>
+        <Button Name="explanationButton" Width="100" Height="35" Grid.Column="1" Grid.Row="3">
+            <TextBlock Text="Explain">
+                <TextBlock.Style>
+                    <Style>
+                        <Setter Property="TextBlock.FontSize" Value="14"></Setter>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Button>
+        <Label Grid.Column="0" Grid.Row="0" Grid.RowSpan="4" Name="explainingLabel" Panel.ZIndex="100" Foreground="White" FontSize="16" Background="Transparent" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+            Working on explanation
+        </Label>
+    </Grid>
+</Window>

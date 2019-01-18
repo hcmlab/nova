@@ -204,7 +204,7 @@ namespace ssi
             control.updateCMLMenu.Click += updateCML_Click;
             control.aboutMenu.Click += aboutMenu_Click;
 
-            control.getExplanation.Click += getExplanation_Click;
+            control.explanationWindow.Click += explanationWindow_Click;
 
 
             // Navigator

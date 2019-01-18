@@ -354,3 +354,4 @@ Scripts/__init__.py
 python/scripts/correlations/test_tobi_domi.py
 python/scripts/testasdf.py
 Scripts/testasdf.py
+*.mp4

@@ -8,6 +8,7 @@ using Python.Runtime;
 using System.Diagnostics;
 using System.Threading;
 using System.Drawing;
+using System.Windows.Media.Imaging;
 
 namespace ssi {
     class InvokePython
@@ -22,29 +23,35 @@ namespace ssi {
 
             //TODO change path variable to relative 
             //TODO add scripts path in front of everything else
-            PythonEngine.PythonPath += ";Scripts";
+            PythonEngine.PythonPath += ";PythonScripts";
             PythonEngine.Initialize();
+            PythonEngine.BeginAllowThreads();
         }
 
-        public static void imageExplainer(string pathModell, byte[] toExplain)
+        public static BitmapImage imageExplainer(string pathModell, byte[] toExplain)
         {
             using (Py.GIL())
             {
                 dynamic os = Py.Import("os");
                 dynamic sys = Py.Import("sys");
+
                 //Console.WriteLine(os.getcwd());
                 //Console.WriteLine(sys.path + "\n");
                 //Console.WriteLine(sys.version);
                 //Console.WriteLine(os.__file__);
-                
-                dynamic limeExplainer = Py.Import("LimeExplain");
-
+                dynamic limeExplainer = Py.Import("ImageExplainer");
                 //byte[] expImg = limeExplainer.explain(pathModell, toExplain);
-                var expImg = limeExplainer.explain(pathModell, toExplain);
-                ImageConverter imageConverter = new ImageConverter();
-                Image final_img = (Image)imageConverter.ConvertFrom((byte[])expImg);
-                //final_img.Save("test.jpg");
+                var expImg = limeExplainer.explainToOrg(pathModell, toExplain);
+                BitmapImage final_img = new BitmapImage();
+                final_img.BeginInit();
+                final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
+                final_img.EndInit();
+                final_img.Freeze();
+                //ImageConverter imageConverter = new ImageConverter();
+                //Image final_img = (Image)imageConverter.ConvertFrom((byte[])expImg);
+                //final_img.Save("test.jpg
 
+                return final_img;
             }
         }
 

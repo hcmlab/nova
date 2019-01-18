@@ -92,7 +92,7 @@
             </MenuItem>
 
             <MenuItem Header="XAI">
-                <MenuItem Header="LimeExplainer" Name="getExplanation"/>
+                <MenuItem Header="LimeExplainer" Name="explanationWindow"/>
             </MenuItem>
 
         </Menu>
