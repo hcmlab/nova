@@ -62,7 +62,28 @@ namespace ssi
         public Face(string filepath, Signal signal, FaceType ftype, int width = 600, int height = 600)
         {
             this.filepath = filepath;
-            this.signal = signal;
+            this.signal = new Signal();
+
+
+            this.signal.data = new float[signal.data.Length];
+            for(int i=0; i<signal.data.Length; i++)
+            {
+                this.signal.data[i] = signal.data[i];
+            }
+
+            this.signal.dim = signal.dim;
+            this.signal.bytes = signal.bytes;
+            this.signal.max = signal.max;
+            this.signal.min = signal.min;
+            this.signal.number = signal.number;
+            this.signal.time = signal.time;
+            this.signal.rate = signal.rate;
+            this.signal.loaded = signal.loaded;
+            this.signal.type = signal.type;
+            this.signal.Meta = signal.Meta;
+
+
+
             this.width = width;
             this.height = height;
 
@@ -115,7 +136,7 @@ namespace ssi
 
                 {
                     int dim = i % 2;
-                    if (mins[dim] > signal.data[i] && signal.data[i] > 0)
+                    if (mins[dim] > signal.data[i])
                     {
                         mins[dim] = signal.data[i];
                     }
@@ -126,6 +147,7 @@ namespace ssi
 
 
                     mins[0] = mins[1] = Math.Min(mins[0], mins[1]);
+
                     maxs[0] = maxs[1] = Math.Max(maxs[0], maxs[1]);
                 }
 
@@ -133,6 +155,11 @@ namespace ssi
 
 
             }
+
+      
+                
+                
+                
         }
 
         public void scaleOF()
@@ -140,18 +167,30 @@ namespace ssi
             for (int i = 0; i < signal.number * signal.dim; i++)
             {
                 // negative values are evil, sometimes occur though
-                if (i >= signal.dim && signal.data[i] <= KINECT_SMALL_VALUES_BUG_THRES
-                    && signal.data[i] < KINECT_LARGE_VALUES_BUG_THRES)
-                {
-                    signal.data[i] = signal.data[i - signal.dim];
-                }
+                //if (i >= signal.dim && signal.data[i] <= KINECT_SMALL_VALUES_BUG_THRES
+                //    && signal.data[i] < KINECT_LARGE_VALUES_BUG_THRES)
+                //{
+                //    signal.data[i] = signal.data[i - signal.dim];
+                //}
                 if (i % signal.dim >= 26 && i % signal.dim <= 161)
 
                 {
+                   
+
                     int dim = i % 2;
+                    float tempmin = mins[dim];
+                    float tempmax = maxs[dim];
                     if (maxs[dim] - mins[dim] != 0)
                     {
-                        signal.data[i] = (signal.data[i] - mins[dim]) / (maxs[dim] - mins[dim]);
+                        if (mins[dim] < 0)
+                        {
+                            signal.data[i] += Math.Abs(tempmin);
+                            tempmin = 0;
+                            tempmax = tempmax + Math.Abs(mins[dim]);
+
+                        }
+                        signal.data[i] = (signal.data[i] - tempmin) / (tempmax - tempmin);
+   
                     }
                     else
                     {
@@ -227,13 +266,16 @@ namespace ssi
         public void Draw(double time)
         {
             postion = time;
-            uint index = (uint)(time * signal.rate);
+
+
+
+
+             uint index = (uint)((time * signal.rate) +0.5F);
 
             writeableBmp.Lock();
             writeableBmp.Clear(BackColor);
 
-
-
+   
             if(facetype == FaceType.KINECT1 || facetype == FaceType.KINECT2)
             {
                 if (index < signal.number)
@@ -253,16 +295,33 @@ namespace ssi
                 {
                     for (uint i = (index * signal.dim) + 26; i < (index * signal.dim) + 161; i += 2)
                     {
-                        double X = signal.data[i] > 0 ? signal.data[i]  * width   - width/2: 0;
-                        double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
-                        writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
- 
-                    }
+                        //double X = signal.data[i] > 0 ? signal.data[i]  * width   - width/2: 0;
+                        //double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
 
-                }
+
+                        double X = signal.data[i] * width;
+                        double Y = signal.data[i + 1] * height;
+                        try
+                            {
+                            if(X < width && Y < height)
+                            {
+                                writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+                            }
+                              
+                            }
+                             catch(Exception e)
+                            {
+                                Console.WriteLine(e);
+                            }
+
+
+        }
+
+    }
 
             }
-           
+         
+
 
             writeableBmp.Unlock();
 

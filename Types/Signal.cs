@@ -148,7 +148,7 @@ namespace ssi
 
         public Dictionary<string, string> Meta { get; set; }
 
-        protected Signal()
+        public Signal()
         {
             rate = 0;
             dim = 0;
