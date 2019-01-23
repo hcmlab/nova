@@ -76,7 +76,7 @@ def rescale(img, width, height):
 
 def test():
     modelPath = "C:/Users/Alex Heimerl/Desktop/test/vgg16_pokemon_test__2_mse_sgd_10-0.23.h5"
-    img_path = "C:/Users/Alex Heimerl/Desktop/nova/Scripts/Capture1.jpg"
+    img_path = "C:/Users/Alex Heimerl/Desktop/test/Capture1.jpg"
     img = Image.open(img_path)
 
     imgByteArr = io.BytesIO()
@@ -94,10 +94,12 @@ def test():
     prediction = model.predict(img)
 
     explainer = lime_image.LimeImageExplainer()
+    
     img = np.squeeze(img)
 #    img = (img + 1)*0.5
 #    img = np.asarray(img, np.float32)
     explanation = explainer.explain_instance(img, model.predict, top_labels=2, hide_color=0, num_samples=1000)
+
     temp, mask = explanation.get_image_and_mask(getTopPrediction(prediction[0]), positive_only=True, num_features=100, hide_rest=False)
     imgExplained = mark_boundaries(temp, mask)
 
@@ -139,7 +141,7 @@ def test():
     imgExplained = testImgExpl
     test = np.uint8(imgExplained*255)
     img = Image.fromarray(test)
-    img.save(r'C:/Users/Alex Heimerl/Desktop/nova/Scripts/testpython.jpg')
+    img.save(r'C:/Users/Alex Heimerl/Desktop/test/testpython.jpg')
 
     f, axarr = plt.subplots(1,3)
     axarr[0].imshow(testImg)
@@ -196,6 +198,7 @@ def inception():
     # imgByteArr = imgByteArr.getvalue()
     # return imgByteArr
 
-# if __name__ == '__main__':
-#     test()
-#     #inception()
+if __name__ == '__main__':
+    test()
+    test()
+    #inception()

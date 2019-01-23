@@ -1,6 +1,7 @@
 ﻿using Octokit;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -204,6 +205,7 @@ namespace ssi
             control.updateCMLMenu.Click += updateCML_Click;
             control.aboutMenu.Click += aboutMenu_Click;
 
+            startExplainableThread();
             control.explanationWindow.Click += explanationWindow_Click;
 
 

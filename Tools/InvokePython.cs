@@ -16,55 +16,29 @@ namespace ssi {
 
         public static void initPython()
         {
-            var pythonPath = @"C:\\Program Files\\Python36";
-            var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
-            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
-            PythonEngine.PythonHome += pythonPath;
-
-            //TODO change path variable to relative 
-            //TODO add scripts path in front of everything else
-            PythonEngine.PythonPath += ";PythonScripts";
-            PythonEngine.Initialize();
-            PythonEngine.BeginAllowThreads();
-        }
-
-        public static BitmapImage imageExplainer(string pathModell, byte[] toExplain)
-        {
-            using (Py.GIL())
+            if (!PythonEngine.IsInitialized)
             {
-                dynamic os = Py.Import("os");
-                dynamic sys = Py.Import("sys");
+                var pythonPath = @"C:\\Program Files\\Python36";
+                var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
+                Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
+                PythonEngine.PythonHome += pythonPath;
 
-                //Console.WriteLine(os.getcwd());
-                //Console.WriteLine(sys.path + "\n");
-                //Console.WriteLine(sys.version);
-                //Console.WriteLine(os.__file__);
-                dynamic limeExplainer = Py.Import("ImageExplainer");
-                //byte[] expImg = limeExplainer.explain(pathModell, toExplain);
-                var expImg = limeExplainer.explainToOrg(pathModell, toExplain);
-                BitmapImage final_img = new BitmapImage();
-                final_img.BeginInit();
-                final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
-                final_img.EndInit();
-                final_img.Freeze();
-                //ImageConverter imageConverter = new ImageConverter();
-                //Image final_img = (Image)imageConverter.ConvertFrom((byte[])expImg);
-                //final_img.Save("test.jpg
-
-                return final_img;
+                //TODO change path variable to relative 
+                //TODO add scripts path in front of everything else
+                PythonEngine.PythonPath += ";PythonScripts";
+                PythonEngine.Initialize();
+                //PythonEngine.BeginAllowThreads();
             }
         }
 
-        //TODO
-        private static void textExplainer()
-        {
 
+        public static IntPtr allowThreads(){
+            return PythonEngine.BeginAllowThreads();
         }
 
-        //TODO
-        private static void audioExplainer()
+        public static void endAllowPython(IntPtr thread_state)
         {
-
+            PythonEngine.EndAllowThreads(thread_state);
         }
 
         //Needed for debugging purposes
