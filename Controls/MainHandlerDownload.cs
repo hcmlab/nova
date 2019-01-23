@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -401,6 +402,8 @@ namespace ssi
 
 
 
+
+
         private async Task httpGet(string URL, string localpath)
         {
             string fileName = Path.GetFileName(localpath);
@@ -489,5 +492,70 @@ namespace ssi
             }
             else await control.Dispatcher.BeginInvoke(new Action<string>(FinishedDownload), DispatcherPriority.Normal, "");
         }
+
+
+
+
+        private void GetPython()
+        {
+            using (webClient = new WebClient())
+            {
+                // if (!Directory.Exists("python"))
+                {
+                    try
+                    {
+
+                   
+                    webClient.DownloadFile("https://www.python.org/ftp/python/3.6.7/python-3.6.7-embed-amd64.zip", "python.zip");
+                    System.IO.Compression.ZipFile.ExtractToDirectory("python.zip", "python");
+                    File.Delete("python.zip");
+                    System.IO.Compression.ZipFile.ExtractToDirectory("python/python36.zip", "python/python36");
+                    File.Delete("python/python36.zip");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("python is already downloaded and extracted");
+                    }
+
+                    string path = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python36._pth";
+
+                    using (StreamWriter sw = File.CreateText(path))
+                    {
+                        sw.WriteLine(".");
+                        sw.WriteLine(".\\DLLs");
+                        sw.WriteLine(".\\lib");
+                        sw.WriteLine(".\\lib\\plat-win");
+                        sw.WriteLine(".\\lib\\site-packages");
+                        sw.WriteLine(".\\python36");
+
+                    }
+
+                    webClient.DownloadFile("https://bootstrap.pypa.io/get-pip.py", "python/get-pip.py");
+
+
+
+
+
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python.exe";
+                    startInfo.Arguments = AppDomain.CurrentDomain.BaseDirectory + "\\python\\get-pip.py";
+                    process.StartInfo = startInfo;
+                    process.Start();
+                    process.WaitForExit();
+
+                    process = new Process();
+                    startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
+                    startInfo.Arguments = "-m pip install numpy";
+                    process.StartInfo = startInfo;
+                    process.Start();
+                    process.WaitForExit();
+
+                }
+            }
+        }
+
+
     }
 }

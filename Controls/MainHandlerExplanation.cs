@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,6 +15,7 @@ using System.Windows.Threading;
 using NovA;
 using Python.Runtime;
 using ssi.Controls.Other;
+
 
 namespace ssi
 {
@@ -47,7 +51,13 @@ namespace ssi
 
         public void startExplainableThread()
         {
+
             var pythonPath = @"C:\\Program Files\\Python36";
+            //var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "\\python\\";
+            if (Directory.Exists(pythonPath))
+            {
+
+            
             var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
             Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
             PythonEngine.PythonHome += pythonPath;
@@ -65,6 +75,15 @@ namespace ssi
             explanationWorker.DoWork += worker_GetExplanation;
             explanationWorker.ProgressChanged += worker_OnProgressChanged;
             explanationWorker.RunWorkerAsync();
+            }
+
+            else
+            {
+                //TODO ADD some logic to ask user to install python
+                GetPython();
+
+
+            }
         }
 
         private void worker_GetExplanation(object sender, DoWorkEventArgs e)
