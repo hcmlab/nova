@@ -80,7 +80,10 @@ namespace ssi
             else
             {
                 //TODO ADD some logic to ask user to install python
-                GetPython();
+                // GetPython();
+                //startExplainableThread()
+                //recursive magic.
+              
 
 
             }

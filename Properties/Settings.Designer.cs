@@ -578,12 +578,18 @@ namespace ssi.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("null")]
+     
         public string explainModelPath {
             get {
                 return ((string)(this["explainModelPath"]));
             }
             set {
                 this["explainModelPath"] = value;
+            }
+       
+        }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("localhost:27017")]
         public string serverhistory {
             get {
@@ -592,6 +598,7 @@ namespace ssi.Properties {
             set {
                 this["serverhistory"] = value;
             }
+           
         }
     }
 }
