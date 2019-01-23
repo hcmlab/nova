@@ -175,6 +175,7 @@
                 <ToggleButton x:Name="toggleButton" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Grid.ColumnSpan="2" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Style="{StaticResource ComboBoxToggleButton}"/>
                 <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Content="{TemplateBinding SelectionBoxItem}" ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" IsHitTestVisible="false" Margin="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
             </Grid>
+           
             <ControlTemplate.Triggers>
                 <Trigger Property="HasDropShadow" SourceName="PART_Popup" Value="true">
                     <Setter Property="Margin" TargetName="shadow" Value="0,0,5,5"/>
@@ -213,6 +214,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+   
         <ControlTemplate x:Key="ComboBoxEditableTemplate" TargetType="{x:Type ComboBox}">
             <Grid x:Name="templateRoot" SnapsToDevicePixels="true">
                 <Grid.ColumnDefinitions>
@@ -285,6 +287,68 @@
                     <Setter Property="Template" Value="{StaticResource ComboBoxEditableTemplate}"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+
+        <Style TargetType="{x:Type local:DropdownItem}">
+            <Setter Property="Padding" Value="2,4"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="NormalBrush" Value="Black"/>
+            <Setter Property="FilterBrush" Value="DarkGray"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type local:DropdownItem}">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                            <TextBlock x:Name="PART_Textpresenter" Margin="{TemplateBinding Padding}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   FontFamily="{TemplateBinding FontFamily}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Padding" Value="3,5"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="#72E3F5C4" Offset="0"/>
+                                <GradientStop Color="#7FC6FF61" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="{x:Type local:DropdownTextBox}">
+            <Setter Property="MinDropdownHeight" Value="8"/>
+            <Setter Property="MaxDropdownHeight" Value="150"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type local:DropdownTextBox}">
+                        <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <TextBox x:Name="PART_InputBox" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" Text="{Binding Text, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Popup IsOpen="{Binding IsDropdownOpened, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}, UpdateSourceTrigger=PropertyChanged}" AllowsTransparency="True" MaxHeight="{Binding MaxDropdownHeight, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}}" Width="{TemplateBinding ActualWidth}" StaysOpen="False" PopupAnimation="Fade" MinHeight="{Binding MinDropdownHeighte, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}}" >
+                                    <Border Background="White" Margin="3">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                            <VirtualizingStackPanel x:Name="PART_ItemPanel" Orientation="Vertical" />
+                                        </ScrollViewer>
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="8" ShadowDepth="6" Opacity="0.8" Color="#FF939090" />
+                                        </Border.Effect>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
     </Application.Resources>

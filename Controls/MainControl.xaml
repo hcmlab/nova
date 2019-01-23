@@ -14,7 +14,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Menu Grid.Row="0" Background="Transparent" Name="menu">
+        <Menu Grid.Row="0" Background="White" Name="menu">
             <Button Name="showSettingsMenu" Background="Transparent" BorderBrush="Transparent">
                 <Image Source="/Resources/settings.png" Width="16"></Image>
             </Button>

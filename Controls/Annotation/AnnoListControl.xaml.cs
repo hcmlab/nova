@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace ssi
 {
@@ -20,6 +21,13 @@ namespace ssi
         public AnnoListControl()
         {
             InitializeComponent();
+            annoDataGrid.Background = Defaults.Brushes.AppBackground;
+            editButton.Background = Defaults.Brushes.ButtonColor;
+            editButton.Foreground = Defaults.Brushes.ButtonForeColor;
+            if (!editButton.IsEnabled)
+            {
+                editButton.Foreground = Brushes.Black;
+            }
         }
 
         private void AnnoDataGrid_SourceUpdated(object sender, DataTransferEventArgs e)
@@ -320,6 +328,11 @@ namespace ssi
                     }
                 }
             }
+        }
+
+        private void editButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

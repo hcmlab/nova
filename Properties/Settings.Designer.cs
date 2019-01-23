@@ -584,6 +584,13 @@ namespace ssi.Properties {
             }
             set {
                 this["explainModelPath"] = value;
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost:27017")]
+        public string serverhistory {
+            get {
+                return ((string)(this["serverhistory"]));
+            }
+            set {
+                this["serverhistory"] = value;
             }
         }
     }

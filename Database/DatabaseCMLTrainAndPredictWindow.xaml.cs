@@ -354,7 +354,9 @@ namespace ssi
                         trainerLeftContext,
                         trainerRightContext,
                         trainerBalance,
-                        mode == Mode.COMPLETE);
+                        mode == Mode.COMPLETE,
+                        (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                        MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
                     }
 
                     catch(Exception ex)
@@ -413,7 +415,9 @@ namespace ssi
                         confidence,
                         minGap,
                         minDur,                        
-                        mode == Mode.COMPLETE);
+                        mode == Mode.COMPLETE,
+                        (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                         MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
                     }
 
                     catch (Exception ex)

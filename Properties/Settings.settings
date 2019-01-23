@@ -142,6 +142,8 @@
     </Setting>
     <Setting Name="explainModelPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">null</Value>
+    <Setting Name="serverhistory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost:27017</Value>
     </Setting>
   </Settings>
 </SettingsFile>

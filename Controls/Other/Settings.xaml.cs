@@ -28,6 +28,15 @@ namespace ssi
                 DBHost.Text = tokens[0];
                 DBPort.Text = tokens[1];
             }
+
+
+            string[] history =  Properties.Settings.Default.serverhistory.Split(';');
+
+            DBHost.DropItems = history;
+            DBHost.DropdownClosed += split;
+
+        
+
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPassword.Password = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
             DBConnnect.IsChecked = Properties.Settings.Default.DatabaseAutoLogin;
@@ -36,6 +45,17 @@ namespace ssi
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
             CMLDirectory.Text = Properties.Settings.Default.CMLDirectory;
 
+        }
+
+
+        private  void split(object sender, RoutedEventArgs e)
+        {
+            string[] tokens = DBHost.Text.Split(':');
+            if (tokens.Length == 2)
+            {
+                DBHost.Text = tokens[0];
+                DBPort.Text = tokens[1];
+            }
         }
 
         public double Uncertainty()
@@ -123,6 +143,21 @@ namespace ssi
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
+
+           
+
+            if(DBHost.Text != "" && DBHost.Text != "")
+            {
+
+                if(Properties.Settings.Default.serverhistory == "") Properties.Settings.Default.serverhistory = DBHost.Text + ":" + DBPort.Text;
+                else if(!Properties.Settings.Default.serverhistory.Contains(DBHost.Text + ":" + DBPort.Text))
+                {
+                    Properties.Settings.Default.serverhistory = Properties.Settings.Default.serverhistory + ";" + DBHost.Text + ":" + DBPort.Text;
+                }
+
+                   
+          
+            
             if (Properties.Settings.Default.DatabaseDirectory != DownloadDirectory.Text)                
             {
                 if (Directory.Exists(DownloadDirectory.Text))
@@ -156,6 +191,13 @@ namespace ssi
 
             DialogResult = true;
             Close();
+
+            }
+
+            else
+            {
+                MessageBox.Show("Host and IP can't be empty!");
+            }
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -254,7 +296,8 @@ namespace ssi
 
         private void DBHost_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            DBHost.SelectAll();
+            if(DBHost.Text == "") DBHost.IsDropdownOpened = true;
+           // DBHost.SelectAll();
         }
 
         private void DBPort_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -264,7 +307,7 @@ namespace ssi
 
         private void DBHost_GotMouseCapture(object sender, MouseEventArgs e)
         {
-            DBHost.SelectAll();
+            if (DBHost.Text == "") DBHost.IsDropdownOpened = true;
         }
 
         private void DBPort_GotMouseCapture(object sender, MouseEventArgs e)
@@ -280,6 +323,22 @@ namespace ssi
         private void DBPassword_GotMouseCapture(object sender, MouseEventArgs e)
         {
             DBPassword.SelectAll();
+        }
+
+        private void drpAge_TextChanged(object sender, RoutedEventArgs e)
+        {
+            //if (tbAge != null)
+            //{
+            //    tbAge.Text = DBHost.Text;
+            //}
+        }
+
+        private void clear_Click(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.serverhistory = "";
+
+            DBHost.DropItems = null;
+
         }
     }
 }
