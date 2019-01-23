@@ -356,7 +356,5 @@ python/scripts/testasdf.py
 Scripts/testasdf.py
 *.mp4
 *.jpg
-nova.csproj
 PythonScripts/test.py
-
 PythonScripts/LimeExplain.py
