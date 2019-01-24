@@ -52,8 +52,8 @@ namespace ssi
         public void startExplainableThread()
         {
 
-            var pythonPath = @"C:\\Program Files\\Python36";
-            //var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "\\python\\";
+            //var pythonPath = @"C:\\Program Files\\Python36";
+            var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "\\python\\";
             if (Directory.Exists(pythonPath))
             {
 
@@ -79,13 +79,15 @@ namespace ssi
 
             else
             {
-                //TODO ADD some logic to ask user to install python
-                // GetPython();
-                //startExplainableThread()
-                //recursive magic.
-              
 
+                MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now?", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
+                if(res == MessageBoxResult.Yes)
+                {
+                    GetPython();
+                    startExplainableThread();
+                    //recursive magic.
+                }
             }
         }
 
@@ -95,13 +97,11 @@ namespace ssi
             {
                 while (!explanationWorker.CancellationPending)
                 {
-                    if (window != null && window.modelPath != null)
+                    if (window != null && window.modelPath != null && window.getNewExplanation)
                     {
                         dynamic limeExplainer = Py.Import("ImageExplainerLime");
                         dynamic model = limeExplainer.loadModel(window.modelPath);
 
-                        if (window.img != null && window.getNewExplanation)
-                        {
                             BackgroundWorker progress = (BackgroundWorker)sender;
                             var expImg = limeExplainer.explain_deprecated(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
                             BitmapImage final_img = new BitmapImage();
@@ -112,7 +112,7 @@ namespace ssi
                             window.explainedImg = final_img;
                             window.getNewExplanation = false;
                             progress.ReportProgress(0, final_img);
-                        }
+                        
                     }
                 }
             }

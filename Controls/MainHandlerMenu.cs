@@ -66,6 +66,7 @@ namespace ssi
             control.removeRemainingSegmentsMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
             control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsContinuous;
             control.convertSignalMenu.IsEnabled = hasTrack;
+            control.XAIMenu.IsEnabled = hasBox;
         }
 
         private void tierMenu_MouseEnter(object sender, RoutedEventArgs e)

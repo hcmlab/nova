@@ -43,7 +43,7 @@ def loadModel(modelPath):
     try:
         model = load_model(modelPath)
     except Exception as e:
-        with open(r'C:\Users\Alex Heimerl\Desktop\test\exception.txt', "w") as f:
+        with open(r'exception.txt', "w") as f:
             f.write(str(e))    
     return model
 
@@ -82,7 +82,7 @@ def explain(model, img, topLabels, numSamples, numFeatures, hideRest, hideColor,
         img.save(imgByteArr, format='JPEG')
         imgByteArr = imgByteArr.getvalue()
     except Exception as e:
-        with open(r'C:\Users\Alex Heimerl\Desktop\test\exception.txt', "w") as f:
+        with open(r'exception.txt', "w") as f:
             f.write(str(e))        
 
     return imgByteArr

@@ -500,10 +500,8 @@ namespace ssi
         {
             using (webClient = new WebClient())
             {
-                // if (!Directory.Exists("python"))
-                {
-                    try
-                    {
+             try
+             {
 
                    
                     webClient.DownloadFile("https://www.python.org/ftp/python/3.6.7/python-3.6.7-embed-amd64.zip", "python.zip");
@@ -545,17 +543,42 @@ namespace ssi
                     process.Start();
                     process.WaitForExit();
 
+    
+                    //process = new Process();
+                    //startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
+                    //startInfo.Arguments = "-m pip install matplotlib";
+                    //process.StartInfo = startInfo;
+                    //process.Start();
+                    //process.WaitForExit();
+
                     process = new Process();
                     startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
-                    startInfo.Arguments = "-m pip install numpy";
+                    startInfo.Arguments = "-m easy_install termcolor";
                     process.StartInfo = startInfo;
+                    process.StartInfo.ErrorDialog = true;
                     process.Start();
                     process.WaitForExit();
 
-                }
+                    process = new Process();
+                    startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
+                    startInfo.Arguments = "-m easy_install toolz";
+                    process.StartInfo = startInfo;
+                    process.StartInfo.ErrorDialog = true;
+                    process.Start();
+                    process.WaitForExit();
+
+                    process = new Process();
+                    startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
+                    startInfo.Arguments = "-m pip install -r requirements.txt";
+                    process.StartInfo = startInfo;
+                    process.StartInfo.ErrorDialog = true;
+                    process.Start();
+                    process.WaitForExit();
+
+
             }
         }
-
+        
 
     }
 }

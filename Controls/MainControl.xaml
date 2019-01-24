@@ -80,7 +80,10 @@
                 </MenuItem>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
-
+            
+            <MenuItem Header="XAI" Name="XAIMenu">
+                <MenuItem Header="LimeExplainer" Name="explanationWindow"/>
+            </MenuItem>
 
             <MenuItem Header="?">
                 <MenuItem Header="About"  Name="aboutMenu" />
@@ -91,9 +94,7 @@
                 
             </MenuItem>
 
-            <MenuItem Header="XAI">
-                <MenuItem Header="LimeExplainer" Name="explanationWindow"/>
-            </MenuItem>
+     
 
         </Menu>
 
