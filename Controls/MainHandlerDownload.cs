@@ -529,12 +529,11 @@ namespace ssi
                     }
 
                     webClient.DownloadFile("https://bootstrap.pypa.io/get-pip.py", "python/get-pip.py");
+                    webClient.DownloadFile("https://raw.githubusercontent.com/hcmlab/nova/master/bin/requirements.txt", "requirements.txt");
 
 
 
-
-
-                    Process process = new Process();
+                Process process = new Process();
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.WindowStyle = ProcessWindowStyle.Normal;
                     startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python.exe";
@@ -566,6 +565,11 @@ namespace ssi
                     process.StartInfo.ErrorDialog = true;
                     process.Start();
                     process.WaitForExit();
+
+              
+
+                
+
 
                     process = new Process();
                     startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
