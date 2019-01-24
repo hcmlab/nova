@@ -3,5 +3,5 @@ lime
 numpy
 scipy
 scikit_image
-tensorflow_== 1.8.0
+tensorflow == 1.8.0
 keras == 2.2.2
