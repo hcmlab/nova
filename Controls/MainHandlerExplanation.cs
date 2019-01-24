@@ -22,7 +22,7 @@ namespace ssi
     public partial class MainHandler
     {
 
-        private BackgroundWorker explanationWorker;
+        public static BackgroundWorker explanationWorker;
         ExplanationWindow window;
         private static Action EmptyDelegate = delegate () { };
 
@@ -52,20 +52,35 @@ namespace ssi
         public void startExplainableThread()
         {
 
+            if(Properties.Settings.Default.forcepythonupdate)
+            {
+                try
+                {
+                    Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python\\", true);
+                }
+                catch { }
+               
+            }
+
+
             //var pythonPath = @"C:\\Program Files\\Python36";
-            var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "\\python\\";
+            var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
+            var pythonScriptsPath = AppDomain.CurrentDomain.BaseDirectory + "PythonScripts";
+          
             if (Directory.Exists(pythonPath))
             {
 
             
             var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
-            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
             PythonEngine.PythonHome += pythonPath;
+             
 
-            //TODO change path variable to relative 
-            //TODO add scripts path in front of everything else
-            PythonEngine.PythonPath += ";PythonScripts";
-            PythonEngine.Initialize();
+                //TODO change path variable to relative 
+                //TODO add scripts path in front of everything else
+                PythonEngine.PythonPath += ";" + pythonScriptsPath;
+    
+                PythonEngine.Initialize();
             PythonEngine.BeginAllowThreads();
             explanationWorker = new BackgroundWorker
             {
@@ -80,13 +95,25 @@ namespace ssi
             else
             {
 
-                MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now?", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                if(res == MessageBoxResult.Yes)
+                if(!Properties.Settings.Default.forcepythonupdate)
                 {
+                    MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now?", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    if (res == MessageBoxResult.Yes)
+                    {
+                        GetPython();
+                        startExplainableThread();
+                        //recursive magic.
+                    }
+                }
+                else
+                {
+                    Properties.Settings.Default.forcepythonupdate = false;
+                    Properties.Settings.Default.Save();
                     GetPython();
                     startExplainableThread();
-                    //recursive magic.
                 }
+               
+                
             }
         }
 
@@ -94,11 +121,13 @@ namespace ssi
         {
             using (Py.GIL())
             {
+                dynamic limeExplainer = Py.Import("ImageExplainerLime");
                 while (!explanationWorker.CancellationPending)
                 {
                     if (window != null && window.modelPath != null && window.getNewExplanation)
                     {
-                        dynamic limeExplainer = Py.Import("ImageExplainerLime");
+                        //dynamic test = Py.Import("test");
+                      
                         dynamic model = limeExplainer.loadModel(window.modelPath);
 
                             BackgroundWorker progress = (BackgroundWorker)sender;

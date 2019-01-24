@@ -515,7 +515,7 @@ namespace ssi
                         Console.WriteLine("python is already downloaded and extracted");
                     }
 
-                    string path = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python36._pth";
+                    string path = AppDomain.CurrentDomain.BaseDirectory + "python\\python36._pth";
 
                     using (StreamWriter sw = File.CreateText(path))
                     {
@@ -529,7 +529,30 @@ namespace ssi
                     }
 
                     webClient.DownloadFile("https://bootstrap.pypa.io/get-pip.py", "python/get-pip.py");
-                    webClient.DownloadFile("https://raw.githubusercontent.com/hcmlab/nova/master/bin/requirements.txt", "requirements.txt");
+
+
+
+                    string cudapath = Environment.GetEnvironmentVariable("CUDA_PATH", EnvironmentVariableTarget.Machine);
+                    //maybe create files for older cuda versions
+
+                    if (cudapath != null)
+                        {
+          
+                             webClient.DownloadFile("https://raw.githubusercontent.com/hcmlab/nova/master/bin/requirements.txt", "requirements.txt");
+                        }
+                    else
+                    {
+                      MessageBoxResult mb = MessageBox.Show("No CUDA installation found, loading tensorflow without GPU support.", "Attention", MessageBoxButton.YesNo);
+                        if(mb == MessageBoxResult.No)
+                        {
+                            Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python");
+                            return;
+                        }
+
+                        webClient.DownloadFile("https://raw.githubusercontent.com/hcmlab/nova/master/bin/requirements-nogpu.txt", "requirements.txt");
+                    }
+
+                   
 
 
 
@@ -542,44 +565,27 @@ namespace ssi
                     process.Start();
                     process.WaitForExit();
     
-                    //process = new Process();
-                    //startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
-                    //startInfo.Arguments = "-m pip install matplotlib";
-                    //process.StartInfo = startInfo;
-                    //process.Start();
-                    //process.WaitForExit();
-
                     process = new Process();
                     startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
-                    startInfo.Arguments = "-m easy_install termcolor";
+                    startInfo.Arguments = "-m easy_install termcolor toolz";
                     process.StartInfo = startInfo;
                     process.StartInfo.ErrorDialog = true;
                     process.Start();
                     process.WaitForExit();
 
+      
                     process = new Process();
                     startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
-                    startInfo.Arguments = "-m easy_install toolz";
+                    startInfo.Arguments = "-m pip install -r requirements.txt --no-warn-script-location";
                     process.StartInfo = startInfo;
                     process.StartInfo.ErrorDialog = true;
                     process.Start();
                     process.WaitForExit();
 
-              
-
-                
+                    File.Delete("requirements.txt");
 
 
-                    process = new Process();
-                    startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
-                    startInfo.Arguments = "-m pip install -r requirements.txt";
-                    process.StartInfo = startInfo;
-                    process.StartInfo.ErrorDialog = true;
-                    process.Start();
-                    process.WaitForExit();
-
-
-                }
+            }
         }
         
 

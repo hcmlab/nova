@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.3.3";
+        public static string BuildVersion = "1.1.0.0";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
 
         private static Timeline timeline = null;
@@ -203,6 +203,7 @@ namespace ssi
             control.helpShortcutsMenu.Click += helpShortcutsMenu_Click;
             control.updateApplicationMenu.Click += updateApplication_Click;
             control.updateCMLMenu.Click += updateCML_Click;
+            control.updatePythonMenu.Click += updatePython_Click;
             control.aboutMenu.Click += aboutMenu_Click;
 
             startExplainableThread();
