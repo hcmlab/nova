@@ -500,10 +500,10 @@ namespace ssi
         {
             using (webClient = new WebClient())
             {
-             try
-             {
+                try
+                {
 
-                   
+                  
                     webClient.DownloadFile("https://www.python.org/ftp/python/3.6.7/python-3.6.7-embed-amd64.zip", "python.zip");
                     System.IO.Compression.ZipFile.ExtractToDirectory("python.zip", "python");
                     File.Delete("python.zip");
@@ -533,15 +533,14 @@ namespace ssi
 
 
 
-                Process process = new Process();
+                    Process process = new Process();
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                    startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python.exe";
-                    startInfo.Arguments = AppDomain.CurrentDomain.BaseDirectory + "\\python\\get-pip.py";
+                    startInfo.FileName = "\""+AppDomain.CurrentDomain.BaseDirectory + "python/python.exe"+"\"";
+                    startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python/get-pip.py"+ "\"";
                     process.StartInfo = startInfo;
                     process.Start();
                     process.WaitForExit();
-
     
                     //process = new Process();
                     //startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
@@ -551,7 +550,7 @@ namespace ssi
                     //process.WaitForExit();
 
                     process = new Process();
-                    startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
+                    startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
                     startInfo.Arguments = "-m easy_install termcolor";
                     process.StartInfo = startInfo;
                     process.StartInfo.ErrorDialog = true;
@@ -559,7 +558,7 @@ namespace ssi
                     process.WaitForExit();
 
                     process = new Process();
-                    startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
+                    startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
                     startInfo.Arguments = "-m easy_install toolz";
                     process.StartInfo = startInfo;
                     process.StartInfo.ErrorDialog = true;
@@ -572,7 +571,7 @@ namespace ssi
 
 
                     process = new Process();
-                    startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\python\\python";
+                    startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
                     startInfo.Arguments = "-m pip install -r requirements.txt";
                     process.StartInfo = startInfo;
                     process.StartInfo.ErrorDialog = true;
@@ -580,7 +579,7 @@ namespace ssi
                     process.WaitForExit();
 
 
-            }
+                }
         }
         
 

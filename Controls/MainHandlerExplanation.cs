@@ -81,7 +81,6 @@ namespace ssi
             {
 
                 MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now?", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
-
                 if(res == MessageBoxResult.Yes)
                 {
                     GetPython();
