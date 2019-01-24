@@ -606,6 +606,7 @@
     <Content Include="PythonScripts\SpearmanR.py" />
     <Content Include="PythonScripts\test.py" />
     <Content Include="PythonScripts\__init__.py" />
+    <Resource Include="Resources\Question_16x.png" />
     <Resource Include="Resources\dropmodel.png" />
     <Resource Include="Resources\dragdrop.png" />
     <Resource Include="Resources\dropmodel2.png" />

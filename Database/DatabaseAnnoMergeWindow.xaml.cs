@@ -467,16 +467,6 @@ namespace ssi
         public Dictionary<string, double> PythonInterface(List<AnnoList> al)
         {
 
-            //var pythonPath = @"C:\\Program Files\\Python36";
-            //var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
-            //Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
-            //PythonEngine.PythonHome += pythonPath;
-
-            ////TODO change path variable to relative 
-            ////TODO add scripts path in front of everything else
-            //PythonEngine.PythonPath += ";Scripts";
-            //PythonEngine.Initialize();
-            InvokePython.initPython();
             Dictionary<string, double> measures = InvokePython.correlate(al[0], al[1]);
 
             return measures;
@@ -1315,7 +1305,7 @@ namespace ssi
                         Stats.Content = Stats.Content + " | MSE: " + mse.ToString("F6") + " | NMSE: " + nmse.ToString("F6"); ;
                     }
 
-                    PythonInterface(annolists);
+                    //PythonInterface(annolists);
 
                 }
 

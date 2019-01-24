@@ -62,34 +62,28 @@ namespace ssi
                
             }
 
-
-            //var pythonPath = @"C:\\Program Files\\Python36";
             var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
             var pythonScriptsPath = AppDomain.CurrentDomain.BaseDirectory + "PythonScripts";
           
             if (Directory.Exists(pythonPath))
             {
 
-            
-            var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
-            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
-            PythonEngine.PythonHome += pythonPath;
+                var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
+                Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
+                PythonEngine.PythonHome += pythonPath;
              
-
-                //TODO change path variable to relative 
-                //TODO add scripts path in front of everything else
                 PythonEngine.PythonPath += ";" + pythonScriptsPath;
     
                 PythonEngine.Initialize();
-            PythonEngine.BeginAllowThreads();
-            explanationWorker = new BackgroundWorker
-            {
-                WorkerReportsProgress = true,
-                WorkerSupportsCancellation = true
-            };
-            explanationWorker.DoWork += worker_GetExplanation;
-            explanationWorker.ProgressChanged += worker_OnProgressChanged;
-            explanationWorker.RunWorkerAsync();
+                PythonEngine.BeginAllowThreads();
+                explanationWorker = new BackgroundWorker
+                {
+                    WorkerReportsProgress = true,
+                    WorkerSupportsCancellation = true
+                };
+                explanationWorker.DoWork += worker_GetExplanation;
+                explanationWorker.ProgressChanged += worker_OnProgressChanged;
+                explanationWorker.RunWorkerAsync();
             }
 
             else
@@ -125,21 +119,19 @@ namespace ssi
                 while (!explanationWorker.CancellationPending)
                 {
                     if (window != null && window.modelPath != null && window.getNewExplanation)
-                    {
-                        //dynamic test = Py.Import("test");
-                      
+                    {                      
                         dynamic model = limeExplainer.loadModel(window.modelPath);
 
-                            BackgroundWorker progress = (BackgroundWorker)sender;
-                            var expImg = limeExplainer.explain_deprecated(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
-                            BitmapImage final_img = new BitmapImage();
-                            final_img.BeginInit();
-                            final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
-                            final_img.EndInit();
-                            final_img.Freeze();
-                            window.explainedImg = final_img;
-                            window.getNewExplanation = false;
-                            progress.ReportProgress(0, final_img);
+                        BackgroundWorker progress = (BackgroundWorker)sender;
+                        var expImg = limeExplainer.explain_raw(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
+                        BitmapImage final_img = new BitmapImage();
+                        final_img.BeginInit();
+                        final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
+                        final_img.EndInit();
+                        final_img.Freeze();
+                        window.explainedImg = final_img;
+                        window.getNewExplanation = false;
+                        progress.ReportProgress(0, final_img);
                         
                     }
                 }
@@ -148,7 +140,6 @@ namespace ssi
 
         private void worker_OnProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            //explanationImage.Source.Dispatcher.Invoke(()=>explanationImage.Source = explainedImg);
             window.explanationImage.Source = (BitmapImage)e.UserState;
             window.explainingLabel.Visibility = Visibility.Hidden;
             BlurEffect blur = new BlurEffect();
