@@ -21,6 +21,9 @@ namespace ssi
     {
         private MainHandler handler;
         private Mode mode;
+        private List<SelectedDatabaseAndSessions> selectedDatabaseAndSessions = new List<SelectedDatabaseAndSessions>();
+        private List<string> databases = new List<string>();
+        string lockedScheme = null;
 
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
@@ -91,7 +94,12 @@ namespace ssi
             if (mode == Mode.COMPLETE)
             {
                 ModeTabControl.Visibility = Visibility.Collapsed;
+                
+
             }
+
+       
+
             else
             {
                 ModeTabControl.SelectedIndex = (int)mode;
@@ -192,6 +200,11 @@ namespace ssi
                     RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
                     LosoCheckBox.Visibility = Visibility.Collapsed;
 
+                    AnnotationSelectionBox.Visibility = Visibility.Collapsed;
+                    removePair.Visibility = Visibility.Collapsed;
+                    multidatabaseadd.Visibility = Visibility.Collapsed;
+                    multidatabaselabel.Visibility = Visibility.Collapsed;
+
                     break;
 
                 case Mode.TRAIN:
@@ -204,7 +217,11 @@ namespace ssi
                     TrainOptionsPanel.Visibility = Visibility.Visible;
                     ForceCheckBox.Visibility = Visibility.Visible;
                     LosoCheckBox.Visibility = Visibility.Collapsed;
-                   
+
+                    AnnotationSelectionBox.Visibility = Visibility.Visible;
+                    removePair.Visibility = Visibility.Visible;
+                    multidatabaseadd.Visibility = Visibility.Visible;
+                    multidatabaselabel.Visibility = Visibility.Visible;
 
 
                     break;
@@ -219,6 +236,11 @@ namespace ssi
                     TrainOptionsPanel.Visibility = Visibility.Collapsed;
                     ForceCheckBox.Visibility = Visibility.Collapsed;
                     LosoCheckBox.Visibility = Visibility.Visible;
+
+                    AnnotationSelectionBox.Visibility = Visibility.Collapsed;
+                    removePair.Visibility = Visibility.Collapsed;
+                    multidatabaseadd.Visibility = Visibility.Collapsed;
+                    multidatabaselabel.Visibility = Visibility.Collapsed;
 
                     break;
 
@@ -239,7 +261,12 @@ namespace ssi
 
                     ConfidenceTextBox.Text = Properties.Settings.Default.CMLDefaultConf.ToString();
                     FillGapTextBox.Text = Properties.Settings.Default.CMLDefaultGap.ToString();
-                    RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();  
+                    RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
+
+                    AnnotationSelectionBox.Visibility = Visibility.Collapsed;
+                    removePair.Visibility = Visibility.Collapsed;
+                    multidatabaseadd.Visibility = Visibility.Collapsed;
+                    multidatabaselabel.Visibility = Visibility.Collapsed;
 
                     break;
             }
@@ -339,24 +366,52 @@ namespace ssi
                 {
                     try
                     {
-                        logTextBox.Text += handler.CMLTrainModel(trainer.Path,
-                        trainerOutPath,
-                        Properties.Settings.Default.DatabaseDirectory,
-                        Properties.Settings.Default.DatabaseAddress,
-                        Properties.Settings.Default.MongoDBUser,
-                        MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
-                        database,
-                        sessionList,
-                        scheme.Name,
-                        rolesList,
-                        annotator.Name,
-                        stream.Name,
-                        trainerLeftContext,
-                        trainerRightContext,
-                        trainerBalance,
-                        mode == Mode.COMPLETE,
-                        (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
-                        MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
+
+                        if(AnnotationSelectionBox.Items.Count > 0)
+
+                        {
+
+                            string[] combinations = new string[selectedDatabaseAndSessions.Count];
+                            int s = 0;
+                            foreach (SelectedDatabaseAndSessions item in AnnotationSelectionBox.Items)
+                            {
+                                combinations[s] = item.Database + ":" + item.Annotator  +  ":" +  item.Roles + ":" + item.Stream + ":" + item.Sessions ;
+                                s++;
+                            }
+
+                            string infofile = Properties.Settings.Default.CMLDirectory + "\\trainingtemp";
+        
+         
+                            System.IO.File.WriteAllLines(infofile, combinations);
+                        }
+
+                        else
+                        {
+
+                            logTextBox.Text += handler.CMLTrainModel(trainer.Path,
+                            trainerOutPath,
+                            Properties.Settings.Default.DatabaseDirectory,
+                            Properties.Settings.Default.DatabaseAddress,
+                            Properties.Settings.Default.MongoDBUser,
+                            MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
+                            database,
+                            sessionList,
+                            scheme.Name,
+                            rolesList,
+                            annotator.Name,
+                            stream.Name,
+                            trainerLeftContext,
+                            trainerRightContext,
+                            trainerBalance,
+                            mode == Mode.COMPLETE,
+                            (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                            MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
+
+                        }
+
+
+
+
                     }
 
                     catch(Exception ex)
@@ -520,7 +575,9 @@ namespace ssi
                     bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
                     if (getTrainer(stream, scheme, template).Count > 0)
                     {
-                        schemesValid.Add(scheme);
+
+                        if (lockedScheme == null) schemesValid.Add(scheme);
+                        else if (scheme.Name == lockedScheme) schemesValid.Add(scheme);
                         break;
                     }
                 }
@@ -1312,5 +1369,99 @@ namespace ssi
         }
 
         #endregion
+
+        private void AnnotationSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void RemovePair_Click(object sender, RoutedEventArgs e)
+        {
+            selectedDatabaseAndSessions.Remove((SelectedDatabaseAndSessions)AnnotationSelectionBox.SelectedItem);
+            AnnotationSelectionBox.Items.Remove(AnnotationSelectionBox.SelectedItem);
+
+            var selecteddatabase = DatabasesBox.SelectedItem;
+            if(AnnotationSelectionBox.Items.Count == 0)
+            {
+                lockedScheme = null;
+                GetDatabases();
+                DatabasesBox.SelectedItem = selecteddatabase;
+                removePair.IsEnabled = false;
+            }
+
+          
+        }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+                string sessions = ""; 
+                foreach (var session in SessionsBox.SelectedItems)
+                {
+                          sessions += session + ";";
+                }
+
+                string roles = "";
+                foreach (var role in RolesBox.SelectedItems)
+                {
+                    roles += role + ";";
+                }
+
+
+            if (selectedDatabaseAndSessions.Count == 0)
+            {
+
+                lockedScheme = SchemesBox.SelectedItem.ToString();
+                var selecteddatabase = DatabasesBox.SelectedItem;
+
+                databases.Clear();
+                foreach (var database in DatabasesBox.Items)
+                {
+                    databases.Add(database.ToString());
+                }
+
+
+                foreach (var database in databases)
+                {
+
+                    //HERE we should be more resitritive, e.g. check if sample rate /min max value of scheme is identical with lockedScheme TODO
+                    DatabaseHandler.ChangeDatabase(database);
+                    if (DatabaseHandler.GetAnnotationScheme(lockedScheme) == null)
+                    {
+                        DatabasesBox.Items.Remove(database);
+                    }
+
+                }
+            }
+
+            string stream = ((DatabaseStream)StreamsBox.SelectedItem).Name + "." + ((DatabaseStream)StreamsBox.SelectedItem).FileExt;
+
+
+
+            SelectedDatabaseAndSessions stp = new SelectedDatabaseAndSessions() { Database = DatabasesBox.SelectedItem.ToString(),  Sessions = sessions, Roles = roles, Annotator = AnnotatorsBox.SelectedItem.ToString(), Stream = stream };
+
+            if (selectedDatabaseAndSessions.Find(item => item.Database == stp.Database) == null)
+            {
+                selectedDatabaseAndSessions.Add(stp);
+                AnnotationSelectionBox.Items.Add(stp);
+                removePair.IsEnabled = true;
+            }
+
+
+
+
+        }
+    }
+
+    public class SelectedDatabaseAndSessions
+    {
+        public string Database { get; set; }
+        public string Sessions { get; set; }
+
+        public string Roles { get; set; }
+
+        public string Annotator { get; set; }
+        public string Stream { get; set; }
+
+
     }
 }
