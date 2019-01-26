@@ -207,8 +207,12 @@ namespace ssi
             control.updatePythonMenu.Click += updatePython_Click;
             control.aboutMenu.Click += aboutMenu_Click;
 
+
+            //PYTHON
             if(ENABLE_PYTHON) startExplainableThread();
             control.explanationWindow.Click += explanationWindow_Click;
+            control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
+
 
 
             // Navigator
