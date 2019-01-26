@@ -379,7 +379,7 @@ namespace ssi
                                 s++;
                             }
 
-                            string infofile = Properties.Settings.Default.CMLDirectory + "\\trainingtemp";
+                            string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
         
          
                            System.IO.File.WriteAllLines(infofile, combinations);
@@ -403,6 +403,14 @@ namespace ssi
                            (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
                            MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition),
                            infofile);
+
+
+                            var dir = new DirectoryInfo(Path.GetDirectoryName(infofile));
+                            foreach (var file in dir.EnumerateFiles(Path.GetFileName(infofile) + "*"))
+                            {
+                                file.CopyTo(dir + "//last_multi_corpus_training", true);
+                                file.Delete();
+                            }
 
                         }
 
@@ -443,7 +451,7 @@ namespace ssi
                 }
                 else
                 {
-                    logTextBox.Text += "skip " + trainerOutPath + "\n";
+                    logTextBox.Text += "The model " + trainerOutPath + " already exists\nUse Force checkbox to overwrite the existing model.";
                 }                
             }
 
@@ -928,7 +936,9 @@ namespace ssi
 
         private List<Trainer> getTrainer(DatabaseStream stream, DatabaseScheme scheme, bool isTemplate)
         {
+           
             List<Trainer> trainers = new List<Trainer>();
+            if (stream == null || scheme == null) return trainers;
 
             if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
             {
@@ -1244,7 +1254,17 @@ namespace ssi
             TrainOptionsPanel.IsEnabled = enable;
             PredictOptionsPanel.IsEnabled = enable;
             ForceCheckBox.IsEnabled = enable;
-            TrainerPathComboBox.IsEnabled = enable;            
+            TrainerPathComboBox.IsEnabled = enable;
+            multidatabaseadd.IsEnabled = enable;
+
+            if(AnnotationSelectionBox.Items.Count > 0)
+            {
+                ApplyButton.IsEnabled = true;
+                TrainOptionsPanel.IsEnabled = true;
+                ForceCheckBox.IsEnabled = true;
+                TrainerPathComboBox.IsEnabled = true;
+            }
+
         }
 
         #endregion
@@ -1453,34 +1473,10 @@ namespace ssi
             if (selectedDatabaseAndSessions.Count == 0)
             {
 
-                lockedScheme = SchemesBox.SelectedItem.ToString();
-                var selecteddatabase = DatabasesBox.SelectedItem;
+                
+                checkSchemeexistsinotherDatabases();
 
-                databases.Clear();
-                foreach (var database in DatabasesBox.Items)
-                {
-                    databases.Add(database.ToString());
-                }
 
-                GetSchemes();
-                GetStreams();
-                AnnoScheme lockedschemeinfo = DatabaseHandler.GetAnnotationScheme(lockedScheme); 
-                foreach (var database in databases)
-                {
-
-                    //HERE we should be more resitritive, e.g. check if sample rate /min max value of scheme is identical with lockedScheme TODO
-                    DatabaseHandler.ChangeDatabase(database);
-                    AnnoScheme temp = DatabaseHandler.GetAnnotationScheme(lockedScheme);
-                    if ( temp == null)
-                    {
-                        DatabasesBox.Items.Remove(database);
-                    }
-                    else if(temp.SampleRate != lockedschemeinfo.SampleRate || temp.MaxScore != lockedschemeinfo.MaxScore || temp.MinScore != lockedschemeinfo.MinScore || temp.Labels.Count !=  lockedschemeinfo.Labels.Count)
-                    {
-                        DatabasesBox.Items.Remove(database);
-                    }
-
-                }
             }
 
             string stream = ((DatabaseStream)StreamsBox.SelectedItem).Name + "." + ((DatabaseStream)StreamsBox.SelectedItem).FileExt;
@@ -1499,6 +1495,75 @@ namespace ssi
 
 
 
+        }
+
+
+        private void checkSchemeexistsinotherDatabases()
+        {
+            var selecteddatabase = DatabasesBox.SelectedItem;
+            lockedScheme = SchemesBox.SelectedItem.ToString();
+            databases.Clear();
+            foreach (var database in DatabasesBox.Items)
+            {
+                databases.Add(database.ToString());
+            }
+
+            GetSchemes();
+            GetStreams();
+            AnnoScheme lockedschemeinfo = DatabaseHandler.GetAnnotationScheme(lockedScheme);
+            foreach (var database in databases)
+            {
+
+                //HERE we should be more resitritive, e.g. check if sample rate /min max value of scheme is identical with lockedScheme TODO
+                DatabaseHandler.ChangeDatabase(database);
+                AnnoScheme temp = DatabaseHandler.GetAnnotationScheme(lockedScheme);
+                if (temp == null)
+                {
+                    DatabasesBox.Items.Remove(database);
+                }
+                else if (temp.SampleRate != lockedschemeinfo.SampleRate || temp.MaxScore != lockedschemeinfo.MaxScore || temp.MinScore != lockedschemeinfo.MinScore || temp.Labels.Count != lockedschemeinfo.Labels.Count)
+                {
+                    DatabasesBox.Items.Remove(database);
+                }
+
+            }
+        }
+
+
+        private void AnnotationSelectionBox_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                // Note that you can have more than one file.
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                try
+                {
+
+              
+                string[] lines =  System.IO.File.ReadAllLines(files[0]);
+
+                foreach (var line in lines)
+                {
+                    string[] entries = line.Split(':');
+                    SelectedDatabaseAndSessions stp = new SelectedDatabaseAndSessions() { Database = entries[0], Sessions = entries[4], Roles = entries[2], Annotator = entries[1], Stream = entries[3] };
+
+                    if (selectedDatabaseAndSessions.Find(item => item.Database == stp.Database) == null)
+                    {
+                        selectedDatabaseAndSessions.Add(stp);
+                        AnnotationSelectionBox.Items.Add(stp);
+                        removePair.IsEnabled = true;
+                    }
+
+                }
+   
+                checkSchemeexistsinotherDatabases();
+                }
+                catch
+                {
+                    MessageBox.Show("Can't read file format.");
+                }
+            }
         }
     }
 
