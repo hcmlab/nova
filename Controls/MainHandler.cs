@@ -18,6 +18,7 @@ namespace ssi
         //Config
         public static string BuildVersion = "1.1.0.0";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
+        public static bool ENABLE_PYTHON = true;
 
         private static Timeline timeline = null;
 
@@ -206,7 +207,7 @@ namespace ssi
             control.updatePythonMenu.Click += updatePython_Click;
             control.aboutMenu.Click += aboutMenu_Click;
 
-            startExplainableThread();
+            if(ENABLE_PYTHON) startExplainableThread();
             control.explanationWindow.Click += explanationWindow_Click;
 
 
