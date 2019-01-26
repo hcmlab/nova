@@ -184,14 +184,14 @@ namespace ssi
             return runCMLTool("cmltrain", "merge", parameters, arguments, "cml-merge");
         }
 
-        public string CMLTrainModel(string templatePath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream, string leftContext, string rightContext, string balance, bool complete, double cmlbegintime)
+        public string CMLTrainModel(string templatePath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream, string leftContext, string rightContext, string balance, bool complete, double cmlbegintime, string multisessionpath = null)
         {
             string[] split = server.Split(':');
             string ip = split[0];
             string port = split[1];
 
             List<object> parameters = new List<object>();
-            parameters.Add("\"" + datapath + "\\" + database + "\"");
+            parameters.Add("\"" + datapath +  "\"");
             parameters.Add(ip);
             parameters.Add(port);
             parameters.Add(database);
@@ -203,13 +203,14 @@ namespace ssi
             parameters.Add("\"" + trainerPath + "\"");
 
             Dictionary <string, object> arguments = new Dictionary<string, object>();
-            arguments["list"] = sessions;
+            if (multisessionpath == null) arguments["list"] = sessions;
             arguments["left"] = leftContext;
             arguments["right"] = rightContext;
             arguments["balance"] = balance;
             arguments["username"] = username;
             arguments["password"] = password;
             arguments["cmlbegintime"] = cmlbegintime;
+            if (multisessionpath != null) arguments["multisession"] = "\"" + multisessionpath + "\"";
             if (complete) arguments["cooperative"] = null;
 
             return runCMLTool("cmltrain", "train", parameters, arguments, "cml-train");            

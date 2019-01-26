@@ -382,7 +382,28 @@ namespace ssi
                             string infofile = Properties.Settings.Default.CMLDirectory + "\\trainingtemp";
         
          
-                            System.IO.File.WriteAllLines(infofile, combinations);
+                           System.IO.File.WriteAllLines(infofile, combinations);
+
+                           logTextBox.Text += handler.CMLTrainModel(trainer.Path,
+                           trainerOutPath,
+                           Properties.Settings.Default.DatabaseDirectory,
+                           Properties.Settings.Default.DatabaseAddress,
+                           Properties.Settings.Default.MongoDBUser,
+                           MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
+                           database,
+                           sessionList,
+                           scheme.Name,
+                           rolesList,
+                           annotator.Name,
+                           stream.Name,
+                           trainerLeftContext,
+                           trainerRightContext,
+                           trainerBalance,
+                           mode == Mode.COMPLETE,
+                           (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                           MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition),
+                           infofile);
+
                         }
 
                         else
@@ -390,7 +411,7 @@ namespace ssi
 
                             logTextBox.Text += handler.CMLTrainModel(trainer.Path,
                             trainerOutPath,
-                            Properties.Settings.Default.DatabaseDirectory,
+                            Properties.Settings.Default.DatabaseDirectory +  "\\" + database,
                             Properties.Settings.Default.DatabaseAddress,
                             Properties.Settings.Default.MongoDBUser,
                             MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -647,15 +668,21 @@ namespace ssi
 
             foreach (DatabaseStream stream in streams)
             {
-                foreach (DatabaseScheme scheme in schemes)
-                {
-                    bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
-                    if (getTrainer(stream, scheme, template).Count > 0)
-                    {
-                        streamsValid.Add(stream);
-                        break;
-                    }
-                }
+
+                //foreach (DatabaseScheme scheme in schemes)
+                //{
+                        DatabaseScheme scheme = ((DatabaseScheme)SchemesBox.SelectedItem);
+                        bool template = mode == Mode.TRAIN || mode == Mode.COMPLETE;
+                        if (getTrainer(stream, scheme, template).Count > 0)
+                        {
+                            streamsValid.Add(stream);
+                           // break;
+                     
+                        }
+               // }
+
+
+               
             }
 
             StreamsBox.ItemsSource = streamsValid;
@@ -834,6 +861,17 @@ namespace ssi
                 if (DatabasesBox.SelectedItem != null)
                 {
                     database = DatabasesBox.SelectedItem.ToString();
+                }
+
+                if(AnnotationSelectionBox.Items.Count > 0)
+                {
+                    database = "";
+                    for(int i=0; i < AnnotationSelectionBox.Items.Count; i++ )
+                    {
+                        database += ((SelectedDatabaseAndSessions)AnnotationSelectionBox.Items[i]).Database + "+";
+                    }
+                    database.Remove(database.Length - 1, 1);
+                   
                 }
                 TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database;
 
@@ -1262,6 +1300,7 @@ namespace ssi
                 handleSelectionChanged = false;
                 Update(mode);
                 handleSelectionChanged = true;
+                GetStreams();
             }
         }
 
@@ -1377,8 +1416,12 @@ namespace ssi
 
         private void RemovePair_Click(object sender, RoutedEventArgs e)
         {
-            selectedDatabaseAndSessions.Remove((SelectedDatabaseAndSessions)AnnotationSelectionBox.SelectedItem);
-            AnnotationSelectionBox.Items.Remove(AnnotationSelectionBox.SelectedItem);
+
+
+                selectedDatabaseAndSessions.Remove((SelectedDatabaseAndSessions)AnnotationSelectionBox.SelectedItem);
+                AnnotationSelectionBox.Items.Remove(AnnotationSelectionBox.SelectedItem);
+            
+           
 
             var selecteddatabase = DatabasesBox.SelectedItem;
             if(AnnotationSelectionBox.Items.Count == 0)
@@ -1419,13 +1462,20 @@ namespace ssi
                     databases.Add(database.ToString());
                 }
 
-
+                GetSchemes();
+                GetStreams();
+                AnnoScheme lockedschemeinfo = DatabaseHandler.GetAnnotationScheme(lockedScheme); 
                 foreach (var database in databases)
                 {
 
                     //HERE we should be more resitritive, e.g. check if sample rate /min max value of scheme is identical with lockedScheme TODO
                     DatabaseHandler.ChangeDatabase(database);
-                    if (DatabaseHandler.GetAnnotationScheme(lockedScheme) == null)
+                    AnnoScheme temp = DatabaseHandler.GetAnnotationScheme(lockedScheme);
+                    if ( temp == null)
+                    {
+                        DatabasesBox.Items.Remove(database);
+                    }
+                    else if(temp.SampleRate != lockedschemeinfo.SampleRate || temp.MaxScore != lockedschemeinfo.MaxScore || temp.MinScore != lockedschemeinfo.MinScore || temp.Labels.Count !=  lockedschemeinfo.Labels.Count)
                     {
                         DatabasesBox.Items.Remove(database);
                     }

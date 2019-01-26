@@ -66,7 +66,7 @@ def explain(model, img, topLabels, numSamples, numFeatures, hideRest, hideColor,
 
     return imgByteArr
 
-def explain_deprecated(model, img, topLabels, numSamples, numFeatures, hideRest, hideColor, positiveOnly):
+def explain_raw(model, img, topLabels, numSamples, numFeatures, hideRest, hideColor, positiveOnly):
     img, oldImg = transform_img_fn(img)
     img = img*(1./255)
     prediction = model.predict(img)
