@@ -6,10 +6,12 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 using System.Xml;
 
 namespace ssi
@@ -1446,10 +1448,16 @@ namespace ssi
             var selecteddatabase = DatabasesBox.SelectedItem;
             if(AnnotationSelectionBox.Items.Count == 0)
             {
+                string tempcontent = multidatabaselabel.Content.ToString();
+                Action EmptyDelegate = delegate () { };
+                multidatabaselabel.Content = "Please Wait...";
+                this.UpdateLayout();
+                this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 lockedScheme = null;
                 GetDatabases();
                 DatabasesBox.SelectedItem = selecteddatabase;
                 removePair.IsEnabled = false;
+                multidatabaselabel.Content = tempcontent;
             }
 
           
@@ -1474,6 +1482,7 @@ namespace ssi
             {
 
                 
+               
                 checkSchemeexistsinotherDatabases();
 
 
@@ -1485,12 +1494,14 @@ namespace ssi
 
             SelectedDatabaseAndSessions stp = new SelectedDatabaseAndSessions() { Database = DatabasesBox.SelectedItem.ToString(),  Sessions = sessions, Roles = roles, Annotator = AnnotatorsBox.SelectedItem.ToString(), Stream = stream };
 
-            if (selectedDatabaseAndSessions.Find(item => item.Database == stp.Database) == null)
-            {
+
+            //For now we allow to add data multiple times. This comes with the advantage that we also allow sessions from different annotators.
+            //if (selectedDatabaseAndSessions.Find(item => item.Database == stp.Database) == null)
+            //{
                 selectedDatabaseAndSessions.Add(stp);
                 AnnotationSelectionBox.Items.Add(stp);
                 removePair.IsEnabled = true;
-            }
+           // }
 
 
 
@@ -1500,6 +1511,13 @@ namespace ssi
 
         private void checkSchemeexistsinotherDatabases()
         {
+            string tempcontent = multidatabaselabel.Content.ToString();
+            Action EmptyDelegate = delegate () { };
+            multidatabaselabel.Content = "Please Wait...";
+            this.UpdateLayout();
+            this.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+
             var selecteddatabase = DatabasesBox.SelectedItem;
             lockedScheme = SchemesBox.SelectedItem.ToString();
             databases.Clear();
@@ -1513,8 +1531,10 @@ namespace ssi
             AnnoScheme lockedschemeinfo = DatabaseHandler.GetAnnotationScheme(lockedScheme);
             foreach (var database in databases)
             {
-
-                //HERE we should be more resitritive, e.g. check if sample rate /min max value of scheme is identical with lockedScheme TODO
+                    //Dispatcher.Invoke(DispatcherPriority.Normal, new Action() => 
+                        
+                        //)
+                //HERE we need to consider how restrictive we are. however if we dont rely on scheme name, it needs to be adjusted in CMLtrain
                 DatabaseHandler.ChangeDatabase(database);
                 AnnoScheme temp = DatabaseHandler.GetAnnotationScheme(lockedScheme);
                 if (temp == null)
@@ -1527,6 +1547,11 @@ namespace ssi
                 }
 
             }
+
+            multidatabaselabel.Content = tempcontent;
+
+
+
         }
 
 
