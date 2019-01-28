@@ -1,6 +1,7 @@
 # <img src="https://github.com/hcmlab/nova/raw/master/docs/logo/nova_plain.png" alt="alt text" width="200" height="whatever">
 
-NOVA is a tool for annotating and analyzing behaviours in social interactions.  It allows to visualize multimodal data streams. A main feature of NOVA is that it allows to employ a collaborative annotation database where annotation work can be split between multiple sides,  but also between a human annotator and a machine by supporting human annotators with machine learning techniques already during the annotation process - A process we call Cooperative Machine Learning.
+NOVA is a tool for annotating and analyzing behaviours in social interactions.  It allows to visualize data recorded with the SSI Framework, as well as from external sources. 
+A main feature of NOVA is that it allows to employ a collaborative annotation database where annotation work can be split between multiple sides,  but also between a human annotator and a machine by supporting human annotators with machine learning techniques already during the annotation process - A process we call Collaborative Machine Learning.
 
 ![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2018/02/nova.png)
 

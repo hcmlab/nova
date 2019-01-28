@@ -7,7 +7,7 @@
         Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
 
     <Window.Resources>
-        
+
         <Style TargetType="Button" x:Key="MyButton" >
             <Setter Property="Margin" Value="2,0,2,0"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -21,7 +21,7 @@
                 <b:UserSelectionChangedBehavior/>
             </i:Interaction.Behaviors>
         </Style>-->
-            
+
         <Style x:Key="SessionsItemColorStyle" TargetType="{x:Type ListViewItem}">
             <Style.Resources>
                 <SolidColorBrush x:Key="ExistsBrush" Color="#FF042271"/>
@@ -77,8 +77,10 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="141*"></ColumnDefinition>
+                <ColumnDefinition Width="140*"/>
+                <ColumnDefinition Width="281*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="Database"/>
@@ -88,7 +90,7 @@
 
             <Label Grid.Row="0" Grid.Column="1" Content="Annotation"/>
             <Grid Grid.Row="1" Grid.Column="1">
-                
+
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
@@ -106,8 +108,8 @@
                 <ListBox Name="AnnotatorsBox" DisplayMemberPath="FullName" SelectionChanged="GeneralBox_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>
 
-            <Label Content="Sessions" Grid.Row="0" Grid.Column="3" ToolTip="Sessions that are not marked as finished appear in red" />
-            <DockPanel Grid.Row="1" Grid.Column="3" Margin="0,0,5,0" LastChildFill="True">
+            <Label Content="Sessions" Grid.Row="0" Grid.Column="4" ToolTip="Sessions that are not marked as finished appear in red" />
+            <DockPanel Grid.Row="1" Grid.Column="4" Margin="0,0,5,0" LastChildFill="True">
 
                 <DockPanel Name="SelectSessionSetComboBoxPanel"  DockPanel.Dock="Bottom" LastChildFill="True">
                     <Label DockPanel.Dock="Left">Select</Label>
@@ -138,8 +140,63 @@
                 </ListView>
             </DockPanel>
 
-            <Label Content="Streams" Grid.Row="0" Grid.Column="2"/>
-            <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="1" Grid.Column="2" SelectionMode="Single" SelectionChanged="GeneralBox_SelectionChanged" GridViewColumnHeader.Click="SortListView">
+            <Label Name="multidatabaselabel" Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="2" Margin="0,0,28,0" ToolTip="It's only necessary to add a selection if you want to train on muliple databases. Adding the first item might take some time, as other databases are checked for consistancy.">Multi Database Training</Label>
+            <Grid Grid.Row="1" Grid.Column="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="12*"/>
+                    <ColumnDefinition Width="14*"/>
+                    <ColumnDefinition Width="63*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Button Name="multidatabaseadd" Content="ADD" Height="20" Width="30" Click="Add_Click"  BorderThickness="0" Background="Transparent"  Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Margin="0,0,35,0" Grid.ColumnSpan="2"   />
+                <Button Height="20" Width="30" Name="removePair" IsEnabled="False" BorderThickness="0" Background="Transparent" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Right"  Click="RemovePair_Click">REM</Button>
+                <ListView Name="AnnotationSelectionBox" MaxWidth="200" Grid.Row="0" AllowDrop="True" Drop="AnnotationSelectionBox_Drop" SelectionMode="Extended"  Margin="0,0,5,0"  SelectionChanged="AnnotationSelectionBox_SelectionChanged" Grid.ColumnSpan="3">
+                    <ListView.View>
+                        <GridView >
+                            <GridViewColumn Width="Auto" Header="Database">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Database" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Roles">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Roles" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Stream">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Stream" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Annotator">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Annotator" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Sessions">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Sessions" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+
+                        </GridView>
+                    </ListView.View>
+
+
+                </ListView>
+
+            </Grid>
+
+
+
+
+
+            <Label Content="Streams" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"/>
+            <ListView Name="StreamsBox" Margin="0,0,5,0" Grid.Row="1" Grid.Column="2" SelectionMode="Single" SelectionChanged="GeneralBox_SelectionChanged" GridViewColumnHeader.Click="SortListView" Grid.ColumnSpan="2">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="Auto" Header="Name">
@@ -151,7 +208,7 @@
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="SampleRate" />
                             </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>                        
+                        </GridViewColumn>
                         <GridViewColumn Width="Auto" Header="Ext">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="FileExt" />
@@ -166,7 +223,10 @@
                 </ListView.View>
             </ListView>
 
-            <GroupBox Grid.Row="2" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Model">
+
+
+
+            <GroupBox Grid.Row="2" Grid.ColumnSpan="6" Margin="0,5,5,0" Header="Model">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -187,7 +247,7 @@
 
             </GroupBox>
 
-            <GroupBox Name="TrainOptionsPanel" Grid.Row="3" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Train">
+            <GroupBox Name="TrainOptionsPanel" Grid.Row="3" Grid.ColumnSpan="6" Margin="0,5,5,0" Header="Train">
 
                 <Grid>
 
@@ -221,12 +281,12 @@
                     <TextBox Name="TrainerNameTextBox" Grid.Row="3" Grid.Column="1" Height="20">0</TextBox>
 
                     <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="4" Grid.Column="2" VerticalAlignment="Center"></Label>
-                    
+
                 </Grid>
 
             </GroupBox>
 
-            <GroupBox Name="PredictOptionsPanel" Grid.Row="4" Grid.ColumnSpan="4" Margin="0,5,5,0" Header="Predict">
+            <GroupBox Name="PredictOptionsPanel" Grid.Row="4" Grid.ColumnSpan="6" Margin="0,5,5,0" Header="Predict">
 
                 <Grid>
 
@@ -254,10 +314,10 @@
                     <Label Name="HelpPredictLabel" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
 
                 </Grid>
-                
+
             </GroupBox>
 
-            <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="5" LastChildFill="False">
+            <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="6" Margin="5" LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" Width="75" Margin="5" Height="30"/>
                     <CheckBox Name="LosoCheckBox" VerticalAlignment="Center" ToolTip="Apply leave-one-session-out cross-validation">Cross-validation</CheckBox>

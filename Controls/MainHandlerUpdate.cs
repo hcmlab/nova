@@ -9,6 +9,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 using System.IO;
+using Python.Runtime;
 
 namespace ssi
 {
@@ -187,6 +188,26 @@ namespace ssi
         {
             checkForCMLUpdates(false);
         }
+
+        private void updatePython_Click(object sender, RoutedEventArgs e)
+        {
+
+            MessageBoxResult mb = MessageBox.Show("The current local Python installation will be deleted and reinstalled", "Attention", MessageBoxButton.YesNo);
+
+            if(mb == MessageBoxResult.Yes)
+            {
+                Properties.Settings.Default.forcepythonupdate = true;
+                Properties.Settings.Default.Save();
+
+                System.Windows.Forms.Application.Restart();
+                System.Windows.Application.Current.Shutdown();
+
+
+            }
+            
+        }
+
+        
 
 
 

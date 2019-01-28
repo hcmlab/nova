@@ -1,6 +1,7 @@
 ﻿using Octokit;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -15,8 +16,9 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.3.3";
+        public static string BuildVersion = "1.0.4.0";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
+        public static bool ENABLE_PYTHON = false;
 
         private static Timeline timeline = null;
 
@@ -202,7 +204,16 @@ namespace ssi
             control.helpShortcutsMenu.Click += helpShortcutsMenu_Click;
             control.updateApplicationMenu.Click += updateApplication_Click;
             control.updateCMLMenu.Click += updateCML_Click;
+            control.updatePythonMenu.Click += updatePython_Click;
             control.aboutMenu.Click += aboutMenu_Click;
+
+
+            //PYTHON
+            if(ENABLE_PYTHON) startExplainableThread();
+            control.explanationWindow.Click += explanationWindow_Click;
+            control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
+
+
 
             // Navigator
 

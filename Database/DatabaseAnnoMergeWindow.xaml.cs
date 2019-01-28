@@ -14,6 +14,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Web.UI.DataVisualization.Charting;
+using Python.Runtime;
+using System.IO;
 
 namespace ssi
 {
@@ -460,6 +462,17 @@ namespace ssi
             if (normalize) return nsm;
             else return mse;
         }
+
+
+        public Dictionary<string, double> PythonInterface(List<AnnoList> al)
+        {
+
+            Dictionary<string, double> measures = InvokePython.correlate(al[0], al[1]);
+
+            return measures;
+
+        }
+
 
         private List<AnnoList> convertAnnoListsToMatrix(List<AnnoList> annolists, string restclass)
         {
@@ -1291,6 +1304,9 @@ namespace ssi
                     {
                         Stats.Content = Stats.Content + " | MSE: " + mse.ToString("F6") + " | NMSE: " + nmse.ToString("F6"); ;
                     }
+
+                    //PythonInterface(annolists);
+
                 }
 
                 this.UpdateLayout();

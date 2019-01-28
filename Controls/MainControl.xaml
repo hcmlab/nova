@@ -80,16 +80,22 @@
                 </MenuItem>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
-
+            
+            <MenuItem Header="XAI" Name="XAIMenu">
+                <MenuItem Header="LimeExplainer" Name="explanationWindow"/>
+            </MenuItem>
 
             <MenuItem Header="?">
                 <MenuItem Header="About"  Name="aboutMenu" />
                 <MenuItem Header="Documentation"  Name="helpDocumentationMenu" />
                 <MenuItem Header="Shortcuts"  Name="helpShortcutsMenu" />
                 <MenuItem Header="Update CML Tools" Name="updateCMLMenu" />
-                <MenuItem Header="Check For Update" Name="updateApplicationMenu" />
+                <MenuItem Header="Update Python Tools" Name="updatePythonMenu" />
+                <MenuItem Header="Check For NOVA Update" Name="updateApplicationMenu" />
                 
             </MenuItem>
+
+     
 
         </Menu>
 

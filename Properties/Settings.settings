@@ -140,8 +140,14 @@
     <Setting Name="DrawVideoWavform" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="explainModelPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">null</Value>
+    </Setting>
     <Setting Name="serverhistory" Type="System.String" Scope="User">
       <Value Profile="(Default)">localhost:27017</Value>
+    </Setting>
+    <Setting Name="forcepythonupdate" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

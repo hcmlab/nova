@@ -66,6 +66,9 @@ namespace ssi
             control.removeRemainingSegmentsMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
             control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsContinuous;
             control.convertSignalMenu.IsEnabled = hasTrack;
+            control.XAIMenu.IsEnabled = hasBox;
+            control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
+            
         }
 
         private void tierMenu_MouseEnter(object sender, RoutedEventArgs e)
