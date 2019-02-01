@@ -14,7 +14,7 @@ import pprint
 from tensorflow.python.keras.models import load_model
 from tensorflow.python.keras.callbacks import ModelCheckpoint
 from tensorflow.python.keras import backend
-
+from nova_data_generator import DataGenerator
 
 #interface
 def getModelType(types, opts, vars):
@@ -29,88 +29,62 @@ def getOptions(opts, vars):
 
         '''Setting the default options. All options can be overwritten by adding them to the conf-dictionary in the same file as the network'''
         opts['network'] = ''
-        opts['is_regression'] = True
-        opts['n_timesteps'] = 1
-        opts['perma_drop'] = False
+        opts['is_regression'] = False
         opts['n_fp'] = 1
-        opts['loss_function'] = 'mean_squared_error'
+        opts['loss_function'] = 'categorical_crossentropy'
         opts['optimizier'] = 'adam'
-        opts['metrics'] = []
+        opts['metrics'] = ['accuracy']
         opts['lr'] = 0.0001
-        opts['n_epoch'] = 1
-        opts['batch_size'] = 32
+        opts['n_epoch'] = 10
+        opts['image_size'] = (300,300)
+        opts['batch_size_train'] = 32
+        opts['batch_size_val'] = 32
+        opts['data_path_train'] = ''
+        opts['data_path_val'] = ''
+        opts['datagen_rescale'] = 1./255
+        opts['datagen_rotation_range'] = 20
+        opts['datagen_width_shift_range'] = 0.2
+        opts['datagen_height_shift_range'] = 0.2
+
 
     except Exception as e:
         print_exception(e, 'getOptions')
         exit()
 
 
-def train(data,label_score, opts, vars):
- 
+def train(data, label_score, opts, vars):
+    
     try:
+        width = 224
+        height = 224
+        n_channels = 3
+        n_classes = 4
+        batch_size = 32
+
+        params = {'dim': (width, height),
+                'batch_size': batch_size,
+                'n_classes': n_classes,
+                'n_channels': n_channels,
+                'shuffle': False
+                }
+
+        # Generators
+        training_generator = DataGenerator(**params)
         module = __import__(opts['network'])
-        set_opts_from_config(opts, module.conf)
-
-        n_input = data[0].dim
-        
-        if not opts['is_regression']:
-            n_output = int(max(label_score)+1)
-        else:
-            n_output = 1
-            
-
-        print ('load network architecture from ' + opts['network'] + '.py')
-        print('#input: {} \n#output: {}'.format(n_input, n_output))
-        model = module.getModel(n_input, n_output)
-        
-
-        nts = opts['n_timesteps']
-        if nts < 1:
-            raise ValueError('n_timesteps must be >= 1 but is {}'.format(nts))     
-        elif nts == 1:
-            sample_shape = (n_input, )   
-        else: 
-            sample_shape = (nts, int(n_input / nts))
-
-       
-        #(number of samples, number of timesteps, input_dim)
-        sample_list_shape = ((len(data),) + sample_shape)
-
-        x = np.empty(sample_list_shape)
-        y = np.empty((len(label_score), n_output))
-       
-        print('Input data array should be of shape: {} \nLabel array should be of shape {} \nStart reshaping input accordingly...\n'.format(x.shape, y.shape))
-
-        sanity_check_input(x)
-        
-        #reshaping
-        for sample in range(len(data)):
-            #input
-            temp = np.reshape(data[sample], sample_shape) 
-            x[sample] = temp
-            #output
-            if not opts['is_regression']:
-                y[sample] = convert_to_one_hot(label_score[sample], n_output)
-            else:
-                y[sample] = label_score[sample] 
-
-        model.summary()
-        print('Loss: {}\nOptimizer: {}\n'.format(opts['loss_function'], opts['optimizier']))
-        model.compile(loss=opts['loss_function'],
-                optimizer=opts['optimizier'],
-                metrics=opts['metrics'])
-
-        print('train_x shape: {} | train_x[0] shape: {}'.format(x.shape, x[0].shape))
-
-        model.fit(x,
-            y,
-            epochs=opts['n_epoch'],
-            batch_size=opts['batch_size'])        
-
+        print(opts['network']) 
+        model = module.getModel((width,height,n_channels), params['n_classes'])
+        print("getmodel")
+        model.compile(optimizer=opts['optimizier'], loss=opts['loss_function'], metrics=opts['metrics'])
+        print("compile")
+        model.fit_generator(generator=training_generator,
+            #validation_data=validation_generator,
+            verbose=1,
+            epochs=3)
+        print("fitgenerator")
         vars['n_input'] = n_input
         vars['n_output'] = n_output
         vars['model'] = model
-    
+
     except Exception as e:
         print_exception(e, 'train')
         exit()
@@ -131,15 +105,15 @@ def forward(data, probs_or_score, opts, vars):
             if nts < 1:
                 raise ValueError('n_timesteps must be >= 1 but is {}'.format(nts))     
             elif nts == 1:
-                sample_shape = (1, n_input)   
+                sample_shape = (n_input,)   
             else:  
-                sample_shape = (1,nts, int(n_input / nts))
+                sample_shape = (int(n_input / nts), nts)
 
             x = np.asarray(data)
-            x = x.astype('float32')
-            x = x.reshape(sample_shape) 
+            x = x.astype('uint8')
+            x.reshape(sample_shape) 
 
-            sanity_check_input(data)
+            sanity_check(data)
 
             results = np.zeros((n_fp, n_output), dtype=np.float32)
 
@@ -152,14 +126,15 @@ def forward(data, probs_or_score, opts, vars):
                         else:     
                             for i in range(len(pred[0])):
                                 results[fp][i] = pred[0][i]
-
             mean = np.mean(results, axis=0)
             std = np.std(results, axis=0)
             conf = max(0,1-np.mean(std))
 
-            sanity_check_output(mean)
-            for i in range(len(mean)): 
+            #sanity_check(probs_or_score)
+            
+            for i in range(len(mean)):
                 probs_or_score[i] = mean[i]
+            
             
             return conf
         else:
@@ -174,9 +149,11 @@ def save(path, opts, vars):
     try:
         # save model
         model_path = path + '.' + opts['network'] + '_weights.h5'
+        model_complete_path = path + '.' + opts['network'] + '_complete.h5'
+
         print('save model to ' + model_path)
         model = vars['model']
-        #model.save(model_path)
+        model.save(model_complete_path)
         model.save_weights(model_path)
 
         # copy scripts
@@ -197,7 +174,9 @@ def save(path, opts, vars):
         
         network_new =  os.path.basename(path) + '.' + opts['network']
         shutil.copy(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')
+
     except Exception as e: 
+
         print_exception(e, 'save')
         exit()
 
@@ -215,7 +194,7 @@ def load(path, opts, vars):
 
         print('tp: {}'.format(trainerPath))
 
-        # parsing trainer to retreive input output
+        # parsing trainer to retrieve input output
         xmldoc = minidom.parse(trainerPath)
         streams = xmldoc.getElementsByTagName('streams')
         streamItem = streams[0].getElementsByTagName('item')
@@ -249,13 +228,51 @@ def load(path, opts, vars):
         print('create prediction function')
 
         model._make_predict_function()
-        #with graph.as_default():
-         #   with sess.as_default():
-          #      n_input = model.inputs[0].shape[1]
-           #     model.predict(np.zeros((1,n_input), dtype=np.float32))
+        with graph.as_default():
+            with sess.as_default():
+                n_input = model.inputs[0].shape[1]
+                model.predict(np.zeros((1,n_input), dtype=np.float32))
 
         vars['graph'] = graph
         vars['session'] = sess
+        vars['model'] = model
+
+        print('\nload model from ' + path)
+    
+        trainerPath = path
+        trainerPath = trainerPath.replace("trainer.PythonModel.model", "trainer")
+
+        print('tp: {}'.format(trainerPath))
+
+        # parsing trainer to retreive input output
+        # xmldoc = minidom.parse(trainerPath)
+        # streams = xmldoc.getElementsByTagName('streams')
+        # streamItem = streams[0].getElementsByTagName('item')
+        # n_input = streamItem[0].attributes['dim'].value
+        # print("#input: " + str(n_input))
+
+        # classes = xmldoc.getElementsByTagName('classes')
+        # n_output = len(classes[0].getElementsByTagName('item'))
+        # print("#output: " + str(n_output))
+
+        # copy unique network file
+        network_tmp = os.path.dirname(path) + '\\' + opts['network'] + '.py'
+        shutil.copy(path + '.' + opts['network'] + '.py', network_tmp)
+        print ('\nload training configuration from ' + network_tmp)
+
+        # reload sys path and import network file
+        importlib.reload(site)
+
+        # loading network specific options 
+        module = __import__(opts['network'])
+        set_opts_from_config(opts, module.conf)
+    
+        # load weights
+        weigth_path = path + '.' + opts['network'] + '_weights.h5'
+
+        print('\nModelpath {}'.format(weigth_path))
+        model = module.getModel(int(n_input), int(n_output))
+        model.load_weights(weigth_path)
         vars['model'] = model
 
     except Exception as e:
@@ -288,14 +305,8 @@ def set_opts_from_config(opts, conf):
     print('\n')
 
 #checking the input for corrupted values
-def sanity_check_input(x):
+def sanity_check(x):
     if np.any(np.isnan(x)):
         print('At least one input is not a number!')
     if np.any(np.isinf(x)):
         print('At least one input is inf!')
-
-def sanity_check_output(x):
-    if np.any(np.isnan(x)):
-        print('At least one output is not a number!')
-    if np.any(np.isinf(x)):
-        print('At least one output is inf!')

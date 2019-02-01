@@ -1,0 +1,55 @@
+import sys
+if not hasattr(sys, 'argv'):
+    sys.argv  = ['']
+
+from tensorflow.python.keras.layers import Input, Dense, Dropout
+from tensorflow.python.keras.models import Sequential
+from tensorflow.contrib.keras.api.keras.initializers import glorot_uniform
+from keras.models import Model
+from keras.layers import Flatten, Dense, Input, Dropout
+from keras_vggface.vggface import VGGFace
+
+
+
+conf = {
+        #general
+        'n_timesteps' : 1, #should be equal to the number of samples in the left context + 1    
+        'dropout_rate' : 0.5,
+
+        #confidence calculation
+        'perma_drop' : False, #uses dropout also during testing
+        'n_fp' : 1, #number of forward passes for each prediction in order to calculate the confidence
+
+        #compile
+        'loss_function' : 'binary_crossentropy',    
+        'optimizier' : 'adam',  
+        'metrics' : ['accuracy'],
+        'lr' : 0.0001,
+
+        #fit
+        'n_epoch' : 10,
+        'batch_size' : 32, 
+       
+    }
+
+
+def getModel (shape, nClasses):
+    hidden_dim = 1024   
+    print(shape)
+    base_model = VGGFace(include_top=False, input_shape=shape)
+
+    for layer in base_model.layers:
+        layer.trainable = False
+
+    x = base_model.output
+    x = Flatten()(x)
+    x = Dense(hidden_dim, activation='relu', name='fc6')(x)
+    x = Dropout(0.25)(x)
+    x = Dense(hidden_dim, activation='relu', name='fc7')(x)
+    predictions = Dense(nClasses, activation='softmax')(x)
+
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    return model
+    
+
