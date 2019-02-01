@@ -76,7 +76,7 @@ class DataGenerator(keras.utils.Sequence):
                 annotator = multi_corpus[1]
                 roles = multi_corpus[2].split(";")
                 stream = multi_corpus[3]
-                sessions = multi_corpus[4].split(";")
+                sessions = multi_corpus[4].strip().split(";")
 
                 for s in sessions:
                     for r in roles:
