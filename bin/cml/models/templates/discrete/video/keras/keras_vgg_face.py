@@ -51,5 +51,4 @@ def getModel (shape, nClasses):
     model = Model(inputs=base_model.input, outputs=predictions)
 
     return model
-    
 

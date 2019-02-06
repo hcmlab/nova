@@ -52,7 +52,7 @@ namespace ssi
         public void startExplainableThread()
         {
 
-            if(Properties.Settings.Default.forcepythonupdate)
+            if (Properties.Settings.Default.forcepythonupdate)
             {
                 try
                 {
@@ -69,11 +69,15 @@ namespace ssi
             {
 
                 var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
-                Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
-                PythonEngine.PythonHome += pythonPath;
-             
+                Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
+
+
                 PythonEngine.PythonPath += ";" + pythonScriptsPath;
-    
+                PythonEngine.PythonHome += pythonPath;
+                PythonEngine.PythonHome += AppDomain.CurrentDomain.BaseDirectory;
+
+
+
                 PythonEngine.Initialize();
                 PythonEngine.BeginAllowThreads();
                 explanationWorker = new BackgroundWorker
@@ -115,26 +119,34 @@ namespace ssi
         {
             using (Py.GIL())
             {
-                dynamic limeExplainer = Py.Import("ImageExplainerLime");
-                while (!explanationWorker.CancellationPending)
+                try
                 {
-                    if (window != null && window.modelPath != null && window.getNewExplanation)
-                    {                      
-                        dynamic model = limeExplainer.loadModel(window.modelPath);
+                    dynamic limeExplainer = Py.Import("ImageExplainerLime");
+                    while (!explanationWorker.CancellationPending)
+                    {
+                        if (window != null && window.modelPath != null && window.getNewExplanation)
+                        {
+                            dynamic model = limeExplainer.loadModel(window.modelPath);
 
-                        BackgroundWorker progress = (BackgroundWorker)sender;
-                        var expImg = limeExplainer.explain_raw(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
-                        BitmapImage final_img = new BitmapImage();
-                        final_img.BeginInit();
-                        final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
-                        final_img.EndInit();
-                        final_img.Freeze();
-                        window.explainedImg = final_img;
-                        window.getNewExplanation = false;
-                        progress.ReportProgress(0, final_img);
-                        
+                            BackgroundWorker progress = (BackgroundWorker)sender;
+                            var expImg = limeExplainer.explain_raw(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
+                            BitmapImage final_img = new BitmapImage();
+                            final_img.BeginInit();
+                            final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
+                            final_img.EndInit();
+                            final_img.Freeze();
+                            window.explainedImg = final_img;
+                            window.getNewExplanation = false;
+                            progress.ReportProgress(0, final_img);
+
+                        }
                     }
                 }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Python installation not found or not complete\nError: " + ex);
+                }
+               
             }
         }
 

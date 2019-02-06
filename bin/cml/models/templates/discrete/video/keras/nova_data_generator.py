@@ -8,10 +8,11 @@ import multiprocessing as mp
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
-from ffmpy import FFprobe, FFRuntimeError
-from database import db_handler as db
+#from ffmpy import FFprobe, FFRuntimeError
+import db_handler as db
 from xml.dom import minidom
 from skimage.transform import resize
+
 
 
 
@@ -84,28 +85,34 @@ class DataGenerator(keras.utils.Sequence):
                         if annoToAdd != None:
                             self.annos.append(annoToAdd)
                             filename = r + "." + stream
-                            filepath = os.path.join(db_info['root'], corpus, s, filename)
+                            filepath = os.path.join(db_info['root'].strip(), corpus, s, filename)
                             self.file_readers.append(imageio.get_reader(filepath, 'ffmpeg'))
                             print(s + ' '+ r)
 
+        #uncomment for debugging.
+        os.remove(self.sessions_file)
+        os.remove(self.db_info_file)
 
     def get_meta(self, f_path):
-        try:
-            tup_resp = FFprobe(
-                inputs={f_path: None},
-                global_options=[
-                    '-v', 'quiet',
-                    '-print_format', 'json',
-                    '-show_entries', 'stream=nb_frames',
-                    '-show_format', '-show_streams'
-                    ]
-            ).run(stdout=subprocess.PIPE)
+        return False
+        # try:
+        #     print("VOLL META ALTER")
+        #     cap = cv2.VideoCapture(f_path)
+        #     tup_resp = FFprobe(
+        #         inputs={f_path: None},
+        #         global_options=[
+        #             '-v', 'quiet',
+        #             '-print_format', 'json',
+        #             '-show_entries', 'stream=nb_frames',
+        #             '-show_format', '-show_streams'
+        #             ]
+        #     ).run(stdout=subprocess.PIPE)
 
-            return json.loads(tup_resp[0].decode('utf-8'))
-        except FFRuntimeError as error:
-            msg = 'Error for file {}\n\tcmd={} \n\texit_code={} \n\tstderr={}  \n\tstdout={}\n'.format(f_path, error.cmd, error.exit_code, error.stderr, error.stdout)
-            print('Error collecting metadata: {}'.format(msg))
-            return False
+        #     return json.loads(tup_resp[0].decode('utf-8'))
+        # except FFRuntimeError as error:
+        #     msg = 'Error for file {}\n\tcmd={} \n\texit_code={} \n\tstderr={}  \n\tstdout={}\n'.format(f_path, error.cmd, error.exit_code, error.stderr, error.stdout)
+        #     print('Error collecting metadata: {}'.format(msg))
+        #     return False
 
 
     def on_epoch_end(self):
@@ -120,6 +127,7 @@ class DataGenerator(keras.utils.Sequence):
 
     def validate_batch(self):
         # check if we have enough data left in the current file for this batch
+        #print(self.file_readers[self.current_file_reader.value]._meta['nframes'])
         batch_is_valid = self.file_readers[self.current_file_reader.value]._meta['nframes'] >= self.batch_size * (self.current_batch_step.value + 1)
         return batch_is_valid
 
@@ -159,7 +167,7 @@ class DataGenerator(keras.utils.Sequence):
         for i in range(0, len(x)):
             xtemp.append(resize(x[i], (self.dim[1], self.dim[0])))
 
-        y = keras.utils.to_categorical(y, num_classes=self.n_classes+1)
+        y = keras.utils.to_categorical(y, num_classes=self.n_classes)
         X = np.asarray(xtemp)
 
         return X, y
@@ -170,7 +178,7 @@ if __name__ == '__main__':
     width = 300
     height = 300
     n_channels = 3
-    n_classes = 2
+    n_classes = 3
     batch_size = 32
 
     params = {'dim': (width, height),
@@ -191,15 +199,15 @@ if __name__ == '__main__':
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
-    model.add(Dense(4, activation='softmax'))
+    model.add(Dense(3, activation='softmax'))
     model.compile(optimizer='sgd', loss='categorical_crossentropy')
 
     # Train model on dataset
     model.fit_generator(generator=training_generator,
                         #validation_data=validation_generator,
                         verbose=1,
-                        use_multiprocessing=True,
                         shuffle=False,
-                        workers=3,
-                        max_queue_size=10,
+                        use_multiprocessing=False,
+                        workers=20,
+                        max_queue_size=20,
                         epochs=3)

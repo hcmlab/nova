@@ -143,8 +143,11 @@ def get_anno_by_session(db_info, corpus_name, session_name, annotator_name, role
         if scheme[0]['type'] == 'DISCRETE':
 
             header_scheme = ""
+            i = 0
             for s in scheme[0]['labels']:
                 header_scheme = header_scheme + "<item name=\"" + s['name'] + "\" id=\"" + str(s['id']) + "\" />"
+                i = i+1
+            header_scheme = header_scheme + "<item name=\"" + "REST" + "\" id=\"" + str(i) + "\" />"
 
             header = ''''<?xml version="1.0" ?>
                     <annotation ssi-v="3">

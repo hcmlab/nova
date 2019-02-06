@@ -365,3 +365,4 @@ bin/cml/models/templates/discrete/video/keras/nova_sessions
 bin/cml/models/templates/discrete/video/keras/nova_db_info
 bin/cml/models/templates/discrete/video/keras/database/__init__.py
 bin/cml/models/templates/discrete/video/keras/__init__.py
+bin/PythonScripts/test.py
