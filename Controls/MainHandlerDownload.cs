@@ -535,8 +535,9 @@ namespace ssi
                 string cudapath = Environment.GetEnvironmentVariable("CUDA_PATH", EnvironmentVariableTarget.Machine);
             
                 string[] requirements = {
-                            "tensorflow_gpu==1.12.0",
-                            "keras_vggface==0.5",
+                          
+                            "keras-vggface==0.5",
+                            "tensorflow-gpu==1.10.0",
                             "imageio==2.3.0",
                             "h5py==2.8.0",
                             "matplotlib==2.2.3",
@@ -546,6 +547,7 @@ namespace ssi
                             "pymongo==3.7.2",
                             "scikit_image==0.14.0",
                             "Pillow==5.4.1"
+                           
                             };
 
 
@@ -565,7 +567,7 @@ namespace ssi
                             return;
                         }
 
-                    requirements[0] = "tensorflow==1.12.0";
+                    requirements[1] = "tensorflow==1.10.0";
  
                     System.IO.File.WriteAllLines("requirements.txt", requirements);
                 }
@@ -623,13 +625,26 @@ namespace ssi
 
 
                 //Temporary FIX for VGG FACE latest Keras version bug
-                string url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/vggface-fix.py";
+                string url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/vggface-fix.py";
                 WebClient Client = new WebClient();
                 Client.DownloadFile(url, temppythonpath + "\\keras_vggface\\models.py");
 
+
+                //Temporary FIX for missing TERMCOLOR
+                url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/termcolor.py";
+                 Client = new WebClient();
+                Client.DownloadFile(url, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor.py");
+
+
+
+
+
+                Directory.CreateDirectory("PythonScripts");
+                url = "https://raw.githubusercontent.com/hcmlab/nova/master/PythonScripts/ImageExplainerLime.py";
+                Client.DownloadFile(url, "PythonScripts\\ImageExplainerLime.py");
+
                 //File.Delete("requirements.txt");
-
-
+                
             }
         }
         

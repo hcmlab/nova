@@ -67,7 +67,7 @@ namespace ssi
           
             if (Directory.Exists(pythonPath))
             {
-
+                var pp = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
                 var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
                 Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
 
