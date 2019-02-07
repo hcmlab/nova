@@ -368,23 +368,50 @@ namespace ssi
                 {
                     try
                     {
-
-                        if(AnnotationSelectionBox.Items.Count > 0)
+                        string[] combinations;
+                        if (AnnotationSelectionBox.Items.Count > 0)
 
                         {
-
-                            string[] combinations = new string[selectedDatabaseAndSessions.Count];
+                            combinations = new string[selectedDatabaseAndSessions.Count];
                             int s = 0;
                             foreach (SelectedDatabaseAndSessions item in AnnotationSelectionBox.Items)
                             {
-                                combinations[s] = item.Database + ":" + item.Annotator  +  ":" +  item.Roles + ":" + item.Stream + ":" + item.Sessions ;
+                                combinations[s] = item.Database.TrimEnd(';') + ":" + item.Annotator.TrimEnd(';') + ":" + item.Roles.TrimEnd(';') + ":" + item.Stream.TrimEnd(';') + ":" + item.Sessions.TrimEnd(';');
                                 s++;
                             }
+                        }
+                        else
+                        {
+                            combinations = new string[1];
+                            combinations[0] =  database + ":" + annotator.Name + ":" + rolesList + ":" + stream.Name + "." + stream.FileExt + ":" + sessionList;
+                        }
 
-                            string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
-        
-         
-                           System.IO.File.WriteAllLines(infofile, combinations);
+                        string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
+                        System.IO.File.WriteAllLines(infofile, combinations);
+
+
+
+                        //For image/video training tasks we additionally provide the interface with information. make sure the interface deletes these files after reading.
+                        if(stream.FileExt == "mp4" || stream.FileExt == "avi" || stream.FileExt == "mov")
+                        {
+                            string trainertemplatesessioninfo = Path.GetDirectoryName(trainer.Path) + "\\nova_sessions";
+                            System.IO.File.WriteAllLines(trainertemplatesessioninfo, combinations);
+
+                            string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
+                                    ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme.Name + ";root=" + Properties.Settings.Default.DatabaseDirectory};
+
+                            string trainertemplatedbinfo = Path.GetDirectoryName(trainer.Path) + "\\nova_db_info";
+                            System.IO.File.WriteAllLines(trainertemplatedbinfo, dbinfo);
+                        }
+
+                   
+
+
+
+
+                        //if (AnnotationSelectionBox.Items.Count > 0)
+                        if (true)
+                        {
 
                            logTextBox.Text += handler.CMLTrainModel(trainer.Path,
                            trainerOutPath,
@@ -397,7 +424,7 @@ namespace ssi
                            scheme.Name,
                            rolesList,
                            annotator.Name,
-                           stream.Name,
+                           stream.Name + "." + stream.FileExt,
                            trainerLeftContext,
                            trainerRightContext,
                            trainerBalance,
@@ -405,17 +432,9 @@ namespace ssi
                            (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
                            MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition),
                            infofile);
-
-
-                            var dir = new DirectoryInfo(Path.GetDirectoryName(infofile));
-                            foreach (var file in dir.EnumerateFiles(Path.GetFileName(infofile) + "*"))
-                            {
-                                file.CopyTo(dir + "//last_multi_corpus_training", true);
-                                file.Delete();
-                            }
-
                         }
 
+                        //oldstyle cml call.
                         else
                         {
 
@@ -430,7 +449,7 @@ namespace ssi
                             scheme.Name,
                             rolesList,
                             annotator.Name,
-                            stream.Name,
+                            stream.Name + "." + stream.FileExt,
                             trainerLeftContext,
                             trainerRightContext,
                             trainerBalance,
@@ -442,7 +461,11 @@ namespace ssi
 
 
 
-
+                        var dir = new DirectoryInfo(Path.GetDirectoryName(infofile));
+                        foreach (var file in dir.EnumerateFiles(Path.GetFileName(infofile) + "*"))
+                        {
+                            file.Delete();
+                        }
                     }
 
                     catch(Exception ex)
@@ -495,7 +518,7 @@ namespace ssi
                         scheme.Name,
                         rolesList,
                         annotator.Name,
-                        stream.Name,
+                        stream.Name + "." + stream.FileExt,
                         trainerLeftContext,
                         trainerRightContext,
                         confidence,

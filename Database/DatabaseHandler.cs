@@ -1865,7 +1865,7 @@ namespace ssi
                         session.Location = document["location"].ToString();
                     }
 
-                    session.Duration = 0;
+                    session.Duration = 0.0;
                     if (document.TryGetElement("duration", out value))
                     {
                         session.Duration = document["duration"].AsDouble;

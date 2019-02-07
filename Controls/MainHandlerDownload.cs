@@ -532,13 +532,31 @@ namespace ssi
 
 
 
-                    string cudapath = Environment.GetEnvironmentVariable("CUDA_PATH", EnvironmentVariableTarget.Machine);
-                    //maybe create files for older cuda versions
+                string cudapath = Environment.GetEnvironmentVariable("CUDA_PATH", EnvironmentVariableTarget.Machine);
+            
+                string[] requirements = {
+                          
+                            "keras-vggface==0.5",
+                            "tensorflow-gpu==1.10.0",
+                            "imageio==2.3.0",
+                            "h5py==2.8.0",
+                            "matplotlib==2.2.3",
+                            "lime==0.1.1.31",
+                            "numpy==1.14.0",
+                            "scipy==1.1.0",
+                            "pymongo==3.7.2",
+                            "scikit_image==0.14.0",
+                            "Pillow==5.4.1"
+                           
+                            };
 
-                    if (cudapath != null)
+
+                if (cudapath != null)
                         {
-          
-                             webClient.DownloadFile("https://raw.githubusercontent.com/hcmlab/nova/master/bin/requirements.txt", "requirements.txt");
+
+                 
+                            System.IO.File.WriteAllLines("requirements.txt", requirements);
+                   
                         }
                     else
                     {
@@ -549,8 +567,10 @@ namespace ssi
                             return;
                         }
 
-                        webClient.DownloadFile("https://raw.githubusercontent.com/hcmlab/nova/master/bin/requirements-nogpu.txt", "requirements.txt");
-                    }
+                    requirements[1] = "tensorflow==1.10.0";
+ 
+                    System.IO.File.WriteAllLines("requirements.txt", requirements);
+                }
 
                    
 
@@ -564,8 +584,24 @@ namespace ssi
                     process.StartInfo = startInfo;
                     process.Start();
                     process.WaitForExit();
-    
-                    process = new Process();
+
+
+                string temppythonpath = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\Lib\\site-packages");
+                var current = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
+                if (current == "")
+                {
+                    var pythonpath = $"{temppythonpath}";
+                    Environment.SetEnvironmentVariable("PYTHONPATH", pythonpath, EnvironmentVariableTarget.User);
+                }
+                else if(current != temppythonpath)
+                {
+                    var pythonpath = $"{temppythonpath};{Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User)}";
+                    Environment.SetEnvironmentVariable("PYTHONPATH", pythonpath, EnvironmentVariableTarget.User);
+                }
+               
+
+
+                process = new Process();
                     startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
                     startInfo.Arguments = "-m easy_install termcolor toolz";
                     process.StartInfo = startInfo;
@@ -573,8 +609,13 @@ namespace ssi
                     process.Start();
                     process.WaitForExit();
 
-      
-                    process = new Process();
+
+                    // url = "https://github.com/hcmlab/ssi/blob/master/plugins/ffmpeg/bin/x64/ffmpeg.exe?raw=true";
+                    //Client = new WebClient();
+                    //Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "ffprobe.exe");
+
+
+                process = new Process();
                     startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
                     startInfo.Arguments = "-m pip install -r requirements.txt --no-warn-script-location";
                     process.StartInfo = startInfo;
@@ -582,9 +623,28 @@ namespace ssi
                     process.Start();
                     process.WaitForExit();
 
-                    File.Delete("requirements.txt");
+
+                //Temporary FIX for VGG FACE latest Keras version bug
+                string url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/vggface-fix.py";
+                WebClient Client = new WebClient();
+                Client.DownloadFile(url, temppythonpath + "\\keras_vggface\\models.py");
 
 
+                //Temporary FIX for missing TERMCOLOR
+                url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/termcolor.py";
+                 Client = new WebClient();
+                Client.DownloadFile(url, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor.py");
+
+
+
+
+
+                Directory.CreateDirectory("PythonScripts");
+                url = "https://raw.githubusercontent.com/hcmlab/nova/master/PythonScripts/ImageExplainerLime.py";
+                Client.DownloadFile(url, "PythonScripts\\ImageExplainerLime.py");
+
+                //File.Delete("requirements.txt");
+                
             }
         }
         

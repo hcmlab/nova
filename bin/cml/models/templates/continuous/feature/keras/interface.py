@@ -70,9 +70,10 @@ def train(data,label_score, opts, vars):
         elif nts == 1:
             sample_shape = (n_input, )   
         else: 
-            sample_shape = (int(n_input / nts), nts)
+            sample_shape = (nts, int(n_input / nts))
 
-        #(number of samples, number of features, number of timesteps)
+       
+        #(number of samples, number of timesteps, input_dim)
         sample_list_shape = ((len(data),) + sample_shape)
 
         x = np.empty(sample_list_shape)
@@ -80,7 +81,7 @@ def train(data,label_score, opts, vars):
        
         print('Input data array should be of shape: {} \nLabel array should be of shape {} \nStart reshaping input accordingly...\n'.format(x.shape, y.shape))
 
-        sanity_check(x)
+        sanity_check_input(x)
         
         #reshaping
         for sample in range(len(data)):
@@ -130,15 +131,15 @@ def forward(data, probs_or_score, opts, vars):
             if nts < 1:
                 raise ValueError('n_timesteps must be >= 1 but is {}'.format(nts))     
             elif nts == 1:
-                sample_shape = (n_input,)   
+                sample_shape = (1, n_input)   
             else:  
-                sample_shape = (int(n_input / nts), nts)
+                sample_shape = (1,nts, int(n_input / nts))
 
             x = np.asarray(data)
             x = x.astype('float32')
-            x.reshape(sample_shape) 
+            x = x.reshape(sample_shape) 
 
-            sanity_check(data)
+            sanity_check_input(data)
 
             results = np.zeros((n_fp, n_output), dtype=np.float32)
 
@@ -156,7 +157,7 @@ def forward(data, probs_or_score, opts, vars):
             std = np.std(results, axis=0)
             conf = max(0,1-np.mean(std))
 
-            sanity_check(mean)
+            sanity_check_output(mean)
             for i in range(len(mean)): 
                 probs_or_score[i] = mean[i]
             
@@ -248,51 +249,13 @@ def load(path, opts, vars):
         print('create prediction function')
 
         model._make_predict_function()
-        with graph.as_default():
-            with sess.as_default():
-                n_input = model.inputs[0].shape[1]
-                model.predict(np.zeros((1,n_input), dtype=np.float32))
+        #with graph.as_default():
+         #   with sess.as_default():
+          #      n_input = model.inputs[0].shape[1]
+           #     model.predict(np.zeros((1,n_input), dtype=np.float32))
 
         vars['graph'] = graph
         vars['session'] = sess
-        vars['model'] = model
-
-        print('\nload model from ' + path)
-    
-        trainerPath = path
-        trainerPath = trainerPath.replace("trainer.PythonModel.model", "trainer")
-
-        print('tp: {}'.format(trainerPath))
-
-        # parsing trainer to retreive input output
-        xmldoc = minidom.parse(trainerPath)
-        streams = xmldoc.getElementsByTagName('streams')
-        streamItem = streams[0].getElementsByTagName('item')
-        n_input = streamItem[0].attributes['dim'].value
-        print("#input: " + str(n_input))
-    	
-        classes = xmldoc.getElementsByTagName('classes')
-        n_output = len(classes[0].getElementsByTagName('item'))
-        print("#output: " + str(n_output))
-
-        # copy unique network file
-        network_tmp = os.path.dirname(path) + '\\' + opts['network'] + '.py'
-        shutil.copy(path + '.' + opts['network'] + '.py', network_tmp)
-        print ('\nload training configuration from ' + network_tmp)
-
-        # reload sys path and import network file
-        importlib.reload(site)
-
-        # loading network specific options 
-        module = __import__(opts['network'])
-        set_opts_from_config(opts, module.conf)
-    
-        # load weights
-        weigth_path = path + '.' + opts['network'] + '_weights.h5'
-
-        print('\nModelpath {}'.format(weigth_path))
-        model = module.getModel(int(n_input), int(n_output))
-        model.load_weights(weigth_path)
         vars['model'] = model
 
     except Exception as e:
@@ -325,8 +288,14 @@ def set_opts_from_config(opts, conf):
     print('\n')
 
 #checking the input for corrupted values
-def sanity_check(x):
+def sanity_check_input(x):
     if np.any(np.isnan(x)):
         print('At least one input is not a number!')
     if np.any(np.isinf(x)):
         print('At least one input is inf!')
+
+def sanity_check_output(x):
+    if np.any(np.isnan(x)):
+        print('At least one output is not a number!')
+    if np.any(np.isinf(x)):
+        print('At least one output is inf!')
