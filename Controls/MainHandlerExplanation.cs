@@ -65,7 +65,7 @@ namespace ssi
             var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
             var pythonScriptsPath = AppDomain.CurrentDomain.BaseDirectory + "PythonScripts";
           
-            if (Directory.Exists(pythonPath))
+            if (Directory.Exists(pythonPath) && Properties.Settings.Default.EnablePython == true)
             {
                 var pp = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
                 var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
@@ -93,9 +93,9 @@ namespace ssi
             else
             {
 
-                if(!Properties.Settings.Default.forcepythonupdate)
+                if(!Properties.Settings.Default.forcepythonupdate && Properties.Settings.Default.EnablePython == true)
                 {
-                    MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now?", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now? This will take some minutes..", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
                     if (res == MessageBoxResult.Yes)
                     {
                         GetPython();
@@ -103,7 +103,7 @@ namespace ssi
                         //recursive magic.
                     }
                 }
-                else
+                else if(Properties.Settings.Default.forcepythonupdate && Properties.Settings.Default.EnablePython == true )
                 {
                     Properties.Settings.Default.forcepythonupdate = false;
                     Properties.Settings.Default.Save();

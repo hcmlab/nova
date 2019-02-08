@@ -610,5 +610,17 @@ namespace ssi.Properties {
                 this["forcepythonupdate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnablePython {
+            get {
+                return ((bool)(this["EnablePython"]));
+            }
+            set {
+                this["EnablePython"] = value;
+            }
+        }
     }
 }

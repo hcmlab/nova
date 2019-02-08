@@ -47,6 +47,7 @@
                         <ImageBrush ImageSource="/Resources/dropmodel2.png"></ImageBrush>
                     </StackPanel.Background>
                 </StackPanel>
+                <!--<ComboBox Name="TrainerPathComboBox" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"></ComboBox>-->
             </StackPanel>
             <StackPanel Name="options" Grid.Row="1" Grid.RowSpan="3">
                 <TextBlock x:Name="modelLoaded" Text="No model loaded" HorizontalAlignment="Center" Margin="0 0 0 10"/>

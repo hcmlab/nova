@@ -40,6 +40,7 @@ namespace ssi
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPassword.Password = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
             DBConnnect.IsChecked = Properties.Settings.Default.DatabaseAutoLogin;
+            EnablePythonCheckbox.IsChecked = Properties.Settings.Default.EnablePython;
             UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateOnStart;
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
@@ -112,6 +113,12 @@ namespace ssi
         {
             return (UpdatesCheckbox.IsChecked == true);
         }
+
+        public bool EnablePython()
+        {
+            return (EnablePythonCheckbox.IsChecked == true);
+        }
+
 
         public bool DBAutoConnect()
         {

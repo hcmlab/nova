@@ -36,6 +36,8 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -58,6 +60,8 @@
                     <CheckBox Grid.Row="13" Name="DrawwaveformCheckbox" Margin="5,0,5,5" />
                     <Label Grid.Row="14" Content="Check for updates on startup:"  />
                     <CheckBox Grid.Row="15" Name="UpdatesCheckbox" Margin="5,0,5,5" />
+                    <Label Grid.Row="16" Content="Enable Python extensions (requires restart):"  />
+                    <CheckBox Grid.Row="17" Name="EnablePythonCheckbox" Margin="5,0,5,5" />
 
                 </Grid>
             </TabItem>

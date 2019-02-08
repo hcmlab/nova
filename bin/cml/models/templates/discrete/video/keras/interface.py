@@ -1,3 +1,8 @@
+from numpy.random import seed
+seed(1234)
+from tensorflow import set_random_seed
+set_random_seed(1234)
+
 import sys
 import importlib
 if not hasattr(sys, 'argv'):
@@ -83,7 +88,7 @@ def train(data, label_score, opts, vars):
         # Generators
         training_generator = DataGenerator(**params)
 
-        print(params['n_classes'])
+        print("Target Classes: " + str(params['n_classes']))
         n_input = width * height * n_channels
         module = __import__(opts['network'])
         print(opts['network']) 
@@ -96,7 +101,7 @@ def train(data, label_score, opts, vars):
                             workers=40,
                             max_queue_size=40,
                             verbose=1,
-                            epochs=50)
+                            epochs=80)
      
         vars['n_input'] = n_input
         vars['n_output'] = params['n_classes']
@@ -113,16 +118,12 @@ def forward(data, probs_or_score, opts, vars):
         sess = vars['session']
         graph = vars['graph']   
 
-
         if model and sess and graph:   
 
             n_output = len(probs_or_score)
-     
-            x = np.frombuffer(data, dtype=np.uint8)
-            
-            x_reshape = np.reshape(x,(300,300,3))
-
-            img = Image.fromarray(x_reshape)
+            npdata = np.asarray(data)
+            img = Image.fromarray(npdata)
+           
             #img.save('test_org.jpg')
             x = img.resize((opts['image_height'], opts['image_width']))
             #imgR.save('test.jpg')

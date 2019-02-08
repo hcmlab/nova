@@ -18,7 +18,7 @@ namespace ssi
         //Config
         public static string BuildVersion = "1.0.4.0";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
-        public static bool ENABLE_PYTHON = true;
+        public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
 
         private static Timeline timeline = null;
 
@@ -566,6 +566,8 @@ namespace ssi
                 Properties.Settings.Default.ContinuousHotkeysNumber = int.Parse(s.ContinuousHotkeyLevels());
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();
                 Properties.Settings.Default.DrawVideoWavform = s.DrawvideoWavform();
+                Properties.Settings.Default.EnablePython = s.EnablePython();
+   
                 Properties.Settings.Default.Save();
                 
 

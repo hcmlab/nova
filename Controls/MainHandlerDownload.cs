@@ -503,151 +503,150 @@ namespace ssi
                 try
                 {
 
-                  
+
                     webClient.DownloadFile("https://www.python.org/ftp/python/3.6.7/python-3.6.7-embed-amd64.zip", "python.zip");
                     System.IO.Compression.ZipFile.ExtractToDirectory("python.zip", "python");
                     File.Delete("python.zip");
                     System.IO.Compression.ZipFile.ExtractToDirectory("python/python36.zip", "python/python36");
                     File.Delete("python/python36.zip");
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("python is already downloaded and extracted");
-                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("python is already downloaded and extracted");
+                }
 
-                    string path = AppDomain.CurrentDomain.BaseDirectory + "python\\python36._pth";
+                string path = AppDomain.CurrentDomain.BaseDirectory + "python\\python36._pth";
 
-                    using (StreamWriter sw = File.CreateText(path))
-                    {
-                        sw.WriteLine(".");
-                        sw.WriteLine(".\\DLLs");
-                        sw.WriteLine(".\\lib");
-                        sw.WriteLine(".\\lib\\plat-win");
-                        sw.WriteLine(".\\lib\\site-packages");
-                        sw.WriteLine(".\\python36");
+                using (StreamWriter sw = File.CreateText(path))
+                {
+                    sw.WriteLine(".");
+                    sw.WriteLine(".\\DLLs");
+                    sw.WriteLine(".\\lib");
+                    sw.WriteLine(".\\lib\\plat-win");
+                    sw.WriteLine(".\\lib\\site-packages");
+                    sw.WriteLine(".\\python36");
 
-                    }
+                }
 
-                    webClient.DownloadFile("https://bootstrap.pypa.io/get-pip.py", "python/get-pip.py");
+                webClient.DownloadFile("https://bootstrap.pypa.io/get-pip.py", "python/get-pip.py");
 
 
 
                 string cudapath = Environment.GetEnvironmentVariable("CUDA_PATH", EnvironmentVariableTarget.Machine);
-            
+
                 string[] requirements = {
-                          
+                            "python/toolz-0.9.0-py2.py3-none-any.whl",
+                            "python/termcolor-1.1.0-py2.py3-none-any.whl",
+                            "python/future-0.17.0-py3-none-any.whl",
                             "keras-vggface==0.5",
-                            "tensorflow-gpu==1.10.0",
+                            "tensorflow-gpu==1.12.0",
                             "imageio==2.3.0",
                             "h5py==2.8.0",
                             "matplotlib==2.2.3",
+                            "https://github.com/albermax/innvestigate/archive/1.0.7.tar.gz",
                             "lime==0.1.1.31",
                             "numpy==1.14.0",
                             "scipy==1.1.0",
                             "pymongo==3.7.2",
                             "scikit_image==0.14.0",
                             "Pillow==5.4.1"
-                           
+
                             };
 
 
                 if (cudapath != null)
-                        {
+                {
+                    System.IO.File.WriteAllLines("requirements.txt", requirements);
 
-                 
-                            System.IO.File.WriteAllLines("requirements.txt", requirements);
-                   
-                        }
-                    else
+                }
+                else
+                {
+                    MessageBoxResult mb = MessageBox.Show("No CUDA installation found, loading tensorflow without GPU support.", "Attention", MessageBoxButton.YesNo);
+                    if (mb == MessageBoxResult.No)
                     {
-                      MessageBoxResult mb = MessageBox.Show("No CUDA installation found, loading tensorflow without GPU support.", "Attention", MessageBoxButton.YesNo);
-                        if(mb == MessageBoxResult.No)
-                        {
-                            Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python");
-                            return;
-                        }
+                        Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python");
+                        return;
+                    }
 
-                    requirements[1] = "tensorflow==1.10.0";
- 
+                    requirements[3] = "tensorflow==1.12.0";
+
                     System.IO.File.WriteAllLines("requirements.txt", requirements);
                 }
 
-                   
+
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
+                startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\get-pip.py" + "\"";
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
+                process.Close();
 
 
+                string sitepackagepath = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\Lib\\site-packages");
 
-                    Process process = new Process();
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                    startInfo.FileName = "\""+AppDomain.CurrentDomain.BaseDirectory + "python/python.exe"+"\"";
-                    startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python/get-pip.py"+ "\"";
-                    process.StartInfo = startInfo;
-                    process.Start();
-                    process.WaitForExit();
+                //var current = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
+                //var pythonpath = $"{sitepackagepath}";
+                //Environment.SetEnvironmentVariable("PYTHONPATH", pythonpath, EnvironmentVariableTarget.User);
 
 
-                string temppythonpath = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\Lib\\site-packages");
-                var current = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
-                if (current == "")
-                {
-                    var pythonpath = $"{temppythonpath}";
-                    Environment.SetEnvironmentVariable("PYTHONPATH", pythonpath, EnvironmentVariableTarget.User);
-                }
-                else if(current != temppythonpath)
-                {
-                    var pythonpath = $"{temppythonpath};{Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User)}";
-                    Environment.SetEnvironmentVariable("PYTHONPATH", pythonpath, EnvironmentVariableTarget.User);
-                }
-               
+                //Install two wheels for broken pip install files on embedded python. Credit to: Christoph Gohlke https://www.lfd.uci.edu/~gohlke/pythonlibs/. Mirrored on NOVA public git.
 
+                string urltoolz = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/toolz-0.9.0-py2.py3-none-any.whl";
+                string urltermcolor = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/termcolor-1.1.0-py2.py3-none-any.whl";
+                string urlfuture = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/future-0.17.0-py3-none-any.whl";
 
-                process = new Process();
-                    startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
-                    startInfo.Arguments = "-m easy_install termcolor toolz";
-                    process.StartInfo = startInfo;
-                    process.StartInfo.ErrorDialog = true;
-                    process.Start();
-                    process.WaitForExit();
-
-
-                    // url = "https://github.com/hcmlab/ssi/blob/master/plugins/ffmpeg/bin/x64/ffmpeg.exe?raw=true";
-                    //Client = new WebClient();
-                    //Client.DownloadFile(url, AppDomain.CurrentDomain.BaseDirectory + "ffprobe.exe");
-
-
-                process = new Process();
-                    startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python" + "\"";
-                    startInfo.Arguments = "-m pip install -r requirements.txt --no-warn-script-location";
-                    process.StartInfo = startInfo;
-                    process.StartInfo.ErrorDialog = true;
-                    process.Start();
-                    process.WaitForExit();
-
-
-                //Temporary FIX for VGG FACE latest Keras version bug
-                string url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/vggface-fix.py";
                 WebClient Client = new WebClient();
-                Client.DownloadFile(url, temppythonpath + "\\keras_vggface\\models.py");
+                Client.DownloadFile(urltoolz, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "toolz-0.9.0-py2.py3-none-any.whl");
+                Client.DownloadFile(urltermcolor, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
+                Client.DownloadFile(urlfuture, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "future-0.17.0-py3-none-any.whl");
 
+                process = new Process();
+                startInfo = new ProcessStartInfo();
+                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
+                startInfo.Arguments = "-m pip install -r requirements.txt --no-warn-script-location";
+                process.StartInfo = startInfo;
+                process.StartInfo.ErrorDialog = true;
+                process.Start();
+                process.WaitForExit();
+                process.Close();
 
-                //Temporary FIX for missing TERMCOLOR
-                url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/termcolor.py";
-                 Client = new WebClient();
-                Client.DownloadFile(url, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor.py");
+                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "toolz-0.9.0-py2.py3-none-any.whl");
+                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
 
+                try
+                {
+                    //Temporary FIX for VGG FACE latest Keras version bug
+                    string url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/vggface-fix.py";
+                    Client = new WebClient();
+                    Client.DownloadFile(url, sitepackagepath + "\\keras_vggface\\models.py");
+                }
 
+                catch { }
 
+                //DOWNLOAD required python scripts from git.
 
-
-                Directory.CreateDirectory("PythonScripts");
-                url = "https://raw.githubusercontent.com/hcmlab/nova/master/PythonScripts/ImageExplainerLime.py";
-                Client.DownloadFile(url, "PythonScripts\\ImageExplainerLime.py");
+                try
+                {
+                    Directory.CreateDirectory("PythonScripts");
+                    string url = "https://raw.githubusercontent.com/hcmlab/nova/master/PythonScripts/ImageExplainerLime.py";
+                    Client.DownloadFile(url, "PythonScripts\\ImageExplainerLime.py");
+                }
+                catch
+                {
+                }
 
                 //File.Delete("requirements.txt");
-                
+                //Environment.SetEnvironmentVariable("PYTHONPATH", current, EnvironmentVariableTarget.User);
             }
+
+
         }
-        
 
     }
+
+
+
 }

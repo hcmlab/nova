@@ -87,7 +87,8 @@ class DataGenerator(keras.utils.Sequence):
                             filename = r + "." + stream
                             filepath = os.path.join(db_info['root'].strip(), corpus, s, filename)
                             self.file_readers.append(imageio.get_reader(filepath, 'ffmpeg'))
-                            print(s + ' '+ r)
+                            print("Loading: " + corpus + ":" + s + ' '+ r + "." + filename)
+                        else: print("Skipping: " + corpus + ":" + s + ' '+ r + "." + filename)   
 
         #uncomment for debugging.
         os.remove(self.sessions_file)
