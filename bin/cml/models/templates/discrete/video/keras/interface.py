@@ -10,7 +10,7 @@ if not hasattr(sys, 'argv'):
 import tensorflow as tf
 import numpy as np
 import random
-import datetime
+from datetime import datetime
 from xml.dom import minidom
 import os
 import shutil
@@ -22,8 +22,10 @@ from skimage.transform import resize
 #from tensorflow.python.keras.models import load_model
 #from tensorflow.python.keras.callbacks import ModelCheckpoint
 #from tensorflow.python.keras import backend
+import keras
 from keras import backend
 from keras.models import load_model
+from keras.callbacks import TensorBoard
 from nova_data_generator import DataGenerator
 from PIL import Image
 
@@ -85,6 +87,32 @@ def train(data, label_score, opts, vars):
                 'shuffle': False
                 }
 
+        #make folder for callbacks
+        if not os.path.exists(os.path.dirname(os.path.realpath(__file__))  + '/backups/'):
+             os.makedirs(os.path.dirname(os.path.realpath(__file__))  + '/backups/')
+        if not os.path.exists(os.path.dirname(os.path.realpath(__file__))  + '/logs/'):
+             os.makedirs(os.path.dirname(os.path.realpath(__file__))  + '/logs/')
+
+
+
+        # tensorboard = keras.callbacks.TensorBoard(
+        #     log_dir=os.path.dirname(os.path.realpath(__file__)) + '/logs/{}'.format(opts['network'] + str(datetime.now()) ),
+        #     write_graph=True,
+        #     write_images=True)
+
+        # saver = keras.callbacks.ModelCheckpoint(
+        #     filepath =  os.path.dirname(os.path.realpath(__file__))  + '/backups/' + opts['network'] + '{epoch:02d}-{acc:.2f}.h5'  , 
+        #     monitor='acc', 
+        #     verbose=0, 
+        #     save_best_only=True, 
+        #     save_weights_only=False, 
+        #     mode='auto', 
+        #     period=1)
+
+        # add ,saver to save after each epoch
+        callbacks = [
+            # tensorboard
+        ]
         # Generators
         training_generator = DataGenerator(**params)
 
@@ -101,7 +129,8 @@ def train(data, label_score, opts, vars):
                             workers=40,
                             max_queue_size=40,
                             verbose=1,
-                            epochs=80)
+                            epochs=opts['n_epoch'],
+                            callbacks=callbacks)
      
         vars['n_input'] = n_input
         vars['n_output'] = params['n_classes']
@@ -157,13 +186,10 @@ def forward(data, probs_or_score, opts, vars):
 def save(path, opts, vars):
     try:
         # save model
-        model_path = path + '.' + opts['network'] + '_weights.h5'
-        model_complete_path = path + '.' + opts['network'] + '.h5'
-
+        model_path = path + '.' + opts['network'] + '.h5'
         print('save model to ' + model_path)
         model = vars['model']
-        model.save(model_complete_path)
-        #model.save_weights(model_path)
+        model.save(model_path)
 
         # copy scripts
         srcDir = os.path.dirname(os.path.realpath(__file__)) + '\\' 

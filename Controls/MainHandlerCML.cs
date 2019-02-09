@@ -203,7 +203,7 @@ namespace ssi
             parameters.Add("\"" + trainerPath + "\"");
 
             Dictionary <string, object> arguments = new Dictionary<string, object>();
-            if (multisessionpath == null) arguments["list"] = sessions;
+            arguments["list"] = sessions;
             arguments["left"] = leftContext;
             arguments["right"] = rightContext;
             arguments["balance"] = balance;

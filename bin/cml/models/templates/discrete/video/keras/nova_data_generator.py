@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import keras
 import subprocess
@@ -36,6 +37,7 @@ class DataGenerator(keras.utils.Sequence):
         self.annos_cont = []
         self.get_training_data()
         self.annos_to_continuous()
+        self.cmlbegintime
 
     def annos_to_continuous(self):
         anno_cont = []
@@ -46,14 +48,14 @@ class DataGenerator(keras.utils.Sequence):
             numclasses = len(xmlreader.getElementsByTagName("item"))
             self.n_classes = numclasses
             sample_rate = self.file_readers[i]._meta["fps"]
-            anno_cont = np.full(self.file_readers[i]._meta['nframes'], numclasses)
+            anno_cont = np.full( min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate)), numclasses-1)
 
             for label in data[0]['labels']:
                 start = int(label["from"]*sample_rate)
-                if (label["to"]*sample_rate) < self.file_readers[i]._meta['nframes']:
+                if (label["to"]*sample_rate) < min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate)):
                     end = int((label["to"] * sample_rate))
                 else:
-                    end = self.file_readers[i]._meta['nframes']
+                    end = min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate))
                 for k in range(start, end):
                     anno_cont[k] = label["id"]
 
@@ -68,6 +70,13 @@ class DataGenerator(keras.utils.Sequence):
             for e in entries:
                 entry = e.split("=")
                 db_info[str(entry[0])] = str(entry[1])
+            if(db_info['cmlbegintime'] != None and float(db_info['cmlbegintime']) > 0 and db_info['cooperative'] != None and bool(db_info['cooperative']) == True ):
+                print("CML Training performed until: " + str(db_info['cmlbegintime']))
+                self.cmlbegintime = float(db_info['cmlbegintime']) 
+            else:
+                self.cmlbegintime = sys.float_info.max
+                print("Training performed on full dataset")
+               
 
         with open(self.sessions_file, 'r') as f:
             for line in f:
@@ -94,28 +103,6 @@ class DataGenerator(keras.utils.Sequence):
         os.remove(self.sessions_file)
         os.remove(self.db_info_file)
 
-    def get_meta(self, f_path):
-        return False
-        # try:
-        #     print("VOLL META ALTER")
-        #     cap = cv2.VideoCapture(f_path)
-        #     tup_resp = FFprobe(
-        #         inputs={f_path: None},
-        #         global_options=[
-        #             '-v', 'quiet',
-        #             '-print_format', 'json',
-        #             '-show_entries', 'stream=nb_frames',
-        #             '-show_format', '-show_streams'
-        #             ]
-        #     ).run(stdout=subprocess.PIPE)
-
-        #     return json.loads(tup_resp[0].decode('utf-8'))
-        # except FFRuntimeError as error:
-        #     msg = 'Error for file {}\n\tcmd={} \n\texit_code={} \n\tstderr={}  \n\tstdout={}\n'.format(f_path, error.cmd, error.exit_code, error.stderr, error.stdout)
-        #     print('Error collecting metadata: {}'.format(msg))
-        #     return False
-
-
     def on_epoch_end(self):
         #TODO Updates indexes after each epoch
         # self.indexes = np.arange(len(self.list_IDs))
@@ -129,7 +116,7 @@ class DataGenerator(keras.utils.Sequence):
     def validate_batch(self):
         # check if we have enough data left in the current file for this batch
         #print(self.file_readers[self.current_file_reader.value]._meta['nframes'])
-        batch_is_valid = self.file_readers[self.current_file_reader.value]._meta['nframes'] >= self.batch_size * (self.current_batch_step.value + 1)
+        batch_is_valid = min(self.file_readers[self.current_file_reader.value]._meta['nframes'], self.cmlbegintime * self.file_readers[self.current_file_reader.value]._meta["fps"]) >= self.batch_size * (self.current_batch_step.value + 1)
         return batch_is_valid
 
     def get_next_batch_pair(self):
@@ -157,7 +144,7 @@ class DataGenerator(keras.utils.Sequence):
     def __len__(self):
         n_batches = 0
         for i in range(0, self.file_readers.__len__()):
-            n_frames = self.file_readers[i]._meta['nframes']
+            n_frames =  min(self.file_readers[i]._meta['nframes'], self.cmlbegintime *self.file_readers[i]._meta["fps"])
             n_batches += int(n_frames) // self.batch_size
         return n_batches
 

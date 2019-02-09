@@ -278,6 +278,52 @@ namespace ssi
 
         #region Apply
 
+        private string createMetaFiles(string database, DatabaseAnnotator annotator, string rolesList, DatabaseStream stream, string sessionList, DatabaseScheme scheme, Trainer trainer)
+        {
+            string[] combinations;
+            if (AnnotationSelectionBox.Items.Count > 0)
+
+            {
+                combinations = new string[selectedDatabaseAndSessions.Count];
+                int s = 0;
+                foreach (SelectedDatabaseAndSessions item in AnnotationSelectionBox.Items)
+                {
+                    combinations[s] = item.Database.TrimEnd(';') + ":" + item.Annotator.TrimEnd(';') + ":" + item.Roles.TrimEnd(';') + ":" + item.Stream.TrimEnd(';') + ":" + item.Sessions.TrimEnd(';');
+                    s++;
+                }
+            }
+            else
+            {
+                combinations = new string[1];
+                combinations[0] = database + ":" + annotator.Name + ":" + rolesList + ":" + stream.Name + "." + stream.FileExt + ":" + sessionList;
+            }
+
+            string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
+            System.IO.File.WriteAllLines(infofile, combinations);
+
+
+
+            //For image/video training tasks we additionally provide the interface with information. make sure the interface deletes these files after reading.
+            if (stream.FileExt == "mp4" || stream.FileExt == "avi" || stream.FileExt == "mov")
+            {
+                string trainertemplatesessioninfo = Path.GetDirectoryName(trainer.Path) + "\\nova_sessions";
+                System.IO.File.WriteAllLines(trainertemplatesessioninfo, combinations);
+
+                double cmlbegintime = (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
+
+
+                string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
+                                    ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme.Name + ";root=" + Properties.Settings.Default.DatabaseDirectory + ";cooperative=" + (mode == Mode.COMPLETE)  + ";cmlbegintime=" + cmlbegintime};
+
+                string trainertemplatedbinfo = Path.GetDirectoryName(trainer.Path) + "\\nova_db_info";
+                System.IO.File.WriteAllLines(trainertemplatedbinfo, dbinfo);
+            }
+
+            return infofile;
+        }
+
+
         private void Apply_Click(object sender, RoutedEventArgs e)
         {       
             Trainer trainer = (Trainer) TrainerPathComboBox.SelectedItem;
@@ -368,44 +414,8 @@ namespace ssi
                 {
                     try
                     {
-                        string[] combinations;
-                        if (AnnotationSelectionBox.Items.Count > 0)
 
-                        {
-                            combinations = new string[selectedDatabaseAndSessions.Count];
-                            int s = 0;
-                            foreach (SelectedDatabaseAndSessions item in AnnotationSelectionBox.Items)
-                            {
-                                combinations[s] = item.Database.TrimEnd(';') + ":" + item.Annotator.TrimEnd(';') + ":" + item.Roles.TrimEnd(';') + ":" + item.Stream.TrimEnd(';') + ":" + item.Sessions.TrimEnd(';');
-                                s++;
-                            }
-                        }
-                        else
-                        {
-                            combinations = new string[1];
-                            combinations[0] =  database + ":" + annotator.Name + ":" + rolesList + ":" + stream.Name + "." + stream.FileExt + ":" + sessionList;
-                        }
-
-                        string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
-                        System.IO.File.WriteAllLines(infofile, combinations);
-
-
-
-                        //For image/video training tasks we additionally provide the interface with information. make sure the interface deletes these files after reading.
-                        if(stream.FileExt == "mp4" || stream.FileExt == "avi" || stream.FileExt == "mov")
-                        {
-                            string trainertemplatesessioninfo = Path.GetDirectoryName(trainer.Path) + "\\nova_sessions";
-                            System.IO.File.WriteAllLines(trainertemplatesessioninfo, combinations);
-
-                            string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
-                                    ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme.Name + ";root=" + Properties.Settings.Default.DatabaseDirectory};
-
-                            string trainertemplatedbinfo = Path.GetDirectoryName(trainer.Path) + "\\nova_db_info";
-                            System.IO.File.WriteAllLines(trainertemplatedbinfo, dbinfo);
-                        }
-
-                   
-
+                        string infofile = createMetaFiles(database, annotator, rolesList, stream, sessionList, scheme, trainer);
 
 
 
