@@ -70,11 +70,11 @@ class DataGenerator(keras.utils.Sequence):
             for e in entries:
                 entry = e.split("=")
                 db_info[str(entry[0])] = str(entry[1])
-            if(db_info['cmlbegintime'] != None and float(db_info['cmlbegintime']) > 0 and db_info['cooperative'] != None and bool(db_info['cooperative']) == True ):
+            if(db_info['cooperative'] != None and db_info['cooperative'] == "True" and db_info['cmlbegintime'] != None and float(db_info['cmlbegintime']) > 0 ):
                 print("CML Training performed until: " + str(db_info['cmlbegintime']))
                 self.cmlbegintime = float(db_info['cmlbegintime']) 
             else:
-                self.cmlbegintime = sys.float_info.max
+                self.cmlbegintime = sys.maxsize
                 print("Training performed on full dataset")
                
 
@@ -96,7 +96,7 @@ class DataGenerator(keras.utils.Sequence):
                             filename = r + "." + stream
                             filepath = os.path.join(db_info['root'].strip(), corpus, s, filename)
                             self.file_readers.append(imageio.get_reader(filepath, 'ffmpeg'))
-                            print("Loading: " + corpus + ":" + s + ' '+ r + "." + filename)
+                            print("Loading: " + corpus + ":" + s + ' '+ filename)
                         else: print("Skipping: " + corpus + ":" + s + ' '+ r + "." + filename)   
 
         #uncomment for debugging.
