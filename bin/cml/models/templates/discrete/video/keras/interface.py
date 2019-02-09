@@ -10,7 +10,7 @@ if not hasattr(sys, 'argv'):
 import tensorflow as tf
 import numpy as np
 import random
-from datetime import datetime
+import time
 from xml.dom import minidom
 import os
 import shutil
@@ -88,31 +88,30 @@ def train(data, label_score, opts, vars):
                 }
 
         #make folder for callbacks
-        if not os.path.exists(os.path.dirname(os.path.realpath(__file__))  + '/backups/'):
-             os.makedirs(os.path.dirname(os.path.realpath(__file__))  + '/backups/')
+        if not os.path.exists(os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/'):
+             os.makedirs(os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/')
         if not os.path.exists(os.path.dirname(os.path.realpath(__file__))  + '/logs/'):
              os.makedirs(os.path.dirname(os.path.realpath(__file__))  + '/logs/')
 
 
 
-        # tensorboard = keras.callbacks.TensorBoard(
-        #     log_dir=os.path.dirname(os.path.realpath(__file__)) + '/logs/{}'.format(opts['network'] + str(datetime.now()) ),
-        #     write_graph=True,
-        #     write_images=True)
+        tensorboard = keras.callbacks.TensorBoard(
+            log_dir=os.path.dirname(os.path.realpath(__file__)) + '/logs/'  +  opts['network'] + '-' + str(time.strftime("%Y_%m_%d-%H_%M_%S")) + '/',
+            write_graph=True,
+            write_images=True)
 
-        # saver = keras.callbacks.ModelCheckpoint(
-        #     filepath =  os.path.dirname(os.path.realpath(__file__))  + '/backups/' + opts['network'] + '{epoch:02d}-{acc:.2f}.h5'  , 
-        #     monitor='acc', 
-        #     verbose=0, 
-        #     save_best_only=True, 
-        #     save_weights_only=False, 
-        #     mode='auto', 
-        #     period=1)
+        checkpoint = keras.callbacks.ModelCheckpoint(
+            #filepath =  os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + opts['network'] + '{epoch:02d}-{acc:.2f}.h5'  , 
+            filepath =  os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + opts['network'] + '.h5', 
+            monitor='acc', 
+            verbose=1, 
+            save_best_only=True, 
+            save_weights_only=False, 
+            mode='auto', 
+            period=1)
 
-        # add ,saver to save after each epoch
-        callbacks = [
-            # tensorboard
-        ]
+
+        callbacklist = [tensorboard, checkpoint]
         # Generators
         training_generator = DataGenerator(**params)
 
@@ -130,7 +129,7 @@ def train(data, label_score, opts, vars):
                             max_queue_size=40,
                             verbose=1,
                             epochs=opts['n_epoch'],
-                            callbacks=callbacks)
+                            callbacks=callbacklist)
      
         vars['n_input'] = n_input
         vars['n_output'] = params['n_classes']
