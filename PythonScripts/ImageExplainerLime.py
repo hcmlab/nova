@@ -32,6 +32,16 @@ def getTopPrediction(prediction):
             maxP = i
     return maxP
 
+def getTopXpredictions(prediction, topLabels):
+
+    prediction_class = []
+
+    for i in range(0, len(prediction[0])):
+        prediction_class.append((i, prediction[0][i]))
+
+    prediction_class.sort(key=lambda x: x[1], reverse=True)
+
+    return prediction_class[:topLabels]
 
 def loadModel(modelPath):
     model = load_model(modelPath)
@@ -81,3 +91,28 @@ def explain_raw(model, img, topLabels, numSamples, numFeatures, hideRest, hideCo
     imgByteArr = imgByteArr.getvalue()
 
     return imgByteArr
+
+def explain_multiple(model, img, topLabels, numSamples, numFeatures, hideRest, hideColor, positiveOnly):
+    img, oldImg = transform_img_fn(img)
+    img = img*(1./255)
+    prediction = model.predict(img)
+    explainer = lime_image.LimeImageExplainer()
+    img = np.squeeze(img)
+    explanation = explainer.explain_instance(img, model.predict, top_labels=topLabels, hide_color=hideColor, num_samples=numSamples)
+
+    topClasses = getTopXpredictions(prediction, topLabels)
+
+    explanations =  []
+
+    for cl in topClasses:
+
+        temp, mask = explanation.get_image_and_mask(cl[0], positive_only=positiveOnly, num_features=numFeatures, hide_rest=hideRest)
+        imgExplained = mark_boundaries(temp, mask)
+        img = Image.fromarray(np.uint8(imgExplained*255))
+        imgByteArr = io.BytesIO()
+        img.save(imgByteArr, format='JPEG')
+        imgByteArr = imgByteArr.getvalue()
+
+        explanations.append((cl[0], cl[1], imgByteArr))
+
+    return (explanations, len(explanations))

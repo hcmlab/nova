@@ -64,6 +64,7 @@ namespace ssi.Controls.Other
 
         private void getExplanation(object sender, RoutedEventArgs e)
         {
+            containerImageToBeExplained.Visibility = Visibility.Visible;
             explainingLabel.Visibility = Visibility.Visible;
             BlurEffect blur = new BlurEffect();
             blur.Radius = 20;
@@ -78,6 +79,7 @@ namespace ssi.Controls.Other
             getNewExplanation = true;
             explanationButton.IsEnabled = false;
 
+            containerExplainedImages.Children.Clear();
 
         }
 

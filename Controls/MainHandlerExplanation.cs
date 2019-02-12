@@ -129,15 +129,35 @@ namespace ssi
                             dynamic model = limeExplainer.loadModel(window.modelPath);
 
                             BackgroundWorker progress = (BackgroundWorker)sender;
-                            var expImg = limeExplainer.explain_raw(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
-                            BitmapImage final_img = new BitmapImage();
-                            final_img.BeginInit();
-                            final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
-                            final_img.EndInit();
-                            final_img.Freeze();
-                            window.explainedImg = final_img;
+                            var data = limeExplainer.explain_multiple(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
+                            int length = data[1];
+
+                            List<Tuple<int, double, BitmapImage>> explanationData = new List<Tuple<int, double, BitmapImage>>();
+
+                            for(int i = 0; i < length; i++)
+                            {
+                                int classID = data[0][i][0];
+                                double acc = data[0][i][1];
+
+                                BitmapImage temp = new BitmapImage();
+                                temp.BeginInit();
+                                temp.StreamSource = new System.IO.MemoryStream((byte[])data[0][i][2]);
+                                temp.EndInit();
+                                temp.Freeze();
+
+                                Tuple<int, double, BitmapImage> tuple = new Tuple<int, double, BitmapImage> (classID, acc, temp);
+
+                                explanationData.Add(tuple);
+                            }
+
+                            //BitmapImage final_img = new BitmapImage();
+                            //final_img.BeginInit();
+                            //final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
+                            //final_img.EndInit();
+                            //final_img.Freeze();
+                            //window.explainedImg = final_img;
                             window.getNewExplanation = false;
-                            progress.ReportProgress(0, final_img);
+                            progress.ReportProgress(0, explanationData);
 
                         }
                     }
@@ -152,11 +172,47 @@ namespace ssi
 
         private void worker_OnProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            window.explanationImage.Source = (BitmapImage)e.UserState;
+
+            List<Tuple<int, double, BitmapImage>> data = (List<Tuple<int, double, BitmapImage>>) e.UserState;
+
+            for(int i = 0; i < data.Count; i++)
+            {
+
+                System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+
+                System.Windows.Controls.Label info = new System.Windows.Controls.Label
+                {
+                    Content = "Class: " + data[i].Item1 + " Score: " + data[i].Item2.ToString("0.###")
+                };
+
+                System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                {
+                    Source = data[i].Item3,
+                    //Stretch = System.Windows.Media.Stretch.Fill
+                };
+                //img.Margin = new Thickness(0,5,0,0);
+
+                //img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / data.Count;
+                //img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / data.Count;
+
+                img.Height = (window.containerExplainedImages.ActualHeight) / data.Count;
+                img.Width = (window.containerExplainedImages.ActualWidth) / data.Count;
+
+
+                wrapper.Margin = new Thickness(5);
+                wrapper.Children.Add(info);
+                wrapper.Children.Add(img);
+
+                window.containerExplainedImages.Children.Add(wrapper);
+                //window.containerExplainedImages.VerticalAlignment = VerticalAlignment.Center;
+            }
+
+            //window.explanationImage.Source = data[0].Item3;
+            window.containerImageToBeExplained.Visibility = Visibility.Hidden;
             window.explainingLabel.Visibility = Visibility.Hidden;
             BlurEffect blur = new BlurEffect();
             blur.Radius = 0;
-            window.explanationImage.Effect = blur;
+            window.containerImageToBeExplained.Effect = blur;
             window.explanationButton.IsEnabled = true;
             window.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
         }
