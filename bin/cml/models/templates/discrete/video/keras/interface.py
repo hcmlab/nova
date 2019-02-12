@@ -25,9 +25,10 @@ from skimage.transform import resize
 import keras
 from keras import backend
 from keras.models import load_model
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, ModelCheckpoint
 from nova_data_generator import DataGenerator
 from PIL import Image
+import uuid
 
 #interface
 def getModelType(types, opts, vars):
@@ -39,6 +40,7 @@ def getOptions(opts, vars):
         vars['y'] = None
         vars['session'] = None
         vars['model'] = None
+        vars['randomfilename'] = "."
 
         '''Setting the default options. All options can be overwritten by adding them to the conf-dictionary in the same file as the network'''
         opts['network'] = ''
@@ -48,11 +50,11 @@ def getOptions(opts, vars):
         opts['optimizier'] = 'adam'
         opts['metrics'] = ['accuracy']
         opts['lr'] = 0.0001
-        opts['n_epoch'] = 10
+        opts['n_epoch'] = 100
         opts['image_width'] = 300
         opts['image_height'] = 300
-        opts['batch_size_train'] = 32
-        opts['batch_size_val'] = 32
+        opts['batch_size_train'] = 8
+        opts['batch_size_val'] = 8
         opts['data_path_train'] = ''
         opts['data_path_val'] = ''
         opts['datagen_rescale'] = 1./255
@@ -75,16 +77,17 @@ def train(data, label_score, opts, vars):
             
     try:
 
+        vars['randomfilename'] = uuid.uuid4().hex.upper()[0:6]
         width = opts['image_width']
         height = opts['image_height']
         n_channels = 3
-        batch_size = 8
+        batch_size = 32
 
         params = {'dim': (width, height),
                 'batch_size': batch_size,
                 'n_classes': n_classes,
                 'n_channels': n_channels,
-                'shuffle': False
+                'shuffle': True
                 }
 
         #make folder for callbacks
@@ -93,16 +96,16 @@ def train(data, label_score, opts, vars):
         if not os.path.exists(os.path.dirname(os.path.realpath(__file__))  + '/logs/'):
              os.makedirs(os.path.dirname(os.path.realpath(__file__))  + '/logs/')
 
-
-
-        tensorboard = keras.callbacks.TensorBoard(
+        tensorboard = TensorBoard(
             log_dir=os.path.dirname(os.path.realpath(__file__)) + '/logs/'  +  opts['network'] + '-' + str(time.strftime("%Y_%m_%d-%H_%M_%S")) + '/',
             write_graph=True,
-            write_images=True)
+            write_images=True,
+            update_freq='batch')
 
-        checkpoint = keras.callbacks.ModelCheckpoint(
+        checkpoint = ModelCheckpoint(
+            
             #filepath =  os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + opts['network'] + '{epoch:02d}-{acc:.2f}.h5'  , 
-            filepath =  os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + opts['network'] + '.h5', 
+            filepath =  os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + vars['randomfilename'] +  '.trainer.PythonModel.model.' + opts['network'] + '.h5', 
             monitor='acc', 
             verbose=1, 
             save_best_only=True, 
@@ -124,9 +127,9 @@ def train(data, label_score, opts, vars):
         model.compile(optimizer=opts['optimizier'], loss=opts['loss_function'], metrics=opts['metrics'])
         print("compile")
         model.fit_generator(generator=training_generator,
-                            shuffle=False,
-                            workers=40,
-                            max_queue_size=40,
+                            shuffle=params['shuffle'],
+                            workers=4,
+                            max_queue_size=20,
                             verbose=1,
                             epochs=opts['n_epoch'],
                             callbacks=callbacklist)
@@ -186,9 +189,10 @@ def save(path, opts, vars):
     try:
         # save model
         model_path = path + '.' + opts['network'] + '.h5'
-        print('save model to ' + model_path)
+        print('move best checkpoint to ' + model_path)
+        shutil.move(os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + vars['randomfilename'] +  '.trainer.PythonModel.model.' + opts['network'] + '.h5', model_path)
         model = vars['model']
-        model.save(model_path)
+        #model.save(model_path)
 
         # copy scripts
         srcDir = os.path.dirname(os.path.realpath(__file__)) + '\\' 
@@ -253,7 +257,7 @@ def load(path, opts, vars):
 
         # load weights
         
-        weight_path = path + '.' + opts['network'] + '_weights.h5'
+       # weight_path = path + '.' + opts['network'] + '_weights.h5'
         model_path = path + '.' + opts['network'] + '.h5'
 
         print('\nModelpath {}'.format(model_path))
