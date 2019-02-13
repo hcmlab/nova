@@ -195,8 +195,10 @@ namespace ssi
                 //img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / data.Count;
                 //img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / data.Count;
 
-                img.Height = (window.containerExplainedImages.ActualHeight) / data.Count;
-                img.Width = (window.containerExplainedImages.ActualWidth) / data.Count;
+                int ratio = getRatio(data.Count);
+
+                img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / ratio;
+                img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / ratio;
 
 
                 wrapper.Margin = new Thickness(5);
@@ -215,6 +217,26 @@ namespace ssi
             window.containerImageToBeExplained.Effect = blur;
             window.explanationButton.IsEnabled = true;
             window.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+        }
+
+        private int getRatio(int n)
+        {
+
+            int m = 1;
+
+            while(true)
+            {
+                if(Math.Pow((m-1), 2) < n && n <= Math.Pow(m, 2))
+                {
+                    return m;
+                }
+                m++;
+                if(m > 1000)
+                {
+                    return -1;
+                }
+            }
+
         }
 
 
