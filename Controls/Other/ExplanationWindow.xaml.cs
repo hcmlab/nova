@@ -16,7 +16,8 @@ using System.ComponentModel;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using Python.Runtime;
-
+using System.Windows.Controls;
+using System.Xml;
 
 namespace ssi.Controls.Other
 {
@@ -37,6 +38,9 @@ namespace ssi.Controls.Other
         public bool hideRestV;
         public bool hideColorV;
         public bool positiveOnlyV;
+        private List<string> models;
+        private List<string> trainers;
+        public Dictionary<int, string> idToClassName;
 
         private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
@@ -59,6 +63,33 @@ namespace ssi.Controls.Other
             numSamples.Text = "100";
 
             getNewExplanation = false;
+
+
+            string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
+            string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
+
+            string basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\"+ schemeType + "\\" + scheme + "\\" + "video" + "{video}";
+
+            DirectoryInfo di = new DirectoryInfo(basePath);
+
+            models = new List<string>();
+            trainers = new List<string>();
+
+            foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+            {
+                if(fi.Extension == ".h5")
+                {
+                    models.Add(fi.FullName);
+                    modelsBox.Items.Add(fi.Name);
+                }
+
+                if(fi.Extension == ".trainer")
+                {
+                    trainers.Add(fi.FullName);
+                }
+            }
+
+            idToClassName = new Dictionary<int, string>();
 
         }
 
@@ -93,7 +124,33 @@ namespace ssi.Controls.Other
                 modelLoaded.Text = Path.GetFileName(modelPath);
                 Properties.Settings.Default.explainModelPath = modelPath;
                 Properties.Settings.Default.Save();
+
+                idToClassName.Clear();
             }
+        }
+
+        private void modelsBox_selectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cmb = sender as ComboBox;
+            modelPath = models[cmb.SelectedIndex];
+            modelLoaded.Text = Path.GetFileName(modelPath);
+            Properties.Settings.Default.explainModelPath = modelPath;
+            Properties.Settings.Default.Save();
+
+            parseTrainerFile(trainers[cmb.SelectedIndex]);
+        }
+
+        private void parseTrainerFile(string path)
+        {
+            XmlDocument trainer = new XmlDocument();
+            trainer.Load(path);
+            XmlNodeList classes = trainer.GetElementsByTagName("classes")[0].ChildNodes;
+
+            for(int i = 0; i < classes.Count; i++)
+            {
+                idToClassName.Add(i, classes.Item(i).Attributes["name"].Value);
+            }
+
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)

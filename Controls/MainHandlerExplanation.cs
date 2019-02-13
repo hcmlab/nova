@@ -164,6 +164,9 @@ namespace ssi
                 }
                 catch(Exception ex)
                 {
+                    //TODO handle exception
+                    //BackgroundWorker progress = (BackgroundWorker)sender;
+                    //progress.ReportProgress(-1, null);
                     MessageBox.Show("Python installation not found or not complete\nError: " + ex);
                 }
                
@@ -179,21 +182,26 @@ namespace ssi
             {
 
                 System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+                string className = "";
+
+                if(window.idToClassName.ContainsKey(data[i].Item1))
+                {
+                    className = window.idToClassName[data[i].Item1];
+                }
+                else
+                {
+                    className = data[i].Item1 + "";
+                }
 
                 System.Windows.Controls.Label info = new System.Windows.Controls.Label
                 {
-                    Content = "Class: " + data[i].Item1 + " Score: " + data[i].Item2.ToString("0.###")
+                    Content = "Class: " + className + " Score: " + data[i].Item2.ToString("0.###")
                 };
 
                 System.Windows.Controls.Image img = new System.Windows.Controls.Image
                 {
                     Source = data[i].Item3,
-                    //Stretch = System.Windows.Media.Stretch.Fill
                 };
-                //img.Margin = new Thickness(0,5,0,0);
-
-                //img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / data.Count;
-                //img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / data.Count;
 
                 int ratio = getRatio(data.Count);
 
@@ -206,7 +214,6 @@ namespace ssi
                 wrapper.Children.Add(img);
 
                 window.containerExplainedImages.Children.Add(wrapper);
-                //window.containerExplainedImages.VerticalAlignment = VerticalAlignment.Center;
             }
 
             //window.explanationImage.Source = data[0].Item3;
@@ -217,6 +224,7 @@ namespace ssi
             window.containerImageToBeExplained.Effect = blur;
             window.explanationButton.IsEnabled = true;
             window.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
         }
 
         private int getRatio(int n)
