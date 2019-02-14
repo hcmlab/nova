@@ -26,10 +26,13 @@
                 
             </TabItem>
         </TabControl>-->
-        <Viewbox Grid.Column="0" Grid.RowSpan="1" Margin="10">
-            <Image Name="explanationImage">
-            </Image>
+        <Viewbox Name="containerImageToBeExplained" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="10">
+            <Image Name="explanationImage"></Image>
         </Viewbox>
+        <WrapPanel Name="containerExplainedImages" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="5">
+            <!--<Image Name="explanationImage" Height="200" Width="200">
+            </Image>-->
+        </WrapPanel>
         <Grid Grid.Column="1" Grid.Row="0" Margin="5 0 5 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100*"></ColumnDefinition>
@@ -42,11 +45,23 @@
                 <RowDefinition Height="20*"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Grid.Column="0" Grid.Row="0">
-                <StackPanel  Name="modelPanel" Width="120" Height="70" Drop="modelPanel_Drop" AllowDrop="True">
-                    <StackPanel.Background>
-                        <ImageBrush ImageSource="/Resources/dropmodel2.png"></ImageBrush>
-                    </StackPanel.Background>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="75*"></RowDefinition>
+                        <RowDefinition Height="25*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel  Name="modelPanel" Grid.Row="0" Width="120" Height="70" Drop="modelPanel_Drop" AllowDrop="True">
+                        <StackPanel.Background>
+                            <ImageBrush ImageSource="/Resources/dropmodel2.png"></ImageBrush>
+                        </StackPanel.Background>
+                    </StackPanel>
+                    <ComboBox Name="modelsBox" Grid.Row="1" Margin="5 10 5 0" SelectionChanged="modelsBox_selectionChanged">
+
+                    </ComboBox>
+                </Grid>
                 <!--<ComboBox Name="TrainerPathComboBox" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"></ComboBox>-->
             </StackPanel>
             <StackPanel Name="options" Grid.Row="1" Grid.RowSpan="3">
