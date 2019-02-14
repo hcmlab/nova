@@ -564,7 +564,7 @@ namespace ssi
                         scheme.Name,
                         rolesList,
                         annotator.Name,
-                        stream.Name,
+                        stream.Name + "." + stream.FileExt,
                         LosoCheckBox.IsChecked.Value);
 
                     if (File.Exists(evalOutPath))

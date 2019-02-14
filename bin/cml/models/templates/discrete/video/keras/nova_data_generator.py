@@ -126,8 +126,8 @@ class DataGenerator(keras.utils.Sequence):
                             print("Skipping: " + corpus + ":" + s + ' '+ r + "." + filename)
 
         #uncomment for debugging.
-        #os.remove(self.sessions_file)
-        #os.remove(self.db_info_file)
+        os.remove(self.sessions_file)
+        os.remove(self.db_info_file)
 
     def on_epoch_end(self):
         #TODO Updates indexes after each epoch
