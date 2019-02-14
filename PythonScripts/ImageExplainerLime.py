@@ -44,7 +44,10 @@ def getTopXpredictions(prediction, topLabels):
     return prediction_class[:topLabels]
 
 def loadModel(modelPath):
-    model = load_model(modelPath)
+    try:
+        model = load_model(modelPath)
+    except Exception as ex:
+        return None
     return model
 
 def explain(model, img, topLabels, numSamples, numFeatures, hideRest, hideColor, positiveOnly):

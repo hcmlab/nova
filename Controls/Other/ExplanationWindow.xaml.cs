@@ -38,8 +38,7 @@ namespace ssi.Controls.Other
         public bool hideRestV;
         public bool hideColorV;
         public bool positiveOnlyV;
-        private List<string> models;
-        private List<string> trainers;
+        private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
 
         private IntPtr lk;
@@ -72,24 +71,38 @@ namespace ssi.Controls.Other
 
             DirectoryInfo di = new DirectoryInfo(basePath);
 
-            models = new List<string>();
-            trainers = new List<string>();
+            modelsTrainers = new List<ModelTrainer>();
+
+            idToClassName = new Dictionary<int, string>();
+            loadModelAndTrainer(basePath);
+
+        }
+
+        private void loadModelAndTrainer(string path)
+        {
+            DirectoryInfo di = new DirectoryInfo(path);
 
             foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
             {
-                if(fi.Extension == ".h5")
+                if (fi.Extension == ".h5")
                 {
-                    models.Add(fi.FullName);
+                    modelsTrainers.Add(new ModelTrainer(fi.FullName, null));
                     modelsBox.Items.Add(fi.Name);
-                }
-
-                if(fi.Extension == ".trainer")
-                {
-                    trainers.Add(fi.FullName);
                 }
             }
 
-            idToClassName = new Dictionary<int, string>();
+            foreach( var t in modelsTrainers)
+            {
+                foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+                {
+                    var subDirModel = Path.GetDirectoryName(t.model).Split(Path.DirectorySeparatorChar).Last();
+                    var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
+                    if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(t.model).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
+                    {
+                        t.trainer = fi.FullName;
+                    }
+                }
+            }
 
         }
 
@@ -132,12 +145,17 @@ namespace ssi.Controls.Other
         private void modelsBox_selectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cmb = sender as ComboBox;
-            modelPath = models[cmb.SelectedIndex];
+            modelPath = modelsTrainers[cmb.SelectedIndex].model;
             modelLoaded.Text = Path.GetFileName(modelPath);
             Properties.Settings.Default.explainModelPath = modelPath;
             Properties.Settings.Default.Save();
 
-            parseTrainerFile(trainers[cmb.SelectedIndex]);
+            Console.WriteLine("Model: " + modelsTrainers[cmb.SelectedIndex].model);
+            Console.WriteLine("Trainer: " + modelsTrainers[cmb.SelectedIndex].trainer);
+            Console.WriteLine("-------");
+
+            idToClassName.Clear();
+            parseTrainerFile(modelsTrainers[cmb.SelectedIndex].trainer);
         }
 
         private void parseTrainerFile(string path)
@@ -158,5 +176,18 @@ namespace ssi.Controls.Other
 
         }
 
+        private class ModelTrainer
+        {
+            public string model{ get; set; }
+            public string trainer { get; set; }
+
+            public ModelTrainer(string model, string trainer)
+            {
+                this.model = model;
+                this.trainer = trainer;
+            }
+        }
+
     }
+
 }

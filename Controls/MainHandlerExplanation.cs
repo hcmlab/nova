@@ -127,8 +127,15 @@ namespace ssi
                         if (window != null && window.modelPath != null && window.getNewExplanation)
                         {
                             dynamic model = limeExplainer.loadModel(window.modelPath);
-
                             BackgroundWorker progress = (BackgroundWorker)sender;
+
+                            if (model == null)
+                            {
+                                window.getNewExplanation = false;
+                                progress.ReportProgress(-1, null);
+                                continue;
+                            }
+
                             var data = limeExplainer.explain_multiple(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
                             int length = data[1];
 
@@ -176,48 +183,54 @@ namespace ssi
         private void worker_OnProgressChanged(object sender, ProgressChangedEventArgs e)
         {
 
-            List<Tuple<int, double, BitmapImage>> data = (List<Tuple<int, double, BitmapImage>>) e.UserState;
-
-            for(int i = 0; i < data.Count; i++)
+            if(e.ProgressPercentage != -1)
             {
 
-                System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
-                string className = "";
+                List<Tuple<int, double, BitmapImage>> data = (List<Tuple<int, double, BitmapImage>>) e.UserState;
 
-                if(window.idToClassName.ContainsKey(data[i].Item1))
+                for(int i = 0; i < data.Count; i++)
                 {
-                    className = window.idToClassName[data[i].Item1];
+
+                    System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+                    string className = "";
+
+                    if(window.idToClassName.ContainsKey(data[i].Item1))
+                    {
+                        className = window.idToClassName[data[i].Item1];
+                    }
+                    else
+                    {
+                        className = data[i].Item1 + "";
+                    }
+
+                    System.Windows.Controls.Label info = new System.Windows.Controls.Label
+                    {
+                        Content = "Class: " + className + " Score: " + data[i].Item2.ToString("0.###")
+                    };
+
+                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                    {
+                        Source = data[i].Item3,
+                    };
+
+                    int ratio = getRatio(data.Count);
+
+                    img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / ratio;
+                    img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / ratio;
+
+
+                    wrapper.Margin = new Thickness(5);
+                    wrapper.Children.Add(info);
+                    wrapper.Children.Add(img);
+
+                    window.containerExplainedImages.Children.Add(wrapper);
                 }
-                else
-                {
-                    className = data[i].Item1 + "";
-                }
 
-                System.Windows.Controls.Label info = new System.Windows.Controls.Label
-                {
-                    Content = "Class: " + className + " Score: " + data[i].Item2.ToString("0.###")
-                };
-
-                System.Windows.Controls.Image img = new System.Windows.Controls.Image
-                {
-                    Source = data[i].Item3,
-                };
-
-                int ratio = getRatio(data.Count);
-
-                img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / ratio;
-                img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / ratio;
-
-
-                wrapper.Margin = new Thickness(5);
-                wrapper.Children.Add(info);
-                wrapper.Children.Add(img);
-
-                window.containerExplainedImages.Children.Add(wrapper);
+                window.containerImageToBeExplained.Visibility = Visibility.Hidden;
             }
 
+
             //window.explanationImage.Source = data[0].Item3;
-            window.containerImageToBeExplained.Visibility = Visibility.Hidden;
             window.explainingLabel.Visibility = Visibility.Hidden;
             BlurEffect blur = new BlurEffect();
             blur.Radius = 0;
