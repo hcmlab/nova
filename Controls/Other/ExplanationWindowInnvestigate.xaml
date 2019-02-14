@@ -1,0 +1,85 @@
+﻿<Window x:Class="ssi.Controls.Other.ExplanationWindowInnvestigate"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi.Controls.Other"
+        mc:Ignorable="d"
+        Title="ExplanationWindowInnvestigate" Height="570" Width="800">
+
+<Grid Name="container">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="75*"></ColumnDefinition>
+            <ColumnDefinition Width="25*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <!--<TabControl>
+            <TabItem Header="Lime">
+                
+            </TabItem>
+            <TabItem Header="Shap">
+                
+            </TabItem>
+            <TabItem Header="Innvestigate">
+                
+            </TabItem>
+        </TabControl>-->
+        <Viewbox Name="containerImageToBeExplained" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="10">
+            <Image Name="explanationImage"></Image>
+        </Viewbox>
+        <WrapPanel Name="containerExplainedImages" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="5">
+            <!--<Image Name="explanationImage" Height="200" Width="200">
+            </Image>-->
+        </WrapPanel>
+        <Grid Grid.Column="1" Grid.Row="0" Margin="5 0 5 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20*"></RowDefinition>
+                <RowDefinition Height="20*"></RowDefinition>
+                <RowDefinition Height="20*"></RowDefinition>
+                <RowDefinition Height="20*"></RowDefinition>
+                <RowDefinition Height="20*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Column="0" Grid.Row="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="75*"></RowDefinition>
+                        <RowDefinition Height="25*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel  Name="modelPanel" Grid.Row="0" Width="120" Height="70" Drop="modelPanel_Drop" AllowDrop="True">
+                        <StackPanel.Background>
+                            <ImageBrush ImageSource="/Resources/dropmodel2.png"></ImageBrush>
+                        </StackPanel.Background>
+                    </StackPanel>
+                    <ComboBox Name="modelsBox" Grid.Row="1" Margin="5 10 5 0" SelectionChanged="modelsBox_selectionChanged">
+
+                    </ComboBox>
+                </Grid>
+                <!--<ComboBox Name="TrainerPathComboBox" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"></ComboBox>-->
+            </StackPanel>
+            <StackPanel Name="options" Grid.Row="1" Grid.RowSpan="3">
+                <TextBlock x:Name="modelLoaded" Text="No model loaded" HorizontalAlignment="Center" Margin="0 0 0 10"/>
+            </StackPanel>
+            <Button Name="explanationButton" Width="100" Height="35" Grid.Column="0" Grid.Row="4">
+                <TextBlock Text="Explain">
+                    <TextBlock.Style>
+                        <Style>
+                            <Setter Property="TextBlock.FontSize" Value="14"></Setter>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Button>
+        </Grid>
+
+        <Label Grid.Column="0" Grid.Row="0" Grid.RowSpan="4" Name="explainingLabel" Panel.ZIndex="100" Foreground="White" FontSize="16" Background="Transparent" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+            Working on explanation
+        </Label>
+    </Grid>
+</Window>

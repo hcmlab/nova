@@ -24,6 +24,7 @@ namespace ssi
 
         public static BackgroundWorker explanationWorker;
         ExplanationWindow window;
+        ExplanationWindowInnvestigate windowInnvestigate;
         private static Action EmptyDelegate = delegate () { };
 
         private void explanationWindow_Click(object sender, RoutedEventArgs e)
@@ -47,6 +48,28 @@ namespace ssi
 
             }
 
+        }
+
+        private void explanationWindowInnvestigate_Click(object sender, RoutedEventArgs e)
+        {
+            windowInnvestigate = new ExplanationWindowInnvestigate();
+
+            try
+            {
+                byte[] img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
+
+                BitmapImage imageBitmap = new BitmapImage();
+                imageBitmap.BeginInit();
+                imageBitmap.StreamSource = new System.IO.MemoryStream(img);
+                imageBitmap.EndInit();
+                windowInnvestigate.explanationImage.Source = imageBitmap;
+
+                windowInnvestigate.ShowDialog();
+            }
+            catch
+            {
+
+            }
         }
 
         public void startExplainableThread()

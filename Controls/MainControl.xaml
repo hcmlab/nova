@@ -83,6 +83,7 @@
             
             <MenuItem Header="XAI" Name="XAIMenu">
                 <MenuItem Header="LimeExplainer" Name="explanationWindow"/>
+                <MenuItem Header="InnvestigateExplainer" Name="explanationWindowInnvestigate"></MenuItem>
             </MenuItem>
 
             <MenuItem Header="?">
