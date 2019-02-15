@@ -550,8 +550,7 @@ namespace ssi
                             "pymongo==3.7.2",
                             "scikit_image==0.14.0",
                             "Pillow==5.4.1",
-                            "opencv-python==4.0.0.21",
-                            "uuid==1.30"
+                            "opencv-python==4.0.0.21"
 
 
                             };

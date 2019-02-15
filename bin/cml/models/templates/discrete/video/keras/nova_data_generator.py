@@ -42,21 +42,24 @@ class DataGenerator(keras.utils.Sequence):
         self.annos_to_continuous()
         
         if self.shuffle:
-            #äself.total_frames = sum([int(reader._meta['nframes']) for reader in self.file_readers])
-            self.total_frames = sum([int(reader.get(cv2.CAP_PROP_FRAME_COUNT)) for reader in self.file_readers])
+            sample_rate = self.file_readers[0].get(cv2.CAP_PROP_FPS)
+            #self.total_frames = sum([int(reader._meta['nframes']) for reader in self.file_readers])
+            if (self.cmlbegintime != sys.maxsize):
+                self.total_frames = int(self.cmlbegintime * sample_rate)
+            else:
+                self.total_frames = sum([int(reader.get(cv2.CAP_PROP_FRAME_COUNT)) for reader in self.file_readers])
             self.indices = np.zeros((self.total_frames, 2))
             self.indices_shuffled = np.arange(self.total_frames)
             np.random.shuffle(self.indices_shuffled)
             count = 0
             for i in range(0, len(self.file_readers)):
                 #for j in range(0, self.file_readers[i]._meta['nframes']):
-                for j in range(0, int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT))):
+                for j in range(0, min(int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT)), int(self.cmlbegintime * sample_rate))):
                     self.indices[count][0] = i
                     self.indices[count][1] = j
                     count+=1
         self.on_epoch_end()
         self.__step_locks = [mp.Lock() for x in range(len(self.file_readers))]
-        self.cmlbegintime
 
     def annos_to_continuous(self):
         anno_cont = []
@@ -265,6 +268,6 @@ if __name__ == '__main__':
                         verbose=1,
                         shuffle=True, # <- ignored ?
                         use_multiprocessing=False,
-                        workers=4,
-                        max_queue_size=40,
+                        workers=10,
+                        max_queue_size=50,
                         epochs=10)

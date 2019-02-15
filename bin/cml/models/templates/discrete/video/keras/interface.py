@@ -24,11 +24,12 @@ from skimage.transform import resize
 #from tensorflow.python.keras import backend
 import keras
 from keras import backend
+from keras import optimizers
+from keras.preprocessing import image as kerasimage
 from keras.models import load_model
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from nova_data_generator import DataGenerator
 from PIL import Image
-import uuid
 
 #interface
 def getModelType(types, opts, vars):
@@ -40,28 +41,33 @@ def getOptions(opts, vars):
         vars['y'] = None
         vars['session'] = None
         vars['model'] = None
-        vars['randomfilename'] = "."
+        vars['model_id'] = "."
 
         '''Setting the default options. All options can be overwritten by adding them to the conf-dictionary in the same file as the network'''
         opts['network'] = ''
+        opts['experiment_id'] = ''
         opts['is_regression'] = False
         opts['n_fp'] = 1
         opts['loss_function'] = 'categorical_crossentropy'
-        opts['optimizier'] = 'adam'
+        opts['optimizer'] = 'adam'
         opts['metrics'] = ['accuracy']
         opts['lr'] = 0.0001
-        opts['n_epoch'] = 100
-        opts['image_width'] = 300
-        opts['image_height'] = 300
-        opts['batch_size_train'] = 8
-        opts['batch_size_val'] = 8
+        opts['batch_size'] = 32
+        opts['n_epoch'] = 10
+        opts['image_width'] = 224
+        opts['image_height'] = 224
+        opts['n_channels'] = 3
+        opts['shuffle'] = True
+        opts['max_queue_size'] = 20
+        opts['workers'] = 4
+        opts['batch_size_train'] = 32
+        opts['batch_size_val'] = 32
         opts['data_path_train'] = ''
         opts['data_path_val'] = ''
         opts['datagen_rescale'] = 1./255
         opts['datagen_rotation_range'] = 20
         opts['datagen_width_shift_range'] = 0.2
         opts['datagen_height_shift_range'] = 0.2
-
 
     except Exception as e:
         print_exception(e, 'getOptions')
@@ -70,81 +76,65 @@ def getOptions(opts, vars):
 
 def train(data, label_score, opts, vars):
     
-    if not opts['is_regression']:
-        n_classes = int(max(label_score)+1)
-    else:
-        n_classes = 1
-            
     try:
+        module = __import__(opts['network'])
+        set_opts_from_config(opts, module.conf)
 
-        vars['randomfilename'] = uuid.uuid4().hex.upper()[0:6]
-        width = opts['image_width']
-        height = opts['image_height']
-        n_channels = 3
-        batch_size = 32
+        n_input = opts['image_width'] * opts['image_height'] * opts['n_channels']
+ 
+        if not opts['is_regression']:
+            #adding one output for the restclass
+            n_classes = int(max(label_score)+1)
+        else:
+            n_classes = 1
 
-        params = {'dim': (width, height),
-                'batch_size': batch_size,
-                'n_classes': n_classes,
-                'n_channels': n_channels,
-                'shuffle': True
-                }
+        # callbacks
+        log_path, ckp_path = get_paths()
 
-        #make folder for callbacks
-        if not os.path.exists(os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/'):
-             os.makedirs(os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/')
-        if not os.path.exists(os.path.dirname(os.path.realpath(__file__))  + '/logs/'):
-             os.makedirs(os.path.dirname(os.path.realpath(__file__))  + '/logs/')
-
+        experiment_id = opts['experiment_id'] if opts['experiment_id'] else opts['network'] + '-' + str(time.strftime("%Y_%m_%d-%H_%M_%S")) 
+        print('Checkpoint dir: {}\nLogdir: {}\nExperiment ID: {}'.format(ckp_path, log_path, experiment_id))
         tensorboard = TensorBoard(
-            log_dir=os.path.dirname(os.path.realpath(__file__)) + '/logs/'  +  opts['network'] + '-' + str(time.strftime("%Y_%m_%d-%H_%M_%S")) + '/',
+            log_dir=os.path.join(log_path, experiment_id),
             write_graph=True,
             write_images=True,
             update_freq='batch')
 
-        checkpoint = ModelCheckpoint(
-            
-            #filepath =  os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + opts['network'] + '{epoch:02d}-{acc:.2f}.h5'  , 
-            filepath =  os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + vars['randomfilename'] +  '.trainer.PythonModel.model.' + opts['network'] + '.h5', 
+        checkpoint = ModelCheckpoint(    
+            filepath =  os.path.join(ckp_path, experiment_id +  '.trainer.PythonModel.model.h5'),   
             monitor='acc', 
             verbose=1, 
             save_best_only=True, 
             save_weights_only=False, 
             mode='auto', 
             period=1)
-
-
         callbacklist = [tensorboard, checkpoint]
-        # Generators
-        training_generator = DataGenerator(**params)
 
-        print("Target Classes: " + str(params['n_classes']))
-        n_input = width * height * n_channels
-        module = __import__(opts['network'])
-        print(opts['network']) 
-        model = module.getModel((width,height,n_channels), params['n_classes'])
-        print("getmodel")
-        model.compile(optimizer=opts['optimizier'], loss=opts['loss_function'], metrics=opts['metrics'])
-        print("compile")
+        # data
+        training_generator = DataGenerator(dim=(opts['image_width'], opts['image_height']), n_channels=opts['n_channels'] ,batch_size=opts['batch_size'], n_classes=n_classes)     
+        
+        # model
+        model = module.getModel(shape=(opts['image_width'], opts['image_height'], opts['n_channels']), n_classes=n_classes)
+        model.compile(optimizer=opts['optimizer'], loss=opts['loss_function'], metrics=opts['metrics'])  
+        print(model.summary())
         model.fit_generator(generator=training_generator,
-                            shuffle=params['shuffle'],
-                            workers=4,
-                            max_queue_size=20,
+                            shuffle=opts['shuffle'],
+                            workers=opts['workers'],
+                            max_queue_size=opts['max_queue_size'],
                             verbose=1,
                             epochs=opts['n_epoch'],
                             callbacks=callbacklist)
      
-        vars['n_input'] = n_input
-        vars['n_output'] = params['n_classes']
+        # setting variables
+        vars['model_id'] = experiment_id
         vars['model'] = model
 
     except Exception as e:
         print_exception(e, 'train')
         sys.exit()
 
-
 def forward(data, probs_or_score, opts, vars):
     try:
+       
         model = vars['model']
         sess = vars['session']
         graph = vars['graph']   
@@ -154,29 +144,22 @@ def forward(data, probs_or_score, opts, vars):
             n_output = len(probs_or_score)
             npdata = np.asarray(data)
             img = Image.fromarray(npdata)
-           
-            #img.save('test_org.jpg')
             x = img.resize((opts['image_height'], opts['image_width']))
-            #imgR.save('test.jpg')
+          
+            x = kerasimage.img_to_array(x)
             x = np.expand_dims(x, axis=0)
-
-            results = np.zeros((1, n_output), dtype=np.float32)
+            x = x*(1./255)
+  
             with sess.as_default():
                 with graph.as_default():
                     pred = model.predict(x, batch_size=1, verbose=0)
-                    for i in range(len(pred[0])):
-                        results[0][i] = pred[0][i]
 
-            mean = np.mean(results, axis=0)
-            std = np.std(results, axis=0)
-            conf = max(0,1-np.mean(std))
-
-            #sanity_check(probs_or_score)
+            sanity_check(probs_or_score)
             
-            for i in range(len(mean)):
-                probs_or_score[i] = mean[i]
+            for i in range(len(pred[0])):
+                probs_or_score[i] = pred[0][i]  
+            return max(probs_or_score)
 
-            return conf
         else:
             print('Train model first') 
             return 1
@@ -188,111 +171,53 @@ def forward(data, probs_or_score, opts, vars):
 def save(path, opts, vars):
     try:
         # save model
-        model_path = path + '.' + opts['network'] + '.h5'
-        print('move best checkpoint to ' + model_path)
-        shutil.move(os.path.dirname(os.path.realpath(__file__))  + '/checkpoints/' + vars['randomfilename'] +  '.trainer.PythonModel.model.' + opts['network'] + '.h5', model_path)
-        model = vars['model']
-        #model.save(model_path)
+        _, ckp_path = get_paths()
+
+        temp_model_path = path + '.' + opts['network'] + '.h5'
+        print('Move best checkpoint to ' + temp_model_path)
+        shutil.move(os.path.join(ckp_path, vars['model_id'] + '.trainer.PythonModel.model.h5'), temp_model_path)
 
         # copy scripts
-        srcDir = os.path.dirname(os.path.realpath(__file__)) + '\\' 
-        dstDir = os.path.dirname(path) + '\\'
+        src_dir = os.path.dirname(os.path.realpath(__file__))
+        dst_dir = os.path.dirname(path)
 
-        print('copy scripts from \'' + srcDir + '\' to \'' + dstDir + '\'')
+        print('copy scripts from \'' + src_dir + '\' to \'' + dst_dir + '\'')
 
-        if not os.path.exists(dstDir):
-            os.makedirs(dstDir)
-
-        srcFiles = os.listdir(srcDir)
+        srcFiles = os.listdir(src_dir)
         for fileName in srcFiles:
-            fullFileName = os.path.join(srcDir, fileName)
-            if os.path.isfile(fullFileName) and ((fileName.endswith(opts['network']+'.py') or fileName.endswith('interface.py')  or fileName.endswith('customlayer.py') or fileName.endswith('nova_data_generator.py')  or fileName.endswith('db_handler.py'))) :
-                shutil.copy(fullFileName, dstDir)
-
-        
-        network_new =  os.path.basename(path) + '.' + opts['network']
-        shutil.copy(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')
+            full_file_name = os.path.join(src_dir, fileName)
+            if os.path.isfile(full_file_name) and ((fileName.endswith(opts['network']+'.py') or fileName.endswith('interface.py')  or fileName.endswith('customlayer.py') or fileName.endswith('nova_data_generator.py')  or fileName.endswith('db_handler.py'))) :
+                shutil.copy(full_file_name, dst_dir)    
 
     except Exception as e: 
-
         print_exception(e, 'save')
         sys.exit()
 
 def load(path, opts, vars):
     try:
-        print('create session and graph')   
+        print('\nLoading model\nCreating session and graph')   
         server = tf.train.Server.create_local_server()
         sess = tf.Session(server.target) 
         graph = tf.get_default_graph()
         backend.set_session(sess) 
         
-        print('\nload model from ' + path)
-        trainerPath = path
-        trainerPath = trainerPath.replace("trainer.PythonModel.model", "trainer")
-
-        print('tp: {}'.format(trainerPath))
-
-        # # parsing trainer to retrieve input output
-        xmldoc = minidom.parse(trainerPath)
-        # streams = xmldoc.getElementsByTagName('streams')
-        # streamItem = streams[0].getElementsByTagName('item')
-        # n_input = streamItem[0].attributes['dim'].value
-        # print("#input: " + str(n_input))
-        
-        classes = xmldoc.getElementsByTagName('classes')
-        n_output = len(classes[0].getElementsByTagName('item'))
-        print("#output: " + str(n_output))
-
-        # copy unique network file
-        network_tmp = os.path.dirname(path) + '\\' + opts['network'] + '.py'
-        shutil.copy(path + '.' + opts['network'] + '.py', network_tmp)
-        print ('\nload training configuration from ' + network_tmp)
-
-        # reload sys path and import network file
-        importlib.reload(site)
-
-        # loading network specific options 
-        module = __import__(opts['network'])
-        set_opts_from_config(opts, module.conf)
-
-        # load weights
-        
-       # weight_path = path + '.' + opts['network'] + '_weights.h5'
         model_path = path + '.' + opts['network'] + '.h5'
-
-        print('\nModelpath {}'.format(model_path))
-        
-        #f = h5py.File(model_path, 'r')
-        #print(f.attrs.get('keras_version'))  
-
+        print('Loading model from {}'.format(model_path))
         model = load_model(model_path);     
-        n_input = (opts['image_width'],  opts['image_height'], 3)
-        #model = module.getModel(n_input, int(n_output))
-        #model.load_weights(weight_path)
-        
-        n_input = (1, opts['image_width'],  opts['image_height'], 3)
 
-        # creating the predict function in order to avoid graph-scope errors later
-        print('create prediction function')
+        
+        print('Create prediction function')
 
         model._make_predict_function()
         with graph.as_default():
             with sess.as_default():
-                model.predict(np.zeros(n_input))
+                input_shape = list(model.layers[0].input_shape)
+                input_shape[0] = 1
+                model.predict(np.zeros(tuple(input_shape)))
 
         vars['graph'] = graph
         vars['session'] = sess
         vars['model'] = model
-
-        print('\nload model from ' + path)
-    
-        trainerPath = path
-        trainerPath = trainerPath.replace("trainer.PythonModel.model", "trainer")
-
-        print('tp: {}'.format(trainerPath))
-
-       
-
     except Exception as e:
         print_exception(e, 'load')
         sys.exit()
@@ -313,18 +238,34 @@ def print_exception(exception, function):
 
 
 def set_opts_from_config(opts, conf):
-    print(conf)
-
     for key, value in conf.items():
         opts[key] = value
 
-    print('Options haven been set to:\n')
+    print('\nOptions haven been set to:\n')
     pprint.pprint(opts)
     print('\n')
 
-#checking the input for corrupted values
+# checking the input for corrupted values
 def sanity_check(x):
     if np.any(np.isnan(x)):
         print('At least one input is not a number!')
     if np.any(np.isinf(x)):
         print('At least one input is inf!')
+
+# retreives the paths for log and checkpoint directories. paths are created if they do not exist
+def get_paths():
+    file_dir = os.path.dirname(os.path.realpath(__file__)) 
+    ckp_dir = 'checkpoints'
+    log_dir = 'logs'
+    ckp_path = os.path.join(file_dir, ckp_dir)
+    log_path = os.path.join(file_dir, log_dir)
+
+    if not os.path.exists(ckp_path):
+        os.makedirs(ckp_path)
+        print('Created checkpoint folder: {}'.format(ckp_path))
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
+        print('Created log folder: {}'.format(log_path))
+    
+    return(log_path, ckp_path)
+

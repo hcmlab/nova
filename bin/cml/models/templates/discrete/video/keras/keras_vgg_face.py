@@ -21,21 +21,20 @@ conf = {
         'n_fp' : 1, #number of forward passes for each prediction in order to calculate the confidence
 
         #compile
-        'loss_function' : 'binary_crossentropy',    
+        'loss_function' : 'categorical_crossentropy',    
         'optimizier' : 'adam',  
         'metrics' : ['accuracy'],
         'lr' : 0.0001,
 
         #fit
         'n_epoch' : 10,
-        'batch_size' : 32, 
+        'batch_size' : 8
        
     }
 
 
-def getModel (shape, nClasses):
-    hidden_dim = 1024   
-    print(shape)
+def getModel (shape, n_classes):
+    hidden_dim = 512   
     base_model = VGGFace(include_top=False, input_shape=shape)
 
     for layer in base_model.layers:
@@ -46,7 +45,7 @@ def getModel (shape, nClasses):
     x = Dense(hidden_dim, activation='relu', name='fc6')(x)
     x = Dropout(0.25)(x)
     x = Dense(hidden_dim, activation='relu', name='fc7')(x)
-    predictions = Dense(nClasses, activation='softmax')(x)
+    predictions = Dense(n_classes, activation='softmax')(x)
 
     model = Model(inputs=base_model.input, outputs=predictions)
 
