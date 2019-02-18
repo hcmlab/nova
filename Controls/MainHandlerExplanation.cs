@@ -208,14 +208,18 @@ namespace ssi
 
                             var data = innvestigateExplainer.explain(model, windowInnvestigate.img, windowInnvestigate.postprocess, windowInnvestigate.explainAlgorithm);
 
+                            int classID = data[0];
+                            double acc = data[1];
 
                             BitmapImage temp = new BitmapImage();
                             temp.BeginInit();
-                            temp.StreamSource = new System.IO.MemoryStream((byte[])data);
+                            temp.StreamSource = new System.IO.MemoryStream((byte[])data[2]);
                             temp.EndInit();
                             temp.Freeze();
 
-                            progress.ReportProgress(1, temp);
+                            Tuple<int, double, BitmapImage> tuple = new Tuple<int, double, BitmapImage>(classID, acc, temp);
+
+                            progress.ReportProgress(1, tuple);
                             windowInnvestigate.getNewExplanation = false;
                             
                         }
@@ -291,8 +295,39 @@ namespace ssi
                 }
                 else if(e.ProgressPercentage == 1)
                 {
-                    windowInnvestigate.explanationImage.Source = (BitmapImage)e.UserState;
+                    Tuple<int, double, BitmapImage> data = (Tuple<int, double, BitmapImage>)e.UserState;
 
+                    //windowInnvestigate.explanationImage.Source = data.Item3;
+
+                    System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+                    string className = "";
+
+                    if (windowInnvestigate.idToClassName.ContainsKey(data.Item1))
+                    {
+                        className = windowInnvestigate.idToClassName[data.Item1];
+                    }
+                    else
+                    {
+                        className = data.Item1 + "";
+                    }
+
+                    System.Windows.Controls.Label info = new System.Windows.Controls.Label
+                    {
+                        Content = "Class: " + className + " Score: " + data.Item2.ToString("0.###")
+                    };
+
+                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                    {
+                        Source = data.Item3,
+                    };
+
+                    wrapper.Margin = new Thickness(5);
+                    wrapper.Children.Add(info);
+                    wrapper.Children.Add(img);
+
+                    windowInnvestigate.containerExplainedImages.Children.Add(wrapper);
+
+                    windowInnvestigate.containerImageToBeExplained.Visibility = Visibility.Hidden;
                     windowInnvestigate.explainingLabel.Visibility = Visibility.Hidden;
                     BlurEffect blur = new BlurEffect();
                     blur.Radius = 0;

@@ -38,10 +38,26 @@ def loadModel(modelPath):
         return None
     return model
 
+def getTopXpredictions(prediction, topLabels):
+
+    prediction_class = []
+
+    for i in range(0, len(prediction[0])):
+        prediction_class.append((i, prediction[0][i]))
+
+    prediction_class.sort(key=lambda x: x[1], reverse=True)
+
+    return prediction_class[:topLabels]
+
 def explain(model, img, postprocess, explainer):
-            
+    
+    explanation = []
+
     img, oldImg = transform_img_fn(img)
     img = img*(1./255)
+
+    prediction = model.predict(img)
+    topClass = getTopXpredictions(prediction, 1)
 
     model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
 
@@ -76,8 +92,10 @@ def explain(model, img, postprocess, explainer):
     imgByteArr = inputoutput.BytesIO()
     img.save(imgByteArr, format='JPEG')
     imgByteArr = imgByteArr.getvalue()
+
+    explanation = (topClass[0][0], topClass[0][1], imgByteArr)
     
-    return imgByteArr
+    return explanation
 
 def test():
     modelPath = "C:/Users/Alex Heimerl/Desktop/test/pokemon.trainer.PythonModel.model.keras_vgg_face.h5"
