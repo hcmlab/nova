@@ -28,6 +28,8 @@ namespace ssi.Controls.Other
         public byte[] img;
         private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
+        public string postprocess;
+        public string explainAlgorithm;
 
 
         public ExplanationWindowInnvestigate()
@@ -93,6 +95,9 @@ namespace ssi.Controls.Other
             BlurEffect blur = new BlurEffect();
             blur.Radius = 20;
             explanationImage.Effect = blur;
+
+            postprocess = postprocessing.Text.ToUpper();
+            explainAlgorithm = explainer.Text.ToUpper();
 
             getNewExplanation = true;
             explanationButton.IsEnabled = false;

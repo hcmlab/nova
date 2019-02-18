@@ -206,7 +206,8 @@ namespace ssi
                                 continue;
                             }
 
-                            var data = innvestigateExplainer.explain(model, windowInnvestigate.img);
+                            var data = innvestigateExplainer.explain(model, windowInnvestigate.img, windowInnvestigate.postprocess, windowInnvestigate.explainAlgorithm);
+
 
                             BitmapImage temp = new BitmapImage();
                             temp.BeginInit();
@@ -280,22 +281,29 @@ namespace ssi
                     }
 
                     window.containerImageToBeExplained.Visibility = Visibility.Hidden;
+                    //window.explanationImage.Source = data[0].Item3;
+                    window.explainingLabel.Visibility = Visibility.Hidden;
+                    BlurEffect blur = new BlurEffect();
+                    blur.Radius = 0;
+                    window.containerImageToBeExplained.Effect = blur;
+                    window.explanationButton.IsEnabled = true;
+                    window.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 }
                 else if(e.ProgressPercentage == 1)
                 {
                     windowInnvestigate.explanationImage.Source = (BitmapImage)e.UserState;
+
+                    windowInnvestigate.explainingLabel.Visibility = Visibility.Hidden;
+                    BlurEffect blur = new BlurEffect();
+                    blur.Radius = 0;
+                    windowInnvestigate.explanationImage.Effect = blur;
+                    windowInnvestigate.explanationButton.IsEnabled = true;
+                    windowInnvestigate.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
                 }
 
             }
 
-
-            //window.explanationImage.Source = data[0].Item3;
-            window.explainingLabel.Visibility = Visibility.Hidden;
-            BlurEffect blur = new BlurEffect();
-            blur.Radius = 0;
-            window.containerImageToBeExplained.Effect = blur;
-            window.explanationButton.IsEnabled = true;
-            window.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
 
         }
 
