@@ -145,6 +145,7 @@ namespace ssi
                 try
                 {
                     dynamic limeExplainer = Py.Import("ImageExplainerLime");
+
                     while (!explanationWorker.CancellationPending)
                     {
                         if (window != null && window.modelPath != null && window.getNewExplanation)
@@ -190,6 +191,33 @@ namespace ssi
                             progress.ReportProgress(0, explanationData);
 
                         }
+
+                        if (windowInnvestigate != null && windowInnvestigate.modelPath != null && windowInnvestigate.getNewExplanation)
+                        {
+                            dynamic innvestigateExplainer = Py.Import("ImageExplainerInnvestigate");
+
+                            dynamic model = innvestigateExplainer.loadModel(windowInnvestigate.modelPath);
+                            BackgroundWorker progress = (BackgroundWorker)sender;
+
+                            if (model == null)
+                            {
+                                window.getNewExplanation = false;
+                                progress.ReportProgress(-1, null);
+                                continue;
+                            }
+
+                            var data = innvestigateExplainer.explain(model, windowInnvestigate.img);
+
+                            BitmapImage temp = new BitmapImage();
+                            temp.BeginInit();
+                            temp.StreamSource = new System.IO.MemoryStream((byte[])data);
+                            temp.EndInit();
+                            temp.Freeze();
+
+                            progress.ReportProgress(1, temp);
+                            windowInnvestigate.getNewExplanation = false;
+                            
+                        }
                     }
                 }
                 catch(Exception ex)
@@ -208,48 +236,56 @@ namespace ssi
 
             if(e.ProgressPercentage != -1)
             {
-
-                List<Tuple<int, double, BitmapImage>> data = (List<Tuple<int, double, BitmapImage>>) e.UserState;
-
-                for(int i = 0; i < data.Count; i++)
+                if(e.ProgressPercentage == 0)
                 {
 
-                    System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
-                    string className = "";
+                    List<Tuple<int, double, BitmapImage>> data = (List<Tuple<int, double, BitmapImage>>) e.UserState;
 
-                    if(window.idToClassName.ContainsKey(data[i].Item1))
+                    for(int i = 0; i < data.Count; i++)
                     {
-                        className = window.idToClassName[data[i].Item1];
+
+                        System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+                        string className = "";
+
+                        if(window.idToClassName.ContainsKey(data[i].Item1))
+                        {
+                            className = window.idToClassName[data[i].Item1];
+                        }
+                        else
+                        {
+                            className = data[i].Item1 + "";
+                        }
+
+                        System.Windows.Controls.Label info = new System.Windows.Controls.Label
+                        {
+                            Content = "Class: " + className + " Score: " + data[i].Item2.ToString("0.###")
+                        };
+
+                        System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                        {
+                            Source = data[i].Item3,
+                        };
+
+                        int ratio = getRatio(data.Count);
+
+                        img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / ratio;
+                        img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / ratio;
+
+
+                        wrapper.Margin = new Thickness(5);
+                        wrapper.Children.Add(info);
+                        wrapper.Children.Add(img);
+
+                        window.containerExplainedImages.Children.Add(wrapper);
                     }
-                    else
-                    {
-                        className = data[i].Item1 + "";
-                    }
 
-                    System.Windows.Controls.Label info = new System.Windows.Controls.Label
-                    {
-                        Content = "Class: " + className + " Score: " + data[i].Item2.ToString("0.###")
-                    };
-
-                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
-                    {
-                        Source = data[i].Item3,
-                    };
-
-                    int ratio = getRatio(data.Count);
-
-                    img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / ratio;
-                    img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / ratio;
-
-
-                    wrapper.Margin = new Thickness(5);
-                    wrapper.Children.Add(info);
-                    wrapper.Children.Add(img);
-
-                    window.containerExplainedImages.Children.Add(wrapper);
+                    window.containerImageToBeExplained.Visibility = Visibility.Hidden;
+                }
+                else if(e.ProgressPercentage == 1)
+                {
+                    windowInnvestigate.explanationImage.Source = (BitmapImage)e.UserState;
                 }
 
-                window.containerImageToBeExplained.Visibility = Visibility.Hidden;
             }
 
 
