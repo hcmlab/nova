@@ -41,7 +41,7 @@ namespace ssi
                 imageBitmap.EndInit();
                 window.explanationImage.Source = imageBitmap;
 
-                window.ShowDialog();
+                window.Show();
             }
             catch
             {
@@ -64,7 +64,7 @@ namespace ssi
                 imageBitmap.EndInit();
                 windowInnvestigate.explanationImage.Source = imageBitmap;
 
-                windowInnvestigate.ShowDialog();
+                windowInnvestigate.Show();
             }
             catch
             {
