@@ -599,11 +599,13 @@ namespace ssi
                 string urltoolz = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/toolz-0.9.0-py2.py3-none-any.whl";
                 string urltermcolor = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/termcolor-1.1.0-py2.py3-none-any.whl";
                 string urlfuture = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/future-0.17.0-py3-none-any.whl";
+                string urltkinderfix = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/tkinterfix.zip";
 
                 WebClient Client = new WebClient();
                 Client.DownloadFile(urltoolz, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "toolz-0.9.0-py2.py3-none-any.whl");
                 Client.DownloadFile(urltermcolor, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
                 Client.DownloadFile(urlfuture, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "future-0.17.0-py3-none-any.whl");
+                Client.DownloadFile(urltkinderfix, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "tkinterfix.zip");
 
                 process = new Process();
                 startInfo = new ProcessStartInfo();
@@ -617,6 +619,11 @@ namespace ssi
 
                 File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "toolz-0.9.0-py2.py3-none-any.whl");
                 File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
+
+
+
+                System.IO.Compression.ZipFile.ExtractToDirectory("python/tkinterfix.zip", "python/");
+                File.Delete("python/tkinterfix.zip");
 
                 try
                 {
