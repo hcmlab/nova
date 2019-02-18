@@ -30,6 +30,7 @@ namespace ssi.Controls.Other
         public Dictionary<int, string> idToClassName;
         public string postprocess;
         public string explainAlgorithm;
+        private string basePath;
 
 
         public ExplanationWindowInnvestigate()
@@ -49,7 +50,7 @@ namespace ssi.Controls.Other
             string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
-            string basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "video" + "{video}";
+            basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "video" + "{video}";
 
             DirectoryInfo di = new DirectoryInfo(basePath);
 
@@ -57,6 +58,9 @@ namespace ssi.Controls.Other
 
             idToClassName = new Dictionary<int, string>();
             loadModelAndTrainer(basePath);
+            parseTrainerFile(getTrainerFile(basePath, modelPath));
+            explainer.SelectedIndex = 0;
+            postprocessing.SelectedIndex = 0;
 
         }
 
@@ -118,6 +122,7 @@ namespace ssi.Controls.Other
                 Properties.Settings.Default.Save();
 
                 idToClassName.Clear();
+                parseTrainerFile(getTrainerFile(basePath, modelPath));
             }
         }
 
@@ -137,15 +142,36 @@ namespace ssi.Controls.Other
             parseTrainerFile(modelsTrainers[cmb.SelectedIndex].trainer);
         }
 
+        private string getTrainerFile(string path, string modelPath)
+        {
+            DirectoryInfo di = new DirectoryInfo(path);
+            string trainerPath = null;
+
+            foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+            {
+                var subDirModel = Path.GetDirectoryName(modelPath).Split(Path.DirectorySeparatorChar).Last();
+                var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
+                if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(modelPath).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
+                {
+                    trainerPath = fi.FullName;
+                }
+            }
+
+            return trainerPath;
+        }
+
         private void parseTrainerFile(string path)
         {
-            XmlDocument trainer = new XmlDocument();
-            trainer.Load(path);
-            XmlNodeList classes = trainer.GetElementsByTagName("classes")[0].ChildNodes;
-
-            for (int i = 0; i < classes.Count; i++)
+            if(path != null)
             {
-                idToClassName.Add(i, classes.Item(i).Attributes["name"].Value);
+                XmlDocument trainer = new XmlDocument();
+                trainer.Load(path);
+                XmlNodeList classes = trainer.GetElementsByTagName("classes")[0].ChildNodes;
+
+                for (int i = 0; i < classes.Count; i++)
+                {
+                    idToClassName.Add(i, classes.Item(i).Attributes["name"].Value);
+                }
             }
 
         }
