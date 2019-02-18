@@ -29,6 +29,11 @@ namespace ssi
 
         private void explanationWindow_Click(object sender, RoutedEventArgs e)
         {
+            if (window != null)
+            {
+                window.deactiveExplainationButton();
+            }
+
             window = new ExplanationWindow();
 
             try
@@ -52,6 +57,11 @@ namespace ssi
 
         private void explanationWindowInnvestigate_Click(object sender, RoutedEventArgs e)
         {
+            if(windowInnvestigate != null)
+            {
+                windowInnvestigate.deactiveExplainationButton();
+            }
+
             windowInnvestigate = new ExplanationWindowInnvestigate();
 
             try

@@ -199,6 +199,12 @@ namespace ssi.Controls.Other
 
         }
 
+        public void deactiveExplainationButton()
+        {
+            this.explanationButton.Visibility = Visibility.Hidden;
+        }
+
+
         private class ModelTrainer
         {
             public string model{ get; set; }
