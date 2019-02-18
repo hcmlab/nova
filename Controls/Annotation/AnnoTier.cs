@@ -375,6 +375,7 @@ namespace ssi
 
             double normal = 1.0 - (yPos / this.ActualHeight);
             double normalized = (normal * range) + this.AnnoList.Scheme.MinScore;
+            if (normalized < 1.1102230246251565E-15) normalized = 0;
 
             continuousTierEllipse.Height = this.ActualHeight / 10;
             continuousTierEllipse.Width = continuousTierEllipse.Height;
