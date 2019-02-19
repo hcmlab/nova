@@ -123,13 +123,17 @@ namespace ssi
 
         public void update()
         {
-            double start = MainHandler.Time.PixelFromTime(item.Start);
-            double stop = MainHandler.Time.PixelFromTime(item.Start + item.Duration);
+            //Media library skips first frame, here we correct this.
+            double samplerate = MainHandler.getMaxVideoSampleRate();
+            double offset = 1.0f / samplerate;
+
+            double start = MainHandler.Time.PixelFromTime(item.Start - offset);
+            double stop = MainHandler.Time.PixelFromTime(item.Start + item.Duration - offset);
             double len = Math.Max(MIN_WIDTH, stop - start);
 
             this.Text = item.Label;
 
-            if (len >= 0 && start >= 0)
+            if (len >= 0 && start >= -offset)
             {
                 this.Height = tier.ActualHeight;
                 this.Width = len;
@@ -146,13 +150,15 @@ namespace ssi
 
         public void update2()
         {
-            double start = MainHandler.Time.PixelFromTime(MainHandler.Time.SelectionStart);
-            double stop = MainHandler.Time.PixelFromTime(item.Stop);
+            double samplerate = MainHandler.getMaxVideoSampleRate();
+            double offset = 1.0f / samplerate;
+            double start = MainHandler.Time.PixelFromTime(MainHandler.Time.SelectionStart - offset);
+            double stop = MainHandler.Time.PixelFromTime(item.Stop - offset);
             double len = Math.Max(MIN_WIDTH, stop - start);
 
             this.Text = item.Label;
 
-            if (len >= 0 && start >= 0)
+            if (len >= 0 && start >= -offset)
             {
                 this.Height = tier.ActualHeight;
                 this.Width = len;
