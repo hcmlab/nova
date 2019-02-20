@@ -130,7 +130,7 @@ namespace ssi
             }
         }
 
-        private double getMaxVideoSampleRate()
+        public static double getMaxVideoSampleRate()
         {
             double rate = 0;
             foreach (IMedia media in mediaList)

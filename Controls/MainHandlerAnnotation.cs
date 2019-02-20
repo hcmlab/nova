@@ -606,10 +606,12 @@ namespace ssi
             {
                 AnnoListItem item = (AnnoListItem)grid.SelectedItem;
                 control.annoListControl.editComboBox.SelectedItem = item.Label;
-
+                double samplerate = MainHandler.getMaxVideoSampleRate();
+                double offset = (1.0f / samplerate);
                 Time.CurrentPlayPosition = item.Start;
 
-                mediaList.Move(item.Start);
+
+                mediaList.Move(item.Start+ offset);
                 moveSignalCursor(item.Start);
 
                 if (item.Start >= timeline.SelectionStop)
