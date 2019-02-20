@@ -73,6 +73,10 @@ def explain(model, img, postprocess, explainer):
         analyzer = innvestigate.analyzer.LRPEpsilon(model_wo_sm)
     elif explainer == "LRPZ":
         analyzer = innvestigate.analyzer.LRPZ(model_wo_sm)
+    elif explainer == "LRPALPHABETA":
+        analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, beta=1)
+    elif explainer == "DEEPTAYLOR":
+        analyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
 
     # Applying the analyzer
     analysis = analyzer.analyze(img)
@@ -85,6 +89,14 @@ def explain(model, img, postprocess, explainer):
         imgFinal = heatmap(analysis)[0]
     elif postprocess == "BK_PROJ":
         imgFinal = bk_proj(analysis)[0]
+    elif postprocess == "GNUPLOT2":
+        imgFinal = heatmapgnuplot2(analysis)[0]
+    elif postprocess == "CMRMAP":
+        imgFinal = heatmapCMRmap(analysis)[0]
+    elif postprocess == "NIPY_SPECTRAL":
+        imgFinal = heatmapnipy_spectral(analysis)[0]
+    elif postprocess == "RAINBOW":
+        imgFinal = heatmap_rainbow(analysis)[0]
 
     imgFinal = np.uint8(imgFinal*255)
 
@@ -117,7 +129,14 @@ def test():
     gradient_analyzer = innvestigate.analyzer.GuidedBackprop(model_wo_sm)
 
     # Applying the analyzer
-    analysis = gradient_analyzer.analyze(img)
+    # analysis = gradient_analyzer.analyze(img)
+    testanalyzer = []
+    testanalyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
+    analysis = testanalyzer.analyze(img)
+
+    testfilter = heatmap_rainbow(analysis)[0]
+    plot.imshow(testfilter)
+    plot.show()
 
     imgFinal = graymap(analysis)[0]
     imgFinal = np.uint8(imgFinal*255)
@@ -157,9 +176,26 @@ def heatmap(X):
     X = ivis.gamma(X, minamp=0, gamma=0.95)
     return ivis.heatmap(X)
 
+def heatmapgnuplot2(X):
+    X =  np.abs(X)
+    return ivis.heatmap(X, cmap_type="gnuplot2", input_is_postive_only=True)
+
+def heatmapCMRmap(X):
+    X =  np.abs(X)
+    return ivis.heatmap(X, cmap_type="CMRmap", input_is_postive_only=True)
+
+def heatmapnipy_spectral(X):
+    X =  np.abs(X)
+    return ivis.heatmap(X, cmap_type="nipy_spectral", input_is_postive_only=True)
+
+def heatmap_rainbow(X):
+    X =  np.abs(X)
+    return ivis.heatmap(X, cmap_type="rainbow", input_is_postive_only=True)
+
 
 def graymap(X):
     return ivis.graymap(np.abs(X), input_is_postive_only=True)
+
 
 
 if __name__ == '__main__':
