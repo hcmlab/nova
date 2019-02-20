@@ -75,8 +75,8 @@ def explain(model, img, postprocess, explainer):
         analyzer = innvestigate.analyzer.LRPZ(model_wo_sm)
     elif explainer == "LRPALPHABETA":
         analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, beta=1)
-    elif explainer == "PATTERNNET":
-        analyzer = innvestigate.analyzer.PatternNet(model_wo_sm, pattern_type="relu")
+    elif explainer == "DEEPTAYLOR":
+        analyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
 
     # Applying the analyzer
     analysis = analyzer.analyze(img)
@@ -96,7 +96,7 @@ def explain(model, img, postprocess, explainer):
     elif postprocess == "NIPY_SPECTRAL":
         imgFinal = heatmapnipy_spectral(analysis)[0]
     elif postprocess == "RAINBOW":
-        imgFinal = heatmapnipy_rainbow(analysis)[0]
+        imgFinal = heatmap_rainbow(analysis)[0]
 
     imgFinal = np.uint8(imgFinal*255)
 
@@ -129,11 +129,12 @@ def test():
     gradient_analyzer = innvestigate.analyzer.GuidedBackprop(model_wo_sm)
 
     # Applying the analyzer
-    analysis = gradient_analyzer.analyze(img)
-    
-    analysis = innvestigate.analyzer.DeepTaylor(model_wo_sm).analyze(img)
+    # analysis = gradient_analyzer.analyze(img)
+    testanalyzer = []
+    testanalyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
+    analysis = testanalyzer.analyze(img)
 
-    testfilter = heatmapnipy_rainbow(analysis)[0]
+    testfilter = heatmap_rainbow(analysis)[0]
     plot.imshow(testfilter)
     plot.show()
 
@@ -187,7 +188,7 @@ def heatmapnipy_spectral(X):
     X =  np.abs(X)
     return ivis.heatmap(X, cmap_type="nipy_spectral", input_is_postive_only=True)
 
-def heatmapnipy_rainbow(X):
+def heatmap_rainbow(X):
     X =  np.abs(X)
     return ivis.heatmap(X, cmap_type="rainbow", input_is_postive_only=True)
 
