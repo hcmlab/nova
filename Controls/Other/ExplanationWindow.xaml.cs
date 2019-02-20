@@ -68,7 +68,8 @@ namespace ssi.Controls.Other
             string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
-            basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\"+ schemeType + "\\" + scheme + "\\" + "video" + "{video}";
+            string videoname = Path.GetFileNameWithoutExtension(MediaBoxStatic.Selected.Media.GetFilepath()).Split('.')[1];
+            basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "video" + "{" + videoname + "}";
 
             DirectoryInfo di = new DirectoryInfo(basePath);
 
@@ -81,26 +82,30 @@ namespace ssi.Controls.Other
 
         private void loadModelAndTrainer(string path)
         {
+            
             DirectoryInfo di = new DirectoryInfo(path);
-
-            foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+            if(di.Exists)
             {
-                if (fi.Extension == ".h5")
-                {
-                    modelsTrainers.Add(new ModelTrainer(fi.FullName, null));
-                    modelsBox.Items.Add(fi.Name);
-                }
-            }
 
-            foreach( var t in modelsTrainers)
-            {
                 foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
                 {
-                    var subDirModel = Path.GetDirectoryName(t.model).Split(Path.DirectorySeparatorChar).Last();
-                    var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
-                    if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(t.model).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
+                    if (fi.Extension == ".h5")
                     {
-                        t.trainer = fi.FullName;
+                        modelsTrainers.Add(new ModelTrainer(fi.FullName, null));
+                        modelsBox.Items.Add(fi.Name);
+                    }
+                }
+
+                foreach( var t in modelsTrainers)
+                {
+                    foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+                    {
+                        var subDirModel = Path.GetDirectoryName(t.model).Split(Path.DirectorySeparatorChar).Last();
+                        var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
+                        if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(t.model).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
+                        {
+                            t.trainer = fi.FullName;
+                        }
                     }
                 }
             }
@@ -163,17 +168,22 @@ namespace ssi.Controls.Other
         private string getTrainerFile(string path, string modelPath)
         {
             DirectoryInfo di = new DirectoryInfo(path);
+
             string trainerPath = null;
 
-            foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+            if(di.Exists)
             {
-                var subDirModel = Path.GetDirectoryName(modelPath).Split(Path.DirectorySeparatorChar).Last();
-                var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
-                if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(modelPath).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
+                foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
                 {
-                    trainerPath = fi.FullName;
+                    var subDirModel = Path.GetDirectoryName(modelPath).Split(Path.DirectorySeparatorChar).Last();
+                    var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
+                    if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(modelPath).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
+                    {
+                        trainerPath = fi.FullName;
+                    }
                 }
             }
+           
 
             return trainerPath;
         }
