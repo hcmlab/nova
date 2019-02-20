@@ -97,6 +97,12 @@ def explain(model, img, postprocess, explainer):
         imgFinal = heatmapnipy_spectral(analysis)[0]
     elif postprocess == "RAINBOW":
         imgFinal = heatmap_rainbow(analysis)[0]
+    elif postprocess == "INFERNO":
+        imgFinal = heatmap_inferno(analysis)[0]
+    elif postprocess == "GIST_HEAT":
+        imgFinal = heatmap_gist_heat(analysis)[0]
+    elif postprocess == "VIRIDIS":
+        imgFinal = heatmap_viridis(analysis)[0]
 
     imgFinal = np.uint8(imgFinal*255)
 
@@ -192,6 +198,17 @@ def heatmap_rainbow(X):
     X =  np.abs(X)
     return ivis.heatmap(X, cmap_type="rainbow", input_is_postive_only=True)
 
+def heatmap_inferno(X):
+    X =  np.abs(X)
+    return ivis.heatmap(X, cmap_type="inferno", input_is_postive_only=True)
+
+def heatmap_viridis(X):
+    X =  np.abs(X)
+    return ivis.heatmap(X, cmap_type="viridis", input_is_postive_only=True)
+
+def heatmap_gist_heat(X):
+    X =  np.abs(X)
+    return ivis.heatmap(X, cmap_type="gist_heat", input_is_postive_only=True)
 
 def graymap(X):
     return ivis.graymap(np.abs(X), input_is_postive_only=True)
