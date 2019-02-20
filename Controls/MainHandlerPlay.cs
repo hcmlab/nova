@@ -43,9 +43,8 @@ namespace ssi
                     }
                     Stop();
                 }
-            }
-            double samplerate = MainHandler.getMaxVideoSampleRate();
-            double offset = 1.0f / samplerate;
+            }            
+
             foreach (IMedia media in mediaList)
             {
                 if (media.GetMediaType() != MediaType.AUDIO
@@ -56,12 +55,12 @@ namespace ssi
             }
 
             updatePositionLabels(Time.CurrentPlayPosition);
-            signalCursor.X = Time.PixelFromTime(Time.CurrentPlayPosition + 2*offset);
+            signalCursor.X = Time.PixelFromTime(Time.CurrentPlayPosition);
 
             if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsGeometric)
             {
                 control.annoListControl.annoDataGrid.SelectedItems.Clear();
-                int position = (int)((Time.CurrentPlayPosition + 2 * offset) * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
+                int position = (int)(Time.CurrentPlayPosition * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
                 if (position < control.annoListControl.annoDataGrid.Items.Count)
                 {
                     AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[position];
