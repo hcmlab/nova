@@ -170,6 +170,7 @@ namespace ssi
 
         public void Move(double time)
         {
+            time = time - 0.04;
             MediaPosition = (long)(time * 10000000.0);
         }
 
