@@ -96,7 +96,9 @@
                         <ComboBoxItem>cmrmap</ComboBoxItem>
                         <ComboBoxItem>nipy_spectral</ComboBoxItem>
                         <ComboBoxItem>rainbow</ComboBoxItem>
-                        
+                        <ComboBoxItem>inferno</ComboBoxItem>
+                        <ComboBoxItem>viridis</ComboBoxItem>
+                        <ComboBoxItem>gist_heat</ComboBoxItem>
                     </ComboBox>
                 </Grid>
             </StackPanel>
