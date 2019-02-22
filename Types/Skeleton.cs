@@ -64,7 +64,7 @@ namespace ssi
 
             BackColor = Defaults.Colors.Background;
             SignalColor = Defaults.Colors.Foreground;
-            HeadColor = Defaults.Colors.Foreground;
+            HeadColor = Colors.YellowGreen; // Defaults.Colors.Foreground;
 
             numSkeletons = 0;
             if (signal.Meta.ContainsKey("num"))
@@ -170,11 +170,27 @@ namespace ssi
                     {
                         case SkeletonType.SSI:
                             {
+
+                                writeableBmp.DrawLine((int)points[3].X, (int)points[3].Y, (int)points[12].X, (int)points[12].Y, getColor(12)); // Hip Center to Left Hip
+                                writeableBmp.DrawLine((int)points[3].X, (int)points[3].Y, (int)points[16].X, (int)points[16].Y, getColor(16)); //Hip Center to Right Hip
+
+                                writeableBmp.DrawLine((int)points[12].X, (int)points[12].Y, (int)points[13].X, (int)points[13].Y, getColor(13)); // Left Hip to Knee
+                                writeableBmp.DrawLine((int)points[16].X, (int)points[16].Y, (int)points[17].X, (int)points[17].Y, getColor(17)); // Right Hip to Knee
+
+                                writeableBmp.DrawLine((int)points[13].X, (int)points[13].Y, (int)points[14].X, (int)points[14].Y, getColor(14)); // Left Knee to Ankle
+                                writeableBmp.DrawLine((int)points[17].X, (int)points[17].Y, (int)points[18].X, (int)points[18].Y, getColor(18)); // Right Knee to Ankle
+
+                                writeableBmp.DrawLine((int)points[14].X, (int)points[14].Y, (int)points[15].X, (int)points[15].Y, getColor(15)); // Left Ankle to foot
+                                writeableBmp.DrawLine((int)points[18].X, (int)points[18].Y, (int)points[19].X, (int)points[19].Y, getColor(19)); // Right Ankle to foot
+
+
+
+
                                 //head
-                                writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[21].X, (int)points[21].Y, colhead);
-                                writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[22].X, (int)points[22].Y, colhead);
-                                writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[24].X, (int)points[24].Y, colhead);
-                                writeableBmp.DrawLine((int)points[22].X, (int)points[22].Y, (int)points[24].X, (int)points[24].Y, colhead);
+                                writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[21].X, (int)points[21].Y, getColor(21, true));
+                                writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[24].X, (int)points[24].Y, getColor(24, true));
+                                writeableBmp.DrawLine((int)points[24].X, (int)points[24].Y, (int)points[22].X, (int)points[22].Y, getColor(22, true));
+                                writeableBmp.DrawLine((int)points[22].X, (int)points[22].Y, (int)points[23].X, (int)points[23].Y, getColor(23, true));
 
                                 writeableBmp.DrawLine((int)points[0].X, (int)points[0].Y, (int)points[1].X, (int)points[1].Y, getColor(1)); //Head to Neck
 
@@ -193,17 +209,7 @@ namespace ssi
                                 writeableBmp.DrawLine((int)points[1].X, (int)points[1].Y, (int)points[2].X, (int)points[2].Y, getColor(2)); //Neck to Torso
                                 writeableBmp.DrawLine((int)points[2].X, (int)points[2].Y, (int)points[3].X, (int)points[3].Y, getColor(3)); //Torso to Hip Center
 
-                                writeableBmp.DrawLine((int)points[3].X, (int)points[3].Y, (int)points[12].X, (int)points[12].Y, getColor(12)); // Hip Center to Left Hip
-                                writeableBmp.DrawLine((int)points[3].X, (int)points[3].Y, (int)points[16].X, (int)points[16].Y, getColor(16)); //Hip Center to Right Hip
-
-                                writeableBmp.DrawLine((int)points[12].X, (int)points[12].Y, (int)points[13].X, (int)points[13].Y, getColor(13)); // Left Hip to Knee
-                                writeableBmp.DrawLine((int)points[16].X, (int)points[16].Y, (int)points[17].X, (int)points[17].Y, getColor(17)); // Right Hip to Knee
-
-                                writeableBmp.DrawLine((int)points[13].X, (int)points[13].Y, (int)points[14].X, (int)points[14].Y, getColor(14)); // Left Knee to Ankle
-                                writeableBmp.DrawLine((int)points[17].X, (int)points[17].Y, (int)points[18].X, (int)points[18].Y, getColor(18)); // Right Knee to Ankle
-
-                                writeableBmp.DrawLine((int)points[14].X, (int)points[14].Y, (int)points[15].X, (int)points[15].Y, getColor(15)); // Left Ankle to foot
-                                writeableBmp.DrawLine((int)points[18].X, (int)points[18].Y, (int)points[19].X, (int)points[19].Y, getColor(19)); // Right Ankle to foot
+                              
                                 break;
                             }
                         case SkeletonType.KINECT1:
@@ -281,29 +287,35 @@ namespace ssi
                 writeableBmp.Unlock();
             }
 
-        private Color getColor(int i)
+        private Color getColor(int i, bool isheadcolor = false)
         {
-            Color c = SignalColor;
+            Color c = isheadcolor ? HeadColor : SignalColor;
             double pos = MainHandler.Time.CurrentPlayPosition;
             int index = (int)(pos * signal.rate);
 
             if (signal.data.Length >= (index * signal.dim) + i * jointValues + 3)
 
             {
-                if ((signal.data[(index * signal.dim) + i * jointValues + 3]) < 0.5)
+                if ((signal.data[(index * signal.dim) + i * jointValues + 3]) < 0.1 || (signal.data[(index * signal.dim) + i * jointValues] == 0))
                 {
-                    c = SignalColor;
+                    c = Colors.White;
+                   // c.A = 0;
+                }
+
+                else if ((signal.data[(index * signal.dim) + i * jointValues + 3]) < 0.5)
+                {
+ 
                     c.A = 128;
                 }
                 else if ((signal.data[(index * signal.dim) + i * jointValues + 3]) < 1.0)
                 {
-                    c = SignalColor;
-                    c.A = 0;
+ 
+                    c.A = 255;
                 }
-                else
-                {
-                    c = SignalColor;
-                }
+                //else
+                //{
+                //    c = SignalColor;
+                //}
             }
             return c;
         }
