@@ -547,7 +547,7 @@ namespace ssi
                 
             }
 
-            if (mode == Mode.EVALUATE)
+             if (mode == Mode.EVALUATE)
             {
                 string evalOutPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
                 try
@@ -589,9 +589,53 @@ namespace ssi
                 handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
 
                 var dir = new DirectoryInfo(Path.GetDirectoryName(tempTrainerPath));
+
+                string streamName = "";
+                string[] streamParts = stream.Name.Split('.');
+                if (streamParts.Length <= 1)
+                {
+                    streamName = stream.Name;
+                }
+                else
+                {
+                    streamName = streamParts[1];
+                    for (int i = 2; i < streamParts.Length; i++)
+                    {
+                        streamName += "." + streamParts[i];
+                    }
+                }
+
+                try
+                {
+                    var tempdir = new DirectoryInfo(Path.GetDirectoryName(Properties.Settings.Default.CMLTempTrainerPath));
+                    foreach (var file in tempdir.EnumerateFiles(Path.GetFileName(Properties.Settings.Default.CMLTempTrainerPath) + "latestcmlmodel*"))
+                    {
+                        file.Delete();
+                    }
+                }
+                catch { }
+              
+
+                Properties.Settings.Default.CMLTempTrainerPath = Properties.Settings.Default.CMLDirectory + "\\" + Defaults.CML.ModelsFolderName + "\\" +  Defaults.CML.ModelsTrainerFolderName + "\\" + AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower() + "\\" + AnnoTier.Selected.AnnoList.Scheme.Name + "\\" + stream.Type + "{" + streamName + "}\\" + trainer.Name + "\\";
+                Properties.Settings.Default.Save();
+
+
+
+                if (!Directory.Exists(Properties.Settings.Default.CMLDirectory)) Directory.CreateDirectory(Properties.Settings.Default.CMLTempTrainerPath);
+               
                 foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*"))
                 {
-                    file.Delete();
+                    string[] split = file.Name.Split('.');
+                    split[0] = "latestcmlmodel";
+                    string filename = string.Join(".", split);
+
+                    if (File.Exists(Properties.Settings.Default.CMLTempTrainerPath + filename))
+                    {
+                        File.Delete(Properties.Settings.Default.CMLTempTrainerPath + filename);
+                    }
+                    file.MoveTo(Properties.Settings.Default.CMLTempTrainerPath + filename);
+                    
+                    //file.Delete();
                 }
 
                 Close();

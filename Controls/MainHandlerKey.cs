@@ -992,9 +992,19 @@ namespace ssi
                         tempTrainerPath = tempTrainerPath.Trim();
                         tempTrainerPath = tempTrainerPath.Replace("\"", "");
                         var dir = new DirectoryInfo(Path.GetDirectoryName(tempTrainerPath));
+                        if (!Directory.Exists(Properties.Settings.Default.CMLDirectory)) Directory.CreateDirectory(Properties.Settings.Default.CMLTempTrainerPath);
                         foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*.trainer*"))
                         {
-                            file.Delete();
+                            string[] split = file.Name.Split('.');
+                            split[0] = "latestcmlmodel";
+                            string filename = string.Join(".", split);
+
+                            if (File.Exists(Properties.Settings.Default.CMLTempTrainerPath + filename))
+                            {
+                                File.Delete(Properties.Settings.Default.CMLTempTrainerPath + filename);
+                            }
+                            file.MoveTo(Properties.Settings.Default.CMLTempTrainerPath + filename);
+                            //file.Delete();
                         }
                     }
                     

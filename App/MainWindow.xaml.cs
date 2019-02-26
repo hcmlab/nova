@@ -111,7 +111,13 @@ namespace ssi
             {
                 e.Cancel = true;
             }
-            
+
+            var dir = new DirectoryInfo(Path.GetDirectoryName(Properties.Settings.Default.CMLTempTrainerPath));
+            foreach (var file in dir.EnumerateFiles(Path.GetFileName(Properties.Settings.Default.CMLTempTrainerPath) + "latestcmlmodel*"))
+            {
+                file.Delete();
+            }
+
         }
     }
 }
