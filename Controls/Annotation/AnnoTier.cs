@@ -329,7 +329,7 @@ namespace ssi
 
                                         if (!init)
                                         {
-                                            yPos = yPos = (numberOfLevels - ((int)(numberOfLevels / 2) * fac)) * segmentHeight;
+                                            yPos = (numberOfLevels - ((int)(numberOfLevels / 2) * fac)) * segmentHeight;
                                             init = true;
                                         }
 
@@ -375,7 +375,8 @@ namespace ssi
 
             double normal = 1.0 - (yPos / this.ActualHeight);
             double normalized = (normal * range) + this.AnnoList.Scheme.MinScore;
-            if (normalized < 1.1102230246251565E-15) normalized = 0;
+            //TODO fix for very small numbers
+            if (normalized < 1.1102230246251565E-15 &&  normalized > -1.1102230246251565E-15)  normalized = 0;
 
             continuousTierEllipse.Height = this.ActualHeight / 10;
             continuousTierEllipse.Width = continuousTierEllipse.Height;
@@ -416,7 +417,7 @@ namespace ssi
 
             double step = fac * segmentHeight;
             yPos = (yPos + step <= this.ActualHeight) ? yPos + step : yPos;
-            if (yPos + step <= this.ActualHeight) level--;
+            level--;
         }
 
         public void continuousSegmentToPosition(int position)
