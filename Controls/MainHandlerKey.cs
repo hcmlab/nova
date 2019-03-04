@@ -926,6 +926,8 @@ namespace ssi
 
                     string[] completetrainoptionstemp = AnnoTierStatic.Selected.CMLCompleteTrainOptions.Split(' ');
                     completetrainoptionstemp[14] = ((AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition : Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition)).ToString(); ;
+                    string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
+                    completetrainoptionstemp[16] = infofile;
                     string completetrainoptions = string.Join(" ", completetrainoptionstemp);
 
 
@@ -933,7 +935,43 @@ namespace ssi
                     completepredictoptionstemp[16] = ((AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition : Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition)).ToString(); ;
                     string completepredictoptions = string.Join(" ", completepredictoptionstemp);
 
-                    
+
+                    string[] combinations = new string[1];
+                    string database = completetrainoptionstemp[23];
+                    string annotator = completetrainoptionstemp[26];
+                    string roles = completetrainoptionstemp[24];
+                    string scheme =  completetrainoptionstemp[25];
+                    string stream = completetrainoptionstemp[27].TrimStart('/', '"').TrimEnd('"', '/'); ;
+                    string sessions = completetrainoptionstemp[2];
+                    string trainerpath = completetrainoptionstemp[28].TrimStart('/','"').TrimEnd('"', '/');
+
+
+                    combinations[0] = database + ":" + annotator + ":" + roles + ":" + stream + ":" + sessions;
+
+
+                   
+                    System.IO.File.WriteAllLines(infofile, combinations);
+
+
+
+
+
+                    //For image/video training tasks we additionally provide the interface with information. make sure the interface deletes these files after reading.
+                    if (stream.Contains(".mp4") || stream.Contains(".avi") || stream.Contains(".mov"))
+                    {
+                        string trainertemplatesessioninfo = Path.GetDirectoryName(trainerpath) + "\\nova_sessions";
+                        System.IO.File.WriteAllLines(trainertemplatesessioninfo, combinations);
+
+                     
+
+                        string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
+                                            ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme + ";root=" + Properties.Settings.Default.DatabaseDirectory + ";cooperative=" + "True"  + ";cmlbegintime=" + completetrainoptionstemp[14]};
+
+                         string trainertemplatedbinfo = Path.GetDirectoryName(trainerpath) + "\\nova_db_info";
+                         System.IO.File.WriteAllLines(trainertemplatedbinfo, dbinfo);
+                    }
+
+  
 
                     runCMLProcess("cmltrain", completetrainoptions);
                     runCMLProcess("cmltrain", completepredictoptions);
@@ -954,9 +992,19 @@ namespace ssi
                         tempTrainerPath = tempTrainerPath.Trim();
                         tempTrainerPath = tempTrainerPath.Replace("\"", "");
                         var dir = new DirectoryInfo(Path.GetDirectoryName(tempTrainerPath));
+                        if (!Directory.Exists(Properties.Settings.Default.CMLDirectory)) Directory.CreateDirectory(Properties.Settings.Default.CMLTempTrainerPath);
                         foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*.trainer*"))
                         {
-                            file.Delete();
+                            string[] split = file.Name.Split('.');
+                            split[0] = "latestcmlmodel";
+                            string filename = string.Join(".", split);
+
+                            if (File.Exists(Properties.Settings.Default.CMLTempTrainerPath + filename))
+                            {
+                                File.Delete(Properties.Settings.Default.CMLTempTrainerPath + filename);
+                            }
+                            file.MoveTo(Properties.Settings.Default.CMLTempTrainerPath + filename);
+                            //file.Delete();
                         }
                     }
                     

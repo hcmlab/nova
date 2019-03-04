@@ -43,7 +43,10 @@ namespace ssi
                     }
                     Stop();
                 }
-            }            
+            }
+
+            double samplerate = MainHandler.getMaxVideoSampleRate();
+            double offset = 1.0f / samplerate;
 
             foreach (IMedia media in mediaList)
             {
@@ -55,12 +58,12 @@ namespace ssi
             }
 
             updatePositionLabels(Time.CurrentPlayPosition);
-            signalCursor.X = Time.PixelFromTime(Time.CurrentPlayPosition);
+            signalCursor.X = Time.PixelFromTime(Time.CurrentPlayPosition + (offset*2.5));
 
             if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsGeometric)
             {
                 control.annoListControl.annoDataGrid.SelectedItems.Clear();
-                int position = (int)(Time.CurrentPlayPosition * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
+                int position = (int)((Time.CurrentPlayPosition + 0.04) * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
                 if (position < control.annoListControl.annoDataGrid.Items.Count)
                 {
                     AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[position];

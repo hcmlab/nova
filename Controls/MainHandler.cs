@@ -16,9 +16,9 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.4.0";
+        public static string BuildVersion = "1.0.5.1";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
-        public static bool ENABLE_PYTHON = true;
+        public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
 
         private static Timeline timeline = null;
 
@@ -211,6 +211,7 @@ namespace ssi
             //PYTHON
             if(ENABLE_PYTHON) startExplainableThread();
             control.explanationWindow.Click += explanationWindow_Click;
+            control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
             control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
 
 
@@ -566,6 +567,8 @@ namespace ssi
                 Properties.Settings.Default.ContinuousHotkeysNumber = int.Parse(s.ContinuousHotkeyLevels());
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();
                 Properties.Settings.Default.DrawVideoWavform = s.DrawvideoWavform();
+                Properties.Settings.Default.EnablePython = s.EnablePython();
+   
                 Properties.Settings.Default.Save();
                 
 

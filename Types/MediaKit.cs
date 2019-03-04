@@ -170,6 +170,9 @@ namespace ssi
 
         public void Move(double time)
         {
+            //First Frame appears to be bugged in the library, therefore we move the video position for 1 frame
+            double offset = 1.0f / sampleRate;
+            time = (time >= offset) ? time - offset : 0;
             MediaPosition = (long)(time * 10000000.0);
         }
 

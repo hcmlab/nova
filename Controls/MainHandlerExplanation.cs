@@ -24,10 +24,16 @@ namespace ssi
 
         public static BackgroundWorker explanationWorker;
         ExplanationWindow window;
+        ExplanationWindowInnvestigate windowInnvestigate;
         private static Action EmptyDelegate = delegate () { };
 
         private void explanationWindow_Click(object sender, RoutedEventArgs e)
         {
+            if (window != null)
+            {
+                window.deactiveExplainationButton();
+            }
+
             window = new ExplanationWindow();
 
             try
@@ -40,13 +46,40 @@ namespace ssi
                 imageBitmap.EndInit();
                 window.explanationImage.Source = imageBitmap;
 
-                window.ShowDialog();
+                window.Show();
             }
             catch
             {
 
             }
 
+        }
+
+        private void explanationWindowInnvestigate_Click(object sender, RoutedEventArgs e)
+        {
+            if(windowInnvestigate != null)
+            {
+                windowInnvestigate.deactiveExplainationButton();
+            }
+
+            windowInnvestigate = new ExplanationWindowInnvestigate();
+
+            try
+            {
+                byte[] img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
+
+                BitmapImage imageBitmap = new BitmapImage();
+                imageBitmap.BeginInit();
+                imageBitmap.StreamSource = new System.IO.MemoryStream(img);
+                imageBitmap.EndInit();
+                windowInnvestigate.explanationImage.Source = imageBitmap;
+
+                windowInnvestigate.Show();
+            }
+            catch
+            {
+
+            }
         }
 
         public void startExplainableThread()
@@ -65,7 +98,7 @@ namespace ssi
             var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
             var pythonScriptsPath = AppDomain.CurrentDomain.BaseDirectory + "PythonScripts";
           
-            if (Directory.Exists(pythonPath))
+            if (Directory.Exists(pythonPath) && Properties.Settings.Default.EnablePython == true)
             {
                 var pp = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
                 var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
@@ -93,9 +126,9 @@ namespace ssi
             else
             {
 
-                if(!Properties.Settings.Default.forcepythonupdate)
+                if(!Properties.Settings.Default.forcepythonupdate && Properties.Settings.Default.EnablePython == true)
                 {
-                    MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now?", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now? This will take some minutes..", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
                     if (res == MessageBoxResult.Yes)
                     {
                         GetPython();
@@ -103,7 +136,7 @@ namespace ssi
                         //recursive magic.
                     }
                 }
-                else
+                else if(Properties.Settings.Default.forcepythonupdate && Properties.Settings.Default.EnablePython == true )
                 {
                     Properties.Settings.Default.forcepythonupdate = false;
                     Properties.Settings.Default.Save();
@@ -122,28 +155,91 @@ namespace ssi
                 try
                 {
                     dynamic limeExplainer = Py.Import("ImageExplainerLime");
+
                     while (!explanationWorker.CancellationPending)
                     {
                         if (window != null && window.modelPath != null && window.getNewExplanation)
                         {
                             dynamic model = limeExplainer.loadModel(window.modelPath);
-
                             BackgroundWorker progress = (BackgroundWorker)sender;
-                            var expImg = limeExplainer.explain_raw(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
-                            BitmapImage final_img = new BitmapImage();
-                            final_img.BeginInit();
-                            final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
-                            final_img.EndInit();
-                            final_img.Freeze();
-                            window.explainedImg = final_img;
-                            window.getNewExplanation = false;
-                            progress.ReportProgress(0, final_img);
 
+                            if (model == null)
+                            {
+                                window.getNewExplanation = false;
+                                progress.ReportProgress(-1, null);
+                                continue;
+                            }
+
+                            var data = limeExplainer.explain_multiple(model, window.img, window.topLablesV, window.numSamplesV, window.numFeaturesV, window.hideRestV, window.hideColorV, window.positiveOnlyV);
+                            int length = data[1];
+
+                            List<Tuple<int, double, BitmapImage>> explanationData = new List<Tuple<int, double, BitmapImage>>();
+
+                            for(int i = 0; i < length; i++)
+                            {
+                                int classID = data[0][i][0];
+                                double acc = data[0][i][1];
+
+                                BitmapImage temp = new BitmapImage();
+                                temp.BeginInit();
+                                temp.StreamSource = new System.IO.MemoryStream((byte[])data[0][i][2]);
+                                temp.EndInit();
+                                temp.Freeze();
+
+                                Tuple<int, double, BitmapImage> tuple = new Tuple<int, double, BitmapImage> (classID, acc, temp);
+
+                                explanationData.Add(tuple);
+                            }
+
+                            //BitmapImage final_img = new BitmapImage();
+                            //final_img.BeginInit();
+                            //final_img.StreamSource = new System.IO.MemoryStream((byte[])expImg);
+                            //final_img.EndInit();
+                            //final_img.Freeze();
+                            //window.explainedImg = final_img;
+                            window.getNewExplanation = false;
+                            progress.ReportProgress(0, explanationData);
+
+                        }
+
+                        if (windowInnvestigate != null && windowInnvestigate.modelPath != null && windowInnvestigate.getNewExplanation)
+                        {
+                            dynamic innvestigateExplainer = Py.Import("ImageExplainerInnvestigate");
+
+                            dynamic model = innvestigateExplainer.loadModel(windowInnvestigate.modelPath);
+                            BackgroundWorker progress = (BackgroundWorker)sender;
+
+                            if (model == null)
+                            {
+                                window.getNewExplanation = false;
+                                progress.ReportProgress(-1, null);
+                                continue;
+                            }
+
+                            var data = innvestigateExplainer.explain(model, windowInnvestigate.img, windowInnvestigate.postprocess, windowInnvestigate.explainAlgorithm);
+
+                            int classID = data[0];
+                            double acc = data[1];
+
+                            BitmapImage temp = new BitmapImage();
+                            temp.BeginInit();
+                            temp.StreamSource = new System.IO.MemoryStream((byte[])data[2]);
+                            temp.EndInit();
+                            temp.Freeze();
+
+                            Tuple<int, double, BitmapImage> tuple = new Tuple<int, double, BitmapImage>(classID, acc, temp);
+
+                            progress.ReportProgress(1, tuple);
+                            windowInnvestigate.getNewExplanation = false;
+                            
                         }
                     }
                 }
                 catch(Exception ex)
                 {
+                    //TODO handle exception
+                    //BackgroundWorker progress = (BackgroundWorker)sender;
+                    //progress.ReportProgress(-1, null);
                     MessageBox.Show("Python installation not found or not complete\nError: " + ex);
                 }
                
@@ -152,13 +248,128 @@ namespace ssi
 
         private void worker_OnProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            window.explanationImage.Source = (BitmapImage)e.UserState;
-            window.explainingLabel.Visibility = Visibility.Hidden;
-            BlurEffect blur = new BlurEffect();
-            blur.Radius = 0;
-            window.explanationImage.Effect = blur;
-            window.explanationButton.IsEnabled = true;
-            window.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+            if(e.ProgressPercentage != -1)
+            {
+                if(e.ProgressPercentage == 0)
+                {
+
+                    List<Tuple<int, double, BitmapImage>> data = (List<Tuple<int, double, BitmapImage>>) e.UserState;
+
+                    for(int i = 0; i < data.Count; i++)
+                    {
+
+                        System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+                        string className = "";
+
+                        if(window.idToClassName.ContainsKey(data[i].Item1))
+                        {
+                            className = window.idToClassName[data[i].Item1];
+                        }
+                        else
+                        {
+                            className = data[i].Item1 + "";
+                        }
+
+                        System.Windows.Controls.Label info = new System.Windows.Controls.Label
+                        {
+                            Content = "Class: " + className + " Score: " + data[i].Item2.ToString("0.###")
+                        };
+
+                        System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                        {
+                            Source = data[i].Item3,
+                        };
+
+                        int ratio = getRatio(data.Count);
+
+                        img.Height = (window.containerExplainedImages.ActualHeight - data.Count * 2 * 5) / ratio;
+                        img.Width = (window.containerExplainedImages.ActualWidth - data.Count * 2 * 5) / ratio;
+
+
+                        wrapper.Margin = new Thickness(5);
+                        wrapper.Children.Add(info);
+                        wrapper.Children.Add(img);
+
+                        window.containerExplainedImages.Children.Add(wrapper);
+                    }
+
+                    window.containerImageToBeExplained.Visibility = Visibility.Hidden;
+                    //window.explanationImage.Source = data[0].Item3;
+                    window.explainingLabel.Visibility = Visibility.Hidden;
+                    BlurEffect blur = new BlurEffect();
+                    blur.Radius = 0;
+                    window.containerImageToBeExplained.Effect = blur;
+                    window.explanationButton.IsEnabled = true;
+                    window.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+                }
+                else if(e.ProgressPercentage == 1)
+                {
+                    Tuple<int, double, BitmapImage> data = (Tuple<int, double, BitmapImage>)e.UserState;
+
+                    //windowInnvestigate.explanationImage.Source = data.Item3;
+
+                    System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+                    string className = "";
+
+                    if (windowInnvestigate.idToClassName.ContainsKey(data.Item1))
+                    {
+                        className = windowInnvestigate.idToClassName[data.Item1];
+                    }
+                    else
+                    {
+                        className = data.Item1 + "";
+                    }
+
+                    System.Windows.Controls.Label info = new System.Windows.Controls.Label
+                    {
+                        Content = "Class: " + className + " Score: " + data.Item2.ToString("0.###")
+                    };
+
+                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                    {
+                        Source = data.Item3,
+                    };
+
+                    wrapper.Margin = new Thickness(5);
+                    wrapper.Children.Add(info);
+                    wrapper.Children.Add(img);
+
+                    windowInnvestigate.containerExplainedImages.Children.Add(wrapper);
+
+                    windowInnvestigate.containerImageToBeExplained.Visibility = Visibility.Hidden;
+                    windowInnvestigate.explainingLabel.Visibility = Visibility.Hidden;
+                    BlurEffect blur = new BlurEffect();
+                    blur.Radius = 0;
+                    windowInnvestigate.explanationImage.Effect = blur;
+                    windowInnvestigate.explanationButton.IsEnabled = true;
+                    windowInnvestigate.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+
+                }
+
+            }
+
+
+        }
+
+        private int getRatio(int n)
+        {
+
+            int m = 1;
+
+            while(true)
+            {
+                if(Math.Pow((m-1), 2) < n && n <= Math.Pow(m, 2))
+                {
+                    return m;
+                }
+                m++;
+                if(m > 1000)
+                {
+                    return -1;
+                }
+            }
+
         }
 
 

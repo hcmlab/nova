@@ -88,7 +88,7 @@ namespace ssi
         private string runCMLTool(string tool, string mode, List<object> parameters, Dictionary<string,object> arguments, string logName)
         {
             string result = "";
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "\\" + logName + ".log";
+            string logPath = AppDomain.CurrentDomain.BaseDirectory + logName + ".log";
 
             File.Delete(logPath);
 
@@ -203,7 +203,7 @@ namespace ssi
             parameters.Add("\"" + trainerPath + "\"");
 
             Dictionary <string, object> arguments = new Dictionary<string, object>();
-            if (multisessionpath == null) arguments["list"] = sessions;
+            arguments["list"] = sessions;
             arguments["left"] = leftContext;
             arguments["right"] = rightContext;
             arguments["balance"] = balance;
