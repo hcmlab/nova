@@ -146,7 +146,10 @@ namespace ssi
             
 
             DatabaseAnnoMainWindow dialog = new DatabaseAnnoMainWindow();
-            if(showDialogClearWorkspace(dialog) && (dialog.DialogResult == true))
+
+
+
+            if (showDialogClearWorkspace(dialog) && (dialog.DialogResult == true))
             {
 
                 Action EmptyDelegate = delegate () { };

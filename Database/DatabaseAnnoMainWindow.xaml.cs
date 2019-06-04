@@ -3,9 +3,11 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -60,6 +62,13 @@ namespace ssi
         private List<DatabaseAnnotation> annotations = new List<DatabaseAnnotation>();
         private CancellationTokenSource cancellation = new CancellationTokenSource();
 
+        bool closeAfterDownload = false;
+
+        WebClient webClient;
+        Stopwatch sw = new Stopwatch();
+        int remainingfiles = int.MaxValue;
+
+
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
@@ -82,17 +91,32 @@ namespace ssi
             Properties.Settings.Default.DataServerLogin = serverLogin.Text;
             Properties.Settings.Default.DataServerPass = MainHandler.Encode(serverPassword.Password);
             Properties.Settings.Default.Save();
-            
+    
+
             if (SessionsBox.SelectedItem != null)
             {
                 DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
                 if (DatabaseHandler.ChangeSession(session.Name))
                 {
-                    DialogResult = true;
+                   // DialogResult = true;
                 }
-            }            
-            
-            Close();
+            }
+
+
+            if (StreamsBox.SelectedItem != null)
+            {
+                closeAfterDownload = true;
+                downloadSelectedFiles();
+               
+            }
+            else
+            {
+
+                DialogResult = true;
+                Close();
+            }
+
+
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -200,8 +224,22 @@ namespace ssi
             }
         }
 
-        private void GetStreams(string selectedItem = null)
+        private void GetStreams(System.Collections.IList selectedItems = null)
         {
+
+            List<StreamItem> temp = new List<StreamItem>();
+
+            if(selectedItems != null)
+            {
+                foreach (var item in selectedItems)
+                {
+                    temp.Add((StreamItem)item);
+                }
+            }
+            
+
+
+
             List<DatabaseStream> streams = DatabaseHandler.Streams;
             List<DatabaseRole> roles = DatabaseHandler.Roles;
 
@@ -235,9 +273,16 @@ namespace ssi
             
             if (StreamsBox.HasItems)
             {
-                if (selectedItem != null)
+                if (selectedItems != null)
                 {
-                    StreamsBox.SelectedItem = items.Find(item => item.Name == selectedItem);
+                    foreach(StreamItem stream in temp)
+                    {
+                        StreamsBox.SelectedItems.Add(items.Find(item => item.Name == stream.Name));
+                    }
+
+                   
+                   
+                    //  StreamsBox.SelectedItems = items.Find(item => item.Name == selectedItem);
                 }
             }
             
@@ -328,64 +373,6 @@ namespace ssi
             ObjectId id = new ObjectId();
             DatabaseHandler.GetObjectID(ref id, collection, name);
             return id;
-        }
-
-        private void CopyAnnotation_Click(object sender, RoutedEventArgs e)
-        {
-            if (AnnotationsBox.SelectedItem != null)
-            {
-                string annotatorName = DatabaseHandler.SelectAnnotator();
-
-                if (annotatorName != null)
-                {
-                    DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
-                    var annotations = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
-
-                    ObjectId annotid_new = new ObjectId();
-                    DatabaseHandler.GetObjectID(ref annotid_new, DatabaseDefinitionCollections.Annotators, annotatorName);
-     
-                    foreach (var item in AnnotationsBox.SelectedItems)
-                    {
-                        ObjectId roleID = GetIdFromName(DatabaseDefinitionCollections.Roles, ((DatabaseAnnotation)(item)).Role);
-                        ObjectId schemeID = GetIdFromName(DatabaseDefinitionCollections.Schemes, ((DatabaseAnnotation)(item)).Scheme);
-                        ObjectId annotatorID = GetIdFromName(DatabaseDefinitionCollections.Annotators, ((DatabaseAnnotation)(item)).Annotator);
-                        ObjectId sessionID = GetIdFromName(DatabaseDefinitionCollections.Sessions, session.Name);
-
-                        var builder = Builders<BsonDocument>.Filter;
-                        var filter = builder.Eq("role_id", roleID) 
-                            & builder.Eq("scheme_id", schemeID)
-                            & builder.Eq("annotator_id", annotatorID)
-                            & builder.Eq("session_id", sessionID);
-                        var anno = annotations.Find(filter).Single();
-
-                        anno.Remove("_id");
-                        anno["annotator_id"] = annotid_new;
-                        try
-                        {
-                            anno["isFinished"] = false;
-                        }
-                        catch 
-                        { }
-
-                            try
-                            {
-                                anno["isLocked"] = false;
-                            }
-                            catch { }
-
-                        UpdateOptions uo = new UpdateOptions();
-                        uo.IsUpsert = true;
-
-                        filter = builder.Eq("role_id", roleID) & builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotid_new) & builder.Eq("session_id", sessionID);
-                        var result = annotations.ReplaceOne(filter, anno, uo);
-
-                    }
-
-                    GetAnnotations(session);
-
-                }
-              
-            }
         }
 
         private void DeleteAnnotation_Click(object sender, RoutedEventArgs e)
@@ -693,6 +680,217 @@ namespace ssi
             Properties.Settings.Default.DBHideMissingStreams = false;
             Properties.Settings.Default.Save();
 
+        }
+
+        private void DownloadStream_Click(object sender, RoutedEventArgs e)
+        {
+
+
+            downloadSelectedFiles();
+            
+        }
+
+        private void downloadSelectedFiles()
+        {
+
+
+            labelDownloaded.Visibility = Visibility.Visible;
+            labelPerc.Visibility = Visibility.Visible;
+            labelSpeed.Visibility = Visibility.Visible;
+            progressBar.Visibility = Visibility.Visible;
+            string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseBox.SelectedItem.ToString() + "\\" + ((DatabaseSession)SessionsBox.SelectedItem).Name + "\\";
+            Directory.CreateDirectory(Path.GetDirectoryName(localPath));
+            List<string> streamstoDownload = new List<string>();
+
+            foreach (StreamItem stream in SelectedStreams())
+            {
+
+                string localfile = localPath + stream.Name;
+
+                if (!File.Exists(localfile))
+                {
+                    streamstoDownload.Add(stream.Name);
+
+                }
+
+            }
+
+            if (streamstoDownload.Count == 0 && closeAfterDownload)
+            {
+                DialogResult = true;
+                Close();
+                return;
+            }
+
+            string url = "";
+            bool requiresAuth = false;
+
+            DatabaseDBMeta meta = new DatabaseDBMeta()
+            {
+                Name = DatabaseHandler.DatabaseName
+            };
+            if (!DatabaseHandler.GetDBMeta(ref meta))
+            {
+                return;
+            }
+
+            if (meta.Server == "" || meta.Server == null)
+            {
+                return;
+            }
+
+
+            if (meta.UrlFormat == UrlFormat.NEXTCLOUD)
+            {
+                url = meta.Server + "/download?path=%2F" + DatabaseBox.SelectedItem.ToString() + "%2F" + ((DatabaseSession)SessionsBox.SelectedItem).Name + "&files=";
+            }
+            else
+            {
+                url = meta.Server + '/' + DatabaseHandler.SessionName + '/';
+                requiresAuth = meta.ServerAuth;
+            }
+
+           
+
+
+
+            List<string> urls = new List<string>();
+
+            foreach(string file in streamstoDownload)
+            {
+                urls.Add(url + file);
+                if(file.EndsWith(".stream"))
+                {
+                    urls.Add(url + file + "~");
+                }
+            }
+
+        
+            remainingfiles = urls.Count;
+            downloadFile(urls);
+        }
+
+
+
+
+        private Queue<string> _downloadUrls = new Queue<string>();
+
+        private void downloadFile(IEnumerable<string> urls)
+        {
+            foreach (var url in urls)
+            {
+                _downloadUrls.Enqueue(url);
+            }
+
+            DownloadFile();
+        }
+
+
+
+        public void DownloadFile()
+        {
+            if (_downloadUrls.Any())
+            {
+
+                using (webClient = new WebClient())
+                {
+                    webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
+                    webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
+
+                    string url = _downloadUrls.Dequeue();
+                    string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseBox.SelectedItem.ToString() + "\\" + ((DatabaseSession)SessionsBox.SelectedItem).Name + "\\";
+                    string[] split = System.IO.Path.GetFileName(url).Split('=');
+
+                    string location = localPath + split[split.Length - 1];
+                    Uri URL = new Uri(url);
+                    // Start the stopwatch which we will be using to calculate the download speed
+                    sw.Start();
+
+                    try
+                    {
+                        // Start downloading the file
+                        webClient.DownloadFileAsync(URL, location);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            }
+
+        }
+
+
+        // The event that will fire whenever the progress of the WebClient is changed
+        private void ProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+
+
+            // Calculate download speed and output it to labelSpeed.
+            labelSpeed.Content = string.Format("{0} kb/s", (e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds).ToString("0.00"));
+
+            // Update the progressbar percentage only when the value is not the same.
+            progressBar.Value = e.ProgressPercentage;
+
+            // Show the percentage on our label.
+            labelPerc.Content = e.ProgressPercentage.ToString() + "%";
+
+            // Update the label with how much data have been downloaded so far and the total size of the file we are currently downloading
+            labelDownloaded.Content = string.Format("{0} MB's / {1} MB's",
+                (e.BytesReceived / 1024d / 1024d).ToString("0.00"),
+                (e.TotalBytesToReceive / 1024d / 1024d).ToString("0.00"));
+        }
+
+        // The event that will trigger when the WebClient is completed
+        private void Completed(object sender, AsyncCompletedEventArgs e)
+        {
+            remainingfiles--;
+            
+            if (e.Error != null)
+            {
+                // handle error scenario
+                //throw e.Error;
+            }
+            if (e.Cancelled)
+            {
+                // handle cancelled scenario
+            }
+            DownloadFile();
+
+            if (remainingfiles == 0)
+            {
+
+                if (closeAfterDownload)
+                {
+                    DialogResult = true;
+                    Close();
+                }
+
+                else
+                {
+                    System.Collections.IList test = StreamsBox.SelectedItems;
+      
+                    GetStreams(test);
+                }
+            }
+        }
+
+        private void StreamsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DownloadStream.Visibility = Visibility.Hidden;
+            labelDownloaded.Visibility = Visibility.Hidden;
+            labelPerc.Visibility = Visibility.Hidden;
+            labelSpeed.Visibility = Visibility.Hidden;
+            progressBar.Visibility = Visibility.Hidden;
+
+            for (int i = 0; i < StreamsBox.SelectedItems.Count; i++)
+            {
+                if (!((StreamItem) StreamsBox.SelectedItems[i]).Exists)
+                {
+                    DownloadStream.Visibility = Visibility.Visible;
+                                    
+                }
+            }
         }
     }
 }

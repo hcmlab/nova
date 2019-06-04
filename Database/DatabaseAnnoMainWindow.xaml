@@ -25,8 +25,8 @@
                     <Setter Property="Foreground" Value="{StaticResource ExistsBrush}" />
                     <Setter Property="Visibility" Value="Visible"/>
                 </DataTrigger>
-                
-            
+
+
 
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
@@ -49,7 +49,7 @@
             </Style.Triggers>
         </Style>
 
-  
+
     </Window.Resources>
 
     <Grid>
@@ -132,7 +132,7 @@
                     <CheckBox Name="showOnlyUnfinished" Content="Unfinished only" Checked="showOnlyUnfinished_Checked" Unchecked="showOnlyUnfinished_Unchecked" />
                 </StackPanel>
                 <ListView Name="AnnotationsBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended" GridViewColumnHeader.Click="SortListView"  >
-                    
+
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
@@ -162,10 +162,30 @@
                 </ListView>
             </DockPanel>
 
-            <DockPanel Grid.Column="3" Grid.Row="0"  Margin="0,0,5,0">
-                <Label Content="Streams"  DockPanel.Dock="Top" Margin="-3,0,0,0" />
+            <DockPanel Grid.Column="3" Grid.Row="0" Margin="0,0,5,0">
+                <DockPanel HorizontalAlignment="Stretch" DockPanel.Dock="Top" >
+                    <Label Content="Streams" />
+                    <StackPanel Grid.Row="0" Margin="0,5,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <!--<Button Name="AddAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="AddAnnotation_Click" Visibility="Collapsed" />-->
+                        <!--Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="COPY" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" /-->
+
+                       
+                        <Label Name="labelSpeed" HorizontalAlignment="Center"></Label>
+                        <Label Name="labelDownloaded" HorizontalAlignment="Center" ></Label>
+                        <Label Name="labelPerc" HorizontalAlignment="Center"></Label>
+                        <ProgressBar Name="progressBar" Width="40" Height="12"></ProgressBar>
+                        <Button Name="DownloadStream" BorderBrush="Transparent" Background="Transparent" Content="GET" Click="DownloadStream_Click" Visibility="Visible" />
+                    </StackPanel>
+                </DockPanel>
+
+
+
+
+
+
+
                 <CheckBox Name="hideMissing" Content="Hide Missing Streams"  DockPanel.Dock="Bottom" Checked="hideMissing_Checked" Unchecked="hideMissing_Unchecked"/>
-                
+
                 <StackPanel Name="ServerLoginPanel"  Orientation="Vertical" DockPanel.Dock="Bottom" Margin="0,5,0,0">
                     <DockPanel LastChildFill="True">
                         <Label Content="Username" Width="70" />
@@ -176,9 +196,9 @@
                         <PasswordBox x:FieldModifier="public" x:Name="serverPassword" Margin="0,0,5,0" Height="25" Focusable="True" VerticalContentAlignment="Center" />
                     </DockPanel>
                 </StackPanel>
-                
 
-                <ListView Name="StreamsBox" Grid.Row="0" Grid.Column="0" ItemContainerStyle="{StaticResource StreamItemColorStyle}" ItemsSource="{Binding}" GridViewColumnHeader.Click="SortListView" >
+
+                <ListView Name="StreamsBox" SelectionChanged="StreamsBox_SelectionChanged" Grid.Row="0" Grid.Column="0" ItemContainerStyle="{StaticResource StreamItemColorStyle}" ItemsSource="{Binding}" GridViewColumnHeader.Click="SortListView" >
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Role" Width="Auto">
@@ -208,7 +228,7 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-            
+
             </DockPanel>
         </Grid>
 
