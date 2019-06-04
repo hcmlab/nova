@@ -21,7 +21,8 @@ namespace ssi
             NONE,
             KINECT1,
             KINECT2,
-            OPENFACE
+            OPENFACE,
+            OPENFACE2
         }
 
         private float KINECT_SMALL_VALUES_BUG_THRES = -10f;
@@ -110,6 +111,12 @@ namespace ssi
                 scaleOF();
             }
 
+            else if (facetype == FaceType.OPENFACE2)
+            {
+                minMaxOF();
+                scaleOF2();
+            }
+
             else
             {
                 minMax();
@@ -191,6 +198,44 @@ namespace ssi
                         }
                         signal.data[i] = (signal.data[i] - tempmin) / (tempmax - tempmin);
    
+                    }
+                    else
+                    {
+                        signal.data[i] = signal.data[i] - mins[dim];
+                    }
+                }
+            }
+        }
+
+        public void scaleOF2()
+        {
+            for (int i = 0; i < signal.number * signal.dim; i++)
+            {
+                // negative values are evil, sometimes occur though
+                //if (i >= signal.dim && signal.data[i] <= KINECT_SMALL_VALUES_BUG_THRES
+                //    && signal.data[i] < KINECT_LARGE_VALUES_BUG_THRES)
+                //{
+                //    signal.data[i] = signal.data[i - signal.dim];
+                //}
+                if (i % signal.dim >= 8  && i % signal.dim <= 134)
+
+                {
+
+
+                    int dim = i % 2;
+                    float tempmin = mins[dim];
+                    float tempmax = maxs[dim];
+                    if (maxs[dim] - mins[dim] != 0)
+                    {
+                        if (mins[dim] < 0)
+                        {
+                            signal.data[i] += Math.Abs(tempmin);
+                            tempmin = 0;
+                            tempmax = tempmax + Math.Abs(mins[dim]);
+
+                        }
+                        signal.data[i] = (signal.data[i] - tempmin) / (tempmax - tempmin);
+
                     }
                     else
                     {
@@ -313,14 +358,42 @@ namespace ssi
                             {
                                 Console.WriteLine(e);
                             }
+                    }
 
-
-        }
-
-    }
+                }
 
             }
-         
+
+            else if (facetype == FaceType.OPENFACE2)
+            {
+                if (index < signal.number)
+                {
+                    for (uint i = (index * signal.dim) + 8; i < (index * signal.dim) + 134; i += 2)
+                    {
+                        //double X = signal.data[i] > 0 ? signal.data[i]  * width   - width/2: 0;
+                        //double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
+
+
+                        double X = signal.data[i] * width;
+                        double Y = signal.data[i + 1] * height;
+                        try
+                        {
+                            if (X < width && Y < height)
+                            {
+                                writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+
+                }
+
+            }
+
 
 
             writeableBmp.Unlock();
