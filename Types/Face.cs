@@ -113,7 +113,7 @@ namespace ssi
 
             else if (facetype == FaceType.OPENFACE2)
             {
-                minMaxOF();
+                minMaxOF2();
                 scaleOF2();
             }
 
@@ -169,6 +169,48 @@ namespace ssi
                 
         }
 
+        public void minMaxOF2()
+        {
+
+            for (int i = 0; i < 2; i++)
+            {
+                mins[i] = float.MaxValue;
+                maxs[i] = float.MinValue;
+            }
+
+            for (int i = 0; i < signal.number * signal.dim; i++)
+            {
+
+                if (i % signal.dim >= 8 && i % signal.dim <= 144)
+
+                {
+                    int dim = i % 2;
+                    if (mins[dim] > signal.data[i])
+                    {
+                        mins[dim] = signal.data[i];
+                    }
+                    else if (maxs[dim] < signal.data[i])
+                    {
+                        maxs[dim] = signal.data[i];
+                    }
+
+
+                    mins[0] = mins[1] = Math.Min(mins[0], mins[1]);
+
+                    maxs[0] = maxs[1] = Math.Max(maxs[0], maxs[1]);
+                }
+
+
+
+
+            }
+
+
+
+
+
+        }
+
         public void scaleOF()
         {
             for (int i = 0; i < signal.number * signal.dim; i++)
@@ -217,7 +259,7 @@ namespace ssi
                 //{
                 //    signal.data[i] = signal.data[i - signal.dim];
                 //}
-                if (i % signal.dim >= 8  && i % signal.dim <= 134)
+                if (i % signal.dim >= 8  && i % signal.dim <= 144)
 
                 {
 
@@ -368,7 +410,7 @@ namespace ssi
             {
                 if (index < signal.number)
                 {
-                    for (uint i = (index * signal.dim) + 8; i < (index * signal.dim) + 134; i += 2)
+                    for (uint i = (index * signal.dim) + 8; i < (index * signal.dim) + 144; i += 2)
                     {
                         //double X = signal.data[i] > 0 ? signal.data[i]  * width   - width/2: 0;
                         //double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
