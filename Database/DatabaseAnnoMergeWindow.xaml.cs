@@ -990,6 +990,44 @@ namespace ssi
             return r;
         }
 
+        private double ConcordanceCorrelationCoefficient(AnnoList xs, AnnoList ys)
+        {
+            double meanxs, meanys;
+            double variancexs, varianceys;
+            double covariance = 0;
+            double p;
+
+            int n = xs.Count() > ys.Count() ? ys.Count() : xs.Count();
+
+            double[] listx = new double[n];
+            double[] listy = new double[n];
+
+            for(int i = 0; i < n; i++)
+            {
+                if(!Double.IsNaN(xs[i].Score) && !Double.IsNaN(ys[i].Score))
+                {
+                    listx[i] = xs[i].Score;
+                    listy[i] = ys[i].Score;
+                }
+            }
+
+            meanxs = listx.Mean();
+            meanys = listy.Mean();
+
+            variancexs = listx.Variance();
+            varianceys = listy.Variance();
+
+            for (int i = 0; i < n; i++)
+            {
+                covariance = covariance + ((listx[i] - meanxs) * (listy[i] - meanys));
+            }
+            covariance = covariance / (n - 1);
+
+            p = (2 * covariance) / (variancexs + varianceys + Math.Pow((meanxs - meanys), 2));
+
+            return p;
+        }
+
         private double Variance(double[] nums)
         {
             if (nums.Length > 1)
@@ -1259,6 +1297,17 @@ namespace ssi
                         Stats.ToolTip = Stats.ToolTip + " | Spearman Correlation: " + interpretation;
                     }
 
+                    double concordancecorrelation = double.MaxValue;
+                    concordancecorrelation = ConcordanceCorrelationCoefficient(annolists[0], annolists[1]);
+
+                    if (concordancecorrelation != double.MaxValue){
+
+                        interpretation = CCCinterpretation(concordancecorrelation);
+
+                        Stats.Content = Stats.Content + " | Concordance Correlation: " + concordancecorrelation.ToString("F3");
+                        Stats.ToolTip = Stats.ToolTip + " | Concordance Correlation: " + interpretation;
+                    }
+
                     double pearsoncorrelation = double.MaxValue;
 
                     pearsoncorrelation = PearsonCorrelationMathNet(annolists[0], annolists[1]);
@@ -1348,6 +1397,27 @@ namespace ssi
             //else  significance = p.ToString("F6") + ">= 0.05";
 
             return interpretation; // + " " + significance;
+        }
+
+        private string CCCinterpretation(double ccc)
+        {
+            string interpretation = "";
+
+            if(ccc < 0.9)
+            {
+                interpretation = "Poor";
+            } else if (ccc >= 0.9 && ccc < 0.95)
+            {
+                interpretation = "Moderate";
+            } else if(ccc >= 0.95 && ccc <= 0.99)
+            {
+                interpretation = "Substantial";
+            } else
+            {
+                interpretation = "Almost perfext";
+            }
+
+            return interpretation;
         }
 
         private string Spearmaninterpretation(double spearmancorrelation)
