@@ -1,14 +1,11 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.GridFS;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -120,7 +117,7 @@ namespace ssi
                 if (client == null)
                 {
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
-                    settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);                    
+                    settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
                     client = new MongoClient(settings);
                 }
                 return client;
@@ -190,12 +187,10 @@ namespace ssi
                 database = Client.GetDatabase(databaseName);
 
                 UpdateDatabaseLocalLists();
-            
             }
 
             return true;
         }
-
 
         static public void UpdateDatabaseLocalLists()
         {
@@ -205,12 +200,11 @@ namespace ssi
             sessions = GetSessions();
             schemes = GetSchemes();
             annotators = GetAnnotators();
-           
         }
 
         static public DatabaseAuthentication CheckAuthentication()
         {
-            return (DatabaseAuthentication) CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
+            return (DatabaseAuthentication)CheckAuthentication(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.DatabaseName);
         }
 
         static public int CheckAuthentication(string database)
@@ -247,13 +241,13 @@ namespace ssi
                     else if ((roles[i]["role"].ToString() == "readAnyDatabase") && auth <= 1) { auth = 1; }
                 }
             }
-            catch 
+            catch
             { }
 
             return auth;
         }
 
-        #endregion
+        #endregion CONNECT AND AUTH
 
         #region GETTER
 
@@ -283,7 +277,7 @@ namespace ssi
                 foreach (var c in databases)
                 {
                     string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local"  && c.GetElement(0).Value.ToString() != "config"  && CheckAuthentication(db) >= (int)level)
+                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && c.GetElement(0).Value.ToString() != "config" && CheckAuthentication(db) >= (int)level)
                     {
                         items.Add(db);
                     }
@@ -513,17 +507,15 @@ namespace ssi
             {
                 try
                 {
-                MongoClient mongo = Client;
-                IMongoDatabase database = mongo.GetDatabase("admin");
-                IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("system.users");
-                var documents = collection.Find(_ => true).ToList();
-                foreach (var document in documents)
-                {
-                       
-
-                    items.Add(document["user"].ToString());
-                }
-                items.Sort();
+                    MongoClient mongo = Client;
+                    IMongoDatabase database = mongo.GetDatabase("admin");
+                    IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("system.users");
+                    var documents = collection.Find(_ => true).ToList();
+                    foreach (var document in documents)
+                    {
+                        items.Add(document["user"].ToString());
+                    }
+                    items.Sort();
                 }
                 catch
                 {
@@ -641,10 +633,9 @@ namespace ssi
             return SelectCollectionField("Select stream type", DatabaseDefinitionCollections.Streams, "name");
         }
 
-        #endregion
+        #endregion GETTER
 
         #region SETTER
-
 
         public static bool GetDBMeta(ref DatabaseDBMeta meta)
         {
@@ -837,8 +828,6 @@ namespace ssi
                         new BsonDocument { { "role", "userAdminAnyDatabase" }, { "db", "admin" } },
                         new BsonDocument { { "role", "root" }, { "db", "admin" } },
                         new BsonDocument { { "role", "changeOwnPasswordCustomDataRole" }, { "db", "admin" } },
-
-
                     } } };
             }
             else
@@ -849,7 +838,6 @@ namespace ssi
                     { "roles", new BsonArray {
                         new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } },
                         new BsonDocument { { "role", "changeOwnPasswordCustomDataRole" }, { "db", "admin" } },
-
                     } } };
             }
 
@@ -892,7 +880,7 @@ namespace ssi
                 {
                     database.RunCommand<BsonDocument>(dropuser);
                 }
-                catch 
+                catch
                 {
                     return false;
                 }
@@ -932,48 +920,35 @@ namespace ssi
             return true;
         }
 
-
-
-
         public static DatabaseUser GetUserInfo(string username)
         {
             DatabaseUser dbuser = new DatabaseUser();
             dbuser.Name = username;
             return GetUserInfo(dbuser);
-       
-
         }
-
 
         public static DatabaseUser GetUserInfo(DatabaseUser dbuser)
         {
-           
-                var adminDB = client.GetDatabase("admin");
-                var cmd = new BsonDocument("usersInfo", dbuser.Name);
-                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
+            var adminDB = client.GetDatabase("admin");
+            var cmd = new BsonDocument("usersInfo", dbuser.Name);
+            var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
             try
             {
                 var Customdata = (BsonDocument)queryResult[0][0]["customData"];
 
-
                 dbuser.Fullname = Customdata["fullname"].ToString();
                 dbuser.Email = Customdata["email"].ToString();
                 dbuser.Expertise = Customdata["expertise"].AsInt32;
-
             }
-
-
-            catch {
+            catch
+            {
                 dbuser.Fullname = dbuser.Name;
                 dbuser.Email = "";
                 dbuser.Expertise = 0;
             };
 
-
-
             return dbuser;
         }
-
 
         public static bool ChangeUserCustomData(DatabaseUser user)
         {
@@ -1023,7 +998,7 @@ namespace ssi
                     } } };
                 admindatabase.RunCommand<BsonDocument>(updateroles);
             }
-            catch 
+            catch
             {
                 return false;
             }
@@ -1065,7 +1040,6 @@ namespace ssi
 
             return true;
         }
-
 
         private static string GetRoleString(int role)
         {
@@ -1133,8 +1107,8 @@ namespace ssi
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.IsUpsert = true;
 
-            ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).ReplaceOne(filter, document, updateOptions);            
-            annotators = GetAnnotators();            
+            ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).ReplaceOne(filter, document, updateOptions);
+            annotators = GetAnnotators();
 
             RevokeUserRole(annotator.Name, "readWrite", databaseName);
             RevokeUserRole(annotator.Name, "dbAdmin", databaseName);
@@ -1161,11 +1135,8 @@ namespace ssi
             return true;
         }
 
-
-
         private static List<DatabaseAnnotator> GetAnnotators(bool onlyValid = true)
         {
-
             List<string> names = GetCollectionField(DatabaseDefinitionCollections.Annotators, "name", true);
             List<DatabaseAnnotator> items = new List<DatabaseAnnotator>();
             foreach (string name in names)
@@ -1178,7 +1149,6 @@ namespace ssi
             }
 
             return items.OrderBy(i => i.FullName).ToList();
-
         }
 
         public static bool GetAnnotator(ref DatabaseAnnotator annotator)
@@ -1188,7 +1158,8 @@ namespace ssi
                 return false;
             }
 
-            if (CheckAuthentication() > DatabaseAuthentication.DBADMIN) {
+            if (CheckAuthentication() > DatabaseAuthentication.DBADMIN)
+            {
                 var builder = Builders<BsonDocument>.Filter;
                 var filter = builder.Eq("user", annotator.Name);
                 var adminDatabase = Client.GetDatabase("admin");
@@ -1221,11 +1192,10 @@ namespace ssi
                 }
             }
 
-            DatabaseUser user =  DatabaseHandler.GetUserInfo(annotator.Name);
+            DatabaseUser user = DatabaseHandler.GetUserInfo(annotator.Name);
             annotator.FullName = user.Fullname;
             annotator.Expertise = user.Expertise;
             annotator.Email = user.Email;
-
 
             //{
             //    var builder = Builders<BsonDocument>.Filter;
@@ -1262,7 +1232,7 @@ namespace ssi
             //            }
             //        }
             //    }
-           // }
+            // }
 
             return true;
         }
@@ -1293,6 +1263,7 @@ namespace ssi
 
             return true;
         }
+
         private static bool AddOrUpdateRole(string name, DatabaseRole role)
         {
             if (role.Name == "")
@@ -1438,7 +1409,6 @@ namespace ssi
             return items.OrderBy(i => i.Name).ToList();
         }
 
-
         public static bool GetStream(ref DatabaseStream stream)
         {
             if (!IsConnected && !IsDatabase)
@@ -1500,8 +1470,8 @@ namespace ssi
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.IsUpsert = true;
 
-            ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).ReplaceOne(filter, document, updateOptions);            
-            streams = GetStreams();            
+            ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).ReplaceOne(filter, document, updateOptions);
+            streams = GetStreams();
 
             return true;
         }
@@ -1560,7 +1530,7 @@ namespace ssi
             streams = GetStreams();
 
             return true;
-        }        
+        }
 
         private static bool AddOrUpdateScheme(string name, AnnoScheme scheme)
         {
@@ -1608,7 +1578,6 @@ namespace ssi
                 document.Add(documentPointsNum);
                 document.Add(documentSr);
                 document.Add(documentColor);
-
             }
             else if (scheme.Type == AnnoScheme.TYPE.FREE)
             {
@@ -1776,14 +1745,12 @@ namespace ssi
                             AnnoScheme.Label lcp = new AnnoScheme.Label(schemeLabelsArray[j]["name"].ToString(), (Color)ColorConverter.ConvertFromString(schemeLabelsArray[j]["color"].ToString()));
                             scheme.Labels.Add(lcp);
                         }
-
                     }
                 }
                 else if (scheme.Type == AnnoScheme.TYPE.FREE)
                 {
                     scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
                 }
-
                 else if (scheme.Type == AnnoScheme.TYPE.POINT)
                 {
                     scheme.NumberOfPoints = annoSchemeDocument["num"].ToInt32();
@@ -1851,9 +1818,9 @@ namespace ssi
                 var documents = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).Find(filter).ToList();
                 if (documents.Count > 0)
                 {
-                    var document = documents[0];                    
-                    BsonElement value;                    
-                    session.Id = document["_id"].AsObjectId;                    
+                    var document = documents[0];
+                    BsonElement value;
+                    session.Id = document["_id"].AsObjectId;
                     session.Language = "";
                     if (document.TryGetElement("language", out value))
                     {
@@ -1886,7 +1853,6 @@ namespace ssi
             return true;
         }
 
-
         private static bool AddOrUpdateSession(string name, DatabaseSession session)
         {
             if (session.Name == "")
@@ -1911,7 +1877,7 @@ namespace ssi
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).ReplaceOne(filter, document, updateOptions);
-            sessions = GetSessions();            
+            sessions = GetSessions();
 
             return true;
         }
@@ -1962,9 +1928,9 @@ namespace ssi
             sessions = GetSessions();
 
             return true;
-        }        
+        }
 
-        #endregion
+        #endregion SETTER
 
         #region Annotation
 
@@ -2058,7 +2024,7 @@ namespace ssi
 
             ObjectId roleID = Roles.Find(role => role.Name == annoList.Meta.Role).Id;
             ObjectId sessionID = Sessions.Find(session => session.Name == annoList.Source.Database.Session).Id;
-            
+
             ObjectId schemeID;
             AnnoScheme.TYPE schemeType;
             BsonDocument schemeDoc;
@@ -2075,8 +2041,7 @@ namespace ssi
                 schemeType = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), type);
             }
 
-
-            if(!keepOriginalAnnotator && annoList.Meta.Annotator != dbuser)
+            if (!keepOriginalAnnotator && annoList.Meta.Annotator != dbuser)
             {
                 ObjectId userID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", dbuser);
                 if (AnnotationExists(userID, sessionID, roleID, schemeID))
@@ -2179,10 +2144,8 @@ namespace ssi
                     newAnnotationDoc.Add(new BsonElement("data_backup_id", annoList.Source.Database.DataBackupOID));
                 }
 
-
                 bool isfinished = annoList.Meta.isFinished;
                 if (markAsFinished) isfinished = true;
-
 
                 newAnnotationDoc.Add(new BsonElement("annotator_id", annotatorID));
                 newAnnotationDoc.Add(new BsonElement("role_id", roleID));
@@ -2358,7 +2321,7 @@ namespace ssi
         private static void loadAnnoListSchemeAndData(ref AnnoList annoList, BsonDocument scheme, BsonDocument data)
         {
             BsonElement value;
-            var builder = Builders<BsonDocument>.Filter;            
+            var builder = Builders<BsonDocument>.Filter;
 
             annoList.Scheme = new AnnoScheme();
             annoList.Scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), scheme["type"].AsString);
@@ -2494,21 +2457,155 @@ namespace ssi
             }
         }
 
+
+
+
+
+        public static double convertRange(
+            double originalStart, double originalEnd, // original range
+            double newStart, double newEnd, // desired range
+            double value) // value to convert
+        {
+            double scale = (double)(newEnd - newStart) / (originalEnd - originalStart);
+            return (double)(newStart + ((value - originalStart) * scale));
+        }
+
+
+
+
+
+        public static void resampleAnnotationtoNewScheme(AnnoList al, AnnoScheme newScheme, AnnoScheme oldScheme)
+        {
+            bool isSaved = false;
+            AnnoList newList = new AnnoList();
+
+
+            
+
+            double new_Samplerate = newScheme.SampleRate;
+            double old_samplerate = oldScheme.SampleRate;
+
+            if (old_samplerate > new_Samplerate)
+            {
+                double factor = old_samplerate / new_Samplerate;
+              
+                int index = 0;
+                double mean = 0;
+                double meanconf = 0;
+                double start = double.MaxValue;
+                foreach (AnnoListItem ali in al)
+                {
+                    if (index < factor-1)
+                    {
+                        mean += ali.Score;
+                        meanconf += ali.Confidence;
+                        start = ali.Start < start ? ali.Start : start;
+                        index++;
+                    }
+
+                    else
+                    {
+
+                        mean += ali.Score;
+                        meanconf += ali.Confidence;
+                        start = ali.Start < start ? ali.Start : start;
+                        index++;
+                    
+                        double duration = 1000.0 / new_Samplerate;
+                        double score = mean / factor;
+                        double conf = meanconf / factor;
+
+
+                        if(oldScheme.MinScore != newScheme.MinScore || oldScheme.MaxScore != newScheme.MaxScore)
+                        {
+                            score = convertRange(oldScheme.MinScore, oldScheme.MaxScore, newScheme.MinScore, newScheme.MaxScore, score);
+                        }
+                       
+
+                        AnnoListItem newali = new AnnoListItem(start, duration, score, ali.Meta, ali.Color, conf);
+                        newList.Add(newali);
+                        start = start + duration;
+                        index = 0;
+                        mean = 0;
+                        meanconf = 0;
+
+                    }    
+                }
+            }
+
+
+            else if (old_samplerate < new_Samplerate)
+            {
+                double factor = new_Samplerate/old_samplerate;
+                double duration = 1000.0 / new_Samplerate;
+
+                foreach (AnnoListItem ali in al)
+                {
+                    double start = ali.Start;
+                   
+                    double score = ali.Score;
+                    if (oldScheme.MinScore != newScheme.MinScore || oldScheme.MaxScore != newScheme.MaxScore)
+                    {
+                        score = convertRange(oldScheme.MinScore, oldScheme.MaxScore, newScheme.MinScore, newScheme.MaxScore, score);
+                    }
+                    double conf = ali.Confidence;
+                    string meta = ali.Meta;
+                    Color color = ali.Color;
+                    for (int i=0; i< factor; i++)
+                    {
+                        AnnoListItem newal = new AnnoListItem(start, duration, score, meta, color, conf);
+                        start = start + duration;
+                        newList.Add(newal);
+                    } 
+  
+                }
+            }
+
+            else if(old_samplerate == new_Samplerate)
+            {
+                foreach (AnnoListItem ali in al)
+                {
+                    if (oldScheme.MinScore != newScheme.MinScore || oldScheme.MaxScore != newScheme.MaxScore)
+                    {
+                        double score = convertRange(oldScheme.MinScore, oldScheme.MaxScore, newScheme.MinScore, newScheme.MaxScore, ali.Score);
+                        AnnoListItem newal = new AnnoListItem(ali.Start, ali.Duration, score, ali.Meta, ali.Color, ali.Confidence);
+                        newList.AddSorted(newal);
+                    }
+                    else
+                    {
+                        newList.AddSorted(ali);
+                    }
+                   
+                }
+            }
+
+            newList.Scheme = newScheme;
+            newList.Meta = al.Meta;
+            newList.Source.StoreToDatabase = true;
+            newList.Source.Database.Session = al.Source.Database.Session;
+            newList.HasChanged = true;
+
+            if (newList != null)
+            {
+                isSaved = newList.Save(null, false, true);
+            }
+        }
+
         public static AnnoList LoadAnnoList(DatabaseAnnotation annotation, bool loadBackup)
         {
             var builder = Builders<BsonDocument>.Filter;
 
             // resolve references
-                            
-            ObjectId roleID = GetObjectID(DatabaseDefinitionCollections.Roles, "name", annotation.Role);            
-            ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, "name", annotation.Scheme);            
-            ObjectId annotatorID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", annotation.Annotator);            
+
+            ObjectId roleID = GetObjectID(DatabaseDefinitionCollections.Roles, "name", annotation.Role);
+            ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, "name", annotation.Scheme);
+            ObjectId annotatorID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", annotation.Annotator);
             ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, "name", annotation.Session);
-           
+
             var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
             var annotationsData = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.AnnotationData);
             var filterAnnotation = builder.Eq("role_id", roleID) & builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("session_id", sessionID);
-            var annotationDocs = annotations.Find(filterAnnotation).ToList();            
+            var annotationDocs = annotations.Find(filterAnnotation).ToList();
 
             // does annotation exist?
 
@@ -2555,7 +2652,7 @@ namespace ssi
 
                 var filterData = builder.Eq("_id", dataID);
                 var annotationDataDoc = annotationsData.Find(filterData).ToList();
-                if(annotationDataDoc.Count > 0) loadAnnoListSchemeAndData(ref annoList, scheme, annotationDataDoc[0]);                
+                if (annotationDataDoc.Count > 0) loadAnnoListSchemeAndData(ref annoList, scheme, annotationDataDoc[0]);
 
                 // update source
 
@@ -2577,21 +2674,27 @@ namespace ssi
             return GetAnnotations(filter);
         }
 
+        public static List<DatabaseAnnotation> GetAnnotations(AnnoScheme scheme)
+        {
+            FilterDefinitionBuilder<BsonDocument> builder = Builders<BsonDocument>.Filter;
+            ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, "name", scheme.Name);
+            FilterDefinition<BsonDocument> filter = builder.Eq("scheme_id", schemeID);
+            return GetAnnotations(filter);
+        }
+
         public static List<DatabaseAnnotation> GetAnnotations(FilterDefinition<BsonDocument> filter = null, bool onlyMe = false, bool onlyUnfinished = false)
         {
-
             List<BsonDocument> annotations;
 
-            if(filter != null)
+            if (filter != null)
             {
-               annotations = Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations).Find(filter).ToList();
+                annotations = Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations).Find(filter).ToList();
             }
-
             else
             {
                 annotations = GetCollection(DatabaseDefinitionCollections.Annotations, false);
             }
-         
+
             List<DatabaseAnnotation> items = new List<DatabaseAnnotation>();
 
             foreach (var annotation in annotations)
@@ -2617,7 +2720,6 @@ namespace ssi
                 string roleName = role.Name;
                 string schemeName = scheme.Name;
 
-            
                 string annotatorName = annotator.Name;
                 string annotatorFullName = annotator.FullName;
 
@@ -2625,18 +2727,17 @@ namespace ssi
                 if (annotation.Contains("isFinished"))
                 {
                     isFinished = annotation["isFinished"].AsBoolean;
-
-                }                
+                }
 
                 bool islocked = false;
                 if (annotation.Contains("isLocked"))
-                { 
+                {
                     islocked = annotation["isLocked"].AsBoolean;
                 }
 
                 DateTime date = DateTime.Today;
                 if (annotation.Contains("date"))
-                { 
+                {
                     date = annotation["date"].ToUniversalTime();
                 }
 
@@ -2655,9 +2756,9 @@ namespace ssi
             return items;
         }
 
-    #endregion
+        #endregion Annotation
 
-    public static List<AnnoList> LoadSession(System.Collections.IList collections)
+        public static List<AnnoList> LoadSession(System.Collections.IList collections)
         {
             if (!IsConnected)
             {
@@ -2678,7 +2779,6 @@ namespace ssi
             return annoLists;
         }
 
-
         public static string FetchDBRef(string collection, string attribute, ObjectId reference)
         {
             if (!IsConnected)
@@ -2695,7 +2795,6 @@ namespace ssi
             {
                 output = result[0][attribute].ToString();
             }
-
 
             return output;
         }
@@ -2719,7 +2818,6 @@ namespace ssi
     {
         GENERAL = 0,
         NEXTCLOUD = 1
-       
     }
 
     public class DatabaseDBMeta
@@ -2729,12 +2827,13 @@ namespace ssi
         public string Server { get; set; }
         public bool ServerAuth { get; set; }
         public UrlFormat UrlFormat { get; set; }
+
         public override string ToString()
         {
             return Name;
         }
     }
-    
+
     public class DatabaseSession
     {
         public ObjectId Id { get; set; }
@@ -2743,7 +2842,7 @@ namespace ssi
         public string Location { get; set; }
         public DateTime Date { get; set; }
 
-        public double Duration { get; set; } 
+        public double Duration { get; set; }
 
         public override string ToString()
         {
@@ -2773,6 +2872,7 @@ namespace ssi
         public ObjectId Id { get; set; }
         public string Name { get; set; }
         public bool HasStreams { get; set; }
+
         public override string ToString()
         {
             return Name;
@@ -2785,6 +2885,7 @@ namespace ssi
         public string Name { get; set; }
         public AnnoScheme.TYPE Type { get; set; }
         public double SampleRate { get; set; }
+
         public override string ToString()
         {
             return Name;
@@ -2814,6 +2915,7 @@ namespace ssi
         public string Role { get; set; }
         public string Email { get; set; }
         public int Expertise { get; set; }
+
         public override string ToString()
         {
             return Name;
@@ -2838,16 +2940,12 @@ namespace ssi
 
         public bool IsFinished { get; set; }
 
-
         public bool IsLocked { get; set; }
 
         public DateTime Date { get; set; }
 
         public ObjectId Data_id { get; set; }
     }
-
-
-
 
     public static class DatabaseDefinitionCollections
     {
@@ -2867,9 +2965,9 @@ namespace ssi
         NONE = 0,
         READ = 1,
         READWRITE = 2,
-        DBADMIN = 3,      
+        DBADMIN = 3,
         ROOT = 4,
     }
 
-    #endregion
+    #endregion DATABASE TYPES
 }
