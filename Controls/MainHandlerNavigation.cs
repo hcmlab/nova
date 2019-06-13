@@ -43,6 +43,7 @@ namespace ssi
         private void annoLiveMode_Changed(object sender, RoutedEventArgs e)
         {
             control.annoLiveModeActivateMouse.IsChecked = Properties.Settings.Default.LiveModeActivateMouse;
+           
 
             if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                if (control.annoLiveModeCheckBox.IsChecked == true)
@@ -55,6 +56,18 @@ namespace ssi
                     AnnoTierStatic.Selected.LiveAnnoMode(true);
                     control.annoLiveModeActivateMouse.IsEnabled = false;
                 }
+
+            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.ControllerConnected)
+            {
+                control.annoLiveModeActivateMouse.IsChecked = false;
+                control.ControllerStatus.Visibility = Visibility.Visible;
+                control.annoLiveModeActivateMouse.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                control.ControllerStatus.Visibility = Visibility.Collapsed;
+                control.annoLiveModeActivateMouse.Visibility = Visibility.Visible;
+            }
         }
 
 
