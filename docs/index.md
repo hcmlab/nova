@@ -101,6 +101,12 @@ After loading at least one media or data stream, new annotations tracks can be a
 
 	To change the values in a continuous track hold down the right mouse button and move the cursor to the desired position within the track. You will notice that the values immediately start to follow the cursor. Hitting 'L' (or switching on the live button in the status bar) turns on the live mode, which no longer requires to hold down the right mouse button. Instead a white button is displayed at the left border of the current track to mark the current value. The height of the white button can either be controlled by the vertical position of the mouse cursor (press key 'M' or activate check box next to live button). Or otherwise by pressing a key between '0' and '9' (see option 'number of levels in live mode' in the SETTINGS). This is especially handy to annotate during playback. Hitting 'L' again turns off the live annotation mode and brings back the default behaviour.
 
+	Additionally, since version 1.0.5.4 NOVA Supports Input from Game controllers (tested with XBOX 360 Controller) for continuous annotations. They can be used as follows:
+
+	![*Controller Command overview*](pics/controller.png){#fig:manual-controller}
+
+	Make sure the controller is plugged in and installed before you open NOVA. Mouse Annotation is disabled while a controller is connected.	
+
 Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. To save an annotation go to the ANNOTATION menu or press 'Ctrl+S'.
 
 ## Shortcut Cheat Sheet
