@@ -6,12 +6,238 @@ using System.Windows.Media;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using SharpDX.XInput;
+using System.Threading;
+using System.Windows.Threading;
+using System.Runtime.InteropServices;
+
+
 
 namespace ssi
 {
+   
 
     public partial class MainHandler
     {
+
+        Controller[] controllers = new[] { new Controller(UserIndex.One), new Controller(UserIndex.Two), new Controller(UserIndex.Three), new Controller(UserIndex.Four) };
+        Controller controller = null;
+        Gamepad gamepad;
+        Gamepad gamepad_last;
+        public Point leftThumb, rightThumb = new Point(0, 0);
+        float leftTrigger, rightTrigger;
+        public int deadband = 2500;
+
+        public void connectController()
+        {
+            foreach (var selectControler in controllers)
+            {
+                if (selectControler.IsConnected)
+                {
+                    controller = selectControler;
+                   
+                    break;
+                }
+            }
+            if (controller == null)
+            {
+                Console.WriteLine("No XInput controller installed");
+                if(AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.ControllerConnected = false;
+            }
+
+            else
+            {
+                Console.WriteLine("XInput controller installed");
+                if (AnnoTierStatic.Selected != null) AnnoTierStatic.Selected.ControllerConnected = true;
+                var ts = new ThreadStart(CheckControllerInput);
+                var backgroundThread = new Thread(ts);
+                backgroundThread.Start();
+
+            }
+
+           
+
+        }
+
+        private void CheckControllerInput()
+        {
+
+        var previousState = controller.GetState();
+            bool wasnotlivemode = false; ;
+            bool locklivemode = false;
+            while (controller.IsConnected)
+            {
+                var state = controller.GetState();
+
+                {
+
+                    gamepad = controller.GetState().Gamepad;
+                    gamepad_last = previousState.Gamepad;
+
+                    leftThumb.X = (Math.Abs((float)gamepad.LeftThumbX) < deadband) ? 0 : (float)gamepad.LeftThumbX / short.MinValue * -100;
+                    leftThumb.Y = (Math.Abs((float)gamepad.LeftThumbY) < deadband) ? 0 : (float)gamepad.LeftThumbY / short.MaxValue * 100;
+                    rightThumb.X = (Math.Abs((float)gamepad.RightThumbX) < deadband) ? 0 : (float)gamepad.RightThumbX / short.MaxValue * 100;
+                    rightThumb.Y = (Math.Abs((float)gamepad.RightThumbY) < deadband) ? 0 : (float)gamepad.RightThumbY / short.MaxValue * 100;
+
+                    leftTrigger = gamepad.LeftTrigger > 15 ? gamepad.LeftTrigger  : 0 ;
+                    rightTrigger = gamepad.RightTrigger >  15 ? gamepad.RightTrigger : 0;
+
+                    if (AnnoTier.Selected != null && AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                    {
+
+                        AnnoTierStatic.Selected.LstickY = leftThumb.Y;
+                        AnnoTierStatic.Selected.ControllerConnected = true;
+
+                        System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                            double offset = (timeline.SelectionStop - timeline.SelectionStart) / 100.0;
+
+                            if (timeline.CurrentPlayPosition > timeline.SelectionStart + offset && leftTrigger > 0)
+                            {
+                                if (!locklivemode)
+                                {
+                                    wasnotlivemode = AnnoTierStatic.isNotLiveAnnoMode;
+                                    System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                                        control.annoLiveModeCheckBox.IsChecked = false;
+                                        if(AnnoTierStatic.isNotLiveAnnoMode) AnnoTierStatic.Selected.LiveAnnoMode(true);
+                                    }));
+                                   
+                                    locklivemode = true;
+                                }
+                               
+                                signalCursor.X = signalCursor.X - leftTrigger / 10.0;
+                                
+
+
+                            }
+
+                            else if (timeline.CurrentPlayPosition < timeline.SelectionStart + offset && leftTrigger > 0)
+                            {
+                               
+                                double factor = (Time.SelectionStop - Time.SelectionStart) / Time.TotalDuration;
+                                control.timeLineControl.rangeSlider.MoveAndUpdate(false, factor);
+                                signalCursor.X = signalCursor.X - leftTrigger / 10.0;
+
+
+
+                            }
+
+                            else if(leftTrigger == 0 && wasnotlivemode)
+                            {
+                            
+                              
+                                if(locklivemode)
+                                {
+                                    System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                                        ToggleLiveMode();
+                                    }));
+                                    locklivemode = false;
+                                }
+                              
+                            }
+
+                           
+
+                            if (timeline.CurrentPlayPosition < timeline.SelectionStop - offset && rightTrigger > 0)
+                            {
+                                signalCursor.X = signalCursor.X + rightTrigger / 10.0;
+                            }
+
+                            else if (timeline.CurrentPlayPosition > timeline.SelectionStop - offset && rightTrigger > 0)
+                                {
+                                    signalCursor.X = signalCursor.X + rightTrigger / 10.0;
+                                    double factor = (Time.SelectionStop - Time.SelectionStart) / Time.TotalDuration;
+                                    control.timeLineControl.rangeSlider.MoveAndUpdate(true, factor);
+                            }
+
+                            if (rightTrigger > 0 || leftTrigger > 0)
+                            {
+
+                                timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+                                MainHandler.Time.CurrentPlayPosition = timeline.CurrentPlayPosition;
+                                mediaList.Move(Time.TimeFromPixel(signalCursor.X));
+                            }
+                          
+                        }));
+                        
+
+
+
+
+                    if (gamepad.Buttons != gamepad_last.Buttons)
+                    {
+                        Console.WriteLine(gamepad.Buttons);
+
+                        if(gamepad.Buttons == GamepadButtonFlags.Y)
+                        {
+                            System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                                ToggleLiveMode();
+                            }));           
+                        }
+
+                        else if (gamepad.Buttons == GamepadButtonFlags.A)
+                        {
+                            System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                                TogglePlay();
+                            }));
+                        }
+
+                            else if (gamepad.Buttons == GamepadButtonFlags.X)
+                            {
+                                System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                                   if(AnnoTierStatic.Selected != null)  AnnoTierStatic.Selected.ClearButtonPressed = true;
+                                }));
+                            }
+
+
+                            //else if (gamepad.Buttons == GamepadButtonFlags.B)
+                            //{
+                            //    System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                            //        ToggleMouseMode();
+                            //    }));
+                            //}
+
+                            else if (gamepad.Buttons == GamepadButtonFlags.DPadUp)
+                            {
+                                System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                                   
+                                    SetContinuousLevelUp();
+                                }));
+                            }
+
+                            else if (gamepad.Buttons == GamepadButtonFlags.DPadDown)
+                            {
+                                System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                                    SetContinuousLevelDown();
+                                }));
+                            }
+
+                            else if (gamepad.Buttons == GamepadButtonFlags.None)
+                            {
+                                System.Windows.Application.Current.Dispatcher.Invoke((Action)(() => {
+                                    if (AnnoTierStatic.Selected != null)  AnnoTierStatic.Selected.ClearButtonPressed = false;
+                                }));
+                            }
+                        }
+
+                    }
+  
+
+                  //  Console.WriteLine(leftThumb.X + " " + leftThumb.Y + " " + leftTrigger + " " + rightTrigger + "  "  + gamepad.Buttons);
+                }
+          
+                   // Console.WriteLine(state.Gamepad);
+                Thread.Sleep(10);
+                previousState = state;
+            }
+
+            AnnoTierStatic.Selected.ControllerConnected = false;
+
+
+        }
+
+
+
+
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (!control.annoListControl.editTextBox.IsFocused
@@ -163,7 +389,7 @@ namespace ssi
                                     SetLabelForSegment(e);                            
                                 }
                             }
-                            else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && AnnoTierStatic.isLiveAnnoMode)
+                            else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && AnnoTierStatic.isNotLiveAnnoMode)
                             {                                
                                 if (e.KeyboardDevice.IsKeyDown(Key.Up))
                                 {
@@ -576,14 +802,14 @@ namespace ssi
         private void SetContinuousLevelUp()
         {
          
-               AnnoTierStatic.Selected.continuousSegmentUp();
+               AnnoTierStatic.Selected.continuousSegmentUpDown(true);
             
         }
 
         private void SetContinuousLevelDown()
         {
 
-            AnnoTierStatic.Selected.continuousSegmentDown();
+            AnnoTierStatic.Selected.continuousSegmentUpDown(false);
 
         }
 

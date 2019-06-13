@@ -239,6 +239,9 @@ namespace ssi
             control.timeLineControl.rangeSlider.Update();
 
 
+            //Gamepad
+            connectController();
+
 
             // Database
 

@@ -433,6 +433,10 @@
                                                   IsEnabled="False"
                                                   ToolTip="Toggle mouse. Shortcut: M">Enable Mouse</CheckBox>
                                         <Separator Width="20" Visibility="Hidden"></Separator>
+                                        <TextBlock x:Name="ControllerStatus" Visibility="Collapsed" 
+                                    		VerticalAlignment="Center" 
+                                    		TextTrimming="WordEllipsis"><Run Text="Gamepad connected"/></TextBlock>
+                                        <Separator Width="20" Visibility="Hidden"></Separator>
                                         <TextBlock x:Name="annoPositionLabel" 
                                     		VerticalAlignment="Center" 
                                     		TextTrimming="WordEllipsis"><Run Text="00:00:00.00"/></TextBlock>
