@@ -173,8 +173,8 @@
                         <Label Name="labelSpeed" HorizontalAlignment="Center"></Label>
                         <Label Name="labelDownloaded" HorizontalAlignment="Center" ></Label>
                         <Label Name="labelPerc" HorizontalAlignment="Center"></Label>
-                        <ProgressBar Name="progressBar" Width="40" Height="12"></ProgressBar>
-                        <Button Name="DownloadStream" BorderBrush="Transparent" Background="Transparent" Content="GET" Click="DownloadStream_Click" Visibility="Visible" />
+                        <ProgressBar Name="progressBar" Width="40" Height="12" Visibility="Hidden"></ProgressBar>
+                        <Button Name="DownloadStream" BorderBrush="Transparent" Background="Transparent" Content="GET" Click="DownloadStream_Click" Visibility="Hidden" />
                     </StackPanel>
                 </DockPanel>
 

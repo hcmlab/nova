@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.5.2";
+        public static string BuildVersion = "1.0.5.4";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
 
@@ -238,6 +238,9 @@ namespace ssi
             control.timeLineControl.rangeSlider.OnTimeRangeChanged += Time.TimelineChanged;
             control.timeLineControl.rangeSlider.Update();
 
+
+            //Gamepad
+            connectController();
 
 
             // Database

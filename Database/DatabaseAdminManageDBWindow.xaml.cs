@@ -485,5 +485,87 @@ namespace ssi
         {
             //DatabaseHandler.UpdateDatabaseLocalLists();
         }
+
+        private void ResampleScheme_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (SchemesBox.SelectedItem != null)
+            {
+                string name = (string)SchemesBox.SelectedItem;
+                AnnoScheme oldScheme = DatabaseHandler.GetAnnotationScheme(name);
+                AnnoScheme newScheme = DatabaseHandler.GetAnnotationScheme(name);
+                if (newScheme.Type != AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    MessageBox.Show("Only continuous annotations can be resampled");
+                    return;
+                }
+
+                
+
+                newScheme.Name = newScheme.Name + "_resampled";
+                AnnoTierNewContinuousSchemeWindow window = new AnnoTierNewContinuousSchemeWindow(ref newScheme);
+                window.ShowDialog();
+
+                if(window.DialogResult == true)
+                {
+                    if (DatabaseHandler.AddScheme(newScheme))
+                    {
+
+                        List<DatabaseAnnotation> existingAnnos =  DatabaseHandler.GetAnnotations(oldScheme);
+
+                        if (existingAnnos.Count > 0)
+                        {
+                            AnnoList al_t = DatabaseHandler.LoadAnnoList(existingAnnos[0].Id);
+                            double old_sr = al_t.Scheme.SampleRate;
+                            double factor = 0;
+
+                            if (old_sr > newScheme.SampleRate)
+                            {
+                                factor = old_sr / newScheme.SampleRate;
+                            }
+                            else if (old_sr < newScheme.SampleRate)
+                            {
+                                factor = newScheme.SampleRate / old_sr;
+                            }
+
+                            else factor = 1;
+                                
+                                
+                            if (factor % 1 != 0)
+                            {
+                                MessageBox.Show("New samplerate must be a number divisible by old samplerate.");
+                                return;
+                            }
+
+
+                            foreach (DatabaseAnnotation anno in existingAnnos)
+                            {
+                                AnnoList al = DatabaseHandler.LoadAnnoList(anno.Id);
+                                DatabaseHandler.resampleAnnotationtoNewScheme(al, newScheme, al_t.Scheme);
+
+                            }
+
+                            GetSchemes();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Scheme created, but no existing Annotations found, nothing was converted.");
+                        }
+                    }
+                }
+
+
+
+             
+
+
+
+
+
+
+
+            }
+
+        }
     }
 }
