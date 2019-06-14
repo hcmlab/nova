@@ -123,7 +123,7 @@ Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. 
 
 **Free / Discrete Scheme**
 
- Shorcut					Description    
+ Shortcut					Description    
  -------					------ 
  0 - 9						Setting the label for the selected segment (For discrete schemes)
  S (on Segment)			    Splitting the selected segment in two parts on the green annotation cursor
@@ -145,7 +145,7 @@ Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. 
 
 **Continuous Scheme**
 
- Shorcut					Description    
+ Shortcut					Description    
  -------					------ 
  0 - 9						Setting the level of the continuous annotation
  arrow key up				Setting the level of the continuous annotation up
@@ -253,7 +253,91 @@ An annotation can be saved to a file on disk. Actually, it is stored in two sepa
     ...
 	~~~~
 	
+## Inter-rater Agreement
+
+NOVA provides several statistical meassures to investigate the agreement between different raters over multiple annotations. The following listing describes in depth details for the implemented meassures.
+
+* Cronbach's alpha:
 	
+	Cronbach's alpha is calculated with the following formula:
+	
+	$\alpha_{standardized} = \frac{K\bar{r}}{1 + (K - 1)\bar{r}}$
+
+	where $K$ defines the number of components (K-items or testlets) 
+	
+	$\bar{r}$ is the mean of the $K(K-1)/2} K(K-1)/2$ non-redundant correlation coefficients
+
+* Spearman Correlation:
+
+	Spearman's $\rho$ is calculated with the following formula:
+
+	$r_{s}=\rho_{rg_{X}, rg_{Y}} = \frac{cov(rg_{X}, rg_{Y})}{\sigma_{rg_{X}}\sigma_{rg_{Y}}}$
+
+	where
+
+	$\rho$ denotes the usual Pearson correlation coefficient, but applied to the rank variables.
+
+	$cov(rg_{X}, rg_{Y})$ is the covariance of the rank variables.
+
+	$\sigma_{rg_{X}}$ and $\sigma_{rg_{Y}}$ are the standard deviations of the rank variables.
+
+* Concordance Correlation:
+
+	Lin’s concordance correlation coefficient is calculated with the following formula:
+
+	$\hat {\rho }_{c}={\frac {2s_{xy}}{s_{x}^{2}+s_{y}^{2}+({\bar {x}}-{\bar {y}})^{2}}}$,
+
+	where the mean is computed as
+
+	$\bar{x}=\frac{1}{N}\sum _{n=1}^{N}x_{n}$
+
+	and the variance
+
+	$s_{x}^{2}={\frac {1}{N}}\sum _{n=1}^{N}(x_{n}-{\bar {x}})^{2}$
+
+	and the covariance
+
+	$s_{xy}={\frac {1}{N}}\sum _{n=1}^{N}(x_{n}-{\bar {x}})(y_{n}-{\bar {y}})$
+
+	McBride suggests the following guidelines for interpreting Lin’s concordance correlation coefficient:
+
+	* < 0.90: poor
+	* 0.90 to 0.95: moderate
+	* 0.95 to 0.99: substantial
+	* \> 0.99 almost perfect.
+
+
+* Pearson Correlation Coefficient:
+
+	Pearson's r is calculated with the following formula:
+
+	$r_{xy} = \frac{\sum_{i = 1}^n(x_{i} - \bar{x})(y_{i} - \bar{y})}{\sqrt{\sum_{i=1}^n(x_{i} - \bar{x})^2} \sqrt{\sum_{i=1}^n(y_{i} - \bar{y})^2}}$
+	
+	$n$ is sample size
+
+	$x_{i}, y_{i}$ are the individual sample points indexed with i
+
+	$\bar{x} = \frac{1}{n}\sum_{i = 1}^n x_{i}$, analogously for $\bar{y}$
+
+	For the interpretation of the Pearson Correlation Coefficient we considered the following guidelines:
+
+	* = -1, perfect downhill (negative) linear relationship
+	* -1 to -0.7, strong downhill (negative) linear relationship
+	* -0.7 to -0.5, moderate downhill (negative) relationship
+	* -0.5 to -0.3, weak downhill (negative) relationship
+	* -0.3 to 0.3 no linear relationship
+	* 0.3 to 0.5, weak uphill (positive) relationship
+	* 0.5 to 0.7, moderate uphill (positive) relationship
+	* 0.7 to 1, strong uphill (positive) linear relationship
+	* = 1, perfect uphill (positive) linear relationship
+	
+
+* Fisher z-score:
+
+	The Fisher Z-Transformation is a way to transform the sampling distribution of Pearson’s r (i.e. the correlation coefficient) so that it becomes normally distributed.
+
+	$z’ = .5[ln(1+r) – ln(1-r)]$
+
 
 # Database
 
