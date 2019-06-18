@@ -35,6 +35,11 @@ namespace updater
             InitializeComponent();
             update(version);
 
+            foreach (var process in Process.GetProcessesByName("nova"))
+            {
+                process.Kill();
+            }
+
         }
 
 
