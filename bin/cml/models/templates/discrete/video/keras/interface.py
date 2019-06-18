@@ -2,7 +2,6 @@ from numpy.random import seed
 seed(1234)
 from tensorflow import set_random_seed
 set_random_seed(1234)
-
 import sys
 import importlib
 if not hasattr(sys, 'argv'):
@@ -42,6 +41,8 @@ def getOptions(opts, vars):
         vars['session'] = None
         vars['model'] = None
         vars['model_id'] = "."
+        vars['monitor'] = ""
+
 
         '''Setting the default options. All options can be overwritten by adding them to the conf-dictionary in the same file as the network'''
         opts['network'] = ''
@@ -81,12 +82,14 @@ def train(data, label_score, opts, vars):
         set_opts_from_config(opts, module.conf)
 
         n_input = opts['image_width'] * opts['image_height'] * opts['n_channels']
- 
+
         if not opts['is_regression']:
             #adding one output for the restclass
-            n_classes = int(max(label_score)+1)
+            n_output = int(max(label_score)+1)
+            vars['monitor'] = "acc"
         else:
-            n_classes = 1
+            n_output = 1
+            vars['monitor'] = "loss"
 
         # callbacks
         log_path, ckp_path = get_paths()
@@ -101,7 +104,7 @@ def train(data, label_score, opts, vars):
 
         checkpoint = ModelCheckpoint(    
             filepath =  os.path.join(ckp_path, experiment_id +  '.trainer.PythonModel.model.h5'),   
-            monitor='acc', 
+            monitor=vars['monitor'], 
             verbose=1, 
             save_best_only=True, 
             save_weights_only=False, 
@@ -139,11 +142,14 @@ def forward(data, probs_or_score, opts, vars):
         sess = vars['session']
         graph = vars['graph']   
 
+        
         if model and sess and graph:   
 
             n_output = len(probs_or_score)
             npdata = np.asarray(data)
             img = Image.fromarray(npdata)
+            b, g, r = img.split()
+            img = Image.merge("RGB", (r, g, b))
             x = img.resize((opts['image_height'], opts['image_width']))
           
             x = kerasimage.img_to_array(x)
@@ -154,7 +160,7 @@ def forward(data, probs_or_score, opts, vars):
                 with graph.as_default():
                     pred = model.predict(x, batch_size=1, verbose=0)
 
-            sanity_check(probs_or_score)
+            #sanity_check(probs_or_score)
             
             for i in range(len(pred[0])):
                 probs_or_score[i] = pred[0][i]  
@@ -173,9 +179,9 @@ def save(path, opts, vars):
         # save model
         _, ckp_path = get_paths()
 
-        temp_model_path = path + '.' + opts['network'] + '.h5'
-        print('Move best checkpoint to ' + temp_model_path)
-        shutil.move(os.path.join(ckp_path, vars['model_id'] + '.trainer.PythonModel.model.h5'), temp_model_path)
+        model_path = path + '.' + opts['network']
+        print('Move best checkpoint to ' + model_path + '.h5')
+        shutil.move(os.path.join(ckp_path, vars['model_id'] + '.trainer.PythonModel.model.h5'), model_path + '.h5')
 
         # copy scripts
         src_dir = os.path.dirname(os.path.realpath(__file__))
@@ -186,8 +192,11 @@ def save(path, opts, vars):
         srcFiles = os.listdir(src_dir)
         for fileName in srcFiles:
             full_file_name = os.path.join(src_dir, fileName)
-            if os.path.isfile(full_file_name) and ((fileName.endswith(opts['network']+'.py') or fileName.endswith('interface.py')  or fileName.endswith('customlayer.py') or fileName.endswith('nova_data_generator.py')  or fileName.endswith('db_handler.py'))) :
-                shutil.copy(full_file_name, dst_dir)    
+            if os.path.isfile(full_file_name) and (fileName.endswith('interface.py')  or fileName.endswith('customlayer.py') or fileName.endswith('nova_data_generator.py')  or fileName.endswith('db_handler.py')):
+                shutil.copy(full_file_name, dst_dir)
+            elif os.path.isfile(full_file_name) and fileName.endswith(opts['network']+'.py'):
+                shutil.copy(full_file_name, os.path.join(dst_dir, model_path + '.py' ))
+                
 
     except Exception as e: 
         print_exception(e, 'save')

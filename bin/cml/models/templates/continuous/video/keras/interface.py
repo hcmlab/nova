@@ -1,3 +1,7 @@
+from numpy.random import seed
+seed(1234)
+from tensorflow import set_random_seed
+set_random_seed(1234)
 import sys
 import importlib
 if not hasattr(sys, 'argv'):
@@ -6,16 +10,25 @@ import tensorflow as tf
 import numpy as np
 import random
 import time
-import datetime
 from xml.dom import minidom
 import os
 import shutil
 import site
 import pprint
-from tensorflow.python.keras.models import load_model
-from tensorflow.python.keras.callbacks import ModelCheckpoint, TensorBoard
-from tensorflow.python.keras import backend
-
+import h5py
+import imageio
+from skimage.transform import resize
+#from tensorflow.python.keras.models import load_model
+#from tensorflow.python.keras.callbacks import ModelCheckpoint
+#from tensorflow.python.keras import backend
+import keras
+from keras import backend
+from keras import optimizers
+from keras.preprocessing import image as kerasimage
+from keras.models import load_model
+from keras.callbacks import TensorBoard, ModelCheckpoint
+from nova_data_generator import DataGenerator
+from PIL import Image
 
 #interface
 def getModelType(types, opts, vars):
@@ -30,80 +43,64 @@ def getOptions(opts, vars):
         vars['model_id'] = "."
         vars['monitor'] = ""
 
+
         '''Setting the default options. All options can be overwritten by adding them to the conf-dictionary in the same file as the network'''
         opts['network'] = ''
         opts['experiment_id'] = ''
         opts['is_regression'] = True
-        opts['n_timesteps'] = 1
-        opts['perma_drop'] = False
         opts['n_fp'] = 1
-        opts['loss_function'] = 'mean_squared_error'
-        opts['optimizier'] = 'adam'
-        opts['metrics'] = []
+        opts['loss_function'] = 'categorical_crossentropy'
+        opts['optimizer'] = 'adam'
+        opts['metrics'] = ['rmse']
         opts['lr'] = 0.0001
-        opts['n_epoch'] = 1
         opts['batch_size'] = 32
+        opts['n_epoch'] = 3
+        opts['image_width'] = 224
+        opts['image_height'] = 224
+        opts['n_channels'] = 3
+        opts['shuffle'] = True
+        opts['max_queue_size'] = 20
+        opts['workers'] = 4
+        opts['batch_size_train'] = 32
+        opts['batch_size_val'] = 32
+        opts['data_path_train'] = ''
+        opts['data_path_val'] = ''
+        opts['datagen_rescale'] = 1./255
+        opts['datagen_rotation_range'] = 20
+        opts['datagen_width_shift_range'] = 0.2
+        opts['datagen_height_shift_range'] = 0.2
 
     except Exception as e:
         print_exception(e, 'getOptions')
-        exit()
+        sys.exit()
 
 
-def train(data,label_score, opts, vars):
- 
+def train(data, label_score, opts, vars):
+    
     try:
         module = __import__(opts['network'])
         set_opts_from_config(opts, module.conf)
 
-        n_input = data[0].dim
-        
+        n_input = opts['image_width'] * opts['image_height'] * opts['n_channels']
+
         if not opts['is_regression']:
             #adding one output for the restclass
             n_output = int(max(label_score)+1)
             vars['monitor'] = "acc"
         else:
-            vars['monitor'] = "loss"
             n_output = 1
-            
+            vars['monitor'] = "mean_squared_error"
 
-        print ('load network architecture from ' + opts['network'] + '.py')
-        print('#input: {} \n#output: {}'.format(n_input, n_output))
-        model = module.getModel(n_input, n_output)
-        
-
-        nts = opts['n_timesteps']
-        if nts < 1:
-            raise ValueError('n_timesteps must be >= 1 but is {}'.format(nts))     
-        elif nts == 1:
-            sample_shape = (n_input, )   
-        else: 
-            sample_shape = (int(n_input / nts), nts)
-
-        #(number of samples, number of features, number of timesteps)
-        sample_list_shape = ((len(data),) + sample_shape)
-
-        x = np.empty(sample_list_shape)
-        y = np.empty((len(label_score), n_output))
-       
-        print('Input data array should be of shape: {} \nLabel array should be of shape {} \nStart reshaping input accordingly...\n'.format(x.shape, y.shape))
-
-        sanity_check(x)
-        
-        #reshaping
-        for sample in range(len(data)):
-            #input
-            temp = np.reshape(data[sample], sample_shape) 
-            x[sample] = temp
-            #output
-            if not opts['is_regression']:
-                y[sample] = convert_to_one_hot(label_score[sample], n_output)
-            else:
-                y[sample] = label_score[sample] 
-
+        # callbacks
         log_path, ckp_path = get_paths()
 
         experiment_id = opts['experiment_id'] if opts['experiment_id'] else opts['network'] + '-' + str(time.strftime("%Y_%m_%d-%H_%M_%S")) 
         print('Checkpoint dir: {}\nLogdir: {}\nExperiment ID: {}'.format(ckp_path, log_path, experiment_id))
+        tensorboard = TensorBoard(
+            log_dir=os.path.join(log_path, experiment_id),
+            write_graph=True,
+            write_images=True,
+            update_freq='batch')
 
         checkpoint = ModelCheckpoint(    
             filepath =  os.path.join(ckp_path, experiment_id +  '.trainer.PythonModel.model.h5'),   
@@ -113,86 +110,69 @@ def train(data,label_score, opts, vars):
             save_weights_only=False, 
             mode='auto', 
             period=1)
-        callbacklist = [checkpoint]
+        callbacklist = [tensorboard, checkpoint]
 
-        model.summary()
-        print('Loss: {}\nOptimizer: {}\n'.format(opts['loss_function'], opts['optimizier']))
-        model.compile(loss=opts['loss_function'],
-                optimizer=opts['optimizier'],
-                metrics=opts['metrics'])
-
-        print('train_x shape: {} | train_x[0] shape: {}'.format(x.shape, x[0].shape))
-
-        model.fit(x,
-            y,
-            epochs=opts['n_epoch'],
-            batch_size=opts['batch_size'],
-            callbacks=callbacklist)        
-
-        vars['n_input'] = n_input
-        vars['n_output'] = n_output
+        # data
+        training_generator = DataGenerator(dim=(opts['image_width'], opts['image_height']), n_channels=opts['n_channels'] ,batch_size=opts['batch_size'], n_classes=n_output)     
+        
+        # model
+        model = module.getModel(shape=(opts['image_width'], opts['image_height'], opts['n_channels']), n_classes=n_output)
+        model.compile(optimizer=opts['optimizer'], loss=opts['loss_function'], metrics=opts['metrics'])  
+        print(model.summary())
+        model.fit_generator(generator=training_generator,
+                            shuffle=opts['shuffle'],
+                            workers=opts['workers'],
+                            max_queue_size=opts['max_queue_size'],
+                            verbose=1,
+                            epochs=opts['n_epoch'],
+                            callbacks=callbacklist)
+     
+        # setting variables
         vars['model_id'] = experiment_id
         vars['model'] = model
-    
+
     except Exception as e:
         print_exception(e, 'train')
-        exit()
+        sys.exit()
 
 def forward(data, probs_or_score, opts, vars):
     try:
+       
         model = vars['model']
         sess = vars['session']
         graph = vars['graph']   
 
+        
         if model and sess and graph:   
-            n_input = data.dim
+
             n_output = len(probs_or_score)
-            n_fp = int(opts['n_fp'])
-
-            #reshaping the input
-            nts = opts['n_timesteps']
-            if nts < 1:
-                raise ValueError('n_timesteps must be >= 1 but is {}'.format(nts))     
-            elif nts == 1:
-                sample_shape = (n_input,)   
-            else:  
-                sample_shape = (int(n_input / nts), nts)
-
-            x = np.asarray(data)
-            x = x.astype('float32')
-            x.reshape(sample_shape) 
-
-            sanity_check(data)
-
-            results = np.zeros((n_fp, n_output), dtype=np.float32)
-
+            npdata = np.asarray(data)
+            img = Image.fromarray(npdata)
+            b, g, r = img.split()
+            img = Image.merge("RGB", (r, g, b))
+            x = img.resize((opts['image_height'], opts['image_width']))
+          
+            x = kerasimage.img_to_array(x)
+            x = np.expand_dims(x, axis=0)
+            x = x*(1./255)
+  
             with sess.as_default():
                 with graph.as_default():
-                    for fp in range(n_fp):
-                        pred = model.predict(x, batch_size=1, verbose=0)
-                        if opts['is_regression']:
-                            results[fp][0] = pred[0][0]
-                        else:     
-                            for i in range(len(pred[0])):
-                                results[fp][i] = pred[0][i]
-            mean = np.mean(results, axis=0)
-            std = np.std(results, axis=0)
-            conf = max(0,1-np.mean(std))
+                    pred = model.predict(x, batch_size=1, verbose=0)
 
             #sanity_check(probs_or_score)
             
-            for i in range(len(mean)):
-                probs_or_score[i] = mean[i]
-            
-            
-            return conf
+            for i in range(len(pred[0])):
+                probs_or_score[i] = pred[0][i]  
+            return max(probs_or_score)
+
         else:
             print('Train model first') 
             return 1
 
     except Exception as e: 
         print_exception(e, 'forward')
-        exit()
+        sys.exit()
 
 def save(path, opts, vars):
     try:
@@ -250,7 +230,7 @@ def load(path, opts, vars):
     except Exception as e:
         print_exception(e, 'load')
         sys.exit()
-        
+
 
 # helper functions
 def convert_to_one_hot(label, n_classes):
@@ -267,16 +247,14 @@ def print_exception(exception, function):
 
 
 def set_opts_from_config(opts, conf):
-    print(conf)
-
     for key, value in conf.items():
         opts[key] = value
 
-    print('Options haven been set to:\n')
+    print('\nOptions haven been set to:\n')
     pprint.pprint(opts)
     print('\n')
 
-#checking the input for corrupted values
+# checking the input for corrupted values
 def sanity_check(x):
     if np.any(np.isnan(x)):
         print('At least one input is not a number!')
@@ -299,3 +277,4 @@ def get_paths():
         print('Created log folder: {}'.format(log_path))
     
     return(log_path, ckp_path)
+
