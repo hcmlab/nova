@@ -96,16 +96,27 @@ namespace updater
             // Reset the stopwatch.
             sw.Reset();
 
-            System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
 
-            System.IO.File.Delete(AppDomain.CurrentDomain.BaseDirectory + "nova.exe");
-            System.IO.File.Move(AppDomain.CurrentDomain.BaseDirectory + "nova_update.exe", AppDomain.CurrentDomain.BaseDirectory + "nova.exe");
+            try
+            {
+                System.Diagnostics.Process updateProcess = new System.Diagnostics.Process();
 
-        
+                System.IO.File.Delete(AppDomain.CurrentDomain.BaseDirectory + "nova.exe");
+                System.IO.File.Move(AppDomain.CurrentDomain.BaseDirectory + "nova_update.exe", AppDomain.CurrentDomain.BaseDirectory + "nova.exe");
 
-            updateProcess.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory +  "nova.exe";
-            updateProcess.Start();
 
+
+                updateProcess.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "nova.exe";
+                updateProcess.Start();
+
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+          
 
             ProcessStartInfo Info = new ProcessStartInfo();
             Info.Arguments = "/C choice /C Y /N /D Y /T 3 & Del " + AppDomain.CurrentDomain.BaseDirectory + "updater.exe";
