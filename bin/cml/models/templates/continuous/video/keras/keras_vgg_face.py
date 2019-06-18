@@ -21,9 +21,9 @@ conf = {
         'n_fp' : 1, #number of forward passes for each prediction in order to calculate the confidence
 
         #compile
-        'loss_function' : 'categorical_crossentropy',    
+        'loss_function' : 'mse',    
         'optimizier' : 'adam',  
-        'metrics' : ['accuracy'],
+        'metrics' : ['mean_squared_error'],
         'lr' : 0.0001,
 
         #fit
@@ -45,7 +45,7 @@ def getModel (shape, n_classes):
     x = Dense(hidden_dim, activation='relu', name='fc6')(x)
     x = Dropout(0.25)(x)
     x = Dense(hidden_dim, activation='relu', name='fc7')(x)
-    predictions = Dense(n_classes, activation='softmax')(x)
+    predictions = Dense(n_classes, activation='linear')(x)
 
     model = Model(inputs=base_model.input, outputs=predictions)
 

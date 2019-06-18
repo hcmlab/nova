@@ -41,7 +41,7 @@ def getModel (n_input, n_output):
     model.add(Dense(round(n_input / 2), activation='relu'))
     model.add(CustomDropout(conf['dropout_rate'], conf['perma_drop']))
     model.add(Dense(round(n_input / 3), activation='relu'))
-    model.add(Dense(units=n_output, activation='tanh'))  
+    model.add(Dense(units=n_output, activation='linear'))  
 
     return model
     

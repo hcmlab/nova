@@ -5,6 +5,7 @@ if not hasattr(sys, 'argv'):
 import tensorflow as tf
 import numpy as np
 import random
+import time
 import datetime
 from xml.dom import minidom
 import os
@@ -12,7 +13,7 @@ import shutil
 import site
 import pprint
 from tensorflow.python.keras.models import load_model
-from tensorflow.python.keras.callbacks import ModelCheckpoint
+from tensorflow.python.keras.callbacks import ModelCheckpoint, TensorBoard
 from tensorflow.python.keras import backend
 
 
@@ -26,9 +27,12 @@ def getOptions(opts, vars):
         vars['y'] = None
         vars['session'] = None
         vars['model'] = None
+        vars['model_id'] = "."
+        vars['monitor'] = ""
 
         '''Setting the default options. All options can be overwritten by adding them to the conf-dictionary in the same file as the network'''
         opts['network'] = ''
+        opts['experiment_id'] = ''
         opts['is_regression'] = False
         opts['n_timesteps'] = 1
         opts['perma_drop'] = False
@@ -56,7 +60,9 @@ def train(data,label_score, opts, vars):
         if not opts['is_regression']:
             #adding one output for the restclass
             n_output = int(max(label_score)+1)
+            vars['monitor'] = "acc"
         else:
+            vars['monitor'] = "loss"
             n_output = 1
             
 
@@ -94,6 +100,21 @@ def train(data,label_score, opts, vars):
             else:
                 y[sample] = label_score[sample] 
 
+        log_path, ckp_path = get_paths()
+
+        experiment_id = opts['experiment_id'] if opts['experiment_id'] else opts['network'] + '-' + str(time.strftime("%Y_%m_%d-%H_%M_%S")) 
+        print('Checkpoint dir: {}\nLogdir: {}\nExperiment ID: {}'.format(ckp_path, log_path, experiment_id))
+
+        checkpoint = ModelCheckpoint(    
+            filepath =  os.path.join(ckp_path, experiment_id +  '.trainer.PythonModel.model.h5'),   
+            monitor=vars['monitor'], 
+            verbose=1, 
+            save_best_only=True, 
+            save_weights_only=False, 
+            mode='auto', 
+            period=1)
+        callbacklist = [checkpoint]
+
         model.summary()
         print('Loss: {}\nOptimizer: {}\n'.format(opts['loss_function'], opts['optimizier']))
         model.compile(loss=opts['loss_function'],
@@ -105,10 +126,12 @@ def train(data,label_score, opts, vars):
         model.fit(x,
             y,
             epochs=opts['n_epoch'],
-            batch_size=opts['batch_size'])        
+            batch_size=opts['batch_size'],
+            callbacks=callbacklist)        
 
         vars['n_input'] = n_input
         vars['n_output'] = n_output
+        vars['model_id'] = experiment_id
         vars['model'] = model
     
     except Exception as e:
@@ -174,135 +197,60 @@ def forward(data, probs_or_score, opts, vars):
 def save(path, opts, vars):
     try:
         # save model
-        model_path = path + '.' + opts['network'] + '_weights.h5'
-        print('save model to ' + model_path)
-        model = vars['model']
-        #model.save(model_path)
-        model.save_weights(model_path)
+        _, ckp_path = get_paths()
+
+        model_path = path + '.' + opts['network']
+        print('Move best checkpoint to ' + model_path + '.h5')
+        shutil.move(os.path.join(ckp_path, vars['model_id'] + '.trainer.PythonModel.model.h5'), model_path + '.h5')
 
         # copy scripts
-        srcDir = os.path.dirname(os.path.realpath(__file__)) + '\\' 
-        dstDir = os.path.dirname(path) + '\\'
+        src_dir = os.path.dirname(os.path.realpath(__file__))
+        dst_dir = os.path.dirname(path)
 
-        print('copy scripts from \'' + srcDir + '\' to \'' + dstDir + '\'')
+        print('copy scripts from \'' + src_dir + '\' to \'' + dst_dir + '\'')
 
-        if not os.path.exists(dstDir):
-            os.makedirs(dstDir)
-
-        srcFiles = os.listdir(srcDir)
+        srcFiles = os.listdir(src_dir)
         for fileName in srcFiles:
-            fullFileName = os.path.join(srcDir, fileName)
-            if os.path.isfile(fullFileName) and (fileName.endswith(opts['network']+'.py') or 'interface' in fileName or 'customlayer' in fileName) :
-                shutil.copy(fullFileName, dstDir)
-
-        
-        network_new =  os.path.basename(path) + '.' + opts['network']
-        shutil.copy(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')
+            full_file_name = os.path.join(src_dir, fileName)
+            if os.path.isfile(full_file_name) and (fileName.endswith('interface.py')  or fileName.endswith('customlayer.py') or fileName.endswith('nova_data_generator.py')  or fileName.endswith('db_handler.py')):
+                shutil.copy(full_file_name, dst_dir)
+            elif os.path.isfile(full_file_name) and fileName.endswith(opts['network']+'.py'):
+                shutil.copy(full_file_name, os.path.join(dst_dir, model_path + '.py' ))
+                
 
     except Exception as e: 
-
         print_exception(e, 'save')
-        exit()
+        sys.exit()
 
 def load(path, opts, vars):
     try:
-        print('create session and graph')   
+        print('\nLoading model\nCreating session and graph')   
         server = tf.train.Server.create_local_server()
         sess = tf.Session(server.target) 
         graph = tf.get_default_graph()
         backend.set_session(sess) 
         
-        print('\nload model from ' + path)
-        trainerPath = path
-        trainerPath = trainerPath.replace("trainer.PythonModel.model", "trainer")
+        model_path = path + '.' + opts['network'] + '.h5'
+        print('Loading model from {}'.format(model_path))
+        model = load_model(model_path);     
 
-        print('tp: {}'.format(trainerPath))
-
-        # parsing trainer to retreive input output
-        xmldoc = minidom.parse(trainerPath)
-        streams = xmldoc.getElementsByTagName('streams')
-        streamItem = streams[0].getElementsByTagName('item')
-        n_input = streamItem[0].attributes['dim'].value
-        print("#input: " + str(n_input))
         
-        classes = xmldoc.getElementsByTagName('classes')
-        n_output = len(classes[0].getElementsByTagName('item'))
-        print("#output: " + str(n_output))
-
-        # copy unique network file
-        network_tmp = os.path.dirname(path) + '\\' + opts['network'] + '.py'
-        shutil.copy(path + '.' + opts['network'] + '.py', network_tmp)
-        print ('\nload training configuration from ' + network_tmp)
-
-        # reload sys path and import network file
-        importlib.reload(site)
-
-        # loading network specific options 
-        module = __import__(opts['network'])
-        set_opts_from_config(opts, module.conf)
-
-        # load weights
-        weigth_path = path + '.' + opts['network'] + '_weights.h5'
-
-        print('\nModelpath {}'.format(weigth_path))
-        model = module.getModel(int(n_input), int(n_output))
-        model.load_weights(weigth_path)
-
-        # creating the predict function in order to avoid graph-scope errors later
-        print('create prediction function')
+        print('Create prediction function')
 
         model._make_predict_function()
         with graph.as_default():
             with sess.as_default():
-                n_input = model.inputs[0].shape[1]
-                model.predict(np.zeros((1,n_input), dtype=np.float32))
+                input_shape = list(model.layers[0].input_shape)
+                input_shape[0] = 1
+                model.predict(np.zeros(tuple(input_shape)))
 
         vars['graph'] = graph
         vars['session'] = sess
         vars['model'] = model
-
-        print('\nload model from ' + path)
-    
-        trainerPath = path
-        trainerPath = trainerPath.replace("trainer.PythonModel.model", "trainer")
-
-        print('tp: {}'.format(trainerPath))
-
-        # parsing trainer to retreive input output
-        # xmldoc = minidom.parse(trainerPath)
-        # streams = xmldoc.getElementsByTagName('streams')
-        # streamItem = streams[0].getElementsByTagName('item')
-        # n_input = streamItem[0].attributes['dim'].value
-        # print("#input: " + str(n_input))
-
-        # classes = xmldoc.getElementsByTagName('classes')
-        # n_output = len(classes[0].getElementsByTagName('item'))
-        # print("#output: " + str(n_output))
-
-        # copy unique network file
-        network_tmp = os.path.dirname(path) + '\\' + opts['network'] + '.py'
-        shutil.copy(path + '.' + opts['network'] + '.py', network_tmp)
-        print ('\nload training configuration from ' + network_tmp)
-
-        # reload sys path and import network file
-        importlib.reload(site)
-
-        # loading network specific options 
-        module = __import__(opts['network'])
-        set_opts_from_config(opts, module.conf)
-    
-        # load weights
-        weigth_path = path + '.' + opts['network'] + '_weights.h5'
-
-        print('\nModelpath {}'.format(weigth_path))
-        model = module.getModel(int(n_input), int(n_output))
-        model.load_weights(weigth_path)
-        vars['model'] = model
-
     except Exception as e:
         print_exception(e, 'load')
-        exit()
-
+        sys.exit()
+        
 
 # helper functions
 def convert_to_one_hot(label, n_classes):
@@ -334,3 +282,20 @@ def sanity_check(x):
         print('At least one input is not a number!')
     if np.any(np.isinf(x)):
         print('At least one input is inf!')
+
+# retreives the paths for log and checkpoint directories. paths are created if they do not exist
+def get_paths():
+    file_dir = os.path.dirname(os.path.realpath(__file__)) 
+    ckp_dir = 'checkpoints'
+    log_dir = 'logs'
+    ckp_path = os.path.join(file_dir, ckp_dir)
+    log_path = os.path.join(file_dir, log_dir)
+
+    if not os.path.exists(ckp_path):
+        os.makedirs(ckp_path)
+        print('Created checkpoint folder: {}'.format(ckp_path))
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
+        print('Created log folder: {}'.format(log_path))
+    
+    return(log_path, ckp_path)
