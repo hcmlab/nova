@@ -34,6 +34,12 @@ namespace ssi
                 window.deactiveExplainationButton();
             }
 
+            if (AnnoTier.Selected == null)
+            {
+                MessageBox.Show("Select annotation track first");
+                return;
+            }
+
             window = new ExplanationWindow();
 
             try
@@ -60,6 +66,12 @@ namespace ssi
             if(windowInnvestigate != null)
             {
                 windowInnvestigate.deactiveExplainationButton();
+            }
+
+            if(AnnoTier.Selected == null)
+            {
+                MessageBox.Show("Select annotation track first");
+                return;
             }
 
             windowInnvestigate = new ExplanationWindowInnvestigate();
