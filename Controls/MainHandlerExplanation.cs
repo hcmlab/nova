@@ -227,8 +227,8 @@ namespace ssi
                                 progress.ReportProgress(-1, null);
                                 continue;
                             }
-
-                            var data = innvestigateExplainer.explain(model, windowInnvestigate.img, windowInnvestigate.postprocess, windowInnvestigate.explainAlgorithm);
+                            
+                            var data = innvestigateExplainer.explain(model, windowInnvestigate.img, windowInnvestigate.postprocess, windowInnvestigate.explainAlgorithm, windowInnvestigate.args);
 
                             int classID = data[0];
                             double acc = data[1];

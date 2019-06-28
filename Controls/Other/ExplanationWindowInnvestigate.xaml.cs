@@ -30,6 +30,7 @@ namespace ssi.Controls.Other
         public Dictionary<int, string> idToClassName;
         public string postprocess;
         public string explainAlgorithm;
+        public string args;
         private string basePath;
 
 
@@ -62,6 +63,9 @@ namespace ssi.Controls.Other
             parseTrainerFile(getTrainerFile(basePath, modelPath));
             explainer.SelectedIndex = 0;
             postprocessing.SelectedIndex = 0;
+            lrpalpha.Text = "1.0";
+            lrpbeta.Text = "0.0";
+            args = "";
 
         }
 
@@ -106,6 +110,10 @@ namespace ssi.Controls.Other
 
             postprocess = postprocessing.Text.ToUpper();
             explainAlgorithm = explainer.Text.ToUpper();
+            args = "{" +
+                "'lrpalpha':" + lrpalpha.Text + "," +
+                "'lrpbeta':" + lrpbeta.Text +
+                "}";
 
             getNewExplanation = true;
             explanationButton.IsEnabled = false;

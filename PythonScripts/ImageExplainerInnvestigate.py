@@ -23,6 +23,8 @@ import innvestigate.utils.visualizations as ivis
 
 import matplotlib.pyplot as plot
 
+import ast
+
 
 def transform_img_fn(img):
     img = pilimage.open(inputoutput.BytesIO(bytes(img)))
@@ -49,8 +51,13 @@ def getTopXpredictions(prediction, topLabels):
 
     return prediction_class[:topLabels]
 
-def explain(model, img, postprocess, explainer):
+def explain(model, img, postprocess, explainer, args):
     
+    explainDict = {}
+
+    if len(args) > 0:
+        explainDict = ast.literal_eval(args)
+
     explanation = []
 
     img, oldImg = transform_img_fn(img)
@@ -74,7 +81,7 @@ def explain(model, img, postprocess, explainer):
     elif explainer == "LRPZ":
         analyzer = innvestigate.analyzer.LRPZ(model_wo_sm)
     elif explainer == "LRPALPHABETA":
-        analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, beta=1)
+        analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, alpha=explainDict['lrpalpha'], beta=explainDict['lrpbeta'])
     elif explainer == "DEEPTAYLOR":
         analyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
 
@@ -114,6 +121,42 @@ def explain(model, img, postprocess, explainer):
     explanation = (topClass[0][0], topClass[0][1], imgByteArr)
     
     return explanation
+
+def lrpalphatest():
+    modelPath = "F:/test/pokemon.trainer.PythonModel.model.keras_vgg_face.h5"
+    img_path = "F:/test/pikachu.jpeg"
+    img = pilimage.open(img_path)
+
+    imgByteArr = inputoutput.BytesIO()
+    img.save(imgByteArr, format='JPEG')
+    imgByteArr = imgByteArr.getvalue()
+
+    img, oldImg = transform_img_fn(imgByteArr)
+    img = img*(1./255)
+
+    model = load_model(modelPath)
+
+    model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
+
+    # Creating an analyzer
+    gradient_analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, alpha=1, beta=0)
+
+    analysis = gradient_analyzer.analyze(img)
+
+    testfilter = heatmap_rainbow(analysis)[0]
+    plot.imshow(testfilter)
+    plot.show()
+
+    imgFinal = graymap(analysis)[0]
+    imgFinal = np.uint8(imgFinal*255)
+
+    img = pilimage.fromarray(imgFinal)
+    imgByteArr = inputoutput.BytesIO()
+    img.save(imgByteArr, format='JPEG')
+    imgByteArr = imgByteArr.getvalue()
+
+    plot.imshow(graymap(analysis)[0])
+    plot.show()
 
 def test():
     modelPath = "C:/Users/Alex Heimerl/Desktop/test/pokemon.trainer.PythonModel.model.keras_vgg_face.h5"
@@ -216,4 +259,4 @@ def graymap(X):
 
 
 if __name__ == '__main__':
-    test()
+    lrpalphatest()
