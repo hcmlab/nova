@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.5.5";
+        public static string BuildVersion = "1.0.5.6";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
 
@@ -117,6 +117,7 @@ namespace ssi
             control.signalStatusBar.Background = Defaults.Brushes.Highlight;
             control.signalSettingsButton.Click += signalSettingsButton_Click;
             control.signalStatsButton.Click += signalStatsButton_Click;
+            control.annoStatsButton.Click += annoStatsButton_Click;
             control.signalStatusDimComboBox.SelectionChanged += signalDimComboBox_SelectionChanged;
             control.signalStatusDimComboBox.SelectionChanged += signalDimComboBox_SelectionChanged;
             control.signalVolumeControl.volumeSlider.ValueChanged += signalVolumeControl_ValueChanged;

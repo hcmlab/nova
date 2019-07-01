@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -168,8 +170,75 @@ namespace ssi
             }
         }
 
+        private void annoStatsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (AnnoTier.Selected != null && AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            {
+
+
+                Signal temp = new Signal();
+
+                AnnoTier annoTier = AnnoTierStatic.Selected;
+                if (annoTier.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS) MessageBox.Show("Selected a continous track to convert to ssi stream");
+                else
+                {
+                    double sr = 1 / annoTier.AnnoList[0].Duration;
+                    double from = 0.0;
+                    double to = annoTier.AnnoList[annoTier.AnnoList.Count - 1].Stop;
+                    int num = annoTier.AnnoList.Count;
+                    string ftype = "ASCII";
+                    string type = "FLOAT";
+                    int by = sizeof(float);
+                    int dim = 1;
+                    int ms = Environment.TickCount;
+
+                    
+                    string filename = annoTier.AnnoList.Scheme.Name + ".stream";
+
+                    StreamWriter swheader = new StreamWriter(filename, false, System.Text.Encoding.Default);
+                    swheader.WriteLine("<?xml version=\"1.0\" ?>");
+                    swheader.WriteLine("<stream ssi-v=\"2\">");
+                    swheader.WriteLine("\t<info ftype=\"" + ftype + "\" sr=\"" + sr.ToString("0.000000", CultureInfo.InvariantCulture) + "\" dim=\"" + dim.ToString() + "\" byte=\"" + by.ToString() + "\" type=\"" + type + "\" />");
+                    swheader.WriteLine("\t<time ms=\"" + ms + "\" local=\"" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + "\" system=\"" + DateTime.UtcNow.ToString("yyyy/MM/dd HH:mm:ss") + "\"/>");
+                    swheader.WriteLine("\t<chunk from=\"" + from.ToString("0.000000", CultureInfo.InvariantCulture) + "\" to=\"" + to.ToString("0.000000", CultureInfo.InvariantCulture) + "\" byte=\"" + "0" + "\" num=\"" + num + "\"/>");
+
+                    swheader.WriteLine("</stream>");
+
+                    swheader.Close();
+
+                    StreamWriter swdata = new StreamWriter(filename + "~", false, System.Text.Encoding.Default);
+                    foreach (AnnoListItem i in annoTier.AnnoList)
+                    {
+                        swdata.WriteLine(i.Score);
+                    }
+                    swdata.Close();
+
+                    temp = Signal.LoadStreamFile(filename);
+                    File.Delete(filename);
+                   
+                }
+
+
+                //temp.
+
+                SignalStatsWindow ssw = new SignalStatsWindow(temp, 0, true);
+                Time.OnTimelineChanged += ssw.timeRangeChanged;
+                ssw.Topmost = true;
+                ssw.WindowStartupLocation = WindowStartupLocation.Manual;
+                ssw.Show();
+
+                if (ssw.DialogResult == false)
+                {
+                    Time.OnTimelineChanged -= ssw.timeRangeChanged;
+                }
+
+            }
+        }
 
         
+
+
+
 
         private void signalVolumeControl_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
