@@ -179,9 +179,7 @@ namespace ssi
                 Signal temp = new Signal();
 
                 AnnoTier annoTier = AnnoTierStatic.Selected;
-                if (annoTier.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS) MessageBox.Show("Selected a continous track to convert to ssi stream");
-                else
-                {
+             
                     double sr = 1 / annoTier.AnnoList[0].Duration;
                     double from = 0.0;
                     double to = annoTier.AnnoList[annoTier.AnnoList.Count - 1].Stop;
@@ -192,8 +190,13 @@ namespace ssi
                     int dim = 1;
                     int ms = Environment.TickCount;
 
-                    
-                    string filename = annoTier.AnnoList.Scheme.Name + ".stream";
+                   var filename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), annoTier.AnnoList.Scheme.Name + ".stream");
+
+
+                try
+                {
+
+               
 
                     StreamWriter swheader = new StreamWriter(filename, false, System.Text.Encoding.Default);
                     swheader.WriteLine("<?xml version=\"1.0\" ?>");
@@ -203,7 +206,6 @@ namespace ssi
                     swheader.WriteLine("\t<chunk from=\"" + from.ToString("0.000000", CultureInfo.InvariantCulture) + "\" to=\"" + to.ToString("0.000000", CultureInfo.InvariantCulture) + "\" byte=\"" + "0" + "\" num=\"" + num + "\"/>");
 
                     swheader.WriteLine("</stream>");
-
                     swheader.Close();
 
                     StreamWriter swdata = new StreamWriter(filename + "~", false, System.Text.Encoding.Default);
@@ -214,22 +216,34 @@ namespace ssi
                     swdata.Close();
 
                     temp = Signal.LoadStreamFile(filename);
-                    File.Delete(filename);
-                   
-                }
+                    try
+                    {
+                        File.Delete(filename);
+                        File.Delete(filename + "~");
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
 
+                    //temp.
 
-                //temp.
-
-                SignalStatsWindow ssw = new SignalStatsWindow(temp, 0, true);
+                    SignalStatsWindow ssw = new SignalStatsWindow(temp, 0, true);
                 Time.OnTimelineChanged += ssw.timeRangeChanged;
                 ssw.Topmost = true;
                 ssw.WindowStartupLocation = WindowStartupLocation.Manual;
                 ssw.Show();
 
-                if (ssw.DialogResult == false)
+                    if (ssw.DialogResult == false)
+                    {
+                        Time.OnTimelineChanged -= ssw.timeRangeChanged;
+                    }
+
+                }
+
+                catch(Exception x)
                 {
-                    Time.OnTimelineChanged -= ssw.timeRangeChanged;
+                    MessageBox.Show(x.ToString());
                 }
 
             }
