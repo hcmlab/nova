@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,13 +25,14 @@ namespace ssi
 
         public Timeline vt = MainHandler.Time;
 
-        public SignalStatsWindow(Signal _signal, int selected_dimension)
+        public SignalStatsWindow(Signal _signal, int selected_dimension, bool isAnno =false)
         {
             InitializeComponent();
 
             this.signal = _signal;
             this.selected_dim = selected_dimension;
-            this.Title = signal.FileName + " Dimension: " + selected_dimension;
+            if (isAnno) this.Title = Path.GetFileNameWithoutExtension(signal.FileName);
+            else this.Title = Path.GetFileNameWithoutExtension(signal.FileName) + " Dimension: " + selected_dimension;
 
             this.MinBox.Text = signal.min[selected_dimension].ToString();
             this.MaxBox.Text = signal.max[selected_dimension].ToString();
@@ -63,6 +65,11 @@ namespace ssi
                 {
                     if (MainHandler.Time.SelectionStart < i / signal.rate && MainHandler.Time.SelectionStop > i / signal.rate)
                     {
+                        if(float.IsNaN(signal.data[i * signal.dim + d]))
+                        {
+                            continue;
+                        }
+
                         average += signal.data[i * signal.dim + d];
                         averagesamples++;
                         for (int j = 1; j <= numclasses; j++)

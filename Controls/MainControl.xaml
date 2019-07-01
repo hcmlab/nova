@@ -408,12 +408,16 @@
                                             <TextBlock Name="annoSchemeContinuousMinLabel" ToolTip="Minimum score value" TextTrimming="WordEllipsis"></TextBlock>
                                             <Separator />
                                             <TextBlock Name="annoSchemeContinuousMaxLabel" ToolTip="Maximum score value" TextTrimming="WordEllipsis"></TextBlock>
+                                            <Separator />
+                                            <Button Name="annoStatsButton" Background="Transparent" BorderThickness="0" Content="Stats" ToolTip="Show Statistics"></Button>
+
                                         </StatusBar>
                                         <Separator />
                                         <TextBlock Name="annoStatusAnnotatorLabel" ToolTip="Name of the annotator" TextTrimming="WordEllipsis"></TextBlock>
                                         <Separator />
                                         <TextBlock Name="annoStatusRoleLabel" ToolTip="Name of the role that is annotated" TextTrimming="WordEllipsis"></TextBlock>
-
+                                       
+                                      
                                     </StatusBar>
 
                                     <StackPanel Grid.Row="0"

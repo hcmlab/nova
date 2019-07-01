@@ -1085,7 +1085,7 @@ namespace ssi
                 int dim = 1;
                 int ms = Environment.TickCount;
 
-                if (annoTier.AnnoList.HasChanged)
+                if (annoTier.AnnoList.HasChanged || annoTier.AnnoList.Source.File.Path == "")
                 {
                     MessageBoxResult m = MessageBoxResult.None;
                     m = MessageBox.Show("You need to save continous annotations on tier " + annoTier.AnnoList.Scheme.Name + " first", "Confirm", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -1095,6 +1095,8 @@ namespace ssi
                         exportSelectedAnnoAs();
                     }
                 }
+
+
 
                 string filename = Path.GetDirectoryName(annoTier.AnnoList.Source.File.Path) + "\\" + annoTier.AnnoList.Scheme.Name + ".stream";
 
@@ -1112,7 +1114,7 @@ namespace ssi
                 StreamWriter swdata = new StreamWriter(filename + "~", false, System.Text.Encoding.Default);
                 foreach (AnnoListItem i in annoTier.AnnoList)
                 {
-                    swdata.WriteLine(i.Label);
+                    swdata.WriteLine(i.Score);
                 }
                 swdata.Close();
 

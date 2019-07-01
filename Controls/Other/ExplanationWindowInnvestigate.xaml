@@ -73,13 +73,13 @@
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="Explainer" HorizontalAlignment="Center"></TextBlock>
                     <ComboBox Name="explainer" Grid.Row="1" Margin="0 5 0 0">
-                        <ComboBoxItem>Gradient</ComboBoxItem>
-                        <ComboBoxItem>Deconvnet</ComboBoxItem>
-                        <ComboBoxItem>GuidedBackprop</ComboBoxItem>
-                        <ComboBoxItem>DeepTaylor</ComboBoxItem>
-                        <ComboBoxItem>LRPEpsilon</ComboBoxItem>
-                        <ComboBoxItem>LRPZ</ComboBoxItem>
-                        <ComboBoxItem>LRPAlphaBeta</ComboBoxItem>
+                        <ComboBoxItem Tag="Gradient">Gradient</ComboBoxItem>
+                        <ComboBoxItem Tag="Deconvnet">Deconvnet</ComboBoxItem>
+                        <ComboBoxItem Tag="GuidedBackprop">GuidedBackprop</ComboBoxItem>
+                        <ComboBoxItem Tag="DeepTaylor">DeepTaylor</ComboBoxItem>
+                        <ComboBoxItem Tag="LRPEpsilon">LRPEpsilon</ComboBoxItem>
+                        <ComboBoxItem Tag="LRPZ">LRPZ</ComboBoxItem>
+                        <ComboBoxItem Tag="LRPAlphaBeta">LRPAlphaBeta</ComboBoxItem>
                     </ComboBox>
                 </Grid>
                 <Grid Margin="5">
@@ -101,7 +101,72 @@
                         <ComboBoxItem>gist_heat</ComboBoxItem>
                     </ComboBox>
                 </Grid>
+                <!--<Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"></ColumnDefinition>
+                            <ColumnDefinition Width="auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" HorizontalAlignment="Center">Alpha:
+                            <Label.Style>
+                                <Style TargetType="{x:Type Label}">
+                                    <Setter Property="Visibility" Value="Hidden"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=explainer, Path=SelectedItem.Tag}" Value="LRPAlphaBeta">
+                                            <Setter Property="Visibility" Value="Visible"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Label.Style>
+                        </Label>
+                        <TextBox Grid.Column="1" Name="alpha" Width="30" HorizontalAlignment="Center" HorizontalContentAlignment="Center">
+                            <TextBox.Style>
+                                <Style TargetType="{x:Type TextBox}">
+                                    <Setter Property="Visibility" Value="Hidden"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=explainer, Path=SelectedItem.Tag}" Value="LRPAlphaBeta">
+                                            <Setter Property="Visibility" Value="Visible"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Grid>
+                </Grid>-->
+                <Grid Margin="5">
+                    <Grid.Style>
+                        <Style>
+                            <Setter Property="Grid.Visibility" Value="Hidden"></Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=explainer, Path=SelectedItem.Tag}" Value="LRPAlphaBeta">
+                                    <Setter Property="Grid.Visibility" Value="Visible"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"></ColumnDefinition>
+                            <ColumnDefinition Width="auto"></ColumnDefinition>
+                            <ColumnDefinition Width="auto"></ColumnDefinition>
+                            <ColumnDefinition Width="auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" HorizontalAlignment="Center">Alpha:</Label>
+                        <TextBox Grid.Column="1" Name="lrpalpha" Width="30" HorizontalAlignment="Left" HorizontalContentAlignment="Center"></TextBox>
+                        <Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center">Beta:</Label>
+                        <TextBox Grid.Column="3" Name="lrpbeta" Width="30" HorizontalAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
+                    </Grid>
+                </Grid>
             </StackPanel>
+
             <Button Name="explanationButton" Width="100" Height="35" Grid.Column="0" Grid.Row="4">
                 <TextBlock Text="Explain">
                     <TextBlock.Style>
