@@ -59,8 +59,8 @@ namespace ssi.Controls.Other
 
             img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
             topLabels.Text = "2";
-            numFeatures.Text = "100";
-            numSamples.Text = "100";
+            numFeatures.Text = "15";
+            numSamples.Text = "800";
 
             getNewExplanation = false;
 
