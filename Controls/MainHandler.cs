@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.5.6";
+        public static string BuildVersion = "1.0.5.7";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static int xaiProcessId;
@@ -214,6 +214,8 @@ namespace ssi
             //if(ENABLE_PYTHON) startExplainableThread();
             if (ENABLE_PYTHON)
             {
+
+                checkPythonInstallation();
                 xaiProcessId = startExplanationBackend();
             }
             control.explanationWindow.Click += explanationWindow_Click;

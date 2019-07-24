@@ -9,7 +9,6 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 using System.IO;
-using Python.Runtime;
 
 namespace ssi
 {

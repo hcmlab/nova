@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ssi</RootNamespace>
     <AssemblyName>nova</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -112,10 +112,6 @@
     <Reference Include="PresentationFramework.Classic" />
     <Reference Include="PropertyTools.Wpf">
       <HintPath>References\PropertyTools.Wpf.dll</HintPath>
-    </Reference>
-    <Reference Include="Python.Runtime, Version=2.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>References\Python.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="ReachFramework" />
     <Reference Include="RibbonControlsLibrary">
@@ -251,7 +247,6 @@
       <DependentUpon>DatabaseCMLTrainAndPredictWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\IPointList.cs" />
-    <Compile Include="Tools\InvokePython.cs" />
     <Compile Include="Tools\PluginCaller.cs" />
     <Compile Include="Tools\Screenshot.cs" />
     <Compile Include="Tools\VolumeControl.xaml.cs">
