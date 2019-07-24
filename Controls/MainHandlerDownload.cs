@@ -551,8 +551,8 @@ namespace ssi
                             "scikit_image==0.14.0",
                             "Pillow==5.4.1",
                             "opencv-python==4.0.0.21",
-                            "resampy"
-
+                            "resampy",
+                            "flask"
 
                             };
 

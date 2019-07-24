@@ -14,7 +14,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Web.UI.DataVisualization.Charting;
-using Python.Runtime;
 using System.IO;
 
 namespace ssi
@@ -467,10 +466,10 @@ namespace ssi
         public Dictionary<string, double> PythonInterface(List<AnnoList> al)
         {
 
-            Dictionary<string, double> measures = InvokePython.correlate(al[0], al[1]);
+            //  Dictionary<string, double> measures = InvokePython.correlate(al[0], al[1]);
 
-            return measures;
-
+            //    return measures;
+            return null;
         }
 
 
