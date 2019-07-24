@@ -14,6 +14,10 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Xml;
+using System.Net.Http;
+using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ssi.Controls.Other
 {
@@ -32,6 +36,8 @@ namespace ssi.Controls.Other
         public string explainAlgorithm;
         public string args;
         private string basePath;
+
+        private static readonly HttpClient client = new HttpClient();
 
 
         public ExplanationWindowInnvestigate()
@@ -100,7 +106,113 @@ namespace ssi.Controls.Other
 
         }
 
-        private void getExplanation(object sender, RoutedEventArgs e)
+        private async Task<Dictionary<string,string>> getExplanationFromBackend()
+        {
+
+            try {
+
+                var base64 = System.Convert.ToBase64String(this.img);
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(modelPath), "model_path" },
+                    { new StringContent(base64), "image" }
+                };
+
+                postprocess = postprocessing.Text.ToUpper();
+                explainAlgorithm = explainer.Text.ToUpper();
+                string url = "http://localhost:5000/innvestigate?postprocess=" + postprocess + "&explainer=" + explainAlgorithm + "&lrpalpha=" + lrpalpha.Text + "&lrpbeta=" + lrpbeta.Text;
+
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                if(explanationDic["success"] == "failed")
+                {
+                    return null;
+                }
+
+                return explanationDic;
+
+            } catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        private async void getExplanation(object sender, RoutedEventArgs e)
+        {
+            containerImageToBeExplained.Visibility = Visibility.Visible;
+            explainingLabel.Visibility = Visibility.Visible;
+            BlurEffect blur = new BlurEffect();
+            blur.Radius = 20;
+            explanationImage.Effect = blur;
+            explanationButton.IsEnabled = false;
+
+            containerExplainedImages.Children.Clear();
+
+            var explanationDic = await getExplanationFromBackend();
+
+            if(explanationDic == null)
+            {
+                MainHandler.restartExplanationBackend();
+
+                this.explainingLabel.Visibility = Visibility.Hidden;
+                blur = new BlurEffect();
+                blur.Radius = 0;
+                this.explanationImage.Effect = blur;
+                this.explanationButton.IsEnabled = true;
+
+                return;
+            }
+
+            byte[] explanation = System.Convert.FromBase64String(explanationDic["explanation"]);
+
+            BitmapImage explanationBitmap = new BitmapImage();
+            explanationBitmap.BeginInit();
+            explanationBitmap.StreamSource = new System.IO.MemoryStream((byte[])explanation);
+            explanationBitmap.EndInit();
+            explanationBitmap.Freeze();
+
+            System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+            string className = "";
+
+            if (this.idToClassName.ContainsKey(Int32.Parse(explanationDic["prediction"])))
+            {
+                className = this.idToClassName[Int32.Parse(explanationDic["prediction"])];
+            }
+            else
+            {
+                className = explanationDic["prediction"];
+            }
+
+            System.Windows.Controls.Label info = new System.Windows.Controls.Label
+            {
+                Content = "Class: " + className + " Score: " + explanationDic["prediction_score"]
+            };
+
+            System.Windows.Controls.Image img = new System.Windows.Controls.Image
+            {
+                Source = explanationBitmap,
+            };
+
+            wrapper.Margin = new Thickness(5);
+            wrapper.Children.Add(info);
+            wrapper.Children.Add(img);
+
+            this.containerExplainedImages.Children.Add(wrapper);
+
+            this.containerImageToBeExplained.Visibility = Visibility.Hidden;
+            this.explainingLabel.Visibility = Visibility.Hidden;
+            blur = new BlurEffect();
+            blur.Radius = 0;
+            this.explanationImage.Effect = blur;
+            this.explanationButton.IsEnabled = true;
+
+        }
+
+        private void getExplanationLegacy(object sender, RoutedEventArgs e)
         {
             containerImageToBeExplained.Visibility = Visibility.Visible;
             explainingLabel.Visibility = Visibility.Visible;

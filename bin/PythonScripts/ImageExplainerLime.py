@@ -1,4 +1,7 @@
 import sys
+import multiprocessing
+
+
 class CatchOutErr:
     def __init__(self):
         self.value = ''
@@ -119,3 +122,12 @@ def explain_multiple(model, img, topLabels, numSamples, numFeatures, hideRest, h
         explanations.append((cl[0], cl[1], imgByteArr))
 
     return (explanations, len(explanations))
+
+def test_explain(model, img, topLabels, numSamples, numFeatures, hideRest, hideColor, positiveOnly):
+    result = []
+    p = multiprocessing.Process(target=explain_multiple, args=(model, img, topLabels, numSamples, numFeatures, hideRest, hideColor, positiveOnly))
+    #result.append(p)
+    p.start()
+    p.join()
+    print(result)
+    return (None, None)

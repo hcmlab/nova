@@ -18,6 +18,9 @@ using System.Windows.Threading;
 using Python.Runtime;
 using System.Windows.Controls;
 using System.Xml;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ssi.Controls.Other
 {
@@ -35,15 +38,18 @@ namespace ssi.Controls.Other
         public int topLablesV;
         public int numSamplesV;
         public int numFeaturesV;
-        public bool hideRestV;
-        public bool hideColorV;
-        public bool positiveOnlyV;
+        public string hideRestV;
+        public string hideColorV;
+        public string positiveOnlyV;
         private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
         private string basePath;
 
         private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
+
+        private static readonly HttpClient client = new HttpClient();
+
 
         public ExplanationWindow()
         {
@@ -112,26 +118,165 @@ namespace ssi.Controls.Other
 
         }
 
-        private void getExplanation(object sender, RoutedEventArgs e)
+        //private async Task<Dictionary<string, Tuple<int, double, string>>> getExplanationFromBackend()
+        private async Task<List<Tuple<int, double, BitmapImage>>> getExplanationFromBackend()
+        {
+
+            try
+            {
+
+                var base64 = System.Convert.ToBase64String(this.img);
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(modelPath), "model_path" },
+                    { new StringContent(base64), "image" }
+                };
+
+                topLablesV = Int32.Parse(topLabels.Text);
+                numSamplesV = Int32.Parse(numSamples.Text);
+                numFeaturesV = Int32.Parse(numFeatures.Text);
+
+                hideRestV = hideRest.IsChecked.Value.ToString();
+                hideColorV = hideColor.IsChecked.Value.ToString();
+                positiveOnlyV = positiveOnly.IsChecked.Value.ToString();
+
+                string url = "http://localhost:5000/lime?toplabels=" + topLablesV + "&hidecolor=" + hideColorV + "&numsamples=" + numSamplesV + "&positiveonly=" + positiveOnlyV + "&numfeatures=" + numFeaturesV + "&hiderest=" + hideRestV;
+
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
+
+                if (explanationDic["success"].Value<string>() == "failed")
+                {
+                    return null;
+                }
+
+                JArray explanations =  JArray.Parse(explanationDic["explanations"].Value<object>().ToString());
+
+                List<Tuple<int, double, BitmapImage>> explanationData = new List<Tuple<int, double, BitmapImage>>();
+
+                foreach (var item in explanations)
+                {
+                    var temp = item.ToArray();
+                    int cl = (int) temp[0];
+                    double cl_score = (double) temp[1];
+                    string explanation_img64 = (string) temp[2];
+                    byte[] explanation = System.Convert.FromBase64String(explanation_img64);
+
+                    BitmapImage explanation_bitmap = new BitmapImage();
+                    explanation_bitmap.BeginInit();
+                    explanation_bitmap.StreamSource = new System.IO.MemoryStream(explanation);
+                    explanation_bitmap.EndInit();
+                    explanation_bitmap.Freeze();
+
+                    Tuple<int, double, BitmapImage> tuple = new Tuple<int, double, BitmapImage>(cl, cl_score, explanation_bitmap);
+                    explanationData.Add(tuple);
+                }
+
+                return explanationData;
+
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        private async void getExplanation(object sender, RoutedEventArgs e)
         {
             containerImageToBeExplained.Visibility = Visibility.Visible;
             explainingLabel.Visibility = Visibility.Visible;
             BlurEffect blur = new BlurEffect();
             blur.Radius = 20;
             explanationImage.Effect = blur;
-            topLablesV = Int32.Parse(topLabels.Text);
-            numSamplesV = Int32.Parse(numSamples.Text);
-            numFeaturesV = Int32.Parse(numFeatures.Text);
-
-            hideRestV = hideRest.IsChecked.Value;
-            hideColorV = hideColor.IsChecked.Value;
-            positiveOnlyV = positiveOnly.IsChecked.Value;
-            getNewExplanation = true;
             explanationButton.IsEnabled = false;
 
             containerExplainedImages.Children.Clear();
 
+            List<Tuple<int, double, BitmapImage>> explanationData = await getExplanationFromBackend();
+
+            if(explanationData == null)
+            {
+                MainHandler.restartExplanationBackend();
+
+                this.explainingLabel.Visibility = Visibility.Hidden;
+                blur = new BlurEffect();
+                blur.Radius = 0;
+                this.explanationImage.Effect = blur;
+                this.explanationButton.IsEnabled = true;
+
+                return;
+            }
+
+            for (int i = 0; i < explanationData.Count; i++)
+            {
+
+                System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
+                string className = "";
+
+                if (this.idToClassName.ContainsKey(explanationData[i].Item1))
+                {
+                    className = this.idToClassName[explanationData[i].Item1];
+                }
+                else
+                {
+                    className = explanationData[i].Item1 + "";
+                }
+
+                System.Windows.Controls.Label info = new System.Windows.Controls.Label
+                {
+                    Content = "Class: " + className + " Score: " + explanationData[i].Item2.ToString("0.###")
+                };
+
+                System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                {
+                    Source = explanationData[i].Item3,
+                };
+
+                int ratio = getRatio(explanationData.Count);
+
+                img.Height = (this.containerExplainedImages.ActualHeight - explanationData.Count * 2 * 5) / ratio;
+                img.Width = (this.containerExplainedImages.ActualWidth - explanationData.Count * 2 * 5) / ratio;
+
+
+                wrapper.Margin = new Thickness(5);
+                wrapper.Children.Add(info);
+                wrapper.Children.Add(img);
+
+                this.containerExplainedImages.Children.Add(wrapper);
+            }
+
+            this.containerImageToBeExplained.Visibility = Visibility.Hidden;
+            this.explainingLabel.Visibility = Visibility.Hidden;
+            blur = new BlurEffect();
+            blur.Radius = 0;
+            this.explanationImage.Effect = blur;
+            this.explanationButton.IsEnabled = true;
+
         }
+
+        //private void getExplanationLegacy(object sender, RoutedEventArgs e)
+        //{
+        //    containerImageToBeExplained.Visibility = Visibility.Visible;
+        //    explainingLabel.Visibility = Visibility.Visible;
+        //    BlurEffect blur = new BlurEffect();
+        //    blur.Radius = 20;
+        //    explanationImage.Effect = blur;
+        //    topLablesV = Int32.Parse(topLabels.Text);
+        //    numSamplesV = Int32.Parse(numSamples.Text);
+        //    numFeaturesV = Int32.Parse(numFeatures.Text);
+
+        //    hideRestV = hideRest.IsChecked.Value;
+        //    hideColorV = hideColor.IsChecked.Value;
+        //    positiveOnlyV = positiveOnly.IsChecked.Value;
+        //    getNewExplanation = true;
+        //    explanationButton.IsEnabled = false;
+
+        //    containerExplainedImages.Children.Clear();
+
+        //}
 
         private void modelPanel_Drop(object sender, DragEventArgs e)
         {
@@ -214,6 +359,25 @@ namespace ssi.Controls.Other
             this.explanationButton.Visibility = Visibility.Hidden;
         }
 
+        private int getRatio(int n)
+        {
+
+            int m = 1;
+
+            while (true)
+            {
+                if (Math.Pow((m - 1), 2) < n && n <= Math.Pow(m, 2))
+                {
+                    return m;
+                }
+                m++;
+                if (m > 1000)
+                {
+                    return -1;
+                }
+            }
+
+        }
 
         private class ModelTrainer
         {

@@ -106,7 +106,13 @@ namespace ssi
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {            
+        {
+
+            if (MainHandler.ENABLE_PYTHON)
+            {
+                MainHandler.killExplanationBackend();
+            }
+
             if (!viewh.clearWorkspace())
             {
                 e.Cancel = true;

@@ -26,6 +26,9 @@ import matplotlib.pyplot as plot
 import ast
 
 
+import multiprocessing
+
+
 def transform_img_fn(img):
     img = pilimage.open(inputoutput.BytesIO(bytes(img)))
     imgR = img.resize((224, 224))
@@ -122,7 +125,8 @@ def explain(model, img, postprocess, explainer, args):
     
     return explanation
 
-def lrpalphatest():
+def lrpalphatest(asdf):
+    print(asdf)
     modelPath = "F:/test/pokemon.trainer.PythonModel.model.keras_vgg_face.h5"
     img_path = "F:/test/pikachu.jpeg"
     img = pilimage.open(img_path)
@@ -257,6 +261,16 @@ def graymap(X):
     return ivis.graymap(np.abs(X), input_is_postive_only=True)
 
 
+def test_explain(asdf):
+    result = []
+    p = multiprocessing.Process(target=lrpalphatest, args=(asdf,))
+    result.append(p)
+    p.start()
+    p.join()
+    print(result)
+    return (None, None)
+
 
 if __name__ == '__main__':
-    lrpalphatest()
+    # lrpalphatest()
+    test_explain("test")

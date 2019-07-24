@@ -19,6 +19,7 @@ namespace ssi
         public static string BuildVersion = "1.0.5.6";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
+        public static int xaiProcessId;
 
         private static Timeline timeline = null;
 
@@ -210,7 +211,11 @@ namespace ssi
 
 
             //PYTHON
-            if(ENABLE_PYTHON) startExplainableThread();
+            //if(ENABLE_PYTHON) startExplainableThread();
+            if (ENABLE_PYTHON)
+            {
+                xaiProcessId = startExplanationBackend();
+            }
             control.explanationWindow.Click += explanationWindow_Click;
             control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
             control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
@@ -594,5 +599,6 @@ namespace ssi
         {
             showSettings();
         }
+
     }
 }
