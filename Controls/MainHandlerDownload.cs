@@ -641,8 +641,9 @@ namespace ssi
                 try
                 {
                     Directory.CreateDirectory("PythonScripts");
-                    string url = "https://raw.githubusercontent.com/hcmlab/nova/master/PythonScripts/ImageExplainerLime.py";
-                    Client.DownloadFile(url, "PythonScripts\\ImageExplainerLime.py");
+                    string url = "https://raw.githubusercontent.com/hcmlab/nova/master/PythonScripts/explanation_backend.py";
+                    Client.DownloadFile(url, "PythonScripts\\explanation_backend.py");
+
                 }
                 catch
                 {
