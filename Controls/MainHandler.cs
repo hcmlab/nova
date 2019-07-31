@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.5.7";
+        public static string BuildVersion = "1.0.5.8";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static int xaiProcessId;
@@ -217,7 +217,17 @@ namespace ssi
 
                 checkPythonInstallation();
                 xaiProcessId = startExplanationBackend();
+
+                var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
+
+                if (Directory.Exists(pythonPath))
+                {
+                    var pp = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
+                    var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
+                    Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
+                }
             }
+
             control.explanationWindow.Click += explanationWindow_Click;
             control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
             control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);

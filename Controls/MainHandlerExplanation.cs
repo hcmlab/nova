@@ -103,17 +103,8 @@ namespace ssi
         //            Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python\\", true);
         //        }
         //        catch { }
-               
-        //    }
 
-        //    var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
-        //    var pythonScriptsPath = AppDomain.CurrentDomain.BaseDirectory + "PythonScripts";
-          
-        //    if (Directory.Exists(pythonPath) && Properties.Settings.Default.EnablePython == true)
-        //    {
-        //        var pp = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
-        //        var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
-        //        Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
+        //    }
 
 
         //        PythonEngine.PythonPath += ";" + pythonScriptsPath;
