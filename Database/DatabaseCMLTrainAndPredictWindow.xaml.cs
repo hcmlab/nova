@@ -284,21 +284,98 @@ namespace ssi
             if (AnnotationSelectionBox.Items.Count > 0)
 
             {
-                combinations = new string[selectedDatabaseAndSessions.Count];
-                int s = 0;
+                List<string> lines = new List<string>();
+                
+               // combinations = new string[selectedDatabaseAndSessions.Count]
                 foreach (SelectedDatabaseAndSessions item in AnnotationSelectionBox.Items)
                 {
-                    combinations[s] = item.Database.TrimEnd(';') + ":" + item.Annotator.TrimEnd(';') + ":" + item.Roles.TrimEnd(';') + ":" + item.Stream.TrimEnd(';') + ":" + item.Sessions.TrimEnd(';');
-                    s++;
+                    //regular case where we only select one corpus. We need to split the string length in case it outruns SSI's max length
+                    int partLength = 512;
+                    int size = (item.Sessions.Length / partLength) + 2;
+                    combinations = new string[size];
+
+
+                    string[] words = item.Sessions.TrimEnd(';').Split(';');
+                    var parts = new Dictionary<int, string>();
+                    string part = string.Empty;
+                    int partCounter = 0;
+                    foreach (var word in words)
+                    {
+                        if (part.Length + word.Length < partLength)
+                        {
+                            part += string.IsNullOrEmpty(part) ? word : ";" + word;
+                        }
+                        else
+                        {
+                            parts.Add(partCounter, part);
+                            part = word;
+                            partCounter++;
+                        }
+                    }
+                    parts.Add(partCounter, part);
+                    foreach (var sessionlistpart in parts)
+                    {
+                        lines.Add(item.Database.TrimEnd(';') + ":" + item.Annotator.TrimEnd(';') + ":" + item.Roles.TrimEnd(';') + ":" + item.Stream.TrimEnd(';') + ":" + sessionlistpart.Value);
+                        //combinations[sessionlistpart.Key] = database + ":" + annotator.Name + ":" + rolesList + ":" + stream.Name + "." + stream.FileExt + ":" + sessionlistpart.Value;
+                        Console.WriteLine(item.Database.TrimEnd(';') + ":" + item.Annotator.TrimEnd(';') + ":" + item.Roles.TrimEnd(';') + ":" + item.Stream.TrimEnd(';') + ":" + sessionlistpart.Value);
+                    }
+
+
+
+
+                   
                 }
+
+
+                combinations = new string[lines.Count];
+                int i = 0;
+                foreach (string line in lines)
+                {
+                    combinations[i] = line;
+                }
+
             }
             else
             {
-                combinations = new string[1];
-                combinations[0] = database + ":" + annotator.Name + ":" + rolesList + ":" + stream.Name + "." + stream.FileExt + ":" + sessionList;
+                //regular case where we only select one corpus. We need to split the string length in case it outruns SSI's max length
+                int partLength = 512;
+                int size = (sessionList.Length / partLength) + 2;
+                combinations = new string[size];
+
+               
+                string[] words = sessionList.Split(';');
+                var parts = new Dictionary<int, string>();
+                string part = string.Empty;
+                int partCounter = 0;
+                foreach (var word in words)
+                {
+                    if (part.Length + word.Length < partLength)
+                    {
+                        part += string.IsNullOrEmpty(part) ? word : ";" + word;
+                    }
+                    else
+                    {
+                        parts.Add(partCounter, part);
+                        part = word;
+                        partCounter++;
+                    }
+                }
+                parts.Add(partCounter, part);
+                foreach (var sessionlistpart in parts)
+                {
+                    combinations[sessionlistpart.Key] = database + ":" + annotator.Name + ":" + rolesList + ":" + stream.Name + "." + stream.FileExt + ":" + sessionlistpart.Value;
+                    Console.WriteLine(combinations[sessionlistpart.Key]);
+                }
+           
+
+
+
+               
             }
 
             string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
+
+
             System.IO.File.WriteAllLines(infofile, combinations);
 
 
