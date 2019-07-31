@@ -34,12 +34,14 @@ class DataGenerator(keras.utils.Sequence):
         self.current_batch_step_shuffle = mp.Value('i', -1)
         self.__step_lock = mp.Lock()
         self.sessions_file = os.path.dirname(os.path.realpath(__file__)) + "\\nova_sessions"
+        print(self.sessions_file)
         self.db_info_file = os.path.dirname(os.path.realpath(__file__)) + "\\nova_db_info"
         self.file_readers = []
         self.annos = []
         self.annos_cont = []
         self.get_training_data()
         self.annos_to_continuous()
+        self.scheme_type
         
         if self.shuffle:
             sample_rate = self.file_readers[0].get(cv2.CAP_PROP_FPS)
@@ -67,26 +69,41 @@ class DataGenerator(keras.utils.Sequence):
         for i in range(0, self.annos.__len__()):
             header, data = self.annos[i]
             xmlreader = minidom.parseString(header)
-            numclasses = len(xmlreader.getElementsByTagName("item"))
-            self.n_classes = numclasses
-            #sample_rate = self.file_readers[i]._meta["fps"]
-            #anno_cont = np.full( min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate)), numclasses-1)
+            scheme = xmlreader.getElementsByTagName("scheme")[0]._attrs
+            self.scheme_type = scheme["type"].value
             sample_rate = self.file_readers[i].get(cv2.CAP_PROP_FPS)
-            anno_cont = np.full( min(int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT)), int(self.cmlbegintime * sample_rate)), numclasses-1)
+
+            if self.scheme_type == "DISCRETE":
+
+                numclasses = len(xmlreader.getElementsByTagName("item"))
+                self.n_classes = numclasses
+                #sample_rate = self.file_readers[i]._meta["fps"]
+                #anno_cont = np.full( min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate)), numclasses-1)
+                anno_cont = np.full( min(int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT)), int(self.cmlbegintime * sample_rate)), numclasses-1)
 
 
-            for label in data[0]['labels']:
-                start = int(label["from"]*sample_rate)
-                #if (label["to"]*sample_rate) < min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate)):
-                if (label["to"]*sample_rate) < min(int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT)), int(self.cmlbegintime * sample_rate)):
-                    end = int((label["to"] * sample_rate))
-                else:
-                    #end = min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate))
-                    end = min(int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT)), int(self.cmlbegintime * sample_rate))
-                for k in range(start, end):
-                    anno_cont[k] = label["id"]
+                for label in data[0]['labels']:
+                    start = int(label["from"]*sample_rate)
+                    #if (label["to"]*sample_rate) < min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate)):
+                    if (label["to"]*sample_rate) < min(int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT)), int(self.cmlbegintime * sample_rate)):
+                        end = int((label["to"] * sample_rate))
+                    else:
+                        #end = min(self.file_readers[i]._meta['nframes'], int(self.cmlbegintime * sample_rate))
+                        end = min(int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT)), int(self.cmlbegintime * sample_rate))
+                    for k in range(start, end):
+                        anno_cont[k] = label["id"]
 
-            self.annos_cont.append(anno_cont)
+                self.annos_cont.append(anno_cont)
+            
+            else:
+
+                anno_cont = np.full( min(int(self.file_readers[i].get(cv2.CAP_PROP_FRAME_COUNT)), int(self.cmlbegintime * sample_rate)), 0.0)
+                
+                for index, label in enumerate(data[0]['labels']):
+                    if index < len(anno_cont):
+                        anno_cont[index] = label["score"]
+                
+                self.annos_cont.append(anno_cont)
 
     def get_training_data(self):
 
@@ -130,8 +147,8 @@ class DataGenerator(keras.utils.Sequence):
                                 print("Skipping: " + corpus + ":" + s + ' '+ r + "." + filename)
 
         #uncomment for debugging.
-        os.remove(self.sessions_file)
-        os.remove(self.db_info_file)
+       # os.remove(self.sessions_file)
+       # os.remove(self.db_info_file)
 
     def on_epoch_end(self):
         #TODO Updates indexes after each epoch
@@ -228,7 +245,9 @@ class DataGenerator(keras.utils.Sequence):
         for i in range(0, len(x)):
             xtemp.append(resize(x[i], (self.dim[1], self.dim[0])))
 
-        y = keras.utils.to_categorical(y, num_classes=self.n_classes)
+        #uncomment for discrete classes
+        if self.scheme_type == "DISCRETE":
+            y = keras.utils.to_categorical(y, num_classes=self.n_classes)
         X = np.asarray(xtemp)
 
         return X, y
@@ -260,8 +279,11 @@ if __name__ == '__main__':
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
-    model.add(Dense(4, activation='softmax'))
+
+    model.add(Dense(2, activation='softmax'))
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    #model.add(Dense(1, activation='linear'))
+    #model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
     # Train model on dataset
     model.fit_generator(generator=training_generator,

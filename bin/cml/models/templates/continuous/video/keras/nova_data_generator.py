@@ -41,6 +41,7 @@ class DataGenerator(keras.utils.Sequence):
         self.annos_cont = []
         self.get_training_data()
         self.annos_to_continuous()
+        self.scheme_type
         
         if self.shuffle:
             sample_rate = self.file_readers[0].get(cv2.CAP_PROP_FPS)
@@ -69,10 +70,10 @@ class DataGenerator(keras.utils.Sequence):
             header, data = self.annos[i]
             xmlreader = minidom.parseString(header)
             scheme = xmlreader.getElementsByTagName("scheme")[0]._attrs
-            scheme_type = scheme["type"].value
+            self.scheme_type = scheme["type"].value
             sample_rate = self.file_readers[i].get(cv2.CAP_PROP_FPS)
 
-            if scheme_type == "DISCRETE":
+            if self.scheme_type == "DISCRETE":
 
                 numclasses = len(xmlreader.getElementsByTagName("item"))
                 self.n_classes = numclasses
@@ -146,8 +147,8 @@ class DataGenerator(keras.utils.Sequence):
                                 print("Skipping: " + corpus + ":" + s + ' '+ r + "." + filename)
 
         #uncomment for debugging.
-        os.remove(self.sessions_file)
-        os.remove(self.db_info_file)
+       # os.remove(self.sessions_file)
+       # os.remove(self.db_info_file)
 
     def on_epoch_end(self):
         #TODO Updates indexes after each epoch
@@ -245,7 +246,8 @@ class DataGenerator(keras.utils.Sequence):
             xtemp.append(resize(x[i], (self.dim[1], self.dim[0])))
 
         #uncomment for discrete classes
-        #y = keras.utils.to_categorical(y, num_classes=self.n_classes)
+        if self.scheme_type == "DISCRETE":
+            y = keras.utils.to_categorical(y, num_classes=self.n_classes)
         X = np.asarray(xtemp)
 
         return X, y
@@ -277,8 +279,11 @@ if __name__ == '__main__':
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
-    model.add(Dense(1, activation='linear'))
-    model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
+
+    model.add(Dense(2, activation='softmax'))
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    #model.add(Dense(1, activation='linear'))
+    #model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
     # Train model on dataset
     model.fit_generator(generator=training_generator,
