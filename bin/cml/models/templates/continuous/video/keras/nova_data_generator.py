@@ -123,26 +123,27 @@ class DataGenerator(keras.utils.Sequence):
 
         with open(self.sessions_file, 'r') as f:
             for line in f:
-                multi_corpus = line.split(":")
+                if len(line) > 1:
+                    multi_corpus = line.split(":")
 
-                corpus = multi_corpus[0]
-                annotator = multi_corpus[1]
-                roles = multi_corpus[2].split(";")
-                stream = multi_corpus[3]
-                sessions = multi_corpus[4].strip().split(";")
+                    corpus = multi_corpus[0]
+                    annotator = multi_corpus[1]
+                    roles = multi_corpus[2].split(";")
+                    stream = multi_corpus[3]
+                    sessions = multi_corpus[4].strip().split(";")
 
-                for s in sessions:
-                    for r in roles:
-                        filename = r + "." + stream
-                        annoToAdd = db.get_anno_by_session(db_info, corpus, s, annotator, r)
-                        if annoToAdd != None:
-                            self.annos.append(annoToAdd)
-                            filepath = os.path.join(db_info['root'].strip(), corpus, s, filename)
-                            #self.file_readers.append(imageio.get_reader(filepath, 'ffmpeg'))
-                            self.file_readers.append(cv2.VideoCapture(filepath))
-                            print("Loading: " + corpus + ":" + s + ' '+ filename)
-                        else:
-                            print("Skipping: " + corpus + ":" + s + ' '+ r + "." + filename)
+                    for s in sessions:
+                        for r in roles:
+                            filename = r + "." + stream
+                            annoToAdd = db.get_anno_by_session(db_info, corpus, s, annotator, r)
+                            if annoToAdd != None:
+                                self.annos.append(annoToAdd)
+                                filepath = os.path.join(db_info['root'].strip(), corpus, s, filename)
+                                #self.file_readers.append(imageio.get_reader(filepath, 'ffmpeg'))
+                                self.file_readers.append(cv2.VideoCapture(filepath))
+                                print("Loading: " + corpus + ":" + s + ' '+ filename)
+                            else:
+                                print("Skipping: " + corpus + ":" + s + ' '+ r + "." + filename)
 
         #uncomment for debugging.
         os.remove(self.sessions_file)
