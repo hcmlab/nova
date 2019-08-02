@@ -87,6 +87,9 @@ namespace ssi
         
         private string runCMLTool(string tool, string mode, List<object> parameters, Dictionary<string,object> arguments, string logName)
         {
+
+         killExplanationBackend();
+
             string result = "";
             string logPath = AppDomain.CurrentDomain.BaseDirectory + logName + ".log";
 
@@ -130,10 +133,6 @@ namespace ssi
 
                 string filename = AppDomain.CurrentDomain.BaseDirectory + "\\" + tool + ".exe";
 
-                runCMLProcess(tool, options);
-
-                result += "\n-------------------------------------------\r\n" + filename + " " + optionsNoPassword + "\n-------------------------------------------\r\n";
-                result += File.ReadAllText(logPath);
 
                 if (mode == "train" && arguments.ContainsKey("cooperative"))
                 {
@@ -143,11 +142,21 @@ namespace ssi
                 {
                     AnnoTierStatic.Selected.CMLCompletePredictOptions = options;
                 }
+
+               // options =  options.Replace(arguments["list"].ToString(), "none");
+                
+                runCMLProcess(tool, options);
+
+                result += "\n-------------------------------------------\r\n" + filename + " " + optionsNoPassword + "\n-------------------------------------------\r\n";
+                result += File.ReadAllText(logPath);
+
             }
             catch (Exception ex)
             {
                 MessageTools.Error(ex.ToString());
             }
+
+           startExplanationBackend();
 
             return result;
         }
@@ -191,7 +200,8 @@ namespace ssi
             string port = split[1];
 
             List<object> parameters = new List<object>();
-            parameters.Add("\"" + datapath +  "\"");
+            if(complete) parameters.Add("\"" + datapath + "\\" + database + "\"");
+            else parameters.Add("\"" + datapath + "\"");
             parameters.Add(ip);
             parameters.Add(port);
             parameters.Add(database);
@@ -203,7 +213,7 @@ namespace ssi
             parameters.Add("\"" + trainerPath + "\"");
 
             Dictionary <string, object> arguments = new Dictionary<string, object>();
-            if (multisessionpath != null) sessions = "none";
+          
             arguments["list"] = sessions;
             arguments["left"] = leftContext;
             arguments["right"] = rightContext;
@@ -211,7 +221,7 @@ namespace ssi
             arguments["username"] = username;
             arguments["password"] = password;
             arguments["cmlbegintime"] = cmlbegintime;
-            if (multisessionpath != null) arguments["multisession"] = "\"" + multisessionpath + "\"";
+            if (multisessionpath != null && !complete) arguments["multisession"] = "\"" + multisessionpath + "\"";
             if (complete) arguments["cooperative"] = null;
 
             return runCMLTool("cmltrain", "train", parameters, arguments, "cml-train");            
