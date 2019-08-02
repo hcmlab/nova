@@ -1153,7 +1153,7 @@ namespace ssi
                     string[] completetrainoptionstemp = AnnoTierStatic.Selected.CMLCompleteTrainOptions.Split(' ');
                     completetrainoptionstemp[14] = ((AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition : Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition)).ToString(); ;
                     string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
-                    completetrainoptionstemp[16] = infofile;
+                    //completetrainoptionstemp[16] = infofile;
                     string completetrainoptions = string.Join(" ", completetrainoptionstemp);
 
 
@@ -1163,13 +1163,13 @@ namespace ssi
 
 
                     string[] combinations = new string[1];
-                    string database = completetrainoptionstemp[23];
-                    string annotator = completetrainoptionstemp[26];
-                    string roles = completetrainoptionstemp[24];
-                    string scheme =  completetrainoptionstemp[25];
-                    string stream = completetrainoptionstemp[27].TrimStart('/', '"').TrimEnd('"', '/'); ;
+                    string database = completetrainoptionstemp[21];
+                    string annotator = completetrainoptionstemp[24];
+                    string roles = completetrainoptionstemp[22];
+                    string scheme =  completetrainoptionstemp[23];
+                    string stream = completetrainoptionstemp[25].TrimStart('/', '"').TrimEnd('"', '/'); ;
                     string sessions = completetrainoptionstemp[2];
-                    string trainerpath = completetrainoptionstemp[28].TrimStart('/','"').TrimEnd('"', '/');
+                    string trainerpath = completetrainoptionstemp[26].TrimStart('/','"').TrimEnd('"', '/');
 
 
                     combinations[0] = database + ":" + annotator + ":" + roles + ":" + stream + ":" + sessions;
@@ -1177,8 +1177,6 @@ namespace ssi
 
                    
                     System.IO.File.WriteAllLines(infofile, combinations);
-
-
 
 
 

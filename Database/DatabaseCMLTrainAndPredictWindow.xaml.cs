@@ -280,6 +280,8 @@ namespace ssi
 
         private string createMetaFiles(string database, DatabaseAnnotator annotator, string rolesList, DatabaseStream stream, string sessionList, DatabaseScheme scheme, Trainer trainer)
         {
+
+
             string[] combinations;
             if (AnnotationSelectionBox.Items.Count > 0)
 
@@ -366,17 +368,29 @@ namespace ssi
                     combinations[sessionlistpart.Key] = database + ":" + annotator.Name + ":" + rolesList + ":" + stream.Name + "." + stream.FileExt + ":" + sessionlistpart.Value;
                     Console.WriteLine(combinations[sessionlistpart.Key]);
                 }
-           
-
-
-
                
             }
 
             string infofile = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetRandomFileName();
 
+            TextWriter tw = new StreamWriter(infofile);
 
-            System.IO.File.WriteAllLines(infofile, combinations);
+            foreach (String s in combinations)
+                if(s != null) tw.WriteLine(s);
+
+            tw.Close();
+
+
+
+            //foreach (var item in combinations)
+            //{
+            //    if (item != null)
+            //    {
+            //        System.IO.File.WriteAllLines(infofile, combinations);
+            //    }
+            //}
+
+          
 
 
 
