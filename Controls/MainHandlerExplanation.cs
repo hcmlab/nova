@@ -419,30 +419,45 @@ namespace ssi
 
         public static int startExplanationBackend()
         {
+            try
+            {
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
+                startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
+                process.StartInfo = startInfo;
+                process.Start();
 
+                return process.Id;
+            }
+
+            catch
+            {
+                return -1;
+            }
             
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
-            startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
-            process.StartInfo = startInfo;
-            process.Start();
-
-            return process.Id;
+           
         }
 
         public static void killExplanationBackend()
         {
-            Process[] process = Process.GetProcesses();
-
-            foreach (Process prs in process)
+            try
             {
-                if (prs.Id == MainHandler.xaiProcessId)
+                Process[] process = Process.GetProcesses();
+
+                foreach (Process prs in process)
                 {
-                    prs.Kill();
-                    break;
+                    if (prs.Id == MainHandler.xaiProcessId)
+                    {
+                        prs.Kill();
+                        break;
+                    }
                 }
+            }
+            catch
+            {
+
             }
         }
 
