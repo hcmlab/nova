@@ -88,7 +88,7 @@ namespace ssi
         private string runCMLTool(string tool, string mode, List<object> parameters, Dictionary<string,object> arguments, string logName)
         {
 
-         killExplanationBackend();
+            if(ENABLE_PYTHON) killExplanationBackend();
 
             string result = "";
             string logPath = AppDomain.CurrentDomain.BaseDirectory + logName + ".log";
@@ -156,7 +156,7 @@ namespace ssi
                 MessageTools.Error(ex.ToString());
             }
 
-           startExplanationBackend();
+            if (ENABLE_PYTHON)  startExplanationBackend();
 
             return result;
         }
