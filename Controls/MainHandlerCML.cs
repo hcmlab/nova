@@ -156,7 +156,10 @@ namespace ssi
                 MessageTools.Error(ex.ToString());
             }
 
-            if (ENABLE_PYTHON)  startExplanationBackend();
+            if (ENABLE_PYTHON)
+            {
+               MainHandler.xaiProcessId = startExplanationBackend();
+            }
 
             return result;
         }
