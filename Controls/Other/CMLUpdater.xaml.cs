@@ -93,8 +93,6 @@ namespace ssi
             urls.Add(SSIbinaryGitPath + ssiframedll);
             //DownloadFile(SSIbinaryGitPath + ssiframedll, ssiframedllPath);
 
-            urls.Add(SSIbinaryGitPath + "opencv_world310.dll");
-
             string opencvdll = "opencv_world310.dll";
             string opencvdllPath = AppDomain.CurrentDomain.BaseDirectory + opencvdll;
 
