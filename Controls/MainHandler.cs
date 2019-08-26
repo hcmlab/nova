@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.6.0";
+        public static string BuildVersion = "1.0.6.1";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static int xaiProcessId;
@@ -589,6 +589,7 @@ namespace ssi
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();
                 Properties.Settings.Default.DrawVideoWavform = s.DrawvideoWavform();
                 Properties.Settings.Default.EnablePython = s.EnablePython();
+                Properties.Settings.Default.EnablePythonDebug = s.EnablePythonDebug();
    
                 Properties.Settings.Default.Save();
                 
