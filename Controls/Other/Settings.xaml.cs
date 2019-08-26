@@ -41,6 +41,7 @@ namespace ssi
             DBPassword.Password = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
             DBConnnect.IsChecked = Properties.Settings.Default.DatabaseAutoLogin;
             EnablePythonCheckbox.IsChecked = Properties.Settings.Default.EnablePython;
+            EnablePythonDebugCheckbox.IsChecked = Properties.Settings.Default.EnablePythonDebug;
             UpdatesCheckbox.IsChecked = Properties.Settings.Default.CheckUpdateOnStart;
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
@@ -117,6 +118,11 @@ namespace ssi
         public bool EnablePython()
         {
             return (EnablePythonCheckbox.IsChecked == true);
+        }
+
+        public bool EnablePythonDebug()
+        {
+            return (EnablePythonDebugCheckbox.IsChecked == true);
         }
 
 

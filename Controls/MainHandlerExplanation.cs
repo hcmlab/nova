@@ -419,11 +419,15 @@ namespace ssi
 
         public static int startExplanationBackend()
         {
+
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+
             try
             {
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+           
+
+                startInfo.WindowStyle =  (Properties.Settings.Default.EnablePythonDebug == true) ? ProcessWindowStyle.Normal :  ProcessWindowStyle.Hidden;
                 startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
                 startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
                 process.StartInfo = startInfo;

@@ -545,12 +545,12 @@ namespace ssi
                             "matplotlib==2.2.3",
                             "https://github.com/albermax/innvestigate/archive/1.0.7.tar.gz",
                             "lime==0.1.1.31",
-                            "numpy==1.14.0",
                             "scipy==1.1.0",
                             "pymongo==3.7.2",
-                            "scikit_image==0.14.0",
+                            "scikit_image==0.14.2",
                             "Pillow==5.4.1",
                             "opencv-python==4.0.0.21",
+                            "numpy==1.17.0",
                             "resampy",
                             "flask"
 
