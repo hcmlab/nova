@@ -30,7 +30,6 @@ namespace ssi.Controls.Other
     {
 
         public string modelPath;
-        private readonly BackgroundWorker worker;
         public byte[] img;
         public bool getNewExplanation;
         public BitmapImage explainedImg;
