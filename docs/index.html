@@ -36,71 +36,244 @@
   <title>NOVA Documentation</title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
-  <link rel="stylesheet" href="templates/template.css" />
+  <link rel="stylesheet" href="templates/template.css" type="text/css" />
+  <script type="text/javascript">/*<![CDATA[*/
+  /*
+  LaTeXMathML.js from http://math.etsu.edu/LaTeXMathML/
+  Adapted by Jeff Knisely and Douglas Woodall from ASCIIMathML.js v. 1.4.7,
+  (c) 2005 Peter Jipsen http://www.chapman.edu/~jipsen.
+  Released under the GNU General Public License version 2 or later.
+  See the GNU General Public License (at http://www.gnu.org/copyleft/gpl.html)
+  for more details.
+  */
+  var checkForMathML=true;var notifyIfNoMathML=true;var alertIfNoMathML=false;var mathcolor="";var mathfontfamily="";var showasciiformulaonhover=true;var isIE=document.createElementNS==null;if(document.getElementById==null)
+  alert("This webpage requires a recent browser such as \nMozilla/Netscape 7+ or Internet Explorer 6+MathPlayer")
+  function AMcreateElementXHTML(t){if(isIE)return document.createElement(t);else return document.createElementNS("http://www.w3.org/1999/xhtml",t);}
+  function AMnoMathMLNote(){var nd=AMcreateElementXHTML("h3");nd.setAttribute("align","center")
+  nd.appendChild(AMcreateElementXHTML("p"));nd.appendChild(document.createTextNode("To view the "));var an=AMcreateElementXHTML("a");an.appendChild(document.createTextNode("LaTeXMathML"));an.setAttribute("href","http://www.maths.nott.ac.uk/personal/drw/lm.html");nd.appendChild(an);nd.appendChild(document.createTextNode(" notation use Internet Explorer 6+"));an=AMcreateElementXHTML("a");an.appendChild(document.createTextNode("MathPlayer"));an.setAttribute("href","http://www.dessci.com/en/products/mathplayer/download.htm");nd.appendChild(an);nd.appendChild(document.createTextNode(" or Netscape/Mozilla/Firefox"));nd.appendChild(AMcreateElementXHTML("p"));return nd;}
+  function AMisMathMLavailable(){if(navigator.appName.slice(0,8)=="Netscape")
+  if(navigator.appVersion.slice(0,1)>="5")return null;else return AMnoMathMLNote();else if(navigator.appName.slice(0,9)=="Microsoft")
+  try{var ActiveX=new ActiveXObject("MathPlayer.Factory.1");return null;}catch(e){return AMnoMathMLNote();}
+  else return AMnoMathMLNote();}
+  var AMcal=[0xEF35,0x212C,0xEF36,0xEF37,0x2130,0x2131,0xEF38,0x210B,0x2110,0xEF39,0xEF3A,0x2112,0x2133,0xEF3B,0xEF3C,0xEF3D,0xEF3E,0x211B,0xEF3F,0xEF40,0xEF41,0xEF42,0xEF43,0xEF44,0xEF45,0xEF46];var AMfrk=[0xEF5D,0xEF5E,0x212D,0xEF5F,0xEF60,0xEF61,0xEF62,0x210C,0x2111,0xEF63,0xEF64,0xEF65,0xEF66,0xEF67,0xEF68,0xEF69,0xEF6A,0x211C,0xEF6B,0xEF6C,0xEF6D,0xEF6E,0xEF6F,0xEF70,0xEF71,0x2128];var AMbbb=[0xEF8C,0xEF8D,0x2102,0xEF8E,0xEF8F,0xEF90,0xEF91,0x210D,0xEF92,0xEF93,0xEF94,0xEF95,0xEF96,0x2115,0xEF97,0x2119,0x211A,0x211D,0xEF98,0xEF99,0xEF9A,0xEF9B,0xEF9C,0xEF9D,0xEF9E,0x2124];var CONST=0,UNARY=1,BINARY=2,INFIX=3,LEFTBRACKET=4,RIGHTBRACKET=5,SPACE=6,UNDEROVER=7,DEFINITION=8,TEXT=9,BIG=10,LONG=11,STRETCHY=12,MATRIX=13;var AMsqrt={input:"\\sqrt",tag:"msqrt",output:"sqrt",ttype:UNARY},AMroot={input:"\\root",tag:"mroot",output:"root",ttype:BINARY},AMfrac={input:"\\frac",tag:"mfrac",output:"/",ttype:BINARY},AMover={input:"\\stackrel",tag:"mover",output:"stackrel",ttype:BINARY},AMatop={input:"\\atop",tag:"mfrac",output:"",ttype:INFIX},AMchoose={input:"\\choose",tag:"mfrac",output:"",ttype:INFIX},AMsub={input:"_",tag:"msub",output:"_",ttype:INFIX},AMsup={input:"^",tag:"msup",output:"^",ttype:INFIX},AMtext={input:"\\mathrm",tag:"mtext",output:"text",ttype:TEXT},AMmbox={input:"\\mbox",tag:"mtext",output:"mbox",ttype:TEXT};var AMsymbols=[{input:"\\alpha",tag:"mi",output:"\u03B1",ttype:CONST},{input:"\\beta",tag:"mi",output:"\u03B2",ttype:CONST},{input:"\\gamma",tag:"mi",output:"\u03B3",ttype:CONST},{input:"\\delta",tag:"mi",output:"\u03B4",ttype:CONST},{input:"\\epsilon",tag:"mi",output:"\u03B5",ttype:CONST},{input:"\\varepsilon",tag:"mi",output:"\u025B",ttype:CONST},{input:"\\zeta",tag:"mi",output:"\u03B6",ttype:CONST},{input:"\\eta",tag:"mi",output:"\u03B7",ttype:CONST},{input:"\\theta",tag:"mi",output:"\u03B8",ttype:CONST},{input:"\\vartheta",tag:"mi",output:"\u03D1",ttype:CONST},{input:"\\iota",tag:"mi",output:"\u03B9",ttype:CONST},{input:"\\kappa",tag:"mi",output:"\u03BA",ttype:CONST},{input:"\\lambda",tag:"mi",output:"\u03BB",ttype:CONST},{input:"\\mu",tag:"mi",output:"\u03BC",ttype:CONST},{input:"\\nu",tag:"mi",output:"\u03BD",ttype:CONST},{input:"\\xi",tag:"mi",output:"\u03BE",ttype:CONST},{input:"\\pi",tag:"mi",output:"\u03C0",ttype:CONST},{input:"\\varpi",tag:"mi",output:"\u03D6",ttype:CONST},{input:"\\rho",tag:"mi",output:"\u03C1",ttype:CONST},{input:"\\varrho",tag:"mi",output:"\u03F1",ttype:CONST},{input:"\\varsigma",tag:"mi",output:"\u03C2",ttype:CONST},{input:"\\sigma",tag:"mi",output:"\u03C3",ttype:CONST},{input:"\\tau",tag:"mi",output:"\u03C4",ttype:CONST},{input:"\\upsilon",tag:"mi",output:"\u03C5",ttype:CONST},{input:"\\phi",tag:"mi",output:"\u03C6",ttype:CONST},{input:"\\varphi",tag:"mi",output:"\u03D5",ttype:CONST},{input:"\\chi",tag:"mi",output:"\u03C7",ttype:CONST},{input:"\\psi",tag:"mi",output:"\u03C8",ttype:CONST},{input:"\\omega",tag:"mi",output:"\u03C9",ttype:CONST},{input:"\\Gamma",tag:"mo",output:"\u0393",ttype:CONST},{input:"\\Delta",tag:"mo",output:"\u0394",ttype:CONST},{input:"\\Theta",tag:"mo",output:"\u0398",ttype:CONST},{input:"\\Lambda",tag:"mo",output:"\u039B",ttype:CONST},{input:"\\Xi",tag:"mo",output:"\u039E",ttype:CONST},{input:"\\Pi",tag:"mo",output:"\u03A0",ttype:CONST},{input:"\\Sigma",tag:"mo",output:"\u03A3",ttype:CONST},{input:"\\Upsilon",tag:"mo",output:"\u03A5",ttype:CONST},{input:"\\Phi",tag:"mo",output:"\u03A6",ttype:CONST},{input:"\\Psi",tag:"mo",output:"\u03A8",ttype:CONST},{input:"\\Omega",tag:"mo",output:"\u03A9",ttype:CONST},{input:"\\frac12",tag:"mo",output:"\u00BD",ttype:CONST},{input:"\\frac14",tag:"mo",output:"\u00BC",ttype:CONST},{input:"\\frac34",tag:"mo",output:"\u00BE",ttype:CONST},{input:"\\frac13",tag:"mo",output:"\u2153",ttype:CONST},{input:"\\frac23",tag:"mo",output:"\u2154",ttype:CONST},{input:"\\frac15",tag:"mo",output:"\u2155",ttype:CONST},{input:"\\frac25",tag:"mo",output:"\u2156",ttype:CONST},{input:"\\frac35",tag:"mo",output:"\u2157",ttype:CONST},{input:"\\frac45",tag:"mo",output:"\u2158",ttype:CONST},{input:"\\frac16",tag:"mo",output:"\u2159",ttype:CONST},{input:"\\frac56",tag:"mo",output:"\u215A",ttype:CONST},{input:"\\frac18",tag:"mo",output:"\u215B",ttype:CONST},{input:"\\frac38",tag:"mo",output:"\u215C",ttype:CONST},{input:"\\frac58",tag:"mo",output:"\u215D",ttype:CONST},{input:"\\frac78",tag:"mo",output:"\u215E",ttype:CONST},{input:"\\pm",tag:"mo",output:"\u00B1",ttype:CONST},{input:"\\mp",tag:"mo",output:"\u2213",ttype:CONST},{input:"\\triangleleft",tag:"mo",output:"\u22B2",ttype:CONST},{input:"\\triangleright",tag:"mo",output:"\u22B3",ttype:CONST},{input:"\\cdot",tag:"mo",output:"\u22C5",ttype:CONST},{input:"\\star",tag:"mo",output:"\u22C6",ttype:CONST},{input:"\\ast",tag:"mo",output:"\u002A",ttype:CONST},{input:"\\times",tag:"mo",output:"\u00D7",ttype:CONST},{input:"\\div",tag:"mo",output:"\u00F7",ttype:CONST},{input:"\\circ",tag:"mo",output:"\u2218",ttype:CONST},{input:"\\bullet",tag:"mo",output:"\u2022",ttype:CONST},{input:"\\oplus",tag:"mo",output:"\u2295",ttype:CONST},{input:"\\ominus",tag:"mo",output:"\u2296",ttype:CONST},{input:"\\otimes",tag:"mo",output:"\u2297",ttype:CONST},{input:"\\bigcirc",tag:"mo",output:"\u25CB",ttype:CONST},{input:"\\oslash",tag:"mo",output:"\u2298",ttype:CONST},{input:"\\odot",tag:"mo",output:"\u2299",ttype:CONST},{input:"\\land",tag:"mo",output:"\u2227",ttype:CONST},{input:"\\wedge",tag:"mo",output:"\u2227",ttype:CONST},{input:"\\lor",tag:"mo",output:"\u2228",ttype:CONST},{input:"\\vee",tag:"mo",output:"\u2228",ttype:CONST},{input:"\\cap",tag:"mo",output:"\u2229",ttype:CONST},{input:"\\cup",tag:"mo",output:"\u222A",ttype:CONST},{input:"\\sqcap",tag:"mo",output:"\u2293",ttype:CONST},{input:"\\sqcup",tag:"mo",output:"\u2294",ttype:CONST},{input:"\\uplus",tag:"mo",output:"\u228E",ttype:CONST},{input:"\\amalg",tag:"mo",output:"\u2210",ttype:CONST},{input:"\\bigtriangleup",tag:"mo",output:"\u25B3",ttype:CONST},{input:"\\bigtriangledown",tag:"mo",output:"\u25BD",ttype:CONST},{input:"\\dag",tag:"mo",output:"\u2020",ttype:CONST},{input:"\\dagger",tag:"mo",output:"\u2020",ttype:CONST},{input:"\\ddag",tag:"mo",output:"\u2021",ttype:CONST},{input:"\\ddagger",tag:"mo",output:"\u2021",ttype:CONST},{input:"\\lhd",tag:"mo",output:"\u22B2",ttype:CONST},{input:"\\rhd",tag:"mo",output:"\u22B3",ttype:CONST},{input:"\\unlhd",tag:"mo",output:"\u22B4",ttype:CONST},{input:"\\unrhd",tag:"mo",output:"\u22B5",ttype:CONST},{input:"\\sum",tag:"mo",output:"\u2211",ttype:UNDEROVER},{input:"\\prod",tag:"mo",output:"\u220F",ttype:UNDEROVER},{input:"\\bigcap",tag:"mo",output:"\u22C2",ttype:UNDEROVER},{input:"\\bigcup",tag:"mo",output:"\u22C3",ttype:UNDEROVER},{input:"\\bigwedge",tag:"mo",output:"\u22C0",ttype:UNDEROVER},{input:"\\bigvee",tag:"mo",output:"\u22C1",ttype:UNDEROVER},{input:"\\bigsqcap",tag:"mo",output:"\u2A05",ttype:UNDEROVER},{input:"\\bigsqcup",tag:"mo",output:"\u2A06",ttype:UNDEROVER},{input:"\\coprod",tag:"mo",output:"\u2210",ttype:UNDEROVER},{input:"\\bigoplus",tag:"mo",output:"\u2A01",ttype:UNDEROVER},{input:"\\bigotimes",tag:"mo",output:"\u2A02",ttype:UNDEROVER},{input:"\\bigodot",tag:"mo",output:"\u2A00",ttype:UNDEROVER},{input:"\\biguplus",tag:"mo",output:"\u2A04",ttype:UNDEROVER},{input:"\\int",tag:"mo",output:"\u222B",ttype:CONST},{input:"\\oint",tag:"mo",output:"\u222E",ttype:CONST},{input:":=",tag:"mo",output:":=",ttype:CONST},{input:"\\lt",tag:"mo",output:"<",ttype:CONST},{input:"\\gt",tag:"mo",output:">",ttype:CONST},{input:"\\ne",tag:"mo",output:"\u2260",ttype:CONST},{input:"\\neq",tag:"mo",output:"\u2260",ttype:CONST},{input:"\\le",tag:"mo",output:"\u2264",ttype:CONST},{input:"\\leq",tag:"mo",output:"\u2264",ttype:CONST},{input:"\\leqslant",tag:"mo",output:"\u2264",ttype:CONST},{input:"\\ge",tag:"mo",output:"\u2265",ttype:CONST},{input:"\\geq",tag:"mo",output:"\u2265",ttype:CONST},{input:"\\geqslant",tag:"mo",output:"\u2265",ttype:CONST},{input:"\\equiv",tag:"mo",output:"\u2261",ttype:CONST},{input:"\\ll",tag:"mo",output:"\u226A",ttype:CONST},{input:"\\gg",tag:"mo",output:"\u226B",ttype:CONST},{input:"\\doteq",tag:"mo",output:"\u2250",ttype:CONST},{input:"\\prec",tag:"mo",output:"\u227A",ttype:CONST},{input:"\\succ",tag:"mo",output:"\u227B",ttype:CONST},{input:"\\preceq",tag:"mo",output:"\u227C",ttype:CONST},{input:"\\succeq",tag:"mo",output:"\u227D",ttype:CONST},{input:"\\subset",tag:"mo",output:"\u2282",ttype:CONST},{input:"\\supset",tag:"mo",output:"\u2283",ttype:CONST},{input:"\\subseteq",tag:"mo",output:"\u2286",ttype:CONST},{input:"\\supseteq",tag:"mo",output:"\u2287",ttype:CONST},{input:"\\sqsubset",tag:"mo",output:"\u228F",ttype:CONST},{input:"\\sqsupset",tag:"mo",output:"\u2290",ttype:CONST},{input:"\\sqsubseteq",tag:"mo",output:"\u2291",ttype:CONST},{input:"\\sqsupseteq",tag:"mo",output:"\u2292",ttype:CONST},{input:"\\sim",tag:"mo",output:"\u223C",ttype:CONST},{input:"\\simeq",tag:"mo",output:"\u2243",ttype:CONST},{input:"\\approx",tag:"mo",output:"\u2248",ttype:CONST},{input:"\\cong",tag:"mo",output:"\u2245",ttype:CONST},{input:"\\Join",tag:"mo",output:"\u22C8",ttype:CONST},{input:"\\bowtie",tag:"mo",output:"\u22C8",ttype:CONST},{input:"\\in",tag:"mo",output:"\u2208",ttype:CONST},{input:"\\ni",tag:"mo",output:"\u220B",ttype:CONST},{input:"\\owns",tag:"mo",output:"\u220B",ttype:CONST},{input:"\\propto",tag:"mo",output:"\u221D",ttype:CONST},{input:"\\vdash",tag:"mo",output:"\u22A2",ttype:CONST},{input:"\\dashv",tag:"mo",output:"\u22A3",ttype:CONST},{input:"\\models",tag:"mo",output:"\u22A8",ttype:CONST},{input:"\\perp",tag:"mo",output:"\u22A5",ttype:CONST},{input:"\\smile",tag:"mo",output:"\u2323",ttype:CONST},{input:"\\frown",tag:"mo",output:"\u2322",ttype:CONST},{input:"\\asymp",tag:"mo",output:"\u224D",ttype:CONST},{input:"\\notin",tag:"mo",output:"\u2209",ttype:CONST},{input:"\\begin{eqnarray}",output:"X",ttype:MATRIX,invisible:true},{input:"\\begin{array}",output:"X",ttype:MATRIX,invisible:true},{input:"\\\\",output:"}&{",ttype:DEFINITION},{input:"\\end{eqnarray}",output:"}}",ttype:DEFINITION},{input:"\\end{array}",output:"}}",ttype:DEFINITION},{input:"\\big",tag:"mo",output:"X",atval:"1.2",ieval:"2.2",ttype:BIG},{input:"\\Big",tag:"mo",output:"X",atval:"1.6",ieval:"2.6",ttype:BIG},{input:"\\bigg",tag:"mo",output:"X",atval:"2.2",ieval:"3.2",ttype:BIG},{input:"\\Bigg",tag:"mo",output:"X",atval:"2.9",ieval:"3.9",ttype:BIG},{input:"\\left",tag:"mo",output:"X",ttype:LEFTBRACKET},{input:"\\right",tag:"mo",output:"X",ttype:RIGHTBRACKET},{input:"{",output:"{",ttype:LEFTBRACKET,invisible:true},{input:"}",output:"}",ttype:RIGHTBRACKET,invisible:true},{input:"(",tag:"mo",output:"(",atval:"1",ttype:STRETCHY},{input:"[",tag:"mo",output:"[",atval:"1",ttype:STRETCHY},{input:"\\lbrack",tag:"mo",output:"[",atval:"1",ttype:STRETCHY},{input:"\\{",tag:"mo",output:"{",atval:"1",ttype:STRETCHY},{input:"\\lbrace",tag:"mo",output:"{",atval:"1",ttype:STRETCHY},{input:"\\langle",tag:"mo",output:"\u2329",atval:"1",ttype:STRETCHY},{input:"\\lfloor",tag:"mo",output:"\u230A",atval:"1",ttype:STRETCHY},{input:"\\lceil",tag:"mo",output:"\u2308",atval:"1",ttype:STRETCHY},{input:")",tag:"mo",output:")",rtag:"mi",atval:"1",ttype:STRETCHY},{input:"]",tag:"mo",output:"]",rtag:"mi",atval:"1",ttype:STRETCHY},{input:"\\rbrack",tag:"mo",output:"]",rtag:"mi",atval:"1",ttype:STRETCHY},{input:"\\}",tag:"mo",output:"}",rtag:"mi",atval:"1",ttype:STRETCHY},{input:"\\rbrace",tag:"mo",output:"}",rtag:"mi",atval:"1",ttype:STRETCHY},{input:"\\rangle",tag:"mo",output:"\u232A",rtag:"mi",atval:"1",ttype:STRETCHY},{input:"\\rfloor",tag:"mo",output:"\u230B",rtag:"mi",atval:"1",ttype:STRETCHY},{input:"\\rceil",tag:"mo",output:"\u2309",rtag:"mi",atval:"1",ttype:STRETCHY},{input:"|",tag:"mo",output:"\u2223",atval:"1",ttype:STRETCHY},{input:"\\|",tag:"mo",output:"\u2225",atval:"1",ttype:STRETCHY},{input:"\\vert",tag:"mo",output:"\u2223",atval:"1",ttype:STRETCHY},{input:"\\Vert",tag:"mo",output:"\u2225",atval:"1",ttype:STRETCHY},{input:"\\mid",tag:"mo",output:"\u2223",atval:"1",ttype:STRETCHY},{input:"\\parallel",tag:"mo",output:"\u2225",atval:"1",ttype:STRETCHY},{input:"/",tag:"mo",output:"/",atval:"1.01",ttype:STRETCHY},{input:"\\backslash",tag:"mo",output:"\u2216",atval:"1",ttype:STRETCHY},{input:"\\setminus",tag:"mo",output:"\\",ttype:CONST},{input:"\\!",tag:"mspace",atname:"width",atval:"-0.167em",ttype:SPACE},{input:"\\,",tag:"mspace",atname:"width",atval:"0.167em",ttype:SPACE},{input:"\\>",tag:"mspace",atname:"width",atval:"0.222em",ttype:SPACE},{input:"\\:",tag:"mspace",atname:"width",atval:"0.222em",ttype:SPACE},{input:"\\;",tag:"mspace",atname:"width",atval:"0.278em",ttype:SPACE},{input:"~",tag:"mspace",atname:"width",atval:"0.333em",ttype:SPACE},{input:"\\quad",tag:"mspace",atname:"width",atval:"1em",ttype:SPACE},{input:"\\qquad",tag:"mspace",atname:"width",atval:"2em",ttype:SPACE},{input:"\\prime",tag:"mo",output:"\u2032",ttype:CONST},{input:"'",tag:"mo",output:"\u02B9",ttype:CONST},{input:"''",tag:"mo",output:"\u02BA",ttype:CONST},{input:"'''",tag:"mo",output:"\u2034",ttype:CONST},{input:"''''",tag:"mo",output:"\u2057",ttype:CONST},{input:"\\ldots",tag:"mo",output:"\u2026",ttype:CONST},{input:"\\cdots",tag:"mo",output:"\u22EF",ttype:CONST},{input:"\\vdots",tag:"mo",output:"\u22EE",ttype:CONST},{input:"\\ddots",tag:"mo",output:"\u22F1",ttype:CONST},{input:"\\forall",tag:"mo",output:"\u2200",ttype:CONST},{input:"\\exists",tag:"mo",output:"\u2203",ttype:CONST},{input:"\\Re",tag:"mo",output:"\u211C",ttype:CONST},{input:"\\Im",tag:"mo",output:"\u2111",ttype:CONST},{input:"\\aleph",tag:"mo",output:"\u2135",ttype:CONST},{input:"\\hbar",tag:"mo",output:"\u210F",ttype:CONST},{input:"\\ell",tag:"mo",output:"\u2113",ttype:CONST},{input:"\\wp",tag:"mo",output:"\u2118",ttype:CONST},{input:"\\emptyset",tag:"mo",output:"\u2205",ttype:CONST},{input:"\\infty",tag:"mo",output:"\u221E",ttype:CONST},{input:"\\surd",tag:"mo",output:"\\sqrt{}",ttype:DEFINITION},{input:"\\partial",tag:"mo",output:"\u2202",ttype:CONST},{input:"\\nabla",tag:"mo",output:"\u2207",ttype:CONST},{input:"\\triangle",tag:"mo",output:"\u25B3",ttype:CONST},{input:"\\therefore",tag:"mo",output:"\u2234",ttype:CONST},{input:"\\angle",tag:"mo",output:"\u2220",ttype:CONST},{input:"\\diamond",tag:"mo",output:"\u22C4",ttype:CONST},{input:"\\Diamond",tag:"mo",output:"\u25C7",ttype:CONST},{input:"\\neg",tag:"mo",output:"\u00AC",ttype:CONST},{input:"\\lnot",tag:"mo",output:"\u00AC",ttype:CONST},{input:"\\bot",tag:"mo",output:"\u22A5",ttype:CONST},{input:"\\top",tag:"mo",output:"\u22A4",ttype:CONST},{input:"\\square",tag:"mo",output:"\u25AB",ttype:CONST},{input:"\\Box",tag:"mo",output:"\u25A1",ttype:CONST},{input:"\\wr",tag:"mo",output:"\u2240",ttype:CONST},{input:"\\arccos",tag:"mi",output:"arccos",ttype:UNARY,func:true},{input:"\\arcsin",tag:"mi",output:"arcsin",ttype:UNARY,func:true},{input:"\\arctan",tag:"mi",output:"arctan",ttype:UNARY,func:true},{input:"\\arg",tag:"mi",output:"arg",ttype:UNARY,func:true},{input:"\\cos",tag:"mi",output:"cos",ttype:UNARY,func:true},{input:"\\cosh",tag:"mi",output:"cosh",ttype:UNARY,func:true},{input:"\\cot",tag:"mi",output:"cot",ttype:UNARY,func:true},{input:"\\coth",tag:"mi",output:"coth",ttype:UNARY,func:true},{input:"\\csc",tag:"mi",output:"csc",ttype:UNARY,func:true},{input:"\\deg",tag:"mi",output:"deg",ttype:UNARY,func:true},{input:"\\det",tag:"mi",output:"det",ttype:UNARY,func:true},{input:"\\dim",tag:"mi",output:"dim",ttype:UNARY,func:true},{input:"\\exp",tag:"mi",output:"exp",ttype:UNARY,func:true},{input:"\\gcd",tag:"mi",output:"gcd",ttype:UNARY,func:true},{input:"\\hom",tag:"mi",output:"hom",ttype:UNARY,func:true},{input:"\\inf",tag:"mo",output:"inf",ttype:UNDEROVER},{input:"\\ker",tag:"mi",output:"ker",ttype:UNARY,func:true},{input:"\\lg",tag:"mi",output:"lg",ttype:UNARY,func:true},{input:"\\lim",tag:"mo",output:"lim",ttype:UNDEROVER},{input:"\\liminf",tag:"mo",output:"liminf",ttype:UNDEROVER},{input:"\\limsup",tag:"mo",output:"limsup",ttype:UNDEROVER},{input:"\\ln",tag:"mi",output:"ln",ttype:UNARY,func:true},{input:"\\log",tag:"mi",output:"log",ttype:UNARY,func:true},{input:"\\max",tag:"mo",output:"max",ttype:UNDEROVER},{input:"\\min",tag:"mo",output:"min",ttype:UNDEROVER},{input:"\\Pr",tag:"mi",output:"Pr",ttype:UNARY,func:true},{input:"\\sec",tag:"mi",output:"sec",ttype:UNARY,func:true},{input:"\\sin",tag:"mi",output:"sin",ttype:UNARY,func:true},{input:"\\sinh",tag:"mi",output:"sinh",ttype:UNARY,func:true},{input:"\\sup",tag:"mo",output:"sup",ttype:UNDEROVER},{input:"\\tan",tag:"mi",output:"tan",ttype:UNARY,func:true},{input:"\\tanh",tag:"mi",output:"tanh",ttype:UNARY,func:true},{input:"\\gets",tag:"mo",output:"\u2190",ttype:CONST},{input:"\\leftarrow",tag:"mo",output:"\u2190",ttype:CONST},{input:"\\to",tag:"mo",output:"\u2192",ttype:CONST},{input:"\\rightarrow",tag:"mo",output:"\u2192",ttype:CONST},{input:"\\leftrightarrow",tag:"mo",output:"\u2194",ttype:CONST},{input:"\\uparrow",tag:"mo",output:"\u2191",ttype:CONST},{input:"\\downarrow",tag:"mo",output:"\u2193",ttype:CONST},{input:"\\updownarrow",tag:"mo",output:"\u2195",ttype:CONST},{input:"\\Leftarrow",tag:"mo",output:"\u21D0",ttype:CONST},{input:"\\Rightarrow",tag:"mo",output:"\u21D2",ttype:CONST},{input:"\\Leftrightarrow",tag:"mo",output:"\u21D4",ttype:CONST},{input:"\\iff",tag:"mo",output:"~\\Longleftrightarrow~",ttype:DEFINITION},{input:"\\Uparrow",tag:"mo",output:"\u21D1",ttype:CONST},{input:"\\Downarrow",tag:"mo",output:"\u21D3",ttype:CONST},{input:"\\Updownarrow",tag:"mo",output:"\u21D5",ttype:CONST},{input:"\\mapsto",tag:"mo",output:"\u21A6",ttype:CONST},{input:"\\longleftarrow",tag:"mo",output:"\u2190",ttype:LONG},{input:"\\longrightarrow",tag:"mo",output:"\u2192",ttype:LONG},{input:"\\longleftrightarrow",tag:"mo",output:"\u2194",ttype:LONG},{input:"\\Longleftarrow",tag:"mo",output:"\u21D0",ttype:LONG},{input:"\\Longrightarrow",tag:"mo",output:"\u21D2",ttype:LONG},{input:"\\Longleftrightarrow",tag:"mo",output:"\u21D4",ttype:LONG},{input:"\\longmapsto",tag:"mo",output:"\u21A6",ttype:CONST},AMsqrt,AMroot,AMfrac,AMover,AMsub,AMsup,AMtext,AMmbox,AMatop,AMchoose,{input:"\\acute",tag:"mover",output:"\u00B4",ttype:UNARY,acc:true},{input:"\\grave",tag:"mover",output:"\u0060",ttype:UNARY,acc:true},{input:"\\breve",tag:"mover",output:"\u02D8",ttype:UNARY,acc:true},{input:"\\check",tag:"mover",output:"\u02C7",ttype:UNARY,acc:true},{input:"\\dot",tag:"mover",output:".",ttype:UNARY,acc:true},{input:"\\ddot",tag:"mover",output:"..",ttype:UNARY,acc:true},{input:"\\mathring",tag:"mover",output:"\u00B0",ttype:UNARY,acc:true},{input:"\\vec",tag:"mover",output:"\u20D7",ttype:UNARY,acc:true},{input:"\\overrightarrow",tag:"mover",output:"\u20D7",ttype:UNARY,acc:true},{input:"\\overleftarrow",tag:"mover",output:"\u20D6",ttype:UNARY,acc:true},{input:"\\hat",tag:"mover",output:"\u005E",ttype:UNARY,acc:true},{input:"\\widehat",tag:"mover",output:"\u0302",ttype:UNARY,acc:true},{input:"\\tilde",tag:"mover",output:"~",ttype:UNARY,acc:true},{input:"\\widetilde",tag:"mover",output:"\u02DC",ttype:UNARY,acc:true},{input:"\\bar",tag:"mover",output:"\u203E",ttype:UNARY,acc:true},{input:"\\overbrace",tag:"mover",output:"\uFE37",ttype:UNARY,acc:true},{input:"\\overbracket",tag:"mover",output:"\u23B4",ttype:UNARY,acc:true},{input:"\\overline",tag:"mover",output:"\u00AF",ttype:UNARY,acc:true},{input:"\\underbrace",tag:"munder",output:"\uFE38",ttype:UNARY,acc:true},{input:"\\underbracket",tag:"munder",output:"\u23B5",ttype:UNARY,acc:true},{input:"\\underline",tag:"munder",output:"\u00AF",ttype:UNARY,acc:true},{input:"\\displaystyle",tag:"mstyle",atname:"displaystyle",atval:"true",ttype:UNARY},{input:"\\textstyle",tag:"mstyle",atname:"displaystyle",atval:"false",ttype:UNARY},{input:"\\scriptstyle",tag:"mstyle",atname:"scriptlevel",atval:"1",ttype:UNARY},{input:"\\scriptscriptstyle",tag:"mstyle",atname:"scriptlevel",atval:"2",ttype:UNARY},{input:"\\textrm",tag:"mstyle",output:"\\mathrm",ttype:DEFINITION},{input:"\\mathbf",tag:"mstyle",atname:"mathvariant",atval:"bold",ttype:UNARY},{input:"\\textbf",tag:"mstyle",atname:"mathvariant",atval:"bold",ttype:UNARY},{input:"\\mathit",tag:"mstyle",atname:"mathvariant",atval:"italic",ttype:UNARY},{input:"\\textit",tag:"mstyle",atname:"mathvariant",atval:"italic",ttype:UNARY},{input:"\\mathtt",tag:"mstyle",atname:"mathvariant",atval:"monospace",ttype:UNARY},{input:"\\texttt",tag:"mstyle",atname:"mathvariant",atval:"monospace",ttype:UNARY},{input:"\\mathsf",tag:"mstyle",atname:"mathvariant",atval:"sans-serif",ttype:UNARY},{input:"\\mathbb",tag:"mstyle",atname:"mathvariant",atval:"double-struck",ttype:UNARY,codes:AMbbb},{input:"\\mathcal",tag:"mstyle",atname:"mathvariant",atval:"script",ttype:UNARY,codes:AMcal},{input:"\\mathfrak",tag:"mstyle",atname:"mathvariant",atval:"fraktur",ttype:UNARY,codes:AMfrk},{input:"\\textcolor",tag:"mstyle",atname:"mathvariant",atval:"mathcolor",ttype:BINARY},{input:"\\colorbox",tag:"mstyle",atname:"mathvariant",atval:"background",ttype:BINARY}];function compareNames(s1,s2){if(s1.input>s2.input)return 1
+  else return-1;}
+  var AMnames=[];function AMinitSymbols(){AMsymbols.sort(compareNames);for(i=0;i<AMsymbols.length;i++)AMnames[i]=AMsymbols[i].input;}
+  var AMmathml="http://www.w3.org/1998/Math/MathML";function AMcreateElementMathML(t){if(isIE)return document.createElement("m:"+t);else return document.createElementNS(AMmathml,t);}
+  function AMcreateMmlNode(t,frag){if(isIE)var node=document.createElement("m:"+t);else var node=document.createElementNS(AMmathml,t);node.appendChild(frag);return node;}
+  function newcommand(oldstr,newstr){AMsymbols=AMsymbols.concat([{input:oldstr,tag:"mo",output:newstr,ttype:DEFINITION}]);}
+  function AMremoveCharsAndBlanks(str,n){var st;st=str.slice(n);for(var i=0;i<st.length&&st.charCodeAt(i)<=32;i=i+1);return st.slice(i);}
+  function AMposition(arr,str,n){if(n==0){var h,m;n=-1;h=arr.length;while(n+1<h){m=(n+h)>>1;if(arr[m]<str)n=m;else h=m;}
+  return h;}else
+  for(var i=n;i<arr.length&&arr[i]<str;i++);return i;}
+  function AMgetSymbol(str){var k=0;var j=0;var mk;var st;var tagst;var match="";var more=true;for(var i=1;i<=str.length&&more;i++){st=str.slice(0,i);j=k;k=AMposition(AMnames,st,j);if(k<AMnames.length&&str.slice(0,AMnames[k].length)==AMnames[k]){match=AMnames[k];mk=k;i=match.length;}
+  more=k<AMnames.length&&str.slice(0,AMnames[k].length)>=AMnames[k];}
+  AMpreviousSymbol=AMcurrentSymbol;if(match!=""){AMcurrentSymbol=AMsymbols[mk].ttype;return AMsymbols[mk];}
+  AMcurrentSymbol=CONST;k=1;st=str.slice(0,1);if("0"<=st&&st<="9")tagst="mn";else tagst=(("A">st||st>"Z")&&("a">st||st>"z")?"mo":"mi");return{input:st,tag:tagst,output:st,ttype:CONST};}
+  var AMpreviousSymbol,AMcurrentSymbol;function AMparseSexpr(str){var symbol,node,result,result2,i,st,newFrag=document.createDocumentFragment();str=AMremoveCharsAndBlanks(str,0);symbol=AMgetSymbol(str);if(symbol==null||symbol.ttype==RIGHTBRACKET)
+  return[null,str,null];if(symbol.ttype==DEFINITION){str=symbol.output+AMremoveCharsAndBlanks(str,symbol.input.length);symbol=AMgetSymbol(str);if(symbol==null||symbol.ttype==RIGHTBRACKET)
+  return[null,str,null];}
+  str=AMremoveCharsAndBlanks(str,symbol.input.length);switch(symbol.ttype){case SPACE:node=AMcreateElementMathML(symbol.tag);node.setAttribute(symbol.atname,symbol.atval);return[node,str,symbol.tag];case UNDEROVER:if(isIE){if(symbol.input.substr(0,4)=="\\big"){str="\\"+symbol.input.substr(4)+str;symbol=AMgetSymbol(str);symbol.ttype=UNDEROVER;str=AMremoveCharsAndBlanks(str,symbol.input.length);}}
+  return[AMcreateMmlNode(symbol.tag,document.createTextNode(symbol.output)),str,symbol.tag];case CONST:var output=symbol.output;if(isIE){if(symbol.input=="'")
+  output="\u2032";else if(symbol.input=="''")
+  output="\u2033";else if(symbol.input=="'''")
+  output="\u2033\u2032";else if(symbol.input=="''''")
+  output="\u2033\u2033";else if(symbol.input=="\\square")
+  output="\u25A1";else if(symbol.input.substr(0,5)=="\\frac"){var denom=symbol.input.substr(6,1);if(denom=="5"||denom=="6"){str=symbol.input.replace(/\\frac/,"\\frac ")+str;return[node,str,symbol.tag];}}}
+  node=AMcreateMmlNode(symbol.tag,document.createTextNode(output));return[node,str,symbol.tag];case LONG:node=AMcreateMmlNode(symbol.tag,document.createTextNode(symbol.output));node.setAttribute("minsize","1.5");node.setAttribute("maxsize","1.5");node=AMcreateMmlNode("mover",node);node.appendChild(AMcreateElementMathML("mspace"));return[node,str,symbol.tag];case STRETCHY:if(isIE&&symbol.input=="\\backslash")
+  symbol.output="\\";node=AMcreateMmlNode(symbol.tag,document.createTextNode(symbol.output));if(symbol.input=="|"||symbol.input=="\\vert"||symbol.input=="\\|"||symbol.input=="\\Vert"){node.setAttribute("lspace","0em");node.setAttribute("rspace","0em");}
+  node.setAttribute("maxsize",symbol.atval);if(symbol.rtag!=null)
+  return[node,str,symbol.rtag];else
+  return[node,str,symbol.tag];case BIG:var atval=symbol.atval;if(isIE)
+  atval=symbol.ieval;symbol=AMgetSymbol(str);if(symbol==null)
+  return[null,str,null];str=AMremoveCharsAndBlanks(str,symbol.input.length);node=AMcreateMmlNode(symbol.tag,document.createTextNode(symbol.output));if(isIE){var space=AMcreateElementMathML("mspace");space.setAttribute("height",atval+"ex");node=AMcreateMmlNode("mrow",node);node.appendChild(space);}else{node.setAttribute("minsize",atval);node.setAttribute("maxsize",atval);}
+  return[node,str,symbol.tag];case LEFTBRACKET:if(symbol.input=="\\left"){symbol=AMgetSymbol(str);if(symbol!=null){if(symbol.input==".")
+  symbol.invisible=true;str=AMremoveCharsAndBlanks(str,symbol.input.length);}}
+  result=AMparseExpr(str,true,false);if(symbol==null||(typeof symbol.invisible=="boolean"&&symbol.invisible))
+  node=AMcreateMmlNode("mrow",result[0]);else{node=AMcreateMmlNode("mo",document.createTextNode(symbol.output));node=AMcreateMmlNode("mrow",node);node.appendChild(result[0]);}
+  return[node,result[1],result[2]];case MATRIX:if(symbol.input=="\\begin{array}"){var mask="";symbol=AMgetSymbol(str);str=AMremoveCharsAndBlanks(str,0);if(symbol==null)
+  mask="l";else{str=AMremoveCharsAndBlanks(str,symbol.input.length);if(symbol.input!="{")
+  mask="l";else do{symbol=AMgetSymbol(str);if(symbol!=null){str=AMremoveCharsAndBlanks(str,symbol.input.length);if(symbol.input!="}")
+  mask=mask+symbol.input;}}while(symbol!=null&&symbol.input!=""&&symbol.input!="}");}
+  result=AMparseExpr("{"+str,true,true);node=AMcreateMmlNode("mtable",result[0]);mask=mask.replace(/l/g,"left ");mask=mask.replace(/r/g,"right ");mask=mask.replace(/c/g,"center ");node.setAttribute("columnalign",mask);node.setAttribute("displaystyle","false");if(isIE)
+  return[node,result[1],null];var lspace=AMcreateElementMathML("mspace");lspace.setAttribute("width","0.167em");var rspace=AMcreateElementMathML("mspace");rspace.setAttribute("width","0.167em");var node1=AMcreateMmlNode("mrow",lspace);node1.appendChild(node);node1.appendChild(rspace);return[node1,result[1],null];}else{result=AMparseExpr("{"+str,true,true);node=AMcreateMmlNode("mtable",result[0]);if(isIE)
+  node.setAttribute("columnspacing","0.25em");else
+  node.setAttribute("columnspacing","0.167em");node.setAttribute("columnalign","right center left");node.setAttribute("displaystyle","true");node=AMcreateMmlNode("mrow",node);return[node,result[1],null];}
+  case TEXT:if(str.charAt(0)=="{")i=str.indexOf("}");else i=0;if(i==-1)
+  i=str.length;st=str.slice(1,i);if(st.charAt(0)==" "){node=AMcreateElementMathML("mspace");node.setAttribute("width","0.33em");newFrag.appendChild(node);}
+  newFrag.appendChild(AMcreateMmlNode(symbol.tag,document.createTextNode(st)));if(st.charAt(st.length-1)==" "){node=AMcreateElementMathML("mspace");node.setAttribute("width","0.33em");newFrag.appendChild(node);}
+  str=AMremoveCharsAndBlanks(str,i+1);return[AMcreateMmlNode("mrow",newFrag),str,null];case UNARY:result=AMparseSexpr(str);if(result[0]==null)return[AMcreateMmlNode(symbol.tag,document.createTextNode(symbol.output)),str];if(typeof symbol.func=="boolean"&&symbol.func){st=str.charAt(0);if(st=="^"||st=="_"||st==","){return[AMcreateMmlNode(symbol.tag,document.createTextNode(symbol.output)),str,symbol.tag];}else{node=AMcreateMmlNode("mrow",AMcreateMmlNode(symbol.tag,document.createTextNode(symbol.output)));if(isIE){var space=AMcreateElementMathML("mspace");space.setAttribute("width","0.167em");node.appendChild(space);}
+  node.appendChild(result[0]);return[node,result[1],symbol.tag];}}
+  if(symbol.input=="\\sqrt"){if(isIE){var space=AMcreateElementMathML("mspace");space.setAttribute("height","1.2ex");space.setAttribute("width","0em");node=AMcreateMmlNode(symbol.tag,result[0])
+  node.appendChild(space);return[node,result[1],symbol.tag];}else
+  return[AMcreateMmlNode(symbol.tag,result[0]),result[1],symbol.tag];}else if(typeof symbol.acc=="boolean"&&symbol.acc){node=AMcreateMmlNode(symbol.tag,result[0]);var output=symbol.output;if(isIE){if(symbol.input=="\\hat")
+  output="\u0302";else if(symbol.input=="\\widehat")
+  output="\u005E";else if(symbol.input=="\\bar")
+  output="\u00AF";else if(symbol.input=="\\grave")
+  output="\u0300";else if(symbol.input=="\\tilde")
+  output="\u0303";}
+  var node1=AMcreateMmlNode("mo",document.createTextNode(output));if(symbol.input=="\\vec"||symbol.input=="\\check")
+  node1.setAttribute("maxsize","1.2");if(isIE&&symbol.input=="\\bar")
+  node1.setAttribute("maxsize","0.5");if(symbol.input=="\\underbrace"||symbol.input=="\\underline")
+  node1.setAttribute("accentunder","true");else
+  node1.setAttribute("accent","true");node.appendChild(node1);if(symbol.input=="\\overbrace"||symbol.input=="\\underbrace")
+  node.ttype=UNDEROVER;return[node,result[1],symbol.tag];}else{if(!isIE&&typeof symbol.codes!="undefined"){for(i=0;i<result[0].childNodes.length;i++)
+  if(result[0].childNodes[i].nodeName=="mi"||result[0].nodeName=="mi"){st=(result[0].nodeName=="mi"?result[0].firstChild.nodeValue:result[0].childNodes[i].firstChild.nodeValue);var newst=[];for(var j=0;j<st.length;j++)
+  if(st.charCodeAt(j)>64&&st.charCodeAt(j)<91)newst=newst+
+  String.fromCharCode(symbol.codes[st.charCodeAt(j)-65]);else newst=newst+st.charAt(j);if(result[0].nodeName=="mi")
+  result[0]=AMcreateElementMathML("mo").appendChild(document.createTextNode(newst));else result[0].replaceChild(AMcreateElementMathML("mo").appendChild(document.createTextNode(newst)),result[0].childNodes[i]);}}
+  node=AMcreateMmlNode(symbol.tag,result[0]);node.setAttribute(symbol.atname,symbol.atval);if(symbol.input=="\\scriptstyle"||symbol.input=="\\scriptscriptstyle")
+  node.setAttribute("displaystyle","false");return[node,result[1],symbol.tag];}
+  case BINARY:result=AMparseSexpr(str);if(result[0]==null)return[AMcreateMmlNode("mo",document.createTextNode(symbol.input)),str,null];result2=AMparseSexpr(result[1]);if(result2[0]==null)return[AMcreateMmlNode("mo",document.createTextNode(symbol.input)),str,null];if(symbol.input=="\\textcolor"||symbol.input=="\\colorbox"){var tclr=str.match(/\{\s*([#\w]+)\s*\}/);str=str.replace(/\{\s*[#\w]+\s*\}/,"");if(tclr!=null){if(IsColorName.test(tclr[1].toLowerCase())){tclr=LaTeXColor[tclr[1].toLowerCase()];}else{tclr=tclr[1];}
+  node=AMcreateElementMathML("mstyle");node.setAttribute(symbol.atval,tclr);node.appendChild(result2[0]);return[node,result2[1],symbol.tag];}}
+  if(symbol.input=="\\root"||symbol.input=="\\stackrel")newFrag.appendChild(result2[0]);newFrag.appendChild(result[0]);if(symbol.input=="\\frac")newFrag.appendChild(result2[0]);return[AMcreateMmlNode(symbol.tag,newFrag),result2[1],symbol.tag];case INFIX:str=AMremoveCharsAndBlanks(str,symbol.input.length);return[AMcreateMmlNode("mo",document.createTextNode(symbol.output)),str,symbol.tag];default:return[AMcreateMmlNode(symbol.tag,document.createTextNode(symbol.output)),str,symbol.tag];}}
+  function AMparseIexpr(str){var symbol,sym1,sym2,node,result,tag,underover;str=AMremoveCharsAndBlanks(str,0);sym1=AMgetSymbol(str);result=AMparseSexpr(str);node=result[0];str=result[1];tag=result[2];symbol=AMgetSymbol(str);if(symbol.ttype==INFIX){str=AMremoveCharsAndBlanks(str,symbol.input.length);result=AMparseSexpr(str);if(result[0]==null)
+  result[0]=AMcreateMmlNode("mo",document.createTextNode("\u25A1"));str=result[1];tag=result[2];if(symbol.input=="_"||symbol.input=="^"){sym2=AMgetSymbol(str);tag=null;underover=((sym1.ttype==UNDEROVER)||(node.ttype==UNDEROVER));if(symbol.input=="_"&&sym2.input=="^"){str=AMremoveCharsAndBlanks(str,sym2.input.length);var res2=AMparseSexpr(str);str=res2[1];tag=res2[2];node=AMcreateMmlNode((underover?"munderover":"msubsup"),node);node.appendChild(result[0]);node.appendChild(res2[0]);}else if(symbol.input=="_"){node=AMcreateMmlNode((underover?"munder":"msub"),node);node.appendChild(result[0]);}else{node=AMcreateMmlNode((underover?"mover":"msup"),node);node.appendChild(result[0]);}
+  node=AMcreateMmlNode("mrow",node);}else{node=AMcreateMmlNode(symbol.tag,node);if(symbol.input=="\\atop"||symbol.input=="\\choose")
+  node.setAttribute("linethickness","0ex");node.appendChild(result[0]);if(symbol.input=="\\choose")
+  node=AMcreateMmlNode("mfenced",node);}}
+  return[node,str,tag];}
+  function AMparseExpr(str,rightbracket,matrix){var symbol,node,result,i,tag,newFrag=document.createDocumentFragment();do{str=AMremoveCharsAndBlanks(str,0);result=AMparseIexpr(str);node=result[0];str=result[1];tag=result[2];symbol=AMgetSymbol(str);if(node!=undefined){if((tag=="mn"||tag=="mi")&&symbol!=null&&typeof symbol.func=="boolean"&&symbol.func){var space=AMcreateElementMathML("mspace");space.setAttribute("width","0.167em");node=AMcreateMmlNode("mrow",node);node.appendChild(space);}
+  newFrag.appendChild(node);}}while((symbol.ttype!=RIGHTBRACKET)&&symbol!=null&&symbol.output!="");tag=null;if(symbol.ttype==RIGHTBRACKET){if(symbol.input=="\\right"){str=AMremoveCharsAndBlanks(str,symbol.input.length);symbol=AMgetSymbol(str);if(symbol!=null&&symbol.input==".")
+  symbol.invisible=true;if(symbol!=null)
+  tag=symbol.rtag;}
+  if(symbol!=null)
+  str=AMremoveCharsAndBlanks(str,symbol.input.length);var len=newFrag.childNodes.length;if(matrix&&len>0&&newFrag.childNodes[len-1].nodeName=="mrow"&&len>1&&newFrag.childNodes[len-2].nodeName=="mo"&&newFrag.childNodes[len-2].firstChild.nodeValue=="&"){var pos=[];var m=newFrag.childNodes.length;for(i=0;matrix&&i<m;i=i+2){pos[i]=[];node=newFrag.childNodes[i];for(var j=0;j<node.childNodes.length;j++)
+  if(node.childNodes[j].firstChild.nodeValue=="&")
+  pos[i][pos[i].length]=j;}
+  var row,frag,n,k,table=document.createDocumentFragment();for(i=0;i<m;i=i+2){row=document.createDocumentFragment();frag=document.createDocumentFragment();node=newFrag.firstChild;n=node.childNodes.length;k=0;for(j=0;j<n;j++){if(typeof pos[i][k]!="undefined"&&j==pos[i][k]){node.removeChild(node.firstChild);row.appendChild(AMcreateMmlNode("mtd",frag));k++;}else frag.appendChild(node.firstChild);}
+  row.appendChild(AMcreateMmlNode("mtd",frag));if(newFrag.childNodes.length>2){newFrag.removeChild(newFrag.firstChild);newFrag.removeChild(newFrag.firstChild);}
+  table.appendChild(AMcreateMmlNode("mtr",row));}
+  return[table,str];}
+  if(typeof symbol.invisible!="boolean"||!symbol.invisible){node=AMcreateMmlNode("mo",document.createTextNode(symbol.output));newFrag.appendChild(node);}}
+  return[newFrag,str,tag];}
+  function AMparseMath(str){var result,node=AMcreateElementMathML("mstyle");var cclr=str.match(/\\color\s*\{\s*([#\w]+)\s*\}/);str=str.replace(/\\color\s*\{\s*[#\w]+\s*\}/g,"");if(cclr!=null){if(IsColorName.test(cclr[1].toLowerCase())){cclr=LaTeXColor[cclr[1].toLowerCase()];}else{cclr=cclr[1];}
+  node.setAttribute("mathcolor",cclr);}else{if(mathcolor!="")node.setAttribute("mathcolor",mathcolor);};if(mathfontfamily!="")node.setAttribute("fontfamily",mathfontfamily);node.appendChild(AMparseExpr(str.replace(/^\s+/g,""),false,false)[0]);node=AMcreateMmlNode("math",node);if(showasciiformulaonhover)
+  node.setAttribute("title",str.replace(/\s+/g," "));if(false){var fnode=AMcreateElementXHTML("font");fnode.setAttribute("face",mathfontfamily);fnode.appendChild(node);return fnode;}
+  return node;}
+  function AMstrarr2docFrag(arr,linebreaks){var newFrag=document.createDocumentFragment();var expr=false;for(var i=0;i<arr.length;i++){if(expr)newFrag.appendChild(AMparseMath(arr[i]));else{var arri=(linebreaks?arr[i].split("\n\n"):[arr[i]]);newFrag.appendChild(AMcreateElementXHTML("span").appendChild(document.createTextNode(arri[0])));for(var j=1;j<arri.length;j++){newFrag.appendChild(AMcreateElementXHTML("p"));newFrag.appendChild(AMcreateElementXHTML("span").appendChild(document.createTextNode(arri[j])));}}
+  expr=!expr;}
+  return newFrag;}
+  function AMprocessNodeR(n,linebreaks){var mtch,str,arr,frg,i;if(n.childNodes.length==0){if((n.nodeType!=8||linebreaks)&&n.parentNode.nodeName!="form"&&n.parentNode.nodeName!="FORM"&&n.parentNode.nodeName!="textarea"&&n.parentNode.nodeName!="TEXTAREA"&&n.parentNode.nodeName!="pre"&&n.parentNode.nodeName!="PRE"){str=n.nodeValue;if(!(str==null)){str=str.replace(/\r\n\r\n/g,"\n\n");str=str.replace(/\x20+/g," ");str=str.replace(/\s*\r\n/g," ");mtch=(str.indexOf("\$")==-1?false:true);str=str.replace(/([^\\])\$/g,"$1 \$");str=str.replace(/^\$/," \$");arr=str.split(" \$");for(i=0;i<arr.length;i++)
+  arr[i]=arr[i].replace(/\\\$/g,"\$");if(arr.length>1||mtch){if(checkForMathML){checkForMathML=false;var nd=AMisMathMLavailable();AMnoMathML=nd!=null;if(AMnoMathML&&notifyIfNoMathML)
+  if(alertIfNoMathML)
+  alert("To view the ASCIIMathML notation use Internet Explorer 6 +\nMathPlayer (free from www.dessci.com)\nor Firefox/Mozilla/Netscape");else AMbody.insertBefore(nd,AMbody.childNodes[0]);}
+  if(!AMnoMathML){frg=AMstrarr2docFrag(arr,n.nodeType==8);var len=frg.childNodes.length;n.parentNode.replaceChild(frg,n);return len-1;}else return 0;}}}else return 0;}else if(n.nodeName!="math"){for(i=0;i<n.childNodes.length;i++)
+  i+=AMprocessNodeR(n.childNodes[i],linebreaks);}
+  return 0;}
+  function AMprocessNode(n,linebreaks,spanclassAM){var frag,st;if(spanclassAM!=null){frag=document.getElementsByTagName("span")
+  for(var i=0;i<frag.length;i++)
+  if(frag[i].className=="AM")
+  AMprocessNodeR(frag[i],linebreaks);}else{try{st=n.innerHTML;}catch(err){}
+  if(st==null||st.indexOf("\$")!=-1)
+  AMprocessNodeR(n,linebreaks);}
+  if(isIE){frag=document.getElementsByTagName('math');for(var i=0;i<frag.length;i++)frag[i].update()}}
+  var inAppendix=false;var sectionCntr=0;var IEcommentWarning=true;var biblist=[];var bibcntr=0;var LaTeXCounter=[];LaTeXCounter["definition"]=0;LaTeXCounter["proposition"]=0;LaTeXCounter["lemma"]=0;LaTeXCounter["theorem"]=0;LaTeXCounter["corollary"]=0;LaTeXCounter["example"]=0;LaTeXCounter["exercise"]=0;LaTeXCounter["subsection"]=0;LaTeXCounter["subsubsection"]=0;LaTeXCounter["figure"]=0;LaTeXCounter["equation"]=0;LaTeXCounter["table"]=0;var LaTeXColor=[];LaTeXColor["greenyellow"]="#D9FF4F";LaTeXColor["yellow"]="#FFFF00";LaTeXColor["goldenrod"]="#FFE529";LaTeXColor["dandelion"]="#FFB529";LaTeXColor["apricot"]="#FFAD7A";LaTeXColor["peach"]="#FF804D";LaTeXColor["melon"]="#FF8A80";LaTeXColor["yelloworange"]="#FF9400";LaTeXColor["orange"]="#FF6321";LaTeXColor["burntorange"]="#FF7D00";LaTeXColor["bittersweet"]="#C20300";LaTeXColor["redorange"]="#FF3B21";LaTeXColor["mahogany"]="#A60000";LaTeXColor["maroon"]="#AD0000";LaTeXColor["brickred"]="#B80000";LaTeXColor["red"]="#FF0000";LaTeXColor["orangered"]="#FF0080";LaTeXColor["rubinered"]="#FF00DE";LaTeXColor["wildstrawberry"]="#FF0A9C";LaTeXColor["salmon"]="#FF789E";LaTeXColor["carnationpink"]="#FF5EFF";LaTeXColor["magenta"]="#FF00FF";LaTeXColor["violetred"]="#FF30FF";LaTeXColor["rhodamine"]="#FF2EFF";LaTeXColor["mulberry"]="#A314FA";LaTeXColor["redviolet"]="#9600A8";LaTeXColor["fuchsia"]="#7303EB";LaTeXColor["lavender"]="#FF85FF";LaTeXColor["thistle"]="#E069FF";LaTeXColor["orchid"]="#AD5CFF";LaTeXColor["darkorchid"]="#9933CC";LaTeXColor["purple"]="#8C24FF";LaTeXColor["plum"]="#8000FF";LaTeXColor["violet"]="#361FFF";LaTeXColor["royalpurple"]="#401AFF";LaTeXColor["blueviolet"]="#1A0DF5";LaTeXColor["periwinkle"]="#6E73FF";LaTeXColor["cadetblue"]="#616EC4";LaTeXColor["cornflowerblue"]="#59DEFF";LaTeXColor["midnightblue"]="#007091";LaTeXColor["navyblue"]="#0F75FF";LaTeXColor["royalblue"]="#0080FF";LaTeXColor["blue"]="#0000FF";LaTeXColor["cerulean"]="#0FE3FF";LaTeXColor["cyan"]="#00FFFF";LaTeXColor["processblue"]="#0AFFFF";LaTeXColor["skyblue"]="#61FFE0";LaTeXColor["turquoise"]="#26FFCC";LaTeXColor["tealblue"]="#1FFAA3";LaTeXColor["aquamarine"]="#2EFFB2";LaTeXColor["bluegreen"]="#26FFAB";LaTeXColor["emerald"]="#00FF80";LaTeXColor["junglegreen"]="#03FF7A";LaTeXColor["seagreen"]="#4FFF80";LaTeXColor["green"]="#00FF00";LaTeXColor["forestgreen"]="#00E000";LaTeXColor["pinegreen"]="#00BF29";LaTeXColor["limegreen"]="#80FF00";LaTeXColor["yellowgreen"]="#8FFF42";LaTeXColor["springgreen"]="#BDFF3D";LaTeXColor["olivegreen"]="#009900";LaTeXColor["rawsienna"]="#8C0000";LaTeXColor["sepia"]="#4D0000";LaTeXColor["brown"]="#660000";LaTeXColor["tan"]="#DB9470";LaTeXColor["gray"]="#808080";LaTeXColor["grey"]="#808080";LaTeXColor["black"]="#000000";LaTeXColor["white"]="#FFFFFF";var IsColorName=/^(?:greenyellow|yellow|goldenrod|dandelion|apricot|peach|melon|yelloworange|orange|burntorange|bittersweet|redorange|mahogany|maroon|brickred|red|orangered|rubinered|wildstrawberry|salmon|carnationpink|magenta|violetred|rhodamine|mulberry|redviolet|fuchsia|lavender|thistle|orchid|darkorchid|purple|plum|violet|royalpurple|blueviolet|periwinkle|cadetblue|cornflowerblue|midnightblue|navyblue|royalblue|blue|cerulean|cyan|processblue|skyblue|turquoise|tealblue|aquamarine|bluegreen|emerald|junglegreen|seagreen|green|forestgreen|pinegreen|limegreen|yellowgreen|springgreen|olivegreen|rawsienna|sepia|brown|tan|gray|grey|black|white)$/;var IsCounter=/^(?:definition|proposition|lemma|theorem|corollary|example|exercise|subsection|subsubsection|figure|equation|table)$/;var IsLaTeXElement=/^(?:displayequation|title|author|address|date|abstract|keyword|section|subsection|subsubsection|ref|cite|thebibliography|definition|proposition|lemma|theorem|corollary|example|exercise|itemize|enumerate|enddefinition|endproposition|endlemma|endtheorem|endcorollary|endexample|endexercise|enditemize|endenumerate|LaTeXMathMLlabel|LaTeXMathML|smallskip|medskip|bigskip|quote|quotation|endquote|endquotation|center|endcenter|description|enddescription|inlinemath)$/;var IsTextOnlyArea=/^(?:form|textarea|pre)$/i;var tableid=0;function makeNumberString(cntr){if(sectionCntr>0){if(inAppendix){return"A"+sectionCntr+"."+cntr;}else{return sectionCntr+"."+cntr;}}else{return""+cntr;}};function LaTeXpreProcess(thebody){var TheBody=thebody;if(TheBody.hasChildNodes()){if(!(IsLaTeXElement.test(TheBody.className)))
+  {for(var i=0;i<TheBody.childNodes.length;i++){LaTeXpreProcess(TheBody.childNodes[i])}}}
+  else{if(TheBody.nodeType==3&&!(IsTextOnlyArea.test(TheBody.parentNode.nodeName)))
+  {var str=TheBody.nodeValue;if(!(str==null)){str=str.replace(/\\%/g,"<per>");str=str.replace(/%[^\n]*(?=\n)/g,"");str=str.replace(/%[^\r]*(?=\r)/g,"");str=str.replace(/%[^\n]*$/,"")
+  if(isIE&&str.match(/%/g)!=null&&IEcommentWarning){alert("Comments may not have parsed properly.  Try putting in <pre class='LaTeX><div>..</div></pre> structure.");IEcommentWarning=false;}
+  str=str.replace(/<per>/g,"%");if(str.match(/XXX[\s\S]*/)!=null){var tmp=str.match(/XXX[\s\S]*/)[0];var tmpstr=tmp.charCodeAt(7)+"::"+tmp.charCodeAt(8)+"::"+tmp.charCodeAt(9)+"::"+tmp.charCodeAt(10)+"::"+tmp.charCodeAt(11)+"::"+tmp.charCodeAt(12)+"::"+tmp.charCodeAt(13);alert(tmpstr);}
+  str=str.replace(/([^\\])\\(\s)/g,"$1\u00A0$2");str=str.replace(/\\quad/g,"\u2001");str=str.replace(/\\qquad/g,"\u2001\u2001");str=str.replace(/\\enspace/g,"\u2002");str=str.replace(/\\;/g,"\u2004");str=str.replace(/\\:/g,"\u2005");str=str.replace(/\\,/g,"\u2006");str=str.replace(/\\thinspace/g,"\u200A");str=str.replace(/([^\\])~/g,"$1\u00A0");str=str.replace(/\\~/g,"~");str=str.replace(/\\\[/g," <DEQ> $\\displaystyle{");str=str.replace(/\\\]/g,"}$ <DEQ> ");str=str.replace(/\$\$/g,"${$<DEQ>$}$");str=str.replace(/\\begin\s*\{\s*array\s*\}/g,"\\begin{array}");str=str.replace(/\\end\s*\{\s*array\s*\}/g,"\\end{array}");str=str.replace(/\\begin\s*\{\s*eqnarray\s*\}/g,"  <DEQ>eqno$\\begin{eqnarray}");str=str.replace(/\\end\s*\{\s*eqnarray\s*\}/g,"\\end{eqnarray}$<DEQ>  ");str=str.replace(/\\begin\s*\{\s*eqnarray\*\s*\}/g,"  <DEQ>$\\begin{eqnarray}");str=str.replace(/\\end\s*\{\s*eqnarray\*\s*\}/g,"\\end{eqnarray}$<DEQ>  ");str=str.replace(/\\begin\s*\{\s*displaymath\s*\}/g," <DEQ> $\\displaystyle{");str=str.replace(/\\end\s*\{\s*displaymath\s*\}/g,"}$ <DEQ> ");str=str.replace(/\\begin\s*\{\s*equation\s*\*\s*\}/g," <DEQ> $\\displaystyle{");str=str.replace(/\\end\s*\{\s*equation\s*\*\s*\}/g,"}$ <DEQ> ");str=str.replace(/\\begin\s*\{\s*equation\s*\}/g," <DEQ>eqno$\\displaystyle{");str=str.replace(/\\end\s*\{\s*equation\s*\}/g,"}$ <DEQ> ");str=str.split("<DEQ>");var newFrag=document.createDocumentFragment();for(var i=0;i<str.length;i++){if(i%2){var DEQtable=document.createElement("table");DEQtable.className='displayequation';var DEQtbody=document.createElement("tbody");var DEQtr=document.createElement("tr");var DEQtdeq=document.createElement("td");DEQtdeq.className='eq';str[i]=str[i].replace(/\$\}\$/g,"$\\displaystyle{");str[i]=str[i].replace(/\$\{\$/g,"}");var lbl=str[i].match(/\\label\s*\{\s*(\w+)\s*\}/);var ISeqno=str[i].match(/^eqno/);str[i]=str[i].replace(/^eqno/," ");str[i]=str[i].replace(/\\label\s*\{\s*\w+\s*\}/," ");DEQtdeq.appendChild(document.createTextNode(str[i]));DEQtr.appendChild(DEQtdeq);str[i]=str[i].replace(/\\nonumber/g,"");if(ISeqno!=null||lbl!=null){var DEQtdno=document.createElement("td");DEQtdno.className='eqno';LaTeXCounter["equation"]++;var eqnoString=makeNumberString(LaTeXCounter["equation"]);var DEQanchor=document.createElement("a");if(lbl!=null){DEQanchor.id=lbl[1]};DEQanchor.className="eqno";var anchorSpan=document.createElement("span");anchorSpan.className="eqno";anchorSpan.style.display="none";anchorSpan.appendChild(document.createTextNode(eqnoString));DEQanchor.appendChild(anchorSpan);DEQtdno.appendChild(DEQanchor);var DEQspan=document.createElement("span");DEQspan.className="eqno";DEQspan.appendChild(document.createTextNode("("+eqnoString+")"));DEQtdno.appendChild(DEQspan);DEQtr.appendChild(DEQtdno);}
+  DEQtbody.appendChild(DEQtr);DEQtable.appendChild(DEQtbody);newFrag.appendChild(DEQtable);}
+  else{str[i]=str[i].replace(/\$\}\$/g,"");str[i]=str[i].replace(/\$\{\$/g,"");str[i]=str[i].replace(/\\maketitle/g,"");str[i]=str[i].replace(/\\begin\s*\{\s*document\s*\}/g,"");str[i]=str[i].replace(/\\end\s*\{\s*document\s*\}/g,"");str[i]=str[i].replace(/\\documentclass[^\}]*?\}/g,"");str[i]=str[i].replace(/\\usepackage[^\}]*?\}/g,"");str[i]=str[i].replace(/\\noindent/g,"");str[i]=str[i].replace(/\\notag/g,"");str[i]=str[i].replace(/\\ref\s*\{\s*(\w+)\}/g," \\[ref\\]$1\\[ ");str[i]=str[i].replace(/\\url\s*\{\s*([^\}\n]+)\}/g," \\[url\\]$1\\[ ");str[i]=str[i].replace(/\\href\s*\{\s*([^\}]+)\}\s*\{\s*([^\}]+)\}/g," \\[href\\]$1\\]$2\\[ ");str[i]=str[i].replace(/\\cite\s*\{\s*(\w+)\}/g," \\[cite\\]$1\\[ ");str[i]=str[i].replace(/\\qed/g,"\u220E");str[i]=str[i].replace(/\\endproof/g,"\u220E");str[i]=str[i].replace(/\\proof/g,"\\textbf{Proof: }");str[i]=str[i].replace(/\\n(?=\s)/g," \\[br\\] \\[ ");str[i]=str[i].replace(/\\newline/g," \\[br\\] \\[ ");str[i]=str[i].replace(/\\linebreak/g," \\[br\\] \\[ ");str[i]=str[i].replace(/\\smallskip/g," \\[logicalbreak\\]smallskip\\[ ");str[i]=str[i].replace(/\\medskip/g," \\[logicalbreak\\]medskip\\[ ");str[i]=str[i].replace(/\\bigskip/g," \\[logicalbreak\\]bigskip\\[ ");str[i]=str[i].replace(/[\n\r]+[ \f\n\r\t\v\u2028\u2029]*[\n\r]+/g," \\[logicalbreak\\]LaTeXMathML\\[ ");if(isIE){str[i]=str[i].replace(/\r/g," ");}
+  str[i]=str[i].replace(/\\bibitem\s*([^\{]*\{\s*\w*\s*\})/g," \\[bibitem\\]$1\\[ ");str[i]=str[i].replace(/\\bibitem\s*/g," \\[bibitem\\] \\[ ");str[i]=str[i].replace(/\\item\s*\[\s*(\w+)\s*\]/g," \\[alistitem\\]$1\\[ ");str[i]=str[i].replace(/\\item\s*/g," \\[alistitem\\] \\[ ");str[i]=str[i].replace(/\\appendix/g," \\[appendix\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*figure\s*\}([\s\S]+?)\\end\s*\{\s*figure\s*\}/g," \\[figure\\]$1\\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*table\s*\}([\s\S]+?)\\end\s*\{\s*table\s*\}/g," \\[table\\]$1\\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*theorem\s*\}/g," \\[theorem\\]Theorem \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*theorem\s*\}/g," \\[endtheorem\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*definition\s*\}/g," \\[definition\\]Definition \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*definition\s*\}/g," \\[enddefinition\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*lemma\s*\}/g," \\[lemma\\]Lemma \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*lemma\s*\}/g," \\[endlemma\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*corollary\s*\}/g," \\[corollary\\]Corollary \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*corollary\s*\}/g," \\[endcorollary\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*proposition\s*\}/g," \\[proposition\\]Proposition \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*proposition\s*\}/g," \\[endproposition\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*example\s*\}/g," \\[example\\]Example \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*example\s*\}/g," \\[endexample\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*exercise\s*\}/g," \\[exercise\\]Exercise \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*exercise\s*\}/g," \\[endexercise\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*thebibliography\s*\}\s*\{\s*\w+\s*\}/g," \\[thebibliography\\]References \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*thebibliography\s*\}/g," \\[thebibliography\\]References \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*thebibliography\s*\}/g," \\[endthebibliography\\]References \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*proof\s*\}/g," \\[proof\\]Proof: \\[ ");if(isIE){str[i]=str[i].replace(/\\end\s*\{\s*proof\s*\}/g,"\u220E \\[endproof\\] \\[ ");}else{str[i]=str[i].replace(/\\end\s*\{\s*proof\s*\}/g," \\[endproof\\] \\[ ");}
+  str[i]=str[i].replace(/\\title\s*\{\s*([^\}]+)\}/g," \\[title\\] \\[$1 \\[endtitle\\] \\[ ");str[i]=str[i].replace(/\\author\s*\{\s*([^\}]+)\}/g," \\[author\\] \\[$1 \\[endauthor\\] \\[ ");str[i]=str[i].replace(/\\address\s*\{\s*([^\}]+)\}/g," \\[address\\] \\[$1 \\[endaddress\\] \\[ ");str[i]=str[i].replace(/\\date\s*\{\s*([^\}]+)\}/g," \\[date\\] \\[$1 \\[enddate\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*keyword\s*\}/g," \\[keyword\\] \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*keyword\s*\}/g," \\[endkeyword\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*abstract\s*\}/g," \\[abstract\\] \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*abstract\s*\}/g," \\[endabstract\\] \\[ ");str[i]=str[i].replace(/\\begin\s*\{\s*(?!array|tabular)(\w+)\s*\}/g," \\[$1\\] \\[ ");str[i]=str[i].replace(/\\end\s*\{\s*(?!array|tabular)(\w+)\s*\}/g," \\[end$1\\] \\[ ");var sectionIndex=str[i].search(/\\section\s*\{\s*[\s\S]+\}/);while(sectionIndex>=0){str[i]=str[i].replace(/\\section\s*\{/," \\[section\\]");var delimcnt=1;for(var ii=sectionIndex;ii<str[i].length;ii++){if(str[i].charAt(ii)=="{"){delimcnt++};if(str[i].charAt(ii)=="}"){delimcnt--};if(delimcnt==0){str[i]=str[i].substring(0,ii)+"\\[ "+str[i].substring(ii+1,str[i].length);break;}};sectionIndex=str[i].search(/\\section\s*\{\s*[\s\S]+\}/);}
+  sectionIndex=str[i].search(/\\subsection\s*\{\s*[\s\S]+\}/);while(sectionIndex>=0){str[i]=str[i].replace(/\\subsection\s*\{/," \\[subsection\\]");var delimcnt=1;for(var ii=sectionIndex;ii<str[i].length;ii++){if(str[i].charAt(ii)=="{"){delimcnt++};if(str[i].charAt(ii)=="}"){delimcnt--};if(delimcnt==0){str[i]=str[i].substring(0,ii)+"\\[ "+str[i].substring(ii+1,str[i].length);break;}};sectionIndex=str[i].search(/\\subsection\s*\{\s*[\s\S]+\}/);}
+  sectionIndex=str[i].search(/\\subsubsection\s*\{\s*[\s\S]+\}/);while(sectionIndex>=0){str[i]=str[i].replace(/\\subsubsection\s*\{/," \\[subsubsection\\]");var delimcnt=1;for(var ii=sectionIndex;ii<str[i].length;ii++){if(str[i].charAt(ii)=="{"){delimcnt++};if(str[i].charAt(ii)=="}"){delimcnt--};if(delimcnt==0){str[i]=str[i].substring(0,ii)+"\\[ "+str[i].substring(ii+1,str[i].length);break;}};sectionIndex=str[i].search(/\\subsubsection\s*\{\s*[\s\S]+\}/);}
+  var CatToNextEven="";var strtmp=str[i].split("\\[");for(var j=0;j<strtmp.length;j++){if(j%2){var strtmparray=strtmp[j].split("\\]");switch(strtmparray[0]){case"section":var nodeTmp=document.createElement("H2");nodeTmp.className='section';sectionCntr++;for(var div in LaTeXCounter){LaTeXCounter[div]=0};var nodeAnchor=document.createElement("a");if(inAppendix){nodeAnchor.className='appendixsection';}else{nodeAnchor.className='section';}
+  var nodeNumString=makeNumberString("");var anchorSpan=document.createElement("span");anchorSpan.className="section";anchorSpan.style.display="none";anchorSpan.appendChild(document.createTextNode(nodeNumString));nodeAnchor.appendChild(anchorSpan);nodeTmp.appendChild(nodeAnchor);var nodeSpan=document.createElement("span");nodeSpan.className='section';nodeSpan.appendChild(document.createTextNode(nodeNumString+" "));nodeTmp.appendChild(nodeSpan);nodeTmp.appendChild(document.createTextNode(strtmparray[1]));newFrag.appendChild(nodeTmp);break;case"subsection":var nodeTmp=document.createElement("H3");nodeTmp.className='subsection';LaTeXCounter["subsection"]++;LaTeXCounter["subsubsection"]=0;var nodeAnchor=document.createElement("a");nodeAnchor.className='subsection';var nodeNumString=makeNumberString(LaTeXCounter["subsection"]);var anchorSpan=document.createElement("span");anchorSpan.className="subsection";anchorSpan.style.display="none";anchorSpan.appendChild(document.createTextNode(nodeNumString));nodeAnchor.appendChild(anchorSpan);nodeTmp.appendChild(nodeAnchor);var nodeSpan=document.createElement("span");nodeSpan.className='subsection';nodeSpan.appendChild(document.createTextNode(nodeNumString+". "));nodeTmp.appendChild(nodeSpan);nodeTmp.appendChild(document.createTextNode(strtmparray[1]));newFrag.appendChild(nodeTmp);break;case"subsubsection":var nodeTmp=document.createElement("H4");nodeTmp.className='subsubsection';LaTeXCounter["subsubsection"]++;var nodeAnchor=document.createElement("a");nodeAnchor.className='subsubsection';var nodeNumString=makeNumberString(LaTeXCounter["subsection"]+"."+LaTeXCounter["subsubsection"]);var anchorSpan=document.createElement("span");anchorSpan.className="subsubsection";anchorSpan.style.display="none";anchorSpan.appendChild(document.createTextNode(nodeNumString));nodeAnchor.appendChild(anchorSpan);nodeTmp.appendChild(nodeAnchor);var nodeSpan=document.createElement("span");nodeSpan.className='subsubsection';nodeSpan.appendChild(document.createTextNode(nodeNumString+". "));nodeTmp.appendChild(nodeSpan);nodeTmp.appendChild(document.createTextNode(strtmparray[1]));newFrag.appendChild(nodeTmp);break;case"href":var nodeTmp=document.createElement("a");nodeTmp.className='LaTeXMathML';nodeTmp.href=strtmparray[1];nodeTmp.appendChild(document.createTextNode(strtmparray[2]));newFrag.appendChild(nodeTmp);break;case"url":var nodeTmp=document.createElement("a");nodeTmp.className='LaTeXMathML';nodeTmp.href=strtmparray[1];nodeTmp.appendChild(document.createTextNode(strtmparray[1]));newFrag.appendChild(nodeTmp);break;case"figure":var nodeTmp=document.createElement("table");nodeTmp.className='figure';var FIGtbody=document.createElement("tbody");var FIGlbl=strtmparray[1].match(/\\label\s*\{\s*(\w+)\s*\}/);strtmparray[1]=strtmparray[1].replace(/\\label\s*\{\w+\}/g,"");var capIndex=strtmparray[1].search(/\\caption\s*\{[\s\S]+\}/);var FIGcap="";if(capIndex>=0){var tmp=strtmparray[1];var delimcnt=0;var capstart=-1;for(var pos=capIndex;pos<tmp.length;pos++){if(tmp.charAt(pos)=="{"){delimcnt++};if(tmp.charAt(pos)=="}"){delimcnt--};if(delimcnt==1&&capstart<0){capstart=pos+1};if(delimcnt==0&&capstart>0){capend=pos-1;FIGcap=tmp.substring(capstart,pos);break}}}
+  var FIGtr2=document.createElement("tr");var FIGtd2=document.createElement("td");FIGtd2.className="caption";var FIGanchor=document.createElement("a");FIGanchor.className="figure";if(FIGlbl!=null){FIGanchor.id=FIGlbl[1];}
+  LaTeXCounter["figure"]++;var fignmbr=makeNumberString(LaTeXCounter["figure"]);var anchorSpan=document.createElement("span");anchorSpan.className="figure";anchorSpan.style.display="none";anchorSpan.appendChild(document.createTextNode(fignmbr));FIGanchor.appendChild(anchorSpan);FIGtd2.appendChild(FIGanchor);var FIGspan=document.createElement("span");FIGspan.className="figure";FIGspan.appendChild(document.createTextNode("Figure "+fignmbr+". "));FIGtd2.appendChild(FIGspan);FIGtd2.appendChild(document.createTextNode(""+FIGcap));FIGtr2.appendChild(FIGtd2);FIGtbody.appendChild(FIGtr2);var IsSpecial=false;var FIGinfo=strtmparray[1].match(/\\includegraphics\s*\{([^\}]+)\}/);if(FIGinfo==null){FIGinfo=strtmparray[1].match(/\\includegraphics\s*\[[^\]]*\]\s*\{\s*([^\}]+)\s*\}/);}
+  if(FIGinfo==null){FIGinfo=strtmparray[1].match(/\\special\s*\{\s*([^\}]+)\}/);IsSpecial=true};if(FIGinfo!=null){var FIGtr1=document.createElement("tr");var FIGtd1=document.createElement("td");FIGtd1.className="image";var FIGimg=document.createElement("img");var FIGsrc=FIGinfo[1];FIGimg.src=FIGsrc;FIGimg.alt="Figure "+FIGsrc+" did not load";FIGimg.title="Figure "+fignmbr+". "+FIGcap;FIGimg.id="figure"+fignmbr;FIGtd1.appendChild(FIGimg);FIGtr1.appendChild(FIGtd1);FIGtbody.appendChild(FIGtr1);}
+  nodeTmp.appendChild(FIGtbody);newFrag.appendChild(nodeTmp);break;case"table":var nodeTmp=document.createElement("table");if(strtmparray[1].search(/\\centering/)>=0){nodeTmp.className='LaTeXtable centered';nodeTmp.align="center";}else{nodeTmp.className='LaTeXtable';};tableid++;nodeTmp.id="LaTeXtable"+tableid;var TABlbl=strtmparray[1].match(/\\label\s*\{\s*(\w+)\s*\}/);strtmparray[1]=strtmparray[1].replace(/\\label\s*\{\w+\}/g,"");var capIndex=strtmparray[1].search(/\\caption\s*\{[\s\S]+\}/);var TABcap="";if(capIndex>=0){var tmp=strtmparray[1];var delimcnt=0;var capstart=-1;for(var pos=capIndex;pos<tmp.length;pos++){if(tmp.charAt(pos)=="{"){delimcnt++};if(tmp.charAt(pos)=="}"){delimcnt--};if(delimcnt==1&&capstart<0){capstart=pos+1};if(delimcnt==0&&capstart>0){capend=pos-1;TABcap=tmp.substring(capstart,pos);break}}}
+  if(TABcap!=""){var TABtbody=document.createElement("tbody");var TABcaption=document.createElement("caption");TABcaption.className="LaTeXtable centered";var TABanchor=document.createElement("a");TABanchor.className="LaTeXtable";if(TABlbl!=null){TABanchor.id=TABlbl[1];}
+  LaTeXCounter["table"]++;var tabnmbr=makeNumberString(LaTeXCounter["table"]);var anchorSpan=document.createElement("span");anchorSpan.className="LaTeXtable";anchorSpan.style.display="none";anchorSpan.appendChild(document.createTextNode(tabnmbr));TABanchor.appendChild(anchorSpan);TABcaption.appendChild(TABanchor);var TABspan=document.createElement("span");TABspan.className="LaTeXtable";TABspan.appendChild(document.createTextNode("Table "+tabnmbr+". "));TABcaption.appendChild(TABspan);TABcaption.appendChild(document.createTextNode(""+TABcap));nodeTmp.appendChild(TABcaption);}
+  var TABinfo=strtmparray[1].match(/\\begin\s*\{\s*tabular\s*\}([\s\S]+)\\end\s*\{\s*tabular\s*\}/);if(TABinfo!=null){var TABtbody=document.createElement('tbody');var TABrow=null;var TABcell=null;var row=0;var col=0;var TABalign=TABinfo[1].match(/^\s*\{([^\}]+)\}/);TABinfo=TABinfo[1].replace(/^\s*\{[^\}]+\}/,"");TABinfo=TABinfo.replace(/\\hline/g,"");TABalign[1]=TABalign[1].replace(/\|/g,"");TABalign[1]=TABalign[1].replace(/\s/g,"");TABinfo=TABinfo.split("\\\\");for(row=0;row<TABinfo.length;row++){TABrow=document.createElement("tr");TABinfo[row]=TABinfo[row].split("&");for(col=0;col<TABinfo[row].length;col++){TABcell=document.createElement("td");switch(TABalign[1].charAt(col)){case"l":TABcell.align="left";break;case"c":TABcell.align="center";break;case"r":TABcell.align="right";break;default:TABcell.align="left";};TABcell.appendChild(document.createTextNode(TABinfo[row][col]));TABrow.appendChild(TABcell);}
+  TABtbody.appendChild(TABrow);}
+  nodeTmp.appendChild(TABtbody);}
+  newFrag.appendChild(nodeTmp);break;case"logicalbreak":var nodeTmp=document.createElement("p");nodeTmp.className=strtmparray[1];nodeTmp.appendChild(document.createTextNode("\u00A0"));newFrag.appendChild(nodeTmp);break;case"appendix":inAppendix=true;sectionCntr=0;break;case"alistitem":var EndDiv=document.createElement("div");EndDiv.className="endlistitem";newFrag.appendChild(EndDiv);var BegDiv=document.createElement("div");BegDiv.className="listitem";if(strtmparray[1]!=" "){var BegSpan=document.createElement("span");BegSpan.className="listitemmarker";var boldBegSpan=document.createElement("b");boldBegSpan.appendChild(document.createTextNode(strtmparray[1]+" "));BegSpan.appendChild(boldBegSpan);BegDiv.appendChild(BegSpan);}
+  newFrag.appendChild(BegDiv);break;case"br":newFrag.appendChild(document.createElement("br"));break;case"bibitem":newFrag.appendChild(document.createElement("br"));var nodeTmp=document.createElement("a");nodeTmp.className='bibitem';var nodeSpan=document.createElement("span");nodeSpan.className='bibitem';bibcntr++;var lbl=strtmparray[1].match(/\{\s*(\w+)\s*\}/);strtmparray[1]=strtmparray[1].replace(/\s*\{\s*\w+\s*\}/g,"");strtmparray[1]=strtmparray[1].replace(/^\s*\[/,"");strtmparray[1]=strtmparray[1].replace(/\s*\]$/,"");strtmparray[1]=strtmparray[1].replace(/^\s+|\s+$/g,"");if(lbl==null){biblist[bibcntr]="bibitem"+bibcntr}else{biblist[bibcntr]=lbl[1];};nodeTmp.name=biblist[bibcntr];nodeTmp.id=biblist[bibcntr];if(strtmparray[1]!=""){nodeSpan.appendChild(document.createTextNode(strtmparray[1]));}else{nodeSpan.appendChild(document.createTextNode("["+bibcntr+"]"));}
+  nodeTmp.appendChild(nodeSpan);newFrag.appendChild(nodeTmp);break;case"cite":var nodeTmp=document.createElement("a");nodeTmp.className='cite';nodeTmp.name='cite';nodeTmp.href="#"+strtmparray[1];newFrag.appendChild(nodeTmp);break;case"ref":var nodeTmp=document.createElement("a");nodeTmp.className='ref';nodeTmp.name='ref';nodeTmp.href="#"+strtmparray[1];newFrag.appendChild(nodeTmp);break;default:var nodeTmp=document.createElement("div");nodeTmp.className=strtmparray[0];if(IsCounter.test(strtmparray[0])){LaTeXCounter[strtmparray[0]]++;var nodeAnchor=document.createElement("a");nodeAnchor.className=strtmparray[0];var divnum=makeNumberString(LaTeXCounter[strtmparray[0]]);var anchorSpan=document.createElement("span");anchorSpan.className=strtmparray[0];anchorSpan.appendChild(document.createTextNode(divnum));anchorSpan.style.display="none";nodeAnchor.appendChild(anchorSpan);nodeTmp.appendChild(nodeAnchor);var nodeSpan=document.createElement("span");nodeSpan.className=strtmparray[0];nodeSpan.appendChild(document.createTextNode(strtmparray[1]+" "+divnum+". "));nodeTmp.appendChild(nodeSpan);}
+  if(isIE){if(strtmparray[0]==("thebibliography"||"abstract"||"keyword"||"proof")){var nodeSpan=document.createElement("span");nodeSpan.className=strtmparray[0];nodeSpan.appendChild(document.createTextNode(strtmparray[1]));nodeTmp.appendChild(nodeSpan);}}
+  if(strtmparray[0]=="endenumerate"||strtmparray[0]=="enditemize"||strtmparray[0]=="enddescription"){var endDiv=document.createElement("div");endDiv.className="endlistitem";newFrag.appendChild(endDiv);}
+  newFrag.appendChild(nodeTmp);if(strtmparray[0]=="enumerate"||strtmparray[0]=="itemize"||strtmparray[0]=="description"){var endDiv=document.createElement("div");endDiv.className="listitem";newFrag.appendChild(endDiv);}}}else{strtmp[j]=strtmp[j].replace(/\\\$/g,"<per>");strtmp[j]=strtmp[j].replace(/\$([^\$]+)\$/g," \\[$1\\[ ");strtmp[j]=strtmp[j].replace(/<per>/g,"\\$");strtmp[j]=strtmp[j].replace(/\\begin\s*\{\s*math\s*\}([\s\S]+?)\\end\s*\{\s*math\s*\}/g," \\[$1\\[ ");var strtmptmp=strtmp[j].split("\\[");for(var jjj=0;jjj<strtmptmp.length;jjj++){if(jjj%2){var nodeTmp=document.createElement("span");nodeTmp.className='inlinemath';nodeTmp.appendChild(document.createTextNode("$"+strtmptmp[jjj]+"$"));newFrag.appendChild(nodeTmp);}else{var TagIndex=strtmptmp[jjj].search(/\\\w+/);var tmpIndex=TagIndex;while(tmpIndex>-1){if(/^\\textcolor/.test(strtmptmp[jjj].substring(TagIndex,strtmptmp[jjj].length))){strtmptmp[jjj]=strtmptmp[jjj].replace(/\\textcolor\s*\{\s*(\w+)\s*\}\s*/," \\[textcolor\\]$1\\]|");}else{if(/^\\colorbox/.test(strtmptmp[jjj].substring(TagIndex,strtmptmp[jjj].length))){strtmptmp[jjj]=strtmptmp[jjj].replace(/\\colorbox\s*\{\s*(\w+)\s*\}\s*/," \\[colorbox\\]$1\\]|");}else{strtmptmp[jjj]=strtmptmp[jjj].substring(0,TagIndex)+strtmptmp[jjj].substring(TagIndex,strtmptmp[jjj].length).replace(/\\\s*(\w+)\s*/," \\[$1\\]|");}}
+  TagIndex+=strtmptmp[jjj].substring(TagIndex,strtmptmp[jjj].length).search(/\|/);TagIndex++;strtmptmp[jjj]=strtmptmp[jjj].replace(/\\\]\|/,"\\] ");if(strtmptmp[jjj].charAt(TagIndex)=="{"){strtmptmp[jjj]=strtmptmp[jjj].substring(0,TagIndex)+strtmptmp[jjj].substring(TagIndex+1,strtmptmp[jjj].length);var delimcnt=1;for(var kk=TagIndex;kk<strtmptmp[jjj].length;kk++){if(strtmptmp[jjj].charAt(kk)=="{"){delimcnt++};if(strtmptmp[jjj].charAt(kk)=="}"){delimcnt--};if(delimcnt==0){break;}}
+  strtmptmp[jjj]=strtmptmp[jjj].substring(0,kk)+"\\[ "+strtmptmp[jjj].substring(kk+1,strtmptmp[jjj].length);TagIndex=kk+3;}else{strtmptmp[jjj]=strtmptmp[jjj].substring(0,TagIndex)+"\\[ "+strtmptmp[jjj].substring(TagIndex+1,strtmptmp[jjj].length);TagIndex=TagIndex+3;}
+  if(TagIndex<strtmptmp[jjj].length){tmpIndex=strtmptmp[jjj].substring(TagIndex,strtmptmp[jjj].length).search(/\\\w+/);}
+  else{tmpIndex=-1};TagIndex+=tmpIndex;}
+  strtmptmp[jjj]=strtmptmp[jjj].replace(/\\\\\s*\\\\/g,"\\\\");strtmptmp[jjj]=strtmptmp[jjj].replace(/\\\\/g," \\[br\\] \\[ ");strtmptmp[jjj]=strtmptmp[jjj].replace(/\\label\s*\{\s*(\w+)\s*\}/g," \\[a\\]$1\\[ ");var strlbls=strtmptmp[jjj].split("\\[");for(var jj=0;jj<strlbls.length;jj++){if(jj%2){var strtmparray=strlbls[jj].split("\\]");switch(strtmparray[0]){case"textcolor":var nodeTmp=document.createElement("span");nodeTmp.className='LaTeXColor';if(IsColorName.test(strtmparray[1].toLowerCase())){nodeTmp.style.color=LaTeXColor[strtmparray[1].toLowerCase()];}else{nodeTmp.style.color=strtmparray[1];};nodeTmp.appendChild(document.createTextNode(strtmparray[2]));newFrag.appendChild(nodeTmp);break;case"colorbox":var nodeTmp=document.createElement("span");nodeTmp.className='LaTeXColor';if(IsColorName.test(strtmparray[1].toLowerCase())){nodeTmp.style.background=LaTeXColor[strtmparray[1].toLowerCase()];}else{nodeTmp.style.background=strtmparray[1];};nodeTmp.appendChild(document.createTextNode(strtmparray[2]));newFrag.appendChild(nodeTmp);break;case"br":newFrag.appendChild(document.createElement("br"));break;case"a":var nodeTmp=document.createElement("a");nodeTmp.className='LaTeXMathMLlabel';nodeTmp.id=strtmparray[1];nodeTmp.style.display="none";newFrag.appendChild(nodeTmp);break;default:var nodeTmp=document.createElement("span");nodeTmp.className=strtmparray[0];nodeTmp.appendChild(document.createTextNode(strtmparray[1]))
+  newFrag.appendChild(nodeTmp);}}else{newFrag.appendChild(document.createTextNode(strlbls[jj]));}}}}}}}};TheBody.parentNode.replaceChild(newFrag,TheBody);}}}
+  return TheBody;}
+  function LaTeXDivsAndRefs(thebody){var TheBody=thebody;var EndDivClass=null;var AllDivs=TheBody.getElementsByTagName("div");var lbl2id="";var lblnode=null;for(var i=AllDivs.length-1;i>=0;i--){EndDivClass=AllDivs[i].className.match(/end\w+/);if(EndDivClass!=null){EndDivClass=EndDivClass[0];var DivClass=EndDivClass.substring(3,EndDivClass.length);var EndDivNode=AllDivs[i];break;}}
+  while(EndDivClass!=null){var newFrag=document.createDocumentFragment();var RootNode=EndDivNode.parentNode;var ClassCount=1;while(EndDivNode.previousSibling!=null&&ClassCount>0){switch(EndDivNode.previousSibling.className){case EndDivClass:ClassCount++;newFrag.insertBefore(EndDivNode.previousSibling,newFrag.firstChild);break;case DivClass:if(EndDivNode.previousSibling.nodeName=="DIV"){ClassCount--;if(lbl2id!=""){EndDivNode.previousSibling.id=lbl2id;lbl2id=""}
+  if(ClassCount==0){RootNode=EndDivNode.previousSibling;}else{newFrag.insertBefore(EndDivNode.previousSibling,newFrag.firstChild);}};break;case'LaTeXMathMLlabel':lbl2id=EndDivNode.previousSibling.id;EndDivNode.parentNode.removeChild(EndDivNode.previousSibling);break;default:newFrag.insertBefore(EndDivNode.previousSibling,newFrag.firstChild);}}
+  RootNode.appendChild(newFrag);EndDivNode.parentNode.removeChild(EndDivNode);AllDivs=TheBody.getElementsByTagName("DIV");for(i=AllDivs.length-1;i>=0;i--){EndDivClass=AllDivs[i].className.match(/end\w+/);if(EndDivClass!=null){ClassCount=0;EndDivClass=EndDivClass[0];DivClass=EndDivClass.substring(3,EndDivClass.length);EndDivNode=AllDivs[i];RootNode=EndDivNode.parentNode;break;}}}
+  var AllDivs=TheBody.getElementsByTagName("div");var DIV2LI=null;for(var i=0;i<AllDivs.length;i++){if(AllDivs[i].className=="itemize"||AllDivs[i].className=="enumerate"||AllDivs[i].className=="description"){if(AllDivs[i].className=="itemize"){RootNode=document.createElement("UL");}else{RootNode=document.createElement("OL");}
+  RootNode.className='LaTeXMathML';if(AllDivs[i].hasChildNodes()){AllDivs[i].removeChild(AllDivs[i].firstChild)};while(AllDivs[i].hasChildNodes()){if(AllDivs[i].firstChild.hasChildNodes()){DIV2LI=document.createElement("LI");while(AllDivs[i].firstChild.hasChildNodes()){DIV2LI.appendChild(AllDivs[i].firstChild.firstChild);}
+  if(DIV2LI.firstChild.className=="listitemmarker"){DIV2LI.style.listStyleType="none";}
+  RootNode.appendChild(DIV2LI)}
+  AllDivs[i].removeChild(AllDivs[i].firstChild);}
+  AllDivs[i].appendChild(RootNode);}}
+  var AllAnchors=TheBody.getElementsByTagName("a");for(var i=0;i<AllAnchors.length;i++){if(AllAnchors[i].className=="ref"||AllAnchors[i].className=="cite"){var label=AllAnchors[i].href.match(/\#(\w+)/);if(label!=null){var labelNode=document.getElementById(label[1]);if(labelNode!=null){var TheSpans=labelNode.getElementsByTagName("SPAN");if(TheSpans!=null){var refNode=TheSpans[0].cloneNode(true);refNode.style.display="inline"
+  refNode.className=AllAnchors[i].className;AllAnchors[i].appendChild(refNode);}}}}}
+  return TheBody;}
+  var AMbody;var AMnoMathML=false,AMtranslated=false;function translate(spanclassAM){if(!AMtranslated){AMtranslated=true;AMinitSymbols();var LaTeXContainers=[];var AllContainers=document.getElementsByTagName('*');var ExtendName="";for(var k=0,l=0;k<AllContainers.length;k++){ExtendName=" "+AllContainers[k].className+" ";if(ExtendName.match(/\sLaTeX\s/)!=null){LaTeXContainers[l]=AllContainers[k];l++;}};if(LaTeXContainers.length>0){for(var m=0;m<LaTeXContainers.length;m++){AMbody=LaTeXContainers[m];try{AMbody=LaTeXDivsAndRefs(LaTeXpreProcess(AMbody));}catch(err){alert("Unknown Error: Defaulting to Original LaTeXMathML");}
+  if(AMbody.tagName=="PRE"){var PreChilds=document.createDocumentFragment();var DivChilds=document.createElement("DIV");while(AMbody.hasChildNodes()){DivChilds.appendChild(AMbody.firstChild);}
+  PreChilds.appendChild(DivChilds);AMbody.parentNode.replaceChild(PreChilds,AMbody);AMbody=DivChilds;}
+  AMprocessNode(AMbody,false,spanclassAM);}}else{AMbody=document.getElementsByTagName("body")[0];try{AMbody=LaTeXDivsAndRefs(LaTeXpreProcess(AMbody));}catch(err){alert("Unknown Error: Defaulting to Original LaTeXMathML");}
+  AMprocessNode(AMbody,false,spanclassAM);}}}
+  if(isIE){document.write("<object id=\"mathplayer\" classid=\"clsid:32F66A20-7614-11D4-BD11-00104BD3F987\"></object>");document.write("<?import namespace=\"m\" implementation=\"#mathplayer\"?>");}
+  function generic()
+  {translate();};if(typeof window.addEventListener!='undefined')
+  {window.addEventListener('load',generic,false);}
+  else if(typeof document.addEventListener!='undefined')
+  {document.addEventListener('load',generic,false);}
+  else if(typeof window.attachEvent!='undefined')
+  {window.attachEvent('onload',generic);}
+  else
+  {if(typeof window.onload=='function')
+  {var existing=onload;window.onload=function()
+  {existing();generic();};}
+  else
+  {window.onload=generic;}}
+  /*]]>*/
+  </script>
 </head>
 <body>
 
@@ -159,28 +332,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       </div>
             <div class="span9">
             <h1 id="introduction"><span class="header-section-number">1</span> Introduction</h1>
-<p>The <strong>N(On) Verbal Annotator </strong> (NOVA) offers a graphical interface for machine-aided annotation of large multi-modal databases. It is developed as a side project of the Social Signal Interpretation (SSI) framework to describe databases recorded with SSI. It’s key features are:</p>
+<p>The <strong>N(On) Verbal Annotator </strong> (NOVA) offers a graphical interface for machine-aided annotation of large multi-modal databases. It is developed as a side project of the Social Signal Interpretation (SSI) framework to describe databases recorded with SSI. It's key features are:</p>
 <ul>
 <li><strong>Visualization and playback</strong> of multi-modal data including support for skeleton and face tracking</li>
-<li>Annotation based on <strong>various schemes</strong> (e.g. discrete and continuous)</li>
+<li>Annotation based on <strong>various schemes</strong> (e.g. discrete and continuous)</li>
 <li><strong>Database back-end</strong> to share annotations between multiple annotators</li>
 <li>Integrated tools to apply machine-aided <strong>cooperative learning</strong></li>
 </ul>
 <h1 id="installation"><span class="header-section-number">2</span> Installation</h1>
 <p>The latest version of NOVA can be accessed at:</p>
 <p><a href="https://github.com/hcmlab/nova" class="uri">https://github.com/hcmlab/nova</a></p>
-<p>Just download or check-out the release branch and start ‘nova.exe’ (yes, NOVA is available for Windows systems only).</p>
+<p>Just download or check-out the release branch and start 'nova.exe' (yes, NOVA is available for Windows systems only).</p>
 <p>If you do not see videos on playback, please make also sure you have the right codecs installed. A good choice is the K-lite Codec Pack <a href="https://www.codecguide.com/download_kl.htm" class="uri">https://www.codecguide.com/download_kl.htm</a> (You can leave all settings on default, but make sure to not not install any 3rd party software that comes with the installer).</p>
 <p>You might also need to install the VC140 Runtime Distributable if it is not installed on your system. <a href="https://www.microsoft.com/en-US/download/details.aspx?id=48145" class="uri">https://www.microsoft.com/en-US/download/details.aspx?id=48145</a></p>
 <h1 id="manual-annotation"><span class="header-section-number">3</span> Manual Annotation</h1>
 <p>In the following we will explain the basic steps to manually create and edit an annotation.</p>
 <h2 id="main-interface"><span class="header-section-number">3.1</span> Main Interface</h2>
-<p>The following image shows NOVA’s main interface. On the top, media files are displayed in horizontally aligned boxes. Videos and tracking data (e.g. facial points) are handled as media and displayed frame by frame. Below that other stream data (e.g. audio waveforms) are displayed as time series in vertically aligned tracks. In the same way, annotation data is visualized in vertical tiers. Below the annotation tiers a slider bar allows it to move the displayed clip along the time scale. The clip can be enlarged or shrink by changing the size of the scroll button. Double-clicking the scroll button will zoom out to show the whole session at once (note: if navigation becomes slow try zooming in). Playback buttons are found on the bottom of the window. A red cursor marks the current playback position (it will be moved during playback and when the signal track is clicked). A green cursor shows the current position on the annotation tier and helps to align labels with the signal tracks. A list of annotations items of the currently selected annotation tier is shown on the left. When an item is selected by the red cursor is moved to the according segment in the tier. Only one media, stream and annotation can be selected at a time. When an entity is clicked which is not already selected, it receives the focus (ie.g. its border turns dark gray) and additional information is displayed in the status bar.</p>
-<figure>
-<img src="pics/manual-interface.png" id="fig:manual-interface" style="width:100.0%" alt="" /><figcaption><em>NOVA’s interface: from top down media, streams and annotations are displayed. On the left a list of annotation items of the selected annotation tier is shown. Time-line and the navigation panel are found at the bottom.</em></figcaption>
-</figure>
+<p>The following image shows NOVA's main interface. On the top, media files are displayed in horizontally aligned boxes. Videos and tracking data (e.g. facial points) are handled as media and displayed frame by frame. Below that other stream data (e.g. audio waveforms) are displayed as time series in vertically aligned tracks. In the same way, annotation data is visualized in vertical tiers. Below the annotation tiers a slider bar allows it to move the displayed clip along the time scale. The clip can be enlarged or shrink by changing the size of the scroll button. Double-clicking the scroll button will zoom out to show the whole session at once (note: if navigation becomes slow try zooming in). Playback buttons are found on the bottom of the window. A red cursor marks the current playback position (it will be moved during playback and when the signal track is clicked). A green cursor shows the current position on the annotation tier and helps to align labels with the signal tracks. A list of annotations items of the currently selected annotation tier is shown on the left. When an item is selected by the red cursor is moved to the according segment in the tier. Only one media, stream and annotation can be selected at a time. When an entity is clicked which is not already selected, it receives the focus (ie.g. its border turns dark gray) and additional information is displayed in the status bar.</p>
+<div class="figure">
+<img src="pics/manual-interface.png" alt="NOVA&#39;s interface: from top down media, streams and annotations are displayed. On the left a list of annotation items of the selected annotation tier is shown. Time-line and the navigation panel are found at the bottom." id="fig:manual-interface" style="width:100.0%" />
+<p class="caption"><em>NOVA's interface: from top down media, streams and annotations are displayed. On the left a list of annotation items of the selected annotation tier is shown. Time-line and the navigation panel are found at the bottom.</em></p>
+</div>
 <h2 id="loading-files"><span class="header-section-number">3.2</span> Loading Files</h2>
-<p>To add a file the FILE menu can be used. It allows to select multiple media, stream or annotation files at once. Alternatively, files or folders can be dropped from the explorer. NOVA supports all common video formats, audio wave files and SSI stream files, as well as, CSV files, which will be imported as stream files (in the latter case the user has to provide number format and sample rate). The currently selected media, stream or annotation file can be removed by clicking the ‘x’ in the according status bar. Clicking the ‘Clear’ button on the right bottom will remove all files at once. The current workspace can be stored to a project file and reloaded at a later point from the FILE menu (or via drag and drop). Note that in the following we will generally refer to any file that is not annotation as stream.</p>
+<p>To add a file the FILE menu can be used. It allows to select multiple media, stream or annotation files at once. Alternatively, files or folders can be dropped from the explorer. NOVA supports all common video formats, audio wave files and SSI stream files, as well as, CSV files, which will be imported as stream files (in the latter case the user has to provide number format and sample rate). The currently selected media, stream or annotation file can be removed by clicking the 'x' in the according status bar. Clicking the 'Clear' button on the right bottom will remove all files at once. The current workspace can be stored to a project file and reloaded at a later point from the FILE menu (or via drag and drop). Note that in the following we will generally refer to any file that is not annotation as stream.</p>
 <h3 id="import-csv-signal-files"><span class="header-section-number">3.2.1</span> Import CSV Signal Files</h3>
 <p>CSV Files can be imported via drag and drop. To be read be NOVA the format should be like in this example:</p>
 <pre><code>1.0;0.7;0.0    //First sample with 3 dimensions (e.g. x,y and z direction)
@@ -188,51 +362,58 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ...</code></pre>
 <p>Either use semicolons as in the example (;) commas, spaces or tabs between dimensions. A dialog shows up, asking for the datatype (most likely FLOAT) and the samplerate in hz. (How many samples represent one second of data).</p>
 <h2 id="creating-an-annotation"><span class="header-section-number">3.3</span> Creating an Annotation</h2>
-<p>After loading at least one media or data stream, new annotations tracks can be added to the project. New annotations are created by clicking the ‘File’ button (bottom left). Alternatively, annotations can be created from the database, too, see <a href="#database-create-annotation">here</a>. A window pops up, which allows to select a scheme type:</p>
-<figure>
-<img src="pics/manual-new-scheme.png" id="fig:manual-new-scheme" style="width:40.0%" alt="" /><figcaption><em>New annotation scheme window.</em></figcaption>
-</figure>
+<p>After loading at least one media or data stream, new annotations tracks can be added to the project. New annotations are created by clicking the 'File' button (bottom left). Alternatively, annotations can be created from the database, too, see <a href="#database-create-annotation">here</a>. A window pops up, which allows to select a scheme type:</p>
+<div class="figure">
+<img src="pics/manual-new-scheme.png" alt="New annotation scheme window." id="fig:manual-new-scheme" style="width:40.0%" />
+<p class="caption"><em>New annotation scheme window.</em></p>
+</div>
 <ul>
 <li><p>Discrete:</p>
-<p>Discrete annotations consist of a list of labelled time segments. Each segment has a start and and end time (in seconds) and a name (label). Segments can be of varying length, may overlap and possibly there are gaps between adjacent segments. An annotator cannot change the names of labels and has to assign exactly one label to each segment. If none of the labels is applicable the label “GARBAGE” is always available.</p>
-<figure>
-<img src="pics/manual-types-of-annotation-discrete.png" id="fig:manual-types-of-annotation-discrete" style="width:100.0%" alt="" /><figcaption><em>Example of a discrete annotation tier.</em></figcaption>
-</figure>
+<p>Discrete annotations consist of a list of labelled time segments. Each segment has a start and and end time (in seconds) and a name (label). Segments can be of varying length, may overlap and possibly there are gaps between adjacent segments. An annotator cannot change the names of labels and has to assign exactly one label to each segment. If none of the labels is applicable the label &quot;GARBAGE&quot; is always available.</p>
+<div class="figure">
+<img src="pics/manual-types-of-annotation-discrete.png" alt="Example of a discrete annotation tier." id="fig:manual-types-of-annotation-discrete" style="width:100.0%" />
+<p class="caption"><em>Example of a discrete annotation tier.</em></p>
+</div>
 <p>Scheme name, class names and colours are set in the following dialogue:</p>
-<figure>
-<img src="pics/manual-new-scheme-discrete.png" id="fig:manual-new-scheme-discrete" alt="" /><figcaption><em>New discrete annotation scheme window.</em></figcaption>
-</figure></li>
+<div class="figure">
+<img src="pics/manual-new-scheme-discrete.png" alt="New discrete annotation scheme window." id="fig:manual-new-scheme-discrete" />
+<p class="caption"><em>New discrete annotation scheme window.</em></p>
+</div></li>
 <li><p>Free:</p>
 <p>Like discrete annotations, but this time annotators are free to choose the label names. This is obviously useful if an annotation task can not easily be reduced to a few labels (for example in case of speech transcriptions). Of course there is the risk that the same phenomenon may be labelled differently (either because a synonym is used or due to misspelling).</p>
-<figure>
-<img src="pics/manual-types-of-annotation-free.png" id="fig:manual-types-of-annotation-free" style="width:100.0%" alt="" /><figcaption><em>Example of a free annotation tier.</em></figcaption>
-</figure></li>
+<div class="figure">
+<img src="pics/manual-types-of-annotation-free.png" alt="Example of a free annotation tier." id="fig:manual-types-of-annotation-free" style="width:100.0%" />
+<p class="caption"><em>Example of a free annotation tier.</em></p>
+</div></li>
 <li><p>Continuous:</p>
-<p>In contrast to discrete annotations, continuous annotations assign numerical values (label score) instead of label names. Also, they have a fixed sample rate, i.e. label scores are assigned in regular intervals. For instance, a sample of 2 Hz means that an annotator has to assign two scores each second. All score values have to be within a fixed interval (defined by a minimum and a maximum score). Optionally, it is possible to quantize the interval into limited steps. The value NAN is assigned when no score is applicable.</p>
-<figure>
-<img src="pics/manual-types-of-annotation-continuous.png" id="fig:manual-types-of-annotation-continuous" style="width:100.0%" alt="" /><figcaption><em>Example of a continuous annotation tier.</em></figcaption>
-</figure>
+<p>In contrast to discrete annotations, continuous annotations assign numerical values (label score) instead of label names. Also, they have a fixed sample rate, i.e. label scores are assigned in regular intervals. For instance, a sample of 2 Hz means that an annotator has to assign two scores each second. All score values have to be within a fixed interval (defined by a minimum and a maximum score). Optionally, it is possible to quantize the interval into limited steps. The value NAN is assigned when no score is applicable.</p>
+<div class="figure">
+<img src="pics/manual-types-of-annotation-continuous.png" alt="Example of a continuous annotation tier." id="fig:manual-types-of-annotation-continuous" style="width:100.0%" />
+<p class="caption"><em>Example of a continuous annotation tier.</em></p>
+</div>
 <p>Scheme name, sample rate, value range and colours are set in the following dialogue:</p>
-<figure>
-<img src="pics/manual-new-scheme-continuous.png" id="fig:manual-new-scheme-continuous" alt="" /><figcaption><em>New continuous annotation scheme window.</em></figcaption>
-</figure></li>
+<div class="figure">
+<img src="pics/manual-new-scheme-continuous.png" alt="New continuous annotation scheme window." id="fig:manual-new-scheme-continuous" />
+<p class="caption"><em>New continuous annotation scheme window.</em></p>
+</div></li>
 <li><p>Import: If you store existing schemes in your (CML)schemes folder, you can select them here</p></li>
 </ul>
 <h2 id="editing-an-annotation"><span class="header-section-number">3.4</span> Editing an Annotation</h2>
 <ul>
 <li><p>Free:</p>
-<p>To place a new segment right click on the start position of the label, keep button pressed and move the cursor to the end position (or vice-versa). Now release the button and a new segment will be added (and selected). If ‘Force Label’ is active you will be asked to enter label name and confidence. Otherwise it gets the label that was previously used. To edit an existing segment left click inside the segment (the colour of the selected segment will change to blue). If you now move the cursor near the borders two arrows will be displayed and you can change the position by holding down the left mouse button. If you move the cursor towards the centre of the segment you can move the whole segment along the track. To change the label hit the ‘W’ key. Note that you can change the position of a label during playback. If ‘Follow Annotation’ is active a newly added segment will be immediately played back. Alternatively, you can also jump to a segment by selecting it from the list left to the annotation tiers. It is also possible to select several segments in the list and rename them all at once.</p></li>
+<p>To place a new segment right click on the start position of the label, keep button pressed and move the cursor to the end position (or vice-versa). Now release the button and a new segment will be added (and selected). If 'Force Label' is active you will be asked to enter label name and confidence. Otherwise it gets the label that was previously used. To edit an existing segment left click inside the segment (the colour of the selected segment will change to blue). If you now move the cursor near the borders two arrows will be displayed and you can change the position by holding down the left mouse button. If you move the cursor towards the centre of the segment you can move the whole segment along the track. To change the label hit the 'W' key. Note that you can change the position of a label during playback. If 'Follow Annotation' is active a newly added segment will be immediately played back. Alternatively, you can also jump to a segment by selecting it from the list left to the annotation tiers. It is also possible to select several segments in the list and rename them all at once.</p></li>
 <li><p>Discrete:</p>
-<p>Works in the same way as free annotations, but when entering or changing a label a selection dialogue pops up that allows you to select a name from the loaded scheme. Alternatively, you can change the label name of a selected segment by pressing a key between ‘0’ and ‘9’. For example, if the selected scheme contains three names ‘A’,‘B’ and ‘C’ pressing ‘1’ assigns ‘A’, ‘2’ assigns ‘B’, and ‘3’ assigns ‘C’. Any other numbers and ‘0’ assign the garbage class.</p></li>
+<p>Works in the same way as free annotations, but when entering or changing a label a selection dialogue pops up that allows you to select a name from the loaded scheme. Alternatively, you can change the label name of a selected segment by pressing a key between '0' and '9'. For example, if the selected scheme contains three names 'A','B' and 'C' pressing '1' assigns 'A', '2' assigns 'B', and '3' assigns 'C'. Any other numbers and '0' assign the garbage class.</p></li>
 <li><p>Continuous:</p>
-<p>To change the values in a continuous track hold down the right mouse button and move the cursor to the desired position within the track. You will notice that the values immediately start to follow the cursor. Hitting ‘L’ (or switching on the live button in the status bar) turns on the live mode, which no longer requires to hold down the right mouse button. Instead a white button is displayed at the left border of the current track to mark the current value. The height of the white button can either be controlled by the vertical position of the mouse cursor (press key ‘M’ or activate check box next to live button). Or otherwise by pressing a key between ‘0’ and ‘9’ (see option ‘number of levels in live mode’ in the SETTINGS). This is especially handy to annotate during playback. Hitting ‘L’ again turns off the live annotation mode and brings back the default behaviour.</p>
+<p>To change the values in a continuous track hold down the right mouse button and move the cursor to the desired position within the track. You will notice that the values immediately start to follow the cursor. Hitting 'L' (or switching on the live button in the status bar) turns on the live mode, which no longer requires to hold down the right mouse button. Instead a white button is displayed at the left border of the current track to mark the current value. The height of the white button can either be controlled by the vertical position of the mouse cursor (press key 'M' or activate check box next to live button). Or otherwise by pressing a key between '0' and '9' (see option 'number of levels in live mode' in the SETTINGS). This is especially handy to annotate during playback. Hitting 'L' again turns off the live annotation mode and brings back the default behaviour.</p>
 <p>Additionally, since version 1.0.5.4 NOVA Supports Input from Game controllers (tested with XBOX 360 Controller) for continuous annotations. They can be used as follows:</p>
-<figure>
-<img src="pics/controller.png" id="fig:manual-controller" alt="" /><figcaption><em>Controller Command overview</em></figcaption>
-</figure>
+<div class="figure">
+<img src="pics/controller.png" alt="Controller Command overview" id="fig:manual-controller" />
+<p class="caption"><em>Controller Command overview</em></p>
+</div>
 <p>Make sure the controller is plugged in and installed before you open NOVA. Mouse Annotation is disabled while a controller is connected.</p></li>
 </ul>
-<p>Pressing ‘Ctrl+Z’ and ‘Ctrl+Y’ allows it to undo and redo the previous changes. To save an annotation go to the ANNOTATION menu or press ‘Ctrl+S’.</p>
+<p>Pressing 'Ctrl+Z' and 'Ctrl+Y' allows it to undo and redo the previous changes. To save an annotation go to the ANNOTATION menu or press 'Ctrl+S'.</p>
 <h2 id="shortcut-cheat-sheet"><span class="header-section-number">3.5</span> Shortcut Cheat Sheet</h2>
 <p><strong>Universal</strong></p>
 <table>
@@ -382,15 +563,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p>Discrete:</p>
 <p>.annotation</p>
 <p>A discrete scheme consists of a list of predefined labels represented by a name and an unique identifier (id). Optionally, colour values can be assigned to the background and each label.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; <span class="kw">?&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">&lt;annotation</span><span class="ot"> ssi-v=</span><span class="st">&quot;3&quot;</span><span class="kw">&gt;</span></span>
-<span id="cb2-3"><a href="#cb2-3"></a>    <span class="kw">&lt;info</span><span class="ot"> ftype=</span><span class="st">&quot;ASCII&quot;</span><span class="ot"> size=</span><span class="st">&quot;71&quot;</span> <span class="kw">/&gt;</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>    <span class="kw">&lt;meta</span><span class="ot"> annotator=</span><span class="st">&quot;Annotator&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb2-5"><a href="#cb2-5"></a>    <span class="kw">&lt;scheme</span><span class="ot"> name=</span><span class="st">&quot;laughter&quot;</span><span class="ot"> type=</span><span class="st">&quot;DISCRETE&quot;</span><span class="ot"> color=</span><span class="st">&quot;#FFEEECE1&quot;</span><span class="kw">&gt;</span></span>
-<span id="cb2-6"><a href="#cb2-6"></a>        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;laugh&quot;</span><span class="ot"> id=</span><span class="st">&quot;0&quot;</span><span class="ot"> color=</span><span class="st">&quot;#FFC0504D&quot;</span> <span class="kw">/&gt;</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a>        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;speech&quot;</span><span class="ot"> id=</span><span class="st">&quot;1&quot;</span><span class="ot"> color=</span><span class="st">&quot;#FF1F497D&quot;</span> <span class="kw">/&gt;</span></span>
-<span id="cb2-8"><a href="#cb2-8"></a>    <span class="kw">&lt;/scheme&gt;</span></span>
-<span id="cb2-9"><a href="#cb2-9"></a><span class="kw">&lt;/annotation&gt;</span></span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; <span class="kw">?&gt;</span>
+<span class="kw">&lt;annotation</span><span class="ot"> ssi-v=</span><span class="st">&quot;3&quot;</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;info</span><span class="ot"> ftype=</span><span class="st">&quot;ASCII&quot;</span><span class="ot"> size=</span><span class="st">&quot;71&quot;</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;meta</span><span class="ot"> annotator=</span><span class="st">&quot;Annotator&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;scheme</span><span class="ot"> name=</span><span class="st">&quot;laughter&quot;</span><span class="ot"> type=</span><span class="st">&quot;DISCRETE&quot;</span><span class="ot"> color=</span><span class="st">&quot;#FFEEECE1&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;laugh&quot;</span><span class="ot"> id=</span><span class="st">&quot;0&quot;</span><span class="ot"> color=</span><span class="st">&quot;#FFC0504D&quot;</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;speech&quot;</span><span class="ot"> id=</span><span class="st">&quot;1&quot;</span><span class="ot"> color=</span><span class="st">&quot;#FF1F497D&quot;</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/scheme&gt;</span>
+<span class="kw">&lt;/annotation&gt;</span></code></pre></div>
 <p>.annotation~</p>
 <p>The data file contains of one segment per line, which are structured as follows:</p>
 <p>&lt;beginning of a segment in seconds&gt; ; &lt;end of a segment in seconds&gt; ; &lt;label id as specified in the header&gt; ; &lt;confidence value&gt;</p>
@@ -404,12 +585,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p>Free:</p>
 <p>.annotation</p>
 <p>A free scheme looks similar, but does not define labels:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; <span class="kw">?&gt;</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="kw">&lt;annotation</span><span class="ot"> ssi-v=</span><span class="st">&quot;3&quot;</span><span class="kw">&gt;</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a>    <span class="kw">&lt;info</span><span class="ot"> ftype=</span><span class="st">&quot;ASCII&quot;</span><span class="ot"> size=</span><span class="st">&quot;110&quot;</span> <span class="kw">/&gt;</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>    <span class="kw">&lt;meta</span><span class="ot"> annotator=</span><span class="st">&quot;Annotator&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a>    <span class="kw">&lt;scheme</span><span class="ot"> name=</span><span class="st">&quot;transcription&quot;</span><span class="ot"> type=</span><span class="st">&quot;FREE&quot;</span><span class="ot"> color=</span><span class="st">&quot;#FFFFFFFF&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb4-6"><a href="#cb4-6"></a><span class="kw">&lt;/annotation&gt;</span></span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; <span class="kw">?&gt;</span>
+<span class="kw">&lt;annotation</span><span class="ot"> ssi-v=</span><span class="st">&quot;3&quot;</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;info</span><span class="ot"> ftype=</span><span class="st">&quot;ASCII&quot;</span><span class="ot"> size=</span><span class="st">&quot;110&quot;</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;meta</span><span class="ot"> annotator=</span><span class="st">&quot;Annotator&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;scheme</span><span class="ot"> name=</span><span class="st">&quot;transcription&quot;</span><span class="ot"> type=</span><span class="st">&quot;FREE&quot;</span><span class="ot"> color=</span><span class="st">&quot;#FFFFFFFF&quot;</span><span class="kw">/&gt;</span>
+<span class="kw">&lt;/annotation&gt;</span></code></pre></div>
 <p>.annotation~</p>
 <p>In contrast to a discrete scheme, in a free annotation the id field is replaced by a string. The last entry may hold an optional colour label.</p>
 <pre><code>2;2.56;hi;1
@@ -423,12 +604,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p>Continuous:</p>
 <p>.annotation</p>
 <p>A continuous scheme contains a samplerate (sr) in hz, as well as, the minimum (min) and maximum (max) score. Optionally, min and max can be assigned colours.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; <span class="kw">?&gt;</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="kw">&lt;annotation</span><span class="ot"> ssi-v=</span><span class="st">&quot;3&quot;</span><span class="kw">&gt;</span></span>
-<span id="cb6-3"><a href="#cb6-3"></a>    <span class="kw">&lt;info</span><span class="ot"> ftype=</span><span class="st">&quot;ASCII&quot;</span><span class="ot"> size=</span><span class="st">&quot;7501&quot;</span> <span class="kw">/&gt;</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a>    <span class="kw">&lt;meta</span><span class="ot"> annotator=</span><span class="st">&quot;Annotator&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a>    <span class="kw">&lt;scheme</span><span class="ot"> name=</span><span class="st">&quot;arousal&quot;</span><span class="ot"> type=</span><span class="st">&quot;CONTINUOUS&quot;</span><span class="ot"> sr=</span><span class="st">&quot;25&quot;</span><span class="ot"> min=</span><span class="st">&quot;-1&quot;</span><span class="ot"> max=</span><span class="st">&quot;1&quot;</span><span class="ot"> mincolor=</span><span class="st">&quot;#FFFFFFFF&quot;</span><span class="ot"> maxcolor=</span><span class="st">&quot;#FF4F81BD&quot;</span> <span class="kw">/&gt;</span></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="kw">&lt;/annotation&gt;</span></span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; <span class="kw">?&gt;</span>
+<span class="kw">&lt;annotation</span><span class="ot"> ssi-v=</span><span class="st">&quot;3&quot;</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;info</span><span class="ot"> ftype=</span><span class="st">&quot;ASCII&quot;</span><span class="ot"> size=</span><span class="st">&quot;7501&quot;</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;meta</span><span class="ot"> annotator=</span><span class="st">&quot;Annotator&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;scheme</span><span class="ot"> name=</span><span class="st">&quot;arousal&quot;</span><span class="ot"> type=</span><span class="st">&quot;CONTINUOUS&quot;</span><span class="ot"> sr=</span><span class="st">&quot;25&quot;</span><span class="ot"> min=</span><span class="st">&quot;-1&quot;</span><span class="ot"> max=</span><span class="st">&quot;1&quot;</span><span class="ot"> mincolor=</span><span class="st">&quot;#FFFFFFFF&quot;</span><span class="ot"> maxcolor=</span><span class="st">&quot;#FF4F81BD&quot;</span> <span class="kw">/&gt;</span>
+<span class="kw">&lt;/annotation&gt;</span></code></pre></div>
 <p>.annotation~</p>
 <p>In the according data file each line represents one frame represented by two values:</p>
 <p>&lt;score&gt; ; &lt;confidence value&gt;</p>
@@ -443,27 +624,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 id="inter-rater-agreement"><span class="header-section-number">3.7</span> Inter-rater Agreement</h2>
 <p>NOVA provides several statistical meassures to investigate the agreement between different raters over multiple annotations. The following listing describes in depth details for the implemented meassures.</p>
 <ul>
-<li><p>Cronbach’s alpha:</p>
-<p>Cronbach’s alpha is calculated with the following formula:</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Calpha_%7Bstandardized%7D%20%3D%20%5Cfrac%7BK%5Cbar%7Br%7D%7D%7B1%20%2B%20%28K%20-%201%29%5Cbar%7Br%7D%7D" alt="\alpha_{standardized} = \frac{K\bar{r}}{1 + (K - 1)\bar{r}}" title="\alpha_{standardized} = \frac{K\bar{r}}{1 + (K - 1)\bar{r}}" /></p>
-<p>where <img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?K" alt="K" title="K" /> defines the number of components (K-items or testlets)</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Cbar%7Br%7D" alt="\bar{r}" title="\bar{r}" /> is the mean of the <img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?K%28K-1%29%2F2%7D%20K%28K-1%29%2F2" alt="K(K-1)/2} K(K-1)/2" title="K(K-1)/2} K(K-1)/2" /> non-redundant correlation coefficients</p></li>
+<li><p>Cronbach's alpha:</p>
+<p>Cronbach's alpha is calculated with the following formula:</p>
+<p><span class="LaTeX">$\alpha_{standardized} = \frac{K\bar{r}}{1 + (K - 1)\bar{r}}$</span></p>
+<p>where <span class="LaTeX">$K$</span> defines the number of components (K-items or testlets)</p>
+<p><span class="LaTeX">$\bar{r}$</span> is the mean of the <span class="LaTeX">$K(K-1)/2} K(K-1)/2$</span> non-redundant correlation coefficients</p></li>
 <li><p>Spearman Correlation:</p>
-<p>Spearman’s <img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Crho" alt="\rho" title="\rho" /> is calculated with the following formula:</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?r_%7Bs%7D%3D%5Crho_%7Brg_%7BX%7D%2C%20rg_%7BY%7D%7D%20%3D%20%5Cfrac%7Bcov%28rg_%7BX%7D%2C%20rg_%7BY%7D%29%7D%7B%5Csigma_%7Brg_%7BX%7D%7D%5Csigma_%7Brg_%7BY%7D%7D%7D" alt="r_{s}=\rho_{rg_{X}, rg_{Y}} = \frac{cov(rg_{X}, rg_{Y})}{\sigma_{rg_{X}}\sigma_{rg_{Y}}}" title="r_{s}=\rho_{rg_{X}, rg_{Y}} = \frac{cov(rg_{X}, rg_{Y})}{\sigma_{rg_{X}}\sigma_{rg_{Y}}}" /></p>
+<p>Spearman's <span class="LaTeX">$\rho$</span> is calculated with the following formula:</p>
+<p><span class="LaTeX">$r_{s}=\rho_{rg_{X}, rg_{Y}} = \frac{cov(rg_{X}, rg_{Y})}{\sigma_{rg_{X}}\sigma_{rg_{Y}}}$</span></p>
 <p>where</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Crho" alt="\rho" title="\rho" /> denotes the usual Pearson correlation coefficient, but applied to the rank variables.</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?cov%28rg_%7BX%7D%2C%20rg_%7BY%7D%29" alt="cov(rg_{X}, rg_{Y})" title="cov(rg_{X}, rg_{Y})" /> is the covariance of the rank variables.</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Csigma_%7Brg_%7BX%7D%7D" alt="\sigma_{rg_{X}}" title="\sigma_{rg_{X}}" /> and <img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Csigma_%7Brg_%7BY%7D%7D" alt="\sigma_{rg_{Y}}" title="\sigma_{rg_{Y}}" /> are the standard deviations of the rank variables.</p></li>
+<p><span class="LaTeX">$\rho$</span> denotes the usual Pearson correlation coefficient, but applied to the rank variables.</p>
+<p><span class="LaTeX">$cov(rg_{X}, rg_{Y})$</span> is the covariance of the rank variables.</p>
+<p><span class="LaTeX">$\sigma_{rg_{X}}$</span> and <span class="LaTeX">$\sigma_{rg_{Y}}$</span> are the standard deviations of the rank variables.</p></li>
 <li><p>Concordance Correlation:</p>
 <p>Lin’s concordance correlation coefficient is calculated with the following formula:</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Chat%20%7B%5Crho%20%7D_%7Bc%7D%3D%7B%5Cfrac%20%7B2s_%7Bxy%7D%7D%7Bs_%7Bx%7D%5E%7B2%7D%2Bs_%7By%7D%5E%7B2%7D%2B%28%7B%5Cbar%20%7Bx%7D%7D-%7B%5Cbar%20%7By%7D%7D%29%5E%7B2%7D%7D%7D" alt="\hat {\rho }_{c}={\frac {2s_{xy}}{s_{x}^{2}+s_{y}^{2}+({\bar {x}}-{\bar {y}})^{2}}}" title="\hat {\rho }_{c}={\frac {2s_{xy}}{s_{x}^{2}+s_{y}^{2}+({\bar {x}}-{\bar {y}})^{2}}}" />,</p>
+<p><span class="LaTeX">$\hat {\rho }_{c}={\frac {2s_{xy}}{s_{x}^{2}+s_{y}^{2}+({\bar {x}}-{\bar {y}})^{2}}}$</span>,</p>
 <p>where the mean is computed as</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Cbar%7Bx%7D%3D%5Cfrac%7B1%7D%7BN%7D%5Csum%20_%7Bn%3D1%7D%5E%7BN%7Dx_%7Bn%7D" alt="\bar{x}=\frac{1}{N}\sum _{n=1}^{N}x_{n}" title="\bar{x}=\frac{1}{N}\sum _{n=1}^{N}x_{n}" /></p>
+<p><span class="LaTeX">$\bar{x}=\frac{1}{N}\sum _{n=1}^{N}x_{n}$</span></p>
 <p>and the variance</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?s_%7Bx%7D%5E%7B2%7D%3D%7B%5Cfrac%20%7B1%7D%7BN%7D%7D%5Csum%20_%7Bn%3D1%7D%5E%7BN%7D%28x_%7Bn%7D-%7B%5Cbar%20%7Bx%7D%7D%29%5E%7B2%7D" alt="s_{x}^{2}={\frac {1}{N}}\sum _{n=1}^{N}(x_{n}-{\bar {x}})^{2}" title="s_{x}^{2}={\frac {1}{N}}\sum _{n=1}^{N}(x_{n}-{\bar {x}})^{2}" /></p>
+<p><span class="LaTeX">$s_{x}^{2}={\frac {1}{N}}\sum _{n=1}^{N}(x_{n}-{\bar {x}})^{2}$</span></p>
 <p>and the covariance</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?s_%7Bxy%7D%3D%7B%5Cfrac%20%7B1%7D%7BN%7D%7D%5Csum%20_%7Bn%3D1%7D%5E%7BN%7D%28x_%7Bn%7D-%7B%5Cbar%20%7Bx%7D%7D%29%28y_%7Bn%7D-%7B%5Cbar%20%7By%7D%7D%29" alt="s_{xy}={\frac {1}{N}}\sum _{n=1}^{N}(x_{n}-{\bar {x}})(y_{n}-{\bar {y}})" title="s_{xy}={\frac {1}{N}}\sum _{n=1}^{N}(x_{n}-{\bar {x}})(y_{n}-{\bar {y}})" /></p>
+<p><span class="LaTeX">$s_{xy}={\frac {1}{N}}\sum _{n=1}^{N}(x_{n}-{\bar {x}})(y_{n}-{\bar {y}})$</span></p>
 <p>McBride suggests the following guidelines for interpreting Lin’s concordance correlation coefficient:</p>
 <ul>
 <li>&lt; 0.90: poor</li>
@@ -472,11 +653,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>&gt; 0.99 almost perfect.</li>
 </ul></li>
 <li><p>Pearson Correlation Coefficient:</p>
-<p>Pearson’s r is calculated with the following formula:</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?r_%7Bxy%7D%20%3D%20%5Cfrac%7B%5Csum_%7Bi%20%3D%201%7D%5En%28x_%7Bi%7D%20-%20%5Cbar%7Bx%7D%29%28y_%7Bi%7D%20-%20%5Cbar%7By%7D%29%7D%7B%5Csqrt%7B%5Csum_%7Bi%3D1%7D%5En%28x_%7Bi%7D%20-%20%5Cbar%7Bx%7D%29%5E2%7D%20%5Csqrt%7B%5Csum_%7Bi%3D1%7D%5En%28y_%7Bi%7D%20-%20%5Cbar%7By%7D%29%5E2%7D%7D" alt="r_{xy} = \frac{\sum_{i = 1}^n(x_{i} - \bar{x})(y_{i} - \bar{y})}{\sqrt{\sum_{i=1}^n(x_{i} - \bar{x})^2} \sqrt{\sum_{i=1}^n(y_{i} - \bar{y})^2}}" title="r_{xy} = \frac{\sum_{i = 1}^n(x_{i} - \bar{x})(y_{i} - \bar{y})}{\sqrt{\sum_{i=1}^n(x_{i} - \bar{x})^2} \sqrt{\sum_{i=1}^n(y_{i} - \bar{y})^2}}" /></p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?n" alt="n" title="n" /> is sample size</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?x_%7Bi%7D%2C%20y_%7Bi%7D" alt="x_{i}, y_{i}" title="x_{i}, y_{i}" /> are the individual sample points indexed with i</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Cbar%7Bx%7D%20%3D%20%5Cfrac%7B1%7D%7Bn%7D%5Csum_%7Bi%20%3D%201%7D%5En%20x_%7Bi%7D" alt="\bar{x} = \frac{1}{n}\sum_{i = 1}^n x_{i}" title="\bar{x} = \frac{1}{n}\sum_{i = 1}^n x_{i}" />, analogously for <img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%5Cbar%7By%7D" alt="\bar{y}" title="\bar{y}" /></p>
+<p>Pearson's r is calculated with the following formula:</p>
+<p><span class="LaTeX">$r_{xy} = \frac{\sum_{i = 1}^n(x_{i} - \bar{x})(y_{i} - \bar{y})}{\sqrt{\sum_{i=1}^n(x_{i} - \bar{x})^2} \sqrt{\sum_{i=1}^n(y_{i} - \bar{y})^2}}$</span></p>
+<p><span class="LaTeX">$n$</span> is sample size</p>
+<p><span class="LaTeX">$x_{i}, y_{i}$</span> are the individual sample points indexed with i</p>
+<p><span class="LaTeX">$\bar{x} = \frac{1}{n}\sum_{i = 1}^n x_{i}$</span>, analogously for <span class="LaTeX">$\bar{y}$</span></p>
 <p>For the interpretation of the Pearson Correlation Coefficient we considered the following guidelines:</p>
 <ul>
 <li>= -1, perfect downhill (negative) linear relationship</li>
@@ -490,13 +671,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>= 1, perfect uphill (positive) linear relationship</li>
 </ul></li>
 <li><p>Fisher z-score:</p>
-<p>The Fisher Z-Transformation is a way to transform the sampling distribution of Pearson’s r (i.e. the correlation coefficient) so that it becomes normally distributed.</p>
-<p><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?z%E2%80%99%20%3D%20.5%5Bln%281%2Br%29%20%E2%80%93%20ln%281-r%29%5D" alt="z’ = .5[ln(1+r) – ln(1-r)]" title="z’ = .5[ln(1+r) – ln(1-r)]" /></p></li>
+<p>The Fisher Z-Transformation is a way to transform the sampling distribution of Pearson’s r (i.e. the correlation coefficient) so that it becomes normally distributed.</p>
+<p><span class="LaTeX">$z’ = .5[ln(1+r) – ln(1-r)]$</span></p></li>
 </ul>
 <h1 id="database"><span class="header-section-number">4</span> Database</h1>
 <p>To support a collaborative annotation process, NOVA maintains a database back-end, which allows users to load and save annotations from and to a MongoDB running on a central server. This gives involved annotators the possibility to immediately commit changes and follow the annotation progress of the others.</p>
 <h2 id="setup-mongodb"><span class="header-section-number">4.1</span> Setup MongoDB</h2>
-<p>We will describe two strategies: a) set up MongoDB with Docker <em>or</em> b) set up MongoDB natively. In the following, make sure to replace the default password “PASSWORD”.</p>
+<p>We will describe two strategies: a) set up MongoDB with Docker <em>or</em> b) set up MongoDB natively. In the following, make sure to replace the default password &quot;PASSWORD&quot;.</p>
 <p>First, we install Docker (<a href="https://www.docker.com/" class="uri">https://www.docker.com/</a>) and run:</p>
 <pre><code>docker pull mongo:latest  
 docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mongo:latest --auth</code></pre>
@@ -535,12 +716,13 @@ db.createRole(
 db.createUser({ user: &#39;system&#39;, pwd: &#39;PASSWORD2&#39;, roles: [ { role: &quot;readWriteAnyDatabase&quot;, db: &quot;admin&quot; }, {&quot;role&quot; : &quot;changeOwnPasswordCustomDataRole&quot;, &quot;db&quot; : &quot;admin&quot;} ], customData: {fullname: &#39;SYSTEM&#39;, email: &#39; &#39;, expertise: NumberInt(0)} });</code></pre>
 <p>We can now test the server:</p>
 <pre><code>show dbs</code></pre>
-<p>To connect to the MongoDB server in NOVA, we open the settings by clicking the wheel in the menu and switch to the ‘Database’ tab. Here we enter the host and port number of the MongoDB server and the user credentials. The dialog also allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.</p>
-<figure>
-<img src="pics/database-connect.png" id="fig:database-connect" alt="" /><figcaption><em>Connect to a database.</em></figcaption>
-</figure>
+<p>To connect to the MongoDB server in NOVA, we open the settings by clicking the wheel in the menu and switch to the 'Database' tab. Here we enter the host and port number of the MongoDB server and the user credentials. The dialog also allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.</p>
+<div class="figure">
+<img src="pics/database-connect.png" alt="Connect to a database." id="fig:database-connect" />
+<p class="caption"><em>Connect to a database.</em></p>
+</div>
 <h3 id="setting-up-mongodb-as-a-service-on-windows"><span class="header-section-number">4.1.1</span> Setting up MongoDB as a service on Windows</h3>
-<p>If you want MongoDB to run in the background so that it doesn’t shut down when you close the console open a Command Prompt as administrator and</p>
+<p>If you want MongoDB to run in the background so that it doesn't shut down when you close the console open a Command Prompt as administrator and</p>
 <p>Create folders for your database and logs (adjust the path in the following snippets)</p>
 <pre><code>mkdir c:\data\db
 mkdir c:\data\log</code></pre>
@@ -562,9 +744,9 @@ net:
 <pre><code>&quot;C:\Program Files\MongoDB\Server\3.6\bin\mongod.exe&quot; --config &quot;C:\Program Files\MongoDB\Server\3.6\mongod.cfg&quot; --install
 
 net start MongoDB</code></pre>
-<p>If you didn’t get an error you can proceed with the next steps as described above. For other systems than Windows, please take a look at the offical MongoDB documentation.</p>
+<p>If you didn't get an error you can proceed with the next steps as described above. For other systems than Windows, please take a look at the offical MongoDB documentation.</p>
 <h2 id="general-structure"><span class="header-section-number">4.2</span> General Structure</h2>
-<p>A database in NOVA aggregates data recorded within the same experiment. It is basically a collection of recorded stream files (data) and descriptions marking interesting events in the data (annotations). NOVA can handle multiple databases and offers tools to maintain them and incrementally accumulate new data and annotations. Generally, stream files are stored on disk and annotations are stored in a MongoDB. Each database consists of one or more sessions. A session is a single and continuous recording distributed over one or more stream files. Each stream file is assigned to one or more subjects, which are represented as roles (e.g. speaker vs listener). A stream file also has a unique name indicating the source of the recording (e.g. audio or video) and a file extension (e.g. wav or mp4). On disk, a database has the following structure:</p>
+<p>A database in NOVA aggregates data recorded within the same experiment. It is basically a collection of recorded stream files (data) and descriptions marking interesting events in the data (annotations). NOVA can handle multiple databases and offers tools to maintain them and incrementally accumulate new data and annotations. Generally, stream files are stored on disk and annotations are stored in a MongoDB. Each database consists of one or more sessions. A session is a single and continuous recording distributed over one or more stream files. Each stream file is assigned to one or more subjects, which are represented as roles (e.g. speaker vs listener). A stream file also has a unique name indicating the source of the recording (e.g. audio or video) and a file extension (e.g. wav or mp4). On disk, a database has the following structure:</p>
 <pre><code>&lt;database-1&gt;/
     &lt;session-1&gt;/
         &lt;role-1&gt;.&lt;stream-name-1&gt;.&lt;stream-ext-1&gt;
@@ -579,9 +761,10 @@ net start MongoDB</code></pre>
         &lt;role-2&gt;.&lt;stream-name-2&gt;.&lt;stream-ext-2&gt;
         ...</code></pre>
 <p>In the MongoDB this is reflected by different tables storing the sessions, the roles, and the streams. In addition, also annotators, annotation schemes and annotations are stored. It is important to note that each annotator can own exactly one annotation per scheme and role. This means it is not possible to store different versions of an annotation in the database.</p>
-<figure>
-<img src="pics/database-structure-detail.png" id="fig:database-structure-detail" alt="" /><figcaption><em>Detailed structure of a database.</em></figcaption>
-</figure>
+<div class="figure">
+<img src="pics/database-structure-detail.png" alt="Detailed structure of a database." id="fig:database-structure-detail" />
+<p class="caption"><em>Detailed structure of a database.</em></p>
+</div>
 <ul>
 <li>Meta: Meta information about a database, including the data server location, and a description</li>
 <li>Sessions: Stores general information for each recording session, such as location, language and date.</li>
@@ -597,104 +780,119 @@ net start MongoDB</code></pre>
 <p>Although stream files have to be locally available when displayed in NOVA, it is possible to store the data on a server and let NOVA download them on demand. This is especially useful for large database, where annotators only work on small subsets.</p>
 <p>TODO: add more details how data can be stored to and accessed from a server</p>
 <h2 id="administration"><span class="header-section-number">4.4</span> Administration</h2>
-<p>The ‘Administration’ sub-menu of the DATABASE menu offers tools to create and maintain databases. Note that most of the functions are only visible to users with administrative rights.</p>
+<p>The 'Administration' sub-menu of the DATABASE menu offers tools to create and maintain databases. Note that most of the functions are only visible to users with administrative rights.</p>
 <ul>
-<li>‘Manage Users’: add or edit an user account. Users that have been added to the list can connect to the MongoDB and contribute to one or more databases.</li>
+<li>'Manage Users': add or edit an user account. Users that have been added to the list can connect to the MongoDB and contribute to one or more databases.</li>
 </ul>
-<figure>
-<img src="pics/database-manage-users.png" id="fig:database-manage-users" alt="" /><figcaption><em>Manage users.</em></figcaption>
-</figure>
+<div class="figure">
+<img src="pics/database-manage-users.png" alt="Manage users." id="fig:database-manage-users" />
+<p class="caption"><em>Manage users.</em></p>
+</div>
 <ul>
-<li>‘Manager Databases’: add or edit a database. After a database has been created, users can be added which allows them to create and edit annotations. Depending on their role, they can view (‘read’) annotations and create own annotations (‘readWrite’). Users with administrative rights (‘dbAdmin’) can also edit the annotations of other users.</li>
+<li>'Manager Databases': add or edit a database. After a database has been created, users can be added which allows them to create and edit annotations. Depending on their role, they can view ('read') annotations and create own annotations ('readWrite'). Users with administrative rights ('dbAdmin') can also edit the annotations of other users.</li>
 </ul>
-<figure>
-<img src="pics/database-manage-databases.png" id="fig:database-manage-databases" alt="" /><figcaption><em>Manage databases.</em></figcaption>
-</figure>
+<div class="figure">
+<img src="pics/database-manage-databases.png" alt="Manage databases." id="fig:database-manage-databases" />
+<p class="caption"><em>Manage databases.</em></p>
+</div>
 <ul>
-<li>‘Manage Sessions’: add or edit a session. After a recording is finished, it has to be added to the database first. The name of the session has to match the folder name, where the stream files are stored. Only, stream files that fit the roles and streams in the database will be accessible.</li>
+<li>'Manage Sessions': add or edit a session. After a recording is finished, it has to be added to the database first. The name of the session has to match the folder name, where the stream files are stored. Only, stream files that fit the roles and streams in the database will be accessible.</li>
 </ul>
-<figure>
-<img src="pics/database-manage-sessions.png" id="fig:database-manage-sessions" alt="" /><figcaption><em>Manage sessions</em></figcaption>
-</figure>
+<div class="figure">
+<img src="pics/database-manage-sessions.png" alt="Manage sessions" id="fig:database-manage-sessions" />
+<p class="caption"><em>Manage sessions</em></p>
+</div>
 <ul>
-<li>‘Manage Annotations’: lists the annotations of a database. For each annotation the session, scheme, role and annotator are given. A search window on the bottom helps to filter relevant annotations. The dialog only allows to delete annotations. Annotations are either manually created by users or when annotations are merged together. However, they can also be automatically predicted using machine learning tools (see next chapter).</li>
+<li>'Manage Annotations': lists the annotations of a database. For each annotation the session, scheme, role and annotator are given. A search window on the bottom helps to filter relevant annotations. The dialog only allows to delete annotations. Annotations are either manually created by users or when annotations are merged together. However, they can also be automatically predicted using machine learning tools (see next chapter).</li>
 </ul>
-<figure>
-<img src="pics/database-manage-annotations.png" id="fig:database-manage-annotations" alt="" /><figcaption><em>Manage annotations.</em></figcaption>
-</figure>
+<div class="figure">
+<img src="pics/database-manage-annotations.png" alt="Manage annotations." id="fig:database-manage-annotations" />
+<p class="caption"><em>Manage annotations.</em></p>
+</div>
 <h2 id="loading-a-session"><span class="header-section-number">4.5</span> Loading a Session</h2>
-<p>The DATABASE menu allows to load annotation and files for a session (note that this will clear the workspace). In the following window you can select multiple annotations and streams belonging to a certain session of a database. Turn on ‘Mine only’ to filter only your own annotations and ‘Unfinished only’ to hide annotations that have already been marked finished. Stream files that are not locally available yet, are displayed in red. If selected NOVA will try to download them before the session is displayed.</p>
-<figure>
-<img src="pics/database-load-session.png" id="fig:database-load-session" alt="" /><figcaption><em>Load a session.</em></figcaption>
-</figure>
+<p>The DATABASE menu allows to load annotation and files for a session (note that this will clear the workspace). In the following window you can select multiple annotations and streams belonging to a certain session of a database. Turn on 'Mine only' to filter only your own annotations and 'Unfinished only' to hide annotations that have already been marked finished. Stream files that are not locally available yet, are displayed in red. If selected NOVA will try to download them before the session is displayed.</p>
+<div class="figure">
+<img src="pics/database-load-session.png" alt="Load a session." id="fig:database-load-session" />
+<p class="caption"><em>Load a session.</em></p>
+</div>
 <h2 id="database-create-annotation"><span class="header-section-number">4.6</span> Creating an Annotation</h2>
-<p>After loading at least one stream file it is possible to add new annotations to the database by pressing the ‘Database’ button on the bottom left. You will now be prompted to select a scheme and a role. If an according annotation already exists it will be loaded, otherwise an empty one is created. When the annotation is saved it is automatically written to the database. In case you want to store it on disk use ‘Export Selected As’ from the ANNOTATION menu. You can also load an existing annotation from another user. As soon as you save the annotation for the first time it will be stored under your name.</p>
+<p>After loading at least one stream file it is possible to add new annotations to the database by pressing the 'Database' button on the bottom left. You will now be prompted to select a scheme and a role. If an according annotation already exists it will be loaded, otherwise an empty one is created. When the annotation is saved it is automatically written to the database. In case you want to store it on disk use 'Export Selected As' from the ANNOTATION menu. You can also load an existing annotation from another user. As soon as you save the annotation for the first time it will be stored under your name.</p>
 <h1 id="cooperative-learning"><span class="header-section-number">5</span> Cooperative Learning</h1>
-<p>NOVA features tools to considerable speed up the annotation process. The following image illustrates the overall system. (A) Database with recordings of human interaction. (B) NOVA’s interface allows to distribute and accomplish annotation tasks among human annotators. (C) At times, Cooperative Learning (CL) can be applied to automatically complete unfinished fractions of the database. Two strategies are available (bottom right box): (I) A session-dependent model is trained on a partly annotated session and applied to complete it. (II) A pool of annotated sessions is used to train a session-independent model and predict labels for the remaining sessions. In both cases, confidence values guide the revision of predicted segments (here marked with a colour gradient).</p>
-<figure>
-<img src="pics/cl-overview.png" id="fig:cl-overview" alt="" /><figcaption><em>Overview of the cooperative learning system integrated in NOVA.</em></figcaption>
-</figure>
+<p>NOVA features tools to considerable speed up the annotation process. The following image illustrates the overall system. (A) Database with recordings of human interaction. (B) NOVA's interface allows to distribute and accomplish annotation tasks among human annotators. (C) At times, Cooperative Learning (CL) can be applied to automatically complete unfinished fractions of the database. Two strategies are available (bottom right box): (I) A session-dependent model is trained on a partly annotated session and applied to complete it. (II) A pool of annotated sessions is used to train a session-independent model and predict labels for the remaining sessions. In both cases, confidence values guide the revision of predicted segments (here marked with a colour gradient).</p>
+<div class="figure">
+<img src="pics/cl-overview.png" alt="Overview of the cooperative learning system integrated in NOVA." id="fig:cl-overview" />
+<p class="caption"><em>Overview of the cooperative learning system integrated in NOVA.</em></p>
+</div>
 <p>Note that all tasks related to machine learning (ML) are outsourced to Social Signal Interpretation (SSI) framework and executed in a background process. To learn more about SSI please visit the project site:</p>
 <p><a href="http://openssi.net" class="uri">http://openssi.net</a></p>
 <h2 id="cl-feature-extraction"><span class="header-section-number">5.1</span> Feature Extraction</h2>
-<p>Features can be automatically extracted from the stream files of a database. The type of feature extraction is defined in a SSI chain file. When run through a chain an input stream first passes a number of filter steps, which are applied in-series, i.e. the output of the first filter servers as input for the second filter and so on. Afterwards, the output of the last filter operation is forwarded to each feature component and results are concatenated. For instance, to extract from an audio input the famous Mel-Frequency Cepstral Components (MFCC) we can define the following chain:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb23-1"><a href="#cb23-1"></a><span class="kw">&lt;chain&gt;</span></span>
-<span id="cb23-2"><a href="#cb23-2"></a>    <span class="kw">&lt;meta</span><span class="ot"> frameStep=</span><span class="st">&quot;10ms&quot;</span><span class="ot"> leftContext=</span><span class="st">&quot;10ms&quot;</span><span class="ot"> rightContext=</span><span class="st">&quot;10ms&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb23-3"><a href="#cb23-3"></a>    <span class="kw">&lt;register&gt;</span></span>
-<span id="cb23-4"><a href="#cb23-4"></a>        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;signal&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb23-5"><a href="#cb23-5"></a>        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;opensmile&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb23-6"><a href="#cb23-6"></a>    <span class="kw">&lt;/register&gt;</span></span>
-<span id="cb23-7"><a href="#cb23-7"></a>    <span class="kw">&lt;filter&gt;</span></span>
-<span id="cb23-8"><a href="#cb23-8"></a>        <span class="kw">&lt;item</span><span class="ot"> create=</span><span class="st">&quot;OSPreemphasis&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb23-9"><a href="#cb23-9"></a>    <span class="kw">&lt;/filter&gt;</span></span>
-<span id="cb23-10"><a href="#cb23-10"></a>    <span class="kw">&lt;feature&gt;</span></span>
-<span id="cb23-11"><a href="#cb23-11"></a>        <span class="kw">&lt;item</span><span class="ot"> create=</span><span class="st">&quot;OSMfccChain&quot;</span><span class="ot"> option=</span><span class="st">&quot;mfcc&quot;</span><span class="kw">/&gt;</span></span>
-<span id="cb23-12"><a href="#cb23-12"></a>    <span class="kw">&lt;/feature&gt;</span></span>
-<span id="cb23-13"><a href="#cb23-13"></a><span class="kw">&lt;/chain&gt;</span></span></code></pre></div>
+<p>Features can be automatically extracted from the stream files of a database. The type of feature extraction is defined in a SSI chain file. When run through a chain an input stream first passes a number of filter steps, which are applied in-series, i.e. the output of the first filter servers as input for the second filter and so on. Afterwards, the output of the last filter operation is forwarded to each feature component and results are concatenated. For instance, to extract from an audio input the famous Mel-Frequency Cepstral Components (MFCC) we can define the following chain:</p>
+<div class="sourceCode"><pre class="sourceCode xml"><code class="sourceCode xml"><span class="kw">&lt;chain&gt;</span>
+    <span class="kw">&lt;meta</span><span class="ot"> frameStep=</span><span class="st">&quot;10ms&quot;</span><span class="ot"> leftContext=</span><span class="st">&quot;10ms&quot;</span><span class="ot"> rightContext=</span><span class="st">&quot;10ms&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;register&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;signal&quot;</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> name=</span><span class="st">&quot;opensmile&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/register&gt;</span>
+    <span class="kw">&lt;filter&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> create=</span><span class="st">&quot;OSPreemphasis&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/filter&gt;</span>
+    <span class="kw">&lt;feature&gt;</span>
+        <span class="kw">&lt;item</span><span class="ot"> create=</span><span class="st">&quot;OSMfccChain&quot;</span><span class="ot"> option=</span><span class="st">&quot;mfcc&quot;</span><span class="kw">/&gt;</span>
+    <span class="kw">&lt;/feature&gt;</span>
+<span class="kw">&lt;/chain&gt;</span></code></pre></div>
 <p>Here, the audio stream is first run through a pre-emphasis filter and afterwards MFCC features are extracted over a sliding window of 25 ms with a frame step of 10 ms (timings can be overwritten in NOVA). To configure the MFCC extraction (e. g., the number of coefficients) a separate option file is created (here ’mfcc’). Note that the chain has two dependencies <code>ssisignal.dll</code> and <code>ssiopensmile</code>, which will be automatically downloaded. To learn more about chains, please visit the SSI documentation:</p>
 <p><a href="https://rawgit.com/hcmlab/ssi/master/docs/index.html#xml-basics-transformer-chain" class="uri">https://rawgit.com/hcmlab/ssi/master/docs/index.html#xml-basics-transformer-chain</a></p>
-<p>To use a chain file in NOVA it must be copied to the CML folder <code>cml\chains\&lt;type&gt;\&lt;group&gt;</code>. To start a feature extraction process, we select ‘Extract Features’ from the ‘LEARNING’ menu. A dialogue pops up, where we can select the stream for which features will be extracted. All chains matching with the type of the feature (i.e. the <type> sub folder in which the chain is stored equals the type of the stream), are now displayed and can be selected. If wished, left context, frame step, and right context can be set. Finally, we can select the sessions and start the feature extraction. Here, the number of threads defines how many files will be processed in parallel. The file name of the new stream is <code>&lt;old-name&gt;.&lt;chain-name&gt;[left,step,right]</code> and is automatically added to the database. Unless ‘Force’ is selected, stream files that already exist will not be overriden and feature extraction is skipped for these sessions.</p>
-<figure>
-<img src="pics/cl-feature-dialog.png" id="fig:cl-feature-dialog" alt="" /><figcaption><em>Feature extraction.</em></figcaption>
-</figure>
+<p>To use a chain file in NOVA it must be copied to the CML folder <code>cml\chains\&lt;type&gt;\&lt;group&gt;</code>. To start a feature extraction process, we select 'Extract Features' from the 'LEARNING' menu. A dialogue pops up, where we can select the stream for which features will be extracted. All chains matching with the type of the feature (i.e. the <type> sub folder in which the chain is stored equals the type of the stream), are now displayed and can be selected. If wished, left context, frame step, and right context can be set. Finally, we can select the sessions and start the feature extraction. Here, the number of threads defines how many files will be processed in parallel. The file name of the new stream is <code>&lt;old-name&gt;.&lt;chain-name&gt;[left,step,right]</code> and is automatically added to the database. Unless 'Force' is selected, stream files that already exist will not be overriden and feature extraction is skipped for these sessions.</p>
+<div class="figure">
+<img src="pics/cl-feature-dialog.png" alt="Feature extraction." id="fig:cl-feature-dialog" />
+<p class="caption"><em>Feature extraction.</em></p>
+</div>
 <h2 id="cl-trainer-templates"><span class="header-section-number">5.2</span> Trainer Templates</h2>
 <p>TODO: explain how to create trainer templates</p>
 <h2 id="annotation-completion"><span class="header-section-number">5.3</span> Annotation Completion</h2>
 <p>NOVA allows it to complete a partly finished annotation. Note that NOVA expects that everything before the last annotation item on the tier has been manually annotated. The following image shows a partly finished annotation before completion is applied:</p>
-<figure>
-<img src="pics/cl-completion-before.png" id="fig:cl-completion-before" alt="" /><figcaption><em>Session before completion.</em></figcaption>
-</figure>
-<p>Now, call ‘Complete Current Annotation’ from the LEARNING menu. In the dialogue that pops up you can now select the <a href="#cl-feature-extraction">feature stream</a> to which machine learning should be applied. Only streams are displayed for which at least one <a href="#cl-trainer-templates">trainer template</a> is available. Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold.</p>
-<figure>
-<img src="pics/cl-completion-dialog.png" id="fig:cl-completion-dialog" alt="" /><figcaption><em>Annotation completion.</em></figcaption>
-</figure>
-<p>If you are not happy with the completion you are still given the opportunity ‘Undo’ the changes now. Otherwise, you can now continue to work with the automatically completed annotation.</p>
-<figure>
-<img src="pics/cl-completion-after.png" id="fig:cl-completion-after" alt="" /><figcaption><em>Session after completion.</em></figcaption>
-</figure>
-<p>Note that predictions with a low confidence will be marked with a special pattern to guide manual revision. You can change the threshold in the SETTINGS (‘Correction certainty level’). Once a label is revised the confidence is automatically set to 1 and it is not longer marked.</p>
-<figure>
-<img src="pics/cl-completion-revise.png" id="fig:cl-completion-revise" alt="" /><figcaption><em>Predictions with a low confidence are marked for revision.</em></figcaption>
-</figure>
+<div class="figure">
+<img src="pics/cl-completion-before.png" alt="Session before completion." id="fig:cl-completion-before" />
+<p class="caption"><em>Session before completion.</em></p>
+</div>
+<p>Now, call 'Complete Current Annotation' from the LEARNING menu. In the dialogue that pops up you can now select the <a href="#cl-feature-extraction">feature stream</a> to which machine learning should be applied. Only streams are displayed for which at least one <a href="#cl-trainer-templates">trainer template</a> is available. Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold.</p>
+<div class="figure">
+<img src="pics/cl-completion-dialog.png" alt="Annotation completion." id="fig:cl-completion-dialog" />
+<p class="caption"><em>Annotation completion.</em></p>
+</div>
+<p>If you are not happy with the completion you are still given the opportunity 'Undo' the changes now. Otherwise, you can now continue to work with the automatically completed annotation.</p>
+<div class="figure">
+<img src="pics/cl-completion-after.png" alt="Session after completion." id="fig:cl-completion-after" />
+<p class="caption"><em>Session after completion.</em></p>
+</div>
+<p>Note that predictions with a low confidence will be marked with a special pattern to guide manual revision. You can change the threshold in the SETTINGS ('Correction certainty level'). Once a label is revised the confidence is automatically set to 1 and it is not longer marked.</p>
+<div class="figure">
+<img src="pics/cl-completion-revise.png" alt="Predictions with a low confidence are marked for revision." id="fig:cl-completion-revise" />
+<p class="caption"><em>Predictions with a low confidence are marked for revision.</em></p>
+</div>
 <h2 id="cl-model-training"><span class="header-section-number">5.4</span> Model Training</h2>
-<p>Once annotations for a number of sessions have been accomplished a ‘strong’ classification model can be trained. This requires that <a href="#cl-feature-extraction">features</a> have been extracted for the sessions and a compatible <a href="#cl-trainer-templates">trainer template</a> is available. Now choose ‘Train and Predict’ from LEARNING and a dialogue pops up. Stay within the ‘Train’ tab. Here you can select a scheme, one or more roles and an annotator. Sessions for which an annotation exists that satisfies the selection are now shown and can be selected. Finally, choose the stream for which a machine learning model should be trained. Note that only those streams are listed for which at least one <a href="#cl-trainer-templates">trainer template</a> is found. By pressing ‘Train’ model training is started. Switch on ‘Force’ if you want to override an existing model.</p>
-<figure>
-<img src="pics/cl-training-dialog.png" id="fig:cl-training-dialog" alt="" /><figcaption><em>Model training.</em></figcaption>
-</figure>
+<p>Once annotations for a number of sessions have been accomplished a 'strong' classification model can be trained. This requires that <a href="#cl-feature-extraction">features</a> have been extracted for the sessions and a compatible <a href="#cl-trainer-templates">trainer template</a> is available. Now choose 'Train and Predict' from LEARNING and a dialogue pops up. Stay within the 'Train' tab. Here you can select a scheme, one or more roles and an annotator. Sessions for which an annotation exists that satisfies the selection are now shown and can be selected. Finally, choose the stream for which a machine learning model should be trained. Note that only those streams are listed for which at least one <a href="#cl-trainer-templates">trainer template</a> is found. By pressing 'Train' model training is started. Switch on 'Force' if you want to override an existing model.</p>
+<div class="figure">
+<img src="pics/cl-training-dialog.png" alt="Model training." id="fig:cl-training-dialog" />
+<p class="caption"><em>Model training.</em></p>
+</div>
 <h2 id="annotation-prediction"><span class="header-section-number">5.5</span> Annotation Prediction</h2>
-<p>With a trained model it is now possible to predict annotations for one or more sessions. Therefore choose ‘Train and Predict’ from the LEARNING menu and switch to the ‘Predict’ tab. Once you have selected a scheme, a role and an Annotator those sessions will be listed, which do not have a matching annotation yet. You can turn of the filter by selecting ‘Show existing’, however, make sure you are not occidentally overriding existing annotations (no undo available!). Finally, select the stream for which a machine learning <a href="#cl-model-training">model</a> has been trained (only streams are listed for which at least one model is found). Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold. After pressing ‘Predict’ annotations will be created based on the chosen model for all sessions that have been selected and stored under your name (if you are an administrator you may also generate annotations for another user).</p>
-<figure>
-<img src="pics/cl-prediction-dialog.png" id="fig:cl-prediction-dialog" alt="" /><figcaption><em>Annotation prediction dialogue.</em></figcaption>
-</figure>
+<p>With a trained model it is now possible to predict annotations for one or more sessions. Therefore choose 'Train and Predict' from the LEARNING menu and switch to the 'Predict' tab. Once you have selected a scheme, a role and an Annotator those sessions will be listed, which do not have a matching annotation yet. You can turn of the filter by selecting 'Show existing', however, make sure you are not occidentally overriding existing annotations (no undo available!). Finally, select the stream for which a machine learning <a href="#cl-model-training">model</a> has been trained (only streams are listed for which at least one model is found). Depending on the scheme, there may be additional options that allow you to tune the generation of the prediction. E.g. in case of a discrete scheme you can automatically fill small gaps or remove segments below a threshold. After pressing 'Predict' annotations will be created based on the chosen model for all sessions that have been selected and stored under your name (if you are an administrator you may also generate annotations for another user).</p>
+<div class="figure">
+<img src="pics/cl-prediction-dialog.png" alt="Annotation prediction dialogue." id="fig:cl-prediction-dialog" />
+<p class="caption"><em>Annotation prediction dialogue.</em></p>
+</div>
 <h2 id="explanation"><span class="header-section-number">5.6</span> Explanation</h2>
-<p>We extended NOVA with the two explanation frameworks <a href="https://github.com/marcotcr/lime">LIME</a> and <a href="https://github.com/albermax/innvestigate">iNNvestigate</a>. The extension allows to further investigate the classifier’s prediction and gain additional insight on the classifier’s decision making. The corresponding functionality is accessible through the ‘XAI’ drop down menu from the navigation bar at the top.</p>
-<figure>
-<img src="pics/lime-explanation.PNG" id="fig:lime-explanation" style="width:80.0%" alt="" /><figcaption><em>Lime explanation dialog.</em></figcaption>
-</figure>
-<p>The figure presents the NOVA interface for generating explanations with LIME. Coherent with LIME it is possible to adjust the number of considered ‘Top Lables’, ‘Number of samples’ and ‘Number of features’. Additional settings for the presentation of explanations can also be altered (‘Hide rest’, ‘Hide color’, ‘Positive only’). Furthermore, for the generation of explanations the user can either choose from a list of models that have been trained with the help of NOVA for the given modality or drag and drop models from a different source.</p>
-<figure>
-<img src="pics/innvestigate-explanation.PNG" id="fig:innvestigate-explanation" style="width:80.0%" alt="" /><figcaption><em>Innvestigate explanation dialog.</em></figcaption>
-</figure>
+<p>We extended NOVA with the two explanation frameworks <a href="https://github.com/marcotcr/lime">LIME</a> and <a href="https://github.com/albermax/innvestigate">iNNvestigate</a>. The extension allows to further investigate the classifier's prediction and gain additional insight on the classifier’s decision making. The corresponding functionality is accessible through the 'XAI' drop down menu from the navigation bar at the top.</p>
+<div class="figure">
+<img src="pics/lime-explanation.PNG" alt="Lime explanation dialog." id="fig:lime-explanation" style="width:80.0%" />
+<p class="caption"><em>Lime explanation dialog.</em></p>
+</div>
+<p>The figure presents the NOVA interface for generating explanations with LIME. Coherent with LIME it is possible to adjust the number of considered 'Top Lables', 'Number of samples' and 'Number of features'. Additional settings for the presentation of explanations can also be altered ('Hide rest', 'Hide color', 'Positive only'). Furthermore, for the generation of explanations the user can either choose from a list of models that have been trained with the help of NOVA for the given modality or drag and drop models from a different source.</p>
+<div class="figure">
+<img src="pics/innvestigate-explanation.PNG" alt="Innvestigate explanation dialog." id="fig:innvestigate-explanation" style="width:80.0%" />
+<p class="caption"><em>Innvestigate explanation dialog.</em></p>
+</div>
 <p>Alongside the explanation generated by LIME, NOVA also offers the possibility to create explanations with iNNvestigate. The figure above presents the corresponding NOVA interface. It not only provides a variety of algorithms implemented in iNNvestigate, but also allows the user to decide between different visualization representations. Following algorithms (explainer) are supported in NOVA:</p>
 <ul>
 <li>Gradient</li>
@@ -705,7 +903,7 @@ net start MongoDB</code></pre>
 <li>LRPZ</li>
 <li>LRPAlphaBeta</li>
 </ul>
-<p>Those algorithms can be visualized with a variety of colormaps (postprocessing), e.g. graymap, heatmap, bk_proj, gnuplot2, cmrmap, nipy_spectral, rainbow, inferno, viridis, gist_heat. Corresponding to the LIME interface for the generation of explanations the user can either choose from a list of models that have been trained with the help of NOVA for the given modality or drag and drop models from a different source.</p>
+<p>Those algorithms can be visualized with a variety of colormaps (postprocessing), e.g. graymap, heatmap, bk_proj, gnuplot2, cmrmap, nipy_spectral, rainbow, inferno, viridis, gist_heat. Corresponding to the LIME interface for the generation of explanations the user can either choose from a list of models that have been trained with the help of NOVA for the given modality or drag and drop models from a different source.</p>
             </div>
     </div>
   </div>

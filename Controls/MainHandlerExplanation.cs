@@ -422,7 +422,6 @@ namespace ssi
 
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
-
             try
             {
            
@@ -431,7 +430,9 @@ namespace ssi
                 startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
                 startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
                 process.StartInfo = startInfo;
+         
                 process.Start();
+ 
 
                 return process.Id;
             }
@@ -454,7 +455,15 @@ namespace ssi
                 {
                     if (prs.Id == MainHandler.xaiProcessId)
                     {
-                        prs.Kill();
+                        if(Properties.Settings.Default.EnablePythonDebug)
+                        {
+                            prs.CloseMainWindow();
+                        }
+                        else
+                        {
+                            prs.Kill();
+                        }
+                       
                         break;
                     }
                 }
