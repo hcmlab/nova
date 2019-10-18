@@ -102,7 +102,16 @@ namespace ssi
                 var commits = await client.Repository.Commit.GetAll("hcmlab", "ssi");
                 var first = commits.First();
                 var last = commits.Last();
-                var result = await client.Repository.Commit.Compare("hcmlab", "ssi", last.Sha, first.Sha);
+                CompareResult result = null;
+                try
+                {
+                   result = await client.Repository.Commit.Compare("hcmlab", "ssi", last.Sha, first.Sha);
+                }
+                catch(Exception en)
+                {
+                    MessageBox.Show(en.ToString());
+                }
+              
 
 
                 var files = result.Files;

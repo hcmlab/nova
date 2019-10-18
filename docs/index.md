@@ -357,8 +357,10 @@ We will describe two strategies: a) set up MongoDB with Docker *or* b) set up Mo
 First, we install Docker (<https://www.docker.com/>) and run:
 
 ~~~~
-docker pull mongo:latest  
-docker run --restart always -p 27017:27017 -h mongodb.local --name nova -d -t mongo:latest --auth
+docker pull mongo:3.6.0  
+docker run -d -p 27017-27019:27017-27019 --name nova mongo:3.6.0
+
+
 ~~~~
 
 *or*
@@ -375,7 +377,12 @@ MongoDB now runs on 127.0.0.1:27017 and we can connect to it:
 
 
 ~~~~
-docker exec -it nova mongo admin
+
+docker exec -it nova bash
+
+Enter:
+mongo
+
 ~~~~
 
 *or*
@@ -390,6 +397,10 @@ We add an administrator:
 use admin
 db.createUser({ user: 'admin', pwd: 'PASSWORD', roles: [ { role: "root", db: "admin" } ],  customData: {fullname: "ADMIN", email: ' ', expertise: NumberInt(0)}}); 
 exit
+
+Enter:
+exit
+
 ~~~~
    
 And reconnect afterwards:
