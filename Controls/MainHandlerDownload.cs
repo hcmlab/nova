@@ -538,7 +538,7 @@ namespace ssi
                             "python/toolz-0.9.0-py2.py3-none-any.whl",
                             "python/termcolor-1.1.0-py2.py3-none-any.whl",
                             "python/future-0.17.0-py3-none-any.whl",
-                            "keras-vggface==0.5",
+                            "keras-vggface==0.6",
                             "tensorflow-gpu==1.12.0",
                             "imageio==2.3.0",
                             "h5py==2.8.0",
@@ -551,7 +551,7 @@ namespace ssi
                             "Pillow==5.4.1",
                             "opencv-python==4.0.0.21",
                             "numpy==1.17.0",
-                            "resampy",
+                            "resampy==0.2.1",
                             "flask"
 
                             };
