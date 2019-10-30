@@ -158,5 +158,8 @@
     <Setting Name="EnablePythonDebug" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="CMLTempTrainerName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">""</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

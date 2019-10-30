@@ -1220,8 +1220,15 @@ namespace ssi
                         foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*.trainer*"))
                         {
                             string[] split = file.Name.Split('.');
-                            split[0] = "latestcmlmodel";
-                            string filename = string.Join(".", split);
+                            string filename = file.Name;
+                            if (split.Length == 2 && split[1] == "trainer")
+                            {
+                                Properties.Settings.Default.CMLTempTrainerName = split[0];
+                                Properties.Settings.Default.Save();
+                                split[0] = "latestcmlmodel";
+                                filename = string.Join(".", split);
+                            }
+                            
 
                             if (File.Exists(Properties.Settings.Default.CMLTempTrainerPath + filename))
                             {

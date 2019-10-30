@@ -124,6 +124,11 @@ namespace ssi
                 {
                     file.Delete();
                 }
+
+                foreach (var file in dir.EnumerateFiles(Path.GetFileName(Properties.Settings.Default.CMLTempTrainerPath) + Properties.Settings.Default.CMLTempTrainerName +  "*"))
+                {
+                    file.Delete();
+                }
             }
             catch { }
            

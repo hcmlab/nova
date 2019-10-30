@@ -708,17 +708,27 @@ namespace ssi
               
 
                 Properties.Settings.Default.CMLTempTrainerPath = Properties.Settings.Default.CMLDirectory + "\\" + Defaults.CML.ModelsFolderName + "\\" +  Defaults.CML.ModelsTrainerFolderName + "\\" + AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower() + "\\" + AnnoTier.Selected.AnnoList.Scheme.Name + "\\" + stream.Type + "{" + streamName + "}\\" + trainer.Name + "\\";
+                
+
+
                 Properties.Settings.Default.Save();
 
 
 
                 if (!Directory.Exists(Properties.Settings.Default.CMLDirectory)) Directory.CreateDirectory(Properties.Settings.Default.CMLTempTrainerPath);
-               
+
                 foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*"))
                 {
+                    string filename = file.Name;
                     string[] split = file.Name.Split('.');
-                    split[0] = "latestcmlmodel";
-                    string filename = string.Join(".", split);
+                    if (split.Length == 2 &&  split[1] == "trainer")
+                    {
+                        Properties.Settings.Default.CMLTempTrainerName = split[0];
+                        Properties.Settings.Default.Save();
+
+                        split[0] = "latestcmlmodel";
+                        filename = string.Join(".", split);
+                    }
 
                     if (File.Exists(Properties.Settings.Default.CMLTempTrainerPath + filename))
                     {
