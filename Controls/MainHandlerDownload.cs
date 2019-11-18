@@ -553,7 +553,6 @@ namespace ssi
                             "numpy==1.17.0",
                             "resampy==0.2.1",
                             "pickle-mixin==1.0.2",
-
                             };
 
 
