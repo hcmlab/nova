@@ -13,7 +13,7 @@ import numpy as np
 
 import lime
 from lime import lime_image
-import lime.lime_tabular
+from lime import lime_tabular
 from skimage.segmentation import mark_boundaries
 
 import innvestigate
@@ -357,7 +357,7 @@ def explain_tabular():
             
             num_features = int(request.args.get("numfeatures"))
 
-            explainer = lime.lime_tabular.LimeTabularExplainer(train_data, mode="classification", discretize_continuous=True)
+            explainer = lime_tabular.LimeTabularExplainer(train_data, mode="classification", discretize_continuous=True)
             exp = explainer.explain_instance(np.asarray(sample), model.predict_proba, num_features=num_features, top_labels=1)
 
             explanation_dictionary = {}

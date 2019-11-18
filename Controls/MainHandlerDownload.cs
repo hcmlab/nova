@@ -552,7 +552,9 @@ namespace ssi
                             "opencv-python==4.0.0.21",
                             "numpy==1.17.0",
                             "resampy==0.2.1",
-                            "flask"
+                            "flask",
+                            "pickle",
+                            "ast"
 
                             };
 

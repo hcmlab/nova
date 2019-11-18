@@ -183,7 +183,6 @@ namespace ssi
         {
 
             SeriesCollection.Clear();
-            //explanationAnalysis.Visibility = Visibility.Visible;
             explanationButton.IsEnabled = false;
 
             //containerExplainedImages.Children.Clear();
