@@ -590,7 +590,8 @@ namespace ssi
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();
                 Properties.Settings.Default.DrawVideoWavform = s.DrawvideoWavform();
                 Properties.Settings.Default.EnablePython = s.EnablePython();
-   
+                Properties.Settings.Default.EnablePythonDebug = s.EnablePythonDebug();
+
                 Properties.Settings.Default.Save();
                 
 
