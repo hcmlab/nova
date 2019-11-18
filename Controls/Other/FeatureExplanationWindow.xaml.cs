@@ -20,13 +20,15 @@ using System.Xml;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using LiveCharts;
+using LiveCharts.Wpf;
 
 namespace ssi
 {
     /// <summary>
     /// Interaction logic for ExplanationWindow.xaml
     /// </summary>
-    public partial class ExplanationWindow : Window
+    public partial class FeatureExplanationWindow : Window
     {
 
         public string modelPath;
@@ -42,13 +44,21 @@ namespace ssi
         private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
         private string basePath;
+        public List<float> sample;
+        public float[] featurestream;
         private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
+        public uint dim;
+        //private string featurepath;
+
+        public SeriesCollection SeriesCollection { get; set; }
+        public string[] Labels { get; set; }
+        public Func<double, string> Formatter { get; set; }
 
         private static readonly HttpClient client = new HttpClient();
         
 
-        public ExplanationWindow()
+        public FeatureExplanationWindow(string featurePath)
         {
 
             InitializeComponent();
@@ -60,19 +70,28 @@ namespace ssi
             }
             explainingLabel.Visibility = Visibility.Hidden;
 
-            img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
-            topLabels.Text = "2";
-            numFeatures.Text = "15";
-            numSamples.Text = "800";
-
+            numFeatures.Text = "2";
             getNewExplanation = false;
 
 
             string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
-            string videoname = Path.GetFileNameWithoutExtension(MediaBoxStatic.Selected.Media.GetFilepath()).Split('.')[1];
-            basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "video" + "{" + videoname + "}";
+            string[] featurenames = Path.GetFileNameWithoutExtension(featurePath).Split('.');
+            string featurename = "";
+
+            for(int i = 2; i < featurenames.Length; i++ ){
+                if(featurename == "")
+                {
+                    featurename = featurenames[i];
+                }
+                else
+                {
+                    featurename = featurename + "." + featurenames[i];
+                }
+            }
+
+            basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "feature" + "{" + featurename + "}";
 
             DirectoryInfo di = new DirectoryInfo(basePath);
 
@@ -81,7 +100,9 @@ namespace ssi
             idToClassName = new Dictionary<int, string>();
             loadModelAndTrainer(basePath);
             parseTrainerFile(getTrainerFile(basePath, modelPath));
-                            
+
+            SeriesCollection = new SeriesCollection();
+
         }
 
         private void loadModelAndTrainer(string path)
@@ -93,10 +114,10 @@ namespace ssi
 
                 foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
                 {
-                    if (fi.Extension == ".h5")
+                    if (fi.Extension == ".model")
                     {
                         modelsTrainers.Add(new ModelTrainer(fi.FullName, null));
-                        modelsBox.Items.Add(fi.Name);
+                        modelsBox.Items.Add(fi.Name + " " + fi.Directory.Name);
                     }
                 }
 
@@ -116,63 +137,40 @@ namespace ssi
 
         }
 
-        //private async Task<Dictionary<string, Tuple<int, double, string>>> getExplanationFromBackend()
-        private async Task<List<Tuple<int, double, BitmapImage>>> getExplanationFromBackend()
+        private async Task<Dictionary<string, float>> getExplanationFromBackend()
         {
             try
             {
 
-                var base64 = System.Convert.ToBase64String(this.img);
-
+               
                 var content = new MultipartFormDataContent
                 {
                     { new StringContent(modelPath), "model_path" },
-                    { new StringContent(base64), "image" }
+                    { new StringContent(JsonConvert.SerializeObject(this.sample).ToString()), "sample" },
+                    { new StringContent(JsonConvert.SerializeObject(this.featurestream).ToString()), "data" },
+                    { new StringContent(this.dim.ToString()), "dim" }
                 };
 
-                topLablesV = Int32.Parse(topLabels.Text);
-                numSamplesV = Int32.Parse(numSamples.Text);
                 numFeaturesV = Int32.Parse(numFeatures.Text);
 
-                hideRestV = hideRest.IsChecked.Value.ToString();
-                hideColorV = hideColor.IsChecked.Value.ToString();
-                positiveOnlyV = positiveOnly.IsChecked.Value.ToString();
-
-                string url = "http://localhost:5000/lime?toplabels=" + topLablesV + "&hidecolor=" + hideColorV + "&numsamples=" + numSamplesV + "&positiveonly=" + positiveOnlyV + "&numfeatures=" + numFeaturesV + "&hiderest=" + hideRestV;
+                string url = "http://localhost:5000/tabular?&numfeatures=" + numFeaturesV;
 
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
-                var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
 
-                if (explanationDic["success"].Value<string>() == "failed")
+
+                var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
+                
+                if (explanationDic["success"].ToString() == "failed")
                 {
                     return null;
                 }
 
-                JArray explanations =  JArray.Parse(explanationDic["explanations"].Value<object>().ToString());
 
-                List<Tuple<int, double, BitmapImage>> explanationData = new List<Tuple<int, double, BitmapImage>>();
+                var explanations = JsonConvert.DeserializeObject<Dictionary<string, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
 
-                foreach (var item in explanations)
-                {
-                    var temp = item.ToArray();
-                    int cl = (int) temp[0];
-                    double cl_score = (double) temp[1];
-                    string explanation_img64 = (string) temp[2];
-                    byte[] explanation = System.Convert.FromBase64String(explanation_img64);
-
-                    BitmapImage explanation_bitmap = new BitmapImage();
-                    explanation_bitmap.BeginInit();
-                    explanation_bitmap.StreamSource = new System.IO.MemoryStream(explanation);
-                    explanation_bitmap.EndInit();
-                    explanation_bitmap.Freeze();
-
-                    Tuple<int, double, BitmapImage> tuple = new Tuple<int, double, BitmapImage>(cl, cl_score, explanation_bitmap);
-                    explanationData.Add(tuple);
-                }
-
-                return explanationData;
+                return explanations;
 
             }
             catch (Exception e)
@@ -183,97 +181,51 @@ namespace ssi
 
         private async void getExplanation(object sender, RoutedEventArgs e)
         {
-            containerImageToBeExplained.Visibility = Visibility.Visible;
-            explainingLabel.Visibility = Visibility.Visible;
-            BlurEffect blur = new BlurEffect();
-            blur.Radius = 20;
-            explanationImage.Effect = blur;
+
+            SeriesCollection.Clear();
+            //explanationAnalysis.Visibility = Visibility.Visible;
             explanationButton.IsEnabled = false;
 
-            containerExplainedImages.Children.Clear();
+            //containerExplainedImages.Children.Clear();
 
-            List<Tuple<int, double, BitmapImage>> explanationData = await getExplanationFromBackend();
+            Dictionary<string, float> explanationData = await getExplanationFromBackend();
 
             if(explanationData == null)
             {
                 MainHandler.restartExplanationBackend();
-
-                this.explainingLabel.Visibility = Visibility.Hidden;
-                blur = new BlurEffect();
-                blur.Radius = 0;
-                this.explanationImage.Effect = blur;
                 this.explanationButton.IsEnabled = true;
 
                 return;
             }
 
-            for (int i = 0; i < explanationData.Count; i++)
+
+            //Labels = new string[explanationData.Count];
+            ChartValues<float> importanceScores = new ChartValues<float>();
+            explanationChart.AxisX[0].Labels = new string[explanationData.Count];
+
+            int i = 0;
+
+            foreach(var entry in explanationData)
             {
-
-                System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
-                string className = "";
-
-                if (this.idToClassName.ContainsKey(explanationData[i].Item1))
-                {
-                    className = this.idToClassName[explanationData[i].Item1];
-                }
-                else
-                {
-                    className = explanationData[i].Item1 + "";
-                }
-
-                System.Windows.Controls.Label info = new System.Windows.Controls.Label
-                {
-                    Content = "Class: " + className + " Score: " + explanationData[i].Item2.ToString("0.###")
-                };
-
-                System.Windows.Controls.Image img = new System.Windows.Controls.Image
-                {
-                    Source = explanationData[i].Item3,
-                };
-
-                int ratio = getRatio(explanationData.Count);
-
-                img.Height = (this.containerExplainedImages.ActualHeight - explanationData.Count * 2 * 5) / ratio;
-                img.Width = (this.containerExplainedImages.ActualWidth - explanationData.Count * 2 * 5) / ratio;
-
-
-                wrapper.Margin = new Thickness(5);
-                wrapper.Children.Add(info);
-                wrapper.Children.Add(img);
-
-                this.containerExplainedImages.Children.Add(wrapper);
+                importanceScores.Add(entry.Value);
+                explanationChart.AxisX[0].Labels[i] = entry.Key;
+                i++;
             }
 
-            this.containerImageToBeExplained.Visibility = Visibility.Hidden;
-            this.explainingLabel.Visibility = Visibility.Hidden;
-            blur = new BlurEffect();
-            blur.Radius = 0;
-            this.explanationImage.Effect = blur;
-            this.explanationButton.IsEnabled = true;
+            SeriesCollection.Add(new ColumnSeries
+            {
+                Title = "",
+                Values = importanceScores
+            });
 
+            Formatter = value => value.ToString("N");
+
+            DataContext = this;
+
+            this.explanationButton.IsEnabled = true;
+            
         }
 
-        //private void getExplanationLegacy(object sender, RoutedEventArgs e)
-        //{
-        //    containerImageToBeExplained.Visibility = Visibility.Visible;
-        //    explainingLabel.Visibility = Visibility.Visible;
-        //    BlurEffect blur = new BlurEffect();
-        //    blur.Radius = 20;
-        //    explanationImage.Effect = blur;
-        //    topLablesV = Int32.Parse(topLabels.Text);
-        //    numSamplesV = Int32.Parse(numSamples.Text);
-        //    numFeaturesV = Int32.Parse(numFeatures.Text);
-
-        //    hideRestV = hideRest.IsChecked.Value;
-        //    hideColorV = hideColor.IsChecked.Value;
-        //    positiveOnlyV = positiveOnly.IsChecked.Value;
-        //    getNewExplanation = true;
-        //    explanationButton.IsEnabled = false;
-
-        //    containerExplainedImages.Children.Clear();
-
-        //}
 
         private void modelPanel_Drop(object sender, DragEventArgs e)
         {

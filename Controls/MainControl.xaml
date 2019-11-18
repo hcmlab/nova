@@ -82,8 +82,13 @@
             </MenuItem>
             
             <MenuItem Header="XAI" Name="XAIMenu">
-                <MenuItem Header="LimeExplainer" Name="explanationWindow"/>
-                <MenuItem Header="InnvestigateExplainer" Name="explanationWindowInnvestigate"></MenuItem>
+                <MenuItem Header="ImageExplainer" Name="ImageExplainer">
+                    <MenuItem Header="Lime" Name="explanationWindow"/>
+                    <MenuItem Header="Innvestigate" Name="explanationWindowInnvestigate"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="FeatureExplainer" Name="FeatureExplainer">
+                    <MenuItem Header="Lime" Name="explanationWindowFeature"></MenuItem>
+                </MenuItem>
             </MenuItem>
 
             <MenuItem Header="?">
