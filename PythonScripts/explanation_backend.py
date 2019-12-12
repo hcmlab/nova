@@ -13,6 +13,7 @@ import numpy as np
 
 import lime
 from lime import lime_image
+from lime import lime_tabular
 from skimage.segmentation import mark_boundaries
 
 import innvestigate
@@ -26,6 +27,8 @@ import io as inputoutput
 import base64
 
 import json
+import pickle
+import ast
 
 
 # initialize our Flask application and the Keras model
@@ -134,7 +137,7 @@ def set_model_path():
         if flask.request.form.get("model_path"):
             print("loadmodel")
             model_path = flask.request.form.get("model_path")
-            loadmodel(model_path)
+            load_model(model_path)
             print("loaded")
             data = {"success": "success"}
 
@@ -329,7 +332,45 @@ def explain_lime():
 
     return flask.Response(json.dumps(data), mimetype="text/plain")
 
+@app.route("/tabular", methods=["POST"])
+def explain_tabular():
+
+    data = {"success": "failed"}
+
+    #TODO send sample to be explained
+
+    if flask.request.method == "POST":
+
+        if flask.request.form:
+
+            #data_dict = ast.literal_eval(json.loads(flask.request.data))
+
+            print("try open model")
+            with open(flask.request.form.get("model_path"), 'rb') as f:
+                model = pickle.load(f)
+
+            train_data = json.loads(flask.request.form.get("data"))
+            dim = json.loads(flask.request.form.get("dim"))
+            train_data = np.asarray(train_data)
+            train_data = train_data.reshape(((int)(train_data.size/dim), dim))
+            sample = json.loads(flask.request.form.get("sample"))
+            
+            num_features = int(request.args.get("numfeatures"))
+
+            explainer = lime_tabular.LimeTabularExplainer(train_data, mode="classification", discretize_continuous=True)
+            exp = explainer.explain_instance(np.asarray(sample), model.predict_proba, num_features=num_features, top_labels=1)
+
+            explanation_dictionary = {}
+
+            for entry in exp.as_list():
+                explanation_dictionary.update({entry[0]: entry[1]})
+
+            data["explanation"] = explanation_dictionary
+            data["success"] = "success"
+
+    return flask.Response(json.dumps(data), mimetype="text/plain")
+
 if __name__ == "__main__":
     print(("* Loading Keras model and Flask starting server..."
         "please wait until server has fully started"))
-    app.run()
+    app.run(debug=True)

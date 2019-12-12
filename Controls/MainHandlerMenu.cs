@@ -66,7 +66,8 @@ namespace ssi
             control.removeRemainingSegmentsMenu.IsEnabled = hasTier && tier.IsDiscreteOrFree;
             control.convertAnnoToSignalMenu.IsEnabled = hasTier && tier.IsContinuous;
             control.convertSignalMenu.IsEnabled = hasTrack;
-            control.XAIMenu.IsEnabled = hasBox;
+            control.ImageExplainer.IsEnabled = hasBox;
+            control.FeatureExplainer.IsEnabled = hasTrack;
             control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
             
         }

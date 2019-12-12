@@ -21,7 +21,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ssi.Controls.Other
+namespace ssi
 {
     /// <summary>
     /// Interaction logic for ExplanationWindow.xaml
@@ -42,12 +42,11 @@ namespace ssi.Controls.Other
         private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
         private string basePath;
-
         private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
 
         private static readonly HttpClient client = new HttpClient();
-
+        
 
         public ExplanationWindow()
         {
@@ -82,6 +81,7 @@ namespace ssi.Controls.Other
             idToClassName = new Dictionary<int, string>();
             loadModelAndTrainer(basePath);
             parseTrainerFile(getTrainerFile(basePath, modelPath));
+                            
         }
 
         private void loadModelAndTrainer(string path)
@@ -119,7 +119,6 @@ namespace ssi.Controls.Other
         //private async Task<Dictionary<string, Tuple<int, double, string>>> getExplanationFromBackend()
         private async Task<List<Tuple<int, double, BitmapImage>>> getExplanationFromBackend()
         {
-
             try
             {
 

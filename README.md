@@ -53,17 +53,22 @@ Please feel free to fork or create an issue
 If you are using NOVA in your research please consider giving us a citation:
 
 
- “Show Me What You’ve Learned: Applying Cooperative Machine Learning for the Semi-Automated Annotation of Social Signals”, Johannes Wagner, Tobias Baur, Dominik Schiller, Yue Zhang, Björn Schuller, Michel F. Valstar, Elisabeth André in Proceedings of the 27th International Joint Conference on Artificial Intelligence (IJCAI) and the 23rd European Conference on Artificial Intelligence (ECAI), Workshop on Explainable Artificial Intelligence July 13-19, 2018, Stockholm, Sweden 
+ “NOVA - A tool for eXplainable Cooperative Machine Learning”, Alexander Heimerl, Tobias Baur, Florian Lingenfelser, Johannes Wagner, Elisabeth André, in Proceedings of the 2019 8th International Conference on Affective Computing and Intelligent Interaction (ACII), Cambridge, September 2019
  
 
 <pre><code>
 
-@article{
-  title={Show Me What You’ve Learned: Applying Cooperative Machine Learning for the Semi-Automated Annotation of Social Signals},
-  author={Wagner, Johannes and Baur, Tobias and Schiller, Dominik and Zhang, Yue and Schuller, Bj{\"o}rn and Valstar, Michel and Andr{\'e}, Elisabeth},
-  journal={Proceedings of the 27th International Joint Conference on Artificial Intelligence (IJCAI) and the 23rd European Conference on Artificial Intelligence (ECAI), Workshop on Explainable Artificial Intelligence, Stockholm, Sweden},
-  pages={171},
-  year={2018}
+@INPROCEEDINGS{
+author={A. {Heimerl} and T. {Baur} and F. {Lingenfelser} and J. {Wagner} and E. {André}},
+booktitle={2019 8th International Conference on Affective Computing and Intelligent Interaction (ACII)},
+title={NOVA - A tool for eXplainable Cooperative Machine Learning},
+year={2019},
+volume={},
+number={},
+pages={109-115},
+doi={10.1109/ACII.2019.8925519},
+ISSN={2156-8103},
+month={Sep.}
 }
   
 </code></pre>

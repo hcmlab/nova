@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.6.3";
+        public static string BuildVersion = "1.0.6.4";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static int xaiProcessId;
@@ -230,6 +230,7 @@ namespace ssi
 
             control.explanationWindow.Click += explanationWindow_Click;
             control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
+            control.explanationWindowFeature.Click += featureExplanationWindow_Click;
             control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
 
 
@@ -590,7 +591,7 @@ namespace ssi
                 Properties.Settings.Default.DrawVideoWavform = s.DrawvideoWavform();
                 Properties.Settings.Default.EnablePython = s.EnablePython();
                 Properties.Settings.Default.EnablePythonDebug = s.EnablePythonDebug();
-   
+
                 Properties.Settings.Default.Save();
                 
 

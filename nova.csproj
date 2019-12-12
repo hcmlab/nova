@@ -65,6 +65,14 @@
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\LiveCharts.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\LiveCharts.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="AvalonControlsLibrary">
       <HintPath>References\AvalonControlsLibrary.dll</HintPath>
@@ -201,6 +209,9 @@
     </Compile>
     <Compile Include="Controls\Other\ConfmatWindow.xaml.cs">
       <DependentUpon>ConfmatWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Other\FeatureExplanationWindow.xaml.cs">
+      <DependentUpon>FeatureExplanationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Other\ExplanationWindow.xaml.cs">
       <DependentUpon>ExplanationWindow.xaml</DependentUpon>
@@ -345,6 +356,10 @@
     <Page Include="Controls\Other\ConfmatWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Other\FeatureExplanationWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Other\ExplanationWindow.xaml">
       <SubType>Designer</SubType>
