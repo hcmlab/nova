@@ -374,3 +374,5 @@ bin/TableView.dll
 bin/DirectShowLib-2005.dll
 docs/pics/interface.pptx
 docs/pics/database.pptx
+bin/LiveCharts.Wpf.dll
+bin/LiveCharts.dll
