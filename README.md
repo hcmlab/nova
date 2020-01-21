@@ -52,6 +52,32 @@ Please feel free to fork or create an issue
 
 If you are using NOVA in your research please consider giving us a citation:
 
+"eXplainable Cooperative Machine Learning with NOVA", Tobias Baur, Alexander Heimerl, Florian Lingenfelser, Johannes Wagner, Michel F. Valstar, Björn Schuller, Elisabeth André, in Ki - Künstliche Intelligenz, 2020
+
+
+<pre><code>
+
+@Article{Baur2020,
+author="Baur, Tobias
+and Heimerl, Alexander
+and Lingenfelser, Florian
+and Wagner, Johannes
+and Valstar, Michel F.
+and Schuller, Bj{\"o}rn
+and Andr{\'e}, Elisabeth",
+title="eXplainable Cooperative Machine Learning with NOVA",
+journal="KI - K{\"u}nstliche Intelligenz",
+year="2020",
+month="Jan",
+day="19",
+issn="1610-1987",
+doi="10.1007/s13218-020-00632-3",
+url="https://doi.org/10.1007/s13218-020-00632-3"
+}
+
+</code></pre>
+
+
 
  “NOVA - A tool for eXplainable Cooperative Machine Learning”, Alexander Heimerl, Tobias Baur, Florian Lingenfelser, Johannes Wagner, Elisabeth André, in Proceedings of the 2019 8th International Conference on Affective Computing and Intelligent Interaction (ACII), Cambridge, September 2019
  
@@ -73,39 +99,3 @@ month={Sep.}
   
 </code></pre>
 
-
-
- “Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions”, Tobias Baur, Gregor Mehlmann, Ionut Damian, Florian Lingenfelser, Johannes Wagner, Birgit Lugrin, Elisabeth André, Patrick Gebhard, in ACM Transactions on Interactive Intelligent Systems (TiiS) 5.2, 2015
-
-<pre><code>
-
-@article{
-  title={Context-Aware Automated Analysis and Annotation of Social Human-Agent Interactions},
-  author={Baur, Tobias and Mehlmann, Gregor and Damian, Ionut and Lingenfelser, Florian and Wagner, Johannes and Lugrin, Birgit and Andr{\'e}, Elisabeth and Gebhard, Patrick},
-  journal={ACM Transactions on Interactive Intelligent Systems (TiiS)},
-  volume={5},
-  number={2},
-  pages={11},
-  year={2015},
-  publisher={ACM}
-}
-
-</code></pre>
- “NovA: Automated Analysis of Nonverbal Signals in Social Interactions” Tobias Baur, Ionut Damian, Florian Lingenfelser, Johannes Wagner and Elisabeth André, in Human Behavior Understanding, LNCS 8212, 2013.
-
-<pre><code>
-@incollection{
-year={2013},
-isbn={978-3-319-02713-5},
-booktitle={Human Behavior Understanding},
-volume={8212},
-series={Lecture Notes in Computer Science},
-editor={Salah, Albert Ali and Hung, Hayley and Aran, Oya and Gunes, Hatice},
-doi={10.1007/978-3-319-02714-2_14},
-title={NovA: Automated Analysis of Nonverbal Signals in Social Interactions},
-url={http://dx.doi.org/10.1007/978-3-319-02714-2_14},
-publisher={Springer International Publishing},
-author={Baur, Tobias and Damian, Ionut and Lingenfelser, Florian and Wagner, Johannes and André, Elisabeth},
-pages={160-171}}
-
-</code></pre>
