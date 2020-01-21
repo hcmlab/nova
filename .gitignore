@@ -376,3 +376,6 @@ docs/pics/interface.pptx
 docs/pics/database.pptx
 bin/LiveCharts.Wpf.dll
 bin/LiveCharts.dll
+bin/ssipython.dll
+bin/opencv_ffmpeg310_64.dll
+bin/ssiliblinear.dll
