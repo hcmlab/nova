@@ -84,13 +84,15 @@ url="https://doi.org/10.1007/s13218-020-00632-3"
 
 <pre><code>
 
-@INPROCEEDINGS{
-author={A. {Heimerl} and T. {Baur} and F. {Lingenfelser} and J. {Wagner} and E. {André}},
+@INPROCEEDINGS{Heimerl2019,
+author="Heimerl, Alexander
+and Baur, Tobias
+and Lingenfelser, Florian
+and Wagner, Johannes
+and Andr{\'e}, Elisabeth",
 booktitle={2019 8th International Conference on Affective Computing and Intelligent Interaction (ACII)},
 title={NOVA - A tool for eXplainable Cooperative Machine Learning},
 year={2019},
-volume={},
-number={},
 pages={109-115},
 doi={10.1109/ACII.2019.8925519},
 ISSN={2156-8103},
