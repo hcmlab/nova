@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nova", "nova.csproj", "{81C49A93-25B8-47ED-BD84-AD5F9A0C0D79}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UdpSender", "plugins\SocketSender\UdpSender.csproj", "{0E4C609B-4054-4C2E-A8B1-80C08B641D10}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSCSender", "plugins\OSCSender\OSCSender.csproj", "{C5972D9F-AE17-4619-A958-D4DC6FFA6669}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nova-light", "nova-light\nova-light.csproj", "{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,14 @@ Global
 		{C5972D9F-AE17-4619-A958-D4DC6FFA6669}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C5972D9F-AE17-4619-A958-D4DC6FFA6669}.Release|x64.ActiveCfg = Release|Any CPU
 		{C5972D9F-AE17-4619-A958-D4DC6FFA6669}.Release|x64.Build.0 = Release|Any CPU
+		{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}.Debug|x64.Build.0 = Debug|Any CPU
+		{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}.Release|x64.ActiveCfg = Release|Any CPU
+		{F6D2020E-1FE9-46D6-A78D-913067DFE0D8}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,5 +79,8 @@ Global
 		{2F29909F-64B8-416F-A8BE-26749ED363E4} = {05CBEA1E-6382-46C3-AAB8-F61026031AC9}
 		{0E4C609B-4054-4C2E-A8B1-80C08B641D10} = {05CBEA1E-6382-46C3-AAB8-F61026031AC9}
 		{C5972D9F-AE17-4619-A958-D4DC6FFA6669} = {05CBEA1E-6382-46C3-AAB8-F61026031AC9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E720A7B5-D928-4546-ABF8-D418A881A64F}
 	EndGlobalSection
 EndGlobal
