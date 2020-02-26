@@ -1,0 +1,21 @@
+﻿<Window x:Class="NOVA_Light.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NOVA_Light"
+        mc:Ignorable="d"
+        Title="NOVA LIGHT" Height="700" Width="500"  KeyDown="Grid_KeyDown"
+        Icon="Resources\ui.ico">
+    <Grid>
+        <!--<Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>-->
+
+        <StackPanel Margin="20,35,20,20" Name="Stackpanel">
+            <Label Name="Info"></Label>
+            <Image Name="testimage" Height="400"/>
+        </StackPanel>
+    </Grid>
+</Window>
