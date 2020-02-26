@@ -114,7 +114,12 @@ namespace NOVA_Light
         {
             var files = Directory.GetFiles(sourcepath, "*.jpg");
             index = index + 1;
-            return files[index - 1];
+            if (index < files.Length) return files[index - 1];
+            else
+            {
+                index = 0;
+                return files[0];
+            }
         }
 
         private void Button_Clicked(object sender, EventArgs e)
