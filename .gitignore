@@ -317,6 +317,7 @@ bin/Squirrel.dll
 bin/RibbonControlsLibrary.dll
 bin/Octokit.dll
 bin/Splat.dll
+bin/ssi/
 bin/zh-Hant/System.Windows.Interactivity.resources.dll
 bin/zh-Hans/System.Windows.Interactivity.resources.dll
 bin/updater.vshost.exe.manifest
@@ -380,3 +381,5 @@ bin/LiveCharts.dll
 bin/ssipython.dll
 bin/opencv_ffmpeg310_64.dll
 bin/ssiliblinear.dll
+bin/ssi/unicodedata.pyd
+bin/ssi/winsound.pyd

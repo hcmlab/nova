@@ -215,7 +215,7 @@ namespace ssi
            
 
                 startInfo.WindowStyle =  (Properties.Settings.Default.EnablePythonDebug == true) ? ProcessWindowStyle.Normal :  ProcessWindowStyle.Hidden;
-                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
+                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "ssi\\python.exe" + "\"";
                 startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
                 process.StartInfo = startInfo;
          

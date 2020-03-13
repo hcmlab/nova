@@ -64,7 +64,7 @@ namespace ssi
 
             //Download xmlchain, if not present yet.
             string xmlchainexe = "xmlchain.exe";
-            string xmlchainexePath = AppDomain.CurrentDomain.BaseDirectory + xmlchainexe;
+            string xmlchainexePath = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\" +  xmlchainexe;
 
             urls.Add(SSIbinaryGitPath + xmlchainexe);
             //DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
@@ -72,7 +72,7 @@ namespace ssi
 
             //Download libmongoc-1.0.dll, if not present yet.
             string libmongocdll = "libmongoc-1.0.dll";
-            string libmongocdllPath = AppDomain.CurrentDomain.BaseDirectory + libmongocdll;
+            string libmongocdllPath = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\" + libmongocdll;
 
 
             urls.Add(SSIbinaryGitPath + libmongocdll);
@@ -81,20 +81,20 @@ namespace ssi
 
             //Download libbson-1.0.dll, if not present yet.
             string libsondll = "libbson-1.0.dll";
-            string libbsondllPath = AppDomain.CurrentDomain.BaseDirectory + libsondll;
+            string libbsondllPath = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\" + libsondll;
 
             urls.Add(SSIbinaryGitPath + libsondll);
             //DownloadFile(SSIbinaryGitPath + libsondll, libbsondllPath);
 
             //Download ssiframe.dll, if not present yet (cml tools will do this automatically, here we force to overwrite it).
             string ssiframedll = "ssiframe.dll";
-            string ssiframedllPath = AppDomain.CurrentDomain.BaseDirectory + ssiframedll;
+            string ssiframedllPath = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\" + ssiframedll;
 
             urls.Add(SSIbinaryGitPath + ssiframedll);
             //DownloadFile(SSIbinaryGitPath + ssiframedll, ssiframedllPath);
 
             string opencvdll = "opencv_world310.dll";
-            string opencvdllPath = AppDomain.CurrentDomain.BaseDirectory + opencvdll;
+            string opencvdllPath = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\" + opencvdll;
 
             urls.Add(SSIbinaryGitPath + opencvdll);
 
@@ -136,7 +136,7 @@ namespace ssi
                     webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
 
                     string url = _downloadUrls.Dequeue();
-                    string location = AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.GetFileName(url);
+                    string location = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\" + System.IO.Path.GetFileName(url);
                     Uri URL = new Uri(url);
                     // Start the stopwatch which we will be using to calculate the download speed
                     sw.Start();

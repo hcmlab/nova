@@ -137,7 +137,8 @@ namespace ssi
 
 
                 string cmltrainexe = "cmltrain.exe";
-                string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + cmltrainexe;
+                if(!Directory.Exists("ssi")) Directory.CreateDirectory("ssi");
+                string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\"+ cmltrainexe;
                 string SSIbinaryGitPath = "https://github.com/hcmlab/ssi/raw/master/bin/x64/vc140/";
 
                 if (!IsCMLTrainUptodate || !(File.Exists(cmltrainexePath)))
@@ -167,7 +168,8 @@ namespace ssi
                     }
 
                     /*
-                    * CMLTrain and XMLchain executables are downloaded from the official SSI git repository.
+                    * CMLTrain and 
+                    * chain executables are downloaded from the official SSI git repository.
                      * */
 
                     CMLUpdater updater = new CMLUpdater(SSIbinaryGitPath, cmltrainexe, cmltrainexePath);
