@@ -46,6 +46,7 @@ namespace ssi
 
             List<string> urls = new List<string>();
 
+            //Test Internetconnection
             try
             {
                 urls.Add(SSIbinaryGitPath + cmltrainexe);
@@ -59,44 +60,13 @@ namespace ssi
             }
 
 
-
-
-
             //Download xmlchain, if not present yet.
-            string xmlchainexe = "xmlchain.exe";
-            string xmlchainexePath = AppDomain.CurrentDomain.BaseDirectory + xmlchainexe;
-
-            urls.Add(SSIbinaryGitPath + xmlchainexe);
-            //DownloadFile(SSIbinaryGitPath + xmlchainexe, xmlchainexePath);
-
-
-            //Download libmongoc-1.0.dll, if not present yet.
-            string libmongocdll = "libmongoc-1.0.dll";
-            string libmongocdllPath = AppDomain.CurrentDomain.BaseDirectory + libmongocdll;
-
-
-            urls.Add(SSIbinaryGitPath + libmongocdll);
-            //DownloadFile(SSIbinaryGitPath + libmongocdll, libmongocdllPath);
-
-
-            //Download libbson-1.0.dll, if not present yet.
-            string libsondll = "libbson-1.0.dll";
-            string libbsondllPath = AppDomain.CurrentDomain.BaseDirectory + libsondll;
-
-            urls.Add(SSIbinaryGitPath + libsondll);
-            //DownloadFile(SSIbinaryGitPath + libsondll, libbsondllPath);
-
-            //Download ssiframe.dll, if not present yet (cml tools will do this automatically, here we force to overwrite it).
-            string ssiframedll = "ssiframe.dll";
-            string ssiframedllPath = AppDomain.CurrentDomain.BaseDirectory + ssiframedll;
-
-            urls.Add(SSIbinaryGitPath + ssiframedll);
-            //DownloadFile(SSIbinaryGitPath + ssiframedll, ssiframedllPath);
-
-            string opencvdll = "opencv_world310.dll";
-            string opencvdllPath = AppDomain.CurrentDomain.BaseDirectory + opencvdll;
-
-            urls.Add(SSIbinaryGitPath + opencvdll);
+            urls.Add(SSIbinaryGitPath + "xmlchain.exe");
+            urls.Add(SSIbinaryGitPath + "xmlpipe.exe");
+            urls.Add(SSIbinaryGitPath + "libmongoc-1.0.dll");
+            urls.Add(SSIbinaryGitPath + "libbson-1.0.dll");
+            urls.Add(SSIbinaryGitPath + "ssiframe.dll");
+            urls.Add(SSIbinaryGitPath + "opencv_world310.dll");
 
 
             remainingfiles = urls.Count;
@@ -136,7 +106,7 @@ namespace ssi
                     webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
 
                     string url = _downloadUrls.Dequeue();
-                    string location = AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.GetFileName(url);
+                    string location = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\" + System.IO.Path.GetFileName(url);
                     Uri URL = new Uri(url);
                     // Start the stopwatch which we will be using to calculate the download speed
                     sw.Start();

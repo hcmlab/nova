@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -498,24 +499,63 @@ namespace ssi
 
         private void GetPython()
         {
+         
+
             using (webClient = new WebClient())
             {
+
+
                 try
                 {
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\tcl")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\tcl", true);
 
+                }
+
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+ 
+                }
+
+
+                try
+                {
+                    
 
                     webClient.DownloadFile("https://www.python.org/ftp/python/3.6.7/python-3.6.7-embed-amd64.zip", "python.zip");
-                    System.IO.Compression.ZipFile.ExtractToDirectory("python.zip", "python");
+
+                    using (FileStream zipToOpen = new FileStream("python.zip", FileMode.Open))
+                    {
+                        using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                        {
+                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi", true);
+                        }
+                    }
+
                     File.Delete("python.zip");
-                    System.IO.Compression.ZipFile.ExtractToDirectory("python/python36.zip", "python/python36");
-                    File.Delete("python/python36.zip");
+
+                  
+
+                    using (FileStream zipToOpen = new FileStream("ssi/python36.zip", FileMode.Open))
+                    {
+                        using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                        {
+                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi/python36", false);
+                        }
+                    }
+                    File.Delete("ssi/python36.zip");
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("python is already downloaded and extracted");
+                    Console.WriteLine(e);
+                    return;
                 }
 
-                string path = AppDomain.CurrentDomain.BaseDirectory + "python\\python36._pth";
+                string path = AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36._pth";
 
                 using (StreamWriter sw = File.CreateText(path))
                 {
@@ -528,16 +568,16 @@ namespace ssi
 
                 }
 
-                webClient.DownloadFile("https://bootstrap.pypa.io/get-pip.py", "python/get-pip.py");
+                webClient.DownloadFile("https://bootstrap.pypa.io/get-pip.py", "ssi/get-pip.py");
 
 
 
                 string cudapath = Environment.GetEnvironmentVariable("CUDA_PATH", EnvironmentVariableTarget.Machine);
 
                 string[] requirements = {
-                            "python/toolz-0.9.0-py2.py3-none-any.whl",
-                            "python/termcolor-1.1.0-py2.py3-none-any.whl",
-                            "python/future-0.17.0-py3-none-any.whl",
+                            "ssi/toolz-0.9.0-py2.py3-none-any.whl",
+                            "ssi/termcolor-1.1.0-py2.py3-none-any.whl",
+                            "ssi/future-0.17.0-py3-none-any.whl",
                             "keras-vggface==0.6",
                             "tensorflow-gpu==1.12.0",
                             "imageio==2.3.0",
@@ -565,11 +605,7 @@ namespace ssi
                 else
                 {
                     MessageBoxResult mb = MessageBox.Show("No CUDA installation found, loading tensorflow without GPU support.", "Attention", MessageBoxButton.YesNo);
-                    if (mb == MessageBoxResult.No)
-                    {
-                        Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python");
-                        return;
-                    }
+               
 
                     requirements[3] = "tensorflow==1.12.0";
 
@@ -580,15 +616,15 @@ namespace ssi
                 Process process = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
-                startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\get-pip.py" + "\"";
+                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "ssi\\python.exe" + "\"";
+                startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "ssi\\get-pip.py" + "\"";
                 process.StartInfo = startInfo;
                 process.Start();
                 process.WaitForExit();
                 process.Close();
 
 
-                string sitepackagepath = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\Lib\\site-packages");
+                string sitepackagepath = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib\\site-packages");
 
                 //var current = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
                 //var pythonpath = $"{sitepackagepath}";
@@ -603,14 +639,14 @@ namespace ssi
                 string urltkinderfix = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/tkinterfix.zip";
 
                 WebClient Client = new WebClient();
-                Client.DownloadFile(urltoolz, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "toolz-0.9.0-py2.py3-none-any.whl");
-                Client.DownloadFile(urltermcolor, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
-                Client.DownloadFile(urlfuture, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "future-0.17.0-py3-none-any.whl");
-                Client.DownloadFile(urltkinderfix, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "tkinterfix.zip");
+                Client.DownloadFile(urltoolz, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.9.0-py2.py3-none-any.whl");
+                Client.DownloadFile(urltermcolor, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
+                Client.DownloadFile(urlfuture, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "future-0.17.0-py3-none-any.whl");
+                Client.DownloadFile(urltkinderfix, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "tkinterfix.zip");
 
                 process = new Process();
                 startInfo = new ProcessStartInfo();
-                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "python\\python.exe" + "\"";
+                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\python.exe" + "\"";
                 startInfo.Arguments = "-m pip install -r requirements.txt --no-warn-script-location";
                 process.StartInfo = startInfo;
                 process.StartInfo.ErrorDialog = true;
@@ -618,13 +654,41 @@ namespace ssi
                 process.WaitForExit();
                 process.Close();
 
-                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "toolz-0.9.0-py2.py3-none-any.whl");
-                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "python\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
+                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.9.0-py2.py3-none-any.whl");
+                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
 
 
 
-                System.IO.Compression.ZipFile.ExtractToDirectory("python/tkinterfix.zip", "python/");
-                File.Delete("python/tkinterfix.zip");
+               // System.IO.Compression.ZipFile.ExtractToDirectory("ssi/tkinterfix.zip", "ssi/");
+
+
+                if(File.Exists("ssi/_tkinter.pyd")) 
+                {
+                    File.Delete("ssi/_tkinter.pyd");
+                }
+                if (File.Exists("ssi/tcl86t.dll"))
+                {
+                    File.Delete("ssi/tcl86t.dll");
+                }
+                if (File.Exists("ssi/tk86t.dll"))
+                {
+                    File.Delete("ssi/tk86t.dll");
+                }
+
+                using (FileStream zipToOpen = new FileStream("ssi/tkinterfix.zip", FileMode.Open))
+                {
+                    using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                    {
+                        ZipArchiveExtension.ExtractToDirectory(archive, "ssi", false);
+                    }
+                }
+                File.Delete("ssi/tkinterfix.zip");
+
+                //FileStream zipToOpentkinter = new FileStream("ssi/tkinterfix.zip", FileMode.Open);
+                //ZipArchive archivetk = new ZipArchive(zipToOpentkinter, ZipArchiveMode.Update);
+                //ZipArchiveExtension.ExtractToDirectory(archivetk, "ssi", true);
+
+                //File.Delete("ssi/tkinterfix.zip");
 
                 try
                 {
@@ -649,6 +713,13 @@ namespace ssi
                 {
                 }
 
+                finally
+                {
+                    Properties.Settings.Default.forcepythonupdate = false;
+                    Properties.Settings.Default.Save();
+                }
+
+               
                 //File.Delete("requirements.txt");
                 //Environment.SetEnvironmentVariable("PYTHONPATH", current, EnvironmentVariableTarget.User);
             }

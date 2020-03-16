@@ -78,7 +78,7 @@ namespace ssi
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.WindowStyle = ProcessWindowStyle.Normal;
-            startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\" + tool + ".exe";
+            startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\" + tool + ".exe";
             startInfo.Arguments = options;
             process.StartInfo = startInfo;
             process.Start();

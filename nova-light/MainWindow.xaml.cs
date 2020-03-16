@@ -3,19 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Automation.Peers;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
 
 namespace NOVA_Light
@@ -114,7 +106,12 @@ namespace NOVA_Light
         {
             var files = Directory.GetFiles(sourcepath, "*.jpg");
             index = index + 1;
-            return files[index - 1];
+            if (index < files.Length) return files[index - 1];
+            else
+            {
+                index = 0;
+                return files[0];
+            }
         }
 
         private void Button_Clicked(object sender, EventArgs e)
@@ -131,7 +128,7 @@ namespace NOVA_Light
                 Directory.CreateDirectory(targetpath + "\\" + userid + "\\" + button + "\\");
             }
 
-            if(move == "True" || move == "true")
+            if (move == "True" || move == "true")
             {
                 System.IO.File.Move(currentsource, targetpath + "\\" + userid + "\\" + button + "\\" + System.IO.Path.GetFileName(currentsource));
             }
@@ -142,7 +139,7 @@ namespace NOVA_Light
 
             if (random == "true" || random == "True") currentsource = getRandomImage();
             else currentsource = getNextImage();
-           
+
             BitmapImage bitmap = new BitmapImage();
             bitmap.BeginInit();
             bitmap.UriSource = new Uri(currentsource);
@@ -155,7 +152,7 @@ namespace NOVA_Light
         {
             if ((e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
             {
-               if(e.Key - Key.D1 > -1 && e.Key - Key.D1 < Buttons.Count && Buttons.ElementAt(e.Key - Key.D1) != null)
+                if (e.Key - Key.D1 > -1 && e.Key - Key.D1 < Buttons.Count && Buttons.ElementAt(e.Key - Key.D1) != null)
                 {
                     string button = Buttons.ElementAt(e.Key - Key.D1).Content.ToString();
                     Button_Clicked_funct(button);
@@ -165,8 +162,8 @@ namespace NOVA_Light
                     backgroundWorker.DoWork += (s, ea) => Thread.Sleep(TimeSpan.FromMilliseconds(200));
                     backgroundWorker.RunWorkerCompleted += (s, ea) =>
                     {
-                        Info.Content =  originalText;
-                      
+                        Info.Content = originalText;
+
                     };
 
                     Info.Content = "Last Selection was: " + button;
@@ -180,6 +177,6 @@ namespace NOVA_Light
 
 
 
-        
+
     }
 }

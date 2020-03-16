@@ -129,9 +129,20 @@ namespace ssi
                 {
                     file.Delete();
                 }
+
+               
             }
             catch { }
-           
+
+            finally
+            {
+                Application.Current.Shutdown();
+                Process.GetCurrentProcess().Kill();
+            }
+    
+                
+
+            
 
         }
     }

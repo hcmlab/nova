@@ -274,6 +274,7 @@ bin/nova.exe.config
 bin/MongoDB.Bson.dll
 bin/MongoDB.Driver.dll
 bin/python
+bin/ssi
 packages\MahApps.Metro.1.3.0
 packages/MahApps.Metro.1.3.0/lib/net40/MahApps.Metro.dll
 packages/MahApps.Metro.1.3.0/MahApps.Metro.1.3.0.nupkg
@@ -316,6 +317,7 @@ bin/Squirrel.dll
 bin/RibbonControlsLibrary.dll
 bin/Octokit.dll
 bin/Splat.dll
+bin/ssi/
 bin/zh-Hant/System.Windows.Interactivity.resources.dll
 bin/zh-Hans/System.Windows.Interactivity.resources.dll
 bin/updater.vshost.exe.manifest
@@ -379,3 +381,5 @@ bin/LiveCharts.dll
 bin/ssipython.dll
 bin/opencv_ffmpeg310_64.dll
 bin/ssiliblinear.dll
+bin/ssi/unicodedata.pyd
+bin/ssi/winsound.pyd
