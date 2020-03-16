@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -498,21 +499,60 @@ namespace ssi
 
         private void GetPython()
         {
+         
+
             using (webClient = new WebClient())
             {
+
+
                 try
                 {
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\tcl")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\tcl", true);
 
+                }
+
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+ 
+                }
+
+
+                try
+                {
+                    
 
                     webClient.DownloadFile("https://www.python.org/ftp/python/3.6.7/python-3.6.7-embed-amd64.zip", "python.zip");
-                    System.IO.Compression.ZipFile.ExtractToDirectory("python.zip", "ssi");
+
+                    using (FileStream zipToOpen = new FileStream("python.zip", FileMode.Open))
+                    {
+                        using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                        {
+                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi", true);
+                        }
+                    }
+
                     File.Delete("python.zip");
-                    System.IO.Compression.ZipFile.ExtractToDirectory("ssi/python36.zip", "ssi/python36");
+
+                  
+
+                    using (FileStream zipToOpen = new FileStream("ssi/python36.zip", FileMode.Open))
+                    {
+                        using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                        {
+                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi/python36", false);
+                        }
+                    }
                     File.Delete("ssi/python36.zip");
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("python is already downloaded and extracted");
+                    Console.WriteLine(e);
+                    return;
                 }
 
                 string path = AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36._pth";
@@ -619,8 +659,36 @@ namespace ssi
 
 
 
-                System.IO.Compression.ZipFile.ExtractToDirectory("ssi/tkinterfix.zip", "ssi/");
+               // System.IO.Compression.ZipFile.ExtractToDirectory("ssi/tkinterfix.zip", "ssi/");
+
+
+                if(File.Exists("ssi/_tkinter.pyd")) 
+                {
+                    File.Delete("ssi/_tkinter.pyd");
+                }
+                if (File.Exists("ssi/tcl86t.dll"))
+                {
+                    File.Delete("ssi/tcl86t.dll");
+                }
+                if (File.Exists("ssi/tk86t.dll"))
+                {
+                    File.Delete("ssi/tk86t.dll");
+                }
+
+                using (FileStream zipToOpen = new FileStream("ssi/tkinterfix.zip", FileMode.Open))
+                {
+                    using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                    {
+                        ZipArchiveExtension.ExtractToDirectory(archive, "ssi", false);
+                    }
+                }
                 File.Delete("ssi/tkinterfix.zip");
+
+                //FileStream zipToOpentkinter = new FileStream("ssi/tkinterfix.zip", FileMode.Open);
+                //ZipArchive archivetk = new ZipArchive(zipToOpentkinter, ZipArchiveMode.Update);
+                //ZipArchiveExtension.ExtractToDirectory(archivetk, "ssi", true);
+
+                //File.Delete("ssi/tkinterfix.zip");
 
                 try
                 {
@@ -645,6 +713,13 @@ namespace ssi
                 {
                 }
 
+                finally
+                {
+                    Properties.Settings.Default.forcepythonupdate = false;
+                    Properties.Settings.Default.Save();
+                }
+
+               
                 //File.Delete("requirements.txt");
                 //Environment.SetEnvironmentVariable("PYTHONPATH", current, EnvironmentVariableTarget.User);
             }

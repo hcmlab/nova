@@ -87,7 +87,7 @@ namespace ssi
                     MessageBox.Show("The version you are running (" + BuildVersion + ") is newer than the latest offical release (" + LatestGitVersion + ")");
                 }
             }
-            catch (Octokit.RateLimitExceededException e) { MessageBox.Show("Github API Limit reached, please try again later."); }
+            catch (Octokit.RateLimitExceededException e) { if(!silent) MessageBox.Show("Github API Limit reached, please try again later."); }
         }
 
         private async void checkForCMLUpdates(bool silent = false)
@@ -184,7 +184,7 @@ namespace ssi
             
             }
 
-            catch (Octokit.RateLimitExceededException e) { MessageBox.Show("Github API Limit reached, please try again later."); }
+            catch (Octokit.RateLimitExceededException e) {if(!silent) MessageBox.Show("Github API Limit reached, please try again later."); }
           
         }
 
@@ -202,7 +202,7 @@ namespace ssi
         private void updatePython_Click(object sender, RoutedEventArgs e)
         {
 
-            MessageBoxResult mb = MessageBox.Show("The current local Python installation will be deleted and reinstalled", "Attention", MessageBoxButton.YesNo);
+            MessageBoxResult mb = MessageBox.Show("The current local Python installation will be overwriten. NOVA will be restarted.", "Attention", MessageBoxButton.YesNo);
 
             if(mb == MessageBoxResult.Yes)
             {
@@ -213,6 +213,12 @@ namespace ssi
                 System.Windows.Application.Current.Shutdown();
 
 
+            }
+
+            else
+            {
+                Properties.Settings.Default.forcepythonupdate = false;
+                Properties.Settings.Default.Save();
             }
             
         }

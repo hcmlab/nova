@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Windows;
 
 namespace ssi
@@ -22,6 +23,10 @@ namespace ssi
 
             return filenames;
         }
+
+
+
+
 
         public static string SaveFileDialog(string defaultName, string defaultExtension, string filterExtension, string directory)
         {
@@ -95,4 +100,36 @@ namespace ssi
 
 
     }
+
+
+    public static class ZipArchiveExtension
+    {
+        public static void ExtractToDirectory(this ZipArchive archive, string destinationDirectoryName, bool overwrite)
+        {
+            if (!overwrite)
+            {
+                archive.ExtractToDirectory(destinationDirectoryName);
+                return;
+            }
+
+            if (!Directory.Exists(destinationDirectoryName))
+            
+            {
+                Directory.CreateDirectory(destinationDirectoryName);
+            }
+                
+
+            foreach (ZipArchiveEntry file in archive.Entries)
+            {
+                string completeFileName = Path.Combine(destinationDirectoryName, file.FullName);
+                if (file.Name == "")
+                {// Assuming Empty for Directory
+                    Directory.CreateDirectory(Path.GetDirectoryName(completeFileName));
+                    continue;
+                }
+                file.ExtractToFile(completeFileName, true);
+            }
+        }
+    }
+
 }

@@ -166,24 +166,22 @@ namespace ssi
         public void checkPythonInstallation()
         {
 
-            if (Properties.Settings.Default.forcepythonupdate)
-            {
-                try
-                {
-                    Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python\\", true);
-                }
-                catch { }
+            //if (Properties.Settings.Default.forcepythonupdate)
+            //{
+            //    try
+            //    {
+            //        Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python\\", true);
+            //    }
+            //    catch { }
 
-            }
+            //}
 
 
-            var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
-            var pythonScriptsPath = AppDomain.CurrentDomain.BaseDirectory + "PythonScripts";
 
-            if (!(Directory.Exists(pythonPath) && Properties.Settings.Default.EnablePython == true))
+            if (Properties.Settings.Default.EnablePython)
             {
 
-                if (!Properties.Settings.Default.forcepythonupdate && Properties.Settings.Default.EnablePython == true)
+                if (Properties.Settings.Default.forcepythonupdate)
                 {
                     MessageBoxResult res = MessageBox.Show("NOVA's new XAI Features require an embedded Python Version, do you want to download the dependencies now? This will take some minutes..", "Attention", MessageBoxButton.YesNo, MessageBoxImage.Information);
                     if (res == MessageBoxResult.Yes)
@@ -192,14 +190,18 @@ namespace ssi
 
                         //recursive magic.
                     }
+                    else
+                    {
+                         Properties.Settings.Default.forcepythonupdate = false;
+                         Properties.Settings.Default.Save();
+                    }
                 }
-                else if (Properties.Settings.Default.forcepythonupdate && Properties.Settings.Default.EnablePython == true)
-                {
-                    Properties.Settings.Default.forcepythonupdate = false;
-                    Properties.Settings.Default.Save();
-                    GetPython();
+                //else if (Properties.Settings.Default.forcepythonupdate && Properties.Settings.Default.EnablePython == true)
+                //{
+               
+                //    GetPython();
 
-                }
+                //}
 
 
             }
