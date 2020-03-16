@@ -166,17 +166,6 @@ namespace ssi
         public void checkPythonInstallation()
         {
 
-            //if (Properties.Settings.Default.forcepythonupdate)
-            //{
-            //    try
-            //    {
-            //        Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\python\\", true);
-            //    }
-            //    catch { }
-
-            //}
-
-
 
             if (Properties.Settings.Default.EnablePython)
             {
@@ -196,12 +185,7 @@ namespace ssi
                          Properties.Settings.Default.Save();
                     }
                 }
-                //else if (Properties.Settings.Default.forcepythonupdate && Properties.Settings.Default.EnablePython == true)
-                //{
-               
-                //    GetPython();
 
-                //}
 
 
             }
