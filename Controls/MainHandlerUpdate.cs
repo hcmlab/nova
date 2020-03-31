@@ -109,31 +109,34 @@ namespace ssi
                 }
                 catch(Exception en)
                 {
-                    MessageBox.Show(en.ToString());
+                    //MessageBox.Show(en.ToString());
                 }
-              
 
-
-                var files = result.Files;
                 bool IsCMLTrainUptodate = false;
-                foreach (var file in files)
+                if (result != null)
                 {
-                    if (file.Filename == "bin/x64/vc140/cmltrain.exe")
+                    var files = result.Files;
+                  
+                    foreach (var file in files)
                     {
-                        if (Properties.Settings.Default.CMLTrainexeGitSha == file.Sha)
+                        if (file.Filename == "bin/x64/vc140/cmltrain.exe")
                         {
-                            IsCMLTrainUptodate = true;
-                        }
-                        else
-                        {
-                            Properties.Settings.Default.CMLTrainexeGitSha = file.Sha;
-                            Properties.Settings.Default.Save();
+                            if (Properties.Settings.Default.CMLTrainexeGitSha == file.Sha)
+                            {
+                                IsCMLTrainUptodate = true;
+                            }
+                            else
+                            {
+                                Properties.Settings.Default.CMLTrainexeGitSha = file.Sha;
+                                Properties.Settings.Default.Save();
 
-                        }
+                            }
 
-                        break;
+                            break;
+                        }
                     }
                 }
+               
 
 
                 string cmltrainexe = "cmltrain.exe";

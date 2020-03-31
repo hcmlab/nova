@@ -127,6 +127,10 @@ namespace ssi
                         ftype = SSI_FILE_TYPE.ANVIL;
                         break;
 
+                    case "odf":
+                        ftype = SSI_FILE_TYPE.NOLDUS;
+                        break;
+
                     case "nova":
                         ftype = SSI_FILE_TYPE.PROJECT;
                         break;
@@ -196,6 +200,11 @@ namespace ssi
 
                 case SSI_FILE_TYPE.ANVIL:
                     ImportAnnoFromAnvil(filepath);
+                    loaded = true;
+                    break;
+
+                case SSI_FILE_TYPE.NOLDUS:
+                    ImportAnnoFromNoldus(filepath);
                     loaded = true;
                     break;
 
@@ -824,6 +833,38 @@ namespace ssi
                 fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
             }
         }
+
+        private void ImportAnnoFromNoldus(string filename)
+        {
+            int annoListnum = annoLists.Count;
+            AnnoList[] lists = AnnoList.LoadfromNoldusFile(filename);
+            double maxdur = 0;
+
+            if (lists != null)
+            {
+                foreach (AnnoList list in lists)
+                {
+                    foreach (AnnoListItem it in list)
+                    {
+                        if (it.Stop > maxdur)
+                        {
+                            maxdur = it.Stop;
+                        }
+                    }
+
+                    annoLists.Add(list);
+                    addAnnoTier(list);
+                }
+            }
+            updateTimeRange(maxdur);
+            if (annoListnum == 0 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            {
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
+            }
+        }
+
+
+        
 
         private void ImportAnnoFromSSIEvents(string filename)
         {
