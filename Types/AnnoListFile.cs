@@ -967,6 +967,59 @@ namespace ssi
             return list;
         }
 
+
+        
+
+
+        public static AnnoList[] LoadfromNoldusFile(String filepath)
+        {
+            AnnoList[] list = new AnnoList[1];
+            list[0] = new AnnoList();
+            list[0].Source.File.Path = filepath;
+
+            string[] lines = File.ReadAllLines(filepath);
+            bool tracklabels = false;
+
+            for (int i=0;  i < lines.Length; i++)
+            {
+                if(lines[i].Contains("{start}")){
+                   tracklabels = true;
+                   continue;
+                   }
+                else if  (lines[i].Contains("{end}"))
+                {
+                    tracklabels = false;
+                    break;
+                }
+                if (tracklabels)
+                {
+                    string[] split = lines[i].Split(' ');
+                    string[] splitnext = lines[i+1].Split(' ');
+                    double start = double.Parse(split[0], CultureInfo.InvariantCulture);
+                    double end = double.Parse(splitnext[0], CultureInfo.InvariantCulture);
+                    double duration = end - start;
+                    string[] labelsplit = split[1].Split(',');
+                    string label = labelsplit[1];
+                    string meta = labelsplit[0];
+
+
+
+                    list[0].AddSorted(new AnnoListItem(start, duration, label, meta, Colors.Black));
+                    
+                }
+                    
+            }
+
+            AnnoScheme scheme = new AnnoScheme();
+            scheme.Type = AnnoScheme.TYPE.FREE;
+            scheme.Name = filepath;
+            list[0].Scheme = scheme;
+
+            return list;
+
+
+        }
+
         public static AnnoList[] LoadfromAnvilFile(String filepath)
         {
             XmlDocument doc = new XmlDocument();

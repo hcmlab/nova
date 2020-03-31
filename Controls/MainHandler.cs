@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.6.5";
+        public static string BuildVersion = "1.0.6.6";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static int xaiProcessId;
@@ -37,10 +37,11 @@ namespace ssi
             ANVIL,
             ARFF,
             PROJECT,
+            NOLDUS,
             IGNORE
         }
 
-        public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "annotation" };
+        public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "odf", "annotation" };
 
         private MainControl control;
 
