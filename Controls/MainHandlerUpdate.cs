@@ -103,16 +103,19 @@ namespace ssi
                 var first = commits.First();
                 var last = commits.Last();
                 CompareResult result = null;
+                bool IsCMLTrainUptodate = false;
                 try
                 {
                    result = await client.Repository.Commit.Compare("hcmlab", "ssi", last.Sha, first.Sha);
                 }
                 catch(Exception en)
                 {
+                    IsCMLTrainUptodate = true;
+                    //If Connection can't be established, don't try to update. 
                     //MessageBox.Show(en.ToString());
                 }
 
-                bool IsCMLTrainUptodate = false;
+                
                 if (result != null)
                 {
                     var files = result.Files;
@@ -141,7 +144,7 @@ namespace ssi
 
                 string cmltrainexe = "cmltrain.exe";
                 if(!Directory.Exists("ssi")) Directory.CreateDirectory("ssi");
-                string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\"+ cmltrainexe;
+                string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "ssi\\"+ cmltrainexe;
                 string SSIbinaryGitPath = "https://github.com/hcmlab/ssi/raw/master/bin/x64/vc140/";
 
                 if (!IsCMLTrainUptodate || !(File.Exists(cmltrainexePath)))
