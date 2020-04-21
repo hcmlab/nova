@@ -144,7 +144,7 @@ namespace ssi
 
                 string cmltrainexe = "cmltrain.exe";
                 if(!Directory.Exists("ssi")) Directory.CreateDirectory("ssi");
-                string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\"+ cmltrainexe;
+                string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "ssi\\"+ cmltrainexe;
                 string SSIbinaryGitPath = "https://github.com/hcmlab/ssi/raw/master/bin/x64/vc140/";
 
                 if (!IsCMLTrainUptodate || !(File.Exists(cmltrainexePath)))
