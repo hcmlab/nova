@@ -1,7 +1,10 @@
+import site as s
+s.getusersitepackages()
+
 import tensorflow as tf
-from keras.models import load_model
-from keras.preprocessing import image as keras_image
-from keras.applications import imagenet_utils
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image as keras_image
+from tensorflow.keras.applications import imagenet_utils
 from PIL import Image
 import numpy as np
 import flask
@@ -16,9 +19,9 @@ from lime import lime_image
 from lime import lime_tabular
 from skimage.segmentation import mark_boundaries
 
-import innvestigate
-import innvestigate.utils as iutils
-import innvestigate.utils.visualizations as ivis
+# import innvestigate
+# import innvestigate.utils as iutils
+# import innvestigate.utils.visualizations as ivis
 
 import matplotlib.pyplot as plot
 
@@ -34,7 +37,8 @@ import ast
 # initialize our Flask application and the Keras model
 app = flask.Flask(__name__)
 model = None
-graph = tf.get_default_graph()
+graph = tf.compat.v1.get_default_graph()
+
 
 # def loadmodel(model_path):
 #     # load the pre-trained Keras model (here we are using a model
@@ -182,99 +186,140 @@ def predict():
     # return the data dictionary as a JSON response
     return flask.jsonify(data)
 
-@app.route("/innvestigate", methods=["POST"])
-def explain_innvestigate():
+# @app.route("/tfexplain", methods=["POST"])
+#  def explain_innvestigate():
 
-    global graph
-    data = {"success": "failed"}
-    # ensure an image was properly uploaded to our endpoint
-    if flask.request.method == "POST":
-        if flask.request.form.get("image"):
+#      global graph
+#      data = {"success": "failed"}
+#      # ensure an image was properly uploaded to our endpoint
+#      if flask.request.method == "POST":
+#          if flask.request.form.get("image"):
+#             from tf_explain.core.grad_cam import GradCAM
 
-            postprocess = request.args.get("postprocess")
-            explainer = request.args.get("explainer")
-            lrpalpha = float(request.args.get("lrpalpha"))
-            lrpbeta = float(request.args.get("lrpbeta"))
+#             with graph.as_default():
+#                  model_path = flask.request.form.get("model_path")
+#                  model = load_model(model_path)
+                 
+#                  # read the image in PIL format
+#                  image64 = flask.request.form.get("image")
+#                  image = base64.b64decode(image64)
+#                  image = Image.open(io.BytesIO(image))
+#                  img = tf.keras.preprocessing.image.img_to_array(image)
+#                  prediction = model.predict(img)
+#                  topClass = getTopXpredictions(prediction, 1)
+#                  data = ([img], None)
+#                  # Instantiation of the explainer
+#                  explainer = GradCAM()
+#                  imgFinal = explainer.explain(data, model, class_index=topClass)  
+#                  explainer.save(imgFinal, ".", "grad_cam.png")
+#                  imgFinal = np.uint8(imgFinal*255)
+#                  img = pilimage.fromarray(imgFinal)
+#                  imgByteArr = inputoutput.BytesIO()
+#                  img.save(imgByteArr, format='JPEG')
+#                  imgByteArr = imgByteArr.getvalue()
 
-            with graph.as_default():
-                model_path = flask.request.form.get("model_path")
-                model = load_model(model_path)
+#                  img64 = base64.b64encode(imgByteArr)
+#                  img64_string = img64.decode("utf-8")
+#                  data["explanation"] = img64_string
+#                  data["prediction"] = str(topClass[0][0])
+#                  data["prediction_score"] = str(topClass[0][1])
+#                  data["success"] = "success"
+                    
+#     return flask.Response(json.dumps(data), mimetype="text/plain")
 
-                # read the image in PIL format
-                image64 = flask.request.form.get("image")
-                image = base64.b64decode(image64)
-                image = Image.open(io.BytesIO(image))
+#@app.route("/innvestigate", methods=["POST"])
+# def explain_innvestigate():
 
-                # preprocess the image and prepare it for classification
-                image = prepare_image(image, target=(224, 224))
-                image = image*(1./255)
+#     global graph
+#     data = {"success": "failed"}
+#     # ensure an image was properly uploaded to our endpoint
+#     if flask.request.method == "POST":
+#         if flask.request.form.get("image"):
 
-                #print(model.summary())
-                model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
+#             postprocess = request.args.get("postprocess")
+#             explainer = request.args.get("explainer")
+#             lrpalpha = float(request.args.get("lrpalpha"))
+#             lrpbeta = float(request.args.get("lrpbeta"))
+
+#             with graph.as_default():
+#                 model_path = flask.request.form.get("model_path")
+#                 model = load_model(model_path)
+
+#                 # read the image in PIL format
+#                 image64 = flask.request.form.get("image")
+#                 image = base64.b64decode(image64)
+#                 image = Image.open(io.BytesIO(image))
+
+#                 # preprocess the image and prepare it for classification
+#                 image = prepare_image(image, target=(224, 224))
+#                 image = image*(1./255)
+
+#                 #print(model.summary())
+#                 model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
       
-                prediction = model.predict(image)
-                topClass = getTopXpredictions(prediction, 1)
+#                 prediction = model.predict(image)
+#                 topClass = getTopXpredictions(prediction, 1)
 
-                model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
+#                 model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
 
-                analyzer = []
+#                 analyzer = []
 
-                if explainer == "GUIDEDBACKPROP":
-                    analyzer = innvestigate.analyzer.GuidedBackprop(model_wo_sm)
-                elif explainer == "GRADIENT":
-                    analyzer = innvestigate.analyzer.Gradient(model_wo_sm)
-                elif explainer == "DECONVNET":
-                    analyzer = innvestigate.analyzer.Deconvnet(model_wo_sm)
-                elif explainer == "LRPEPSILON":
-                    analyzer = innvestigate.analyzer.LRPEpsilon(model_wo_sm)
-                elif explainer == "LRPZ":
-                    analyzer = innvestigate.analyzer.LRPZ(model_wo_sm)
-                elif explainer == "LRPALPHABETA":
-                    analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, alpha=lrpalpha, beta=lrpbeta)
-                elif explainer == "DEEPTAYLOR":
-                    analyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
+#                 if explainer == "GUIDEDBACKPROP":
+#                     analyzer = innvestigate.analyzer.GuidedBackprop(model_wo_sm)
+#                 elif explainer == "GRADIENT":
+#                     analyzer = innvestigate.analyzer.Gradient(model_wo_sm)
+#                 elif explainer == "DECONVNET":
+#                     analyzer = innvestigate.analyzer.Deconvnet(model_wo_sm)
+#                 elif explainer == "LRPEPSILON":
+#                     analyzer = innvestigate.analyzer.LRPEpsilon(model_wo_sm)
+#                 elif explainer == "LRPZ":
+#                     analyzer = innvestigate.analyzer.LRPZ(model_wo_sm)
+#                 elif explainer == "LRPALPHABETA":
+#                     analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, alpha=lrpalpha, beta=lrpbeta)
+#                 elif explainer == "DEEPTAYLOR":
+#                     analyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
 
-                # Applying the analyzer
-                analysis = analyzer.analyze(image)
+#                 # Applying the analyzer
+#                 analysis = analyzer.analyze(image)
 
-                imgFinal = []
+#                 imgFinal = []
 
-                if postprocess == "GRAYMAP":
-                    imgFinal = graymap(analysis)[0]
-                elif postprocess =="HEATMAP":
-                    imgFinal = heatmap(analysis)[0]
-                elif postprocess == "BK_PROJ":
-                    imgFinal = bk_proj(analysis)[0]
-                elif postprocess == "GNUPLOT2":
-                    imgFinal = heatmapgnuplot2(analysis)[0]
-                elif postprocess == "CMRMAP":
-                    imgFinal = heatmapCMRmap(analysis)[0]
-                elif postprocess == "NIPY_SPECTRAL":
-                    imgFinal = heatmapnipy_spectral(analysis)[0]
-                elif postprocess == "RAINBOW":
-                    imgFinal = heatmap_rainbow(analysis)[0]
-                elif postprocess == "INFERNO":
-                    imgFinal = heatmap_inferno(analysis)[0]
-                elif postprocess == "GIST_HEAT":
-                    imgFinal = heatmap_gist_heat(analysis)[0]
-                elif postprocess == "VIRIDIS":
-                    imgFinal = heatmap_viridis(analysis)[0]
+#                 if postprocess == "GRAYMAP":
+#                     imgFinal = graymap(analysis)[0]
+#                 elif postprocess =="HEATMAP":
+#                     imgFinal = heatmap(analysis)[0]
+#                 elif postprocess == "BK_PROJ":
+#                     imgFinal = bk_proj(analysis)[0]
+#                 elif postprocess == "GNUPLOT2":
+#                     imgFinal = heatmapgnuplot2(analysis)[0]
+#                 elif postprocess == "CMRMAP":
+#                     imgFinal = heatmapCMRmap(analysis)[0]
+#                 elif postprocess == "NIPY_SPECTRAL":
+#                     imgFinal = heatmapnipy_spectral(analysis)[0]
+#                 elif postprocess == "RAINBOW":
+#                     imgFinal = heatmap_rainbow(analysis)[0]
+#                 elif postprocess == "INFERNO":
+#                     imgFinal = heatmap_inferno(analysis)[0]
+#                 elif postprocess == "GIST_HEAT":
+#                     imgFinal = heatmap_gist_heat(analysis)[0]
+#                 elif postprocess == "VIRIDIS":
+#                     imgFinal = heatmap_viridis(analysis)[0]
 
-                imgFinal = np.uint8(imgFinal*255)
+#                 imgFinal = np.uint8(imgFinal*255)
 
-                img = pilimage.fromarray(imgFinal)
-                imgByteArr = inputoutput.BytesIO()
-                img.save(imgByteArr, format='JPEG')
-                imgByteArr = imgByteArr.getvalue()
+#                 img = pilimage.fromarray(imgFinal)
+#                 imgByteArr = inputoutput.BytesIO()
+#                 img.save(imgByteArr, format='JPEG')
+#                 imgByteArr = imgByteArr.getvalue()
 
-                img64 = base64.b64encode(imgByteArr)
-                img64_string = img64.decode("utf-8")
-                data["explanation"] = img64_string
-                data["prediction"] = str(topClass[0][0])
-                data["prediction_score"] = str(topClass[0][1])
-                data["success"] = "success"
+#                 img64 = base64.b64encode(imgByteArr)
+#                 img64_string = img64.decode("utf-8")
+#                 data["explanation"] = img64_string
+#                 data["prediction"] = str(topClass[0][0])
+#                 data["prediction_score"] = str(topClass[0][1])
+#                 data["success"] = "success"
                 
-    return flask.Response(json.dumps(data), mimetype="text/plain")
+#     return flask.Response(json.dumps(data), mimetype="text/plain")
 
 
 @app.route("/lime", methods=["POST"])

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<options>
+   <item name="syspath" type="CHAR" num="1024" value=".;.." lock="true" help="path to look for python script (if several seperate by ';')" />
+   <item name="script" type="CHAR" num="1024" value="interface" lock="true" help="name of python script (without ending)" />
+   <item name="optsstr" type="CHAR" num="1024" value="network=keras_recurrent" lock="true" help="string with option tuple <key=val> (if several seperate by ;)" />
+   <item name="optsfile" type="CHAR" num="1024" value="" lock="true" help="path to file with option tuple <key=val> (if several one per line)" />
+</options>

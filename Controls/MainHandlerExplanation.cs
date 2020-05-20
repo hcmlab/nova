@@ -215,8 +215,8 @@ namespace ssi
             {
                 return -1;
             }
-            
-           
+
+       
         }
 
         public static void killExplanationBackend()

@@ -8,8 +8,8 @@ class CatchOutErr:
 catchOutErr = CatchOutErr()
 sys.stderr = catchOutErr
 
-from keras.preprocessing import image as kerasimg
-from keras.models import load_model
+from tensorflow.keras.preprocessing import image as kerasimg
+from tensorflow.keras.models import load_model
 import os
 import numpy as np
 import io as inputoutput
