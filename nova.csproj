@@ -211,6 +211,9 @@
     <Compile Include="Controls\Other\ConfmatWindow.xaml.cs">
       <DependentUpon>ConfmatWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Other\ExplanationWindowTfExplain.xaml.cs">
+      <DependentUpon>ExplanationWindowTfExplain.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Other\FeatureExplanationWindow.xaml.cs">
       <DependentUpon>FeatureExplanationWindow.xaml</DependentUpon>
     </Compile>
@@ -355,6 +358,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Other\ConfmatWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Other\ExplanationWindowTfExplain.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

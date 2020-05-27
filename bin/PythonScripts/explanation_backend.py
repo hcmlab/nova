@@ -186,140 +186,203 @@ def predict():
     # return the data dictionary as a JSON response
     return flask.jsonify(data)
 
-# @app.route("/tfexplain", methods=["POST"])
-#  def explain_innvestigate():
+@app.route("/tfexplain", methods=["POST"])
+def explain_tfexplain():
 
-#      global graph
-#      data = {"success": "failed"}
+    global graph
+    data = {"success": "failed"}
 #      # ensure an image was properly uploaded to our endpoint
-#      if flask.request.method == "POST":
-#          if flask.request.form.get("image"):
-#             from tf_explain.core.grad_cam import GradCAM
+    if flask.request.method == "POST":
+        if flask.request.form.get("image"):
+            
+            
+            
 
-#             with graph.as_default():
-#                  model_path = flask.request.form.get("model_path")
-#                  model = load_model(model_path)
-                 
+            explainer = request.args.get("explainer")
+            #with graph.as_default():
+            model_path = flask.request.form.get("model_path")
+            model = load_model(model_path)
+           
+            
 #                  # read the image in PIL format
-#                  image64 = flask.request.form.get("image")
-#                  image = base64.b64decode(image64)
-#                  image = Image.open(io.BytesIO(image))
-#                  img = tf.keras.preprocessing.image.img_to_array(image)
-#                  prediction = model.predict(img)
-#                  topClass = getTopXpredictions(prediction, 1)
-#                  data = ([img], None)
-#                  # Instantiation of the explainer
-#                  explainer = GradCAM()
-#                  imgFinal = explainer.explain(data, model, class_index=topClass)  
-#                  explainer.save(imgFinal, ".", "grad_cam.png")
-#                  imgFinal = np.uint8(imgFinal*255)
-#                  img = pilimage.fromarray(imgFinal)
-#                  imgByteArr = inputoutput.BytesIO()
-#                  img.save(imgByteArr, format='JPEG')
-#                  imgByteArr = imgByteArr.getvalue()
+            image64 = flask.request.form.get("image")
+            image = base64.b64decode(image64)
+            image = Image.open(io.BytesIO(image))
+            image = prepare_image(image, target=(224, 224))
+            image = image*(1./255)
+            #img = tf.keras.preprocessing.image.img_to_array(image)
+            prediction = model.predict(image)
+            topClass = getTopXpredictions(prediction, 1)
+            print(topClass[0])
+            image = np.squeeze(image)
+            
 
-#                  img64 = base64.b64encode(imgByteArr)
-#                  img64_string = img64.decode("utf-8")
-#                  data["explanation"] = img64_string
-#                  data["prediction"] = str(topClass[0][0])
-#                  data["prediction_score"] = str(topClass[0][1])
-#                  data["success"] = "success"
+            if explainer == "GRADCAM":
+                im = ([image], None)
+                from tf_explain.core.grad_cam import GradCAM
+                exp = GradCAM()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])  
+                #exp.save(imgFinal, ".", "grad_cam.png")  
+                   
+            elif explainer == "OCCLUSIONSENSITIVITY":
+                im = ([image], None)
+                from tf_explain.core.occlusion_sensitivity import OcclusionSensitivity
+                exp = OcclusionSensitivity()   
+                imgFinal = exp.explain(im, model,class_index=topClass[0][0], patch_size=10)  
+                #exp.save(imgFinal, ".", "grad_cam.png")  
+
+            elif explainer == "GRADIENTSINPUTS":
+                im = (np.array([image]), None)
+                from tf_explain.core.gradients_inputs import GradientsInputs
+                exp = GradientsInputs()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+
+            elif explainer == "VANILLAGRADIENTS":
+                im = (np.array([image]), None)
+                from tf_explain.core.vanilla_gradients import VanillaGradients
+                exp = VanillaGradients()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+
+            elif explainer == "SMOOTHGRAD":
+                im = (np.array([image]), None)
+                from tf_explain.core.smoothgrad  import SmoothGrad
+                exp = SmoothGrad()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+
+            elif explainer == "INTEGRATEDGRADIENTS":
+                im = (np.array([image]), None)
+                from tf_explain.core.integrated_gradients  import IntegratedGradients
+                exp = IntegratedGradients()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+            
+            elif explainer == "ACTIVATIONVISUALIZATION":
+                #need some solution to find out and submit layers name
+                im = (np.array([image]), None)
+                from tf_explain.core.activations  import ExtractActivations
+                exp = ExtractActivations()
+                imgFinal = exp.explain(im, model, layers_name=["activation_1"])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+
+
+         
+
+
+
+
+          
+
+            img = pilimage.fromarray(imgFinal)
+            imgByteArr = inputoutput.BytesIO()
+            img.save(imgByteArr, format='JPEG')
+            imgByteArr = imgByteArr.getvalue()
+
+            img64 = base64.b64encode(imgByteArr)
+            img64_string = img64.decode("utf-8")
+
+            data["explanation"] = img64_string
+            data["prediction"] = str(topClass[0][0])
+            data["prediction_score"] = str(topClass[0][1])
+            data["success"] = "success"
                     
-#     return flask.Response(json.dumps(data), mimetype="text/plain")
+    return flask.Response(json.dumps(data), mimetype="text/plain")
 
-#@app.route("/innvestigate", methods=["POST"])
-# def explain_innvestigate():
+@app.route("/innvestigate", methods=["POST"])
+def explain_innvestigate():
 
-#     global graph
-#     data = {"success": "failed"}
-#     # ensure an image was properly uploaded to our endpoint
-#     if flask.request.method == "POST":
-#         if flask.request.form.get("image"):
+    global graph
+    data = {"success": "failed"}
+    # ensure an image was properly uploaded to our endpoint
+    if flask.request.method == "POST":
+        if flask.request.form.get("image"):
 
-#             postprocess = request.args.get("postprocess")
-#             explainer = request.args.get("explainer")
-#             lrpalpha = float(request.args.get("lrpalpha"))
-#             lrpbeta = float(request.args.get("lrpbeta"))
+            postprocess = request.args.get("postprocess")
+            explainer = request.args.get("explainer")
+            lrpalpha = float(request.args.get("lrpalpha"))
+            lrpbeta = float(request.args.get("lrpbeta"))
 
-#             with graph.as_default():
-#                 model_path = flask.request.form.get("model_path")
-#                 model = load_model(model_path)
+            with graph.as_default():
+                model_path = flask.request.form.get("model_path")
+                model = load_model(model_path)
 
-#                 # read the image in PIL format
-#                 image64 = flask.request.form.get("image")
-#                 image = base64.b64decode(image64)
-#                 image = Image.open(io.BytesIO(image))
+                # read the image in PIL format
+                image64 = flask.request.form.get("image")
+                image = base64.b64decode(image64)
+                image = Image.open(io.BytesIO(image))
 
-#                 # preprocess the image and prepare it for classification
-#                 image = prepare_image(image, target=(224, 224))
-#                 image = image*(1./255)
+                # preprocess the image and prepare it for classification
+                image = prepare_image(image, target=(224, 224))
+                image = image*(1./255)
 
-#                 #print(model.summary())
-#                 model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
+                #print(model.summary())
+                model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
       
-#                 prediction = model.predict(image)
-#                 topClass = getTopXpredictions(prediction, 1)
+                prediction = model.predict(image)
+                topClass = getTopXpredictions(prediction, 1)
 
-#                 model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
+                model_wo_sm = iutils.keras.graph.model_wo_softmax(model)
 
-#                 analyzer = []
+                analyzer = []
 
-#                 if explainer == "GUIDEDBACKPROP":
-#                     analyzer = innvestigate.analyzer.GuidedBackprop(model_wo_sm)
-#                 elif explainer == "GRADIENT":
-#                     analyzer = innvestigate.analyzer.Gradient(model_wo_sm)
-#                 elif explainer == "DECONVNET":
-#                     analyzer = innvestigate.analyzer.Deconvnet(model_wo_sm)
-#                 elif explainer == "LRPEPSILON":
-#                     analyzer = innvestigate.analyzer.LRPEpsilon(model_wo_sm)
-#                 elif explainer == "LRPZ":
-#                     analyzer = innvestigate.analyzer.LRPZ(model_wo_sm)
-#                 elif explainer == "LRPALPHABETA":
-#                     analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, alpha=lrpalpha, beta=lrpbeta)
-#                 elif explainer == "DEEPTAYLOR":
-#                     analyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
+                if explainer == "GUIDEDBACKPROP":
+                    analyzer = innvestigate.analyzer.GuidedBackprop(model_wo_sm)
+                elif explainer == "GRADIENT":
+                    analyzer = innvestigate.analyzer.Gradient(model_wo_sm)
+                elif explainer == "DECONVNET":
+                    analyzer = innvestigate.analyzer.Deconvnet(model_wo_sm)
+                elif explainer == "LRPEPSILON":
+                    analyzer = innvestigate.analyzer.LRPEpsilon(model_wo_sm)
+                elif explainer == "LRPZ":
+                    analyzer = innvestigate.analyzer.LRPZ(model_wo_sm)
+                elif explainer == "LRPALPHABETA":
+                    analyzer = innvestigate.analyzer.LRPAlphaBeta(model_wo_sm, alpha=lrpalpha, beta=lrpbeta)
+                elif explainer == "DEEPTAYLOR":
+                    analyzer = innvestigate.analyzer.DeepTaylor(model_wo_sm)
 
-#                 # Applying the analyzer
-#                 analysis = analyzer.analyze(image)
+                # Applying the analyzer
+                analysis = analyzer.analyze(image)
 
-#                 imgFinal = []
+                imgFinal = []
 
-#                 if postprocess == "GRAYMAP":
-#                     imgFinal = graymap(analysis)[0]
-#                 elif postprocess =="HEATMAP":
-#                     imgFinal = heatmap(analysis)[0]
-#                 elif postprocess == "BK_PROJ":
-#                     imgFinal = bk_proj(analysis)[0]
-#                 elif postprocess == "GNUPLOT2":
-#                     imgFinal = heatmapgnuplot2(analysis)[0]
-#                 elif postprocess == "CMRMAP":
-#                     imgFinal = heatmapCMRmap(analysis)[0]
-#                 elif postprocess == "NIPY_SPECTRAL":
-#                     imgFinal = heatmapnipy_spectral(analysis)[0]
-#                 elif postprocess == "RAINBOW":
-#                     imgFinal = heatmap_rainbow(analysis)[0]
-#                 elif postprocess == "INFERNO":
-#                     imgFinal = heatmap_inferno(analysis)[0]
-#                 elif postprocess == "GIST_HEAT":
-#                     imgFinal = heatmap_gist_heat(analysis)[0]
-#                 elif postprocess == "VIRIDIS":
-#                     imgFinal = heatmap_viridis(analysis)[0]
+                if postprocess == "GRAYMAP":
+                    imgFinal = graymap(analysis)[0]
+                elif postprocess =="HEATMAP":
+                    imgFinal = heatmap(analysis)[0]
+                elif postprocess == "BK_PROJ":
+                    imgFinal = bk_proj(analysis)[0]
+                elif postprocess == "GNUPLOT2":
+                    imgFinal = heatmapgnuplot2(analysis)[0]
+                elif postprocess == "CMRMAP":
+                    imgFinal = heatmapCMRmap(analysis)[0]
+                elif postprocess == "NIPY_SPECTRAL":
+                    imgFinal = heatmapnipy_spectral(analysis)[0]
+                elif postprocess == "RAINBOW":
+                    imgFinal = heatmap_rainbow(analysis)[0]
+                elif postprocess == "INFERNO":
+                    imgFinal = heatmap_inferno(analysis)[0]
+                elif postprocess == "GIST_HEAT":
+                    imgFinal = heatmap_gist_heat(analysis)[0]
+                elif postprocess == "VIRIDIS":
+                    imgFinal = heatmap_viridis(analysis)[0]
 
-#                 imgFinal = np.uint8(imgFinal*255)
+                imgFinal = np.uint8(imgFinal*255)
 
-#                 img = pilimage.fromarray(imgFinal)
-#                 imgByteArr = inputoutput.BytesIO()
-#                 img.save(imgByteArr, format='JPEG')
-#                 imgByteArr = imgByteArr.getvalue()
+                img = pilimage.fromarray(imgFinal)
+                imgByteArr = inputoutput.BytesIO()
+                img.save(imgByteArr, format='JPEG')
+                imgByteArr = imgByteArr.getvalue()
 
-#                 img64 = base64.b64encode(imgByteArr)
-#                 img64_string = img64.decode("utf-8")
-#                 data["explanation"] = img64_string
-#                 data["prediction"] = str(topClass[0][0])
-#                 data["prediction_score"] = str(topClass[0][1])
-#                 data["success"] = "success"
+                img64 = base64.b64encode(imgByteArr)
+                img64_string = img64.decode("utf-8")
+                data["explanation"] = img64_string
+                data["prediction"] = str(topClass[0][0])
+                data["prediction_score"] = str(topClass[0][1])
+                data["success"] = "success"
                 
-#     return flask.Response(json.dumps(data), mimetype="text/plain")
+    return flask.Response(json.dumps(data), mimetype="text/plain")
 
 
 @app.route("/lime", methods=["POST"])

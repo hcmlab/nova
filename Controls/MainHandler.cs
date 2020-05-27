@@ -230,7 +230,8 @@ namespace ssi
             }
 
             control.explanationWindow.Click += explanationWindow_Click;
-           // control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
+            //control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
+            control.expalanationWindowTFExplain.Click += explanationWindowtfexplain_Click;
             control.explanationWindowFeature.Click += featureExplanationWindow_Click;
             control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
 
