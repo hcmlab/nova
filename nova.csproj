@@ -639,11 +639,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="PythonScripts\EnumScriptType.py" />
+    <Content Include="PythonScripts\explanation_backend.py" />
     <Content Include="PythonScripts\ImageExplainerLime.py" />
     <Content Include="PythonScripts\KendallTau.py" />
     <Content Include="PythonScripts\LimeExplain.py" />
     <Content Include="PythonScripts\SpearmanR.py" />
-    <Content Include="PythonScripts\test.py" />
     <Content Include="PythonScripts\__init__.py" />
     <Resource Include="Resources\Question_16x.png" />
     <Resource Include="Resources\dropmodel.png" />
