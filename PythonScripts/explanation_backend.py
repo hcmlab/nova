@@ -1,7 +1,10 @@
+import site as s
+s.getusersitepackages()
+
 import tensorflow as tf
-from keras.models import load_model
-from keras.preprocessing import image as keras_image
-from keras.applications import imagenet_utils
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image as keras_image
+from tensorflow.keras.applications import imagenet_utils
 from PIL import Image
 import numpy as np
 import flask
@@ -16,9 +19,9 @@ from lime import lime_image
 from lime import lime_tabular
 from skimage.segmentation import mark_boundaries
 
-import innvestigate
-import innvestigate.utils as iutils
-import innvestigate.utils.visualizations as ivis
+# import innvestigate
+# import innvestigate.utils as iutils
+# import innvestigate.utils.visualizations as ivis
 
 import matplotlib.pyplot as plot
 
@@ -34,7 +37,8 @@ import ast
 # initialize our Flask application and the Keras model
 app = flask.Flask(__name__)
 model = None
-graph = tf.get_default_graph()
+graph = tf.compat.v1.get_default_graph()
+
 
 # def loadmodel(model_path):
 #     # load the pre-trained Keras model (here we are using a model
@@ -181,6 +185,110 @@ def predict():
 
     # return the data dictionary as a JSON response
     return flask.jsonify(data)
+
+@app.route("/tfexplain", methods=["POST"])
+def explain_tfexplain():
+
+    global graph
+    data = {"success": "failed"}
+#      # ensure an image was properly uploaded to our endpoint
+    if flask.request.method == "POST":
+        if flask.request.form.get("image"):
+            
+            
+            
+
+            explainer = request.args.get("explainer")
+            #with graph.as_default():
+            model_path = flask.request.form.get("model_path")
+            model = load_model(model_path)
+           
+            
+#                  # read the image in PIL format
+            image64 = flask.request.form.get("image")
+            image = base64.b64decode(image64)
+            image = Image.open(io.BytesIO(image))
+            image = prepare_image(image, target=(224, 224))
+            image = image*(1./255)
+            #img = tf.keras.preprocessing.image.img_to_array(image)
+            prediction = model.predict(image)
+            topClass = getTopXpredictions(prediction, 1)
+            print(topClass[0])
+            image = np.squeeze(image)
+            
+
+            if explainer == "GRADCAM":
+                im = ([image], None)
+                from tf_explain.core.grad_cam import GradCAM
+                exp = GradCAM()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])  
+                #exp.save(imgFinal, ".", "grad_cam.png")  
+                   
+            elif explainer == "OCCLUSIONSENSITIVITY":
+                im = ([image], None)
+                from tf_explain.core.occlusion_sensitivity import OcclusionSensitivity
+                exp = OcclusionSensitivity()   
+                imgFinal = exp.explain(im, model,class_index=topClass[0][0], patch_size=10)  
+                #exp.save(imgFinal, ".", "grad_cam.png")  
+
+            elif explainer == "GRADIENTSINPUTS":
+                im = (np.array([image]), None)
+                from tf_explain.core.gradients_inputs import GradientsInputs
+                exp = GradientsInputs()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+
+            elif explainer == "VANILLAGRADIENTS":
+                im = (np.array([image]), None)
+                from tf_explain.core.vanilla_gradients import VanillaGradients
+                exp = VanillaGradients()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+
+            elif explainer == "SMOOTHGRAD":
+                im = (np.array([image]), None)
+                from tf_explain.core.smoothgrad  import SmoothGrad
+                exp = SmoothGrad()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+
+            elif explainer == "INTEGRATEDGRADIENTS":
+                im = (np.array([image]), None)
+                from tf_explain.core.integrated_gradients  import IntegratedGradients
+                exp = IntegratedGradients()
+                imgFinal = exp.explain(im, model, class_index=topClass[0][0])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+            
+            elif explainer == "ACTIVATIONVISUALIZATION":
+                #need some solution to find out and submit layers name
+                im = (np.array([image]), None)
+                from tf_explain.core.activations  import ExtractActivations
+                exp = ExtractActivations()
+                imgFinal = exp.explain(im, model, layers_name=["activation_1"])
+                #exp.save(imgFinal, ".", "gradients_inputs.png")
+
+
+         
+
+
+
+
+          
+
+            img = pilimage.fromarray(imgFinal)
+            imgByteArr = inputoutput.BytesIO()
+            img.save(imgByteArr, format='JPEG')
+            imgByteArr = imgByteArr.getvalue()
+
+            img64 = base64.b64encode(imgByteArr)
+            img64_string = img64.decode("utf-8")
+
+            data["explanation"] = img64_string
+            data["prediction"] = str(topClass[0][0])
+            data["prediction_score"] = str(topClass[0][1])
+            data["success"] = "success"
+                    
+    return flask.Response(json.dumps(data), mimetype="text/plain")
 
 @app.route("/innvestigate", methods=["POST"])
 def explain_innvestigate():

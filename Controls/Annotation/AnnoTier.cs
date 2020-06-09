@@ -231,6 +231,22 @@ namespace ssi
             }
         }
 
+        private int fixedsize = -1;
+
+        public int FixedSize
+        {
+            get
+            {
+                return fixedsize;
+            }
+            set
+            {
+                fixedsize = value;
+            }
+        }
+
+
+
         private Color maxOrForeColor = Defaults.Colors.Foreground;
 
         public Color MaxOrForeColor

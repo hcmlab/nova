@@ -383,3 +383,10 @@ bin/opencv_ffmpeg310_64.dll
 bin/ssiliblinear.dll
 bin/ssi/unicodedata.pyd
 bin/ssi/winsound.pyd
+bin/cml/models/templates/discrete/video/tensorflow/vgg_face_weights.h5
+*.v2
+*.profile-empty
+*.trace
+bin/cml/models/templates/continuous/video/tensorflow/vgg_face_weights.h5
+bin/cml/models/templates/continuous/video/tensorflow/nova_sessions
+bin/cml/models/templates/continuous/video/tensorflow/nova_db_info

@@ -2,190 +2,307 @@ import sys
 import importlib
 if not hasattr(sys, 'argv'):
 	sys.argv  = ['']
-import tensorflow as tf
 import numpy as np
 import random
-import datetime
 from xml.dom import minidom
 import os
 import shutil
-import time
-import site
+import pprint
+import pickle
+import site as s
+s.getusersitepackages()
 
+from tensorflow.keras.models import load_model
+from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
+from tensorflow.keras import backend, optimizers
 
+#interface
 def getModelType(types, opts, vars):
-    return types.CLASSIFICATION
-
+    return types.REGRESSION if opts["is_regression"] else types.CLASSIFICATION
 
 def getOptions(opts, vars):
+    try:
+        vars['x'] = None
+        vars['y'] = None
+        vars['session'] = None
+        vars['model'] = None
+        vars['model_id'] = "."
 
-    vars['x'] = None
-    vars['y'] = None
-    vars['sess'] = None
-    opts['network'] = ''
-    opts['p_drop'] = 0.5
-    opts['batch_size'] = 1
-    opts['n_epoch'] = 1000
-    opts['n_log'] = 10
-    opts['n_log_full'] = 100    
+        '''Setting the default options. All options can be overwritten by adding them to the conf-dictionary in the same file as the network'''
+        opts['network'] = ''
+        opts['experiment_id'] = ''
+        opts['is_regression'] = False
+        opts['n_timesteps'] = 1
+        opts['perma_drop'] = False
+        opts['n_fp'] = 1
+        opts['loss_function'] = 'mean_squared_error'
+        opts['optimizier'] = 'adam'
+        opts['metrics'] = []
+        opts['lr'] = 0.0001
+        opts['n_epoch'] = 1
+        opts['batch_size'] = 32
 
+    except Exception as e:
+        print_exception(e, 'getOptions')
+        sys.exit()
+
+
+def train(data,label_score, opts, vars):
+    try:
+         module = __import__(opts['network'])
+         set_opts_from_config(opts, module.conf)
+
+         n_input = data[0].dim
+        
+         if not opts['is_regression']:
+             #adding one output for the restclass
+             n_output = int(max(label_score)+1)
+             vars['monitor'] = "accuracy"
+         else:
+             vars['monitor'] = "loss"
+             n_output = 1
+            
+
+         print ('load network architecture from ' + opts['network'] + '.py')
+         print('#input: {} \n#output: {}'.format(n_input, n_output))
+         model = module.getModel(n_input, n_output)
+        
+
+         nts = opts['n_timesteps']
+         if nts < 1:
+             raise ValueError('n_timesteps must be >= 1 but is {}'.format(nts))     
+         elif nts == 1:
+             sample_shape = (n_input, )   
+         else: 
+             sample_shape = (int(n_input / nts), nts)
+
+         #(number of samples, number of features, number of timesteps)
+         sample_list_shape = ((len(data),) + sample_shape)
+
+         x = np.empty(sample_list_shape)
+         y = np.empty((len(label_score), n_output))
+       
+         print('Input data array should be of shape: {} \nLabel array should be of shape {} \nStart reshaping input accordingly...\n'.format(x.shape, y.shape))
+
+         sanity_check(x)
+        
+         #reshaping
+         for sample in range(len(data)):
+             #input
+             temp = np.reshape(data[sample], sample_shape) 
+             x[sample] = temp
+             #output
+             if not opts['is_regression']:
+                 y[sample] = convert_to_one_hot(label_score[sample], n_output)
+             else:
+                 y[sample] = label_score[sample] 
+
+         log_path, ckp_path = get_paths()
+
+         experiment_id = opts['experiment_id'] if opts['experiment_id'] else opts['network']
+         print('Checkpoint dir: {}\nLogdir: {}\nExperiment ID: {}'.format(ckp_path, log_path, experiment_id))
+
+         checkpoint = ModelCheckpoint(    
+             filepath =  os.path.join(ckp_path, experiment_id +  '.trainer.PythonModel.model.h5'),   
+             monitor=vars['monitor'], 
+             verbose=1, 
+             save_best_only=True, 
+             save_weights_only=False, 
+             mode='auto', 
+             period=1)
+         callbacklist = [checkpoint]
+
+         model.summary()
+         print('Loss: {}\nOptimizer: {}\n'.format(opts['loss_function'], opts['optimizier']))
+         model.compile(loss=opts['loss_function'],
+                 optimizer=opts['optimizier'],
+                 metrics=opts['metrics'])
+
+         print('train_x shape: {} | train_x[0] shape: {}'.format(x.shape, x[0].shape))
+
+         model.fit(x,
+             y,
+             epochs=opts['n_epoch'],
+             batch_size=opts['batch_size'],
+             callbacks=callbacklist)        
+
+         vars['n_input'] = n_input
+         vars['n_output'] = n_output
+         vars['model_id'] = experiment_id
+         vars['model'] = model
+    
+    except Exception as e:
+        print_exception(e, 'train')
+        sys.exit()
+
+def forward(data, probs_or_score, opts, vars):
+    try:
+        model = vars['model']
+        sess = vars['session']
+        graph = vars['graph']   
+
+        if model and sess and graph:   
+            n_input = data.dim
+            n_output = len(probs_or_score)
+            n_fp = int(opts['n_fp'])
+
+            #reshaping the input
+            nts = opts['n_timesteps']
+            if nts < 1:
+                raise ValueError('n_timesteps must be >= 1 but is {}'.format(nts))     
+            elif nts == 1:
+                sample_shape = (n_input,)   
+            else:  
+                sample_shape = (int(n_input / nts), nts)
+
+            x = np.asarray(data)
+            x = x.astype('float32')
+            x.reshape(sample_shape) 
+
+            sanity_check(data)
+
+            results = np.zeros((n_fp, n_output), dtype=np.float32)
+
+            with sess.as_default():
+                with graph.as_default():
+                    for fp in range(n_fp):
+                        pred = model.predict(x, batch_size=1, verbose=0)
+                        if opts['is_regression']:
+                            results[fp][0] = pred[0][0]
+                        else:     
+                            for i in range(len(pred[0])):
+                                results[fp][i] = pred[0][i]
+            mean = np.mean(results, axis=0)
+            std = np.std(results, axis=0)
+            conf = max(0,1-np.mean(std))
+
+            #sanity_check(probs_or_score)
+            
+            for i in range(len(mean)):
+                probs_or_score[i] = mean[i]
+            
+            
+            return conf
+        else:
+            print('Train model first') 
+            return 1
+
+    except Exception as e: 
+        print_exception(e, 'forward')
+        exit()
+
+def save(path, opts, vars):
+    try:
+        # save model
+        _, ckp_path = get_paths()
+
+        model_path = path + '.' + opts['network']
+        print('Move best checkpoint to ' + model_path + '.h5')
+        shutil.move(os.path.join(ckp_path, vars['model_id'] + '.trainer.PythonModel.model.h5'), model_path + '.h5')
+
+        # copy scripts
+        src_dir = os.path.dirname(os.path.realpath(__file__))
+        dst_dir = os.path.dirname(path)
+
+        print('copy scripts from \'' + src_dir + '\' to \'' + dst_dir + '\'')
+
+        srcFiles = os.listdir(src_dir)
+        for fileName in srcFiles:
+            full_file_name = os.path.join(src_dir, fileName)
+            if os.path.isfile(full_file_name) and (fileName.endswith('interface.py')  or fileName.endswith('customlayer.py') or fileName.endswith('nova_data_generator.py')  or fileName.endswith('db_handler.py')):
+                shutil.copy(full_file_name, dst_dir)
+            elif os.path.isfile(full_file_name) and fileName.endswith(opts['network']+'.py'):
+                shutil.copy(full_file_name, os.path.join(dst_dir, model_path + '.py' ))
+                
+
+    except Exception as e: 
+        print_exception(e, 'save')
+        sys.exit()
+
+def load(path, opts, vars):
+    try:
+        print('\nLoading model\nCreating session and graph')   
+        server = tf.train.Server.create_local_server()
+        sess = tf.Session(server.target) 
+        graph = tf.get_default_graph()
+        backend.set_session(sess) 
+        
+        model_path = path + '.' + opts['network'] + '.h5'
+        print('Loading model from {}'.format(model_path))
+        model = load_model(model_path);     
+
+        
+        print('Create prediction function')
+
+        model._make_predict_function()
+        with graph.as_default():
+            with sess.as_default():
+                input_shape = list(model.layers[0].input_shape)
+                input_shape[0] = 1
+                model.predict(np.zeros(tuple(input_shape)))
+
+        vars['graph'] = graph
+        vars['session'] = sess
+        vars['model'] = model
+    except Exception as e:
+        print_exception(e, 'load')
+        sys.exit()
+        
+
+# helper functions
 
 def convert_to_one_hot(label, n_classes):
-
-    float_label = int(label)
+    int_label = int(label)
     one_hot = np.zeros(n_classes)
-    one_hot[label] = 1.0
-
+    one_hot[int_label] = 1.0
     return one_hot
 
 
-def getBatch(n, x, y):
-
-    indices = np.random.choice(len(x),n,False)
-
-    x_ = x[indices,]
-    y_ = y[indices]
-
-    return (x_, y_)
+def print_exception(exception, function):
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)
+    print('Exception in {}: {} \nType: {} Fname: {} LN: {} '.format(function, exception, exc_type, fname, exc_tb.tb_lineno))
 
 
-def train(data, label, opts, vars):
+def set_opts_from_config(opts, conf):
+    print(conf)
 
-    n_input = data[0].dim
-    n_output = max(label)+1
+    for key, value in conf.items():
+        opts[key] = value
 
-    print ('load network architecture from ' + opts['network'] + '.py')
-    module = __import__(opts['network'])
-    x, y, p_drop = module.getModel(n_input,n_output) 
-    train_step, y_ = module.getTrainer(n_output,y)
+    print('Options haven been set to:\n')
+    pprint.pprint(opts)
+    print('\n')
 
-    sess = tf.InteractiveSession()
+#checking the input for corrupted values
+def sanity_check(x):
+    if np.any(np.isnan(x)):
+        print('At least one input is not a number!')
+    if np.any(np.isinf(x)):
+        print('At least one input is inf!')
 
-    merged = tf.summary.merge_all()
-    st = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    train_writer = tf.summary.FileWriter('./logs/' + opts['network'] + '/' + st + '/train', sess.graph)
-    test_writer = tf.summary.FileWriter('./logs/' + opts['network'] + '/' + st + '/test')
-    tf.global_variables_initializer().run()
+# retreives the paths for log and checkpoint directories. paths are created if they do not exist
+def get_paths():
+    file_dir = os.path.dirname(os.path.realpath(__file__)) 
+    ckp_dir = 'checkpoints'
+    log_dir = 'logs'
+    ckp_path = os.path.join(file_dir, ckp_dir)
+    log_path = os.path.join(file_dir, log_dir)
 
-    with tf.name_scope('prediction'):
-        correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))        
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        summary_accuracy = tf.summary.scalar('accuracy', accuracy)
-
-    train_x = np.empty((len(data), n_input))
-    train_y = np.empty((len(label), n_output))
-
-    for sample in range(len(data)):
-        train_x[sample] = np.reshape(data[sample],(n_input))
-        train_y[sample] = convert_to_one_hot(label[sample], n_output)
-
-    train_x = train_x.astype('float32')  
-    for i in range(opts['n_epoch']):
-        batch_x, batch_y = getBatch(opts['batch_size'], train_x, train_y)
-        feed_dict = {x: batch_x, y_: batch_y, p_drop: opts['p_drop']}
-        _ = sess.run(train_step, feed_dict=feed_dict)
-
-    vars['x'] = x
-    vars['y'] = y
-    vars['p_drop'] = p_drop
-    vars['sess'] = sess
-    vars['n_input'] = n_input
-    vars['n_output'] = n_output
-
-
-def forward(data, probs, opts, vars):
-
-    n_input = data.dim    
-
-    sess = vars['sess']
-    x = vars['x']
-    y = vars['y']
-    p_drop = vars['p_drop']
-
-    np_array_x = np.asarray(data)
-    np_array_x = np_array_x.astype('float32')
-    np_array_x = np.reshape(np_array_x, (n_input))
-
-    pred = sess.run(y, {x: [np_array_x], p_drop: 0})
-    for i in range (len(pred[0])):
-        probs[i] = float(pred[0][i])
-
-    return max(probs)
-
-
-def save(path, opts, vars):
-
-    sess = vars['sess']
-
-    print('save model to ' + path)
-
-    # save model weights
-
-    saver = tf.train.Saver()
-    saver.save(sess, path)
-
-    # copy scripts
-
-    srcDir = os.path.dirname(os.path.realpath(__file__)) + '\\'
-    dstDir = os.path.dirname(path) + '\\'
-
-    print('copy scripts from \'' + srcDir + '\' to \'' + dstDir + '\'')
-
-    if not os.path.exists(dstDir):
-        os.makedirs(dstDir)
-
-    srcFiles = os.listdir(srcDir)
-    for fileName in srcFiles:
-        fullFileName = os.path.join(srcDir, fileName)
-        if os.path.isfile(fullFileName) and fileName.endswith('.py'):
-            shutil.copy(fullFileName, dstDir)
+    if not os.path.exists(ckp_path):
+        os.makedirs(ckp_path)
+        print('Created checkpoint folder: {}'.format(ckp_path))
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
+        print('Created log folder: {}'.format(log_path))
     
-    network_new =  os.path.basename(path) + '.' + opts['network']
-    shutil.copy(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')
-    #os.rename(dstDir + opts['network'] + '.py', dstDir + network_new + '.py')    
-    #shutil.move(dstDir + opts['network'] + '.py', dstDir + network_new + '.py') 
+    return(log_path, ckp_path)
 
+def main():
+    print("Hello World!")
 
-def load(path, opts, vars):
-	
-    print ('load model from ' + path)
-
-    # parse input/output dimensions
-
-    trainerPath = path
-    trainerPath = trainerPath.replace("trainer.PythonModel.model", "trainer")	
-    xmldoc = minidom.parse(trainerPath)
-    streams = xmldoc.getElementsByTagName('streams')
-    streamItem = streams[0].getElementsByTagName('item')
-    n_input = streamItem[0].attributes['dim'].value
-    print("#input: " + str(n_input))
-    	
-    classes = xmldoc.getElementsByTagName('classes')
-    n_output = len(classes[0].getElementsByTagName('item'))
-    print("#output: " + str(n_output))
-   
-    # copy unique network file
-    
-    network_tmp = os.path.dirname(path) + '\\' + opts['network'] + '.py'
-    shutil.copy(path + '.' + opts['network'] + '.py', network_tmp)    
-
-    # reload sys path and import network file
-
-    importlib.reload(site)
-    module = __import__(opts['network'])
-    os.remove(network_tmp)
-
-    # load model weights
-
-    [x,y,p_drop] = module.getModel(n_input,n_output)
-    sess = tf.InteractiveSession()
-    saver = tf.train.Saver()    
-    saver.restore(sess, path)
-
-    # store variables
-
-    vars['x'] = x
-    vars['y'] = y
-    vars['sess'] = sess
-    vars['p_drop'] = p_drop
-
+if __name__ == "__main__":
+    opts = []
+    vars = []
+    getOptions(opts, vars)
+    train([0,1,2,2], [0,0,1,1], opts, vars)

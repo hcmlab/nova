@@ -211,6 +211,9 @@
     <Compile Include="Controls\Other\ConfmatWindow.xaml.cs">
       <DependentUpon>ConfmatWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Other\ExplanationWindowTfExplain.xaml.cs">
+      <DependentUpon>ExplanationWindowTfExplain.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Other\FeatureExplanationWindow.xaml.cs">
       <DependentUpon>FeatureExplanationWindow.xaml</DependentUpon>
     </Compile>
@@ -355,6 +358,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Other\ConfmatWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Other\ExplanationWindowTfExplain.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -632,11 +639,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="PythonScripts\EnumScriptType.py" />
+    <Content Include="PythonScripts\explanation_backend.py" />
     <Content Include="PythonScripts\ImageExplainerLime.py" />
     <Content Include="PythonScripts\KendallTau.py" />
     <Content Include="PythonScripts\LimeExplain.py" />
     <Content Include="PythonScripts\SpearmanR.py" />
-    <Content Include="PythonScripts\test.py" />
     <Content Include="PythonScripts\__init__.py" />
     <Resource Include="Resources\Question_16x.png" />
     <Resource Include="Resources\dropmodel.png" />

@@ -696,6 +696,11 @@ namespace ssi
                 window.DataContext = AnnoTierStatic.Selected;
                 window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 window.ShowDialog();
+                control.annoTierControl.UpdateRowHeight(AnnoTierStatic.Selected, AnnoTierStatic.Selected.FixedSize);
+                if(control.annoTierControl.Height < AnnoTierStatic.Selected.FixedSize)
+                    {
+                    control.annoTierControl.Height = AnnoTierStatic.Selected.FixedSize;
+                    }
                 updateAnnoInfo(AnnoTierStatic.Selected);
                 AnnoTierStatic.Selected.AnnoList.HasChanged = true;
             }

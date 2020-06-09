@@ -41,6 +41,10 @@
                 <Label Margin="5,0,5,-5">Background color:</Label>
                 <p:ColorPicker SelectedColor="{Binding MinOrBackColor}" Margin="5" Background="Transparent" BorderBrush="DarkGray"/>
             </StackPanel>
+            <StackPanel>
+                <Label Margin="5,0,5,-5">Fixed height in px (-1 = default):</Label>
+                <TextBox Margin="5" Text="{Binding FixedSize}"></TextBox>
+            </StackPanel>
         </StackPanel>
     </Grid>
     

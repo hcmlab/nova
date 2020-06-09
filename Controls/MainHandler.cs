@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.6.7";
+        public static string BuildVersion = "1.0.7.0";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static int xaiProcessId;
@@ -230,7 +230,8 @@ namespace ssi
             }
 
             control.explanationWindow.Click += explanationWindow_Click;
-            control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
+            //control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
+            control.expalanationWindowTFExplain.Click += explanationWindowtfexplain_Click;
             control.explanationWindowFeature.Click += featureExplanationWindow_Click;
             control.XAIMenu.Visibility = control.updatePythonMenu.Visibility = (MainHandler.ENABLE_PYTHON ? Visibility.Visible : Visibility.Collapsed);
 
@@ -333,7 +334,7 @@ namespace ssi
             }
 
             string cmltrainexe = "cmltrain.exe";
-            string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + cmltrainexe;
+            string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "ssi\\" + cmltrainexe;
 
             if (!(File.Exists(cmltrainexePath)) && !alreadycheckedcmlupdate)
             {

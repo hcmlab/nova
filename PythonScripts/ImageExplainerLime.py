@@ -10,9 +10,10 @@ class CatchOutErr:
 
 catchOutErr = CatchOutErr()
 sys.stderr = catchOutErr
-
-from keras.preprocessing import image
-from keras.models import load_model
+import site as s
+s.getusersitepackages()
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.models import load_model
 import os
 import numpy as np
 import io

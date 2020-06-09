@@ -507,7 +507,7 @@ namespace ssi
 
                 try
                 {
-                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python37")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python37", true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib", true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts", true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share", true);
@@ -526,7 +526,7 @@ namespace ssi
                 {
                     
 
-                    webClient.DownloadFile("https://www.python.org/ftp/python/3.6.7/python-3.6.7-embed-amd64.zip", "python.zip");
+                    webClient.DownloadFile("https://www.python.org/ftp/python/3.7.7/python-3.7.7-embed-amd64.zip", "python.zip");
 
                     using (FileStream zipToOpen = new FileStream("python.zip", FileMode.Open))
                     {
@@ -540,14 +540,14 @@ namespace ssi
 
                   
 
-                    using (FileStream zipToOpen = new FileStream("ssi/python36.zip", FileMode.Open))
+                    using (FileStream zipToOpen = new FileStream("ssi/python37.zip", FileMode.Open))
                     {
                         using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                         {
-                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi/python36", false);
+                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi/python37", false);
                         }
                     }
-                    File.Delete("ssi/python36.zip");
+                    File.Delete("ssi/python37.zip");
                 }
                 catch (Exception e)
                 {
@@ -555,16 +555,17 @@ namespace ssi
                     return;
                 }
 
-                string path = AppDomain.CurrentDomain.BaseDirectory + "ssi\\python36._pth";
+                string path = AppDomain.CurrentDomain.BaseDirectory + "ssi\\python37._pth";
 
                 using (StreamWriter sw = File.CreateText(path))
                 {
                     sw.WriteLine(".");
+                    sw.WriteLine(".\\");
                     sw.WriteLine(".\\DLLs");
                     sw.WriteLine(".\\lib");
                     sw.WriteLine(".\\lib\\plat-win");
                     sw.WriteLine(".\\lib\\site-packages");
-                    sw.WriteLine(".\\python36");
+                    sw.WriteLine(".\\python37");
 
                 }
 
@@ -575,26 +576,32 @@ namespace ssi
                 string cudapath = Environment.GetEnvironmentVariable("CUDA_PATH", EnvironmentVariableTarget.Machine);
 
                 string[] requirements = {
-                            "ssi/toolz-0.9.0-py2.py3-none-any.whl",
+                            "ssi/toolz-0.10.0-py2.py3-none-any.whl",
                             "ssi/termcolor-1.1.0-py2.py3-none-any.whl",
-                            "ssi/future-0.17.0-py3-none-any.whl",
-                            "keras-vggface==0.6",
-                            "tensorflow-gpu==1.12.0",
-                            "imageio==2.3.0",
-                            "h5py==2.8.0",
-                            "matplotlib==2.2.3",
-                            "https://github.com/albermax/innvestigate/archive/1.0.7.tar.gz",
-                            "lime==0.1.1.31",
-                            "scipy==1.1.0",
+                            "ssi/future-0.18.2-py3-none-any.whl",
+                            "resampy",
+                            "pickle-mixin",
+                            "Flask",
+                            "tensorflow-gpu==2.0.1",
+                            "imageio == 2.8.0",
+                            "h5py == 2.10.0",
+                            "matplotlib == 3.2.1",
+                            "tf-explain",
+                            //"https://github.com/albermax/innvestigate/archive/1.0.7.tar.gz",
+                            "lime==0.2",
+                            "scipy == 1.4.1",
                             "pymongo==3.7.2",
                             "scikit_image==0.14.2",
-                            "Pillow==5.4.1",
-                            "opencv-python==4.0.0.21",
-                            "numpy==1.17.0",
-                            "resampy==0.2.1",
-                            "pickle-mixin==1.0.2",
-                            "Flask==1.1.1",
+                            "Pillow == 5.4.1",
+                            "opencv-python",
+                            "numpy==1.18.2",
+                            "sklearn"
+
+                           
+
                             };
+
+
 
 
                 if (cudapath != null)
@@ -633,15 +640,15 @@ namespace ssi
 
                 //Install two wheels for broken pip install files on embedded python. Credit to: Christoph Gohlke https://www.lfd.uci.edu/~gohlke/pythonlibs/. Mirrored on NOVA public git.
 
-                string urltoolz = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/toolz-0.9.0-py2.py3-none-any.whl";
+                string urltoolz = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/toolz-0.10.0-py2.py3-none-any.whl";
                 string urltermcolor = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/termcolor-1.1.0-py2.py3-none-any.whl";
-                string urlfuture = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/future-0.17.0-py3-none-any.whl";
-                string urltkinderfix = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/tkinterfix.zip";
+                string urlfuture = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/future-0.18.2-py3-none-any.whl";
+                string urltkinderfix = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/tkinter-fix-377.zip";
 
                 WebClient Client = new WebClient();
-                Client.DownloadFile(urltoolz, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.9.0-py2.py3-none-any.whl");
+                Client.DownloadFile(urltoolz, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.10.0-py2.py3-none-any.whl");
                 Client.DownloadFile(urltermcolor, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
-                Client.DownloadFile(urlfuture, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "future-0.17.0-py3-none-any.whl");
+                Client.DownloadFile(urlfuture, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "future-0.18.2-py3-none-any.whl");
                 Client.DownloadFile(urltkinderfix, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "tkinterfix.zip");
 
                 process = new Process();
@@ -654,12 +661,10 @@ namespace ssi
                 process.WaitForExit();
                 process.Close();
 
-                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.9.0-py2.py3-none-any.whl");
+                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.10.0-py2.py3-none-any.whl");
                 File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
 
 
-
-               // System.IO.Compression.ZipFile.ExtractToDirectory("ssi/tkinterfix.zip", "ssi/");
 
 
                 if(File.Exists("ssi/_tkinter.pyd")) 
@@ -680,9 +685,14 @@ namespace ssi
                     using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                     {
                         ZipArchiveExtension.ExtractToDirectory(archive, "ssi", false);
-                    }
+                   }
                 }
                 File.Delete("ssi/tkinterfix.zip");
+
+  
+
+
+
 
                 //FileStream zipToOpentkinter = new FileStream("ssi/tkinterfix.zip", FileMode.Open);
                 //ZipArchive archivetk = new ZipArchive(zipToOpentkinter, ZipArchiveMode.Update);
@@ -690,15 +700,15 @@ namespace ssi
 
                 //File.Delete("ssi/tkinterfix.zip");
 
-                try
-                {
-                    //Temporary FIX for VGG FACE latest Keras version bug
-                    string url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/vggface-fix.py";
-                    Client = new WebClient();
-                    Client.DownloadFile(url, sitepackagepath + "\\keras_vggface\\models.py");
-                }
+                //try
+                //{
+                //    //Temporary FIX for VGG FACE latest Keras version bug
+                //    string url = "https://raw.githubusercontent.com/hcmlab/nova/master/packages/python-fixes/vggface-fix.py";
+                //    Client = new WebClient();
+                //    Client.DownloadFile(url, sitepackagepath + "\\keras_vggface\\models.py");
+                //}
 
-                catch { }
+                //catch { }
 
                 //DOWNLOAD required python scripts from git.
 

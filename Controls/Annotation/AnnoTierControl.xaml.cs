@@ -83,6 +83,24 @@ namespace ssi
             tier.Border = border;
         }
 
+
+        public void UpdateRowHeight(AnnoTier tier, int height)
+        {
+            int rowIndex = Grid.GetRow(tier.Border);
+            var r = grid.RowDefinitions[rowIndex];
+
+            if (height <= 0)
+            {
+                r.Height = new GridLength(1, GridUnitType.Star);
+            }
+            else
+            {
+                r.Height = new GridLength((double)height, GridUnitType.Pixel);
+            }
+           
+            
+        }
+
         public void Remove(AnnoTier tier)
         {
             int rowIndex = Grid.GetRow(tier.Border);

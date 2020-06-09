@@ -25,6 +25,7 @@ namespace ssi
         public static BackgroundWorker explanationWorker;
         ExplanationWindow window;
         ExplanationWindowInnvestigate windowInnvestigate;
+        ExplanationWindowTfExplain windowfexplain;
         FeatureExplanationWindow windowFeatureExplanations;
         private static Action EmptyDelegate = delegate () { };
 
@@ -160,7 +161,41 @@ namespace ssi
             }
         }
 
-        
+
+        private void explanationWindowtfexplain_Click(object sender, RoutedEventArgs e)
+        {
+            if (windowfexplain != null)
+            {
+                windowfexplain.deactiveExplainationButton();
+            }
+
+            if (AnnoTier.Selected == null)
+            {
+                MessageBox.Show("Select annotation track first");
+                return;
+            }
+
+            windowfexplain = new ExplanationWindowTfExplain();
+
+            try
+            {
+                byte[] img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
+
+                BitmapImage imageBitmap = new BitmapImage();
+                imageBitmap.BeginInit();
+                imageBitmap.StreamSource = new System.IO.MemoryStream(img);
+                imageBitmap.EndInit();
+                windowfexplain.explanationImage.Source = imageBitmap;
+
+                windowfexplain.Show();
+            }
+            catch
+            {
+
+            }
+        }
+
+
 
 
         public void checkPythonInstallation()
@@ -198,15 +233,15 @@ namespace ssi
             ProcessStartInfo startInfo = new ProcessStartInfo();
             try
             {
-           
 
-                startInfo.WindowStyle =  (Properties.Settings.Default.EnablePythonDebug == true) ? ProcessWindowStyle.Normal :  ProcessWindowStyle.Hidden;
+
+                startInfo.WindowStyle = (Properties.Settings.Default.EnablePythonDebug == true) ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
                 startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "ssi\\python.exe" + "\"";
                 startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
                 process.StartInfo = startInfo;
-         
+
                 process.Start();
- 
+
 
                 return process.Id;
             }
@@ -215,8 +250,8 @@ namespace ssi
             {
                 return -1;
             }
-            
            
+       
         }
 
         public static void killExplanationBackend()
