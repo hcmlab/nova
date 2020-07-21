@@ -16,7 +16,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.7.0";
+        public static string BuildVersion = "1.0.7.1";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static int xaiProcessId;

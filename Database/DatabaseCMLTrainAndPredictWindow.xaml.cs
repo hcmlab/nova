@@ -334,6 +334,7 @@ namespace ssi
                 foreach (string line in lines)
                 {
                     combinations[i] = line;
+                    i++;
                 }
 
             }
