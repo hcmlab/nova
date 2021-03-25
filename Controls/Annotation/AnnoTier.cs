@@ -381,7 +381,9 @@ namespace ssi
                         InitPointValues(anno);
                     }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON)
-                    { }
+                    { 
+                        //TODO MARCO                    
+                    }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.GRAPH)
                     { }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
