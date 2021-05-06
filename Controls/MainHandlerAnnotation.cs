@@ -153,17 +153,35 @@ namespace ssi
             if (AnnoTierStatic.Selected != null)
             {
                 control.geometricListControl.Visibility = Visibility.Collapsed;
+                control.polygonListControl.Visibility = Visibility.Collapsed;
                 control.annoLiveModeCheckBox.Visibility = Visibility.Collapsed;
                 control.annoLiveModeCheckBoxLabel.Visibility = Visibility.Collapsed;
                 control.annoLiveModeActivateMouse.Visibility = Visibility.Collapsed;
 
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
-                    AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                     AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
                     control.geometricListControl.Visibility = Visibility.Visible;
                     control.geometricListControl.Height = control.ActualHeight / 2;
+                }
+                else if(AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                {
+                    control.polygonListControl.Visibility = Visibility.Visible;
+                    control.polygonListControl.Height = control.ActualHeight / 2;
+
+                    GridView gView = control.polygonListControl.polygonDataGrid.View as GridView;
+                    const int GRID_VIEW_COLUMN_HEADER_COLOR_WIDTH = 60;
+                    var workingWidth = control.polygonListControl.polygonDataGrid.ActualWidth - SystemParameters.VerticalScrollBarWidth - GRID_VIEW_COLUMN_HEADER_COLOR_WIDTH;
+                    gView.Columns[0].Width = workingWidth;
+
+                    control.annoListControl.editButton.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editComboBox.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editTextBox.Visibility = Visibility.Collapsed;
+                    control.annoListControl.editComboBox.IsEnabled = false;
+                    control.annoListControl.editTextBox.IsEnabled = false;
+                    control.annoListControl.LabelColumn.Width = 70;
+                    control.annoListControl.ScoreColumn.Width = 0;
                 }
                 else
                 {
@@ -195,6 +213,7 @@ namespace ssi
                     control.annoListControl.editTextBox.IsEnabled = false;
                     control.annoListControl.LabelColumn.Width = 70;
                     control.annoListControl.ScoreColumn.Width = 0;
+
                 }
                 else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                 {
@@ -300,7 +319,7 @@ namespace ssi
 
 
 
-                AnnoListItem newItem = new AnnoListItem(start, stop - start, double.NaN);
+                AnnoListItem newItem = new AnnoListItem(start, stop - start, double.NaN.ToString());
                 AnnoTierNewLabelWindow dialog = new AnnoTierNewLabelWindow(AnnoTierStatic.Selected.AnnoList.Scheme, newItem);
                 dialog.ShowDialog();
 
@@ -356,6 +375,10 @@ namespace ssi
             else if (scheme.Type == AnnoScheme.TYPE.POINT)
             {
                 dialog = new AnnoTierNewPointSchemeWindow(ref scheme);
+            }
+            else if(scheme.Type == AnnoScheme.TYPE.POLYGON)
+            {
+                dialog = new AnnoTierNewPolygonSchemeWindow(ref scheme);
             }
             else
             {
@@ -426,8 +449,15 @@ namespace ssi
 
             AnnoTierStatic.Select(tier);
             tier.TimeRangeChanged(Time);
-
+            
             updateNavigator();
+
+            if (control.annoListControl.annoDataGrid.Items != null)
+                if (control.annoListControl.annoDataGrid.Items.Count > 0)
+                    if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                    {
+                        control.annoListControl.annoDataGrid.SelectedValue = control.annoListControl.annoDataGrid.Items[0];
+                    }
         }
 
         private void reloadAnnoTierFromFile(AnnoTier track)
@@ -610,7 +640,6 @@ namespace ssi
                 double offset = (1.0f / samplerate);
                 Time.CurrentPlayPosition = item.Start;
 
-
                 mediaList.Move(item.Start+ offset);
                 moveSignalCursor(item.Start);
 
@@ -635,10 +664,13 @@ namespace ssi
                     }
                 }
 
-                if (item.isGeometric)
+                if (item.Type == AnnoListItem.TYPE.POINT)
                 {
-                    int position = (int)(Time.CurrentPlayPosition * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
-                    geometricSelectItem(item, position);
+                    geometricSelectItem(item);
+                }
+                else if (item.Type == AnnoListItem.TYPE.POLYGON)
+                {
+                    polygonSelectItem(item);
                 }
             }
         }
