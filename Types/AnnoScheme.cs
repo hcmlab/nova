@@ -21,6 +21,8 @@ namespace ssi
             SEGMENTATION,
         }
 
+        public TYPE Type { get; set; }
+
         public class Label
         {
             public string Name { get; set; }
@@ -43,9 +45,9 @@ namespace ssi
             SampleRate = 1;
             MinOrBackColor = Defaults.Colors.Background;
             MaxOrForeColor = Defaults.Colors.Foreground;
+            DefaultLabel = "";
+            DefaultColor = Color.FromRgb(0, 0, 0);
         }
-
-        public TYPE Type { get; set;  }
 
         public string Name { get; set; }
 
@@ -75,5 +77,10 @@ namespace ssi
         public Color MinOrBackColor { get; set; }
 
         public Color MaxOrForeColor { get; set; }
-    } 
+        
+        public string DefaultLabel { get; set; }
+
+        public Color DefaultColor { get; set; }
+
+    }
 }
