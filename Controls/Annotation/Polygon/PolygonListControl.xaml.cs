@@ -10,6 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Collections;
 using System.Collections.ObjectModel;
+using PropertyTools.Wpf;
 
 namespace ssi
 {
@@ -20,45 +21,12 @@ namespace ssi
     {
         private GridViewColumnHeader listViewSortCol = null;
         private ListViewSortAdorner listViewSortAdorner = null;
+        private MainHandler mainHandler;
+        private Color color;
 
         public PolygonListControl()
         {
             InitializeComponent();
-        }
-
-
-        private void editTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-        }
-
-        private void MenuItemSetConfidenceZeroClick(object sender, RoutedEventArgs e)
-        {
-            if (geometricDataGrid.SelectedItems.Count != 0)
-            {
-                string name = geometricDataGrid.SelectedItem.GetType().Name;
-                if (name == "PointListItem")
-                {
-                    foreach (PointListItem s in geometricDataGrid.SelectedItems)
-                    {
-                        s.Confidence = 0.0;
-                    }
-                }
-            }
-        }
-
-        private void MenuItemSetConfidenceOneClick(object sender, RoutedEventArgs e)
-        {
-            if (geometricDataGrid.SelectedItems.Count != 0)
-            {
-                string name = geometricDataGrid.SelectedItem.GetType().Name;
-                if (name == "PointListItem")
-                {
-                    foreach (PointListItem s in geometricDataGrid.SelectedItems)
-                    {
-                        s.Confidence = 1.0;
-                    }
-                }
-            }
         }
 
         private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
@@ -69,11 +37,10 @@ namespace ssi
                 string sortBy = column.Tag.ToString();
                 if (sortBy == "Label")
                 {
-
                     if (listViewSortCol != null)
                     {
                         AdornerLayer.GetAdornerLayer(listViewSortCol).Remove(listViewSortAdorner);
-                        geometricDataGrid.Items.SortDescriptions.Clear();
+                        polygonDataGrid.Items.SortDescriptions.Clear();
                     }
 
                     if (listViewSortCol == null)
@@ -81,13 +48,13 @@ namespace ssi
                         listViewSortCol = column;
                         listViewSortAdorner = new ListViewSortAdorner(listViewSortCol, ListSortDirection.Ascending);
                         AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
-                        geometricDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Ascending));
+                        polygonDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Ascending));
                     }
                     else if (listViewSortAdorner.Direction == ListSortDirection.Ascending)
                     {
                         listViewSortAdorner = new ListViewSortAdorner(listViewSortCol, ListSortDirection.Descending);
                         AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
-                        geometricDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Descending));
+                        polygonDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Descending));
                     }
                     else
                     {
@@ -97,5 +64,26 @@ namespace ssi
             }     
         }
 
+        public void setMainHandler(MainHandler mh)
+        {
+            this.mainHandler = mh;
+        }
+
+        private void ColorPicker_DropDownClosed(object sender, EventArgs e)
+        {
+            PolygonLabel pl = (PolygonLabel)((ColorPicker)sender).DataContext;
+
+            if (!this.mainHandler.updateFrameData(pl))
+            {
+                this.mainHandler.undoColorChanges(pl, this.color);
+            }
+        }
+
+        private void ColorPicker_DropDownOpened(object sender, EventArgs e)
+        {
+            PolygonLabel pl = (PolygonLabel)((ColorPicker)sender).DataContext;
+            this.color = pl.Color;
+            this.mainHandler.selectSpecificLabel(pl);
+        }
     }
 }
