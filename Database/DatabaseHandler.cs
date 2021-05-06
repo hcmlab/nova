@@ -1579,6 +1579,10 @@ namespace ssi
                 document.Add(documentSr);
                 document.Add(documentColor);
             }
+            else if(scheme.Type == AnnoScheme.TYPE.POLYGON)
+            {
+                // TODO MARCO
+            }
             else if (scheme.Type == AnnoScheme.TYPE.FREE)
             {
                 document.Add(documentColor);
@@ -1756,6 +1760,10 @@ namespace ssi
                     scheme.NumberOfPoints = annoSchemeDocument["num"].ToInt32();
                     scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
                     scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
+                }
+                else if(scheme.Type == AnnoScheme.TYPE.POLYGON)
+                {
+                    // TODO MARCO
                 }
             }
             catch (Exception ex)
@@ -1994,6 +2002,10 @@ namespace ssi
 
                     data.Add(new BsonDocument { { "label", annoList[i].Label }, { "conf", annoList[i].Confidence }, { "points", Points } });
                 }
+            }
+            else if(schemeType == AnnoScheme.TYPE.POLYGON)
+            {
+                // TODO MARCO
             }
 
             return data;
@@ -2350,7 +2362,7 @@ namespace ssi
                         double start = i / annoList.Scheme.SampleRate;
                         double dur = 1 / annoList.Scheme.SampleRate;
 
-                        AnnoListItem ali = new AnnoListItem(start, dur, score, "", Colors.Black, double.Parse(confidence));
+                        AnnoListItem ali = new AnnoListItem(start, dur, score.ToString(), "", Colors.Black, double.Parse(confidence));
 
                         annoList.Add(ali);
                     }
@@ -2450,9 +2462,13 @@ namespace ssi
                         double start = i / annoList.Scheme.SampleRate;
                         double dur = 1 / annoList.Scheme.SampleRate;
 
-                        AnnoListItem ali = new AnnoListItem(start, dur, label, "", annoList.Scheme.MinOrBackColor, confidence, true, pl);
+                        AnnoListItem ali = new AnnoListItem(start, dur, label, "", annoList.Scheme.MinOrBackColor, confidence, AnnoListItem.TYPE.POINT, pl);
                         annoList.Add(ali);
                     }
+                }
+                else if(annoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                {
+                    // TODO Marco
                 }
             }
         }
@@ -2522,7 +2538,7 @@ namespace ssi
                         }
                        
 
-                        AnnoListItem newali = new AnnoListItem(start, duration, score, ali.Meta, ali.Color, conf);
+                        AnnoListItem newali = new AnnoListItem(start, duration, score.ToString(), ali.Meta, ali.Color, conf);
                         newList.Add(newali);
                         start = start + duration;
                         index = 0;
@@ -2553,7 +2569,7 @@ namespace ssi
                     Color color = ali.Color;
                     for (int i=0; i< factor; i++)
                     {
-                        AnnoListItem newal = new AnnoListItem(start, duration, score, meta, color, conf);
+                        AnnoListItem newal = new AnnoListItem(start, duration, score.ToString(), meta, color, conf);
                         start = start + duration;
                         newList.Add(newal);
                     } 
@@ -2568,7 +2584,7 @@ namespace ssi
                     if (oldScheme.MinScore != newScheme.MinScore || oldScheme.MaxScore != newScheme.MaxScore)
                     {
                         double score = convertRange(oldScheme.MinScore, oldScheme.MaxScore, newScheme.MinScore, newScheme.MaxScore, ali.Score);
-                        AnnoListItem newal = new AnnoListItem(ali.Start, ali.Duration, score, ali.Meta, ali.Color, ali.Confidence);
+                        AnnoListItem newal = new AnnoListItem(ali.Start, ali.Duration, score.ToString(), ali.Meta, ali.Color, ali.Confidence);
                         newList.AddSorted(newal);
                     }
                     else
