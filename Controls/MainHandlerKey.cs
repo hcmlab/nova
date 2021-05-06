@@ -240,6 +240,7 @@ namespace ssi
 
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
+            handleKeyEvent(sender, e);
             if (!control.annoListControl.editTextBox.IsFocused
                 && !control.annoListControl.searchTextBox.IsFocused)
             {
@@ -408,7 +409,6 @@ namespace ssi
                             }
                         }
 
-                      
                         break;
                     default:
                         break;
@@ -419,6 +419,7 @@ namespace ssi
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
+            handleKeyEvent(sender, e);
             if (!this.control.annoListControl.editTextBox.IsFocused)
             {
 
@@ -433,11 +434,11 @@ namespace ssi
                     case 2:
                         if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
                         {
-
+                            
                         }
                         else if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                         {
-
+                            
                         }
                         else if (e.KeyboardDevice.IsKeyDown(Key.LeftShift) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
                         {
@@ -461,7 +462,6 @@ namespace ssi
                             {
                                 saveSelectedAnno();
                             }
-
                             else  if (e.KeyboardDevice.IsKeyDown(Key.N))
                                 {
                                     addNewAnnotation();
