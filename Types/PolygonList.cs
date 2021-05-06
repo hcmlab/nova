@@ -20,9 +20,9 @@ namespace ssi
             get
             {
                 List<PolygonLabel> polygonListClone = new List<PolygonLabel>();
-
-                foreach (PolygonLabel p in this.polygons)
-                    polygonListClone.Add(new PolygonLabel(p.Polygon, p.Label));
+                if (this.polygons is object)
+                    foreach (PolygonLabel p in this.polygons)
+                        polygonListClone.Add(new PolygonLabel(p.Polygon, p.Label, p.Color, p.ID));
 
                 return polygonListClone;
             }
@@ -43,7 +43,7 @@ namespace ssi
             this.polygons.Add(polygonLabel);
         }
 
-        public void removeLastPoint()
+        public void removeLastPolygon()
         {
             this.polygons.RemoveAt(polygons.Count - 1);
         }
@@ -51,6 +51,23 @@ namespace ssi
         public void removeAt(int pos)
         {
             this.polygons.RemoveAt(pos);
+        }
+
+        public void removeAllPolygons()
+        {
+            this.polygons.Clear();
+        }
+
+        public void removeExplicitPolygon(PolygonLabel pl)
+        {
+            for(int i = 0; i < polygons.Count; i++)
+            {
+                if (polygons[i].Equals(pl))
+                {
+                    polygons.RemoveAt(i);
+                    break;
+                }
+            }
         }
     }
 }
