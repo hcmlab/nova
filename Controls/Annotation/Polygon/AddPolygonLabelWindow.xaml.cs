@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using System.Windows.Input;
+
 
 namespace ssi
 {
@@ -28,17 +20,29 @@ namespace ssi
 
             this.scheme = scheme;
             this.mainHandler = mainHandler;
-            plTextBox.Text = scheme.DefaultLabel;
-            plTextBox.SelectAll();
+            dlColor.SelectedColor = scheme.DefaultColor;
+
+            if (scheme.DefaultLabel != "")
+                plTextBox.Text = scheme.DefaultLabel;
+            else
+                plTextBox.Text = "Unknown";
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
+            Byte R = dlColor.SelectedColor.GetValueOrDefault().R;
+            Byte G = dlColor.SelectedColor.GetValueOrDefault().G;
+            Byte B = dlColor.SelectedColor.GetValueOrDefault().B;
 
-            PolygonLabel polygonLabel = new PolygonLabel(null, plTextBox.Text == "" ? Defaults.Strings.Unkown : plTextBox.Text);
-            this.mainHandler.addPolygonLabelToDataGrid(polygonLabel);
+            PolygonLabel polygonLabel = new PolygonLabel(null, plTextBox.Text == "" ? Defaults.Strings.Unkown : plTextBox.Text, Color.FromRgb(R, G, B));
+            
+            this.mainHandler.addPolygonLabelToPolygonList(polygonLabel);
+
             Close();
+            MainHandler.IsCreateModeOn = true;
+            this.mainHandler.drawPolygon(polygonLabel);
+            
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
