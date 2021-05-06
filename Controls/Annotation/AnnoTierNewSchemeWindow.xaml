@@ -10,7 +10,7 @@
         Icon="..\..\Resources\ui.ico"
         SizeToContent="WidthAndHeight">
 
-    <Grid Margin="5">
+    <Grid Margin="5" Height="422">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
@@ -51,6 +51,16 @@
                 </StackPanel>
             </RadioButton>
 
+            <Separator Name="cmlPolySeparator" Height="20"></Separator>
+
+            <RadioButton Name="polygoneRadioButton" GroupName="Scheme" VerticalContentAlignment="Center" Visibility="Visible">
+                <StackPanel>
+                    <Label>Create a scheme with polygones</Label>
+                    <!--<Image Width="300" Source="/Resources/continuous.png" Margin="0,0,0,5"/>-->
+                </StackPanel>
+            </RadioButton>
+
+            
             <Separator Name="cmlSeparator" Height="20"></Separator>
 
             <RadioButton Name="cmlRadioButton" GroupName="Scheme" VerticalContentAlignment="Center" HorizontalContentAlignment="Stretch">
