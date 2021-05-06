@@ -13,18 +13,17 @@ namespace ssi
         private string meta;
         private Color color;
         private double confidence;
-        private bool geometric;
         private PointList points;
+        private PolygonList polygonList;
 
-        public bool isGeometric
+        public enum TYPE
         {
-            get { return geometric; }
-            set
-            {
-                geometric = value;
-                OnPropertyChanged("Geometric");
-            }
+            POINT,
+            POLYGON,
+            NONE
         }
+
+        public TYPE Type { get; set; }        
 
         public PointList Points
         {
@@ -124,7 +123,9 @@ namespace ssi
             }
         }
 
-        public AnnoListItem(double start, double duration, string label, string meta = "", Color color = new Color(), double confidence = 1.0, bool geometric = false, PointList points = null)
+        public PolygonList PolygonList { get => polygonList; set => polygonList = value; }
+
+        public AnnoListItem(double start, double duration, string label, string meta = "", Color color = new Color(), double confidence = 1.0, TYPE type = TYPE.NONE, PointList points = null, PolygonList polygonList = null)
         {
             this.start = Math.Max(0, start);
             this.duration = Math.Max(0, duration);
@@ -133,34 +134,19 @@ namespace ssi
             this.meta = meta;
             this.color = color;
             this.confidence = confidence;
-            this.geometric = geometric;
-            if (geometric)
+            this.Type = type;
+            if (this.Type == TYPE.POINT)
             {
                 if (points != null)
                 {
                     this.points = points;
                 }
             }
+
+            this.polygonList = polygonList;
         }
 
-        public AnnoListItem(double start, double duration, double score, string meta = "", Color color = new Color(), double confidence = 1.0, bool geometric = false, PointList points = null)
-        {
-            this.start = Math.Max(0, start);
-            this.duration = Math.Max(0, duration);
-            this.label = null;
-            this.score = score;
-            this.meta = meta;
-            this.color = color;
-            this.confidence = confidence;
-            this.geometric = geometric;
-            if (geometric)
-            {
-                if (points != null)
-                {
-                    this.points = points;
-                }
-            }
-        }
+       
 
         public class AnnoListItemComparer : IComparer<AnnoListItem>
         {
