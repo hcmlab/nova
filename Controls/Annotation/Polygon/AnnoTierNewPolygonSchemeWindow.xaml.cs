@@ -27,9 +27,17 @@ namespace ssi
 
             this.scheme = scheme;
 
-            nameTextBox.Text = scheme.Name;
+            if(scheme.Name != "")
+                nameTextBox.Text = scheme.Name;
+            else
+                nameTextBox.Text = "Unknown";
+
+            if (scheme.DefaultLabel != "")
+                dlTextBox.Text = scheme.DefaultLabel;
+            else
+                dlTextBox.Text = "Unknown";
+
             srTextBox.Text = scheme.SampleRate.ToString();
-            dlTextBox.Text = scheme.DefaultLabel;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
@@ -37,8 +45,13 @@ namespace ssi
             DialogResult = true;
 
             scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
-            scheme.DefaultLabel = dlTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
-            
+            scheme.DefaultLabel = dlTextBox.Text == "" ? Defaults.Strings.Unkown : dlTextBox.Text;
+            Byte R = dlColor.SelectedColor.GetValueOrDefault().R;
+            Byte G = dlColor.SelectedColor.GetValueOrDefault().G;
+            Byte B = dlColor.SelectedColor.GetValueOrDefault().B;
+
+            scheme.DefaultColor = Color.FromRgb(R, G, B);
+
             if (double.TryParse(srTextBox.Text, out double value))
             {
                 scheme.SampleRate = value;

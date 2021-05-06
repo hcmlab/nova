@@ -22,6 +22,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Label Grid.Column="0" Grid.Row="0" >Scheme name</Label>
@@ -30,10 +31,13 @@
         <Label Grid.Column="0" Grid.Row="1" >Sample rate (Hz)</Label>
         <TextBox Name="srTextBox" Grid.Column="1" Grid.Row="1" x:FieldModifier="public" Margin="5"/>
 
-        <Label Grid.Column="0" Grid.Row="2" >Defautl Label</Label>
+        <Label Grid.Column="0" Grid.Row="2" >Default-Label</Label>
         <TextBox Name="dlTextBox" Grid.Column="1" Grid.Row="2" x:FieldModifier="public" Margin="5"/>
+
+        <Label Grid.Column="0" Grid.Row="3" >Default-Color</Label>
+        <p:ColorPicker Name="dlColor" Grid.Row="3" Grid.Column="1" Margin="5" BorderBrush="DarkGray" SelectedColor="Black" Background="Transparent" />
         
-        <StackPanel Grid.ColumnSpan="2" Grid.Row="3"  HorizontalAlignment="Right" Orientation="Horizontal" >
+        <StackPanel Grid.ColumnSpan="2" Grid.Row="4"  HorizontalAlignment="Right" Orientation="Horizontal" >
             <Button Margin="5" Width="60" Height="25" Click="OkButton_Click">OK</Button>
             <Button Margin="5" Width="60" Height="25" Click="CancelButton_Click">Cancel</Button>
         </StackPanel>
