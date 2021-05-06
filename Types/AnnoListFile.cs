@@ -160,7 +160,7 @@ namespace ssi
                             {
                                 writer.WriteStartObject();
                                 writer.WritePropertyName("name");
-                                writer.WriteValue(e.Label);
+                                writer.WriteValue(e.Label.Split(' ')[1]);
                                 if(e.PolygonList.Polygons.Count > 0)
                                 {
                                     writer.WritePropertyName("polygons");
@@ -192,7 +192,7 @@ namespace ssi
 
                             writer.WriteEndArray();
                             writer.WriteEndObject();
-                            File.WriteAllText(filePath + "~.json", sb.ToString());
+                            File.WriteAllText(filePath + "~", sb.ToString());
                         }
                     }
                     else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
@@ -450,7 +450,7 @@ namespace ssi
                     list.Scheme.DefaultColor = (Color)(ColorConverter.ConvertFromString(scheme.Attributes["default-label-color"].Value));
                 }
 
-                if (File.Exists(filepath + "~") || File.Exists(filepath + "~.json"))
+                if (File.Exists(filepath + "~") || File.Exists(filepath + "~"))
                 {
                     if (list.Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                     {
@@ -537,12 +537,12 @@ namespace ssi
                         }
                         else
                         {
-                            dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(File.ReadAllText(filepath + "~.json"));
+                            dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(File.ReadAllText(filepath + "~"));
                             Console.WriteLine(result);
 
                             foreach (var frame in result.frame)
                             {
-                                String Framename = frame.name;
+                                String Framename = "Frame " + frame.name;
                                 List<PolygonLabel> polygonLabels = new List<PolygonLabel>();
 
                                 if (frame.polygons is object)
