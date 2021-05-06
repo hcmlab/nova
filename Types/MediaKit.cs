@@ -106,28 +106,28 @@ namespace ssi
          
            
 
-            // add grid
-            grid = new Grid();
-            grid.MouseDown += OnMouseDown;
-            grid.MouseUp += OnMouseUp;
-            grid.MouseMove += OnMouseMove;
+                // add grid
+                grid = new Grid();
+                grid.MouseDown += OnMouseDown;
+                grid.MouseUp += OnMouseUp;
+                grid.MouseMove += OnMouseMove;
 
-            // add video
-            Grid.SetColumn(this, 0);
-            Grid.SetRow(this, 0);
-            grid.Children.Add(this);
+                // add video
+                Grid.SetColumn(this, 0);
+                Grid.SetRow(this, 0);
+                grid.Children.Add(this);
 
-            // add overlay
-            if (type == MediaType.VIDEO)
-            {
-                overlayImage = new Image();
-                overlayBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
-                overlayBitmap.Clear(Colors.Transparent);
-                overlayImage.Source = overlayBitmap;
-                Grid.SetColumn(overlayImage, 0);
-                Grid.SetRow(overlayImage, 0);
-                grid.Children.Add(overlayImage);
-            }
+                // add overlay
+                if (type == MediaType.VIDEO)
+                {
+                    overlayImage = new Image();
+                    overlayBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+                    overlayBitmap.Clear(Colors.Transparent);
+                    overlayImage.Source = overlayBitmap;
+                    Grid.SetColumn(overlayImage, 0);
+                    Grid.SetRow(overlayImage, 0);
+                    grid.Children.Add(overlayImage);
+                }
             }
             catch
             {
