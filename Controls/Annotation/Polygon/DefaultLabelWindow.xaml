@@ -19,12 +19,16 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Label Grid.Column="0" Grid.Row="0" >New Default-Label</Label>
         <TextBox Name="dlTextBox" Grid.Column="1" Grid.Row="0" x:FieldModifier="public" Margin="5"/>
-        
-        <StackPanel Grid.ColumnSpan="2" Grid.Row="1"  HorizontalAlignment="Right" Orientation="Horizontal" >
+
+        <Label Grid.Column="0" Grid.Row="1" >Default-Color</Label>
+        <p:ColorPicker Name="dlColor" Grid.Row="1" Grid.Column="1" Margin="5" BorderBrush="DarkGray" SelectedColor="Black" Background="Transparent" />
+
+        <StackPanel Grid.ColumnSpan="2" Grid.Row="2"  HorizontalAlignment="Right" Orientation="Horizontal" >
             <Button Margin="5" Width="60" Height="25" Click="OkButton_Click">OK</Button>
             <Button Margin="5" Width="60" Height="25" Click="CancelButton_Click">Cancel</Button>
         </StackPanel>

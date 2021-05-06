@@ -27,12 +27,24 @@ namespace ssi
 
             this.scheme = scheme;
             dlTextBox.Text = scheme.DefaultLabel;
+            dlColor.SelectedColor = scheme.DefaultColor;
+
+            if (scheme.DefaultLabel != "")
+                dlTextBox.Text = scheme.DefaultLabel;
+            else
+                dlTextBox.Text = "Unknown";
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            scheme.DefaultLabel = dlTextBox.Text == "" ? Defaults.Strings.Unkown : dlTextBox.Text;  
+            scheme.DefaultLabel = dlTextBox.Text == "" ? Defaults.Strings.Unkown : dlTextBox.Text;
+
+            Byte R = dlColor.SelectedColor.GetValueOrDefault().R;
+            Byte G = dlColor.SelectedColor.GetValueOrDefault().G;
+            Byte B = dlColor.SelectedColor.GetValueOrDefault().B;
+
+            scheme.DefaultColor = Color.FromRgb(R, G, B);
 
             Close();
         }
