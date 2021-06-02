@@ -390,3 +390,5 @@ bin/cml/models/templates/discrete/video/tensorflow/vgg_face_weights.h5
 bin/cml/models/templates/continuous/video/tensorflow/vgg_face_weights.h5
 bin/cml/models/templates/continuous/video/tensorflow/nova_sessions
 bin/cml/models/templates/continuous/video/tensorflow/nova_db_info
+bin/PythonScripts/db.cfg
+bin/PythonScripts/example.py

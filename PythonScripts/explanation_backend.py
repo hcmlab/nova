@@ -415,7 +415,7 @@ def explain_lime():
                 img = img*(1./255)
                 prediction = model.predict(img)
                 explainer = lime_image.LimeImageExplainer()
-                img = np.squeeze(img)
+                img = np.squeeze(img).astype("double")
                 explanation = explainer.explain_instance(img, model.predict, top_labels=top_labels, hide_color=hide_color=="True", num_samples=num_samples)
 
                 top_classes = getTopXpredictions(prediction, top_labels)

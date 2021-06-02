@@ -507,7 +507,7 @@ namespace ssi
 
                 try
                 {
-                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python37")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python37", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python38")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python38", true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib", true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts", true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share", true);
@@ -526,7 +526,7 @@ namespace ssi
                 {
                     
 
-                    webClient.DownloadFile("https://www.python.org/ftp/python/3.7.7/python-3.7.7-embed-amd64.zip", "python.zip");
+                    webClient.DownloadFile("https://www.python.org/ftp/python/3.8.10/python-3.8.10-embed-amd64.zip", "python.zip");
 
                     using (FileStream zipToOpen = new FileStream("python.zip", FileMode.Open))
                     {
@@ -540,14 +540,14 @@ namespace ssi
 
                   
 
-                    using (FileStream zipToOpen = new FileStream("ssi/python37.zip", FileMode.Open))
+                    using (FileStream zipToOpen = new FileStream("ssi/python38.zip", FileMode.Open))
                     {
                         using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                         {
-                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi/python37", false);
+                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi/python38", false);
                         }
                     }
-                    File.Delete("ssi/python37.zip");
+                    File.Delete("ssi/python38.zip");
                 }
                 catch (Exception e)
                 {
@@ -555,7 +555,7 @@ namespace ssi
                     return;
                 }
 
-                string path = AppDomain.CurrentDomain.BaseDirectory + "ssi\\python37._pth";
+                string path = AppDomain.CurrentDomain.BaseDirectory + "ssi\\python38._pth";
 
                 using (StreamWriter sw = File.CreateText(path))
                 {
@@ -565,7 +565,7 @@ namespace ssi
                     sw.WriteLine(".\\lib");
                     sw.WriteLine(".\\lib\\plat-win");
                     sw.WriteLine(".\\lib\\site-packages");
-                    sw.WriteLine(".\\python37");
+                    sw.WriteLine(".\\python38");
 
                 }
 
@@ -576,25 +576,28 @@ namespace ssi
                 string cudapath = Environment.GetEnvironmentVariable("CUDA_PATH", EnvironmentVariableTarget.Machine);
 
                 string[] requirements = {
-                            "ssi/toolz-0.10.0-py2.py3-none-any.whl",
+                            "ssi/toolz-0.11.1-py3-none-any.whl",
                             "ssi/termcolor-1.1.0-py2.py3-none-any.whl",
+                            "ssi/typing-3.7.4.3-py3-none-any.whl",
+                            "ssi/promise-2.3-py3-none-any.whl",
                             "ssi/future-0.18.2-py3-none-any.whl",
                             "resampy",
                             "pickle-mixin",
                             "Flask",
-                            "tensorflow-gpu==2.0.1",
-                            "imageio == 2.8.0",
-                            "h5py == 2.10.0",
-                            "matplotlib == 3.2.1",
+                            "hcai-datasets",
+                            //"tensorflow-gpu==2.0.1",
+                            "imageio",
+                            "h5py",
+                            "matplotlib",
                             "tf-explain",
                             //"https://github.com/albermax/innvestigate/archive/1.0.7.tar.gz",
-                            "lime==0.2",
-                            "scipy == 1.4.1",
-                            "pymongo==3.7.2",
-                            "scikit_image==0.14.2",
-                            "Pillow == 5.4.1",
+                            "lime",
+                            "scipy",
+                            "pymongo",
+                            "scikit_image",
+                            "Pillow",
                             "opencv-python",
-                            "numpy==1.18.2",
+                            "numpy",
                             "sklearn"
 
                            
@@ -604,20 +607,20 @@ namespace ssi
 
 
 
-                if (cudapath != null)
-                {
+                //if (cudapath != null)
+                //{
                     System.IO.File.WriteAllLines("requirements.txt", requirements);
 
-                }
-                else
-                {
-                    MessageBoxResult mb = MessageBox.Show("No CUDA installation found, loading tensorflow without GPU support.", "Attention", MessageBoxButton.YesNo);
+                //}
+                //else
+                //{
+                //    MessageBoxResult mb = MessageBox.Show("No CUDA installation found, loading tensorflow without GPU support.", "Attention", MessageBoxButton.YesNo);
                
 
-                    requirements[3] = "tensorflow==1.12.0";
+                //    requirements[3] = "tensorflow==2.12.0";
 
-                    System.IO.File.WriteAllLines("requirements.txt", requirements);
-                }
+                //    System.IO.File.WriteAllLines("requirements.txt", requirements);
+                //}
 
 
                 Process process = new Process();
@@ -640,16 +643,20 @@ namespace ssi
 
                 //Install two wheels for broken pip install files on embedded python. Credit to: Christoph Gohlke https://www.lfd.uci.edu/~gohlke/pythonlibs/. Mirrored on NOVA public git.
 
-                string urltoolz = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/toolz-0.10.0-py2.py3-none-any.whl";
-                string urltermcolor = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/termcolor-1.1.0-py2.py3-none-any.whl";
+                string urltoolz = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/toolz-0.11.1-py3-none-any.whl";
+                string urltyping = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/typing-3.7.4.3-py3-none-any.whl";
+                string urlpromise = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/promise-2.3-py3-none-any.whl";
                 string urlfuture = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/future-0.18.2-py3-none-any.whl";
-                string urltkinderfix = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/tkinter-fix-377.zip";
+                string urltermcolor = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/termcolor-1.1.0-py2.py3-none-any.whl";
+                //string urltkinderfix = "https://github.com/hcmlab/nova/raw/master/packages/python-fixes/tkinter-fix-377.zip";
 
                 WebClient Client = new WebClient();
-                Client.DownloadFile(urltoolz, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.10.0-py2.py3-none-any.whl");
+                Client.DownloadFile(urltoolz, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.11.1-py3-none-any.whl");
+                Client.DownloadFile(urltyping, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "typing-3.7.4.3-py3-none-any.whl");
                 Client.DownloadFile(urltermcolor, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
+                Client.DownloadFile(urlpromise, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "promise-2.3-py3-none-any.whl");
                 Client.DownloadFile(urlfuture, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "future-0.18.2-py3-none-any.whl");
-                Client.DownloadFile(urltkinderfix, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "tkinterfix.zip");
+                //Client.DownloadFile(urltkinderfix, Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "tkinterfix.zip");
 
                 process = new Process();
                 startInfo = new ProcessStartInfo();
@@ -661,35 +668,37 @@ namespace ssi
                 process.WaitForExit();
                 process.Close();
 
-                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.10.0-py2.py3-none-any.whl");
-                File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "termcolor-1.1.0-py2.py3-none-any.whl");
+                //File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "toolz-0.11.1-py3-none-any.whl");
+                //File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "typing-3.7.4.3-py3-none-any.whl");
+                //File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "promise-2.3-py3-none-any.whl");
+                //File.Delete(Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory + "\\ssi\\") + "promise-2.3-py3-none-any.whl");
 
 
 
 
-                if(File.Exists("ssi/_tkinter.pyd")) 
-                {
-                    File.Delete("ssi/_tkinter.pyd");
-                }
-                if (File.Exists("ssi/tcl86t.dll"))
-                {
-                    File.Delete("ssi/tcl86t.dll");
-                }
-                if (File.Exists("ssi/tk86t.dll"))
-                {
-                    File.Delete("ssi/tk86t.dll");
-                }
+                //if(File.Exists("ssi/_tkinter.pyd")) 
+                //{
+                //    File.Delete("ssi/_tkinter.pyd");
+                //}
+                //if (File.Exists("ssi/tcl86t.dll"))
+                //{
+                //    File.Delete("ssi/tcl86t.dll");
+                //}
+                //if (File.Exists("ssi/tk86t.dll"))
+                //{
+                //    File.Delete("ssi/tk86t.dll");
+                //}
 
-                using (FileStream zipToOpen = new FileStream("ssi/tkinterfix.zip", FileMode.Open))
-                {
-                    using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
-                    {
-                        ZipArchiveExtension.ExtractToDirectory(archive, "ssi", false);
-                   }
-                }
-                File.Delete("ssi/tkinterfix.zip");
+                //using (FileStream zipToOpen = new FileStream("ssi/tkinterfix.zip", FileMode.Open))
+                //{
+                //    using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                //    {
+                //        ZipArchiveExtension.ExtractToDirectory(archive, "ssi", false);
+                //   }
+                //}
+                //File.Delete("ssi/tkinterfix.zip");
 
-  
+
 
 
 
