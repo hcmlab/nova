@@ -980,6 +980,16 @@ namespace ssi
             string[] lines = File.ReadAllLines(filepath);
             bool tracklabels = false;
 
+
+            string[] split;
+            string[] splitnext;
+            double start;
+            double end;
+            double duration;
+            string[] labelsplit;
+            string label;
+            string meta;
+
             for (int i=0;  i < lines.Length; i++)
             {
                 if(lines[i].Contains("{start}")){
@@ -993,26 +1003,42 @@ namespace ssi
                 }
                 if (tracklabels)
                 {
-                    string[] split = lines[i].Split(' ');
-                    string[] splitnext = lines[i+1].Split(' ');
-                    double start = double.Parse(split[0], CultureInfo.InvariantCulture);
-                    double end = double.Parse(splitnext[0], CultureInfo.InvariantCulture);
-                    double duration = end - start;
-                    string[] labelsplit = split[1].Split(',');
-                    string label = labelsplit[1];
-                    string meta = labelsplit[0];
+                    split = lines[i].Split(' ');
+                    splitnext = lines[i + 1].Split(' ');
+
+                    if (lines[i].Contains("_start")){
+                        start = double.Parse(split[0], CultureInfo.InvariantCulture);
+                        end = double.Parse(splitnext[0], CultureInfo.InvariantCulture);
+                        duration = end - start;
+                        labelsplit = split[1].Split(',');
+                        label = labelsplit[1].Remove(labelsplit[1].Length-6,6);
+                        meta = labelsplit[0];
+                        list[0].AddSorted(new AnnoListItem(start, duration, label, meta, Colors.Black));
+                    }
+                    else if (lines[i].Contains("_end")){
+                        //nothing, sanity check.
+                    }
+
+                    else
+                    {
+                        
+                        start = double.Parse(split[0], CultureInfo.InvariantCulture);
+                        end = double.Parse(splitnext[0], CultureInfo.InvariantCulture);
+                        duration = end - start;
+                        labelsplit = split[1].Split(',');
+                        label = labelsplit[1];
+                        meta = labelsplit[0];
 
 
 
-                    list[0].AddSorted(new AnnoListItem(start, duration, label, meta, Colors.Black));
-                    
-                }
-                    
+                        list[0].AddSorted(new AnnoListItem(start, duration, label, meta, Colors.Black));
+                    }
+                }  
             }
 
             AnnoScheme scheme = new AnnoScheme();
             scheme.Type = AnnoScheme.TYPE.FREE;
-            scheme.Name = filepath;
+            scheme.Name = System.IO.Path.GetFileNameWithoutExtension(filepath);
             list[0].Scheme = scheme;
 
             return list;

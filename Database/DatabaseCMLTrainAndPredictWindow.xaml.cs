@@ -496,8 +496,16 @@ namespace ssi
                                 stream.Type + "{" +
                                 streamName + "}\\" +
                                 trainer.Name + "\\";
-                                
-                Directory.CreateDirectory(trainerDir);
+
+                try
+                {
+                    Directory.CreateDirectory(trainerDir);
+                }
+                catch
+                {
+                    MessageBox.Show("Could not create folder " + trainerDir + " Make sure NOVA has writing access to the directory");
+                    return;
+                }
                 
                 string trainerName = TrainerNameTextBox.Text == "" ? trainer.Name : TrainerNameTextBox.Text;
                 string trainerOutPath = mode == Mode.COMPLETE ? tempTrainerPath : trainerDir + trainerName;
