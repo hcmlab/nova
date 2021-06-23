@@ -281,7 +281,8 @@ namespace ssi
                 media.OnMediaMouseUp += OnMediaMouseUp;
                 media.OnMediaMouseMove += OnMediaMouseMove;
                 media.OnMediaMouseDown += OnPolygonMediaMouseDown;
-                media.OnMediaMouseMove += OnPolygonMediaMouseMove;
+                media.OnMediaMouseUp += OnPolygonMediaMouseUp;
+                media.OnMediaMouseMove += OnPolygonMediaMouseMove; 
 
             }
             else
@@ -290,9 +291,12 @@ namespace ssi
                 mediaKit.OnMediaMouseUp += OnMediaMouseUp;
                 mediaKit.OnMediaMouseMove += OnMediaMouseMove;
                 mediaKit.OnMediaMouseDown += OnPolygonMediaMouseDown;
+                mediaKit.OnMediaMouseUp += OnPolygonMediaMouseUp;
                 mediaKit.OnMediaMouseMove += OnPolygonMediaMouseMove;
             }
         }
+
+        
 
         private void loadAnnoFile(string filename)
         {
