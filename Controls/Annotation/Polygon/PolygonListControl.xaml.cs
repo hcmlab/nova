@@ -81,9 +81,16 @@ namespace ssi
 
         private void ColorPicker_DropDownOpened(object sender, EventArgs e)
         {
-            PolygonLabel pl = (PolygonLabel)((ColorPicker)sender).DataContext;
-            this.color = pl.Color;
-            this.mainHandler.selectSpecificLabel(pl);
+            if(AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+            {
+                ((ColorPicker)sender).IsEnabled = false;
+            }
+            else
+            {
+                PolygonLabel pl = (PolygonLabel)((ColorPicker)sender).DataContext;
+                this.color = pl.Color;
+                this.mainHandler.selectSpecificLabel(pl);
+            }
         }
     }
 }
