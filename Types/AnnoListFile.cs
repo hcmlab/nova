@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
+using ssi.Types.Polygon;
 
 namespace ssi
 {
@@ -65,6 +66,24 @@ namespace ssi
                     sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"POLYGON\" sr=\"" + this.Scheme.SampleRate + "\" default-label=\"" + this.Scheme.DefaultLabel + "\" " +
                                  "default-label-color=\"" + this.Scheme.DefaultColor + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
                 }
+                else if (Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                {
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"DISCRETE_POLYGON\" sr=\"" + this.Scheme.SampleRate + "\" default-label=\"" + this.Scheme.DefaultLabel + "\" " +
+                                 "default-label-color=\"" + this.Scheme.DefaultColor + "\" color=\"" + this.Scheme.MinOrBackColor + "\">");
+
+                    int index = 0;
+
+                    foreach (AnnoScheme.Label lp in this.Scheme.Labels)
+                    {
+                        if (lp.Name != "GARBAGE")
+                        {
+                            sw.WriteLine("        <item name=\"" + lp.Name + "\" id=\"" + index + "\" color=\"" + lp.Color + "\" />");
+                            LabelIds.Add(lp.Name, index.ToString());
+                            index++;
+                        }
+                    }
+                    sw.WriteLine("    </scheme>");
+                }
                 else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
                 {
                     sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\"  />");
@@ -88,7 +107,7 @@ namespace ssi
                 if (Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                 {
                     StreamWriter sw = null;
-                    if (Scheme.Type != AnnoScheme.TYPE.POLYGON)
+                    if (Scheme.Type != AnnoScheme.TYPE.POLYGON && Scheme.Type != AnnoScheme.TYPE.DISCRETE_POLYGON)
                          sw = new StreamWriter(filePath + "~", false, System.Text.Encoding.Default);
 
                     if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -143,11 +162,12 @@ namespace ssi
                             sw.WriteLine(output + e.Confidence);
                         }
                     }
-                    else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                    else if (Scheme.Type == AnnoScheme.TYPE.POLYGON || Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                     {
                         StringBuilder sb = new StringBuilder();
                         StringWriter stringWriter = new StringWriter(sb);
-                        
+                        string index = "";
+
                         using (JsonWriter writer = new JsonTextWriter(stringWriter))
                         {
                             writer.Formatting = Newtonsoft.Json.Formatting.Indented;
@@ -155,7 +175,6 @@ namespace ssi
                             writer.WritePropertyName("frame");
                             writer.WriteStartArray();
                             
-
                             foreach (AnnoListItem e in this)
                             {
                                 writer.WriteStartObject();
@@ -170,16 +189,26 @@ namespace ssi
                                     {
                                         writer.WriteStartObject();
                                         writer.WritePropertyName("label");
-                                        writer.WriteValue(pl.Label);
-                                        writer.WritePropertyName("label_color");
-                                        writer.WriteValue(pl.Color.ToString());
+
+                                        if (Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                                        {
+                                            LabelIds.TryGetValue(pl.Label, out index);
+                                            writer.WriteValue(index);
+                                        }
+                                        else
+                                        {
+                                            writer.WriteValue(pl.Label);
+                                            writer.WritePropertyName("label_color");
+                                            writer.WriteValue(pl.Color.ToString());
+                                        }
+                                        
                                         writer.WritePropertyName("points");
                                         writer.WriteStartArray();
                                         foreach (PolygonPoint pp in pl.Polygon)
                                         {
                                             writer.WriteStartArray();
-                                            writer.WriteValue(pp.X);
-                                            writer.WriteValue(pp.Y);
+                                            writer.WriteValue(Convert.ToInt32(pp.X));
+                                            writer.WriteValue(Convert.ToInt32(pp.Y));
                                             writer.WriteEndArray();
                                         }
                                         writer.WriteEndArray();
@@ -209,7 +238,7 @@ namespace ssi
                             sw.WriteLine(e.Label + delimiter + e.Confidence);
                         }
                     }
-                    if (Scheme.Type != AnnoScheme.TYPE.POLYGON)
+                    if (Scheme.Type != AnnoScheme.TYPE.POLYGON && Scheme.Type != AnnoScheme.TYPE.DISCRETE_POLYGON)
                         sw.Close();
                 }
                 else
@@ -379,6 +408,10 @@ namespace ssi
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.POLYGON;
                 }
+                else if (type == AnnoScheme.TYPE.DISCRETE_POLYGON.ToString())
+                {
+                    list.Scheme.Type = AnnoScheme.TYPE.DISCRETE_POLYGON;
+                }
                 else if (type == AnnoScheme.TYPE.GRAPH.ToString())
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.GRAPH;
@@ -443,7 +476,23 @@ namespace ssi
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
                     list.Scheme.NumberOfPoints = int.Parse(scheme.Attributes["num"].Value);                    
                 }
-                else if(list.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                else if(list.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                {
+                    list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
+                    list.Scheme.DefaultLabel = scheme.Attributes["default-label"].Value;
+                    list.Scheme.DefaultColor = (Color)(ColorConverter.ConvertFromString(scheme.Attributes["default-label-color"].Value));
+
+                    foreach (XmlNode item in scheme)
+                    {
+                        LabelIds.Add(item.Attributes["id"].Value, item.Attributes["name"].Value);
+
+                        Color color = Defaults.Colors.Foreground;
+                        if (item.Attributes["color"] != null) color = (Color)ColorConverter.ConvertFromString(item.Attributes["color"].Value);
+                        AnnoScheme.Label lcp = new AnnoScheme.Label(item.Attributes["name"].Value, color);
+                        list.Scheme.Labels.Add(lcp);
+                    }
+                }
+                else if (list.Scheme.Type == AnnoScheme.TYPE.POLYGON)
                 {
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
                     list.Scheme.DefaultLabel = scheme.Attributes["default-label"].Value;
@@ -456,7 +505,7 @@ namespace ssi
                     {
                         double start = 0.0;
 
-                        if (list.Scheme.Type != AnnoScheme.TYPE.POLYGON)
+                        if (list.Scheme.Type != AnnoScheme.TYPE.POLYGON && list.Scheme.Type != AnnoScheme.TYPE.DISCRETE_POLYGON)
                         {
                             StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.UTF8);
                             string line = null;
@@ -538,31 +587,50 @@ namespace ssi
                         else
                         {
                             dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(File.ReadAllText(filepath + "~"));
-                            Console.WriteLine(result);
 
                             foreach (var frame in result.frame)
                             {
-                                String Framename = "Frame " + frame.name;
+                                String frameName = "Frame " + frame.name;
                                 List<PolygonLabel> polygonLabels = new List<PolygonLabel>();
 
                                 if (frame.polygons is object)
                                 {
                                     foreach (var polygon in frame.polygons)
                                     {
-                                        String label = polygon.label;
-                                        String color = polygon.label_color;
-                                        Color labelColor = (Color)ColorConverter.ConvertFromString(color);
+                                        String label = "";
+                                        String color = "";
+                                        Color labelColor = Colors.Black;
+
+                                        if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                                        {
+                                            String tmp = polygon.label;
+                                            LabelIds.TryGetValue(tmp, out label);
+
+                                            if (list.Scheme.Labels.Find(x => x.Name == label) != null)
+                                            {
+                                                labelColor = list.Scheme.Labels.Find(x => x.Name == label).Color;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            label = polygon.label;
+                                            color = polygon.label_color;
+                                            labelColor = (Color)ColorConverter.ConvertFromString(color);
+                                        }
+
                                         List<PolygonPoint> points = new List<PolygonPoint>();
                                         foreach (var point in polygon.points)
                                         {
-                                            points.Add(new PolygonPoint((double)point.First, (double)point.Last));
+                                            double id = PolygonUtilities.IDcounter;
+                                            PolygonUtilities.IDcounter++;
+                                            points.Add(new PolygonPoint((double)point.First, (double)point.Last, id));
                                         }
 
                                         polygonLabels.Add(new PolygonLabel(points, label, labelColor));
                                     }
                                 }
                                 const double defaultConfidence = 1.0;
-                                list.Add(new AnnoListItem(start, 1 / list.Scheme.SampleRate, Framename, "", list.Scheme.MinOrBackColor, defaultConfidence, AnnoListItem.TYPE.POLYGON, polygonList: new PolygonList(polygonLabels)));
+                                list.Add(new AnnoListItem(start, 1 / list.Scheme.SampleRate, frameName, "", list.Scheme.MinOrBackColor, defaultConfidence, AnnoListItem.TYPE.POLYGON, polygonList: new PolygonList(polygonLabels)));
                                 start += 1 / list.Scheme.SampleRate;
                             }
                         }
