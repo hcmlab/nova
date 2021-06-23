@@ -17,9 +17,12 @@ namespace ssi
             CONTINUOUS,
             POINT,
             POLYGON,
+            DISCRETE_POLYGON,
             GRAPH,
             SEGMENTATION,
         }
+
+
 
         public TYPE Type { get; set; }
 
@@ -47,9 +50,12 @@ namespace ssi
             MaxOrForeColor = Defaults.Colors.Foreground;
             DefaultLabel = "";
             DefaultColor = Color.FromRgb(0, 0, 0);
+            toSave = false;
         }
 
         public string Name { get; set; }
+
+        public bool toSave { get; set; }
 
         public List<Label> Labels { get; set; }
 
