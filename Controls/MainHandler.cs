@@ -161,10 +161,15 @@ namespace ssi
             control.polygonListControl.polygonRelabelButton.Click += polygonRelabelButton_Click;
             control.polygonListControl.polygonListElementDelete.Click += polygonListElementDelete_Click;
             control.polygonListControl.polygonDataGrid.SelectionChanged += polygonList_Selection;
-            control.polygonListControl.editPolygon.Click += editPolygon;
+            control.polygonListControl.editPolygon.Click += polygonEdit_Click;
+            control.polygonListControl.InvoiceDetailsList.Opened += polygonContextMenueOpened;
             control.polygonListControl.setMainHandler(this);
+            control.polygonListControl.addMorePolygonLabels.Click += polygonAddmoreLabels_Click;
+            control.polygonListControl.interpolateLabels.Click += polygonInterpolateLabels_Click;
+            control.polygonListControl.editComboBox.SelectionChanged += discretePolygonSelectionChanged;
             control.mediaBoxControl.MouseLeave += onPolygonMediaMouseLeave;
             control.mediaBoxControl.MouseMove += OnPolygonMediaBoxMouseMove;
+            polygonHandlerInit();
 
             // Menu
             control.menu.MouseEnter += tierMenu_MouseEnter;
@@ -377,7 +382,6 @@ namespace ssi
 
             control.Drop += controlDrop;
         }
-
 
         public void showShadowBox(string message)
         {
