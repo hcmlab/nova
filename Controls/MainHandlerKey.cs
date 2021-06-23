@@ -241,8 +241,7 @@ namespace ssi
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             handleKeyEvent(sender, e);
-            if (!control.annoListControl.editTextBox.IsFocused
-                && !control.annoListControl.searchTextBox.IsFocused)
+            if (!control.annoListControl.editTextBox.IsFocused && !control.annoListControl.searchTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
             {
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
                 switch (level)
@@ -419,8 +418,8 @@ namespace ssi
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
-            handleKeyEvent(sender, e);
-            if (!this.control.annoListControl.editTextBox.IsFocused)
+            // TODO MARCO vllt wieder auskommentieren? handleKeyEvent(sender, e);
+            if (!this.control.annoListControl.editTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
             {
 
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
