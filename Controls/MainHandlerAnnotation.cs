@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Windows;
+using Label = ssi.Types.Label;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Collections.Generic;
 
 namespace ssi
 {
@@ -149,6 +151,7 @@ namespace ssi
             updateAnnoInfo(tier);
             setAnnoList(tier.AnnoList);
             control.annoListControl.editComboBox.Items.Clear();
+            control.polygonListControl.editComboBox.Items.Clear();
 
             if (AnnoTierStatic.Selected != null)
             {
@@ -165,10 +168,32 @@ namespace ssi
                     control.geometricListControl.Visibility = Visibility.Visible;
                     control.geometricListControl.Height = control.ActualHeight / 2;
                 }
-                else if(AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                 {
                     control.polygonListControl.Visibility = Visibility.Visible;
                     control.polygonListControl.Height = control.ActualHeight / 2;
+
+                    control.polygonListControl.polygonDataGrid.ItemsSource = null;
+
+                    if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                    {
+
+                        control.polygonListControl.editComboBox.Visibility = Visibility.Visible;
+                        control.polygonListControl.polygonSetDefaultLabelButton.Visibility = Visibility.Collapsed;
+                        control.polygonListControl.polygonCopyButton.SetValue(Grid.ColumnProperty, 0);
+                        control.polygonListControl.polygonCopyButton.SetValue(Grid.ColumnSpanProperty, 2);
+
+                        if (AnnoTierStatic.Selected.AnnoList.Scheme != null
+                        && AnnoTierStatic.Selected.AnnoList.Scheme.Labels != null)
+                        {
+                            foreach (AnnoScheme.Label lcp in AnnoTierStatic.Selected.AnnoList.Scheme.Labels)
+                            {
+                                if (!control.polygonListControl.editComboBox.Items.Contains(new Label(lcp.Name, lcp.Color)))
+                                    control.polygonListControl.editComboBox.Items.Add(new Label(lcp.Name, lcp.Color));
+                            }
+                            control.polygonListControl.editComboBox.SelectedIndex = 0;
+                        }
+                    }
 
                     GridView gView = control.polygonListControl.polygonDataGrid.View as GridView;
                     const int GRID_VIEW_COLUMN_HEADER_COLOR_WIDTH = 60;
@@ -182,6 +207,10 @@ namespace ssi
                     control.annoListControl.editTextBox.IsEnabled = false;
                     control.annoListControl.LabelColumn.Width = 70;
                     control.annoListControl.ScoreColumn.Width = 0;
+                    control.annoListControl.MetaColumn.Width = 0;
+                    control.annoListControl.ConfidenceColumn.Width = 0;
+                    control.annoListControl.InvoiceDetailsList.StaysOpen = false;
+                    control.annoListControl.InvoiceDetailsList.IsEnabled = false;
                 }
                 else
                 {
@@ -246,6 +275,7 @@ namespace ssi
                 }
             }
         }
+
 
         private void changeAnnoTierSegmentHandler(AnnoTierSegment segment, EventArgs e)
         {
@@ -380,6 +410,10 @@ namespace ssi
             {
                 dialog = new AnnoTierNewPolygonSchemeWindow(ref scheme);
             }
+            else if(scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+            {
+                dialog = new AnnoTierNewDiscretePolygonSchemeWindow(ref scheme);
+            }
             else
             {
                 return false;
@@ -451,13 +485,6 @@ namespace ssi
             tier.TimeRangeChanged(Time);
             
             updateNavigator();
-
-            if (control.annoListControl.annoDataGrid.Items != null)
-                if (control.annoListControl.annoDataGrid.Items.Count > 0)
-                    if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
-                    {
-                        control.annoListControl.annoDataGrid.SelectedValue = control.annoListControl.annoDataGrid.Items[0];
-                    }
         }
 
         private void reloadAnnoTierFromFile(AnnoTier track)
@@ -670,7 +697,7 @@ namespace ssi
                 }
                 else if (item.Type == AnnoListItem.TYPE.POLYGON)
                 {
-                    polygonSelectItem(item);
+                    polygonUtilities.polygonSelectItem(item);
                 }
             }
         }
