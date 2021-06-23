@@ -15,6 +15,7 @@ namespace ssi
         private double confidence;
         private PointList points;
         private PolygonList polygonList;
+        private int labelCount;
 
         public enum TYPE
         {
@@ -124,6 +125,7 @@ namespace ssi
         }
 
         public PolygonList PolygonList { get => polygonList; set => polygonList = value; }
+        public int LabelCount { get => labelCount; set => labelCount = value; }
 
         public AnnoListItem(double start, double duration, string label, string meta = "", Color color = new Color(), double confidence = 1.0, TYPE type = TYPE.NONE, PointList points = null, PolygonList polygonList = null)
         {
@@ -143,10 +145,21 @@ namespace ssi
                 }
             }
 
+            if(this.Type == TYPE.POLYGON)
+                this.labelCount = polygonList.Polygons.Count;
+            
             this.polygonList = polygonList;
+            if(this.polygonList != null)
+                this.labelCount = this.polygonList.getRealList().Count;
         }
 
-       
+        public void updateLabelCount()
+        {
+            this.labelCount = polygonList.getRealList().Count;
+            OnPropertyChanged("LabelCont");
+        }
+
+
 
         public class AnnoListItemComparer : IComparer<AnnoListItem>
         {
