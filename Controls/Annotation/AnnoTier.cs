@@ -202,6 +202,7 @@ namespace ssi
             {
                 return (AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION);
             }
@@ -376,7 +377,7 @@ namespace ssi
                     {
                         InitPointValues(anno);
                     }
-                    else if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                    else if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON || anno.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                     {
                         InitPolygonCase(anno);
                     }
