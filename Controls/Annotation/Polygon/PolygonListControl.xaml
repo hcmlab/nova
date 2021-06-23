@@ -23,6 +23,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
 
@@ -43,11 +44,11 @@
                             <GridViewColumnHeader Tag="Label" Click="GridViewColumnHeader_Click">Label</GridViewColumnHeader>
                         </GridViewColumn.Header>
                     </GridViewColumn>
-                    <GridViewColumn Width="Auto" Header="Color" >
+                    <GridViewColumn Width="Auto" Header="Color">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal"> 
-                                    <p:ColorPicker SelectedColor="{Binding Color}" DropDownOpened="ColorPicker_DropDownOpened" DropDownClosed="ColorPicker_DropDownClosed" IsEnabled="true" Width="40" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <p:ColorPicker  Name="colorPicker" SelectedColor="{Binding Color}" DropDownOpened="ColorPicker_DropDownOpened" DropDownClosed="ColorPicker_DropDownClosed" IsEnabled="true" Width="40" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -62,44 +63,58 @@
         <Grid Grid.Column="0" Grid.Row="1">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Button Name="polygonAddNewLabelButton" Width="Auto" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Add New Label</Button>
-            <Button Name="polygonSelectAllButton" Width="Auto" Grid.Column="1" Grid.Row="0" Height="25" Margin="5,0,5,0">Select All</Button>
+            <Button Name="polygonAddNewLabelButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Add One Label</Button>
+            <Button Name="polygonSelectAllButton" Grid.Column="1" Grid.Row="0" Height="25" Margin="5,0,5,0">Select All</Button>
 
         </Grid>
 
         <Grid Grid.Column="0" Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Button Name="polygonSetDefaultLabelButton" Width="Auto" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Set Default-Label</Button>
-            <Button Name="polygonCopyButton" Width="Auto" Grid.Column="2" Grid.Row="0" Height="25" Margin="7,5,5,5">Copy</Button>
+            <Button Name="polygonSetDefaultLabelButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Set Default-Label</Button>
+            <Button Name="polygonCopyButton" Grid.Column="1" Grid.Row="0" Height="25" Margin="5,0,5,0">Copy</Button>
         </Grid>
 
         <Grid Grid.Column="0" Grid.Row="3">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Button Name="polygonRelabelButton" Width="Auto" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Relabel</Button>
-            <TextBox Name="editTextBox" ToolTip="Label" Grid.Column="1" Grid.Row="0" Height="25" Margin="5,0,5,0"></TextBox>
+            <Button Name="polygonRelabelButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Relabel</Button>
+            <TextBox Name="editTextBox"  Grid.Column="1" Grid.Row="0" Height="25" Margin="5,0,5,0" FontSize="14"></TextBox>
+            <ComboBox Name="editComboBox"  Grid.Column="1" Grid.Row="0" Height="25" Margin="5,0,5,0" FontSize="14" Visibility="Collapsed"></ComboBox>
+        </Grid>
+        
+        <Grid Grid.Column="0" Grid.Row="4">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Button Name="addMorePolygonLabels" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Add More Labels</Button>
+            <Button Name="interpolateLabels" Grid.Column="1" Grid.Row="0" Height="25" Margin="5,0,5,0">Interpolate</Button>
         </Grid>
     </Grid>
 </UserControl>
