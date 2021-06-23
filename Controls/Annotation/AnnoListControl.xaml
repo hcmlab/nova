@@ -37,7 +37,7 @@
 
                 <ListView Name="annoDataGrid" Grid.Row="0" SourceUpdated ="AnnoDataGrid_SourceUpdated" GridViewColumnHeader.Click="SortListView"  >
                 <ListView.ContextMenu>
-                    <ContextMenu Name="InvoiceDetailsList" StaysOpen="true">
+                    <ContextMenu Name="InvoiceDetailsList">
                         <ContextMenu.BitmapEffect>
                             <BitmapEffectGroup />
                         </ContextMenu.BitmapEffect>
@@ -61,7 +61,6 @@
 
                             <GridViewColumn x:Name="ScoreColumn" Header="Score" Width="70" DisplayMemberBinding="{Binding Score}">
                             </GridViewColumn>
-
                             <GridViewColumn Width="Auto" Header="From">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Start" Converter="{StaticResource roundConverter}" />
@@ -77,8 +76,9 @@
                                 <Binding Path="Duration" Converter="{StaticResource roundConverter}" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Confidence" DisplayMemberBinding="{Binding Confidence}" />
-                        <GridViewColumn Width="Auto" Header="Meta" DisplayMemberBinding="{Binding Meta}" />
+                        <GridViewColumn x:Name="MetaColumn" Width="Auto" Header="Confidence" DisplayMemberBinding="{Binding Confidence}" />
+                        <GridViewColumn x:Name="ConfidenceColumn" Width="Auto" Header="Meta" DisplayMemberBinding="{Binding Meta}" />
+                        <GridViewColumn x:Name="LabelCountColumn" Width="Auto" Header="Label Count" DisplayMemberBinding="{Binding LabelCount}" />
                     </GridView>
                 </ListView.View>
             </ListView>
