@@ -111,6 +111,10 @@ namespace ssi
                 {
                     Scheme.Type = AnnoScheme.TYPE.POLYGON;
                 }
+                else if(discretePolygoneRadioButton.IsChecked == true)
+                {
+                    Scheme.Type = AnnoScheme.TYPE.DISCRETE_POLYGON;
+                }
             }
         }
 
