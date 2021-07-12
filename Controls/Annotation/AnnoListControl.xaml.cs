@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ssi.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,6 +19,7 @@ namespace ssi
 
         private GridViewColumnHeader _lastHeaderClicked = null;
         private ListSortDirection _lastDirection = ListSortDirection.Ascending;
+        private IPolygonUtilities polygonUtilities;
 
         public AnnoListControl()
         {
@@ -330,9 +333,17 @@ namespace ssi
             }
         }
 
-        private void editButton_Click(object sender, RoutedEventArgs e)
+        private void MenuItemDeletAllPolygoneseClick(object sender, RoutedEventArgs e)
         {
-
+            foreach(Object obj in this.annoDataGrid.SelectedItems)
+            {
+                AnnoListItem item = (AnnoListItem)obj;
+                item.PolygonList = new PolygonList(new List<PolygonLabel>());
+                polygonUtilities.polygonSelectItem(item);
+                item.updateLabelCount();
+            }
         }
+
+        internal IPolygonUtilities PolygonUtilities { set => polygonUtilities = value; }
     }
 }

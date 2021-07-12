@@ -42,6 +42,7 @@
                             <BitmapEffectGroup />
                         </ContextMenu.BitmapEffect>
                         <MenuItem Header="Delete" Click="MenuItemDeleteClick" />
+                        <MenuItem Header="Delete all labels" Click="MenuItemDeletAllPolygoneseClick" IsEnabled="False"/>
                         <Separator></Separator>
                         <MenuItem Header="Copy With Meta" Click="MenuItemCopyWithMetaClick" />
                         <MenuItem Header="Copy Without Meta" Click="MenuItemCopyWithoutMetaClick" />
@@ -95,7 +96,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5" Click="editButton_Click" >Relabel</Button>
+            <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Relabel</Button>
             <TextBox Name="editTextBox" Grid.Column="1" Grid.Row="0" Margin="5,5,7,5"/>
             <ComboBox Name="editComboBox" Grid.Column="1" Grid.Row="0" Margin="5" Visibility="Collapsed">
                 <ComboBox.Resources>
