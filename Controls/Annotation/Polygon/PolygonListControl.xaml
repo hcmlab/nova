@@ -33,7 +33,6 @@
                     <ContextMenu.BitmapEffect>
                         <BitmapEffectGroup />
                     </ContextMenu.BitmapEffect>
-                    <MenuItem Header="Edit Polygon" Name="editPolygon"/>
                     <MenuItem Header="Delete" Name="polygonListElementDelete"/>
                 </ContextMenu>
             </ListView.ContextMenu>
