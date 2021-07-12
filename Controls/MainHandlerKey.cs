@@ -240,7 +240,7 @@ namespace ssi
 
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            handleKeyEvent(sender, e);
+            handleKeyDownEvent(sender, e);
             if (!control.annoListControl.editTextBox.IsFocused && !control.annoListControl.searchTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
             {
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
@@ -541,6 +541,7 @@ namespace ssi
 
         public void OnKeyUp(object sender, KeyEventArgs e)
         {
+            handleKeyUpEvent(sender, e);
             isKeyDown = false;
         }
 
