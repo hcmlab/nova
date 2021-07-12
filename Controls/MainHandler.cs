@@ -161,7 +161,6 @@ namespace ssi
             control.polygonListControl.polygonRelabelButton.Click += polygonRelabelButton_Click;
             control.polygonListControl.polygonListElementDelete.Click += polygonListElementDelete_Click;
             control.polygonListControl.polygonDataGrid.SelectionChanged += polygonList_Selection;
-            control.polygonListControl.editPolygon.Click += polygonEdit_Click;
             control.polygonListControl.InvoiceDetailsList.Opened += polygonContextMenueOpened;
             control.polygonListControl.setMainHandler(this);
             control.polygonListControl.addMorePolygonLabels.Click += polygonAddmoreLabels_Click;
@@ -599,6 +598,7 @@ namespace ssi
                 Properties.Settings.Default.DefaultZoomInSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());
+                Properties.Settings.Default.DefaultPolygonPointDistance = double.Parse(s.PolygonPointDistance());
                 Properties.Settings.Default.CheckUpdateOnStart = s.CheckforUpdatesonStartup();
                 Properties.Settings.Default.ContinuousHotkeysNumber = int.Parse(s.ContinuousHotkeyLevels());
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();
