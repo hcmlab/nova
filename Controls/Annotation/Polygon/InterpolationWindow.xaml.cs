@@ -28,28 +28,68 @@ namespace ssi
             TargetFrames.SelectedItem = TargetFrames.Items[0];
         }
 
-        private void Interpolate_Click(object sender, RoutedEventArgs e)
+        private void Interpolate_2D_Click(object sender, RoutedEventArgs e)
         {
             if(SourceFrames.SelectedIndex < TargetFrames.SelectedIndex && SourceLabelsListBox.SelectedValue != null && TargetLabelsListBox.SelectedValue != null)
             {
 
                 PolygonLabel selectedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
                 PolygonLabel selectedTargetPolygon = (PolygonLabel)TargetLabelsListBox.SelectedValue;
+
+                if (selectedSourcePolygon.Polygon.Count < selectedTargetPolygon.Polygon.Count)
+                {
+                    PolygonLabel tmp = selectedSourcePolygon;
+                    selectedSourcePolygon = selectedTargetPolygon;
+                    selectedTargetPolygon = tmp;
+                }
+
                 double selectedSourcePolygonArea = calculatePolygonArea(selectedSourcePolygon.Polygon);
                 double selectedTargetPolygonArea = calculatePolygonArea(selectedTargetPolygon.Polygon);
                 
-                Point pSource = calculatePolygonMidPoint(selectedSourcePolygon.Polygon, selectedSourcePolygonArea);
-                Point pTarget = calculatePolygonMidPoint(selectedTargetPolygon.Polygon, selectedTargetPolygonArea);
+                Point midPointSource = calculatePolygonMidPoint(selectedSourcePolygon.Polygon, selectedSourcePolygonArea);
+                Point midPointTarget = calculatePolygonMidPoint(selectedTargetPolygon.Polygon, selectedTargetPolygonArea);
 
-                double xDif = pTarget.X - pSource.X;
-                double yDif = pTarget.Y - pSource.Y;
+                double xDif = midPointTarget.X - midPointSource.X;
+                double yDif = midPointTarget.Y - midPointSource.Y;
 
                 int framesBetween = TargetFrames.SelectedIndex - SourceFrames.SelectedIndex;
 
                 double xStepPerFrame = xDif / framesBetween;
                 double yStepPerFrame = yDif / framesBetween;
 
-                mainHandler.handleInterpolation((ComboboxItem)SourceFrames.SelectedItem, selectedSourcePolygon, selectedTargetPolygon, xStepPerFrame, yStepPerFrame, framesBetween);
+                mainHandler.handle2DInterpolation((ComboboxItem)SourceFrames.SelectedItem, selectedSourcePolygon, selectedTargetPolygon, xStepPerFrame, yStepPerFrame, framesBetween);
+                DialogResult = true;
+                Close();
+            }
+            else
+            {
+                MessageBoxResult mb = MessageBoxResult.OK;
+                mb = MessageBox.Show("Not able to interpolate with the selected values.", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void Interpolate_3D_Click(object sender, RoutedEventArgs e)
+        {
+            if (SourceFrames.SelectedIndex < TargetFrames.SelectedIndex && SourceLabelsListBox.SelectedValue != null && TargetLabelsListBox.SelectedValue != null)
+            {
+                PolygonLabel selectedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
+                PolygonLabel selectedTargetPolygon = (PolygonLabel)TargetLabelsListBox.SelectedValue;
+
+                double selectedSourcePolygonArea = calculatePolygonArea(selectedSourcePolygon.Polygon);
+                double selectedTargetPolygonArea = calculatePolygonArea(selectedTargetPolygon.Polygon);
+
+                Point midPointSource = calculatePolygonMidPoint(selectedSourcePolygon.Polygon, selectedSourcePolygonArea);
+                Point midPointTarget = calculatePolygonMidPoint(selectedTargetPolygon.Polygon, selectedTargetPolygonArea);
+
+                double xDif = midPointTarget.X - midPointSource.X;
+                double yDif = midPointTarget.Y - midPointSource.Y;
+
+                int framesBetween = TargetFrames.SelectedIndex - SourceFrames.SelectedIndex;
+
+                double xStepPerFrame = xDif / framesBetween;
+                double yStepPerFrame = yDif / framesBetween;
+
+                mainHandler.handle3DInterpolation((ComboboxItem)SourceFrames.SelectedItem, selectedSourcePolygon, selectedTargetPolygon, xStepPerFrame, yStepPerFrame, framesBetween);
                 DialogResult = true;
                 Close();
             }

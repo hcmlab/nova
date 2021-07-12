@@ -92,8 +92,9 @@
 
 
         <StackPanel Grid.Row="3" Grid.Column="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Name="Interpolate" Click="Interpolate_Click" Height="25" Width="120" Margin="5">Interpolate Labels</Button>
-            <Button Name="Cancel" Click="Cancel_Click" Height="25" Width="120">Cancel</Button>
+            <Button Name="Interpolate_2D" Click="Interpolate_2D_Click" Height="25" Width="100" Margin="5">Interpolate 2D</Button>
+            <Button Name="Interpolate_3D" Click="Interpolate_3D_Click" Height="25" Width="100" Margin="5">Interpolate 3D</Button>
+            <Button Name="Cancel" Click="Cancel_Click" Height="25" Width="100">Cancel</Button>
         </StackPanel>
 
     </Grid>
