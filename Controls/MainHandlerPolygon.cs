@@ -29,7 +29,7 @@ namespace ssi
             polygonDrawUnit = new PolygonDrawUnit(this.control, creationInfos, editInfos);
             polygonUtilities = new PolygonUtilities(this.control, creationInfos, editInfos, dataGridChecker, polygonDrawUnit);
             polygonDrawUnit.PolygonUtilities = polygonUtilities;
-
+            control.annoListControl.PolygonUtilities = polygonUtilities;
         }
 
         private void discretePolygonSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -60,8 +60,9 @@ namespace ssi
             }
 
             PolygonLabel polygonLabel = new PolygonLabel(null, name, color);
-            polygonUtilities.addPolygonLabelToPolygonList(polygonLabel);
+            editInfos.IsEditModeOn = false;
             creationInfos.IsCreateModeOn = true;
+            polygonUtilities.addPolygonLabelToPolygonList(polygonLabel);
             polygonUtilities.enableOrDisableControls(false);
         }
 
@@ -169,7 +170,7 @@ namespace ssi
             }
         }
 
-        public void handleInterpolation(ComboboxItem sourceFrame, PolygonLabel sourceLabel, PolygonLabel targetLabel, double xStepPerFrame, double yStepPerFrame, int framesBetween)
+        public void handle2DInterpolation(ComboboxItem sourceFrame, PolygonLabel sourceLabel, PolygonLabel targetLabel, double xStepPerFrame, double yStepPerFrame, int framesBetween)
         {
             AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
             int newLabelCounter = 0;
@@ -185,7 +186,6 @@ namespace ssi
 
                 if(toStart)
                 {
-                    // TODO Marco prüfen ob polygon komplex ist, also eine line des polygons überschneidet eine andere, dann interpolation nicht zulassen
                     List<PolygonPoint> newPolygon = new List<PolygonPoint>();
 
                     foreach(PolygonPoint point in sourceLabel.Polygon)
@@ -198,6 +198,60 @@ namespace ssi
                     listItem.updateLabelCount();
                     newLabelCounter++;
                     
+                    if (newLabelCounter == (framesBetween + 1))
+                    {
+                        listItem.PolygonList.removeExplicitPolygon(targetLabel);
+                        polygonUtilities.refreshAnnoDataGrid();
+                        listItem.updateLabelCount();
+                        break;
+                    }
+                    AnnoTierStatic.Selected.AnnoList.HasChanged = true;
+                }
+            }
+
+            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+            polygonDrawUnit.polygonOverlayUpdate(item);
+        }
+
+        public void handle3DInterpolation(ComboboxItem sourceFrame, PolygonLabel sourceLabel, PolygonLabel targetLabel, double xStepPerFrame, double yStepPerFrame, int framesBetween)
+        {
+            /*
+             * A = y2-y1; B = x1-x2; C = Ax1+By1
+             * float delta = A1 * B2 - A2 * B1;
+               if (delta == 0) 
+                   throw new ArgumentException("Lines are parallel");
+
+               float x = (B2 * C1 - B1 * C2) / delta;
+               float y = (A1 * C2 - A2 * C1) / delta;
+             * 
+             */
+
+            AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
+            int newLabelCounter = 0;
+            bool toStart = false;
+            foreach (AnnoListItem listItem in list)
+            {
+                if (listItem.Equals(sourceFrame.Value))
+                {
+                    toStart = true;
+                    newLabelCounter++;
+                    continue;
+                }
+
+                if (toStart)
+                {
+                    List<PolygonPoint> newPolygon = new List<PolygonPoint>();
+
+                    foreach (PolygonPoint point in sourceLabel.Polygon)
+                    {
+                        newPolygon.Add(new PolygonPoint(point.X + (newLabelCounter * xStepPerFrame), point.Y + (newLabelCounter * yStepPerFrame)));
+                    }
+
+                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color);
+                    listItem.PolygonList.addPolygonLabel(newLabel);
+                    listItem.updateLabelCount();
+                    newLabelCounter++;
+
                     if (newLabelCounter == (framesBetween + 1))
                     {
                         listItem.PolygonList.removeExplicitPolygon(targetLabel);
@@ -324,27 +378,30 @@ namespace ssi
             }
         }
 
-        private void polygonEdit_Click(object sender, RoutedEventArgs e)
-        {
-            polygonUtilities.activateEditMode();
-        }
-
         private void polygonList_Selection(object sender, SelectionChangedEventArgs e)
         {
             if (dataGridChecker.polygonDGIsNotNullAndCountsOne())
             {
-                if(AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                creationInfos.LastSelectedLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[0];
+
+                if (!creationInfos.IsCreateModeOn)
+                    polygonUtilities.activateEditMode();
+
+                PolygonLabel polygon = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[0];
+
+                if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
                 {
-                    PolygonLabel polygon = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[0];
                     control.polygonListControl.editTextBox.Text = polygon.Label;
                 }
                 else
                 {
-                    PolygonLabel polygon = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[0];
                     control.polygonListControl.editComboBox.SelectedItem = new Label(polygon.Label, polygon.Color);
                 }
-                
-            } 
+            }
+            else
+            {
+                editInfos.IsEditModeOn = false;
+            }
 
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
             polygonDrawUnit.polygonOverlayUpdate(item);
@@ -370,7 +427,7 @@ namespace ssi
                         if (lastPoint && !creationInfos.AddMoreLabels)
                         {
                             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
-                            polygonUtilities.endCreationOrEditingMode(item);
+                            polygonUtilities.endCreationMode(item);
                         }
 
                     }
@@ -419,14 +476,12 @@ namespace ssi
         public void OnPolygonMediaBoxMouseMove(object sender, MouseEventArgs e)
         {
             if (creationInfos.IsCreateModeOn)
-            {
+             {
                 control.Cursor = Cursors.Cross;
-                if (creationInfos.IsPolylineToDraw)
-                    control.Cursor = Cursors.Cross;
             }
         }
 
-        public void handleKeyEvent(object sender, KeyEventArgs e)
+        public void handleKeyDownEvent(object sender, KeyEventArgs e)
         {
             if (creationInfos.IsCreateModeOn)
             {
@@ -444,20 +499,14 @@ namespace ssi
                         polygonDrawUnit.removeLastPoint(currentPolygonLabel, item);
                         if(currentPolygonLabel.Polygon.Count == 0)
                         {
-                            polygonUtilities.endCreationOrEditingMode(item, currentPolygonLabel);
+                            polygonUtilities.endCreationMode(item, currentPolygonLabel);
                         }
-
                     }
                 }
             }
             else if (editInfos.IsEditModeOn)
             {
-                if (e.KeyboardDevice.IsKeyDown(Key.Escape))
-                {
-                    AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
-                    polygonUtilities.endCreationOrEditingMode(item);
-                }
-                else if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.Z))
+                if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.Z))
                 {
                     AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
 
@@ -471,7 +520,22 @@ namespace ssi
                         PolygonLabel label = polygonUtilities.PolygonUndoRedoStack.Undo();
                         polygonDrawUnit.polygonOverlayUpdate(item);
                     }
-                    
+                }
+                else if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) && polygonUtilities.mouseIsOnLine())
+                {
+                    control.Cursor = Cursors.Cross;
+                }
+            }
+        }
+
+
+        public void handleKeyUpEvent(object sender, KeyEventArgs e)
+        {
+           if (editInfos.IsEditModeOn)
+            {
+                if (e.Key == Key.LeftCtrl && !e.KeyboardDevice.IsKeyDown(Key.RightCtrl) || e.Key == Key.RightCtrl && !e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                {
+                    control.Cursor = Cursors.Arrow;
                 }
             }
         }
@@ -500,6 +564,17 @@ namespace ssi
             {
                 creationInfos.LastKnownPoint = new System.Windows.Point(x, y);
                 polygonDrawUnit.drawLineToMousePosition(x, y);
+
+                if (Mouse.LeftButton == MouseButtonState.Pressed)
+                {
+                    int MAX_DISTANCE = Convert.ToInt32(Properties.Settings.Default.DefaultPolygonPointDistance);
+                    double currentDistance = Math.Sqrt(Math.Pow(creationInfos.LastPrintedPoint.X - x, 2) + Math.Pow(creationInfos.LastPrintedPoint.Y - y, 2));
+
+                    if (currentDistance > MAX_DISTANCE)
+                    {
+                        OnPolygonMediaMouseDown(null, x, y);
+                    }
+                }
             }
             else if (editInfos.IsEditModeOn)
             {
@@ -523,28 +598,51 @@ namespace ssi
                 }
                 else
                 {
-                    if (polygonUtilities.isMouseAbovePoint(x, y))
+                    if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
                     {
-                        control.Cursor = Cursors.Hand;
-                        polygonDrawUnit.polygonOverlayUpdate(item);
-                    }
-                    else if (polygonUtilities.isMouseWithinPolygonArea(x, y))
-                    {
-                        editInfos.IsAboveSelectedPolygonPoint = false;
-                        editInfos.IsWithinSelectedPolygonArea = true;
-                        control.Cursor = Cursors.Hand;
-                        polygonDrawUnit.polygonOverlayUpdate(item);
+                        if(polygonUtilities.mouseIsOnLine())
+                        {
+                            control.Cursor = Cursors.Cross;
+                            editInfos.restetInfos();
+                        }
+                        else
+                        {
+                            control.Cursor = Cursors.Arrow;
+                            if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
+                            {
+                                editInfos.restetInfos();
+                                polygonDrawUnit.polygonOverlayUpdate(item);
+                            }
+                        }
                     }
                     else
                     {
-                        if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
+                        if (polygonUtilities.isMouseAbovePoint(x, y))
                         {
-                            editInfos.restetInfos();
-                            control.Cursor = Cursors.Arrow;
+                            control.Cursor = Cursors.Hand;
                             polygonDrawUnit.polygonOverlayUpdate(item);
                         }
+                        else if (polygonUtilities.isMouseWithinPolygonArea(x, y))
+                        {
+                            editInfos.IsAboveSelectedPolygonPoint = false;
+                            editInfos.IsWithinSelectedPolygonArea = true;
+                            control.Cursor = Cursors.Hand;
+                            polygonDrawUnit.polygonOverlayUpdate(item);
+                        }
+                        else
+                        {
+                            if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
+                            {
+                                control.Cursor = Cursors.Arrow;
+                                editInfos.restetInfos();
+                                polygonDrawUnit.polygonOverlayUpdate(item);
+                            }
+                        }
                     }
+                    
                 }
+
+
             }
         }
          
