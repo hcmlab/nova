@@ -210,7 +210,21 @@ namespace ssi
                     control.annoListControl.MetaColumn.Width = 0;
                     control.annoListControl.ConfidenceColumn.Width = 0;
                     control.annoListControl.InvoiceDetailsList.StaysOpen = false;
-                    control.annoListControl.InvoiceDetailsList.IsEnabled = false;
+                    int amount = control.annoListControl.InvoiceDetailsList.Items.Count;
+                    int spot = 0;
+
+                    for (int i = 0; i < amount; i++)
+                    {
+                        if(control.annoListControl.InvoiceDetailsList.Items[spot].ToString().Contains("Delete all labels"))
+                        {
+                            ((MenuItem)control.annoListControl.InvoiceDetailsList.Items[spot]).IsEnabled = true;
+                            spot++;
+                        }
+                        else
+                        {
+                            control.annoListControl.InvoiceDetailsList.Items.RemoveAt(spot);
+                        }
+                    }
                 }
                 else
                 {
