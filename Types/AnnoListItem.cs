@@ -156,7 +156,7 @@ namespace ssi
         public void updateLabelCount()
         {
             this.labelCount = polygonList.getRealList().Count;
-            OnPropertyChanged("LabelCont");
+            OnPropertyChanged("LabelCount");
         }
 
 
