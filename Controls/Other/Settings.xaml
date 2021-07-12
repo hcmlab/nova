@@ -38,6 +38,8 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -54,14 +56,16 @@
                     <TextBox Grid.Row="7" Name="Segmentmindur" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
                     <Label Grid.Row="8" Content="Discrete sample rate in Hz (0 for none):" />
                     <TextBox Grid.Row="9" Name="Samplerate" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
-                    <Label Grid.Row="10" Content="Number of levels in live mode (continuous annotations):"  />
-                    <TextBox Grid.Row="11" Name="ContinuousHotkeysnum" Margin="5,0,5,5"  PreviewTextInput="IntNumberValidationTextBoxContinuous"/>
-                    <Label Grid.Row="12" Content="Draw wavform from video (might be slower) :"  />
-                    <CheckBox Grid.Row="13" Name="DrawwaveformCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="14" Content="Check for updates on startup:"  />
-                    <CheckBox Grid.Row="15" Name="UpdatesCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="16" Content="Enable Python extensions (requires restart):"  />
-                    <Grid Grid.Row="17">
+                    <Label Grid.Row="10" Content="Distance between points (free hand drawing - polygon anno):" />
+                    <TextBox Grid.Row="11" Name="PointDistance" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
+                    <Label Grid.Row="12" Content="Number of levels in live mode (continuous annotations):"  />
+                    <TextBox Grid.Row="13" Name="ContinuousHotkeysnum" Margin="5,0,5,5"  PreviewTextInput="IntNumberValidationTextBoxContinuous"/>
+                    <Label Grid.Row="14" Content="Draw wavform from video (might be slower) :"  />
+                    <CheckBox Grid.Row="15" Name="DrawwaveformCheckbox" Margin="5,0,5,5" />
+                    <Label Grid.Row="16" Content="Check for updates on startup:"  />
+                    <CheckBox Grid.Row="17" Name="UpdatesCheckbox" Margin="5,0,5,5" />
+                    <Label Grid.Row="18" Content="Enable Python extensions (requires restart):"  />
+                    <Grid Grid.Row="19">
                         <CheckBox Grid.Row="0" Grid.Column="0" Name="EnablePythonCheckbox" Margin="5,0,5,5" />
                         <Label Grid.Row="0" Grid.Column="1"  Content="Debug Mode"  Margin="240,-7,0,0"/>
                         <CheckBox Grid.Row="0" Grid.Column="2" Name="EnablePythonDebugCheckbox"  Margin="220,0,5,5" />
