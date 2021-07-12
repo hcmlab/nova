@@ -21,7 +21,7 @@ namespace ssi.Types.Polygon
         static private double idCounter = 0;
 
         public static double IDcounter { get => idCounter; set => idCounter = value; }
-
+        
         public bool IsNextToStartPoint
         { 
             get => isNextToStartPoint; 
@@ -48,7 +48,7 @@ namespace ssi.Types.Polygon
             control.mediaCloseButton.IsEnabled = enable;
         }
 
-        public void endCreationOrEditingMode(AnnoListItem item, PolygonLabel currentPolygonLabel = null)
+        public void endCreationMode(AnnoListItem item, PolygonLabel currentPolygonLabel = null)
         {
             if (currentPolygonLabel != null)
                 item.PolygonList.removeExplicitPolygon(currentPolygonLabel);
@@ -57,14 +57,21 @@ namespace ssi.Types.Polygon
             creationInfos.IsCreateModeOn = false;
             creationInfos.AddMoreLabels = false;
 
-            editInfos.IsEditModeOn = false;
-            editInfos.restetInfos();
-
             this.isNextToStartPoint = false;
             this.enableOrDisableControls(true);
             this.polygonSelectItem(item);
             this.polygonUndoRedoStack = null;
             this.control.Cursor = Cursors.Arrow;
+
+            polygonSelectItem(item);
+            if (creationInfos.LastSelectedLabel != null)
+            {
+                control.polygonListControl.polygonDataGrid.SelectedItem = creationInfos.LastSelectedLabel;
+                creationInfos.LastSelectedLabel = null;
+            }
+
+            if (dataGridChecker.polygonDGIsNotNullAndCountsOne())
+                editInfos.IsEditModeOn = true;
         }
 
         public bool isMouseWithinPolygonArea(double x, double y)
@@ -88,7 +95,6 @@ namespace ssi.Types.Polygon
                 if(contains)
                     editInfos.StartPosition = new Point(x, y);
             }
-            Console.WriteLine(contains);
             return contains;
 
         }
@@ -162,19 +168,52 @@ namespace ssi.Types.Polygon
 
         public void editPolygon(double x, double y)
         {
-            if(editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
+            if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) && mouseIsOnLine())
             {
                 PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
-                List<Point> polygonPoints = new List<Point>();
-
-                foreach(PolygonPoint point in polygonLabel.Polygon)
+                List<PolygonPoint> polygonPoints = new List<PolygonPoint>();
+                foreach (PolygonPoint point in polygonLabel.Polygon)
                 {
-                    polygonPoints.Add(new Point(point.X, point.Y));
+                    polygonPoints.Add(new PolygonPoint(point.X, point.Y, point.PointID, false));
+                    if (point.PointID == editInfos.LastPolygonPoint.PointID)
+                        polygonPoints.Add(new PolygonPoint(x, y));
                 }
 
-                editInfos.PolygonStartPosition = polygonPoints;
-                editInfos.IsLeftMouseDown = true;
-                control.Cursor = Cursors.SizeAll;
+                AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+                List<PolygonLabel> polygonLabels = item.PolygonList.getRealList();
+                PolygonLabel selectedItem = null;
+
+                foreach (PolygonLabel label in polygonLabels)
+                {
+                    if (label.ID == polygonLabel.ID)
+                    {
+                        label.Polygon = polygonPoints;
+                        selectedItem = label;
+                        break;
+                    }
+                }
+
+                item.PolygonList.Polygons = polygonLabels;
+                polygonSelectItem(item);
+                refreshAnnoDataGrid();
+                control.polygonListControl.polygonDataGrid.SelectedItem = selectedItem;
+            }
+            else
+            {
+                if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
+                {
+                    PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
+                    List<Point> polygonPoints = new List<Point>();
+
+                    foreach (PolygonPoint point in polygonLabel.Polygon)
+                    {
+                        polygonPoints.Add(new Point(point.X, point.Y));
+                    }
+
+                    editInfos.PolygonStartPosition = polygonPoints;
+                    editInfos.IsLeftMouseDown = true;
+                    control.Cursor = Cursors.SizeAll;
+                }
             }
         }
 
@@ -191,7 +230,6 @@ namespace ssi.Types.Polygon
                 item.updateLabelCount();
                 refreshAnnoDataGrid();
                 AnnoTierStatic.Selected.AnnoList.HasChanged = true;
-
                 return true;
             }
 
@@ -200,7 +238,7 @@ namespace ssi.Types.Polygon
             PolygonPoint polygonPoint = new PolygonPoint(x, y, id);
             PolygonLabel selectedItem = null;
             List<PolygonLabel> polygonLabels = item.PolygonList.getRealList();
-
+            creationInfos.LastPrintedPoint = new Point(x, y);
             foreach (PolygonLabel label in polygonLabels)
             {
                 if (label.ID == polygonLabel.ID)
@@ -243,7 +281,6 @@ namespace ssi.Types.Polygon
         public void activateEditMode()
         {
             editInfos.IsEditModeOn = true;
-            enableOrDisableControls(false);
             polygonUndoRedoStack = new UndoRedoStack();
         }
 
@@ -278,13 +315,11 @@ namespace ssi.Types.Polygon
             if (currentDistance < MIN_DISTANCE)
             {
                 isNextToStartPoint = true;
-                Console.WriteLine(true);
                 return true;
             } 
             else
             {
                 isNextToStartPoint = false;
-                Console.WriteLine(false);
                 return false;
             }
         }
@@ -316,8 +351,73 @@ namespace ssi.Types.Polygon
             }
             else
             {
-                endCreationOrEditingMode(item, currentPolygonLabel);
+                endCreationMode(item, currentPolygonLabel);
             }
+        }
+
+        public bool mouseIsOnLine()
+        {
+            const double EPSILON = 4;
+            Point currentPoint = creationInfos.LastKnownPoint;
+            PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
+            Point p1 = new Point();
+            Point p2 = new Point();
+            for (int i = 0; i < polygonLabel.Polygon.Count; i++)
+            {
+                if (i + 1 < polygonLabel.Polygon.Count)
+                {
+                    p1 = new Point(polygonLabel.Polygon[i].X, polygonLabel.Polygon[i].Y);
+                    p2 = new Point(polygonLabel.Polygon[i + 1].X, polygonLabel.Polygon[i + 1].Y);
+                }
+                else
+                {
+                    p1 = new Point(polygonLabel.Polygon[i].X, polygonLabel.Polygon[i].Y);
+                    p2 = new Point(polygonLabel.Polygon[0].X, polygonLabel.Polygon[0].Y);
+                }
+
+                double a = (p2.Y - p1.Y) / (p2.X - p1.X);
+                double b = p1.Y - a * p1.X;
+
+                if (Math.Abs(currentPoint.Y - (a * currentPoint.X + b)) < EPSILON || Math.Abs(currentPoint.X - ((currentPoint.Y - b) / a)) < EPSILON)
+                {
+                    // Set the defintion area
+                    double largeX;
+                    double largeY;
+                    double smallX;
+                    double smallY;
+
+                    if(p1.X >= p2.X)
+                    {
+                        largeX = p1.X;
+                        smallX = p2.X;
+                    }
+                    else
+                    {
+                        largeX = p2.X;
+                        smallX = p1.X;
+                    }
+
+                    if (p1.Y >= p2.Y)
+                    {
+                        largeY = p1.Y;
+                        smallY = p2.Y;
+                    }
+                    else
+                    {
+                        largeY = p2.Y;
+                        smallY = p1.Y;
+                    }
+                    
+                    // Check whether we are in the definition area
+                    if(currentPoint.X > (smallX - EPSILON) && currentPoint.X < (largeX + EPSILON) && currentPoint.Y > (smallY - EPSILON) && currentPoint.Y < (largeY + EPSILON))
+                    {
+                        editInfos.LastPolygonPoint = polygonLabel.Polygon[i];
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

@@ -15,9 +15,10 @@ namespace ssi
         private double pointID;
         private static List<double> allIDs = new List<double>();
 
-        public PolygonPoint(double x, double y, double pointID)
+        public PolygonPoint(double x, double y, double pointID, bool check = true)
         {
-            checkID(pointID);
+            if(check)
+                checkID(pointID);
 
             this.x = x;
             this.y = y;

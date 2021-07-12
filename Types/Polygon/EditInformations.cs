@@ -17,6 +17,7 @@ namespace ssi.Types.Polygon
         private bool isLeftMouseDown = false;
         private Point startPosition;
         private List<Point> polygonStartPosition;
+        private PolygonPoint lastPolygonPoint;
 
 
         public bool IsEditModeOn { get => isEditModeOn; set => isEditModeOn = value; }
@@ -27,6 +28,7 @@ namespace ssi.Types.Polygon
         public bool IsLeftMouseDown { get => isLeftMouseDown; set => isLeftMouseDown = value; }
         public Point StartPosition { get => startPosition; set => startPosition = value; }
         public List<Point> PolygonStartPosition { get => polygonStartPosition; set => polygonStartPosition = value; }
+        public PolygonPoint LastPolygonPoint { get => lastPolygonPoint; set => lastPolygonPoint = value; }
 
         public EditInformations()
         {
