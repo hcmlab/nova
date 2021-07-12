@@ -9,7 +9,7 @@ namespace ssi.Interfaces
         void updatePoint(double x, double y, AnnoListItem item);
         void updatePolygon(double x, double y, AnnoListItem item);
         void polygonTableUpdate();
-        void endCreationOrEditingMode(AnnoListItem item, PolygonLabel currentPolygonLabel = null);
+        void endCreationMode(AnnoListItem item, PolygonLabel currentPolygonLabel = null);
         bool isMouseAbovePoint(double x, double y);
         void editPolygon(double x, double y);
         bool addNewPoint(double x, double y);
@@ -23,6 +23,6 @@ namespace ssi.Interfaces
         bool isNewPointNextToStartPoint(PolygonPoint startPoint, Point newPoint);
         bool IsNextToStartPoint { get; set; }
         UndoRedoStack PolygonUndoRedoStack { get; set; }
-
+        bool mouseIsOnLine();
     }
 }
