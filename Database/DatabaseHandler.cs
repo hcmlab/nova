@@ -1653,6 +1653,7 @@ namespace ssi
                     scheme.Id = document["_id"].AsObjectId;
                     scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), document["type"].AsString);
                     scheme.SampleRate = 0;
+                   
                     if (document.Contains("sr"))
                     {
                         scheme.SampleRate = document["sr"].AsDouble;
@@ -2989,6 +2990,7 @@ namespace ssi
         public string Name { get; set; }
         public AnnoScheme.TYPE Type { get; set; }
         public double SampleRate { get; set; }
+ 
 
         public override string ToString()
         {

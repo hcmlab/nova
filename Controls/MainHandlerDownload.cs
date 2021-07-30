@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -494,8 +496,8 @@ namespace ssi
             else await control.Dispatcher.BeginInvoke(new Action<string>(FinishedDownload), DispatcherPriority.Normal, "");
         }
 
-
-
+        public static string PYTHON_VERSION = "3.8.10";
+        public static string PYTHON_VERSION_FOLDER = "python38";
 
         private void GetPython()
         {
@@ -503,11 +505,11 @@ namespace ssi
 
             using (webClient = new WebClient())
             {
-
+                
 
                 try
                 {
-                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python38")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python38", true);
+                    if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python38")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\"+ PYTHON_VERSION_FOLDER, true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Lib", true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Scripts", true);
                     if (Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share")) Directory.Delete(AppDomain.CurrentDomain.BaseDirectory + "ssi\\Share", true);
@@ -526,7 +528,7 @@ namespace ssi
                 {
                     
 
-                    webClient.DownloadFile("https://www.python.org/ftp/python/3.8.10/python-3.8.10-embed-amd64.zip", "python.zip");
+                    webClient.DownloadFile("https://www.python.org/ftp/python/"+ PYTHON_VERSION +"/ python-" + PYTHON_VERSION + "-embed-amd64.zip", "python.zip");
 
                     using (FileStream zipToOpen = new FileStream("python.zip", FileMode.Open))
                     {
@@ -540,11 +542,11 @@ namespace ssi
 
                   
 
-                    using (FileStream zipToOpen = new FileStream("ssi/python38.zip", FileMode.Open))
+                    using (FileStream zipToOpen = new FileStream("ssi/"+ PYTHON_VERSION_FOLDER + ".zip", FileMode.Open))
                     {
                         using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                         {
-                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi/python38", false);
+                            ZipArchiveExtension.ExtractToDirectory(archive, "ssi/" + PYTHON_VERSION_FOLDER, false);
                         }
                     }
                     File.Delete("ssi/python38.zip");
@@ -555,7 +557,7 @@ namespace ssi
                     return;
                 }
 
-                string path = AppDomain.CurrentDomain.BaseDirectory + "ssi\\python38._pth";
+                string path = AppDomain.CurrentDomain.BaseDirectory + "ssi\\"+ PYTHON_VERSION_FOLDER + "._pth";
 
                 using (StreamWriter sw = File.CreateText(path))
                 {
@@ -565,7 +567,7 @@ namespace ssi
                     sw.WriteLine(".\\lib");
                     sw.WriteLine(".\\lib\\plat-win");
                     sw.WriteLine(".\\lib\\site-packages");
-                    sw.WriteLine(".\\python38");
+                    sw.WriteLine(".\\" + PYTHON_VERSION_FOLDER);
 
                 }
 
@@ -598,7 +600,8 @@ namespace ssi
                             "Pillow",
                             "opencv-python",
                             "numpy",
-                            "sklearn"
+                            "sklearn",
+                            "imblearn"
 
                            
 
