@@ -240,8 +240,8 @@ namespace ssi
 
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (!control.annoListControl.editTextBox.IsFocused
-                && !control.annoListControl.searchTextBox.IsFocused)
+            handleKeyDownEvent(sender, e);
+            if (!control.annoListControl.editTextBox.IsFocused && !control.annoListControl.searchTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
             {
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
                 switch (level)
@@ -410,7 +410,6 @@ namespace ssi
                             }
                         }
 
-                      
                         break;
                     default:
                         break;
@@ -421,7 +420,8 @@ namespace ssi
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (!this.control.annoListControl.editTextBox.IsFocused)
+            // TODO MARCO vllt wieder auskommentieren? handleKeyEvent(sender, e);
+            if (!this.control.annoListControl.editTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
             {
 
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
@@ -435,11 +435,11 @@ namespace ssi
                     case 2:
                         if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
                         {
-
+                            
                         }
                         else if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) && e.KeyboardDevice.IsKeyDown(Key.LeftShift))
                         {
-
+                            
                         }
                         else if (e.KeyboardDevice.IsKeyDown(Key.LeftShift) && e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
                         {
@@ -463,7 +463,6 @@ namespace ssi
                             {
                                 saveSelectedAnno();
                             }
-
                             else  if (e.KeyboardDevice.IsKeyDown(Key.N))
                                 {
                                     addNewAnnotation();
@@ -544,6 +543,7 @@ namespace ssi
 
         public void OnKeyUp(object sender, KeyEventArgs e)
         {
+            handleKeyUpEvent(sender, e);
             isKeyDown = false;
         }
 

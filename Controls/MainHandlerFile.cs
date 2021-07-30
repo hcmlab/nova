@@ -147,18 +147,17 @@ namespace ssi
                     {
                         loadMediaFile(filepath, MediaType.VIDEO);
                         loadvideosaudio = Properties.Settings.Default.DrawVideoWavform;
-                    }
 
-                    if (loadvideosaudio)
-                    {
-                        Signal signal = loadAudioSignalFile(filepath, foreground, background);
-                    
-                        if (signal != null)
-                        {                        
-                            signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                        if (loadvideosaudio)
+                        {
+                            Signal signal = loadAudioSignalFile(filepath, foreground, background);
+
+                            if (signal != null)
+                            {
+                                signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                            }
                         }
                     }
-
                     else
                     {
                         loadMediaFile(filepath, MediaType.AUDIO);
@@ -248,48 +247,56 @@ namespace ssi
                 MessageTools.Error("Media file not found '" + filename + "'");
                 return null;
             }
-
-            if(MediaBackend == MEDIABACKEND.MEDIAKIT)
+            try
             {
-                try
+                if (MediaBackend == MEDIABACKEND.MEDIAKIT)
                 {
                     MediaKit media = new MediaKit(filename, type);
-                    media.OnMediaMouseDown += OnMediaMouseDown;
-                    media.OnMediaMouseUp += OnMediaMouseUp;
-                    media.OnMediaMouseMove += OnMediaMouseMove;
+                    addEvents(null, media);
                     addMedia(media);
                     return media;
                 }
-                catch
-                {
-                    return null;
-                    //ignore the file
-                }
-              
-            }
-           else if(MediaBackend == MEDIABACKEND.MEDIA)
-            {
-                try
+                else if (MediaBackend == MEDIABACKEND.MEDIA)
                 {
                     Media media = new Media(filename, type);
-                    media.OnMediaMouseDown += OnMediaMouseDown;
-                    media.OnMediaMouseUp += OnMediaMouseUp;
-                    media.OnMediaMouseMove += OnMediaMouseMove;
+                    addEvents(media);
                     addMedia(media);
                     return media;
                 }
-
-                catch
-                {
-                    return null;
-                    //ignore the file
-                }
+            }
+            catch
+            {
+                return null;
+                //ignore the file
             }
 
-
             return null;
-           
         }
+
+        private void addEvents(Media media = null, MediaKit mediaKit = null)
+        {
+            if(media != null)
+            {
+                media.OnMediaMouseDown += OnMediaMouseDown;
+                media.OnMediaMouseUp += OnMediaMouseUp;
+                media.OnMediaMouseMove += OnMediaMouseMove;
+                media.OnMediaMouseDown += OnPolygonMediaMouseDown;
+                media.OnMediaMouseUp += OnPolygonMediaMouseUp;
+                media.OnMediaMouseMove += OnPolygonMediaMouseMove; 
+
+            }
+            else
+            {
+                mediaKit.OnMediaMouseDown += OnMediaMouseDown;
+                mediaKit.OnMediaMouseUp += OnMediaMouseUp;
+                mediaKit.OnMediaMouseMove += OnMediaMouseMove;
+                mediaKit.OnMediaMouseDown += OnPolygonMediaMouseDown;
+                mediaKit.OnMediaMouseUp += OnPolygonMediaMouseUp;
+                mediaKit.OnMediaMouseMove += OnPolygonMediaMouseMove;
+            }
+        }
+
+        
 
         private void loadAnnoFile(string filename)
         {

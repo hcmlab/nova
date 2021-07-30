@@ -202,6 +202,7 @@ namespace ssi
             {
                 return (AnnoList.Scheme.Type == AnnoScheme.TYPE.POINT ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON ||
+                       AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                        AnnoList.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION);
             }
@@ -341,36 +342,32 @@ namespace ssi
                                 closestIndex = GetClosestContinuousIndex(closestposition);
                                 if (closestIndex > -1)
                                 {
+                                    continuousTierEllipse.Visibility = Visibility.Visible;
+
+                                    double numberOfLevels = Properties.Settings.Default.ContinuousHotkeysNumber;
+                                    double fac = 1 + (1 / (numberOfLevels - 1));
+                                    double segmentHeight = (this.ActualHeight / numberOfLevels);
+
+                                    if (!init)
                                     {
-                                        continuousTierEllipse.Visibility = Visibility.Visible;
-
-                                        double numberOfLevels = Properties.Settings.Default.ContinuousHotkeysNumber;
-                                        double fac = 1 + (1 / (numberOfLevels - 1));
-                                        double segmentHeight = (this.ActualHeight / numberOfLevels);
-
-                                        if (!init)
-                                        {
-                                            yPos = (numberOfLevels - ((int)(numberOfLevels / 2) * fac)) * segmentHeight;
-                                            init = true;
-                                        }
-
-
-                                        if ((this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 && Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver)) && MouseActive && !ControllerConnected)
-                                        {
-                                            yPos = (Mouse.GetPosition(this).Y < 0.0 ? 0.0 : Mouse.GetPosition(this).Y);
-                                        }
-
-
-                                        if (ControllerConnected)
-                                        {
-                                            double res = yPos - (LstickY / 10.0);
-                                            yPos = res < 0.0 ? 0.0 : res > this.ActualHeight ? this.ActualHeight : res;
-                                        }
-
-
-
-                                        UdpateContinuousPosition(ClearButtonPressed);
+                                        yPos = (numberOfLevels - ((int)(numberOfLevels / 2) * fac)) * segmentHeight;
+                                        init = true;
                                     }
+
+
+                                    if ((this == Mouse.DirectlyOver || (Mouse.GetPosition(this).Y > 0 && Mouse.GetPosition(this).Y < this.ActualHeight && continuousTierEllipse == Mouse.DirectlyOver)) && MouseActive && !ControllerConnected)
+                                    {
+                                        yPos = (Mouse.GetPosition(this).Y < 0.0 ? 0.0 : Mouse.GetPosition(this).Y);
+                                    }
+
+
+                                    if (ControllerConnected)
+                                    {
+                                        double res = yPos - (LstickY / 10.0);
+                                        yPos = res < 0.0 ? 0.0 : res > this.ActualHeight ? this.ActualHeight : res;
+                                    }
+
+                                    UdpateContinuousPosition(ClearButtonPressed);
                                 }
                             }
                             else continuousTierEllipse.Visibility = Visibility.Hidden;
@@ -380,14 +377,18 @@ namespace ssi
                     {
                         InitPointValues(anno);
                     }
-                    else if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON)
-                    { }
+                    else if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON || anno.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                    {
+                        InitPolygonCase(anno);
+                    }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.GRAPH)
                     { }
                     else if (anno.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                     { }
 
                     anno.HasChanged = false;
+
+
                 };
             }
             selectedTier = this;
@@ -578,7 +579,7 @@ namespace ssi
 
         public void SplitSegment(AnnoTierSegment s)
         {
-            AnnoListItem second_segment = new AnnoListItem(MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition), s.Item.Stop - MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition), s.Item.Label, s.Item.Meta, s.Item.Color, s.Item.Confidence, s.Item.isGeometric, s.Item.Points);
+            AnnoListItem second_segment = new AnnoListItem(MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition), s.Item.Stop - MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition), s.Item.Label, s.Item.Meta, s.Item.Color, s.Item.Confidence, s.Item.Type, s.Item.Points);
             AnnoTierSegment second_s = AddSegment(second_segment);
             ChangeRepresentationObject RememberSplit = UnDoObject.MakeChangeRepresentationObjectForSplit(GetLeft(s), (FrameworkElement)s, (FrameworkElement)second_s);
             UnDoObject.InsertObjectforUndoRedo(RememberSplit);
@@ -619,7 +620,7 @@ namespace ssi
             {
                 for (int i = AnnoList.Count; i < samples; i++)
                 {
-                    AnnoListItem ali = new AnnoListItem(i * delta, delta, initValue, "", Colors.Black);
+                    AnnoListItem ali = new AnnoListItem(i * delta, delta, initValue.ToString(), "", Colors.Black);
                     AnnoList.Add(ali);
                 }
             }
@@ -667,7 +668,6 @@ namespace ssi
             double delta = 1.0 / sr;
             if (AnnoList.Count < samples)
             {
-                Random rnd = new Random();
                 for (int i = AnnoList.Count; i < samples; i++)
                 {
                     PointList points = new PointList();
@@ -675,17 +675,33 @@ namespace ssi
                     {
                         int x = -1;
                         int y = -1;
-                        //x = rnd.Next(50, 200);
-                        //y = rnd.Next(50, 200);
                         points.Add(new PointListItem(x, y, (j + 1).ToString(), 1.0));
                     }
-                    AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, true, points);
+                    AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, AnnoListItem.TYPE.POINT, points);
                     AnnoList.Add(ali);
                 }
             }
 
             TimeRangeChanged(MainHandler.Time);
-            //TimeRangeChanged(MainHandler.Time);
+        }
+
+        public void InitPolygonCase(AnnoList anno)
+        {
+            double sr = anno.Scheme.SampleRate;
+            int samples = (int)Math.Round(MainHandler.Time.TotalDuration * sr);
+
+            double delta = 1.0 / sr;
+            if (AnnoList.Count < samples)
+            {
+                for (int i = AnnoList.Count; i < samples; i++)
+                {
+                    PolygonList pl = new PolygonList(new List<PolygonLabel>());
+                    AnnoListItem ali = new AnnoListItem(i * delta, delta, "Frame " + (i + 1).ToString(), "", anno.Scheme.MinOrBackColor, 1, AnnoListItem.TYPE.POLYGON, polygonList: pl);
+                    AnnoList.Add(ali);
+                }
+            }
+
+            TimeRangeChanged(MainHandler.Time);
         }
 
         public void LiveAnnoMode(bool activated)
@@ -890,7 +906,7 @@ namespace ssi
             }
             else if (!IsDiscreteOrFree && Keyboard.IsKeyDown(Key.LeftShift) && stop < MainHandler.Time.TotalDuration)
             {
-                AnnoListItem temp = new AnnoListItem(start, len, DefaultScore, "", Colors.Black);
+                AnnoListItem temp = new AnnoListItem(start, len, DefaultScore.ToString(), "", Colors.Black);
                 AnnoTierSegment segment = new AnnoTierSegment(temp, this);
                 segment.Width = 1;
                 annorightdirection = true;
@@ -1284,10 +1300,6 @@ namespace ssi
         public void TimeRangeChanged(Timeline time)
         {
             this.Width = time.SelectionInPixel;
-
-
-
-            
 
             //segments can happen in both, discrete and continuous annotations, so we check them in any case
             foreach (AnnoTierSegment s in segments)

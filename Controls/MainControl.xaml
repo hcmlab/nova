@@ -75,12 +75,12 @@
                 <MenuItem Header="Fusion" Name="fusionmenu">
                     <MenuItem Header="Bayesian Networks" Name="bnmenu">
                         <MenuItem Header="Train" Name="databaseCMLFusionMenu"/>
-                    <MenuItem Header="Predict" Name="databaseCMLFusionMenuPredict"/>
+                        <MenuItem Header="Predict" Name="databaseCMLFusionMenuPredict"/>
                     </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
-            
+
             <MenuItem Header="XAI" Name="XAIMenu">
                 <MenuItem Header="ImageExplainer" Name="ImageExplainer">
                     <MenuItem Header="Lime" Name="explanationWindow"/>
@@ -99,10 +99,10 @@
                 <MenuItem Header="Update CML Tools" Name="updateCMLMenu" />
                 <MenuItem Header="Update Python Tools" Name="updatePythonMenu" />
                 <MenuItem Header="Check For NOVA Update" Name="updateApplicationMenu" />
-                
+
             </MenuItem>
 
-     
+
 
         </Menu>
 
@@ -114,7 +114,7 @@
               Name="viewGrid">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="300" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
@@ -131,9 +131,14 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
+                <!-- two times 'Row = 0' because we either take the geometric part of the window or the polygon part, never both -->
                 <Border Grid.Column="0" 
                     Grid.Row="0">
                     <local:GeometricListControl x:Name="geometricListControl"></local:GeometricListControl>
+                </Border>
+
+                <Border Grid.Column="0" Grid.Row="0">
+                    <local:PolygonListControl x:Name="polygonListControl"></local:PolygonListControl>
                 </Border>
 
                 <Border Grid.Column="0" 
@@ -315,8 +320,8 @@
                                         <TextBlock Name="signalStatusValueMaxLabel" ToolTip="The max Value of the Signal" TextTrimming="WordEllipsis"></TextBlock>
                                         <Separator />
                                         <TextBlock Name="signalStatusValueLabel" ToolTip="The current sample value of the selected signal track" TextTrimming="WordEllipsis"></TextBlock>
-                                        
-                                        
+
+
                                     </StatusBar>
 
                                     <local:VolumeControl x:Name="signalVolumeControl" 
@@ -333,7 +338,7 @@
                                                             VerticalAlignment="Center"
                                                             TextTrimming="WordEllipsis">00:00:00.00</TextBlock>
                                         <Separator />
-                                        
+
                                         <Button Name="signalCloseButton" 
                                                         Content="X" 
                                                         HorizontalAlignment="Right" 
@@ -384,8 +389,8 @@
                                 <Grid>
 
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="151*" />
+                                        <ColumnDefinition Width="387*" />
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="30"  />
@@ -422,8 +427,8 @@
                                         <TextBlock Name="annoStatusAnnotatorLabel" ToolTip="Name of the annotator" TextTrimming="WordEllipsis"></TextBlock>
                                         <Separator />
                                         <TextBlock Name="annoStatusRoleLabel" ToolTip="Name of the role that is annotated" TextTrimming="WordEllipsis"></TextBlock>
-                                       
-                                      
+
+
                                     </StatusBar>
 
                                     <StackPanel Grid.Row="0"
@@ -480,7 +485,7 @@
 
                         <Border Grid.Column="0"  
                                     Grid.Row="3">
-                            <local:TimeTrackControl x:Name="timeLineControl" />
+                            <local:TimeTrackControl x:Name="timeLineControl"/>
                         </Border>
 
                     </Grid>
@@ -502,7 +507,7 @@
                     </StackPanel>
                 </Grid>
             </Grid>
-            
+
         </Grid>
     </Grid>
 

@@ -1,13 +1,17 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Windows.Media;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Media;
 using System.Xml;
 using System.Xml.Linq;
+using ssi.Types.Polygon;
 
 namespace ssi
 {
@@ -59,7 +63,26 @@ namespace ssi
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
                 {
-                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"CONTINUOUS\" sr=\"" + this.Scheme.SampleRate + "\" num=\"" + this.Scheme.NumberOfPoints + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"POLYGON\" sr=\"" + this.Scheme.SampleRate + "\" default-label=\"" + this.Scheme.DefaultLabel + "\" " +
+                                 "default-label-color=\"" + this.Scheme.DefaultColor + "\" color=\"" + this.Scheme.MinOrBackColor + "\" />");
+                }
+                else if (Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                {
+                    sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"DISCRETE_POLYGON\" sr=\"" + this.Scheme.SampleRate + "\" default-label=\"" + this.Scheme.DefaultLabel + "\" " +
+                                 "default-label-color=\"" + this.Scheme.DefaultColor + "\" color=\"" + this.Scheme.MinOrBackColor + "\">");
+
+                    int index = 0;
+
+                    foreach (AnnoScheme.Label lp in this.Scheme.Labels)
+                    {
+                        if (lp.Name != "GARBAGE")
+                        {
+                            sw.WriteLine("        <item name=\"" + lp.Name + "\" id=\"" + index + "\" color=\"" + lp.Color + "\" />");
+                            LabelIds.Add(lp.Name, index.ToString());
+                            index++;
+                        }
+                    }
+                    sw.WriteLine("    </scheme>");
                 }
                 else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
                 {
@@ -83,7 +106,10 @@ namespace ssi
             {
                 if (Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                 {
-                    StreamWriter sw = new StreamWriter(filePath + "~", false, System.Text.Encoding.Default);
+                    StreamWriter sw = null;
+                    if (Scheme.Type != AnnoScheme.TYPE.POLYGON && Scheme.Type != AnnoScheme.TYPE.DISCRETE_POLYGON)
+                         sw = new StreamWriter(filePath + "~", false, System.Text.Encoding.Default);
+
                     if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                     {
                         foreach (AnnoListItem e in this)
@@ -136,11 +162,66 @@ namespace ssi
                             sw.WriteLine(output + e.Confidence);
                         }
                     }
-                    else if (Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                    else if (Scheme.Type == AnnoScheme.TYPE.POLYGON || Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                     {
-                        foreach (AnnoListItem e in this)
+                        StringBuilder sb = new StringBuilder();
+                        StringWriter stringWriter = new StringWriter(sb);
+                        string index = "";
+
+                        using (JsonWriter writer = new JsonTextWriter(stringWriter))
                         {
-                            sw.WriteLine(e.Label + delimiter + e.Confidence);
+                            writer.Formatting = Newtonsoft.Json.Formatting.Indented;
+                            writer.WriteStartObject();
+                            writer.WritePropertyName("frame");
+                            writer.WriteStartArray();
+                            
+                            foreach (AnnoListItem e in this)
+                            {
+                                writer.WriteStartObject();
+                                writer.WritePropertyName("name");
+                                writer.WriteValue(e.Label.Split(' ')[1]);
+                                if(e.PolygonList.Polygons.Count > 0)
+                                {
+                                    writer.WritePropertyName("polygons");
+                                    writer.WriteStartArray();
+
+                                    foreach (PolygonLabel pl in e.PolygonList.Polygons)
+                                    {
+                                        writer.WriteStartObject();
+                                        writer.WritePropertyName("label");
+
+                                        if (Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                                        {
+                                            LabelIds.TryGetValue(pl.Label, out index);
+                                            writer.WriteValue(index);
+                                        }
+                                        else
+                                        {
+                                            writer.WriteValue(pl.Label);
+                                            writer.WritePropertyName("label_color");
+                                            writer.WriteValue(pl.Color.ToString());
+                                        }
+                                        
+                                        writer.WritePropertyName("points");
+                                        writer.WriteStartArray();
+                                        foreach (PolygonPoint pp in pl.Polygon)
+                                        {
+                                            writer.WriteStartArray();
+                                            writer.WriteValue(Convert.ToInt32(pp.X));
+                                            writer.WriteValue(Convert.ToInt32(pp.Y));
+                                            writer.WriteEndArray();
+                                        }
+                                        writer.WriteEndArray();
+                                        writer.WriteEndObject();
+                                    }
+                                    writer.WriteEndArray();
+                                }
+                                writer.WriteEndObject();
+                            }
+
+                            writer.WriteEndArray();
+                            writer.WriteEndObject();
+                            File.WriteAllText(filePath + "~", sb.ToString());
                         }
                     }
                     else if (Scheme.Type == AnnoScheme.TYPE.GRAPH)
@@ -157,8 +238,8 @@ namespace ssi
                             sw.WriteLine(e.Label + delimiter + e.Confidence);
                         }
                     }
-
-                    sw.Close();
+                    if (Scheme.Type != AnnoScheme.TYPE.POLYGON && Scheme.Type != AnnoScheme.TYPE.DISCRETE_POLYGON)
+                        sw.Close();
                 }
                 else
                 {
@@ -293,7 +374,6 @@ namespace ssi
                 {
                     if (meta.Attributes["role"] != null) list.Meta.Role = meta.Attributes["role"].Value;
                     if (meta.Attributes["annotator"] != null) list.Meta.Annotator = meta.Attributes["annotator"].Value;
-                   
                 }
 
                 XmlNode scheme = annotation.SelectSingleNode("scheme");
@@ -327,6 +407,10 @@ namespace ssi
                 else if (type == AnnoScheme.TYPE.POLYGON.ToString())
                 {
                     list.Scheme.Type = AnnoScheme.TYPE.POLYGON;
+                }
+                else if (type == AnnoScheme.TYPE.DISCRETE_POLYGON.ToString())
+                {
+                    list.Scheme.Type = AnnoScheme.TYPE.DISCRETE_POLYGON;
                 }
                 else if (type == AnnoScheme.TYPE.GRAPH.ToString())
                 {
@@ -386,95 +470,170 @@ namespace ssi
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
                 }
                 else if (list.Scheme.Type == AnnoScheme.TYPE.POINT ||
-                         list.Scheme.Type == AnnoScheme.TYPE.POLYGON || list.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
+                         list.Scheme.Type == AnnoScheme.TYPE.GRAPH ||
                          list.Scheme.Type == AnnoScheme.TYPE.SEGMENTATION)
                 {
                     list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
                     list.Scheme.NumberOfPoints = int.Parse(scheme.Attributes["num"].Value);                    
                 }
+                else if(list.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                {
+                    list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
+                    list.Scheme.DefaultLabel = scheme.Attributes["default-label"].Value;
+                    list.Scheme.DefaultColor = (Color)(ColorConverter.ConvertFromString(scheme.Attributes["default-label-color"].Value));
 
-                if (File.Exists(filepath + "~"))
+                    foreach (XmlNode item in scheme)
+                    {
+                        LabelIds.Add(item.Attributes["id"].Value, item.Attributes["name"].Value);
 
+                        Color color = Defaults.Colors.Foreground;
+                        if (item.Attributes["color"] != null) color = (Color)ColorConverter.ConvertFromString(item.Attributes["color"].Value);
+                        AnnoScheme.Label lcp = new AnnoScheme.Label(item.Attributes["name"].Value, color);
+                        list.Scheme.Labels.Add(lcp);
+                    }
+                }
+                else if (list.Scheme.Type == AnnoScheme.TYPE.POLYGON)
+                {
+                    list.Scheme.SampleRate = double.Parse(scheme.Attributes["sr"].Value);
+                    list.Scheme.DefaultLabel = scheme.Attributes["default-label"].Value;
+                    list.Scheme.DefaultColor = (Color)(ColorConverter.ConvertFromString(scheme.Attributes["default-label-color"].Value));
+                }
+
+                if (File.Exists(filepath + "~") || File.Exists(filepath + "~"))
                 {
                     if (list.Source.File.Type == AnnoSource.FileSource.TYPE.ASCII)
                     {
-                        StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.UTF8);
-                        string line = null;
                         double start = 0.0;
 
-                        while ((line = sr.ReadLine()) != null)
+                        if (list.Scheme.Type != AnnoScheme.TYPE.POLYGON && list.Scheme.Type != AnnoScheme.TYPE.DISCRETE_POLYGON)
                         {
-                            string[] data = line.Split(';');
-                            if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-                            {
-                                double value = double.NaN;
-                                double.TryParse(data[0], out value);
-                                double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value, "", Defaults.Colors.Foreground, confidence);
-                                list.Add(e);
-                                start = start + 1 / list.Scheme.SampleRate;
-                            }
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
-                            {
-                                start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                                double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                double dur = stop - start;
-                                string label = "";
-                                if (int.Parse(data[2]) < 0) label = "GARBAGE";
-                                else LabelIds.TryGetValue(data[2], out label);
-                                Color color = Colors.Black;
+                            StreamReader sr = new StreamReader(filepath + "~", System.Text.Encoding.UTF8);
+                            string line = null;
 
-                                if (list.Scheme.Labels.Find(x => x.Name == label) != null)
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                string[] data = line.Split(';');
+                                if (list.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                                 {
-                                    color = list.Scheme.Labels.Find(x => x.Name == label).Color;
+                                    double value = double.NaN;
+                                    double.TryParse(data[0], out value);
+                                    double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                    AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value.ToString(), "", Defaults.Colors.Foreground, confidence);
+                                    list.Add(e);
+                                    start = start + 1 / list.Scheme.SampleRate;
                                 }
-
-                                double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
-                                AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
-                                list.AddSorted(e);
-                            }
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
-                            {
-                                start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
-                                double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                double dur = stop - start;
-                                string label = data[2];
-                                double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
-                                Color color = Colors.Black;
-                                if (data.Length > 4)
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                                 {
-                                    string[] metapairs = data[4].Split('=');
-                                    for (int i = 0; i < metapairs.Length; i++)
+                                    start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                    double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                    double dur = stop - start;
+                                    string label = "";
+                                    if (int.Parse(data[2]) < 0) label = "GARBAGE";
+                                    else LabelIds.TryGetValue(data[2], out label);
+                                    Color color = Colors.Black;
+
+                                    if (list.Scheme.Labels.Find(x => x.Name == label) != null)
                                     {
-                                        if (metapairs[i].Contains("color"))
+                                        color = list.Scheme.Labels.Find(x => x.Name == label).Color;
+                                    }
+
+                                    double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
+                                    AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
+                                    list.AddSorted(e);
+                                }
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
+                                {
+                                    start = Convert.ToDouble(data[0], CultureInfo.InvariantCulture);
+                                    double stop = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
+                                    double dur = stop - start;
+                                    string label = data[2];
+                                    double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
+                                    Color color = Colors.Black;
+                                    if (data.Length > 4)
+                                    {
+                                        string[] metapairs = data[4].Split('=');
+                                        for (int i = 0; i < metapairs.Length; i++)
                                         {
-                                            color = (Color)ColorConverter.ConvertFromString(metapairs[i + 1]);
-                                            break;
+                                            if (metapairs[i].Contains("color"))
+                                            {
+                                                color = (Color)ColorConverter.ConvertFromString(metapairs[i + 1]);
+                                                break;
+                                            }
                                         }
                                     }
+                                    AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
+                                    list.AddSorted(e);
                                 }
-                                AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
-                                list.AddSorted(e);
-                            }
 
-                            else if (list.Scheme.Type == AnnoScheme.TYPE.POINT)
-                            {
-                                string frameLabel = data[0];
-                                double frameConfidence = Convert.ToDouble(data[data.Count() - 1], CultureInfo.InvariantCulture);
-                                PointList points = new PointList();
-                                for (int i = 1; i < data.Count() - 1; ++i)
+                                else if (list.Scheme.Type == AnnoScheme.TYPE.POINT)
                                 {
-                                    string pd = data[i].Replace("(", "");
-                                    pd = pd.Replace(")", "");
-                                    string[] pointData = pd.Split(':');
-                                    points.Add(new PointListItem(double.Parse(pointData[1]), double.Parse(pointData[2]), pointData[0], double.Parse(pointData[3])));
+                                    string frameLabel = data[0];
+                                    double frameConfidence = Convert.ToDouble(data[data.Count() - 1], CultureInfo.InvariantCulture);
+                                    PointList points = new PointList();
+                                    for (int i = 1; i < data.Count() - 1; ++i)
+                                    {
+                                        string pd = data[i].Replace("(", "");
+                                        pd = pd.Replace(")", "");
+                                        string[] pointData = pd.Split(':');
+                                        points.Add(new PointListItem(double.Parse(pointData[1]), double.Parse(pointData[2]), pointData[0], double.Parse(pointData[3])));
+                                    }
+                                    AnnoListItem ali = new AnnoListItem(start, 1 / list.Scheme.SampleRate, frameLabel, "", list.Scheme.MinOrBackColor, frameConfidence, AnnoListItem.TYPE.POINT, points);
+                                    list.Add(ali);
+                                    start = start + 1 / list.Scheme.SampleRate;
                                 }
-                                AnnoListItem ali = new AnnoListItem(start, 1 / list.Scheme.SampleRate, frameLabel, "", list.Scheme.MinOrBackColor, frameConfidence, true, points);
-                                list.Add(ali);
-                                start = start + 1 / list.Scheme.SampleRate;
+                            }
+                            sr.Close();
+                        }
+                        else
+                        {
+                            dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(File.ReadAllText(filepath + "~"));
+
+                            foreach (var frame in result.frame)
+                            {
+                                String frameName = "Frame " + frame.name;
+                                List<PolygonLabel> polygonLabels = new List<PolygonLabel>();
+
+                                if (frame.polygons is object)
+                                {
+                                    foreach (var polygon in frame.polygons)
+                                    {
+                                        String label = "";
+                                        String color = "";
+                                        Color labelColor = Colors.Black;
+
+                                        if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                                        {
+                                            String tmp = polygon.label;
+                                            LabelIds.TryGetValue(tmp, out label);
+
+                                            if (list.Scheme.Labels.Find(x => x.Name == label) != null)
+                                            {
+                                                labelColor = list.Scheme.Labels.Find(x => x.Name == label).Color;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            label = polygon.label;
+                                            color = polygon.label_color;
+                                            labelColor = (Color)ColorConverter.ConvertFromString(color);
+                                        }
+
+                                        List<PolygonPoint> points = new List<PolygonPoint>();
+                                        foreach (var point in polygon.points)
+                                        {
+                                            double id = PolygonUtilities.IDcounter;
+                                            PolygonUtilities.IDcounter++;
+                                            points.Add(new PolygonPoint((double)point.First, (double)point.Last, id));
+                                        }
+
+                                        polygonLabels.Add(new PolygonLabel(points, label, labelColor));
+                                    }
+                                }
+                                const double defaultConfidence = 1.0;
+                                list.Add(new AnnoListItem(start, 1 / list.Scheme.SampleRate, frameName, "", list.Scheme.MinOrBackColor, defaultConfidence, AnnoListItem.TYPE.POLYGON, polygonList: new PolygonList(polygonLabels)));
+                                start += 1 / list.Scheme.SampleRate;
                             }
                         }
-                        sr.Close();
                     }
                     else if (list.Source.File.Type == AnnoSource.FileSource.TYPE.BINARY)
                     {
@@ -488,7 +647,7 @@ namespace ssi
                             {
                                 double value = (double)binaryReader.ReadSingle();
                                 double confidence = (double)binaryReader.ReadSingle();
-                                AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value, "", Defaults.Colors.Foreground, confidence);
+                                AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value.ToString(), "", Defaults.Colors.Foreground, confidence);
                                 list.Add(e);
                                 start = start + 1 / list.Scheme.SampleRate;
                             }
@@ -790,12 +949,12 @@ namespace ssi
                             {
                                 list.Scheme.MaxScore = double.Parse(data[4]);
                             }
-                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, score, "Range: " + list.Scheme.MinScore + "-" + list.Scheme.MaxScore, Colors.Black);
+                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, score.ToString(), "Range: " + list.Scheme.MinScore + "-" + list.Scheme.MaxScore, Colors.Black);
                             list.AddSorted(e);
                         }
                         else
                         {
-                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, score, "", Colors.Black, 1);
+                            AnnoListItem e = new AnnoListItem(start, samplerate == 0 ? 0 : 1 / samplerate, score.ToString(), "", Colors.Black, 1);
                             if (filter == null || tier == filter)
                                 list.AddSorted(e);
                         }

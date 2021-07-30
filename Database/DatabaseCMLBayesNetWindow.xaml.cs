@@ -525,7 +525,7 @@ namespace ssi
                     {
                         for (int j = 0; j < round; j++)
                         {
-                            AnnoListItem ali = new AnnoListItem(annolist[i].Start + j * (1.0 / round), (1.0 / round), annolist[i].Score);
+                            AnnoListItem ali = new AnnoListItem(annolist[i].Start + j * (1.0 / round), (1.0 / round), annolist[i].Score.ToString());
 
                             result.Add(ali);
                         }

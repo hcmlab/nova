@@ -20,6 +20,7 @@ namespace ssi
             DefaultZoom.Text = Properties.Settings.Default.DefaultZoomInSeconds.ToString();
             Segmentmindur.Text = Properties.Settings.Default.DefaultMinSegmentSize.ToString();
             Samplerate.Text = Properties.Settings.Default.DefaultDiscreteSampleRate.ToString();
+            PointDistance.Text = Properties.Settings.Default.DefaultPolygonPointDistance.ToString();
             DrawwaveformCheckbox.IsChecked = Properties.Settings.Default.DrawVideoWavform;
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
@@ -98,6 +99,11 @@ namespace ssi
         public string SampleRate()
         {
             return Samplerate.Text;
+        }
+
+        public string PolygonPointDistance()
+        {
+            return PointDistance.Text;
         }
 
         public bool DrawvideoWavform()
