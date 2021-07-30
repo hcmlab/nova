@@ -1,9 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -11,6 +15,8 @@ namespace ssi
 {
     public partial class MainHandler
     {
+ 
+        private static readonly HttpClient client = new HttpClient();
         private void databaseCMLExtractFeatures_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLExtractFeaturesWindow dialog = new DatabaseCMLExtractFeaturesWindow(this, DatabaseCMLExtractFeaturesWindow.Mode.EXTRACT);
@@ -158,7 +164,7 @@ namespace ssi
 
             if (ENABLE_PYTHON)
             {
-               MainHandler.xaiProcessId = startExplanationBackend();
+               MainHandler.pythonProcessID = startExplanationBackend();
             }
 
             return result;
@@ -229,6 +235,9 @@ namespace ssi
 
             return runCMLTool("cmltrain", "train", parameters, arguments, "cml-train");            
         }
+
+
+
 
         public string CMLEvaluateModel(string evalPath, string trainerPath, string datapath, string server, string username, string password, string database, string sessions, string scheme, string roles, string annotator, string stream, bool loso)
         {
@@ -304,6 +313,186 @@ namespace ssi
             if (complete) arguments["cooperative"] = null;
 
             return runCMLTool("cmltrain", "forward", parameters, arguments, "cml-predict");            
+        }
+
+
+        public async Task<Dictionary<string, string>> PythonBackEndPredict(string templatePath, string trainerScript, string trainerPath, string dataPath, string server, string username, string password, string database, string sessions, DatabaseScheme scheme, string roles, string annotator, DatabaseStream stream, string leftContext, string rightContext, string balance, bool complete, double cmlbegintime, string multisessionpath = null)
+        {
+            var trainerScriptPath = Directory.GetParent(templatePath) + "\\" + trainerScript;
+
+
+
+            try
+            {
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(templatePath), "templatePath" },
+                    { new StringContent(trainerPath), "trainerPath" },
+                    { new StringContent(dataPath), "dataPath" },
+                    { new StringContent(server), "server" },
+                    { new StringContent(username), "username" },
+                    { new StringContent(password), "password" },
+                    { new StringContent(database), "database" },
+                    { new StringContent(sessions), "sessions" },
+                    { new StringContent(scheme.Name), "scheme" },
+                    { new StringContent(roles), "roles" },
+                    { new StringContent(annotator), "annotator" },
+                    { new StringContent(stream.Name), "stream" },
+                    { new StringContent(leftContext), "leftContext" },
+                    { new StringContent(rightContext), "rightContext" },
+                    { new StringContent(balance), "balance" },
+                    { new StringContent(complete.ToString()), "complete" },
+                    { new StringContent(cmlbegintime.ToString()), "cmlbegintime" },
+                    { new StringContent(multisessionpath), "multisessionpath" },
+                    { new StringContent(trainerScriptPath), "trainerScript" }
+
+
+
+                };
+
+
+                string url = "http://localhost:5000/forward";
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                if (explanationDic["success"] == "failed")
+                {
+                    return null;
+                }
+
+               // CreateTrainerFile(trainerPath, dataPath, trainerScriptPath, database, sessions, roles, scheme, rightContext, leftContext, balance);
+
+                return explanationDic;
+
+            }
+            catch (Exception e)
+            {
+
+                return null;
+            }
+
+
+        }
+
+
+        public int CreateTrainerFile(string trainerPath, string dataPath, string trainerScriptPath, string database, string sessions, string roles, DatabaseScheme scheme, DatabaseStream stream, string rightContext, string leftContext, string balance)
+        {
+
+            string filename = trainerPath + ".trainer";
+
+            StreamWriter swheader = new StreamWriter(filename, false, System.Text.Encoding.Default);
+            swheader.WriteLine("<?xml version=\"1.0\" ?>");
+            swheader.WriteLine("<trainer ssi-v=\"5\">");
+            swheader.WriteLine("\t<info trained=\"true\"/>");
+            swheader.WriteLine("\t<meta rightContext=\"" + rightContext + "\" leftContext=\"" + leftContext + "\" balance=\"" + balance + "\" backend=\"Python\" />");
+            swheader.WriteLine("\t<register>");
+            swheader.WriteLine("\t\t<item name=\"" + MainHandler.PYTHON_VERSION_FOLDER + "\" />");
+            swheader.WriteLine("\t</register>");
+            swheader.WriteLine("\t<streams>");
+
+            string[] sessionssplit = sessions.Split(';');
+            string[] rolessplit = roles.Split(';');
+            //load exemplary data stream
+            Signal signal = Signal.LoadStreamFile(dataPath + "\\" + database + "\\" + sessionssplit[0] + "\\" + rolessplit[0] + "." + stream.Name + ".stream");
+            signal.type = Signal.Type.FLOAT;
+            swheader.WriteLine("\t\t<item byte=\"" + signal.bytes + "\" dim=\"" + signal.dim + "\" sr=\"" + signal.rate + "\" type=\"" + signal.type + "\" />");
+            swheader.WriteLine("\t</streams>");
+            swheader.WriteLine("\t<classes>");
+
+
+            AnnoScheme annoscheme = DatabaseHandler.GetAnnotationScheme(scheme.Name);
+            foreach (AnnoScheme.Label i in annoscheme.Labels)
+            {
+                swheader.WriteLine("\t\t<item name=\"" + i.Name + "\" />");
+            }
+            swheader.WriteLine("\t\t<item name=\"REST\" />");
+            swheader.WriteLine("\t</classes>");
+
+            swheader.WriteLine("\t<users>");
+
+
+
+            foreach (string i in sessionssplit)
+            {
+                swheader.WriteLine("\t\t<item name=\"" + i + "\" />");
+            }
+
+            swheader.WriteLine("\t</users>");
+
+            File.Copy(trainerScriptPath, trainerPath + "." + Path.GetFileName(trainerScriptPath), true);
+            swheader.WriteLine("\t<model create=\"Model\" stream=\"0\" script=\"" + Path.GetFileName(trainerPath) + "." + Path.GetFileName(trainerScriptPath) + "\"/>");
+            swheader.WriteLine("</trainer>");
+
+
+            swheader.Close();
+
+            swheader.Dispose();
+
+            return 1;
+        }
+
+        public async Task<Dictionary<string, string>> PythonBackEndTraining(string templatePath, string trainerScript, string trainerPath, string dataPath, string server, string username, string password, string database, string sessions, DatabaseScheme scheme, string roles, string annotator, DatabaseStream stream, string leftContext, string rightContext, string balance, bool complete, double cmlbegintime, string multisessionpath = null)
+        {
+           var trainerScriptPath =  Directory.GetParent(templatePath) + "\\" +  trainerScript;
+          
+
+
+            try
+            {
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(templatePath), "templatePath" },
+                    { new StringContent(trainerPath), "trainerPath" },
+                    { new StringContent(dataPath), "dataPath" },
+                    { new StringContent(server), "server" },
+                    { new StringContent(username), "username" },
+                    { new StringContent(password), "password" },
+                    { new StringContent(database), "database" },
+                    { new StringContent(sessions), "sessions" },
+                    { new StringContent(scheme.Name), "scheme" },
+                    { new StringContent(roles), "roles" },
+                    { new StringContent(annotator), "annotator" },
+                    { new StringContent(stream.Name), "stream" },
+                    { new StringContent(leftContext), "leftContext" },
+                    { new StringContent(rightContext), "rightContext" },
+                    { new StringContent(balance), "balance" },
+                    { new StringContent(complete.ToString()), "complete" },
+                    { new StringContent(cmlbegintime.ToString()), "cmlbegintime" },
+                    { new StringContent(multisessionpath), "multisessionpath" },
+                    { new StringContent(trainerScriptPath), "trainerScript" }
+
+
+
+                };
+
+
+                string url = "http://localhost:5000/train";   
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                if (explanationDic["success"] == "failed")
+                {
+                    return null;
+                }
+
+                CreateTrainerFile(trainerPath, dataPath, trainerScriptPath, database, sessions, roles, scheme, stream, rightContext, leftContext, balance);
+
+                return explanationDic;
+
+            }
+            catch (Exception e)
+            {
+               
+                return null;
+            }
+
+          
         }
 
         public string CMLPredictBayesFusion(string roleout,

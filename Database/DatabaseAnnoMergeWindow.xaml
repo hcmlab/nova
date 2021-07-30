@@ -126,7 +126,7 @@
                     <Label Content="Copy"/>
                     <Button x:Name="Copy" ToolTip="assign annotation to another annotator" Content="Copy" Grid.Column="0" Click="Copy_Click" IsEnabled="False" />
                     <Label Content="Export Statistics"/>
-                    <Button x:Name="exStats" ToolTip="Export statistics" Content="Export statistics" Grid.Column="0" Click="Stats_Click" IsEnabled="True" />
+                    <!--<Button x:Name="exStats" ToolTip="Export statistics" Content="Export statistics" Grid.Column="0" Click="Stats_Click" IsEnabled="True" />-->
                     <Label Name="Warning" Foreground="Red" Visibility="Collapsed">Only admins can merge!</Label>
                     <Separator Height="10" Visibility="Hidden"></Separator>
 

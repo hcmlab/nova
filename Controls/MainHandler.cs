@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -16,10 +17,11 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.0.7.2";
+        public static string BuildVersion = "1.1.0.0";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
-        public static int xaiProcessId;
+        public static int pythonProcessID;
+        public static int pythonWindowHandle;
 
         private static Timeline timeline = null;
 
@@ -209,6 +211,7 @@ namespace ssi
             control.updateCMLMenu.Click += updateCML_Click;
             control.updatePythonMenu.Click += updatePython_Click;
             control.aboutMenu.Click += aboutMenu_Click;
+            control.supportMenu.Click += support_Click;
 
 
             //PYTHON
@@ -217,7 +220,7 @@ namespace ssi
             {
 
                 checkPythonInstallation();
-                xaiProcessId = startExplanationBackend();
+                pythonProcessID = startExplanationBackend();
 
                 var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
 
@@ -332,6 +335,10 @@ namespace ssi
                 DownloadFile("https://github.com/hcmlab/nova/raw/master/" + hardwareAcceleratorLibrary, hardwareAcceleratorLibraryPath);
 
             }
+
+           
+
+
 
             string cmltrainexe = "cmltrain.exe";
             string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "ssi\\" + cmltrainexe;

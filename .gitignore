@@ -392,3 +392,9 @@ bin/cml/models/templates/continuous/video/tensorflow/nova_sessions
 bin/cml/models/templates/continuous/video/tensorflow/nova_db_info
 bin/PythonScripts/db.cfg
 bin/PythonScripts/example.py
+/Packages/Microsoft.Toolkit.Wpf.UI.Controls.WebView.6.1.2
+/Packages/Microsoft.Web.WebView2.1.0.864.35
+/Packages/Microsoft.Windows.SDK.Contracts.10.0.18362.2005
+/Packages/Microsoft.CSharp.4.5.0
+/Packages/System.Runtime.WindowsRuntime.4.6.0
+/Packages/System.Runtime.WindowsRuntime.UI.Xaml.4.6.0

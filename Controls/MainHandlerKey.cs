@@ -348,7 +348,9 @@ namespace ssi
 
                             else
                             {
-                                annoCursor.X = signalCursor.X;
+                               annoCursor.X = signalCursor.X;
+                               timeline.CurrentSelectPosition = annoCursor.X;
+                               timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
                             }
                             e.Handled = true;
                         }
