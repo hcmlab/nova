@@ -1,10 +1,12 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,6 +31,7 @@ namespace ssi
 
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
+        
 
         public class Trainer
         {
@@ -37,6 +40,8 @@ namespace ssi
             public string LeftContext { get; set; }
             public string RightContext { get; set; }
             public string Balance { get; set; }
+            public string Backend { get; set; }
+            public string Script { get; set; }
 
             public override string ToString()
             {
@@ -100,7 +105,13 @@ namespace ssi
 
             }
 
-       
+            //if (MainHandler.ENABLE_PYTHON)
+            //{
+            //    MainHandler.killExplanationBackend();
+            //    MainHandler.pythonProcessID = MainHandler.startExplanationBackend(true);
+               
+            //}
+
 
             else
             {
@@ -415,6 +426,7 @@ namespace ssi
             return infofile;
         }
 
+        
 
         private void Apply_Click(object sender, RoutedEventArgs e)
         {       
@@ -496,8 +508,16 @@ namespace ssi
                                 stream.Type + "{" +
                                 streamName + "}\\" +
                                 trainer.Name + "\\";
-                                
-                Directory.CreateDirectory(trainerDir);
+
+                try
+                {
+                    Directory.CreateDirectory(trainerDir);
+                }
+                catch
+                {
+                    MessageBox.Show("Could not create folder " + trainerDir + " Make sure NOVA has writing access to the directory");
+                    return;
+                }
                 
                 string trainerName = TrainerNameTextBox.Text == "" ? trainer.Name : TrainerNameTextBox.Text;
                 string trainerOutPath = mode == Mode.COMPLETE ? tempTrainerPath : trainerDir + trainerName;
@@ -509,10 +529,9 @@ namespace ssi
 
                         string infofile = createMetaFiles(database, annotator, rolesList, stream, sessionList, scheme, trainer);
 
-
-
+                     
                         //if (AnnotationSelectionBox.Items.Count > 0)
-                        if (true)
+                        if (trainer.Backend.ToUpper() == "SSI")
                         {
 
                            logTextBox.Text += handler.CMLTrainModel(trainer.Path,
@@ -534,6 +553,37 @@ namespace ssi
                            (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
                            MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition),
                            infofile);
+                        }
+
+
+                        else if (trainer.Backend.ToUpper() == "PYTHON")
+                        {
+                            logTextBox.Text += "Using Python Backend...\n";
+                            logTextBox.Text += "Trying to show window...\n";
+                           // logTextBox.Text += MainHandler.showExplanationBackend(true) + "\n";
+                            logTextBox.Text += "Training...\n";
+
+                           handler.PythonBackEndTraining(trainer.Path, trainer.Script,
+                           trainerOutPath,
+                           Properties.Settings.Default.DatabaseDirectory,
+                           Properties.Settings.Default.DatabaseAddress,
+                           Properties.Settings.Default.MongoDBUser,
+                           MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
+                           database,
+                           sessionList,
+                           scheme,
+                           rolesList,
+                           annotator.Name,
+                           stream,
+                           trainerLeftContext,
+                           trainerRightContext,
+                           trainerBalance,
+                           mode == Mode.COMPLETE,
+                           (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                           MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition),
+                           infofile);
+                            
+
                         }
 
                         //oldstyle cml call.
@@ -560,6 +610,8 @@ namespace ssi
                             MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
 
                         }
+
+
 
 
 
@@ -1103,6 +1155,21 @@ namespace ssi
                     if (balance != null)
                     {
                         trainer.Balance = balance.Value;
+                    }
+                    var backend = node.Attributes["backend"];
+                    if (backend != null)
+                    {
+                        trainer.Backend = backend.Value.ToUpper();
+                    }
+                    else trainer.Backend = "SSI";
+                }
+
+                foreach (XmlNode node in doc.SelectNodes("//model"))
+                {
+                    var script = node.Attributes["script"];
+                    if (script != null)
+                    {
+                        trainer.Script = script.Value;
                     }
                 }
             }

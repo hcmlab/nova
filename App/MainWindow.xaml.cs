@@ -108,10 +108,7 @@ namespace ssi
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
 
-            if (MainHandler.ENABLE_PYTHON)
-            {
-                MainHandler.killExplanationBackend();
-            }
+          
 
             if (!viewh.clearWorkspace())
             {
@@ -136,14 +133,28 @@ namespace ssi
 
             finally
             {
+                if (MainHandler.ENABLE_PYTHON)
+                {
+                    MainHandler.killExplanationBackend();
+                }
                 Application.Current.Shutdown();
                 Process.GetCurrentProcess().Kill();
             }
-    
-                
 
-            
 
+
+
+
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            if (MainHandler.ENABLE_PYTHON)
+            {
+                MainHandler.killExplanationBackend();
+            }
+            Application.Current.Shutdown();
+            Process.GetCurrentProcess().Kill();
         }
     }
 }

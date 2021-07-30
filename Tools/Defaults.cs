@@ -71,6 +71,11 @@ namespace ssi
             public static string SessionSetExtension = "set";
         }
 
+        public class URLS
+        {
+            public static string TippingURL = "aHR0cHM6Ly9iaXQubHkvMzVlV2ppNg==";
+        }
+
         public static int SelectionBorderWidth = 7;
 
         public static double DefaultSampleRate = 25.0;

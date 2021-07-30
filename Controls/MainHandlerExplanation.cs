@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,12 +16,20 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using NovA;
 using ssi.Controls.Other;
+       
 
 
 namespace ssi
 {
     public partial class MainHandler
     {
+
+        [DllImport("user32.dll")]
+        static extern int ShowWindow(int hwnd, int nCmdShow);
+
+
+        const int SW_HIDE = 0;
+        const int SW_SHOW = 5;
 
         public static BackgroundWorker explanationWorker;
         ExplanationWindow window;
@@ -226,22 +235,56 @@ namespace ssi
             }
         }
 
-        public static int startExplanationBackend()
+        public static string showExplanationBackend(bool show)
+        {
+            int nCMD = SW_HIDE;
+            if (show) nCMD = SW_SHOW;
+
+            Process[] processes = Process.GetProcessesByName("Python");
+            foreach (Process p in processes)
+            {
+
+                p.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                int p1 = p.MainWindowHandle.ToInt32();
+                ShowWindow(p1, nCMD);
+                return "success";
+            }
+            return "failed";
+        }
+      
+    
+
+        public static int startExplanationBackend(bool forcedebug = false)
         {
 
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
             try
             {
-
+         
 
                 startInfo.WindowStyle = (Properties.Settings.Default.EnablePythonDebug == true) ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
+                startInfo.WindowStyle = (forcedebug == true ) ? ProcessWindowStyle.Minimized : startInfo.WindowStyle;
+                //startInfo.RedirectStandardOutput = true;
+                //startInfo.RedirectStandardError = true;
                 startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "ssi\\python.exe" + "\"";
                 startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
                 process.StartInfo = startInfo;
 
                 process.Start();
+               
+                //string output = process.StandardOutput.ReadToEnd();
+                //Console.WriteLine(output);
+              
 
+                //string output = process.StandardOutput.ReadToEnd();
+                //MessageBox.Show(output);
+                //Console.WriteLine(output);
+                //string err = process.StandardError.ReadToEnd();
+                //Console.WriteLine(err);
+                //process.WaitForExit();
+
+                //ShowWindow(process.MainWindowHandle, 5);
 
                 return process.Id;
             }
@@ -254,7 +297,7 @@ namespace ssi
        
         }
 
-        public static void killExplanationBackend()
+        public static void killExplanationBackend(bool forcedebug = false )
         {
             try
             {
@@ -262,9 +305,9 @@ namespace ssi
 
                 foreach (Process prs in process)
                 {
-                    if (prs.Id == MainHandler.xaiProcessId)
+                    if (prs.Id == MainHandler.pythonProcessID)
                     {
-                        if(Properties.Settings.Default.EnablePythonDebug)
+                        if(Properties.Settings.Default.EnablePythonDebug )
                         {
                             prs.CloseMainWindow();
                         }
@@ -276,6 +319,8 @@ namespace ssi
                         break;
                     }
                 }
+
+
             }
             catch
             {
@@ -286,7 +331,7 @@ namespace ssi
         public static void restartExplanationBackend()
         {
             killExplanationBackend();
-            MainHandler.xaiProcessId = startExplanationBackend();
+            MainHandler.pythonProcessID = startExplanationBackend();
         }
 
     }

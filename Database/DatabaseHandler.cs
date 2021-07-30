@@ -1682,6 +1682,7 @@ namespace ssi
                     scheme.Id = document["_id"].AsObjectId;
                     scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), document["type"].AsString);
                     scheme.SampleRate = 0;
+                   
                     if (document.Contains("sr"))
                     {
                         scheme.SampleRate = document["sr"].AsDouble;
@@ -2804,6 +2805,83 @@ namespace ssi
             }
         }
 
+
+        public static AnnoList LoadAnnoList(string Scheme, string Session, string Role, string Annotator, bool loadBackup)
+        {
+            var builder = Builders<BsonDocument>.Filter;
+
+            // resolve references
+
+            ObjectId roleID = GetObjectID(DatabaseDefinitionCollections.Roles, "name", Role);
+            ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, "name", Scheme);
+            ObjectId annotatorID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", Annotator);
+            ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, "name", Session);
+
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var annotationsData = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.AnnotationData);
+            var filterAnnotation = builder.Eq("role_id", roleID) & builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("session_id", sessionID);
+            var annotationDocs = annotations.Find(filterAnnotation).ToList();
+
+            // does annotation exist?
+
+            if (annotationDocs.Count > 0)
+            {
+                AnnoList annoList = new AnnoList();
+                BsonDocument annotationDoc = annotationDocs[0];
+
+                ObjectId dataID = annotationDoc["data_id"].AsObjectId;
+                ObjectId dataBackupID = AnnoSource.DatabaseSource.ZERO;
+                if (annotationDoc.Contains("data_backup_id"))
+                {
+                    dataBackupID = annotationDoc["data_backup_id"].AsObjectId;
+                }
+
+                if (loadBackup && dataBackupID != AnnoSource.DatabaseSource.ZERO)
+                {
+                    // in case backup is loaded we swap data ids first
+
+                    ObjectId tmp = dataBackupID;
+                    dataBackupID = dataID;
+                    dataID = tmp;
+
+                    var updateDataIds = Builders<BsonDocument>.Update
+                        .Set("data_id", dataID)
+                        .Set("data_backup_id", dataBackupID);
+
+                    annotations.UpdateOne(filterAnnotation, updateDataIds);
+                }
+
+                var schemes = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
+                var filterScheme = builder.Eq("_id", schemeID);
+                BsonDocument scheme = schemes.Find(filterScheme).Single();
+
+                // update meta
+
+                annoList.Meta.Annotator = Annotator;
+                annoList.Meta.AnnotatorFullName = GetUserInfo(Annotator).Fullname;
+                annoList.Meta.Role = Role;
+               // annoList.Meta.isLocked = IsLocked;
+               // annoList.Meta.isFinished = IsFinished;
+
+                // load scheme and data
+
+                var filterData = builder.Eq("_id", dataID);
+                var annotationDataDoc = annotationsData.Find(filterData).ToList();
+                if (annotationDataDoc.Count > 0) loadAnnoListSchemeAndData(ref annoList, scheme, annotationDataDoc[0]);
+
+                // update source
+
+                annoList.Source.Database.OID = annotationDoc["_id"].AsObjectId;
+                annoList.Source.Database.DataOID = dataID;
+                annoList.Source.Database.DataBackupOID = dataBackupID;
+                annoList.Source.Database.Session = Session;
+
+                return annoList;
+            }
+
+            return null;
+        }
+
         public static AnnoList LoadAnnoList(DatabaseAnnotation annotation, bool loadBackup)
         {
             var builder = Builders<BsonDocument>.Filter;
@@ -2971,6 +3049,33 @@ namespace ssi
 
         #endregion Annotation
 
+
+   
+             public static List<AnnoList> LoadSession(System.Collections.IList collections, System.Collections.IList sessions)
+        {
+            if (!IsConnected)
+            {
+                return null;
+            }
+
+            List<AnnoList> annoLists = new List<AnnoList>();
+
+            foreach (DatabaseSession session in sessions)
+            {
+                foreach (DatabaseAnnotation annotation in collections)
+                {
+                    AnnoList annoList = LoadAnnoList(annotation.Scheme, session.Name, annotation.Role, annotation.Annotator, false);
+                    if (annoList != null)
+                    {
+                        annoLists.Add(annoList);
+                    }
+                }
+            }
+
+          
+
+            return annoLists;
+        }
         public static List<AnnoList> LoadSession(System.Collections.IList collections)
         {
             if (!IsConnected)
@@ -3098,6 +3203,7 @@ namespace ssi
         public string Name { get; set; }
         public AnnoScheme.TYPE Type { get; set; }
         public double SampleRate { get; set; }
+ 
 
         public override string ToString()
         {

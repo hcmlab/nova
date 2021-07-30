@@ -841,6 +841,31 @@ namespace ssi
             }
         }
 
+
+        private void batchConvertNoldus (string directory)
+        {
+            string[] dirs = Directory.GetDirectories(directory, "*", SearchOption.AllDirectories);
+                foreach(string dir in dirs)
+                {
+                    string[] files = Directory.GetFiles(dir, "*.odf", SearchOption.TopDirectoryOnly);
+                    foreach(string filename in files)
+                    {
+                    AnnoList[] lists = AnnoList.LoadfromNoldusFile(filename);
+                    if (lists != null)
+                    {
+                        foreach (AnnoList list in lists)
+                        {
+                            string path = Path.GetFullPath(Path.GetDirectoryName(list.Source.File.Path) + "\\" + list.Scheme.Name) + ".annotation";
+                            list.SaveToFile(path);
+                            //list.Save();
+                        }
+                    }
+                }
+                }
+
+           
+        }
+
         private void ImportAnnoFromNoldus(string filename)
         {
             int annoListnum = annoLists.Count;

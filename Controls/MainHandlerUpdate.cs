@@ -9,6 +9,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Controls;
 
 namespace ssi
 {
@@ -235,10 +236,17 @@ namespace ssi
 
         private void aboutMenu_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human Centered Multimedia 2020\nLead Developer: Tobias Baur, Johannes Wagner & Alexander Heimerl\nnova@hcm-lab.de");
+            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human-Centered Artificial Intelligence 2021\nLead Developer: Tobias Baur, Johannes Wagner, Alexander Heimerl & Dominik Schiller\nnova@hcm-lab.de");
+         
         }
 
-       
+        private void support_Click(object sender, RoutedEventArgs e)
+        {
+            Browser web = new Browser(MainHandler.Decode(Defaults.URLS.TippingURL), this);
+            web.Show();
+        }
+
+
 
 
         public int compareVersion(string Version1, string Version2)

@@ -27,6 +27,7 @@ namespace ssi
         private readonly object syncLock = new object();
         private string defaultlabeltext = "Hover here to calculate correlations";
 
+
         private CultureInfo culture = CultureInfo.InvariantCulture;
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
 
@@ -94,7 +95,8 @@ namespace ssi
             return id;
         }
 
-        public void GetAnnotations(bool onlyme = false)
+
+        public void GetAnnotations(bool onlyme = false, string sessionname = null)
 
         {
             AnnotationResultBox.ItemsSource = null;
@@ -138,10 +140,21 @@ namespace ssi
 
             if (SessionsResultsBox.SelectedItem == null) SessionsResultsBox.SelectedIndex = 0;
 
-            DatabaseSession session = SessionsResultsBox.SelectedItems.Count > 0 ? (DatabaseSession)SessionsResultsBox.SelectedItem : DatabaseHandler.Sessions[0];
-            ;
+            ObjectId sessionid = ObjectId.Empty;
+            if (sessionname == null)
+            {
+                DatabaseSession session = SessionsResultsBox.SelectedItems.Count > 0 ? (DatabaseSession)SessionsResultsBox.SelectedItem : DatabaseHandler.Sessions[0];
+                sessionid = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", session.Name);
+                sessionname = session.Name;
+            }
 
-            ObjectId sessionid = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", session.Name);
+            else
+            {
+                sessionid = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", sessionname);
+            }
+           
+
+
             var filter = builder.Eq("session_id", sessionid);
             var annos = annotations.Find(filter).ToList();
 
@@ -169,11 +182,11 @@ namespace ssi
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = session.Name });
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = sessionname });
                 }
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
-                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = session.Name });
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = sessionname });
                 }
                 }
             }
@@ -1594,6 +1607,25 @@ namespace ssi
         private void Stats_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             calculateStatistics();
+        }
+
+        private void Stats_Click(object sender, RoutedEventArgs e)
+        {
+            if(AnnotationResultBox.SelectedItems.Count == 1)
+            {
+ 
+             List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems, SessionsResultsBox.SelectedItems);
+                
+              
+
+            }
+            else if(AnnotationResultBox.SelectedItems.Count > 1)
+            {
+                foreach(var entry in SessionsResultsBox.SelectedItems)
+                {
+
+                }
+            }
         }
     }
 }

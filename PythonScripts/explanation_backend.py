@@ -10,6 +10,7 @@ import numpy as np
 import flask
 from flask import request
 import io
+import imblearn
 
 from PIL import Image as pilimage
 import numpy as np
@@ -18,6 +19,17 @@ import lime
 from lime import lime_image
 from lime import lime_tabular
 from skimage.segmentation import mark_boundaries
+
+
+import os
+import hcai_datasets
+import tensorflow_datasets as tfds
+import importlib
+
+import warnings
+warnings.simplefilter("ignore")
+
+
 
 # import innvestigate
 # import innvestigate.utils as iutils
@@ -185,6 +197,92 @@ def predict():
 
     # return the data dictionary as a JSON response
     return flask.jsonify(data)
+
+
+@app.route("/train", methods=["POST"])
+def train():
+    
+    data = {"success": "failed"}
+    # ensure an image was properly uploaded to our endpoint
+    if flask.request.method == "POST":
+
+        spec = importlib.util.spec_from_file_location("trainer", flask.request.form.get("trainerScript"))
+        trainer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(trainer)
+
+        db_config_dict = {
+        'ip': flask.request.form.get("server").split(':')[0],
+        'port': int(flask.request.form.get("server").split(':')[1]),
+        'user': flask.request.form.get("username"),
+        'password':flask.request.form.get("password")
+        }
+
+        ds, ds_info = tfds.load(
+        'hcai_nova_dynamic',
+        split='dynamic_split',
+        with_info=True,
+        as_supervised=False,
+        data_dir='.',
+        read_config=tfds.ReadConfig(
+            shuffle_seed=1337
+        ),
+        builder_kwargs={
+            # Database Config
+            'db_config_path':  None, #os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db.cfg'), 
+            'db_config_dict': db_config_dict,
+
+
+            # Dataset Config
+            'dataset': flask.request.form.get("database"),
+            'nova_data_dir': flask.request.form.get("dataPath"),
+            'sessions': flask.request.form.get("sessions").split(';'),
+            'roles': flask.request.form.get("roles").split(';'),
+            'schemes': flask.request.form.get("scheme").split(';'),
+            'annotator': flask.request.form.get("annotator"),
+            'data_streams': flask.request.form.get("stream").split(' '),
+            
+            # Sample Config
+            'frame_size': 0.04,
+            'left_context': 0,
+            'right_context': 0,
+            'start': 0,
+            'end': 0,    
+            'flatten_samples': True,
+            'supervised_keys': [flask.request.form.get("stream").split(' ')[0], flask.request.form.get("scheme").split(';')[0]],
+
+            # Additional Config
+            'clear_cache': True,
+        }
+        )
+        data_it = ds.as_numpy_iterator()
+        data_list = list(data_it)
+        data_list.sort(key=lambda x: int(x['frame'].decode('utf-8').split('_')[0]))
+        x = [v[flask.request.form.get("stream").split(' ')[0]] for v in data_list]
+        y = [v[flask.request.form.get("scheme").split(';')[0]] for v in data_list]
+
+        #[i for i, a in enumerate(x) if a.shape != x[0].shape]
+        #[10, 14, 206, 1790, 4309, 7212, 15941, 28502, 28503, 28504, 28505, 28506, 28507, 28508, 28509, 28510, 28511]
+        x_np = np.ma.concatenate( x, axis=0 )
+        y_np = np.array( y )
+
+        if flask.request.form.get("balance") == "over":
+            print('OVERSAMPLING from {} Samples'.format(x_np.shape))
+            oversample = imblearn.over_sampling.SMOTE()
+            x_np, y_np = oversample.fit_resample(x_np, y_np)
+            print('to {} Samples'.format(x_np.shape))
+        if flask.request.form.get("balance") == "under":
+            print('UNDERSAMPLING from {} Samples'.format(x_np.shape))
+            undersample = imblearn.under_sampling.RandomUnderSampler()
+            x_np, y_np = undersample.fit_resample(x_np, y_np)
+            print('to {} Samples'.format(x_np.shape))
+
+        modelpath = flask.request.form.get("trainerPath") 
+        model = trainer.train(x_np, y_np)
+        trainer.save(model, modelpath)
+      
+        data["success"] = "success"
+                    
+    return flask.Response(json.dumps(data), mimetype="text/plain")    
 
 @app.route("/tfexplain", methods=["POST"])
 def explain_tfexplain():
@@ -415,7 +513,7 @@ def explain_lime():
                 img = img*(1./255)
                 prediction = model.predict(img)
                 explainer = lime_image.LimeImageExplainer()
-                img = np.squeeze(img)
+                img = np.squeeze(img).astype("double")
                 explanation = explainer.explain_instance(img, model.predict, top_labels=top_labels, hide_color=hide_color=="True", num_samples=num_samples)
 
                 top_classes = getTopXpredictions(prediction, top_labels)
