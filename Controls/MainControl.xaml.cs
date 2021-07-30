@@ -25,7 +25,5 @@ namespace ssi
                 OnHandlerLoaded?.Invoke(handler);
             }
         }
-
-   
     }
 }

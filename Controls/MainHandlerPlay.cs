@@ -66,10 +66,25 @@ namespace ssi
                 int position = (int)((Time.CurrentPlayPosition + 0.04) * AnnoTierStatic.Selected.AnnoList.Scheme.SampleRate);
                 if (position < control.annoListControl.annoDataGrid.Items.Count)
                 {
-                    AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[position];
-                    if (ali.Points.Count > 0)
+                    if(AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                     {
-                        geometricOverlayUpdate(ali, AnnoScheme.TYPE.POINT, position);
+                        AnnoListItem annoListItem = (AnnoListItem)control.annoListControl.annoDataGrid.Items[position];
+                        if (annoListItem.PolygonList.Polygons.Count > 0)
+                        {
+                            polygonDrawUnit.polygonOverlayUpdate(annoListItem);
+                        }
+                        else
+                        {
+                            polygonDrawUnit.clearOverlay();
+                        }
+                    }
+                    else
+                    {
+                        AnnoListItem ali = (AnnoListItem)control.annoListControl.annoDataGrid.Items[position];
+                        if (ali.Points.Count > 0)
+                        {
+                            geometricOverlayUpdate(ali, AnnoScheme.TYPE.POINT);
+                        }
                     }
                 }
             }

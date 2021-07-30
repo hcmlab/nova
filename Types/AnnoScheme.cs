@@ -17,9 +17,14 @@ namespace ssi
             CONTINUOUS,
             POINT,
             POLYGON,
+            DISCRETE_POLYGON,
             GRAPH,
             SEGMENTATION,
         }
+
+
+
+        public TYPE Type { get; set; }
 
         public class Label
         {
@@ -43,11 +48,14 @@ namespace ssi
             SampleRate = 1;
             MinOrBackColor = Defaults.Colors.Background;
             MaxOrForeColor = Defaults.Colors.Foreground;
+            DefaultLabel = "";
+            DefaultColor = Color.FromRgb(0, 0, 0);
+            toSave = false;
         }
 
-        public TYPE Type { get; set;  }
-
         public string Name { get; set; }
+
+        public bool toSave { get; set; }
 
         public List<Label> Labels { get; set; }
 
@@ -75,5 +83,10 @@ namespace ssi
         public Color MinOrBackColor { get; set; }
 
         public Color MaxOrForeColor { get; set; }
-    } 
+        
+        public string DefaultLabel { get; set; }
+
+        public Color DefaultColor { get; set; }
+
+    }
 }

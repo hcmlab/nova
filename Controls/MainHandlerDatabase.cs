@@ -426,7 +426,8 @@ namespace ssi
                 {
                     return;
                 }
-                scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
+                if(scheme.Type != AnnoScheme.TYPE.DISCRETE_POLYGON)
+                    scheme.Labels.Add(new AnnoScheme.Label("GARBAGE", Colors.Black));
 
                 ObjectId annotatid = DatabaseHandler.GetObjectID(DatabaseDefinitionCollections.Annotators, "name", Properties.Settings.Default.MongoDBUser);
                 string annotator = Properties.Settings.Default.MongoDBUser;

@@ -201,6 +201,21 @@
     <Compile Include="Controls\Annotation\Geometric\GeometricListControl.xaml.cs">
       <DependentUpon>GeometricListControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Annotation\Polygon\AnnoTierNewDiscretePolygonSchemeWindow.xaml.cs">
+      <DependentUpon>AnnoTierNewDiscretePolygonSchemeWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Annotation\Polygon\InterpolationWindow.xaml.cs">
+      <DependentUpon>InterpolationWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Annotation\Polygon\AnnoTierNewPolygonSchemeWindow.xaml.cs">
+      <DependentUpon>AnnoTierNewPolygonSchemeWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Annotation\Polygon\DefaultLabelWindow.xaml.cs">
+      <DependentUpon>DefaultLabelWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Annotation\Polygon\PolygonListControl.xaml.cs">
+      <DependentUpon>PolygonListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\MainHandlerAnnotation.cs" />
     <Compile Include="Controls\MainHandlerCML.cs" />
     <Compile Include="Controls\MainHandlerDatabase.cs" />
@@ -212,6 +227,7 @@
     <Compile Include="Controls\MainHandlerMenu.cs" />
     <Compile Include="Controls\MainHandlerNavigation.cs" />
     <Compile Include="Controls\MainHandlerPlay.cs" />
+    <Compile Include="Controls\MainHandlerPolygon.cs" />
     <Compile Include="Controls\MainHandlerSignal.cs" />
     <Compile Include="Controls\MainHandlerUpdate.cs" />
     <Compile Include="Controls\Navigation\TimeRangeSlider.xaml.cs">
@@ -276,7 +292,10 @@
     <Compile Include="Database\DatabaseCMLTrainAndPredictWindow.xaml.cs">
       <DependentUpon>DatabaseCMLTrainAndPredictWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Interfaces\IPointList.cs" />
+    <Compile Include="Interfaces\IPolygonDrawUnit.cs" />
+    <Compile Include="Interfaces\IPolygonUtilities.cs" />
     <Compile Include="Tools\PluginCaller.cs" />
     <Compile Include="Tools\Screenshot.cs" />
     <Compile Include="Tools\VolumeControl.xaml.cs">
@@ -287,11 +306,22 @@
     <Compile Include="Tools\Defaults.cs" />
     <Compile Include="Types\AnnoTrigger.cs" />
     <Compile Include="Types\Face.cs" />
+    <Compile Include="Types\Label.cs" />
     <Compile Include="Types\Pipeline.cs" />
     <Compile Include="Types\PointList.cs" />
     <Compile Include="Types\PointListItem.cs" />
+    <Compile Include="Types\Polygon\ChangeCompletePolygonCommand .cs" />
+    <Compile Include="Types\Polygon\CreationInformation.cs" />
+    <Compile Include="Types\Polygon\DataGridChecker.cs" />
+    <Compile Include="Types\Polygon\EditInformations.cs" />
+    <Compile Include="Types\Polygon\PolygonDrawUnit.cs" />
+    <Compile Include="Types\Polygon\PolygonLabel.cs" />
+    <Compile Include="Types\Polygon\PolygonList.cs" />
+    <Compile Include="Types\Polygon\PolygonPoint.cs" />
+    <Compile Include="Types\Polygon\PolygonUtilities.cs" />
     <Compile Include="Types\SignalFile.cs" />
     <Compile Include="Types\Skeleton.cs" />
+    <Compile Include="Types\Polygon\UndoRedoStack.cs" />
     <Page Include="App\App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -361,6 +391,26 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Annotation\Geometric\GeometricListControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Annotation\Polygon\AnnoTierNewDiscretePolygonSchemeWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Annotation\Polygon\InterpolationWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Annotation\Polygon\AnnoTierNewPolygonSchemeWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Annotation\Polygon\DefaultLabelWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Annotation\Polygon\PolygonListControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

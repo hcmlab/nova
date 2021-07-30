@@ -1,0 +1,101 @@
+﻿<Window x:Class="ssi.InterpolationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+          xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
+        mc:Ignorable="d"
+        Title="New Discrete Scheme" Height="400" Width="700" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="MyButton" >
+            <Setter Property="Margin" Value="2,0,2,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="10"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Label Name="SourceLabel" Grid.Row="0" Foreground="DarkBlue" Grid.ColumnSpan="2" Grid.Column="0" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" FontWeight="Bold">Source</Label>
+        <Label Name="TargetLabel" Grid.Row="0" Foreground="DarkBlue" Grid.ColumnSpan="2" Grid.Column="3" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" FontWeight="Bold">Target</Label>
+
+        <ComboBox Name="SourceFrames" SelectionChanged="sourceFrameChanged" Grid.Column="0" Grid.Row="1" Margin="5"/>
+
+        <ListView Name="SourceLabelsListBox" SelectionChanged="sourceLabelChanged" Grid.Row="2" Grid.Column="0" Margin="5,5,5,0" SelectionMode="Single">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="190" Header="Label">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Name="SourceLabelListBoxItem" Content="{Binding Label}" IsEnabled="false" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"></Label>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="135" Header="Color">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <p:ColorPicker SelectedColor="{Binding Color}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="false" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+
+        <GridSplitter ResizeDirection="Columns" Grid.Column="1" Background="DarkBlue" Grid.RowSpan="5" Height="Auto" Width="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0"/>
+
+        <ComboBox Name="TargetFrames" SelectionChanged="targetFrameChanged" Grid.Column="2" Grid.Row="1" Margin="5"/>
+
+        <ListView Name="TargetLabelsListBox"  SelectionChanged="targetLabelChanged" Grid.Row="2" Grid.Column="2" Margin="5,5,5,0" SelectionMode="Single">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="190" Header="Label">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Name="TargetLabelListBoxItem" Content="{Binding Label}" IsEnabled="false" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"></Label>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="135" Header="Color">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <p:ColorPicker SelectedColor="{Binding Color}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="false" Width="Auto" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+
+        <StackPanel Grid.Row="3" Grid.Column="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Name="Interpolate_2D" Click="Interpolate_2D_Click" Height="25" Width="100" Margin="5">Interpolate 2D</Button>
+            <Button Name="Interpolate_3D" Click="Interpolate_3D_Click" Height="25" Width="100" Margin="5">Interpolate 3D</Button>
+            <Button Name="Cancel" Click="Cancel_Click" Height="25" Width="100">Cancel</Button>
+        </StackPanel>
+
+    </Grid>
+</Window>

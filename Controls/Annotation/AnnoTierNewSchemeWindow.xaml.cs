@@ -81,39 +81,39 @@ namespace ssi
             }
             else
             {
-                AnnoScheme.TYPE annoType = AnnoScheme.TYPE.FREE;
+                Scheme.Type = AnnoScheme.TYPE.FREE;
 
                 if (freeRadioButton.IsChecked == true)
                 {
-                    annoType = AnnoScheme.TYPE.FREE;
+                    Scheme.Type = AnnoScheme.TYPE.FREE;
                 }
                 else if (discreteRadioButton.IsChecked == true)
                 {
-                    annoType = AnnoScheme.TYPE.DISCRETE;
+                    Scheme.Type = AnnoScheme.TYPE.DISCRETE;
                 }
                 else if (continuousRadioButton.IsChecked == true)
                 {
-                    annoType = AnnoScheme.TYPE.CONTINUOUS;
-                }
+                    Scheme.Type = AnnoScheme.TYPE.CONTINUOUS;
 
-                else if (pointRadioButton.IsChecked == true)
-                {
-                    annoType = AnnoScheme.TYPE.POINT;
-                }
-
-                Scheme.Type = annoType;
-
-                if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-                {
                     Scheme.MinScore = 0.0;
                     Scheme.MaxScore = 1.0;
                     Scheme.MinOrBackColor = Defaults.Colors.GradientMin;
                     Scheme.MaxOrForeColor = Defaults.Colors.GradientMax;
                 }
-                else if (Scheme.Type == AnnoScheme.TYPE.POINT)
+                else if (pointRadioButton.IsChecked == true)
                 {
+                    Scheme.Type = AnnoScheme.TYPE.POINT;
+
                     Scheme.NumberOfPoints = 1;
                     Scheme.MaxOrForeColor = Colors.Green;
+                }
+                else if (polygoneRadioButton.IsChecked == true)
+                {
+                    Scheme.Type = AnnoScheme.TYPE.POLYGON;
+                }
+                else if(discretePolygoneRadioButton.IsChecked == true)
+                {
+                    Scheme.Type = AnnoScheme.TYPE.DISCRETE_POLYGON;
                 }
             }
         }

@@ -106,18 +106,15 @@ namespace ssi
             control = view;
 
             // Shadow box
-
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
 
             // Media
-
             control.mediaStatusBar.Background = Defaults.Brushes.Highlight;
             MediaBoxStatic.OnBoxChange += onMediaBoxChange;
             control.mediaVolumeControl.volumeSlider.ValueChanged += mediaVolumeControl_ValueChanged;
             control.mediaCloseButton.Click += mediaBoxCloseButton_Click;
 
             // Signal
-
             control.signalStatusBar.Background = Defaults.Brushes.Highlight;
             control.signalSettingsButton.Click += signalSettingsButton_Click;
             control.signalStatsButton.Click += signalStatsButton_Click;
@@ -130,7 +127,6 @@ namespace ssi
             control.signalAndAnnoGrid.MouseDown += signalAndAnnoGrid_MouseDown;
 
             // Anno
-
             control.annoStatusBar.Background = Defaults.Brushes.Highlight;
             control.annoCloseButton.Click += annoTierCloseButton_Click;
             control.annoSettingsButton.Click += annoSettingsButton_Click;
@@ -149,7 +145,6 @@ namespace ssi
             control.annoLiveModeActivateMouse.Unchecked += annoLiveModeActiveMouse_Unchecked;
 
             // Geometric
-
             control.geometricListControl.editButton.Click += geometricListEdit_Click;
             control.geometricListControl.editTextBox.GotMouseCapture += geometricListEdit_Focused;
             control.geometricListControl.copyButton.Click += geometricListCopy_Click;
@@ -159,10 +154,26 @@ namespace ssi
             control.geometricListControl.KeyDown += geometricKeyDown;
             control.geometricListControl.Visibility = Visibility.Collapsed;
 
+            // Polygon
+            control.polygonListControl.Visibility = Visibility.Collapsed;
+            control.polygonListControl.polygonAddNewLabelButton.Click += polygonAddNewLabelButton_Click;
+            control.polygonListControl.polygonSelectAllButton.Click += polygonSelectAllButton_Click;
+            control.polygonListControl.polygonSetDefaultLabelButton.Click += polygonSetDefaultLabelButton_Click;
+            control.polygonListControl.polygonCopyButton.Click += polygonCopyButton_Click;
+            control.polygonListControl.polygonRelabelButton.Click += polygonRelabelButton_Click;
+            control.polygonListControl.polygonListElementDelete.Click += polygonListElementDelete_Click;
+            control.polygonListControl.polygonDataGrid.SelectionChanged += polygonList_Selection;
+            control.polygonListControl.InvoiceDetailsList.Opened += polygonContextMenueOpened;
+            control.polygonListControl.setMainHandler(this);
+            control.polygonListControl.addMorePolygonLabels.Click += polygonAddmoreLabels_Click;
+            control.polygonListControl.interpolateLabels.Click += polygonInterpolateLabels_Click;
+            control.polygonListControl.editComboBox.SelectionChanged += discretePolygonSelectionChanged;
+            control.mediaBoxControl.MouseLeave += onPolygonMediaMouseLeave;
+            control.mediaBoxControl.MouseMove += OnPolygonMediaBoxMouseMove;
+            polygonHandlerInit();
+
             // Menu
-
             control.menu.MouseEnter += tierMenu_MouseEnter;
-
             control.annoSaveMenu.Click += annoSave_Click;
             control.annoNewMenu.Click += navigatorNewAnno_Click;
             control.annoSaveAsFinishedMenu.Click += annoSaveAsFinished_Click;
@@ -378,7 +389,6 @@ namespace ssi
             control.Drop += controlDrop;
         }
 
-
         public void showShadowBox(string message)
         {
             control.Cursor = Cursors.Wait;
@@ -480,6 +490,7 @@ namespace ssi
             control.timeLineControl.rangeSlider.slider.RangeStartSelected = 0;
             control.timeLineControl.rangeSlider.slider.RangeStopSelected = 100000;
             control.geometricListControl.Visibility = Visibility.Collapsed;
+            control.polygonListControl.Visibility = Visibility.Collapsed;
 
             return true;
         }
@@ -594,6 +605,7 @@ namespace ssi
                 Properties.Settings.Default.DefaultZoomInSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());
+                Properties.Settings.Default.DefaultPolygonPointDistance = double.Parse(s.PolygonPointDistance());
                 Properties.Settings.Default.CheckUpdateOnStart = s.CheckforUpdatesonStartup();
                 Properties.Settings.Default.ContinuousHotkeysNumber = int.Parse(s.ContinuousHotkeyLevels());
                 Properties.Settings.Default.DatabaseAskBeforeOverwrite = s.DBAskforOverwrite();

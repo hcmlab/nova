@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-
+using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1550,6 +1550,10 @@ namespace ssi
             BsonElement documentColor = new BsonElement("color", new SolidColorBrush(scheme.MinOrBackColor).Color.ToString());
             BsonElement documentMaxColor = new BsonElement("max_color", new SolidColorBrush(scheme.MaxOrForeColor).Color.ToString());
             BsonElement documentPointsNum = new BsonElement("num", scheme.NumberOfPoints);
+            BsonElement documentDefaultLabel = new BsonElement("default-label", scheme.DefaultLabel);
+            BsonElement documentDefaultLabelColor = new BsonElement("default-label-color", new SolidColorBrush(scheme.DefaultColor).Color.ToString());
+
+
 
             document.Add(documentName);
             document.Add(documentType);
@@ -1577,6 +1581,31 @@ namespace ssi
             {
                 document.Add(documentPointsNum);
                 document.Add(documentSr);
+                document.Add(documentColor);
+            }
+            else if (scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+            {
+                BsonArray labels = new BsonArray();
+                int index = 0;
+                foreach (AnnoScheme.Label label in scheme.Labels)
+                {
+                    labels.Add(new BsonDocument() {
+                    { "id", index++ },
+                    { "name", label.Name },
+                    { "color", label.Color.ToString() },
+                    { "isValid", true } });
+                }
+                document.Add("labels", labels);
+                document.Add(documentSr);
+                document.Add(documentDefaultLabel);
+                document.Add(documentDefaultLabelColor);
+                document.Add(documentColor);
+            }
+            else if(scheme.Type == AnnoScheme.TYPE.POLYGON)
+            {
+                document.Add(documentSr);
+                document.Add(documentDefaultLabel);
+                document.Add(documentDefaultLabelColor);
                 document.Add(documentColor);
             }
             else if (scheme.Type == AnnoScheme.TYPE.FREE)
@@ -1757,6 +1786,40 @@ namespace ssi
                     scheme.NumberOfPoints = annoSchemeDocument["num"].ToInt32();
                     scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
                     scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
+                }
+                else if(scheme.Type == AnnoScheme.TYPE.POLYGON || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                {
+                    scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
+                    scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
+                    scheme.DefaultColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["default-label-color"].ToString());
+                    scheme.DefaultLabel = annoSchemeDocument["default-label"].ToString();
+
+                    if(scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                    {
+                        BsonArray schemeLabelsArray = annoSchemeDocument["labels"].AsBsonArray;
+                        string SchemeLabel = "";
+                        string SchemeColor = "#000000";
+                        for (int j = 0; j < schemeLabelsArray.Count; j++)
+                        {
+                            try
+                            {
+                                if (schemeLabelsArray[j]["isValid"].AsBoolean == true)
+                                {
+                                    SchemeLabel = schemeLabelsArray[j]["name"].ToString();
+                                    SchemeColor = schemeLabelsArray[j]["color"].ToString();
+                                    AnnoScheme.Label lcp = new AnnoScheme.Label(schemeLabelsArray[j]["name"].ToString(), (Color)ColorConverter.ConvertFromString(schemeLabelsArray[j]["color"].ToString()));
+                                    scheme.Labels.Add(lcp);
+                                }
+                            }
+                            catch
+                            {
+                                SchemeLabel = schemeLabelsArray[j]["name"].ToString();
+                                SchemeColor = schemeLabelsArray[j]["color"].ToString();
+                                AnnoScheme.Label lcp = new AnnoScheme.Label(schemeLabelsArray[j]["name"].ToString(), (Color)ColorConverter.ConvertFromString(schemeLabelsArray[j]["color"].ToString()));
+                                scheme.Labels.Add(lcp);
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -1994,6 +2057,64 @@ namespace ssi
                     }
 
                     data.Add(new BsonDocument { { "label", annoList[i].Label }, { "conf", annoList[i].Confidence }, { "points", Points } });
+                }
+            }
+            else if(schemeType == AnnoScheme.TYPE.POLYGON || schemeType == AnnoScheme.TYPE.DISCRETE_POLYGON)
+            {
+                BsonArray polygones;
+                BsonDocument polygon = null;
+                BsonArray points;
+                BsonDocument point;
+
+                foreach (AnnoListItem item in annoList)
+                {
+                    polygones = new BsonArray();
+
+                    foreach(PolygonLabel label in item.PolygonList.Polygons)
+                    {
+                        if (schemeType == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                        {
+                            BsonArray labels = schemeDoc["labels"].AsBsonArray;
+                            int index = 0;
+                            for (int j = 0; j < labels.Count; j++)
+                            {
+                                if (label.Label == labels[j]["name"].ToString())
+                                {
+                                    index = labels[j]["id"].AsInt32;
+                                    polygon = new BsonDocument
+                                    {
+                                        new BsonElement("label", index),
+                                    };
+
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            polygon = new BsonDocument
+                            {
+                                new BsonElement("label", label.Label),
+                                new BsonElement("label_color", new SolidColorBrush(label.Color).Color.ToString())
+                            };
+                        }
+
+                        points = new BsonArray();
+                        foreach (PolygonPoint polygonPoint in label.Polygon)
+                        {
+                            point = new BsonDocument
+                            {
+                                new BsonElement("x", Convert.ToInt32(polygonPoint.X)),
+                                new BsonElement("y", Convert.ToInt32(polygonPoint.Y))
+                            };
+
+                            points.Add(point);
+                        }
+
+                        polygon.Add(new BsonElement("points", points));
+                        polygones.Add(polygon);
+                    }
+                    data.Add(new BsonDocument { { "name", item.Label.Split(' ')[1] }, { "polygons", polygones } });
                 }
             }
 
@@ -2351,7 +2472,7 @@ namespace ssi
                         double start = i / annoList.Scheme.SampleRate;
                         double dur = 1 / annoList.Scheme.SampleRate;
 
-                        AnnoListItem ali = new AnnoListItem(start, dur, score, "", Colors.Black, double.Parse(confidence));
+                        AnnoListItem ali = new AnnoListItem(start, dur, score.ToString(), "", Colors.Black, double.Parse(confidence));
 
                         annoList.Add(ali);
                     }
@@ -2430,6 +2551,9 @@ namespace ssi
                 {
                     annoList.Scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(scheme["color"].ToString());
 
+                    if (scheme.TryGetElement("sr", out value)) 
+                        annoList.Scheme.SampleRate = double.Parse(scheme["sr"].ToString());
+
                     for (int i = 0; i < labels.Count; i++)
                     {
                         BsonDocument entry = labels[i].AsBsonDocument;
@@ -2451,8 +2575,97 @@ namespace ssi
                         double start = i / annoList.Scheme.SampleRate;
                         double dur = 1 / annoList.Scheme.SampleRate;
 
-                        AnnoListItem ali = new AnnoListItem(start, dur, label, "", annoList.Scheme.MinOrBackColor, confidence, true, pl);
+                        AnnoListItem ali = new AnnoListItem(start, dur, label, "", annoList.Scheme.MinOrBackColor, confidence, AnnoListItem.TYPE.POINT, pl);
                         annoList.Add(ali);
+                    }
+                }
+                else if(annoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                {
+                    BsonArray schemelabels = null;
+                    annoList.Scheme.Labels.Clear();
+
+                    if (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                    {
+                        annoList.Scheme.Labels = new List<AnnoScheme.Label>();
+                        schemelabels = scheme["labels"].AsBsonArray;
+
+                        for (int j = 0; j < schemelabels.Count; j++)
+                        {
+                            try
+                            {
+                                if (schemelabels[j]["isValid"].AsBoolean == true) annoList.Scheme.Labels.Add(new AnnoScheme.Label(schemelabels[j]["name"].ToString(), (Color)ColorConverter.ConvertFromString(schemelabels[j]["color"].ToString())));
+                            }
+                            catch
+                            {
+                                annoList.Scheme.Labels.Add(new AnnoScheme.Label(schemelabels[j]["name"].ToString(), (Color)ColorConverter.ConvertFromString(schemelabels[j]["color"].ToString())));
+                            }
+                        }
+                    }
+
+                    double start = 0.0;
+
+                    if (scheme.TryGetElement("sr", out value))
+                        annoList.Scheme.SampleRate = double.Parse(value.Value.ToString());
+                    if (scheme.TryGetElement("default-label", out value))
+                        annoList.Scheme.DefaultLabel = value.Value.ToString();
+                    if (scheme.TryGetElement("default-label-color", out value))
+                        annoList.Scheme.DefaultColor = (Color)ColorConverter.ConvertFromString(value.Value.ToString());
+                    if (scheme.TryGetElement("color", out value))
+                        annoList.Scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(value.Value.ToString());
+
+                    foreach (BsonDocument entry in labels)
+                    {
+                        string frameName = "Frame " + entry["name"].AsString;
+                        List<PolygonLabel> polygonLabels = new List<PolygonLabel>();
+
+                        BsonArray polygones = entry["polygons"].AsBsonArray;
+
+                        if (polygones.Count > 0)
+                        {
+                            foreach (BsonDocument polygon in polygones)
+                            {
+                                String label = "";
+                                Color labelColor = Colors.Black;
+
+                                if (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                                {
+                                    for (int j = 0; j < schemelabels.Count; j++)
+                                    {
+                                        if (polygon["label"].AsInt32 == schemelabels[j]["id"].AsInt32)
+                                        {
+                                            label = schemelabels[j]["name"].ToString();
+                                            labelColor = (Color)ColorConverter.ConvertFromString(schemelabels[j]["color"].ToString());
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    label = polygon["label"].ToString();
+                                    labelColor = (Color)ColorConverter.ConvertFromString(polygon["label_color"].ToString());
+                                }
+
+                                BsonArray b_points = polygon["points"].AsBsonArray;
+                                List<PolygonPoint> points = new List<PolygonPoint>();
+                                
+                                if(b_points.Count > 0)
+                                {
+                                    foreach (BsonDocument point in b_points)
+                                    {
+                                        double id = PolygonUtilities.IDcounter;
+                                        PolygonUtilities.IDcounter++;
+
+                                        points.Add(new PolygonPoint(point["x"].ToDouble(), point["y"].ToDouble(), id));
+                                    }
+
+                                    polygonLabels.Add(new PolygonLabel(points, label, labelColor));
+                                }
+                            }
+                        }
+
+                        const double defaultConfidence = 1.0;
+                        annoList.Add(new AnnoListItem(start, 1 / annoList.Scheme.SampleRate, frameName, "", annoList.Scheme.MinOrBackColor, defaultConfidence, AnnoListItem.TYPE.POLYGON, polygonList: new PolygonList(polygonLabels)));
+                        start += 1 / annoList.Scheme.SampleRate;
                     }
                 }
             }
@@ -2523,7 +2736,7 @@ namespace ssi
                         }
                        
 
-                        AnnoListItem newali = new AnnoListItem(start, duration, score, ali.Meta, ali.Color, conf);
+                        AnnoListItem newali = new AnnoListItem(start, duration, score.ToString(), ali.Meta, ali.Color, conf);
                         newList.Add(newali);
                         start = start + duration;
                         index = 0;
@@ -2554,7 +2767,7 @@ namespace ssi
                     Color color = ali.Color;
                     for (int i=0; i< factor; i++)
                     {
-                        AnnoListItem newal = new AnnoListItem(start, duration, score, meta, color, conf);
+                        AnnoListItem newal = new AnnoListItem(start, duration, score.ToString(), meta, color, conf);
                         start = start + duration;
                         newList.Add(newal);
                     } 
@@ -2569,7 +2782,7 @@ namespace ssi
                     if (oldScheme.MinScore != newScheme.MinScore || oldScheme.MaxScore != newScheme.MaxScore)
                     {
                         double score = convertRange(oldScheme.MinScore, oldScheme.MaxScore, newScheme.MinScore, newScheme.MaxScore, ali.Score);
-                        AnnoListItem newal = new AnnoListItem(ali.Start, ali.Duration, score, ali.Meta, ali.Color, ali.Confidence);
+                        AnnoListItem newal = new AnnoListItem(ali.Start, ali.Duration, score.ToString(), ali.Meta, ali.Color, ali.Confidence);
                         newList.AddSorted(newal);
                     }
                     else
