@@ -46,7 +46,7 @@
 
             <RadioButton Name="pointRadioButton" GroupName="Scheme" VerticalContentAlignment="Center" Visibility="Visible">
                 <StackPanel>
-                    <Label>Create a scheme with geometric points (beta)</Label>
+                    <Label>Create a scheme with geometric points</Label>
                     <!--<Image Width="300" Source="/Resources/continuous.png" Margin="0,0,0,5"/>-->
                 </StackPanel>
             </RadioButton>
@@ -55,7 +55,7 @@
 
             <RadioButton Name="discretePolygoneRadioButton" GroupName="Scheme" VerticalContentAlignment="Center" Visibility="Visible">
                 <StackPanel>
-                    <Label>Create a discrete scheme with polygones</Label>
+                    <Label>Create a discrete scheme with polygons</Label>
                 </StackPanel>
             </RadioButton>
 
@@ -63,7 +63,7 @@
 
             <RadioButton Name="polygoneRadioButton" GroupName="Scheme" VerticalContentAlignment="Center" Visibility="Visible">
                 <StackPanel>
-                    <Label>Create a scheme with polygones</Label>
+                    <Label>Create a free scheme with polygons</Label>
                 </StackPanel>
             </RadioButton>
 

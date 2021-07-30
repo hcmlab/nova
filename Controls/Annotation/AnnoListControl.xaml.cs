@@ -333,7 +333,7 @@ namespace ssi
             }
         }
 
-        private void MenuItemDeletAllPolygoneseClick(object sender, RoutedEventArgs e)
+        private void MenuItemDeletAllPolygonsClick(object sender, RoutedEventArgs e)
         {
             foreach(Object obj in this.annoDataGrid.SelectedItems)
             {

@@ -2061,14 +2061,14 @@ namespace ssi
             }
             else if(schemeType == AnnoScheme.TYPE.POLYGON || schemeType == AnnoScheme.TYPE.DISCRETE_POLYGON)
             {
-                BsonArray polygones;
+                BsonArray polygons;
                 BsonDocument polygon = null;
                 BsonArray points;
                 BsonDocument point;
 
                 foreach (AnnoListItem item in annoList)
                 {
-                    polygones = new BsonArray();
+                    polygons = new BsonArray();
 
                     foreach(PolygonLabel label in item.PolygonList.Polygons)
                     {
@@ -2112,9 +2112,9 @@ namespace ssi
                         }
 
                         polygon.Add(new BsonElement("points", points));
-                        polygones.Add(polygon);
+                        polygons.Add(polygon);
                     }
-                    data.Add(new BsonDocument { { "name", item.Label.Split(' ')[1] }, { "polygons", polygones } });
+                    data.Add(new BsonDocument { { "name", item.Label.Split(' ')[1] }, { "polygons", polygons } });
                 }
             }
 
@@ -2618,11 +2618,11 @@ namespace ssi
                         string frameName = "Frame " + entry["name"].AsString;
                         List<PolygonLabel> polygonLabels = new List<PolygonLabel>();
 
-                        BsonArray polygones = entry["polygons"].AsBsonArray;
+                        BsonArray polygons = entry["polygons"].AsBsonArray;
 
-                        if (polygones.Count > 0)
+                        if (polygons.Count > 0)
                         {
-                            foreach (BsonDocument polygon in polygones)
+                            foreach (BsonDocument polygon in polygons)
                             {
                                 String label = "";
                                 Color labelColor = Colors.Black;
