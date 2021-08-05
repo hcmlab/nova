@@ -26,7 +26,7 @@ namespace ssi
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
-            Title = "NOVA | v" + MainHandler.BuildVersion + " | HCM-Lab, Augsburg University | http://openssi.net";
+            Title = "NOVA | v" + MainHandler.BuildVersion + " | Human-Centered Artificial Intelligence Lab, Augsburg University | http://github.com/hcmlab/nova";
         }
 
         private void viewHandlerLoaded(MainHandler handler)
@@ -135,7 +135,13 @@ namespace ssi
             {
                 if (MainHandler.ENABLE_PYTHON)
                 {
-                    MainHandler.killExplanationBackend();
+                    MainHandler.killPythonBackend();
+
+                    //Process[] p = Process.GetProcessesByName("Python");
+                    //foreach(Process pr in p)
+                    //{
+                    //    pr.Kill();
+                    //}
                 }
                 Application.Current.Shutdown();
                 Process.GetCurrentProcess().Kill();
@@ -151,7 +157,7 @@ namespace ssi
         {
             if (MainHandler.ENABLE_PYTHON)
             {
-                MainHandler.killExplanationBackend();
+                MainHandler.killPythonBackend();
             }
             Application.Current.Shutdown();
             Process.GetCurrentProcess().Kill();

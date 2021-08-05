@@ -491,3 +491,52 @@ bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/synchronousLookupUris_6376324
 bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/topTraffic
 bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/topTraffic_637582443620690300
 bin/nova.exe.WebView2/EBWebView/BrowserMetrics/BrowserMetrics-6103E602-780.pma
+bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/synchronousLookupUris_637637476152106980
+bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000004
+bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000003
+bin/nova.exe.WebView2/EBWebView/Default/Top Sites-journal
+bin/nova.exe.WebView2/EBWebView/Default/Top Sites
+bin/nova.exe.WebView2/EBWebView/Default/Sync Data/LevelDB/LOG.old
+bin/nova.exe.WebView2/EBWebView/Default/Site Characteristics Database/LOG.old
+bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/metadata/MANIFEST-000001
+bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/metadata/LOG
+bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/metadata/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/metadata/CURRENT
+bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/MANIFEST-000001
+bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/LOG
+bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/CURRENT
+bin/nova.exe.WebView2/EBWebView/Default/Session Storage/LOG.old
+bin/nova.exe.WebView2/EBWebView/Default/PreferredApps
+bin/nova.exe.WebView2/EBWebView/Default/optimization_guide_model_and_features_store/LOG
+bin/nova.exe.WebView2/EBWebView/Default/optimization_guide_model_and_features_store/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/optimization_guide_hint_cache_store/LOG
+bin/nova.exe.WebView2/EBWebView/Default/optimization_guide_hint_cache_store/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/Network Action Predictor-journal
+bin/nova.exe.WebView2/EBWebView/Default/Network Action Predictor
+bin/nova.exe.WebView2/EBWebView/Default/LOG
+bin/nova.exe.WebView2/EBWebView/Default/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/Local Storage/leveldb/LOG.old
+bin/nova.exe.WebView2/EBWebView/Default/heavy_ad_intervention_opt_out.db-journal
+bin/nova.exe.WebView2/EBWebView/Default/heavy_ad_intervention_opt_out.db
+bin/nova.exe.WebView2/EBWebView/Default/Feature Engagement Tracker/EventDB/LOG
+bin/nova.exe.WebView2/EBWebView/Default/Feature Engagement Tracker/EventDB/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/Feature Engagement Tracker/AvailabilityDB/LOG
+bin/nova.exe.WebView2/EBWebView/Default/Feature Engagement Tracker/AvailabilityDB/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/Extension State/LOG.old
+bin/nova.exe.WebView2/EBWebView/Default/Download Service/EntryDB/LOG
+bin/nova.exe.WebView2/EBWebView/Default/Download Service/EntryDB/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/data_reduction_proxy_leveldb/MANIFEST-000002
+bin/nova.exe.WebView2/EBWebView/Default/data_reduction_proxy_leveldb/LOG
+bin/nova.exe.WebView2/EBWebView/Default/data_reduction_proxy_leveldb/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/data_reduction_proxy_leveldb/CURRENT
+bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000a
+bin/nova.exe.WebView2/EBWebView/Default/BudgetDatabase/LOG
+bin/nova.exe.WebView2/EBWebView/Default/BudgetDatabase/LOCK
+bin/nova.exe.WebView2/EBWebView/Default/AutofillStrikeDatabase/LOG
+bin/nova.exe.WebView2/EBWebView/Default/AutofillStrikeDatabase/LOCK
+bin/nova.exe.WebView2/EBWebView/BrowserMetrics/BrowserMetrics-610B9E9E-9E60.pma
+bin/nova.exe.WebView2/EBWebView/BrowserMetrics-spare.pma
+*.old
+*.db
+*.db-journal
