@@ -156,7 +156,7 @@ namespace ssi.Controls.Other
 
             if(explanationDic == null)
             {
-                MainHandler.restartExplanationBackend();
+                MainHandler.restartPythonnBackend();
 
                 this.explainingLabel.Visibility = Visibility.Hidden;
                 blur = new BlurEffect();

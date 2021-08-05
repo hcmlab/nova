@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -254,7 +255,7 @@ namespace ssi
       
     
 
-        public static int startExplanationBackend(bool forcedebug = false)
+        public static int startPythonBackend(bool forcedebug = false)
         {
 
             Process process = new Process();
@@ -264,15 +265,23 @@ namespace ssi
          
 
                 startInfo.WindowStyle = (Properties.Settings.Default.EnablePythonDebug == true) ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
-                startInfo.WindowStyle = (forcedebug == true ) ? ProcessWindowStyle.Minimized : startInfo.WindowStyle;
+                //startInfo.WindowStyle = (forcedebug == true ) ? ProcessWindowStyle.Minimized : startInfo.WindowStyle;
                 //startInfo.RedirectStandardOutput = true;
                 //startInfo.RedirectStandardError = true;
+                //if(!File.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\nova_python.exe")){
+                //    File.Copy(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python.exe", AppDomain.CurrentDomain.BaseDirectory + "ssi\\nova_python.exe");
+                //}
+
+
+                  
                 startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "ssi\\python.exe" + "\"";
                 startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
+               
                 process.StartInfo = startInfo;
 
                 process.Start();
-               
+                
+        
                 //string output = process.StandardOutput.ReadToEnd();
                 //Console.WriteLine(output);
               
@@ -297,29 +306,22 @@ namespace ssi
        
         }
 
-        public static void killExplanationBackend(bool forcedebug = false )
+        public static void killPythonBackend(bool forcedebug = false )
         {
             try
             {
                 Process[] process = Process.GetProcesses();
-
                 foreach (Process prs in process)
                 {
+                   
                     if (prs.Id == MainHandler.pythonProcessID)
                     {
-                        if(Properties.Settings.Default.EnablePythonDebug )
-                        {
-                            prs.CloseMainWindow();
-                        }
-                        else
-                        {
-                            prs.Kill();
-                        }
-                       
+                        KillProcessAndChildren(prs.Id);
                         break;
                     }
                 }
 
+             
 
             }
             catch
@@ -328,10 +330,37 @@ namespace ssi
             }
         }
 
-        public static void restartExplanationBackend()
+        public static void restartPythonnBackend()
         {
-            killExplanationBackend();
-            MainHandler.pythonProcessID = startExplanationBackend();
+            killPythonBackend();
+            MainHandler.pythonProcessID = startPythonBackend();
+        }
+
+
+
+        public static void KillProcessAndChildren(int pid)
+        {
+            // Cannot close 'system idle process'.
+            if (pid == 0)
+            {
+                return;
+            }
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher
+                    ("Select * From Win32_Process Where ParentProcessID=" + pid);
+            ManagementObjectCollection moc = searcher.Get();
+            foreach (ManagementObject mo in moc)
+            {
+                KillProcessAndChildren(Convert.ToInt32(mo["ProcessID"]));
+            }
+            try
+            {
+                Process proc = Process.GetProcessById(pid);
+                proc.Kill();
+            }
+            catch (ArgumentException)
+            {
+                // Process already exited.
+            }
         }
 
     }

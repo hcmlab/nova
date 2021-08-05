@@ -191,7 +191,7 @@ namespace ssi
 
             if(explanationData == null)
             {
-                MainHandler.restartExplanationBackend();
+                MainHandler.restartPythonnBackend();
                 this.explanationButton.IsEnabled = true;
 
                 return;
