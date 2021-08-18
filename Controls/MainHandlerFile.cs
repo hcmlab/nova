@@ -705,6 +705,7 @@ namespace ssi
             saveAllAnnos();
 
             string firstmediadir = "";
+
             if (mediaList.Count > 0) firstmediadir = mediaList[0].GetDirectory();
             else if (signals.Count > 0) firstmediadir = signals[0].Directory;
 
