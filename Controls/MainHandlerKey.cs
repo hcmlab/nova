@@ -354,6 +354,16 @@ namespace ssi
                             }
                             e.Handled = true;
                         }
+
+                        else if (e.KeyboardDevice.IsKeyDown(Key.A))
+                        {
+                            
+                                annoCursor.X = signalCursor.X;
+                                timeline.CurrentSelectPosition = annoCursor.X;
+                                timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+                            
+                            e.Handled = true;
+                        }
                         else if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
                         {
                             ChangeTier();
