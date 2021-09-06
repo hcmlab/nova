@@ -54,8 +54,8 @@ namespace ssi
                     break;
             }
         }
-        
-        private void okButton_Click(object sender, RoutedEventArgs e)
+
+        private void okButton()
         {
             DialogResult = true;
 
@@ -75,21 +75,26 @@ namespace ssi
                         double score = 0;
                         double.TryParse(scoreTextBox.Text, out score);
                         Result.Score = score;
-                        
+
                     }
                     break;
 
                 case AnnoScheme.TYPE.DISCRETE:
-                    Result.Label = (string) labelComboBox.SelectedItem;
+                    Result.Label = (string)labelComboBox.SelectedItem;
                     Result.Color = scheme.Labels.Find(x => x.Name == Result.Label).Color;
                     break;
 
                 case AnnoScheme.TYPE.FREE:
-                    Result.Label = labelTextBox.Text;                    
+                    Result.Label = labelTextBox.Text;
                     break;
             }
 
             Close();
+        }
+
+        private void okButton_Click(object sender, RoutedEventArgs e)
+        {
+            okButton();
         }
 
         private void cancelButton_Click(object sender, RoutedEventArgs e)
@@ -102,5 +107,7 @@ namespace ssi
         {
             confidenceLabelValue.Content = Math.Round(this.confidenceSlider.Value, 2).ToString();
         }
+
+      
     }
 }

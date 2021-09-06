@@ -489,6 +489,8 @@ namespace ssi
                             {
                                 AlignToSampleRate();
                             }
+                           
+                            
                         }
                         else if (e.KeyboardDevice.IsKeyDown(Key.LeftAlt))
                         {
@@ -502,6 +504,8 @@ namespace ssi
                                 MoveFrameAnnotation(false);
                                 e.Handled = true;
                             }
+
+                            
                         }
                         break;
                     /*No Modifier keys are pressed*/
@@ -530,6 +534,38 @@ namespace ssi
                         else if ((e.KeyboardDevice.IsKeyDown(Key.W)))
                         {
                             CreateOrSelectAnnotation();
+                        }
+                        else if ((e.KeyboardDevice.IsKeyDown(Key.D)))
+                        {
+                            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                            {
+                                UnselectLabel();
+                                CreateOrSelectAnnotation();
+                                e.Handled = true;
+                            }
+                        }
+
+                        else if ((e.KeyboardDevice.IsKeyDown(Key.U)))
+                        {
+                            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                            {
+                                UnselectLabel();
+                                e.Handled = true;
+                                
+                            }
+                        }
+                        else if ((e.KeyboardDevice.IsKeyDown(Key.J)))
+                        {
+                            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                            {
+                                double selectedtime = MainHandler.timeline.CurrentPlayPosition;
+                                AnnoTierSegment t = AnnoTier.Selected.GetSegmentAtLocation(selectedtime);
+                                MainHandler.timeline.CurrentPlayPosition = selectedtime;
+                               
+                                AnnoTierStatic.SelectLabel(t);
+
+                                e.Handled = true;
+                            }
                         }
                         else if (e.KeyboardDevice.IsKeyDown(Key.Back))
                         {
@@ -570,7 +606,11 @@ namespace ssi
                 Play();
             }
         }
-
+        public void UnselectLabel()
+        {
+            AnnoTierStatic.UnselectLabel();
+            control.annoListControl.annoDataGrid.SelectedItem = null;
+        }
         private void SplitSegment(object sender, KeyEventArgs e)
         {
             
@@ -1047,7 +1087,7 @@ namespace ssi
 
             else if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
             {
-                AnnoTierStatic.UnselectLabel();
+                UnselectLabel();
                 double pos = Time.PixelFromTime(timeline.CurrentPlayPosition);
                 MainHandler.Time.CurrentSelectPosition = pos;
                 annoCursor.X = pos;
