@@ -2014,7 +2014,7 @@ namespace ssi
                         if (annoList[i].Label == labels[j]["name"].ToString())
                         {
                             index = labels[j]["id"].AsInt32;
-                            data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "id", index }, { "conf", annoList[i].Confidence } });
+                            data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "id", index }, { "conf", annoList[i].Confidence }, { "meta", annoList[i].Meta } });
                             break;
                         }
                         else if (annoList[i].Label == GARBAGELABEL)
@@ -2029,7 +2029,7 @@ namespace ssi
             {
                 for (int i = 0; i < annoList.Count; i++)
                 {
-                    data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "name", annoList[i].Label }, { "conf", annoList[i].Confidence } });
+                    data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "name", annoList[i].Label }, { "conf", annoList[i].Confidence }, { "meta", annoList[i].Meta } });
                 }
             }
             else if (schemeType == AnnoScheme.TYPE.CONTINUOUS)
@@ -2526,8 +2526,17 @@ namespace ssi
                         double duration = stop - start;
                         string label = SchemeLabel;
                         string confidence = labels[i]["conf"].ToString();
+                        string meta = "";
+                        try
+                        {
+                            meta = labels[i]["meta"].ToString();
+                        }
+                        catch (Exception e)
+                        {
+                          
+                        }
 
-                        AnnoListItem ali = new AnnoListItem(start, duration, label, "", SchemeColor, double.Parse(confidence));
+                        AnnoListItem ali = new AnnoListItem(start, duration, label, meta, SchemeColor, double.Parse(confidence));
                         annoList.AddSorted(ali);
                     }
                 }
@@ -2542,8 +2551,17 @@ namespace ssi
                         double duration = stop - start;
                         string label = labels[i]["name"].ToString();
                         string confidence = labels[i]["conf"].ToString();
+                        string meta = "";
+                        try
+                        {
+                            meta = labels[i]["meta"].ToString();
+                        }
+                        catch (Exception e)
+                        {
 
-                        AnnoListItem ali = new AnnoListItem(start, duration, label, "", Colors.Black, double.Parse(confidence));
+                        }
+                        //string colorstring = labels[i]["color"].ToString();
+                        AnnoListItem ali = new AnnoListItem(start, duration, label, meta, Colors.Black, double.Parse(confidence));
                         annoList.AddSorted(ali);
                     }
                 }

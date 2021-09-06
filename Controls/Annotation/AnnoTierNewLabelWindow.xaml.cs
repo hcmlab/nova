@@ -27,7 +27,7 @@ namespace ssi
             this.scheme = scheme;
             confidenceSlider.Value = item.Confidence;
             colorPicker.SelectedColor = item.Color;
-
+            descriptiontextBox.Text = item.Meta;
             switch (scheme.Type)
             {
                 case AnnoScheme.TYPE.CONTINUOUS:
@@ -61,6 +61,7 @@ namespace ssi
 
             Result.Confidence = confidenceSlider.Value;
             Result.Color = colorPicker.SelectedColor.Value;
+            Result.Meta = descriptiontextBox.Text;
 
             switch (scheme.Type)
             {
