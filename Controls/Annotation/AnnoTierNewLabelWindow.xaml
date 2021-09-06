@@ -72,7 +72,7 @@
         </DockPanel>
 
         <StackPanel Grid.Row="5" HorizontalAlignment="Right" Orientation="Horizontal" >
-            <Button Margin="5" Width="60" Height="25" Click="okButton_Click">OK</Button>
+            <Button Margin="5" Width="60" Height="25" IsDefault="True" Click="okButton_Click">OK</Button>
             <Button Margin="5" Width="60" Height="25" Click="cancelButton_Click">Cancel</Button>
         </StackPanel>
 

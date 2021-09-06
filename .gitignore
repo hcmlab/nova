@@ -540,3 +540,29 @@ bin/nova.exe.WebView2/EBWebView/BrowserMetrics-spare.pma
 *.old
 *.db
 *.db-journal
+bin/nova.exe.WebView2/EBWebView/BrowserMetrics/BrowserMetrics-61360194-19EB4.pma
+bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000b
+bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000c
+bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000d
+bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000e
+bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/0737b1db6a890051_0
+bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/442eea43b0825207_0
+bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/95facfd04898a965_0
+bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000005
+bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000006
+bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000007
+bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/synchronousLookupUris_637665232204592820
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Cookies
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Cookies-journal
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Favicons
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Favicons-journal
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/History
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/History-journal
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Login Data
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Login Data-journal
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Preferences
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Secure Preferences
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Web Data
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Web Data-journal
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Last Version
+bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Local State

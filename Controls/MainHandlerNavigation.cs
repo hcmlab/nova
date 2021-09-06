@@ -209,6 +209,8 @@ namespace ssi
         private void navigatorFollowAnno_Unchecked(object sender, RoutedEventArgs e)
         {
             AnnoTierStatic.UnselectLabel();
+            control.annoListControl.annoDataGrid.SelectedItem = null;
+
 
             bool is_playing = IsPlaying();
             Stop();
