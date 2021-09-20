@@ -213,58 +213,9 @@ namespace ssi
             polygonDrawUnit.polygonOverlayUpdate(item);
         }
 
-        public void handle3DInterpolation(ComboboxItem sourceFrame, PolygonLabel sourceLabel, PolygonLabel targetLabel, double xStepPerFrame, double yStepPerFrame, int framesBetween)
+        public void handle3DInterpolation(PolygonLabel souceLabel, PolygonLabel targetLabel, List<PointAngleTuple> sourcePointsAnglesTuple, List<PointAngleTuple> targetPointsAnglesTuple, int framesBetween)
         {
-            /*
-             * A = y2-y1; B = x1-x2; C = Ax1+By1
-             * float delta = A1 * B2 - A2 * B1;
-               if (delta == 0) 
-                   throw new ArgumentException("Lines are parallel");
-
-               float x = (B2 * C1 - B1 * C2) / delta;
-               float y = (A1 * C2 - A2 * C1) / delta;
-             * 
-             */
-
-            AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
-            int newLabelCounter = 0;
-            bool toStart = false;
-            foreach (AnnoListItem listItem in list)
-            {
-                if (listItem.Equals(sourceFrame.Value))
-                {
-                    toStart = true;
-                    newLabelCounter++;
-                    continue;
-                }
-
-                if (toStart)
-                {
-                    List<PolygonPoint> newPolygon = new List<PolygonPoint>();
-
-                    foreach (PolygonPoint point in sourceLabel.Polygon)
-                    {
-                        newPolygon.Add(new PolygonPoint(point.X + (newLabelCounter * xStepPerFrame), point.Y + (newLabelCounter * yStepPerFrame)));
-                    }
-
-                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color);
-                    listItem.PolygonList.addPolygonLabel(newLabel);
-                    listItem.updateLabelCount();
-                    newLabelCounter++;
-
-                    if (newLabelCounter == (framesBetween + 1))
-                    {
-                        listItem.PolygonList.removeExplicitPolygon(targetLabel);
-                        polygonUtilities.refreshAnnoDataGrid();
-                        listItem.updateLabelCount();
-                        break;
-                    }
-                    AnnoTierStatic.Selected.AnnoList.HasChanged = true;
-                }
-            }
-
-            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
-            polygonDrawUnit.polygonOverlayUpdate(item);
+            
         }
 
         private void polygonRelabelButton_Click(object sender, RoutedEventArgs e)
@@ -465,6 +416,9 @@ namespace ssi
 
         private bool targetPositionEqualsSource(List<Point> start, List<Point> target)
         {
+            if (start is null || target is null)
+                return true;
+            
             for(int i = 0; i < start.Count; i++)
             {
                 if (start[i].X != target[i].X || start[i].Y != target[i].Y)
