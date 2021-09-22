@@ -48,6 +48,11 @@ namespace ssi
         public double Y { get => y; set => y = value; }
         public double PointID { get => pointID; }
 
+        public bool isOnTheSameSpot(PolygonPoint point)
+        {
+            return this.X == point.X && this.Y == point.Y;
+        }
+
         public override bool Equals(object obj)
         {
             PolygonPoint point = obj as PolygonPoint;

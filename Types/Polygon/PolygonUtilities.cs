@@ -89,6 +89,9 @@ namespace ssi.Types.Polygon
                     points[i] = new System.Drawing.Point((int)polygonPoint.X, (int)polygonPoint.Y);
                 }
 
+                if (points.Length < 3)
+                    return false;
+
                 gp.AddPolygon(points);
                 contains = gp.IsVisible(new System.Drawing.Point((int)x, (int)y));
 
