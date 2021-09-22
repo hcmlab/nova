@@ -71,7 +71,8 @@ namespace ssi
                     sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"DISCRETE_POLYGON\" sr=\"" + this.Scheme.SampleRate + "\" default-label=\"" + this.Scheme.DefaultLabel + "\" " +
                                  "default-label-color=\"" + this.Scheme.DefaultColor + "\" color=\"" + this.Scheme.MinOrBackColor + "\">");
 
-                    int index = 0;
+                    // 0 is reserved for the background, -1 = garbage
+                    int index = 1;
 
                     foreach (AnnoScheme.Label lp in this.Scheme.Labels)
                     {
