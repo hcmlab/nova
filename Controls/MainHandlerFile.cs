@@ -140,28 +140,32 @@ namespace ssi
             switch (ftype)
             {
                 case SSI_FILE_TYPE.VIDEO:
-                case SSI_FILE_TYPE.AUDIO:
 
-                    bool loadvideosaudio = true;
-                    if (ftype != SSI_FILE_TYPE.AUDIO)
-                    {
+ 
                         loadMediaFile(filepath, MediaType.VIDEO);
-                        loadvideosaudio = Properties.Settings.Default.DrawVideoWavform;
 
-                        if (loadvideosaudio)
+                        if (Properties.Settings.Default.DrawVideoWavform)
                         {
                             Signal signal = loadAudioSignalFile(filepath, foreground, background);
 
                             if (signal != null)
                             {
-                                signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                            signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
                             }
+
                         }
-                    }
-                    else
-                    {
-                        loadMediaFile(filepath, MediaType.AUDIO);
-                    }
+
+                        else loadMediaFile(filepath, MediaType.AUDIO);
+
+                    loaded = true;
+                    break;
+
+
+                case SSI_FILE_TYPE.AUDIO:
+
+                    Signal signala = loadAudioSignalFile(filepath, foreground, background);
+                    signala.Media = loadMediaFile(filepath, MediaType.AUDIO);
+
 
                     loaded = true;
 
@@ -701,6 +705,7 @@ namespace ssi
             saveAllAnnos();
 
             string firstmediadir = "";
+
             if (mediaList.Count > 0) firstmediadir = mediaList[0].GetDirectory();
             else if (signals.Count > 0) firstmediadir = signals[0].Directory;
 

@@ -519,7 +519,7 @@ namespace ssi
                                     double value = double.NaN;
                                     double.TryParse(data[0], out value);
                                     double confidence = Convert.ToDouble(data[1], CultureInfo.InvariantCulture);
-                                    AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value.ToString(), "", Defaults.Colors.Foreground, confidence);
+                                    AnnoListItem e = new AnnoListItem(start, 1 / list.Scheme.SampleRate, value, "", Defaults.Colors.Foreground, confidence);
                                     list.Add(e);
                                     start = start + 1 / list.Scheme.SampleRate;
                                 }

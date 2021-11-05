@@ -196,7 +196,7 @@ namespace ssi
 
             if(explanationData == null)
             {
-                MainHandler.restartExplanationBackend();
+                MainHandler.restartPythonnBackend();
 
                 this.explainingLabel.Visibility = Visibility.Hidden;
                 blur = new BlurEffect();

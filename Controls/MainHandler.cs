@@ -17,7 +17,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.1.0.0";
+        public static string BuildVersion = "1.1.0.3";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static int pythonProcessID;
@@ -231,7 +231,7 @@ namespace ssi
             {
 
                 checkPythonInstallation();
-                pythonProcessID = startExplanationBackend();
+               
 
                 var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
 
@@ -241,6 +241,7 @@ namespace ssi
                     var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
                     Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
                 }
+                MainHandler.pythonProcessID = startPythonBackend();
             }
 
             control.explanationWindow.Click += explanationWindow_Click;

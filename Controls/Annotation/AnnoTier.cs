@@ -116,6 +116,7 @@ namespace ssi
                 selectedLabel.select(false);
                 SetZIndex(selectedLabel, selectedZindex);
                 selectedLabel = null;
+               
             }
         }
 
@@ -553,6 +554,18 @@ namespace ssi
             return null;
         }
 
+        public AnnoTierSegment GetSegmentAtLocation(double time)
+        {
+            foreach (AnnoTierSegment segment in segments)
+            {
+                if (segment.Item.Start < time && segment.Item.Stop > time)
+                {
+                    return segment;
+                }
+            }
+            return null;
+        }
+
         public AnnoTierSegment AddSegment(AnnoListItem item)
         {
             AnnoTierSegment segment = new AnnoTierSegment(item, this);
@@ -569,7 +582,7 @@ namespace ssi
             UnDoObject.InsertObjectforUndoRedo(RememberDelete);
             DeleteSegment(s);
         }
-
+     
         public void DeleteSegment(AnnoTierSegment s)
         {
             AnnoList.Remove(s.Item);
@@ -927,6 +940,7 @@ namespace ssi
             }
             else
             {
+                
                 UnselectLabel();
                 this.Select(true);
 
