@@ -568,8 +568,9 @@ namespace ssi
             {
                annoList.Source.Database.BountyID = bounty.OID;
                annoList.Source.Database.HasBounty = true;
-               
-               addAnnoTier(annoList);
+
+
+                addAnnoTierFromList(annoList);
             }
             else
             {

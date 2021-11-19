@@ -409,7 +409,7 @@ namespace ssi
 
         public DatabaseBounty getBounty()
         {
-            return bounty;
+            return selectedBounty;
         }
 
         private void CreateBounty_Click(object sender, RoutedEventArgs e)
@@ -515,7 +515,9 @@ namespace ssi
                     stat.Name = item.Name;
 
                     ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, item.Name, bounty.Session, bounty.Database);
-                    var annos = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+
+                    IMongoDatabase db = DatabaseHandler.Client.GetDatabase(bounty.Database);
+                    var annos = db.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
                     var builder = Builders<BsonDocument>.Filter;
 
                     var filter = builder.Eq("_id", id);

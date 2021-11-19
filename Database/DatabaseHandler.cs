@@ -2583,27 +2583,28 @@ namespace ssi
         }
 
 
-        public static ObjectId GetAnnotationId(string role, string scheme, string annotator, string session, string db)
+        public static ObjectId GetAnnotationId(string role, string scheme, string annotator, string session, string dbname)
         {
             ObjectId id = new ObjectId();
 
+            IMongoDatabase db = DatabaseHandler.Client.GetDatabase(dbname);
             var builder = Builders<BsonDocument>.Filter;
-            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var annotations = db.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
 
-            ObjectId roleID = GetObjectID(DatabaseDefinitionCollections.Roles, "name", role);
-            string roleName = FetchDBRef(DatabaseDefinitionCollections.Roles, "name", roleID);
+            ObjectId roleID = GetObjectID(DatabaseDefinitionCollections.Roles, db, "name", role);
+            string roleName = FetchDBRef(DatabaseDefinitionCollections.Roles, db, "name", roleID);
 
-            ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, "name", scheme);
-            string schemeName = FetchDBRef(DatabaseDefinitionCollections.Schemes, "name", schemeID);
+            ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, db, "name", scheme);
+            string schemeName = FetchDBRef(DatabaseDefinitionCollections.Schemes, db, "name", schemeID);
 
-            ObjectId annotatorID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", annotator);
-            string annotatorName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "name", annotatorID);
+            ObjectId annotatorID = GetObjectID(DatabaseDefinitionCollections.Annotators, db, "name", annotator);
+            string annotatorName = FetchDBRef(DatabaseDefinitionCollections.Annotators, db, "name", annotatorID);
             DatabaseHandler.GetUserInfo(annotator);
             //string annotatorFullName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatorID);
             string annotatorFullName = DatabaseHandler.GetUserInfo(annotator).Fullname;
 
-            ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, "name", session);
-            string sessionName = FetchDBRef(DatabaseDefinitionCollections.Sessions, "name", sessionID);
+            ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, db, "name", session);
+            string sessionName = FetchDBRef(DatabaseDefinitionCollections.Sessions, db, "name", sessionID);
 
             var filterAnnotation = builder.Eq("role_id", roleID) & builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("session_id", sessionID);
             var annotationDocs = annotations.Find(filterAnnotation).ToList();
@@ -3761,12 +3762,45 @@ namespace ssi
             return output;
         }
 
+
+        public static string FetchDBRef(string collection, IMongoDatabase db, string attribute, ObjectId reference)
+        {
+            if (!IsConnected)
+            {
+                return null;
+            }
+
+            string output = "";
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("_id", reference);
+            var result = db.GetCollection<BsonDocument>(collection).Find(filter).ToList();
+
+            if (result.Count > 0)
+            {
+                output = result[0][attribute].ToString();
+            }
+
+            return output;
+        }
+
         public static ObjectId GetObjectID(string collection, string value, string attribute)
         {
             ObjectId id = new ObjectId();
             var builder = Builders<BsonDocument>.Filter;
             var filtera = builder.Eq(value, attribute);
             var result = database.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
+
+            if (result.Count > 0) id = result[0].GetValue(0).AsObjectId;
+
+            return id;
+        }
+
+        public static ObjectId GetObjectID(string collection, IMongoDatabase db, string value, string attribute)
+        {
+            ObjectId id = new ObjectId();
+            var builder = Builders<BsonDocument>.Filter;
+            var filtera = builder.Eq(value, attribute);
+            var result = db.GetCollection<BsonDocument>(collection).Find(filtera).ToList();
 
             if (result.Count > 0) id = result[0].GetValue(0).AsObjectId;
 
