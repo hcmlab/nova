@@ -124,7 +124,33 @@ namespace ssi
             {
                 DatabaseBounty bounty = dialog.getMyBounty();
                 loadFilesForBounty(bounty, Properties.Settings.Default.MongoDBUser);
+                wait(1000);
+                loadAnnoForBounty(bounty, Properties.Settings.Default.MongoDBUser);
 
+            }
+        }
+
+        public void wait(int milliseconds)
+        {
+            var timer1 = new System.Windows.Forms.Timer();
+            if (milliseconds == 0 || milliseconds < 0) return;
+
+            // Console.WriteLine("start wait timer");
+            timer1.Interval = milliseconds;
+            timer1.Enabled = true;
+            timer1.Start();
+
+            timer1.Tick += (s, e) =>
+            {
+                timer1.Enabled = false;
+                timer1.Stop();
+                // Console.WriteLine("stop wait timer");
+            };
+
+            while (timer1.Enabled)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Background,
+                                                  new Action(delegate { }));
             }
         }
 
@@ -139,6 +165,7 @@ namespace ssi
                 DatabaseBounty bounty = dialog.getBounty();
                 string annotator = dialog.getAnnotator();
                 loadFilesForBounty(bounty, annotator);
+                loadAnnoForBounty(bounty, annotator);
                 viewonlyMode(true);
             }
             else

@@ -558,9 +558,15 @@ namespace ssi
             
             foreach (StreamItem path in bounty.streams)
             {
-
-                loadFile(Properties.Settings.Default.DatabaseDirectory + "\\" + bounty.Database + "\\" + bounty.Session + "\\" + path.Name);
+                loadFile(Properties.Settings.Default.DatabaseDirectory + "\\" + bounty.Database + "\\" + bounty.Session + "\\" + path.Name);       
             }
+
+         
+ 
+        }
+
+        public void loadAnnoForBounty(DatabaseBounty bounty, string user)
+        {
 
             var id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user, bounty.Session);
             AnnoList annoList = DatabaseHandler.LoadAnnoList(id);
@@ -571,13 +577,14 @@ namespace ssi
 
 
                 addAnnoTierFromList(annoList);
-            }
+    }
             else
             {
                 addNewAnnotationDatabase(bounty);
             }
         }
-   
+
+
         public void loadProjectFile(string filepath)
         {
             clearWorkspace();
