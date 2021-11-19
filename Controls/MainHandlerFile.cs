@@ -547,6 +547,35 @@ namespace ssi
                 addSignalTrack(signal, signalColor, backgroundColor);
             }
         }
+
+
+        public void loadFilesForBounty(DatabaseBounty bounty, string user)
+        {
+            clearWorkspace();
+            DatabaseHandler.ChangeDatabase(bounty.Database);
+            DatabaseHandler.ChangeSession(bounty.Session);
+
+            
+            foreach (StreamItem path in bounty.streams)
+            {
+
+                loadFile(Properties.Settings.Default.DatabaseDirectory + "\\" + bounty.Database + "\\" + bounty.Session + "\\" + path.Name);
+            }
+
+            var id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user, bounty.Session);
+            AnnoList annoList = DatabaseHandler.LoadAnnoList(id);
+            if (annoList != null)
+            {
+               annoList.Source.Database.BountyID = bounty.OID;
+               annoList.Source.Database.HasBounty = true;
+               
+               addAnnoTier(annoList);
+            }
+            else
+            {
+                addNewAnnotationDatabase(bounty);
+            }
+        }
    
         public void loadProjectFile(string filepath)
         {

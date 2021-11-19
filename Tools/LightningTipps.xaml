@@ -1,0 +1,35 @@
+﻿<Window x:Class="ssi.LightningTipps"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        mc:Ignorable="d"
+        Title="Buy us a coffee " Height="600" Width="270">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="1">
+
+            <Separator Height="10" Visibility="Hidden"></Separator>
+            <Label Content="Tip Sats to Developers"/>
+            <TextBox x:Name="DepositSats">1000</TextBox>
+            <Label Content="Internal Wallet"/>
+
+
+            <Button x:Name="Withdraw"  Content="Tip Amount to Developers directly" Grid.Column="0" Click="Withdraw_Click" IsEnabled="True" />
+            <Label x:Name="statuswithdraw" Foreground="Green"></Label>
+            <Label Content="External Wallet"/>
+            <Button x:Name="GenerateInvoice"  Content="Generate Invoice" Grid.Column="0" Click="GenerateInvoice_Click" IsEnabled="True" />
+            <Image x:Name="QR" Width="256"></Image>
+            <TextBox x:Name="DepositAdress">Invoice will appear here, copy to your wallet</TextBox>
+            <Label x:Name="clipboard" Content=""/>
+
+        </StackPanel>
+
+
+
+    </Grid>
+</Window>
+

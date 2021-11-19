@@ -18,7 +18,7 @@
             <Button Name="showSettingsMenu" Background="Transparent" BorderBrush="Transparent">
                 <Image Source="/Resources/settings.png" Width="16"></Image>
             </Button>
-            <MenuItem Header="FILE">
+            <MenuItem Header="FILE" Name="filemenu">
                 <MenuItem Header="Load Files" Name="loadFilesMenu" />
                 <MenuItem Header="Load Project" Name="fileLoadProjectMenu" />
                 <MenuItem Header="Save Project" Name="fileSaveProjectMenu" />
@@ -37,7 +37,7 @@
                     </MenuItem>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="DATABASE">
+            <MenuItem Header="DATABASE" Name="databasemenu">
                 <MenuItem Header="Load Session" Name="databaseLoadSessionMenu" />
                 <MenuItem Header="Administration" Name="databaseAdminMenu">
                     <MenuItem Header="Manage Users" Name="databaseManageUsersMenu" />
@@ -48,9 +48,13 @@
                 <MenuItem Header="Manage Account" Name="databasePasswordMenu" />
                 <MenuItem Header="Update" Name="databaseUpdateMenu" />
                 <MenuItem Header="Connect" Name="databaseConnectMenu" />
-
+                <MenuItem Header="Bounties">
+                    <MenuItem Header="Raise/Manage Bounties" Name="databasecreateBountyMenu" />
+                    <MenuItem Header="My Tasks" Name="databasehuntBountyMenu" />
+                </MenuItem>
+                
             </MenuItem>
-            <MenuItem Header="ANNOTATION">
+            <MenuItem Header="ANNOTATION" Name="annotationmenu">
                 <MenuItem Header="New Annotation" Name="annoNewMenu" InputGestureText="Ctrl+N"/>
                 <MenuItem Header="Save" Name="annoSaveMenu" InputGestureText="Ctrl+S"/>
                 <MenuItem Header="Save As Finished" Name="annoSaveAsFinishedMenu"/>

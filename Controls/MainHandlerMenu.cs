@@ -58,6 +58,7 @@ namespace ssi
             control.annoSaveAllMenu.IsEnabled = hasTier;
             control.annoSaveMenu.IsEnabled = hasTier;
             control.annoSaveAsFinishedMenu.IsEnabled = hasTier;
+            control.annoSaveAsFinishedMenu.Header = hasTier && tier.AnnoList.Source.Database.HasBounty ? "Save As Finished (Complete Task)" : "Save As Finished";
             control.annoReloadMenu.IsEnabled = hasTier;
             control.annoReloadBackupMenu.IsEnabled = hasDatabaseTier;
             control.annoExportMenu.IsEnabled = hasTier;

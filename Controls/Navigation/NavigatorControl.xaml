@@ -41,6 +41,8 @@
             <StatusBarItem Name="statusBarDatabase"></StatusBarItem>
             <Separator/>
             <StatusBarItem Name="statusBarSessionInfo"></StatusBarItem>
+            <Separator/>
+            <StatusBarItem Name="satsbalance"></StatusBarItem>
         </StatusBar>
     </Grid>
 </UserControl>

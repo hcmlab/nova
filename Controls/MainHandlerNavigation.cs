@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace ssi
 {
@@ -36,9 +37,11 @@ namespace ssi
         }
 
         #endregion CURSOR
-
+        private System.Timers.Timer checkInvoicePaidTimer;
         #region EVENTHANDLER
         static double PlayerSpeed = 1.0;
+
+
 
         private void annoLiveMode_Changed(object sender, RoutedEventArgs e)
         {
@@ -138,11 +141,34 @@ namespace ssi
             PlayerSpeed = PlayerSpeed * 0.5;
         }
 
+        public void InitCheckLightningBalanceTimer()
+        {
+
+            if (checkInvoicePaidTimer != null) checkInvoicePaidTimer.Stop();
+            checkInvoicePaidTimer = new System.Timers.Timer();
+            checkInvoicePaidTimer.Elapsed += new ElapsedEventHandler(timer_Tick);
+            checkInvoicePaidTimer.Interval = 5000; // in miliseconds
+            checkInvoicePaidTimer.Start();
+        }
+
+        private async void timer_Tick(object sender, EventArgs e)
+        {
+
+                //checkInvoicePaidTimer.Stop();
+                if (ENABLE_LIGHTNING && myWallet != null)
+                {
+                    Lightning lightning = new Lightning();
+                    myWallet.balance = await lightning.GetWalletBalance(myWallet.admin_key);
+                    this.control.navigator.satsbalance.Dispatcher.Invoke(() => {
+                        control.navigator.satsbalance.Content = "\u26a1 " + (myWallet.balance / 1000) + " Sats";
+                    });
+                }
+            
+        }
 
 
 
-
-        private void updateNavigator()
+        public void updateNavigator()
         {
             if (mediaList.Count > 0
                 || signalTracks.Count > 0
@@ -168,7 +194,7 @@ namespace ssi
             bool isConnectedAndHasSession = DatabaseHandler.IsConnected && DatabaseHandler.IsSession;
 
 
-            if (Time.TotalDuration > 0 == true || isConnectedAndHasSession)
+            if ((Time.TotalDuration > 0 == true || isConnectedAndHasSession) && !ENABLE_VIEWONLY)
             {
                 control.navigator.newAnnoButton.IsEnabled = true;
             }
@@ -187,6 +213,14 @@ namespace ssi
             control.navigator.statusBarServer.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
             control.navigator.statusBarDatabase.Content = DatabaseHandler.DatabaseInfo;
             control.navigator.statusBarDatabase.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
+            if (ENABLE_LIGHTNING)
+            {
+                if (myWallet == null) control.navigator.satsbalance.Content = "\u26a1 ";
+                else control.navigator.satsbalance.Content = "\u26a1 " + (myWallet.balance / 1000) + " Sats";
+            }
+               
+            control.navigator.satsbalance.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
+            
 
             this.control.annostatusbar.Visibility=  annoTiers.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         }

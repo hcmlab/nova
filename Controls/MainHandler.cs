@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,9 +18,11 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.1.0.3";
+        public static string BuildVersion = "1.1.0.21";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
+        public static bool ENABLE_LIGHTNING = true;
+        public static bool ENABLE_VIEWONLY = false;
         public static int pythonProcessID;
         public static int pythonWindowHandle;
 
@@ -45,7 +48,7 @@ namespace ssi
 
         public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "odf", "annotation" };
 
-        private MainControl control;
+        public MainControl control;
 
         public static Timeline Time
         {
@@ -200,6 +203,8 @@ namespace ssi
             control.convertSignalToAnnoContinuousMenu.Click += convertSignalToAnnoContinuous_Click;
             control.removeRemainingSegmentsMenu.Click += removeRemainingSegmentsMenu_Click;
 
+            control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+            bool LightningWindowActive = false;
 
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
@@ -244,6 +249,8 @@ namespace ssi
                 MainHandler.pythonProcessID = startPythonBackend();
             }
 
+
+
             control.explanationWindow.Click += explanationWindow_Click;
             //control.explanationWindowInnvestigate.Click += explanationWindowInnvestigate_Click;
             control.expalanationWindowTFExplain.Click += explanationWindowtfexplain_Click;
@@ -285,20 +292,23 @@ namespace ssi
             control.databaseConnectMenu.Click += DatabaseConnectMenu_Click;
             control.databasePasswordMenu.Click += DatabasePassMenu_Click;
 
-
+            control.databasecreateBountyMenu.Click += DatabaseCreateBounty_Click;
+            control.databasehuntBountyMenu.Click += DatabaseHuntBounty_Click;
             if (Properties.Settings.Default.DatabaseAutoLogin)
             {
-                databaseConnect();
+               databaseConnect();
             }
             else
             {
                 updateNavigator();
             }
 
-           
+          
+
+
             // Mouse
 
-            control.MouseWheel += (sender, args) =>
+           control.MouseWheel += (sender, args) =>
             {
                 if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
                 {
@@ -390,6 +400,18 @@ namespace ssi
             control.Drop += controlDrop;
         }
 
+        private void Lightning_Click(object sender, MouseButtonEventArgs e)
+        {
+            LightningWalletMangement lwm = new LightningWalletMangement(this);
+            lwm.Left = System.Windows.Application.Current.MainWindow.Left + 425;
+            lwm.Top = System.Windows.Application.Current.MainWindow.Top + System.Windows.Application.Current.MainWindow.ActualHeight - 680;
+            lwm.Topmost = true;
+            lwm.ShowDialog();
+            updateNavigator();
+
+
+        }
+
         public void showShadowBox(string message)
         {
             control.Cursor = Cursors.Wait;
@@ -418,6 +440,9 @@ namespace ssi
             updateSignalTrack(SignalTrackStatic.Selected);
             updateMediaBox(MediaBoxStatic.Selected);
             updateAnnoInfo(AnnoTierStatic.Selected);
+
+           
+
         }
 
         public bool clearWorkspace()
@@ -431,7 +456,8 @@ namespace ssi
                 if (track.AnnoList.HasChanged) anytrackchanged = true;
             }
 
-            if (annoTiers.Count > 0 && anytrackchanged)
+           
+            if (annoTiers.Count > 0 && anytrackchanged && !ENABLE_VIEWONLY)
             {
                 MessageBoxResult mbx = MessageBox.Show("There are unsaved changes, save all annotations?", "Question", MessageBoxButton.YesNoCancel);
                 if (mbx == MessageBoxResult.Cancel)
@@ -451,9 +477,7 @@ namespace ssi
                 }
             }
 
-
-           
-
+       
 
             while (mediaBoxes.Count > 0)
             {
@@ -470,6 +494,7 @@ namespace ssi
                 removeAnnoTier(annoTiers[0]);
             }
 
+
            
             control.annoLiveModeCheckBox.IsChecked = false;
 
@@ -485,7 +510,10 @@ namespace ssi
             {
                 DatabaseHandler.ChangeSession(null);
             }
-
+            if (ENABLE_VIEWONLY)
+            {
+                viewonlyMode(false);
+            }
             updateControl();
             control.timeLineControl.rangeSlider.Update();
             control.timeLineControl.rangeSlider.slider.RangeStartSelected = 0;

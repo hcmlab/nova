@@ -103,6 +103,8 @@ namespace ssi
             var filter = builder.Eq("_id", id);
             var update = Builders<BsonDocument>.Update.Set("isFinished", state);
             annos.UpdateOne(filter, update);
+
+
         }
 
         private void ChangeLockedState(ObjectId id, bool state)

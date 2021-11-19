@@ -471,7 +471,8 @@ namespace ssi
                         {                            
                             if (e.KeyboardDevice.IsKeyDown(Key.S))
                             {
-                                saveSelectedAnno();
+                                if (!ENABLE_VIEWONLY) saveSelectedAnno();
+                                else MessageBox.Show("You can not save while Annotation is locked! Unlock annotation first!");
                             }
                             else  if (e.KeyboardDevice.IsKeyDown(Key.N))
                                 {

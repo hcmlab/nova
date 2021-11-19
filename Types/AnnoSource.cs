@@ -78,6 +78,10 @@ namespace ssi
                 DataOID = ZERO;
                 DataBackupOID = ZERO;
             }
+            public ObjectId BountyID { get; set; }
+            public bool HasBounty { get; set; }
+            public bool BountyIsPaid { get; set; }
+
         }
 
         public FileSource File { get; set; }

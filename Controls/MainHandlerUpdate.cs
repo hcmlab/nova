@@ -236,14 +236,17 @@ namespace ssi
 
         private void aboutMenu_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human-Centered Artificial Intelligence 2021\nLead Developer: Tobias Baur, Johannes Wagner, Alexander Heimerl & Dominik Schiller\nnova@hcm-lab.de");
+            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human-Centered Artificial Intelligence 2021\nLead Developer: Tobias Baur, Johannes Wagner, Alexander Heimerl & Dominik Schiller\nnova@hcai.eu");
          
         }
 
         private void support_Click(object sender, RoutedEventArgs e)
         {
-            Browser web = new Browser(MainHandler.Decode(Defaults.URLS.TippingURL), this);
-            web.Show();
+            LightningTipps tips = new LightningTipps (this);
+            tips.ShowDialog();
+            updateNavigator();
+            //Browser web = new Browser(MainHandler.Decode(Defaults.Lighting.TippingURL), this);
+            //web.Show();
         }
 
 

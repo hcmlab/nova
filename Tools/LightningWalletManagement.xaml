@@ -1,0 +1,90 @@
+﻿<Window x:Class="ssi.LightningWalletMangement"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        mc:Ignorable="d"
+        WindowStyle="ToolWindow"
+        Title="Lightning Wallet" Height="660" Width="270">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <StackPanel Name="LightningCreate" Visibility="Collapsed" Grid.Row="0">
+
+
+            <Label Content="Lightning Network support is here!"/>
+            <Separator Height="20" Visibility="Hidden"></Separator>
+
+            <TextBlock HorizontalAlignment="Left" Width="242" Margin="10,0,0,0"><Run Text="NOVA now features fast and easy transactions"/>
+                <LineBreak/><Run Text="on the Bitcoin Lightning Layer."/>
+                <LineBreak/><Run Text="Deposit and Withdraw Satoshis (or Sats,"/>
+                <LineBreak/><Run Text="small units of a Bitcoin) from and to any"/>
+                <LineBreak/><Run Text="Lightning Wallet (e.g. Bluewallet, Zap, Zeus)."/>
+                <LineBreak/><Run Text=""/>
+                <LineBreak/><Run Text="Earn and spend Satoshis within NOVA soon."/>
+            </TextBlock>
+
+
+            <Separator Height="30" Visibility="Hidden"></Separator>
+            <Image x:Name="LN" Source="/Resources/lightning.png" Height="72" />
+            <Separator Height="30" Visibility="Hidden"></Separator>
+            <Button x:Name="createButton"  Content="Generate Wallet" Click="createButton_Click" IsEnabled="True" />
+            <Separator Height="30" Visibility="Hidden"></Separator>
+            <TextBlock HorizontalAlignment="Left" Width="242" Margin="10,0,0,0"><Run Text="This feature is still in beta. Use at own risk."/>
+              
+                
+            </TextBlock>
+
+
+        </StackPanel>
+
+        <StackPanel Name="Lightning" Visibility="Visible" Grid.Row="0">
+            <Button x:Name="help" Foreground="Black" Background="White" Content="?" Click="help_Click" IsEnabled="True" Height="16" Width="16" Margin="220,0,18,0" >
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="5"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Label x:Name="balance" Height="25" Content="0 Sats"/>
+            <Separator Height="10" Visibility="Hidden"/>
+            <Label Content="Deposit Funds"/>
+            <TextBox x:Name="DepositSats" Text="100"/>
+            <Label Content="Sats"/>
+            <Button x:Name="GenerateInvoice"  Content="Generate Invoice" Click="GenerateInvoice_Click" IsEnabled="True" />
+            <Image x:Name="QR" Width="256"/>
+            <TextBox x:Name="DepositAdress" Text="Invoice will appear here, copy to your wallet"/>
+            <Label x:Name="clipboard" Content=""/>
+            <Separator Height="10" Visibility="Hidden"/>
+
+
+            <Label Content="Withdraw Funds"/>
+
+            <TextBox x:Name="WithdrawUrl" TextChanged="WithdrawUrl_TextChanged" GotFocus="WithdrawUrl_GotFocus" Text="Enter Invoice / LN address here" />
+        <StackPanel Name="withdrawsatspanel" Visibility="Collapsed">
+           <Label Content="Withdraw Sats:"/>
+           <TextBox x:Name="WithdrawAmount" Text="100"/>
+        </StackPanel>
+        <Label x:Name="satsWithdrawLabel" Foreground="Green" Content="0 Sats"/>
+            <Button x:Name="Withdraw"  Content="Withdraw" Grid.Column="0" Click="Withdraw_Click" IsEnabled="True" />
+            <Label x:Name="statuswithdraw" Foreground="Green"/>
+            <Separator Height="10" Visibility="Hidden"/>
+
+
+        </StackPanel>
+        <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="statusBar" Margin="0">
+            <!--<StatusBarItem Name="balance">0 Sats</StatusBarItem>-->
+            <StatusBarItem Name="walletid" MouseDoubleClick="walletid_MouseDoubleClick"></StatusBarItem>
+        </StatusBar>
+
+
+
+    </Grid>
+</Window>

@@ -316,57 +316,6 @@ namespace ssi
             LoadingLabel.Visibility = Visibility.Collapsed;          
         }
 
-        //not used anymore
-        public void addAnnoToList(BsonDocument annotation, DatabaseSession session, bool onlyMe, bool onlyUnfinished)
-        {
-            ObjectId id = annotation["_id"].AsObjectId;
-
-            string roleName = "";
-            DatabaseHandler.GetObjectName(ref roleName, DatabaseDefinitionCollections.Roles, annotation["role_id"].AsObjectId);
-            string schemeName = "";
-            DatabaseHandler.GetObjectName(ref schemeName, DatabaseDefinitionCollections.Schemes, annotation["scheme_id"].AsObjectId);
-            string annotatorName = "";
-            DatabaseHandler.GetObjectName(ref annotatorName, DatabaseDefinitionCollections.Annotators, annotation["annotator_id"].AsObjectId);
-            string annotatorFullName = DatabaseHandler.GetUserInfo(annotatorName).Fullname;
-
-            //DatabaseHandler.GetObjectField(ref annotatorFullName, DatabaseDefinitionCollections.Annotators, annotation["annotator_id"].AsObjectId, "fullname");
-
-            bool isFinished = false;
-            try
-            {
-                isFinished = annotation["isFinished"].AsBoolean;
-               
-            }
-            catch  { }
-
-            bool islocked = false;
-            try
-            {
-                islocked = annotation["isLocked"].AsBoolean;
-
-            }
-            catch  { }
-
-            DateTime date = DateTime.Today;
-            try
-            {
-                date = annotation["date"].ToUniversalTime();                
-            }
-            catch  { }
-
-            bool isOwner = Properties.Settings.Default.MongoDBUser == annotatorName || DatabaseHandler.CheckAuthentication() > DatabaseAuthentication.DBADMIN;
-
-
-            if (!onlyMe && !onlyUnfinished ||
-                onlyMe && !onlyUnfinished && Properties.Settings.Default.MongoDBUser == annotatorName ||
-                !onlyMe && onlyUnfinished && !isFinished ||
-                onlyMe && onlyUnfinished && !isFinished && Properties.Settings.Default.MongoDBUser == annotatorName)
-            {
-
-                annotations.Add(new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = session.Name, IsFinished = isFinished, IsLocked = islocked, Date = date, IsOwner = isOwner });
-            }
-        }
-        
 
         private ObjectId GetIdFromName(string collection, string name)
         {

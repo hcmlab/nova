@@ -20,17 +20,21 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
-
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ssi
 {
     public partial class MainHandler
     {
-
-
+        public static Lightning.LightningWallet myWallet = new Lightning.LightningWallet();
+        public void paymentReceived(uint amount)
+        {
+            updateNavigator();           
+        }
         #region DATABASELOGIC
 
-        private void databaseConnect()
+        private async void databaseConnect()
         {
             Action EmptyDelegate = delegate () { };
             control.ShadowBoxText.Text = "Connecting to Database...";
@@ -40,13 +44,16 @@ namespace ssi
 
             bool isConnected = DatabaseHandler.Connect();
 
+            
+
             if (isConnected)
             {
                 if (!DatabaseHandler.ChangeDatabase(Properties.Settings.Default.DatabaseName))
                 {
                     Properties.Settings.Default.DatabaseName = null;
                     Properties.Settings.Default.Save();
-                }                
+                }
+
             }
             else
             {
@@ -59,16 +66,99 @@ namespace ssi
            
             control.ShadowBox.Visibility = Visibility.Collapsed;
             control.ShadowBoxText.Text = "Loading Data...";
+
+            if (isConnected && ENABLE_LIGHTNING)
+            {
+
+                    Lightning lightning = new Lightning();
+                    try
+                    {
+                        DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                        int balance = await lightning.GetWalletBalance(user.ln_admin_key);
+                        //if error we don't have a wallet, returns -1.
+                        if (balance == -1)
+                            myWallet = null;
+                        else
+                        {
+                            myWallet.admin_key = user.ln_admin_key;
+                            myWallet.invoice_key = user.ln_invoice_key;
+                            myWallet.wallet_id = user.ln_wallet_id;
+                            myWallet.user_id = user.ln_user_id;
+                            myWallet.balance = balance;
+                        }
+                    updateNavigator();
+                    //InitCheckLightningBalanceTimer();
+                }
+                    catch (Exception e)
+                    {
+
+                    }
+            }
+
+            
+        
         }
+
+        public void viewonlyMode(bool on)
+        {
+
+            control.filemenu.IsEnabled = !on;
+            control.databaseCMLMenu.IsEnabled = !on;
+            control.XAIMenu.IsEnabled = !on;
+            control.annotationmenu.IsEnabled = !on;
+            control.databaseCMLMenu.IsEnabled = !on;
+            control.databaseLoadSessionMenu.IsEnabled = !on;
+            control.navigator.newAnnoButton.IsEnabled = !on;
+            ENABLE_VIEWONLY = on;
+
+        }
+
+       
+     
+        private void DatabaseHuntBounty_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseBountiesMainWindow dialog = new DatabaseBountiesMainWindow();
+            dialog.ShowDialog();
+
+            if (dialog.DialogResult == true)
+            {
+                DatabaseBounty bounty = dialog.getMyBounty();
+                loadFilesForBounty(bounty, Properties.Settings.Default.MongoDBUser);
+
+            }
+        }
+
+
+        private void DatabaseCreateBounty_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseBountiesCreateWindow dialog = new DatabaseBountiesCreateWindow();
+            dialog.ShowDialog();
+
+            if (dialog.DialogResult == true)
+            {
+                DatabaseBounty bounty = dialog.getBounty();
+                string annotator = dialog.getAnnotator();
+                loadFilesForBounty(bounty, annotator);
+                viewonlyMode(true);
+            }
+            else
+            {
+                clearWorkspace();
+                viewonlyMode(false);
+            }
+        }
+    
 
         private void DatabaseConnectMenu_Click(object sender, RoutedEventArgs e)
         {
             databaseConnect();
         }
 
-        private void databaseUpdate()
+        private async void databaseUpdate()
         {
             DatabaseHandler.UpdateDatabaseLocalLists();
+            //Lightning lightning = new Lightning();
+            //MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
         }
 
         private void DatabaseUpdateMenu_Click(object sender, RoutedEventArgs e)
@@ -90,30 +180,47 @@ namespace ssi
 
             if (dialog.DialogResult == true)
             {
-                DatabaseUser user = new DatabaseUser()
-                {
-                    Name = dialog.GetName(),
-                    Fullname = dialog.GetFullName(),
-                    Password = dialog.GetPassword(),
-                    Email = dialog.Getemail(),
-                    Expertise = dialog.GetExpertise()
-                };
+                DatabaseUser user = DatabaseHandler.GetUserInfo(dialog.GetName());
+                user.Name = dialog.GetName();
+                user.Fullname = dialog.GetFullName();
+                user.Password = dialog.GetPassword();
+                user.Email = dialog.Getemail();
+                user.Expertise = dialog.GetExpertise();
+                //DatabaseUser user = new DatabaseUser()
+                //{
+                //    Name = dialog.GetName(),
+                //    Fullname = dialog.GetFullName(),
+                //    Password = dialog.GetPassword(),
+                //    Email = dialog.Getemail(),
+                //    Expertise = dialog.GetExpertise()
+                //};
 
                 DatabaseHandler.ChangeUserCustomData(user);
-                  
                 if (user.Password != "" && user.Password != null)
                 {
                     if (DatabaseHandler.ChangeUserPassword(user))
                     {
-                        MessageBox.Show("Password Change successful!");
                         Properties.Settings.Default.MongoDBPass = MainHandler.Encode(user.Password);
+                        MessageBox.Show("Password Change successful!");
+                        if(MainHandler.myWallet != null)
+                        {
+                            user.ln_admin_key = MainHandler.Cipher.EncryptString(MainHandler.myWallet.admin_key, user.Password);
+                            DatabaseHandler.ChangeUserCustomData(user);
+
+                        }
+                       
                         databaseConnect();
                     }
-                }
 
+                }
                
+
+
+
+
+
             }
-           
+
         }
         
 
@@ -405,21 +512,32 @@ namespace ssi
             control.ShadowBox.Visibility = Visibility.Collapsed;
         }
 
-        private void addNewAnnotationDatabase()
+        private void addNewAnnotationDatabase(DatabaseBounty bounty = null)
         {
             if (Time.TotalDuration > 0)
-            {              
-                string annoScheme = DatabaseHandler.SelectScheme();
-                if (annoScheme == null)
+            {
+                string annoScheme = "";
+                if (bounty == null)
                 {
-                    return;
+                    annoScheme = DatabaseHandler.SelectScheme();
+                    if (annoScheme == null)
+                    {
+                        return;
+                    }
                 }
+                else annoScheme = bounty.Scheme;
 
-                string role = DatabaseHandler.SelectRole();
-                if (role == null)
+                string role = "";
+                if (bounty == null)
                 {
-                    return;
+                    role = DatabaseHandler.SelectRole();
+                    if (role == null)
+                    {
+                        return;
+                    }
                 }
+                else role = bounty.Role;
+                
 
                 AnnoScheme scheme = DatabaseHandler.GetAnnotationScheme(annoScheme);
                 if (scheme == null)
@@ -431,9 +549,6 @@ namespace ssi
 
                 ObjectId annotatid = DatabaseHandler.GetObjectID(DatabaseDefinitionCollections.Annotators, "name", Properties.Settings.Default.MongoDBUser);
                 string annotator = Properties.Settings.Default.MongoDBUser;
-               
-
-               // DatabaseHandler.FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatid);
 
                 AnnoList annoList;
                 if (DatabaseHandler.AnnotationExists(annotator, DatabaseHandler.SessionName, role, scheme.Name))
@@ -453,12 +568,20 @@ namespace ssi
                     annoList = new AnnoList();
                     annoList.Meta.Role = role;
                     annoList.Meta.Annotator = annotator;
-                    string annotatorFullName = DatabaseHandler.GetUserInfo(annotator).Fullname;
+                    DatabaseUser user = DatabaseHandler.GetUserInfo(annotator);
+                    string annotatorFullName = user.Fullname;
                     annoList.Meta.AnnotatorFullName = annotatorFullName;
                     annoList.Scheme = scheme;
                     annoList.Source.StoreToDatabase = true;
                     annoList.Source.Database.Session = DatabaseHandler.SessionName;
                     annoList.HasChanged = true;
+                    if(bounty != null)
+                    {
+                        annoList.Source.Database.HasBounty = true;
+                        annoList.Source.Database.BountyID = bounty.OID;
+                        annoList.Source.Database.BountyIsPaid = false;
+                    }
+                   
                     
                 }
 
@@ -512,6 +635,99 @@ namespace ssi
 
         #endregion EVENTHANDLERS
 
+        public static class Cipher
+        {
+            private const int Keysize = 256;
+
+            // This constant determines the number of iterations for the password bytes generation function.
+            private const int DerivationIterations = 1000;
+
+            public static string EncryptString(string plainText, string passPhrase)
+            {
+                // Salt and IV is randomly generated each time, but is preprended to encrypted cipher text
+                // so that the same Salt and IV values can be used when decrypting.  
+                var saltStringBytes = Generate256BitsOfRandomEntropy();
+                var ivStringBytes = Generate256BitsOfRandomEntropy();
+                var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+                using (var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations))
+                {
+                    var keyBytes = password.GetBytes(Keysize / 8);
+                    using (var symmetricKey = new RijndaelManaged())
+                    {
+                        symmetricKey.BlockSize = 256;
+                        symmetricKey.Mode = CipherMode.CBC;
+                        symmetricKey.Padding = PaddingMode.PKCS7;
+                        using (var encryptor = symmetricKey.CreateEncryptor(keyBytes, ivStringBytes))
+                        {
+                            using (var memoryStream = new MemoryStream())
+                            {
+                                using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                                {
+                                    cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
+                                    cryptoStream.FlushFinalBlock();
+                                    // Create the final bytes as a concatenation of the random salt bytes, the random iv bytes and the cipher bytes.
+                                    var cipherTextBytes = saltStringBytes;
+                                    cipherTextBytes = cipherTextBytes.Concat(ivStringBytes).ToArray();
+                                    cipherTextBytes = cipherTextBytes.Concat(memoryStream.ToArray()).ToArray();
+                                    memoryStream.Close();
+                                    cryptoStream.Close();
+                                    return Convert.ToBase64String(cipherTextBytes);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            public static string DecryptString(string cipherText, string passPhrase)
+            {
+                // Get the complete stream of bytes that represent:
+                // [32 bytes of Salt] + [32 bytes of IV] + [n bytes of CipherText]
+                var cipherTextBytesWithSaltAndIv = Convert.FromBase64String(cipherText);
+                // Get the saltbytes by extracting the first 32 bytes from the supplied cipherText bytes.
+                var saltStringBytes = cipherTextBytesWithSaltAndIv.Take(Keysize / 8).ToArray();
+                // Get the IV bytes by extracting the next 32 bytes from the supplied cipherText bytes.
+                var ivStringBytes = cipherTextBytesWithSaltAndIv.Skip(Keysize / 8).Take(Keysize / 8).ToArray();
+                // Get the actual cipher text bytes by removing the first 64 bytes from the cipherText string.
+                var cipherTextBytes = cipherTextBytesWithSaltAndIv.Skip((Keysize / 8) * 2).Take(cipherTextBytesWithSaltAndIv.Length - ((Keysize / 8) * 2)).ToArray();
+
+                using (var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations))
+                {
+                    var keyBytes = password.GetBytes(Keysize / 8);
+                    using (var symmetricKey = new RijndaelManaged())
+                    {
+                        symmetricKey.BlockSize = 256;
+                        symmetricKey.Mode = CipherMode.CBC;
+                        symmetricKey.Padding = PaddingMode.PKCS7;
+                        using (var decryptor = symmetricKey.CreateDecryptor(keyBytes, ivStringBytes))
+                        {
+                            using (var memoryStream = new MemoryStream(cipherTextBytes))
+                            {
+                                using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                                {
+                                    var plainTextBytes = new byte[cipherTextBytes.Length];
+                                    var decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
+                                    memoryStream.Close();
+                                    cryptoStream.Close();
+                                    return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            private static byte[] Generate256BitsOfRandomEntropy()
+            {
+                var randomBytes = new byte[32]; // 32 Bytes will give us 256 bits.
+                using (var rngCsp = new RNGCryptoServiceProvider())
+                {
+                    // Fill the array with cryptographically secure random bytes.
+                    rngCsp.GetBytes(randomBytes);
+                }
+                return randomBytes;
+            }
+        }
 
 
         public static string Encode(string plainText)

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -21,6 +22,7 @@ namespace ssi
         private static IMongoDatabase database = null;
         private static string databaseName = null;
         private static string sessionName = null;
+        private static string serverName = null;
 
         private static List<DatabaseStream> streams = new List<DatabaseStream>();
         public static List<DatabaseStream> Streams { get { return streams; } }
@@ -39,6 +41,10 @@ namespace ssi
 
         private static List<DatabaseUser> users = new List<DatabaseUser>();
         private static bool throwOnInvalidBytes;
+
+        private static List<DatabaseBounty> bounties = new List<DatabaseBounty>();
+        public static List<DatabaseBounty> Bounties { get { return bounties; } }
+
 
         public static List<DatabaseUser> Users { get { return users; } }
 
@@ -64,7 +70,7 @@ namespace ssi
             return Connect(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.MongoDBPass, Properties.Settings.Default.DatabaseAddress);
         }
 
-        public static bool Connect(string user, string password, string address)
+        public static  bool Connect(string user, string password, string address)
         {
             client = null;
             databaseName = null;
@@ -92,6 +98,7 @@ namespace ssi
                 }
             }
 
+ 
             return true;
         }
 
@@ -182,6 +189,7 @@ namespace ssi
                 Properties.Settings.Default.DatabaseName = name;
                 Properties.Settings.Default.LastSessionId = null;
                 Properties.Settings.Default.Save();
+                serverName = Properties.Settings.Default.DataServer;
                 databaseName = name;
                 sessionName = null;
                 database = Client.GetDatabase(databaseName);
@@ -321,11 +329,41 @@ namespace ssi
             return false;
         }
 
+        public static bool GetObjectID(ref ObjectId id, IMongoDatabase db, string collection, string name)
+        {
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("name", name);
+            var result = db.GetCollection<BsonDocument>(collection).Find(filter).ToList();
+
+            if (result.Count > 0)
+            {
+                id = result[0].GetValue(0).AsObjectId;
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool GetObjectName(ref string name, string collection, ObjectId id)
         {
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("_id", id);
             var result = database.GetCollection<BsonDocument>(collection).Find(filter).ToList();
+
+            if (result.Count > 0)
+            {
+                name = result[0]["name"].ToString();
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool GetObjectName(ref string name, IMongoDatabase db,  string collection, ObjectId id)
+        {
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("_id", id);
+            var result = db.GetCollection<BsonDocument>(collection).Find(filter).ToList();
 
             if (result.Count > 0)
             {
@@ -758,6 +796,7 @@ namespace ssi
             database.CreateCollection(DatabaseDefinitionCollections.Sessions);
             database.CreateCollection(DatabaseDefinitionCollections.Streams);
             database.CreateCollection(DatabaseDefinitionCollections.Subjects);
+            database.CreateCollection(DatabaseDefinitionCollections.Bounties);
 
             AddOrUpdateDBMeta(meta);
 
@@ -841,6 +880,10 @@ namespace ssi
                     } } };
             }
 
+            user.ln_admin_key = "";
+            user.ln_invoice_key = "";
+            user.ln_user_id = "";
+            user.ln_wallet_id = "";
             try
             {
                 adminDatabase.RunCommand<BsonDocument>(createUser);
@@ -917,6 +960,8 @@ namespace ssi
                 return false;
             }
 
+           
+
             return true;
         }
 
@@ -932,20 +977,73 @@ namespace ssi
             var adminDB = client.GetDatabase("admin");
             var cmd = new BsonDocument("usersInfo", dbuser.Name);
             var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
+            var Customdata = (BsonDocument)queryResult[0][0]["customData"];
             try
             {
-                var Customdata = (BsonDocument)queryResult[0][0]["customData"];
-
                 dbuser.Fullname = Customdata["fullname"].ToString();
-                dbuser.Email = Customdata["email"].ToString();
-                dbuser.Expertise = Customdata["expertise"].AsInt32;
             }
             catch
             {
                 dbuser.Fullname = dbuser.Name;
+            };
+            try
+            {
+                dbuser.Email = Customdata["email"].ToString();
+            }
+            catch
+            {
                 dbuser.Email = "";
+            };
+            try
+            {
+                dbuser.Expertise = Customdata["expertise"].AsInt32;
+            }
+            catch
+            {
                 dbuser.Expertise = 0;
             };
+
+            try
+            {
+                dbuser.ln_invoice_key = Customdata["ln_invoice_key"].ToString();
+            }
+            catch
+            {
+                dbuser.ln_invoice_key = "";
+            };
+
+            try
+            {
+                dbuser.ln_admin_key = MainHandler.Cipher.DecryptString(Customdata["ln_admin_key"].ToString(), MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+
+            }
+            catch
+            {
+                dbuser.ln_admin_key = "";
+            };
+
+            try
+            {
+                dbuser.ln_wallet_id = Customdata["ln_wallet_id"].ToString();
+
+            }
+            catch
+            {
+                dbuser.ln_wallet_id = "";
+            };
+
+            try
+            {
+                dbuser.ln_user_id = Customdata["ln_user_id"].ToString();
+
+            }
+            catch
+            {
+                dbuser.ln_user_id = "";
+            };
+
+
+
 
             return dbuser;
         }
@@ -958,7 +1056,7 @@ namespace ssi
             }
 
             var database = Client.GetDatabase("admin");
-            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise } } } };
+            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id } } } };
             try
             {
                 database.RunCommand<BsonDocument>(updatecustomdata);
@@ -1830,6 +1928,28 @@ namespace ssi
             return scheme;
         }
 
+
+        public static bool DeleteBounty(ObjectId id)
+        {
+            if (!IsConnected && !IsDatabase)
+            {
+                return false;
+            }
+
+            try
+            {
+                var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Bounties);
+                var builder = Builders<BsonDocument>.Filter;
+                var filter = builder.Eq("_id", id);
+                collection.DeleteOne(filter);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+           
+        }
         public static bool DeleteScheme(string name)
         {
             if (!IsConnected && !IsDatabase)
@@ -1998,6 +2118,26 @@ namespace ssi
 
         #region Annotation
 
+        private static BsonArray BountyListToBsonArray(List<DatabaseUser> annotators, int contractvalue)
+        {
+            BsonArray data = new BsonArray();
+            for (int i = 0; i < annotators.Count; i++)
+            {
+                data.Add(new BsonDocument { { "name", annotators[i].Name }, { "status", "default" }, { "value", contractvalue} });
+            }
+            return data;
+        }
+
+        //private static List<DatabaseUser> BsonArrayToBountyList(BsonArray annotators)
+        //{
+        //    List<DatabaseUser> users = new List<DatabaseUser>();
+        //    for (int i = 0; i < annotators.Count; i++)
+        //    {
+        //        data.Add(new BsonDocument { { "name", annotators[i].Name }, { "value", contractvalue } });
+        //    }
+        //    return data;
+        //}
+
         private static BsonArray AnnoListToBsonArray(AnnoList annoList, BsonDocument schemeDoc)
         {
             BsonArray data = new BsonArray();
@@ -2119,6 +2259,80 @@ namespace ssi
             }
 
             return data;
+        }
+
+        public static bool SaveBounty(DatabaseBounty bounty)
+        {
+            ChangeDatabase(bounty.Database);
+            if (!IsConnected && !IsDatabase && !IsSession)
+            {
+                return false;
+            }
+
+            if (CheckAuthentication() == 0)
+            {
+                return false;
+            }
+
+            string dbuser = Properties.Settings.Default.MongoDBUser;
+
+            // resolve references
+
+            var builder = Builders<BsonDocument>.Filter;
+            var bounties = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Bounties);
+           
+            // search if bounty exists
+            ObjectId roleID = GetObjectID(DatabaseDefinitionCollections.Roles, "name", bounty.Role);
+            ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, "name", bounty.Scheme);
+            ObjectId contractorID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", bounty.Contractor.Name);
+            ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, "name", bounty.Session);
+
+
+            var filter_bounty = builder.Eq("scheme_id", schemeID)
+                    & builder.Eq("role_id", roleID)
+                    & builder.Eq("contractor_id", contractorID)
+                    & builder.Eq("session_id", sessionID);
+
+            var bountyDoc = bounties.Find(filter_bounty).ToList();
+
+                BsonArray candidates = BountyListToBsonArray(bounty.annotatorsJobCandidates, bounty.valueInSats);
+                BsonArray jobdone = BountyListToBsonArray(bounty.annotatorsJobDone, bounty.valueInSats);
+                BsonArray streamArray = new BsonArray();
+                if (bounty.streams != null)
+                {
+                    foreach (StreamItem dmi in bounty.streams)
+                    {
+                        streamArray.Add(new BsonString(dmi.Name));
+                    }
+                }
+               
+                BsonDocument newBountyDoc = new BsonDocument();
+
+                // insert/update annotation
+                newBountyDoc.Add(new BsonElement("contractor_id", contractorID));
+                newBountyDoc.Add(new BsonElement("role_id", roleID));
+                newBountyDoc.Add(new BsonElement("scheme_id", schemeID));
+                newBountyDoc.Add(new BsonElement("session_id", sessionID));
+                newBountyDoc.Add(new BsonElement("valueInSats", bounty.valueInSats));
+                newBountyDoc.Add(new BsonElement("type", bounty.Type));
+                newBountyDoc.Add(new BsonElement("numOfAnnotations", bounty.numOfAnnotations));
+                newBountyDoc.Add(new BsonElement("numOfAnnotationsNeededCurrent", bounty.numOfAnnotationsNeededCurrent));
+                newBountyDoc.Add("annotatorsJobCandidates", candidates);
+                newBountyDoc.Add("annotatorsJobDone", jobdone);
+                newBountyDoc.Add("streams", streamArray);
+
+
+            UpdateOptions newAnnotationDocUpdate = new UpdateOptions();
+                newAnnotationDocUpdate.IsUpsert = true;
+                bounties.ReplaceOne(filter_bounty, newBountyDoc, newAnnotationDocUpdate);
+
+                if (bountyDoc.Count > 0)
+                {
+                    bounty.OID = bountyDoc[0]["_id"].AsObjectId;
+                }
+                else bounty.OID = ObjectId.GenerateNewId();
+
+            return true;
         }
 
         public static bool SaveAnnoList(AnnoList annoList, List<string> linkedStreams = null, bool force = false, bool markAsFinished = false, bool keepOriginalAnnotator = false)
@@ -2267,14 +2481,44 @@ namespace ssi
                 }
 
                 bool isfinished = annoList.Meta.isFinished;
-                if (markAsFinished) isfinished = true;
+                if (markAsFinished)
+                { 
+                    isfinished = true;
 
+                    if (annoList.Source.Database.HasBounty)
+                    {
+                        DatabaseBounty bounty = GetBountybyID(annoList.Source.Database.BountyID);
+                        //Simple Case, should probably not be used.
+                        //if(bounty.Type == "Trust")
+                        {
+                            DatabaseUser user = GetUserInfo(dbuser);
+                            int index = bounty.annotatorsJobCandidates.FindIndex(s => s.Name == user.Name);
+                            if (index > -1)
+                            {
+                                bounty.annotatorsJobCandidates.RemoveAt(index);
+                                bounty.annotatorsJobDone.Add(user);
+                                bounty.numOfAnnotationsNeededCurrent -= 1;
+                                MessageBox.Show("Bounty submitted, please wait for Contractor to approve.");
+                                SaveBounty(bounty);
+                            }
+                           
+                        }
+                       
+
+                    }
+                }
                 newAnnotationDoc.Add(new BsonElement("annotator_id", annotatorID));
                 newAnnotationDoc.Add(new BsonElement("role_id", roleID));
                 newAnnotationDoc.Add(new BsonElement("scheme_id", schemeID));
                 newAnnotationDoc.Add(new BsonElement("session_id", sessionID));
                 newAnnotationDoc.Add(new BsonElement("isFinished", isfinished));
                 newAnnotationDoc.Add(new BsonElement("isLocked", isLocked));
+                if (annoList.Source.Database.HasBounty)
+                {
+                    newAnnotationDoc.Add(new BsonElement("bounty_id", annoList.Source.Database.BountyID));
+                    newAnnotationDoc.Add(new BsonElement("bountyIsPaid", annoList.Source.Database.BountyIsPaid));
+                }
+               
                 newAnnotationDoc.Add(new BsonElement("date", new BsonDateTime(DateTime.Now)));
                 BsonArray streamArray = new BsonArray();
                 if (linkedStreams != null)
@@ -2306,6 +2550,40 @@ namespace ssi
         }
 
         public static ObjectId GetAnnotationId(string role, string scheme, string annotator, string session)
+        {
+            ObjectId id = new ObjectId();
+
+            var builder = Builders<BsonDocument>.Filter;
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+
+            ObjectId roleID = GetObjectID(DatabaseDefinitionCollections.Roles, "name", role);
+            string roleName = FetchDBRef(DatabaseDefinitionCollections.Roles, "name", roleID);
+
+            ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, "name", scheme);
+            string schemeName = FetchDBRef(DatabaseDefinitionCollections.Schemes, "name", schemeID);
+
+            ObjectId annotatorID = GetObjectID(DatabaseDefinitionCollections.Annotators, "name", annotator);
+            string annotatorName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "name", annotatorID);
+            DatabaseHandler.GetUserInfo(annotator);
+            //string annotatorFullName = FetchDBRef(DatabaseDefinitionCollections.Annotators, "fullname", annotatorID);
+            string annotatorFullName = DatabaseHandler.GetUserInfo(annotator).Fullname;
+
+            ObjectId sessionID = GetObjectID(DatabaseDefinitionCollections.Sessions, "name", session);
+            string sessionName = FetchDBRef(DatabaseDefinitionCollections.Sessions, "name", sessionID);
+
+            var filterAnnotation = builder.Eq("role_id", roleID) & builder.Eq("scheme_id", schemeID) & builder.Eq("annotator_id", annotatorID) & builder.Eq("session_id", sessionID);
+            var annotationDocs = annotations.Find(filterAnnotation).ToList();
+
+            if (annotationDocs.Count > 0)
+            {
+                id = annotationDocs[0]["_id"].AsObjectId;
+            }
+
+            return id;
+        }
+
+
+        public static ObjectId GetAnnotationId(string role, string scheme, string annotator, string session, string db)
         {
             ObjectId id = new ObjectId();
 
@@ -2383,10 +2661,343 @@ namespace ssi
             return true;
         }
 
+        public static DatabaseBounty GetBountybyID(ObjectId id)
+        {
+            if (!IsConnected)
+            {
+                return null;
+            }
+
+            var builder = Builders<BsonDocument>.Filter;
+
+            var bountiesDB = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Bounties);
+            //maybe need some more logic here
+            var filter = builder.Eq("_id", id);
+            BsonDocument doc = null;
+            var doclist = bountiesDB.Find(filter).ToList();
+            if (doclist.Count == 0) return null;
+            else doc = doclist[0];
+
+            DatabaseBounty bounty = new DatabaseBounty();
+
+            bounty.OID = id;
+
+            ObjectId contractorID = doc["contractor_id"].AsObjectId;
+            string contractorname = "";
+            GetObjectName(ref contractorname, database, DatabaseDefinitionCollections.Annotators, contractorID);
+            bounty.Contractor = GetUserInfo(contractorname);
+
+            ObjectId roleID = doc["role_id"].AsObjectId;
+            string role = "";
+            GetObjectName(ref role, database, DatabaseDefinitionCollections.Roles, roleID);
+            bounty.Role = role;
+
+            ObjectId sessionID = doc["session_id"].AsObjectId;
+            string session = "";
+            GetObjectName(ref session, database, DatabaseDefinitionCollections.Sessions, sessionID);
+            bounty.Session = session;
+
+            ObjectId schemeID = doc["scheme_id"].AsObjectId;
+            string scheme = "";
+            GetObjectName(ref scheme, database, DatabaseDefinitionCollections.Schemes, schemeID);
+            bounty.Scheme = scheme;
+
+            bounty.valueInSats = doc["valueInSats"].AsInt32;
+            bounty.numOfAnnotations = doc["numOfAnnotations"].AsInt32;
+            bounty.Type = doc["type"].AsString;
+            bounty.numOfAnnotationsNeededCurrent = doc["numOfAnnotationsNeededCurrent"].AsInt32;
+            bounty.Database = database.DatabaseNamespace.DatabaseName;
+
+            bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+            foreach (BsonDocument cand in doc["annotatorsJobCandidates"].AsBsonArray)
+            {
+                DatabaseUser user = GetUserInfo(cand["name"].AsString);
+                bounty.annotatorsJobCandidates.Add(user);
+            }
+
+            bounty.annotatorsJobDone = new List<DatabaseUser>();
+            bool foundmine = false;
+            foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
+            {
+                DatabaseUser user = GetUserInfo(cand["name"].AsString);
+                bounty.annotatorsJobDone.Add(user);
+            }
+
+            bounty.streams = new List<StreamItem>();
+            foreach (BsonString stream in doc["streams"].AsBsonArray)
+            {
+                string str = stream.AsString;
+                StreamItem dbst = new StreamItem();
+                dbst.Name = str;
+                bounty.streams.Add(dbst);
+            }
+            return bounty;
+        }
+
+        public static List<DatabaseBounty> LoadAcceptedBounties(IMongoDatabase database)
+        {
+
+            List<DatabaseBounty> bounties = new List<DatabaseBounty>();
+            if (!IsConnected)
+            {
+                return null;
+            }
+
+            var builder = Builders<BsonDocument>.Filter;
+
+            var bountiesDB = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Bounties);
+            //maybe need some more logic here
+            var filter = builder.Gt("numOfAnnotationsNeededCurrent", 0);
+            var bountiesDoc = bountiesDB.Find(filter).ToList();
+            if (bountiesDoc.Count == 0) return null;
+            foreach (BsonDocument doc in bountiesDoc)
+            {
+                DatabaseBounty bounty = new DatabaseBounty();
+
+                bounty.OID = doc["_id"].AsObjectId;
+
+                ObjectId contractorID = doc["contractor_id"].AsObjectId;
+                string contractorname = "";
+                GetObjectName(ref contractorname, database, DatabaseDefinitionCollections.Annotators, contractorID);
+                bounty.Contractor = GetUserInfo(contractorname);
+
+                ObjectId roleID = doc["role_id"].AsObjectId;
+                string role = "";
+                GetObjectName(ref role, database, DatabaseDefinitionCollections.Roles, roleID);
+                bounty.Role = role;
+
+                ObjectId sessionID = doc["session_id"].AsObjectId;
+                string session = "";
+                GetObjectName(ref session, database, DatabaseDefinitionCollections.Sessions, sessionID);
+                bounty.Session = session;
+
+                ObjectId schemeID = doc["scheme_id"].AsObjectId;
+                string scheme = "";
+                GetObjectName(ref scheme, database, DatabaseDefinitionCollections.Schemes, schemeID);
+                bounty.Scheme = scheme;
+
+                bounty.valueInSats = doc["valueInSats"].AsInt32;
+                bounty.numOfAnnotations = doc["numOfAnnotations"].AsInt32;
+                bounty.Type = doc["type"].AsString;
+                bounty.numOfAnnotationsNeededCurrent = doc["numOfAnnotationsNeededCurrent"].AsInt32;
+                bounty.Database = database.DatabaseNamespace.DatabaseName;
+
+                bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+                bool foundmine = false;
+                foreach (BsonDocument cand in doc["annotatorsJobCandidates"].AsBsonArray)
+                {
+                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
+                    bounty.annotatorsJobCandidates.Add(user);
+
+                    //Don't return contract if already accepted.
+                    if (user.Name == Properties.Settings.Default.MongoDBUser)
+                    {
+                        foundmine = true;
+                    }
+                }
+
+                bounty.annotatorsJobDone = new List<DatabaseUser>();
+               
+                foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
+                {
+                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
+                    bounty.annotatorsJobDone.Add(user);
+                }
+
+                bounty.streams = new List<StreamItem>();
+                foreach (BsonString stream in doc["streams"].AsBsonArray)
+                {
+                    string str = stream.AsString;
+                    StreamItem dbst = new StreamItem();
+                    dbst.Name = str;
+                    bounty.streams.Add(dbst);
+                }
+                //todo ListofAnnotators
+                if (foundmine) bounties.Add(bounty);
+            }
+
+            return bounties;
+        }
+
+        public static List<DatabaseBounty> LoadCreatedBounties(string databaseName)
+        {
+            IMongoDatabase db = DatabaseHandler.Client.GetDatabase(databaseName);
+            List<DatabaseBounty> bounties = new List<DatabaseBounty>();
+            if (!IsConnected)
+            {
+                return null;
+            }
+
+            var builder = Builders<BsonDocument>.Filter;
+
+            var bountiesDB = db.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Bounties);
+            //maybe need some more logic here
+
+
+            ObjectId id = new ObjectId();
+            GetObjectID(ref id, db, DatabaseDefinitionCollections.Annotators, Properties.Settings.Default.MongoDBUser);
+
+        
+
+
+            var filter = builder.Eq("contractor_id", id);
+            var bountiesDoc = bountiesDB.Find(filter).ToList();
+            if (bountiesDoc.Count == 0) return null;
+            foreach (BsonDocument doc in bountiesDoc)
+            {
+                DatabaseBounty bounty = new DatabaseBounty();
+
+                bounty.OID = doc["_id"].AsObjectId;
+                bounty.Contractor = GetUserInfo(Properties.Settings.Default.MongoDBUser);
+
+                ObjectId roleID = doc["role_id"].AsObjectId;
+                string role = "";
+                GetObjectName(ref role, db, DatabaseDefinitionCollections.Roles, roleID);
+                bounty.Role = role;
+
+                ObjectId sessionID = doc["session_id"].AsObjectId;
+                string session = "";
+                GetObjectName(ref session, db, DatabaseDefinitionCollections.Sessions, sessionID);
+                bounty.Session = session;
+
+                ObjectId schemeID = doc["scheme_id"].AsObjectId;
+                string scheme = "";
+                GetObjectName(ref scheme, db, DatabaseDefinitionCollections.Schemes, schemeID);
+                bounty.Scheme = scheme;
+
+                bounty.valueInSats = doc["valueInSats"].AsInt32;
+                bounty.numOfAnnotations = doc["numOfAnnotations"].AsInt32;
+                bounty.Type = doc["type"].AsString;
+                bounty.numOfAnnotationsNeededCurrent = doc["numOfAnnotationsNeededCurrent"].AsInt32;
+                bounty.Database = databaseName;
+
+                bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+                foreach (BsonDocument cand in doc["annotatorsJobCandidates"].AsBsonArray)
+                {
+                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
+                    bounty.annotatorsJobCandidates.Add(user);
+                }
+
+                bounty.annotatorsJobDone = new List<DatabaseUser>();
+
+                foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
+                {
+                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
+                    bounty.annotatorsJobDone.Add(user);
+                }
+
+                bounty.streams = new List<StreamItem>();
+                foreach (BsonString stream in doc["streams"].AsBsonArray)
+                {
+                    string str = stream.AsString;
+                    StreamItem dbst = new StreamItem();
+                    dbst.Name = str;
+                    bounty.streams.Add(dbst);
+                }
+                //todo ListofAnnotators
+               bounties.Add(bounty);
+            }
+
+            return bounties;
+        }
+
+
+
+        public static List<DatabaseBounty> LoadActiveBounties(IMongoDatabase database)
+        {
+            List<DatabaseBounty> bounties = new List<DatabaseBounty>();
+            if (!IsConnected)
+            {
+                return null;
+            }
+
+            var builder = Builders<BsonDocument>.Filter;
+            var bountiesDB = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Bounties);
+            //maybe need some more logic here
+            var filter = builder.Gt("numOfAnnotationsNeededCurrent", 0);
+            var bountiesDoc = bountiesDB.Find(filter).ToList();
+            if (bountiesDoc.Count == 0) return null;
+            foreach(BsonDocument doc in bountiesDoc)
+            {
+                DatabaseBounty bounty = new DatabaseBounty();
+
+                bounty.OID = doc["_id"].AsObjectId;
+
+                ObjectId contractorID = doc["contractor_id"].AsObjectId;
+                string contractorname = "";
+                GetObjectName(ref contractorname, database, DatabaseDefinitionCollections.Annotators, contractorID);
+                bounty.Contractor = GetUserInfo(contractorname);
+
+                ObjectId roleID = doc["role_id"].AsObjectId;
+                string role = "";
+                GetObjectName(ref role, database, DatabaseDefinitionCollections.Roles, roleID);
+                bounty.Role = role;
+
+                ObjectId sessionID = doc["session_id"].AsObjectId;
+                string session = "";
+                GetObjectName(ref session, database, DatabaseDefinitionCollections.Sessions, sessionID);
+                bounty.Session = session;
+
+                ObjectId schemeID = doc["scheme_id"].AsObjectId;
+                string scheme = "";
+                GetObjectName(ref scheme, database, DatabaseDefinitionCollections.Schemes, schemeID);
+                bounty.Scheme = scheme;
+
+                bounty.valueInSats = doc["valueInSats"].AsInt32;
+                bounty.numOfAnnotations = doc["numOfAnnotations"].AsInt32;
+                bounty.Type = doc["type"].AsString;
+                bounty.numOfAnnotationsNeededCurrent = doc["numOfAnnotationsNeededCurrent"].AsInt32;
+                bounty.Database = database.DatabaseNamespace.DatabaseName;
+
+                bool handled = false;
+                bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+                foreach (BsonDocument cand in doc["annotatorsJobCandidates"].AsBsonArray)
+                {
+                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
+                    bounty.annotatorsJobCandidates.Add(user);
+                    //Don't return contract if already accepted.
+                    if (user.Name == Properties.Settings.Default.MongoDBUser)
+                    {
+                        handled = true;
+                    }
+                }
+
+                bounty.annotatorsJobDone = new List<DatabaseUser>();
+                foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
+                {
+                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
+                    bounty.annotatorsJobDone.Add(user);
+
+                    //Don't return contract if already finished.
+                    if (user.Name == Properties.Settings.Default.MongoDBUser)
+                    {
+                        handled = true;
+                    }
+                }
+
+               
+                bounty.streams = new List<StreamItem>();
+                foreach (BsonString stream in (doc["streams"].AsBsonArray))
+                {
+                    string str = stream.AsString;
+                    StreamItem dbst = new StreamItem();
+                    dbst.Name = str;
+                    bounty.streams.Add(dbst);
+                }
+
+                //todo ListofAnnotators
+
+                if(!handled) bounties.Add(bounty);
+            }
+
+            return bounties;
+        }
+
         public static AnnoList LoadAnnoList(string oid)
         {
             return LoadAnnoList(new ObjectId(oid));
         }
+
 
         public static AnnoList LoadAnnoList(ObjectId oid)
         {
@@ -2448,6 +3059,14 @@ namespace ssi
             annoList.Scheme = new AnnoScheme();
             annoList.Scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), scheme["type"].AsString);
             annoList.Scheme.Name = scheme["name"].ToString();
+
+            if (scheme.TryGetElement("bounty_id", out value))
+            {
+                annoList.Source.Database.HasBounty = true;
+                annoList.Source.Database.BountyID = scheme["bounty_id"].AsObjectId;
+                annoList.Source.Database.BountyIsPaid = scheme["bountyIsPaid"].AsBoolean;
+            }
+
 
             BsonArray labels = data["labels"].AsBsonArray;
             if (labels != null)
@@ -3014,6 +3633,12 @@ namespace ssi
                 ObjectId roleid = annotation["role_id"].AsObjectId;
                 ObjectId schemeid = annotation["scheme_id"].AsObjectId;
                 ObjectId annotatorid = annotation["annotator_id"].AsObjectId;
+                BsonElement value;
+                bool isPaid = true;
+                if (annotation.TryGetElement("bountyIsPaid", out value))
+                {
+                    isPaid = annotation["bountyIsPaid"].AsBoolean;
+                }
 
                 DatabaseSession session = sessions.Find(s => s.Id == sessionid);
                 DatabaseRole role = Roles.Find(r => r.Id == roleid);
@@ -3058,7 +3683,8 @@ namespace ssi
                    onlyMe && onlyUnfinished && !isFinished && Properties.Settings.Default.MongoDBUser == annotatorName)
                 {
                     DatabaseAnnotation anno = new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = sessionName, IsFinished = isFinished, IsLocked = islocked, Date = date, IsOwner = isOwner };
-                    items.Add(anno);
+                   
+                    if (isPaid || Properties.Settings.Default.MongoDBUser == annotatorName) items.Add(anno);
                 }
             }
 
@@ -3197,6 +3823,15 @@ namespace ssi
 
         public int Expertise { get; set; }
 
+        //key for Lightning
+        public string ln_admin_key { get; set; }
+        public string ln_invoice_key { get; set; }
+        public string ln_wallet_id{ get; set; }
+        public string ln_user_id { get; set; }
+
+
+
+
         public override string ToString()
         {
             return Name;
@@ -3228,6 +3863,25 @@ namespace ssi
             return Name;
         }
     }
+
+    public class DatabaseBounty
+    {
+        public ObjectId OID { get; set; }
+        public int valueInSats { get; set; }
+        public DatabaseUser Contractor { get; set; }
+        public string Scheme { get; set; }
+        public string Role { get; set; }
+        public string Session { get; set; }
+        public int numOfAnnotations { get; set; }
+        public int numOfAnnotationsNeededCurrent { get; set; }
+        public string Database { get; set; }
+        public string Type { get; set; }
+        public List<DatabaseUser> annotatorsJobCandidates { get; set; }
+        public List<DatabaseUser> annotatorsJobDone { get; set; }
+        public List<StreamItem> streams { get; set; }
+
+    }
+
 
     public class DatabaseStream
     {
@@ -3295,6 +3949,7 @@ namespace ssi
         public static string Streams = "Streams";
         public static string Schemes = "Schemes";
         public static string Meta = "Meta";
+        public static string Bounties = "Bounties";
     }
 
     public enum DatabaseAuthentication
