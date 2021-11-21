@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<annotation ssi-v="3">
+    <info ftype="ASCII" size="208" />
+    <meta annotator="" role=""/>
+    <scheme name="Beispiel_Polygon" type="DISCRETE_POLYGON" sr="17.55" default-label="" default-label-color="#FF000000" color="#FFFFFFFF">
+        <item name="Eye" id="1" color="#FF36EB7C" />
+        <item name="Mouth" id="2" color="#FF3C8595" />
+    </scheme>
+</annotation>
