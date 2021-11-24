@@ -19,10 +19,13 @@ namespace ssi.Interfaces
         void refreshAnnoDataGrid();
         bool labelIsNotSelected(PolygonLabel pl);
         void enableOrDisableControls(bool enable);
+        void enableOrDisableControlButtons(bool enable);
         void addPolygonLabelToPolygonList(PolygonLabel pl);
         bool isNewPointNextToStartPoint(PolygonPoint startPoint, Point newPoint);
         bool IsNextToStartPoint { get; set; }
         UndoRedoStack PolygonUndoRedoStack { get; set; }
         bool mouseIsOnLine();
+        void changeSelection(AnnoListItem newSelectedAnnoListItem, PolygonLabel newSelectedPolygonLabel);
+
     }
 }

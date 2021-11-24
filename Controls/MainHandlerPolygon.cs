@@ -44,7 +44,11 @@ namespace ssi
                 currentLabelName = "";
                 currentLabelColor = Colors.Black;
             }
-            
+        }
+
+        public void changeSelection(AnnoListItem newSelectedAnnoListItem, PolygonLabel newSelectedPolygonLabel)
+        {
+            polygonUtilities.changeSelection(newSelectedAnnoListItem, newSelectedPolygonLabel);
         }
 
         private void polygonAddNewLabelButton_Click(object sender, RoutedEventArgs e)
@@ -159,9 +163,8 @@ namespace ssi
                 scheme = AnnoTierStatic.Selected.AnnoList.Scheme;
                 AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
                 dialog = new InterpolationWindow(list, this);
-
                 dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dialog.ShowDialog();
+                dialog.Show();
             }
             else
             {
@@ -170,21 +173,24 @@ namespace ssi
             }
         }
 
+        public void enableOrDisableControlButtons(bool enable)
+        {
+            polygonUtilities.enableOrDisableControlButtons(enable);
+        }
+
         public void handle2DInterpolation(ComboboxItem sourceFrame, PolygonLabel sourceLabel, PolygonLabel targetLabel, double xStepPerFrame, double yStepPerFrame, int framesBetween)
         {
             AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
             int newLabelCounter = 0;
-            bool toStart = false;
             foreach (AnnoListItem listItem in list)
             {
                 if(listItem.Equals(sourceFrame.Value))
                 {
-                    toStart = true;
                     newLabelCounter++;
                     continue;
                 }
 
-                if(toStart)
+                if(newLabelCounter > 0)
                 {
                     List<PolygonPoint> newPolygon = new List<PolygonPoint>();
 
@@ -213,9 +219,81 @@ namespace ssi
             polygonDrawUnit.polygonOverlayUpdate(item);
         }
 
-        public void handle3DInterpolation(PolygonLabel souceLabel, PolygonLabel targetLabel, List<PointAngleTuple> sourcePointsAnglesTuple, List<PointAngleTuple> targetPointsAnglesTuple, int framesBetween)
+        public void handle3DInterpolation(List<double> xStepsPerFrame, List<double> yStepsPerFrame, ComboboxItem sourceFrame, PolygonLabel sourceLabel, 
+                                          PolygonLabel targetLabel, List<PointAngleTuple> sourcePointsAnglesTuple, List<PointAngleTuple> targetPointsAnglesTuple, 
+                                          int stepsFromSourceToTarget)
         {
-            
+            removeOldAndAddNewPolygon(sourceLabel, sourcePointsAnglesTuple);
+            removeOldAndAddNewPolygon(targetLabel, targetPointsAnglesTuple);
+
+            AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
+            int newLabelCounter = 0;
+
+            foreach (AnnoListItem listItem in list)
+            {
+                // We don't change the selected frame
+                if (listItem.Equals(sourceFrame.Value))
+                {
+                    newLabelCounter++;
+                    continue;
+                } 
+
+                if (newLabelCounter > 0)
+                {
+                    List<PolygonPoint> newPolygon = new List<PolygonPoint>();
+
+                    int pointCounter = 0;
+                    foreach (PointAngleTuple tuple in sourcePointsAnglesTuple)
+                    {
+                        newPolygon.Add(new PolygonPoint(tuple.point.X + (newLabelCounter * xStepsPerFrame[pointCounter]), 
+                                                        tuple.point.Y + (newLabelCounter * yStepsPerFrame[pointCounter])));
+                        pointCounter++;
+                    }
+
+                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color);
+                    listItem.PolygonList.addPolygonLabel(newLabel);
+                    listItem.updateLabelCount();
+                    newLabelCounter++;
+
+                    if (newLabelCounter == (stepsFromSourceToTarget))
+                    {
+                        polygonUtilities.refreshAnnoDataGrid();
+                        break;
+                    }
+                    AnnoTierStatic.Selected.AnnoList.HasChanged = true;
+                }
+            }
+
+            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+            polygonDrawUnit.polygonOverlayUpdate(item);
+        }
+
+        public void removeOldAndAddNewPolygon(PolygonLabel labelToRemove, List<PointAngleTuple> pointsAngleTuple)
+        {
+            List<PolygonPoint> polygon = new List<PolygonPoint>();
+            foreach(PointAngleTuple tuple in pointsAngleTuple)
+            {
+                polygon.Add(tuple.point);
+            }
+
+            int ID = labelToRemove.ID;
+
+            foreach (AnnoListItem item in control.annoListControl.annoDataGrid.Items)
+            {
+                List<PolygonLabel> polygonLabels = item.PolygonList.getRealList();
+
+                foreach (PolygonLabel polygonLabel in polygonLabels)
+                {
+                    if(polygonLabel.ID == ID)
+                    {
+                        polygonLabel.Polygon = polygon;
+                        item.PolygonList.Polygons = polygonLabels;
+                        polygonUtilities.polygonSelectItem(item);
+                        polygonUtilities.refreshAnnoDataGrid();
+                        return;
+                    }
+                }
+            }
         }
 
         private void polygonRelabelButton_Click(object sender, RoutedEventArgs e)
@@ -361,6 +439,9 @@ namespace ssi
 
         private void OnPolygonMediaMouseDown(IMedia media, double x, double y)
         {
+            x = Math.Round(x);
+            y = Math.Round(y);
+
             if (Mouse.LeftButton == MouseButtonState.Pressed)
             {
                 if (dataGridChecker.isSchemeTypePolygon() && dataGridChecker.annonDGIsNotNull() && dataGridChecker.polygonDGIsNotNull())
@@ -392,6 +473,9 @@ namespace ssi
 
         private void OnPolygonMediaMouseUp(IMedia media, double x, double y)
         {
+            x = Math.Round(x);
+            y = Math.Round(y);
+
             if (dataGridChecker.isSchemeTypePolygon() && dataGridChecker.annonDGIsNotNull() && dataGridChecker.polygonDGIsNotNull())
             {
                 if (editInfos.IsEditModeOn)
@@ -496,6 +580,9 @@ namespace ssi
 
         void OnPolygonMediaMouseMove(IMedia media, double x, double y)
         {
+            x = Math.Round(x);
+            y = Math.Round(y);
+
             if (Mouse.LeftButton != MouseButtonState.Pressed && editInfos.IsLeftMouseDown)
             {
                 editInfos.IsLeftMouseDown = false;

@@ -58,6 +58,18 @@ namespace ssi
             }
         }
 
+        public List<PolygonPoint> getPolygonAsCopy()
+        {
+            List<PolygonPoint> copy = new List<PolygonPoint>();
+
+            foreach(PolygonPoint point in this.polygon)
+            {
+                copy.Add(new PolygonPoint(point.X, point.Y));
+            }
+
+            return copy;
+        }
+
         public void addPoint(PolygonPoint p)
         {
             this.polygon.Add(p);

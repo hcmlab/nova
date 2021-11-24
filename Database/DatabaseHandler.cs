@@ -2472,7 +2472,7 @@ namespace ssi
                         double start = i / annoList.Scheme.SampleRate;
                         double dur = 1 / annoList.Scheme.SampleRate;
 
-                        AnnoListItem ali = new AnnoListItem(start, dur, score, "", Colors.Black, double.Parse(confidence));
+                        AnnoListItem ali = new AnnoListItem(start, dur, score.ToString(), "", Colors.Black, double.Parse(confidence));
 
                         annoList.Add(ali);
                     }

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ssi"
           xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
         mc:Ignorable="d"
-        Title="New Discrete Scheme" Height="400" Width="700" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+        Title="Interpolation" Height="400" Width="780" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >
@@ -35,7 +35,7 @@
 
         <ComboBox Name="SourceFrames" SelectionChanged="sourceFrameChanged" Grid.Column="0" Grid.Row="1" Margin="5"/>
 
-        <ListView Name="SourceLabelsListBox" SelectionChanged="sourceLabelChanged" Grid.Row="2" Grid.Column="0" Margin="5,5,5,0" SelectionMode="Single">
+        <ListView Name="SourceLabelsListBox" PreviewMouseLeftButtonDown="SourceLabelsListBox_PreviewMouseLeftButtonDown" PreviewMouseRightButtonDown="SourceLabelsListBox_PreviewMouseRightButtonDown"  SelectionChanged="sourceLabelChanged" Grid.Row="2" Grid.Column="0" Margin="5,5,5,0" SelectionMode="Single">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="190" Header="Label">
@@ -47,7 +47,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="135" Header="Color">
+                    <GridViewColumn Width="160" Header="Color">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -65,7 +65,7 @@
 
         <ComboBox Name="TargetFrames" SelectionChanged="targetFrameChanged" Grid.Column="2" Grid.Row="1" Margin="5"/>
 
-        <ListView Name="TargetLabelsListBox"  SelectionChanged="targetLabelChanged" Grid.Row="2" Grid.Column="2" Margin="5,5,5,0" SelectionMode="Single">
+        <ListView Name="TargetLabelsListBox" PreviewMouseLeftButtonDown="TargetLabelsListBox_PreviewMouseLeftButtonDown" PreviewMouseRightButtonDown="TargetLabelsListBox_PreviewMouseRightButtonDown"  SelectionChanged="targetLabelChanged" Grid.Row="2" Grid.Column="2" Margin="5,5,5,0" SelectionMode="Single">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="190" Header="Label">
@@ -77,7 +77,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="135" Header="Color">
+                    <GridViewColumn Width="160" Header="Color">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
