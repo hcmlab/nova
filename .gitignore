@@ -361,6 +361,7 @@ Scripts/testasdf.py
 *.jpg
 PythonScripts/test.py
 PythonScripts/LimeExplain.py
+PythonScripts\polygon_network_example\resources\dataset
 bin/exception.txt
 bin/requirements.txt
 bin/cml/models/templates/discrete/video/keras/nova_sessions
