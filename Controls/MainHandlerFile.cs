@@ -284,23 +284,22 @@ namespace ssi
                 media.OnMediaMouseDown += OnMediaMouseDown;
                 media.OnMediaMouseUp += OnMediaMouseUp;
                 media.OnMediaMouseMove += OnMediaMouseMove;
-                media.OnMediaMouseDown += OnPolygonMediaMouseDown;
-                media.OnMediaMouseUp += OnPolygonMediaMouseUp;
-                media.OnMediaMouseMove += OnPolygonMediaMouseMove; 
-
+                media.OnMediaMouseDown += OnPolygonMedia_MouseDown;
+                media.OnMediaMouseUp += OnPolygonMedia_MouseUp;
+                media.OnMediaMouseMove += OnPolygonMedia_MouseMove;
             }
             else
             {
                 mediaKit.OnMediaMouseDown += OnMediaMouseDown;
                 mediaKit.OnMediaMouseUp += OnMediaMouseUp;
                 mediaKit.OnMediaMouseMove += OnMediaMouseMove;
-                mediaKit.OnMediaMouseDown += OnPolygonMediaMouseDown;
-                mediaKit.OnMediaMouseUp += OnPolygonMediaMouseUp;
-                mediaKit.OnMediaMouseMove += OnPolygonMediaMouseMove;
+                mediaKit.OnMediaMouseDown += OnPolygonMedia_MouseDown;
+                mediaKit.OnMediaMouseUp += OnPolygonMedia_MouseUp;
+                mediaKit.OnMediaMouseMove += OnPolygonMedia_MouseMove;
             }
         }
 
-        
+       
 
         private void loadAnnoFile(string filename)
         {
