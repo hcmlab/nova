@@ -13,12 +13,12 @@
         <StackPanel Grid.Row="1">
 
             <Separator Height="10" Visibility="Hidden"></Separator>
-            <Label Content="Tip Sats to Developers"/>
+            <Label Content="Tip Sats to devs using the Lightning Network"/>
             <TextBox x:Name="DepositSats">1000</TextBox>
-            <Label Content="Internal Wallet"/>
+            <Label x:Name="internalwalletlabel"  Content="Internal Wallet"/>
 
 
-            <Button x:Name="Withdraw"  Content="Tip Amount to Developers directly" Grid.Column="0" Click="Withdraw_Click" IsEnabled="True" />
+            <Button x:Name="Withdraw"  Content="Tip Amount to Developers from Wallet" Grid.Column="0" Click="Withdraw_Click" IsEnabled="True" />
             <Label x:Name="statuswithdraw" Foreground="Green"></Label>
             <Label Content="External Wallet"/>
             <Button x:Name="GenerateInvoice"  Content="Generate Invoice" Grid.Column="0" Click="GenerateInvoice_Click" IsEnabled="True" />

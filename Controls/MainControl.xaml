@@ -48,7 +48,7 @@
                 <MenuItem Header="Manage Account" Name="databasePasswordMenu" />
                 <MenuItem Header="Update" Name="databaseUpdateMenu" />
                 <MenuItem Header="Connect" Name="databaseConnectMenu" />
-                <MenuItem Header="Bounties">
+                <MenuItem Header="Bounties" Name="bountiesMenu">
                     <MenuItem Header="Raise/Manage Bounties" Name="databasecreateBountyMenu" />
                     <MenuItem Header="My Tasks" Name="databasehuntBountyMenu" />
                 </MenuItem>

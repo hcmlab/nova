@@ -27,6 +27,11 @@ namespace ssi
         {
             InitializeComponent();
             this.handler = handler;
+            if(!MainHandler.ENABLE_LIGHTNING)
+            {
+                Withdraw.Visibility = Visibility.Hidden;
+                internalwalletlabel.Visibility = Visibility.Hidden;
+    }
         }
 
         private async void GenerateInvoice_Click(object sender, RoutedEventArgs e)

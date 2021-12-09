@@ -36,14 +36,25 @@ namespace ssi
         public DatabaseBountiesCreateWindow()
         {
             InitializeComponent();
-
-
+            if(!MainHandler.ENABLE_LIGHTNING)
+            {
+                balance.Visibility = Visibility.Hidden;
+                sats.Visibility = Visibility.Hidden;
+                satsperannotatorlabel.Visibility = Visibility.Hidden;
+            }
         }
 
 
         private async void loadbalancewithCurrency()
         {
-            balance.Content = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats (" + (await lightning.PriceinCurrency(MainHandler.myWallet.balance / 1000, "EUR")).ToString("0.00") + "€)";
+            if (MainHandler.myWallet != null)
+            {
+                balance.Content = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats (" + (await lightning.PriceinCurrency(MainHandler.myWallet.balance / 1000, "EUR")).ToString("0.00") + "€)";
+            }
+
+            else balance.Content = "Lightning wallet not activated";
+
+
         }
 
         private void CollectionResultsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -601,7 +612,7 @@ namespace ssi
             DatabaseBounty bounty = (DatabaseBounty)BountiesOverviewBox.SelectedItem;
             string name = ((AnnotatorStatus)BountiesJobDone.SelectedItem).Name;
             DatabaseUser user = DatabaseHandler.GetUserInfo(name);
-            if (bounty.valueInSats > 0)
+            if (bounty.valueInSats > 0 && MainHandler.ENABLE_LIGHTNING && MainHandler.myWallet != null)
             {
                 Lightning lightning = new Lightning();
                 Lightning.LightningInvoice invoice = await lightning.CreateInvoice(user.ln_invoice_key, (uint)bounty.valueInSats, bounty.Database + "/" + bounty.Session + "/" + bounty.Scheme + "/" + bounty.Role);

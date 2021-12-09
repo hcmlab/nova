@@ -185,7 +185,7 @@
                             <Separator Height="10" Visibility="Hidden"></Separator>
                             <Label Content="Number of Annotators"/>
                             <TextBox x:Name="numannotators"  Text="3" Grid.Column="0"/>
-                            <Label Content="Sats per Annotator"/>
+                            <Label x:Name="satsperannotatorlabel" Content="Sats per Annotator"/>
                             <TextBox x:Name="sats"  Text="0" Grid.Column="0"  />
 
                             <Separator Height="10" Visibility="Hidden"></Separator>
