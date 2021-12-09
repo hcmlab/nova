@@ -69,6 +69,12 @@ namespace ssi
             client.Close();
 
         }
+
+        public Tuple<int, int> GetImageSize()
+        {
+            return null;
+        }
+
         public void move(double newPosition, double threshold)
         {
         }
