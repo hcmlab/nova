@@ -39,11 +39,11 @@
         <Label Grid.Column="0" Grid.Row="1" >Sample rate (Hz)</Label>
         <TextBox Name="srTextBox" Grid.Column="1" Grid.Row="1" x:FieldModifier="public" Margin="5"/>
 
-        <Label Grid.Row="2" Grid.Column="0" Margin="5">Label names</Label>
+        <Label Grid.Row="2" Grid.Column="0" Margin="5">Label types</Label>
         <ListView Name="LabelsListBox" Grid.Row="2" Grid.Column="1" Margin="5,5,5,0" SelectionMode="Single">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="170" Header="Label">
+                    <GridViewColumn Width="170" Header="Name">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
