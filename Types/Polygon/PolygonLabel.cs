@@ -1,4 +1,5 @@
 ﻿using ssi.Interfaces;
+using ssi.Types.Polygon;
 using System.Collections.Generic;
 using System.Windows.Media;
 
@@ -11,7 +12,8 @@ namespace ssi
         private string label;
         private Color color;
         private static int sID = 0;
-        private readonly int id; 
+        private readonly int id;
+        private LabelInformations informations;
 
         public PolygonLabel(List<PolygonPoint> polygon, string label, Color color)
         {
@@ -22,6 +24,21 @@ namespace ssi
             
             this.label = label;
             this.color = color;
+
+            id = sID;
+            sID++;
+        }
+
+        public PolygonLabel(List<PolygonPoint> polygon, string label, Color color, LabelInformations infos)
+        {
+            if (polygon is null)
+                this.polygon = new List<PolygonPoint>();
+            else
+                this.polygon = polygon;
+
+            this.label = label;
+            this.color = color;
+            this.informations = infos;
 
             id = sID;
             sID++;
@@ -44,6 +61,30 @@ namespace ssi
             this.color = color;
 
             id = ID;
+        }
+
+        public void addPointAfterSpecificID(double id, PolygonPoint newPoint)
+        {
+            List<PolygonPoint> polygonPoints = new List<PolygonPoint>();
+            foreach (PolygonPoint point in this.Polygon)
+            {
+                polygonPoints.Add(new PolygonPoint(point.X, point.Y, point.PointID, false));
+                if (point.PointID == id)
+                    polygonPoints.Add(newPoint);
+            }
+
+            this.polygon = polygonPoints;
+        }
+
+        public void removePointAfterSpecificID(double id)
+        {
+            for(int i = 0; i < this.polygon.Count; i++)
+            {
+                if (this.polygon[i].PointID == id)
+                {
+                    this.removeAt(i + 1);
+                }
+            }
         }
 
         public List<PolygonPoint> Polygon
@@ -94,6 +135,8 @@ namespace ssi
         public Color Color { get => color; set => color = value; }
 
         public int ID => id;
+
+        internal LabelInformations Informations { get => informations; set => informations = value; }
 
         public override bool Equals(object obj)
         {
