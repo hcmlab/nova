@@ -143,7 +143,7 @@ namespace ssi
             control.annoLiveModeCheckBox.Unchecked += annoLiveMode_Changed;
             control.annoLiveModeActivateMouse.Checked += annoLiveModeActiveMouse_Checked;
             control.annoLiveModeActivateMouse.Unchecked += annoLiveModeActiveMouse_Unchecked;
-
+            
             // Geometric
             control.geometricListControl.editButton.Click += geometricListEdit_Click;
             control.geometricListControl.editTextBox.GotMouseCapture += geometricListEdit_Focused;
@@ -156,21 +156,29 @@ namespace ssi
 
             // Polygon
             control.polygonListControl.Visibility = Visibility.Collapsed;
-            control.polygonListControl.polygonAddNewLabelButton.Click += polygonAddNewLabelButton_Click;
-            control.polygonListControl.polygonSelectAllButton.Click += polygonSelectAllButton_Click;
             control.polygonListControl.polygonSetDefaultLabelButton.Click += polygonSetDefaultLabelButton_Click;
-            control.polygonListControl.polygonCopyButton.Click += polygonCopyButton_Click;
-            control.polygonListControl.polygonRelabelButton.Click += polygonRelabelButton_Click;
             control.polygonListControl.polygonListElementDelete.Click += polygonListElementDelete_Click;
-            control.polygonListControl.polygonDataGrid.SelectionChanged += polygonList_Selection;
-            control.polygonListControl.InvoiceDetailsList.Opened += polygonContextMenueOpened;
-            control.polygonListControl.setMainHandler(this);
-            control.polygonListControl.addMorePolygonLabels.Click += polygonAddmoreLabels_Click;
+            control.polygonListControl.polygonSelectAllButton.Click += polygonSelectAllButton_Click;
             control.polygonListControl.interpolateLabels.Click += polygonInterpolateLabels_Click;
-            control.polygonListControl.editComboBox.SelectionChanged += discretePolygonSelectionChanged;
-            control.mediaBoxControl.MouseLeave += onPolygonMediaMouseLeave;
-            control.mediaBoxControl.MouseMove += OnPolygonMediaBoxMouseMove;
+            control.polygonListControl.polygonRelabelButton.Click += polygonRelabelButton_Click;
+            control.polygonListControl.polygonCopyButton.Click += polygonCopyButton_Click;
+            control.polygonListControl.stopInsertion.Click += polygonStopInsertion_Click;
+            control.polygonListControl.addLabels.Click += polygonAddLabels_Click;
+
+            control.polygonListControl.editComboBox.SelectionChanged += discretePolygon_SelectionChanged;
+            control.polygonListControl.polygonDataGrid.SelectionChanged += polygonList_SelectionChanged;
+
+            control.polygonListControl.InvoiceDetailsList.Opened += polygonContextMenue_Open;
+
+            control.MouseUp += OnPolygonMainControlMouseUp;
+            control.MouseMove += OnPolygonMainControlMouseMove;
+
             polygonHandlerInit();
+            control.polygonListControl.setPolygonUtilitiesManager(this.polygonUtilities);
+
+            
+
+
 
             // Menu
             control.menu.MouseEnter += tierMenu_MouseEnter;
