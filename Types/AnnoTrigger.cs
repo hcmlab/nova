@@ -38,6 +38,11 @@ namespace ssi
             }
         }
 
+        public Tuple<int, int> GetImageSize()
+        {
+            return null;
+        }
+
         private int findItem(double position)
         {
             if (annoList.Count == 0)
