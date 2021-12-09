@@ -33,6 +33,10 @@ namespace ssi
         int width;
         int height;
 
+        public Tuple<int, int> GetImageSize()
+        {
+            return new Tuple<int, int>(width, height);
+        }
 
         public MediaType GetMediaType()
         {
