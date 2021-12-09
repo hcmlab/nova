@@ -1,4 +1,5 @@
 ﻿using ssi.Interfaces;
+using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,7 +20,7 @@ namespace ssi
 
         private GridViewColumnHeader _lastHeaderClicked = null;
         private ListSortDirection _lastDirection = ListSortDirection.Ascending;
-        private IPolygonUtilities polygonUtilities;
+        private Utilities polygonUtilities;
 
         public AnnoListControl()
         {
@@ -344,6 +345,6 @@ namespace ssi
             }
         }
 
-        internal IPolygonUtilities PolygonUtilities { set => polygonUtilities = value; }
+        internal Utilities PolygonUtilities { set => polygonUtilities = value; }
     }
 }
