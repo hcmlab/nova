@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ssi.Interfaces
 {
-    interface ICommand
+    public interface ICommand
     {
         PolygonLabel Do();
         PolygonLabel Undo();
