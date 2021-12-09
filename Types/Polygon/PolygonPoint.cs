@@ -26,8 +26,8 @@ namespace ssi
         }
         public PolygonPoint(double x, double y)
         {
-            double id = PolygonUtilities.IDcounter;
-            PolygonUtilities.IDcounter++;
+            double id = Utilities.IDcounter;
+            Utilities.IDcounter++;
 
             this.x = x;
             this.y = y;
