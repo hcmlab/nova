@@ -366,6 +366,7 @@ namespace ssi
             AnnoTierStatic.Label.Item.Color = dialog.Result.Color;
             AnnoTierStatic.Label.Item.Confidence = dialog.Result.Confidence;
             AnnoTierStatic.Label.Item.Label = dialog.Result.Label;
+            AnnoTierStatic.Label.Item.Meta = dialog.Result.Meta;
 
             AnnoTierStatic.Selected.DefaultColor = dialog.Result.Color;
             AnnoTierStatic.Selected.DefaultLabel = dialog.Result.Label;

@@ -141,7 +141,7 @@ namespace ssi
                             if (e.Label != "GARBAGE")
                             {
                                 LabelIds.TryGetValue(e.Label, out index);
-                                sw.WriteLine(e.Start + delimiter + e.Stop + delimiter + index + delimiter + e.Confidence);
+                                sw.WriteLine(e.Start + delimiter + e.Stop + delimiter + index + delimiter + e.Confidence + delimiter + e.Meta);
                             }
                             else
                             {
@@ -532,6 +532,15 @@ namespace ssi
                                     if (int.Parse(data[2]) < 0) label = "GARBAGE";
                                     else LabelIds.TryGetValue(data[2], out label);
                                     Color color = Colors.Black;
+                                    string metastr = "";
+                                    try
+                                    {
+                                        metastr = data[4];
+                                    }
+                                    catch (Exception ex)
+                                    {
+
+                                    }
 
                                     if (list.Scheme.Labels.Find(x => x.Name == label) != null)
                                     {
@@ -539,7 +548,7 @@ namespace ssi
                                     }
 
                                     double confidence = Convert.ToDouble(data[3], CultureInfo.InvariantCulture);
-                                    AnnoListItem e = new AnnoListItem(start, dur, label, "", color, confidence);
+                                    AnnoListItem e = new AnnoListItem(start, dur, label, metastr, color, confidence);
                                     list.AddSorted(e);
                                 }
                                 else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)

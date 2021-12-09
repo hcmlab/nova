@@ -601,9 +601,8 @@ namespace ssi
                             "opencv-python",
                             "numpy",
                             "sklearn",
-                            "imblearn"
-
-                           
+                            "imblearn",
+                            "pandas"
 
                             };
 
