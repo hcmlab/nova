@@ -71,7 +71,8 @@ namespace ssi
                     sw.WriteLine("    <scheme name=\"" + this.Scheme.Name + "\" type=\"DISCRETE_POLYGON\" sr=\"" + this.Scheme.SampleRate + "\" default-label=\"" + this.Scheme.DefaultLabel + "\" " +
                                  "default-label-color=\"" + this.Scheme.DefaultColor + "\" color=\"" + this.Scheme.MinOrBackColor + "\">");
 
-                    int index = 0;
+                    // 0 is reserved for the background, -1 = garbage
+                    int index = 1;
 
                     foreach (AnnoScheme.Label lp in this.Scheme.Labels)
                     {
@@ -587,7 +588,7 @@ namespace ssi
                         else
                         {
                             dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(File.ReadAllText(filepath + "~"));
-
+             
                             foreach (var frame in result.frame)
                             {
                                 String frameName = "Frame " + frame.name;
@@ -617,12 +618,12 @@ namespace ssi
                                             color = polygon.label_color;
                                             labelColor = (Color)ColorConverter.ConvertFromString(color);
                                         }
-
+                                        
                                         List<PolygonPoint> points = new List<PolygonPoint>();
                                         foreach (var point in polygon.points)
                                         {
-                                            double id = PolygonUtilities.IDcounter;
-                                            PolygonUtilities.IDcounter++;
+                                            double id = Utilities.IDcounter;
+                                            Utilities.IDcounter++;
                                             points.Add(new PolygonPoint((double)point.First, (double)point.Last, id));
                                         }
 
@@ -632,6 +633,7 @@ namespace ssi
                                 const double defaultConfidence = 1.0;
                                 list.Add(new AnnoListItem(start, 1 / list.Scheme.SampleRate, frameName, "", list.Scheme.MinOrBackColor, defaultConfidence, AnnoListItem.TYPE.POLYGON, polygonList: new PolygonList(polygonLabels)));
                                 start += 1 / list.Scheme.SampleRate;
+
                             }
                         }
                     }

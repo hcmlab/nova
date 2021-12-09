@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ssi.Types
 {
-    class UndoRedoStack
+    public class UndoRedoStack
     {
         private Stack<ICommand> _Undo;
         private Stack<ICommand> _Redo;
