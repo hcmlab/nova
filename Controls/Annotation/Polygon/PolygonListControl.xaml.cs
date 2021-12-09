@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Media;
-using System.Collections;
-using System.Collections.ObjectModel;
 using PropertyTools.Wpf;
+using ssi.Types.Polygon;
 
 namespace ssi
 {
@@ -21,7 +13,7 @@ namespace ssi
     {
         private GridViewColumnHeader listViewSortCol = null;
         private ListViewSortAdorner listViewSortAdorner = null;
-        private MainHandler mainHandler;
+        private Utilities polygonUtilitiesManager;
         private Color color;
 
         public PolygonListControl()
@@ -29,53 +21,23 @@ namespace ssi
             InitializeComponent();
         }
 
-        private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
+        internal void setPolygonUtilitiesManager(Utilities manager)
         {
-            GridViewColumnHeader column = (sender as GridViewColumnHeader);
-            if (column.Tag != null)
-            {                
-                string sortBy = column.Tag.ToString();
-                if (sortBy == "Label")
-                {
-                    if (listViewSortCol != null)
-                    {
-                        AdornerLayer.GetAdornerLayer(listViewSortCol).Remove(listViewSortAdorner);
-                        polygonDataGrid.Items.SortDescriptions.Clear();
-                    }
-
-                    if (listViewSortCol == null)
-                    {
-                        listViewSortCol = column;
-                        listViewSortAdorner = new ListViewSortAdorner(listViewSortCol, ListSortDirection.Ascending);
-                        AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
-                        polygonDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Ascending));
-                    }
-                    else if (listViewSortAdorner.Direction == ListSortDirection.Ascending)
-                    {
-                        listViewSortAdorner = new ListViewSortAdorner(listViewSortCol, ListSortDirection.Descending);
-                        AdornerLayer.GetAdornerLayer(listViewSortCol).Add(listViewSortAdorner);
-                        polygonDataGrid.Items.SortDescriptions.Add(new SortDescription(sortBy, ListSortDirection.Descending));
-                    }
-                    else
-                    {
-                        listViewSortCol = null;
-                    }
-                }               
-            }     
+            this.polygonUtilitiesManager = manager;
         }
 
-        public void setMainHandler(MainHandler mh)
+        public void setDefaultLabel(String defaultLabel)
         {
-            this.mainHandler = mh;
+            this.editTextBox.Text = defaultLabel;
         }
 
         private void ColorPicker_DropDownClosed(object sender, EventArgs e)
         {
             PolygonLabel pl = (PolygonLabel)((ColorPicker)sender).DataContext;
 
-            if (!this.mainHandler.updateFrameData(pl))
+            if (!this.polygonUtilitiesManager.updateFrameData(pl))
             {
-                this.mainHandler.undoColorChanges(pl, this.color);
+                this.polygonUtilitiesManager.undoColorChanges(pl, this.color);
             }
         }
 
@@ -89,7 +51,7 @@ namespace ssi
             {
                 PolygonLabel pl = (PolygonLabel)((ColorPicker)sender).DataContext;
                 this.color = pl.Color;
-                this.mainHandler.selectSpecificLabel(pl);
+                this.polygonUtilitiesManager.selectSpecificLabel(pl);
             }
         }
     }
