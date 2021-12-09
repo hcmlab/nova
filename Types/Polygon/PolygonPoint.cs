@@ -26,8 +26,8 @@ namespace ssi
         }
         public PolygonPoint(double x, double y)
         {
-            double id = PolygonUtilities.IDcounter;
-            PolygonUtilities.IDcounter++;
+            double id = Utilities.IDcounter;
+            Utilities.IDcounter++;
 
             this.x = x;
             this.y = y;
@@ -47,6 +47,11 @@ namespace ssi
         public double X { get => x; set => x = value; }
         public double Y { get => y; set => y = value; }
         public double PointID { get => pointID; }
+
+        public bool isOnTheSameSpot(PolygonPoint point)
+        {
+            return this.X == point.X && this.Y == point.Y;
+        }
 
         public override bool Equals(object obj)
         {

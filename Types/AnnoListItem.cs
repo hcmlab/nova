@@ -152,6 +152,7 @@ namespace ssi
             if(this.polygonList != null)
                 this.labelCount = this.polygonList.getRealList().Count;
         }
+
         public AnnoListItem(double start, double duration, double score, string meta = "", Color color = new Color(), double confidence = 1.0)
         {
             this.start = Math.Max(0, start);
@@ -161,8 +162,9 @@ namespace ssi
             this.meta = meta;
             this.color = color;
             this.confidence = confidence;
-           
+
         }
+
         public void updateLabelCount()
         {
             this.labelCount = polygonList.getRealList().Count;

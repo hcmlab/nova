@@ -1,6 +1,7 @@
 ﻿using ssi.Interfaces;
 using System.Collections.Generic;
 using System.Windows;
+using static ssi.Types.Polygon.LabelInformations;
 
 namespace ssi.Types.Polygon
 {
@@ -9,12 +10,14 @@ namespace ssi.Types.Polygon
         private PolygonLabel polygonToChange;
         private List<Point> oldPoints;
         private List<Point> newPoints;
+        private TYPE type;
 
-        public ChangeCompletePolygonCommand(List<Point> oldPoints, List<Point> newPoints, PolygonLabel polygonToChange)
+        public ChangeCompletePolygonCommand(List<Point> oldPoints, List<Point> newPoints, PolygonLabel polygonToChange, TYPE type)
         {
             this.polygonToChange = polygonToChange;
             this.oldPoints = oldPoints;
             this.newPoints = newPoints;
+            this.type = type;
         }
 
         public PolygonLabel Do()
@@ -26,7 +29,8 @@ namespace ssi.Types.Polygon
                 point.Y = newPoints[counter].Y;
                 counter++;
             }
-                
+
+            polygonToChange.Informations = new LabelInformations(this.type);
             return polygonToChange;
         }
 
@@ -40,6 +44,7 @@ namespace ssi.Types.Polygon
                 counter++;
             }
 
+            polygonToChange.Informations = new LabelInformations(this.type);
             return polygonToChange;
         }
     }

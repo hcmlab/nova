@@ -12,16 +12,16 @@ using Color = System.Windows.Media.Color;
 
 namespace ssi.Types.Polygon
 {
-    class PolygonDrawUnit : IPolygonDrawUnit
+    class DrawUnit : IDrawUnit
     {
         private MainControl control;
         private EditInformations editInfos;
         private CreationInformation creationInfos;
-        private IPolygonUtilities polygonUtilities;
+        private Utilities polygonUtilities;
 
-        public IPolygonUtilities PolygonUtilities { get => polygonUtilities; set => polygonUtilities = value; }
+        public Utilities PolygonUtilities { get => polygonUtilities; set => polygonUtilities = value; }
 
-        public PolygonDrawUnit(MainControl control, CreationInformation creationInfos, EditInformations editInfos)
+        public DrawUnit(MainControl control, CreationInformation creationInfos, EditInformations editInfos)
         {
             this.control = control;
             this.editInfos = editInfos;
@@ -50,8 +50,6 @@ namespace ssi.Types.Polygon
 
             overlay.Lock();
             overlay.Clear();
-
-            
 
             drawLabels(polygonList, overlay);
 
@@ -90,7 +88,7 @@ namespace ssi.Types.Polygon
                     if (color.R + color.G + color.B > 600)
                         secondColor = Color.FromRgb(0, 0, 0);
 
-                    if (currentPolygonLabelEqualSelectedOne && editInfos.IsEditModeOn && (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea))
+                    if (currentPolygonLabelEqualSelectedOne && !creationInfos.IsCreateModeOn && (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea))
                     {
                         lastColor.R = polygonLabel.Color.R;
                         lastColor.G = polygonLabel.Color.G;
@@ -124,7 +122,7 @@ namespace ssi.Types.Polygon
             }
         }
 
-        public void drawPolygons(WriteableBitmap overlay, PolygonLabel polygonLabel, int thickness, bool isSelectedOne, Color color, Color secondColor)
+        private void drawPolygons(WriteableBitmap overlay, PolygonLabel polygonLabel, int thickness, bool isSelectedOne, Color color, Color secondColor)
         {
             PolygonPoint point, nextPoint = null;
 
@@ -156,7 +154,7 @@ namespace ssi.Types.Polygon
                         continue;
                     }
 
-                    overlay.DrawLineAa((int)point.X, (int)point.Y, (int)nextPoint.X, (int)nextPoint.Y, color, thickness);
+                    overlay.DrawLineAa((int)point.X, (int)point.Y, (Int32)nextPoint.X, (Int32)nextPoint.Y, color, thickness);
                 }
             }
 
@@ -167,7 +165,7 @@ namespace ssi.Types.Polygon
             }
         }
 
-        public void fillRect(WriteableBitmap overlay, Color lastColor)
+        private void fillRect(WriteableBitmap overlay, Color lastColor)
         {
             const int LINE_THICKNESS = 7;
             overlay.FillRectangle((int)editInfos.SelectedPolygonPoint.X - LINE_THICKNESS, (int)editInfos.SelectedPolygonPoint.Y - LINE_THICKNESS, (int)editInfos.SelectedPolygonPoint.X + LINE_THICKNESS, (int)editInfos.SelectedPolygonPoint.Y + LINE_THICKNESS, lastColor);
@@ -190,6 +188,9 @@ namespace ssi.Types.Polygon
             Color color = polygonLabel.Color;
             overlay.Lock();
 
+            if (!polygonUtilities.posIs5pxFromBottomAway(y))
+                y = editInfos.ImageHeight;
+
             if (PolygonUtilities.isNewPointNextToStartPoint(polygonLabel.Polygon.First(), new Point(x, y)))
             {
                 polygonOverlayUpdate(item);
@@ -206,26 +207,13 @@ namespace ssi.Types.Polygon
 
         
 
-        public void removeLastPoint(PolygonLabel currentPolygonLabel, AnnoListItem item)
+        public void drawNew(PolygonLabel currentPolygonLabel, AnnoListItem item)
         {
             if (currentPolygonLabel is object && currentPolygonLabel.Polygon is object)
             {
-                if (currentPolygonLabel.Polygon.Count > 1)
-                {
-                    List<PolygonLabel> polygonLabels = item.PolygonList.getRealList();
-                    foreach (PolygonLabel polygonLabel in polygonLabels)
-                    {
-                        if (polygonLabel.Equals(currentPolygonLabel))
-                        {
-                            List<PolygonPoint> polygon = polygonLabel.Polygon;
-                            polygon.RemoveAt(polygon.Count - 1);
-                        }
-                    }
-
-                    polygonOverlayUpdate(item);
-
+                polygonOverlayUpdate(item);
+                if(currentPolygonLabel.Polygon.Count > 0)
                     drawLineToMousePosition(creationInfos.LastKnownPoint.X, creationInfos.LastKnownPoint.Y);
-                }
             }
         }
 
