@@ -46,6 +46,11 @@ namespace ssi
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public Tuple<int, int> GetImageSize()
+        {
+            return new Tuple<int, int>(width, height);
+        }
+
         protected void RaisePropertyChanged(string property)
         {
             PropertyChangedEventHandler handler = PropertyChanged;
