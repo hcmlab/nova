@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -546,7 +547,44 @@ namespace ssi
                 addSignalTrack(signal, signalColor, backgroundColor);
             }
         }
-   
+
+
+        public void loadFilesForBounty(DatabaseBounty bounty, string user)
+        {
+            clearWorkspace();
+            DatabaseHandler.ChangeDatabase(bounty.Database);
+            DatabaseHandler.ChangeSession(bounty.Session);
+
+            
+            foreach (StreamItem path in bounty.streams)
+            {
+                loadFile(Properties.Settings.Default.DatabaseDirectory + "\\" + bounty.Database + "\\" + bounty.Session + "\\" + path.Name);       
+            }
+
+         
+ 
+        }
+
+        public void loadAnnoForBounty(DatabaseBounty bounty, string user)
+        {
+
+            var id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user, bounty.Session);
+            AnnoList annoList = DatabaseHandler.LoadAnnoList(id);
+            if (annoList != null)
+            {
+               annoList.Source.Database.BountyID = bounty.OID;
+               annoList.Source.Database.HasBounty = true;
+
+
+                addAnnoTierFromList(annoList);
+    }
+            else
+            {
+                addNewAnnotationDatabase(bounty);
+            }
+        }
+
+
         public void loadProjectFile(string filepath)
         {
             clearWorkspace();
@@ -777,6 +815,48 @@ namespace ssi
         #endregion SAVE
 
         #region IMPORT
+
+        
+        private void BatchConvertElanAnnotations(string parentDiretory)
+        {
+            DirectoryInfo directory = new DirectoryInfo(parentDiretory);
+            DirectoryInfo[] directories = directory.GetDirectories();
+
+            foreach (DirectoryInfo folder in directories)
+            {
+                var ext = new List<string> { "eaf" };
+                var eafFiles = Directory.EnumerateFiles(folder.FullName, "*.*", SearchOption.AllDirectories).Where(s => ext.Contains(Path.GetExtension(s).TrimStart('.').ToLowerInvariant()));
+                foreach(var eafFile in eafFiles)
+                {
+                    List<AnnoList> lists = AnnoList.LoadfromElanFile(eafFile);
+                    foreach (AnnoList list in lists)
+                    {
+                        list.Scheme.Name = convert_uml(list.Scheme.Name);
+
+                        string saveto = folder.FullName + "\\" + list.Meta.Role + "." + list.Scheme.Name + ".annotation";
+                        list.Source.StoreToFile = true;
+                        list.Source.File.Path = saveto;
+                        list.Save();
+                    }
+                }
+
+            }
+
+
+        }
+
+
+        public static string convert_uml(string old)
+        {
+            old = old.Replace("ä", "ae");
+            old = old.Replace("ö", "oe");
+            old = old.Replace("ü", "ue");
+            old = old.Replace("Ä", "Ae");
+            old = old.Replace("Ö", "Oe");
+            old = old.Replace("Ü", "Ue");
+            old = old.Replace("ß", "ss");
+            return (old);
+        }
 
         private void ImportAnnoFromElan(string filename)
         {

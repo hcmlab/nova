@@ -1445,9 +1445,9 @@ namespace ssi
 
                             if (AnnoList[index].Start >= time.SelectionStart && AnnoList[index].Stop <= time.SelectionStop)
                             {
-                                int offset = (int)((double)visiblesamples / (double)continuousTierLines.Count + 0.5f);
+                                int offset = (int)((double)visiblesamples / (double)continuousTierLines.Count - 0.5f);
                                 s.X1 = MainHandler.Time.PixelFromTime(AnnoList[index].Start);
-                                if (i < continuousTierLines.Count - 1 && AnnoList[index + offset].Stop <= time.SelectionStop) s.X2 = continuousTierLines[i + 1].X1;
+                                if (i < continuousTierLines.Count - 1 /*&& AnnoList[index + offset].Stop <= time.SelectionStop*/) s.X2 = continuousTierLines[i + 1].X1;
                                 else s.X2 = MainHandler.Time.PixelFromTime(AnnoList[index].Start);
 
                                 double mean = 0;
@@ -1514,7 +1514,7 @@ namespace ssi
                                     }
                                 }
 
-                                if (i < continuousTierLines.Count - 1 && AnnoList[index + offset].Stop <= time.SelectionStop) s.Y2 = continuousTierLines[i + 1].Y1;
+                                if (i < continuousTierLines.Count - 1 && AnnoList[index].Stop <= time.SelectionStop) s.Y2 = continuousTierLines[i + 1].Y1;
                                 else s.Y2 = s.Y1;
                             }
                             i++;

@@ -48,7 +48,7 @@ namespace ssi
             {
                 MessageBoxResult mb = MessageBoxResult.No;
 
-                if (tier.AnnoList.HasChanged)
+                if (tier.AnnoList.HasChanged && !ENABLE_VIEWONLY)
                 {
                     mb = MessageBox.Show("Save annotations on tier #" + tier.Name + " first?", "Confirm", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                     if (mb == MessageBoxResult.Yes)

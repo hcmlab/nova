@@ -50,6 +50,7 @@ namespace ssi
  
                 };
 
+
                 if (DatabaseHandler.AddUser(user, dialog.GetIsUserAdmin()))
                 {
                     GetUsers();
@@ -90,25 +91,41 @@ namespace ssi
                 dialog.ShowDialog();
 
                 if (dialog.DialogResult == true)
-                {                    
+                {
                     DatabaseUser user = new DatabaseUser()
                     {
                         Name = dialog.GetName(),
                         Fullname = dialog.GetFullName(),
                         Email = dialog.Getemail(),
                         Expertise = dialog.GetExpertise(),
-                        Password = dialog.GetPassword()
+                        Password = dialog.GetPassword(),
+                        ln_admin_key = blankuser.ln_admin_key,
+                        ln_invoice_key = blankuser.ln_invoice_key,
+                        ln_wallet_id = blankuser.ln_wallet_id,
+                        ln_user_id = blankuser.ln_user_id
                     };
 
-                    DatabaseHandler.ChangeUserCustomData(user);
 
-                    if(user.Password != "")
+
+                    if (user.Password != "")
                     {
                         if (DatabaseHandler.ChangeUserPassword(user))
                         {
-                           
+                         
                         }
                     }
+
+                    //if user has no wallet
+                    if (user.ln_wallet_id == null)
+                    {
+                        user.ln_wallet_id = "";
+                        user.ln_user_id = "";
+                        user.ln_invoice_key = "";
+                        user.ln_admin_key = "";
+                    }
+                  
+
+                    DatabaseHandler.ChangeUserCustomData(user);
 
                     GetUsers();
 

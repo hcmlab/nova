@@ -190,6 +190,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Polygon\AddOrRemoveExtraPolygonPointCommand.cs" />
+    <Compile Include="Commands\Polygon\AddOrRemovePolygonPointCommand.cs" />
+    <Compile Include="Commands\Polygon\ChangeCompletePolygonCommand .cs" />
     <Compile Include="Controls\Annotation\AnnoTierNewFreeSchemeWindow.xaml.cs">
       <DependentUpon>AnnoTierNewFreeSchemeWindow.xaml</DependentUpon>
     </Compile>
@@ -275,6 +278,9 @@
     <Compile Include="Database\DatabaseAdminManageUsersWindow.xaml.cs">
       <DependentUpon>DatabaseAdminManageUsersWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseBountiesMainWindow.xaml.cs">
+      <DependentUpon>DatabaseBountiesMainWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseUserManageWindow.xaml.cs">
       <DependentUpon>DatabaseUserManageWindow.xaml</DependentUpon>
     </Compile>
@@ -293,14 +299,26 @@
     <Compile Include="Database\DatabaseCMLTrainAndPredictWindow.xaml.cs">
       <DependentUpon>DatabaseCMLTrainAndPredictWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseBountiesCreateWindow.xaml.cs">
+      <DependentUpon>DatabaseBountiesCreateWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\ICommand.cs" />
+    <Compile Include="Interfaces\IDrawUnit.cs" />
     <Compile Include="Interfaces\IPointList.cs" />
-    <Compile Include="Interfaces\IPolygonDrawUnit.cs" />
-    <Compile Include="Interfaces\IPolygonUtilities.cs" />
+    <Compile Include="Tools\Lightning.cs" />
+    <Compile Include="Tools\LightningTipps.xaml.cs">
+      <DependentUpon>LightningTipps.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\PluginCaller.cs" />
+    <Compile Include="Tools\Polygon Helper\DataGridChecker.cs" />
+    <Compile Include="Tools\Polygon Helper\DrawUnit.cs" />
+    <Compile Include="Tools\Polygon Helper\Utilities.cs" />
     <Compile Include="Tools\Screenshot.cs" />
     <Compile Include="Tools\VolumeControl.xaml.cs">
       <DependentUpon>VolumeControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\LightningWalletManagement.xaml.cs">
+      <DependentUpon>LightningWalletManagement.xaml</DependentUpon>
     </Compile>
     <Compile Include="Types\AnnoMeta.cs" />
     <Compile Include="Types\AnnoSource.cs" />
@@ -311,15 +329,12 @@
     <Compile Include="Types\Pipeline.cs" />
     <Compile Include="Types\PointList.cs" />
     <Compile Include="Types\PointListItem.cs" />
-    <Compile Include="Types\Polygon\ChangeCompletePolygonCommand .cs" />
     <Compile Include="Types\Polygon\CreationInformation.cs" />
-    <Compile Include="Types\Polygon\DataGridChecker.cs" />
     <Compile Include="Types\Polygon\EditInformations.cs" />
-    <Compile Include="Types\Polygon\PolygonDrawUnit.cs" />
+    <Compile Include="Types\Polygon\LabelInformations.cs" />
     <Compile Include="Types\Polygon\PolygonLabel.cs" />
     <Compile Include="Types\Polygon\PolygonList.cs" />
     <Compile Include="Types\Polygon\PolygonPoint.cs" />
-    <Compile Include="Types\Polygon\PolygonUtilities.cs" />
     <Compile Include="Types\SignalFile.cs" />
     <Compile Include="Types\Skeleton.cs" />
     <Compile Include="Types\Polygon\UndoRedoStack.cs" />
@@ -561,6 +576,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Database\DatabaseBountiesMainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Database\DatabaseUserManageWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -584,6 +603,14 @@
     <Page Include="Database\DatabaseCMLTrainAndPredictWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Database\DatabaseBountiesCreateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\LightningTipps.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tools\PatternBrushes.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -638,6 +665,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Tools\VolumeControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\LightningWalletManagement.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -715,6 +746,7 @@
     <Content Include="PythonScripts\LimeExplain.py" />
     <Content Include="PythonScripts\SpearmanR.py" />
     <Content Include="PythonScripts\__init__.py" />
+    <Resource Include="Resources\lightning.png" />
     <Resource Include="Resources\Question_16x.png" />
     <Resource Include="Resources\dropmodel.png" />
     <Resource Include="Resources\dragdrop.png" />

@@ -1138,6 +1138,7 @@ namespace ssi
                 trainer.LeftContext = "0";
                 trainer.RightContext = "0";
                 trainer.Balance = "none";
+                trainer.Backend = "SSI";
 
                 foreach (XmlNode node in doc.SelectNodes("//meta"))
                 {

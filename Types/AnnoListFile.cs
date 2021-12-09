@@ -1057,7 +1057,21 @@ namespace ssi
                 doc.Load(filepath);
 
 
+
+
+                //XmlNode header = doc.SelectSingleNode("//HEADER");
+                //List<KeyValuePair<string, string>> header_list = new List<KeyValuePair<string, string>>();
+                //foreach (XmlNode node in header.ChildNodes)
+                //{
+                //    header_list.Add(new KeyValuePair<string, string>(node.Attributes[0].Value.ToString(), node.Attributes[1].Value.ToString()));
+                //}
+
+               
+
                 //Get time order references
+
+
+
 
                 XmlNode time_order = doc.SelectSingleNode("//TIME_ORDER");
                 List<KeyValuePair<string, string>> time_order_list = new List<KeyValuePair<string, string>>();
@@ -1077,17 +1091,17 @@ namespace ssi
 
 
                     scheme.Type = AnnoScheme.TYPE.FREE;
-                    
-                
                     string tierid = tier.Attributes.GetNamedItem("TIER_ID").Value.ToString();
-  
                     string role = "";
+
                     try
                     {
                        role = tier.Attributes.GetNamedItem("PARTICIPANT").Value.ToString();
                     }
                     catch { }
-                    
+
+                    bool hasreftrack = false;
+                    AnnoList refList = new AnnoList();
 
                     al = new AnnoList();
                     al.Source.File.Path = filepath;
@@ -1100,21 +1114,69 @@ namespace ssi
                         double start = -1;
                         double end = -1;
                         double duration = -1;
+                        string id = "";
                         XmlNode alignable_annotation = annotation.FirstChild;
 
-                        starttmp = (from kvp in time_order_list where kvp.Key == alignable_annotation.Attributes.GetNamedItem("TIME_SLOT_REF1").Value.ToString() select kvp.Value).ToList()[0];
-                        start = double.Parse(starttmp, CultureInfo.InvariantCulture) / 1000;
-                        endtmp = (from kvp in time_order_list where kvp.Key == alignable_annotation.Attributes.GetNamedItem("TIME_SLOT_REF2").Value.ToString() select kvp.Value).ToList()[0];
-                        end = double.Parse(endtmp, CultureInfo.InvariantCulture) / 1000;
-                        label = alignable_annotation.FirstChild.InnerText;
-                        AnnoScheme.Label l = new AnnoScheme.Label(label, Colors.Black);
+                        if(alignable_annotation.Name == "ALIGNABLE_ANNOTATION")
+                        {
+                            starttmp = (from kvp in time_order_list where kvp.Key == alignable_annotation.Attributes.GetNamedItem("TIME_SLOT_REF1").Value.ToString() select kvp.Value).ToList()[0];
+                            start = double.Parse(starttmp, CultureInfo.InvariantCulture) / 1000;
+                            endtmp = (from kvp in time_order_list where kvp.Key == alignable_annotation.Attributes.GetNamedItem("TIME_SLOT_REF2").Value.ToString() select kvp.Value).ToList()[0];
+                            end = double.Parse(endtmp, CultureInfo.InvariantCulture) / 1000;
+                            id = alignable_annotation.Attributes.GetNamedItem("ANNOTATION_ID").Value.ToString();
+                            label = alignable_annotation.FirstChild.InnerText.Replace(';', ',');
+                           
+
+                            AnnoScheme.Label l = new AnnoScheme.Label(label, Colors.Black);
 
 
-                        if(scheme.Type == AnnoScheme.TYPE.DISCRETE && scheme.Labels.Find(x => x.Name == label) == null) scheme.Labels.Add(l);
-                                     
+                            if (scheme.Type == AnnoScheme.TYPE.DISCRETE && scheme.Labels.Find(x => x.Name == label) == null) scheme.Labels.Add(l);
 
-                        duration = end - start;
-                        al.AddSorted(new AnnoListItem(start, duration, label, "", Colors.Black));
+
+                            duration = end - start;
+                            al.AddSorted(new AnnoListItem(start, duration, label, id, Colors.Black));
+                        }
+
+                        else if (alignable_annotation.Name == "REF_ANNOTATION")
+                         
+                        {
+
+
+                            string annoid = alignable_annotation.Attributes.GetNamedItem("ANNOTATION_REF").Value.ToString();
+                            if (!hasreftrack)
+                            {
+                                foreach(AnnoList a in list)
+                                {
+                                    foreach(AnnoListItem ali in a)
+                                    {
+                                        if(ali.Meta == annoid)
+                                        {
+                                            refList = a;
+                                            hasreftrack = true;
+                                            break;
+                                        }
+                                    }
+                                    if(hasreftrack)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            string value = alignable_annotation.FirstChild.InnerText.Replace(';', ','); ;
+                            var annoitem = refList.Where(item => item.Meta == annoid).FirstOrDefault();       // C# 3.0+
+                            start = annoitem.Start;
+                            end = annoitem.Stop;
+                            duration = end - start;
+                            id = alignable_annotation.Attributes.GetNamedItem("ANNOTATION_ID").Value.ToString();
+
+                            al.AddSorted(new AnnoListItem(start, duration, value, id, Colors.Black));
+
+
+                            // string value = (from kvp in time_order_list where kvp.Key == alignable_annotation.Attributes.GetNamedItem("ANNOTATION_VALUE").Value.ToString() select kvp.Value).ToList()[0];
+                           
+                        }
+                       
 
                  
                         //The tier is used as metainformation as well. Might be changed if thats relevant in the future
