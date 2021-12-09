@@ -430,7 +430,6 @@ namespace ssi
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
-            // TODO MARCO vllt wieder auskommentieren? handleKeyEvent(sender, e);
             if (!this.control.annoListControl.editTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
             {
 
