@@ -1,39 +1,62 @@
-﻿using System;
+﻿using ssi.Types.Polygon;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Windows.Input;
 
 namespace ssi
 {
-    public partial class InterpolationWindow : Window
+    partial class InterpolationWindow : Window
     {
+        private AnnoList list;
+        private Utilities polygonUtilities;
+        private int lastInterpolatedSourceFrameIndex = -1;
+        private PolygonLabel lastInterpolatedSourcePolygon = null;
 
-       
-        AnnoList list;
-        MainHandler mainHandler;
-        public InterpolationWindow(AnnoList list, MainHandler mainHandler)
+        internal InterpolationWindow(Utilities polygonUtilities)
         {
             InitializeComponent();
-            this.list = list;
-            this.mainHandler = mainHandler;
-            this.mainHandler.enableOrDisableControlButtons(false);
+            this.polygonUtilities = polygonUtilities;
+            this.polygonUtilities.enableOrDisableControlButtons(false);
+            this.updateItmes();
+            
+            int currentIndex = this.polygonUtilities.getCurrentAnnoListIndex();
+            TargetFrames.SelectedIndex = currentIndex;
+            SourceFrames.SelectedIndex = currentIndex;
+            
+            if (SourceFrames.SelectedItem != null)
+                SourceLabelsListBox.SelectedIndex = this.polygonUtilities.getCurrentLabelIndex();
 
+        }
+
+        public void updateItmes()
+        {
+            this.list = polygonUtilities.getCurrentAnnoList();
+            int sourceFrameIndex = SourceFrames.SelectedIndex;
+            int targetFrameIndex = TargetFrames.SelectedIndex;
+            int sourceLabelIndex = SourceLabelsListBox.SelectedIndex;
+            int targetLabelIndex = TargetLabelsListBox.SelectedIndex;
+            SourceFrames.Items.Clear();
+            TargetFrames.Items.Clear();
+            int counter = 0;
             foreach (AnnoListItem item in this.list)
             {
-                SourceFrames.Items.Add(new ComboboxItem(item.Label, item));
-                TargetFrames.Items.Add(new ComboboxItem(item.Label, item));
+                SourceFrames.Items.Add(new ComboboxItem(item.Label + " | Labels in frame: " + item.LabelCount, counter));
+                TargetFrames.Items.Add(new ComboboxItem(item.Label + " | Labels in frame: " + item.LabelCount, counter));
+                counter++;
             }
-            SourceFrames.SelectedItem = SourceFrames.Items[0];
-            TargetFrames.SelectedItem = TargetFrames.Items[0];
+            SourceFrames.SelectedIndex = sourceFrameIndex;
+            TargetFrames.SelectedIndex = targetFrameIndex;
+            SourceLabelsListBox.SelectedIndex = sourceLabelIndex;
+            TargetLabelsListBox.SelectedIndex = targetLabelIndex;
+
         }
 
         private void Interpolate_2D_Click(object sender, RoutedEventArgs e)
         {
-            if(SourceFrames.SelectedIndex < TargetFrames.SelectedIndex && SourceLabelsListBox.SelectedValue != null && TargetLabelsListBox.SelectedValue != null)
+            if(selectedLabelsCorrect())
             {
                 PolygonLabel selectedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
                 PolygonLabel selectedTargetPolygon = (PolygonLabel)TargetLabelsListBox.SelectedValue;
@@ -47,7 +70,7 @@ namespace ssi
 
                 double selectedSourcePolygonArea = calculatePolygonArea(selectedSourcePolygon.Polygon);
                 double selectedTargetPolygonArea = calculatePolygonArea(selectedTargetPolygon.Polygon);
-                
+
                 Point midPointSource = calculatePolygonMidPoint(selectedSourcePolygon.Polygon, selectedSourcePolygonArea);
                 Point midPointTarget = calculatePolygonMidPoint(selectedTargetPolygon.Polygon, selectedTargetPolygonArea);
 
@@ -59,128 +82,141 @@ namespace ssi
                 double xStepPerFrame = xDif / framesBetween;
                 double yStepPerFrame = yDif / framesBetween;
 
-                mainHandler.handle2DInterpolation((ComboboxItem)SourceFrames.SelectedItem, selectedSourcePolygon, selectedTargetPolygon, xStepPerFrame, yStepPerFrame, framesBetween);
-                DialogResult = true;
-                Close();
-            }
-            else
-            {
-                MessageBox.Show("Not able to interpolate with the selected values.", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                polygonUtilities.handle2DInterpolation((ComboboxItem)TargetFrames.SelectedItem, (ComboboxItem)SourceFrames.SelectedItem, selectedSourcePolygon, selectedTargetPolygon, xStepPerFrame, yStepPerFrame, framesBetween);
+                updateItmes();
+                this.lastInterpolatedSourceFrameIndex = SourceFrames.SelectedIndex;
+                this.lastInterpolatedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
             }
         }
 
         private void Interpolate_3D_Click(object sender, RoutedEventArgs e)
         {
-            // We need at least 1 frame between source and target
-            if (SourceFrames.SelectedIndex + 1 < TargetFrames.SelectedIndex && SourceLabelsListBox.SelectedValue != null && TargetLabelsListBox.SelectedValue != null)
+            if (selectedLabelsCorrect())
             {
-                if(((PolygonLabel)SourceLabelsListBox.SelectedValue).Label == ((PolygonLabel)TargetLabelsListBox.SelectedValue).Label)
+                PolygonLabel selectedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
+                PolygonLabel selectedTargetPolygon = (PolygonLabel)TargetLabelsListBox.SelectedValue;
+
+                // Step 1: Calculation for the midpoints
+                double selectedSourcePolygonArea = calculatePolygonArea(selectedSourcePolygon.Polygon);
+                double selectedTargetPolygonArea = calculatePolygonArea(selectedTargetPolygon.Polygon);
+                Point midPointSource = calculatePolygonMidPoint(selectedSourcePolygon.Polygon, selectedSourcePolygonArea);
+                Point midPointTarget = calculatePolygonMidPoint(selectedTargetPolygon.Polygon, selectedTargetPolygonArea);
+
+                // Step 2: Change coordination system from image to math 
+                Point negativeMidPointSource = new Point(midPointSource.X, -midPointSource.Y);
+                Point negativeMidPointTarget = new Point(midPointTarget.X, -midPointTarget.Y);
+
+                List<PolygonPoint> newNegativeSourcePolygon = selectedSourcePolygon.getPolygonAsCopy();
+                List<PolygonPoint> newNegativeTargetPolygon = selectedTargetPolygon.getPolygonAsCopy();
+
+                for (int i = 0; i < newNegativeSourcePolygon.Count; i++)
                 {
-                    PolygonLabel selectedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
-                    PolygonLabel selectedTargetPolygon = (PolygonLabel)TargetLabelsListBox.SelectedValue;
-                    
-                    // Step 1: Calculation for the midpoints
-                    double selectedSourcePolygonArea = calculatePolygonArea(selectedSourcePolygon.Polygon);
-                    double selectedTargetPolygonArea = calculatePolygonArea(selectedTargetPolygon.Polygon);
-                    Point midPointSource = calculatePolygonMidPoint(selectedSourcePolygon.Polygon, selectedSourcePolygonArea);
-                    Point midPointTarget = calculatePolygonMidPoint(selectedTargetPolygon.Polygon, selectedTargetPolygonArea);
-
-                    // Step 2: Change coordination system from image to math 
-                    Point negativeMidPointSource = new Point(midPointSource.X, -midPointSource.Y);
-                    Point negativeMidPointTarget = new Point(midPointTarget.X, -midPointTarget.Y);
-
-                    List<PolygonPoint> newNegativeSourcePolygon = selectedSourcePolygon.getPolygonAsCopy();
-                    List<PolygonPoint> newNegativeTargetPolygon = selectedTargetPolygon.getPolygonAsCopy();
-
-                    for (int i = 0; i < newNegativeSourcePolygon.Count; i++)
-                    {
-                        newNegativeSourcePolygon[i].Y *= -1; 
-                    }
-
-                    for (int i = 0; i < newNegativeTargetPolygon.Count; i++)
-                    {
-                        newNegativeTargetPolygon[i].Y *= -1;
-                    }
-
-                    // Step 3: Add points of the source polygon, to the target polygon and and vice versa 
-                    double angleOfPointToAdd;
-                    Point pointToAdd = new Point();
-                    foreach (PolygonPoint point in selectedSourcePolygon.Polygon)
-                    {
-                        pointToAdd = new Point(point.X, -point.Y);
-                        angleOfPointToAdd = calculateAngle(negativeMidPointSource, pointToAdd);
-                        newNegativeTargetPolygon = addPoint(angleOfPointToAdd, negativeMidPointTarget, newNegativeTargetPolygon);
-                    }
-
-                    foreach (PolygonPoint point in selectedTargetPolygon.Polygon)
-                    {
-                        pointToAdd = new Point(point.X, -point.Y);
-                        angleOfPointToAdd = calculateAngle(negativeMidPointTarget, pointToAdd);
-                        newNegativeSourcePolygon = addPoint(angleOfPointToAdd, negativeMidPointSource, newNegativeSourcePolygon);
-                    }
-
-                    // 4. Check the results: we must have two polygons with the same amount of points and each angle of a point must be in both polygons 
-                    List<PointAngleTuple> sourcePointsAnglesTuple = new List<PointAngleTuple>();
-                    List<PointAngleTuple> targetPointsAnglesTuple = new List<PointAngleTuple>();
-
-                    foreach (PolygonPoint point in newNegativeSourcePolygon)
-                    {
-                        sourcePointsAnglesTuple.Add(new PointAngleTuple(new PolygonPoint(point.X, -point.Y), Math.Round(calculateAngle(negativeMidPointSource, getMathPoint(point)), 2)));
-                    }
-
-                    foreach (PolygonPoint point in newNegativeTargetPolygon)
-                    {
-                        targetPointsAnglesTuple.Add(new PointAngleTuple(new PolygonPoint(point.X, -point.Y), Math.Round(calculateAngle(negativeMidPointTarget, getMathPoint(point)), 2)));
-                    }
-
-                    sourcePointsAnglesTuple.Sort(delegate (PointAngleTuple first, PointAngleTuple second) { return first.angle.CompareTo(second.angle); });
-                    targetPointsAnglesTuple.Sort(delegate (PointAngleTuple first, PointAngleTuple second) { return first.angle.CompareTo(second.angle); });
-
-                    if (sourcePointsAnglesTuple.Count != targetPointsAnglesTuple.Count)
-                        throw new Exception("Implementation Error: New source and new target polygon have not the same amount of points!");
-
-                    for (int i = 0; i < sourcePointsAnglesTuple.Count; i++)
-                    {
-                        if (sourcePointsAnglesTuple[i].angle != targetPointsAnglesTuple[i].angle)
-                            throw new Exception("At least one angle not equal!");
-                    }
-
-                    int stepsFromSourceToTarget = TargetFrames.SelectedIndex - SourceFrames.SelectedIndex;
-                    List<double> xStepsPerFrame = new List<double>();
-                    List<double> yStepsPerFrame = new List<double>();
-
-                    for (int i = 0; i < sourcePointsAnglesTuple.Count; i++)
-                    {
-                        xStepsPerFrame.Add((targetPointsAnglesTuple[i].point.X - sourcePointsAnglesTuple[i].point.X) / stepsFromSourceToTarget);
-                        yStepsPerFrame.Add((targetPointsAnglesTuple[i].point.Y - sourcePointsAnglesTuple[i].point.Y) / stepsFromSourceToTarget);
-                    }
-
-                    mainHandler.handle3DInterpolation(xStepsPerFrame, yStepsPerFrame, (ComboboxItem)SourceFrames.SelectedItem,(PolygonLabel)SourceLabelsListBox.SelectedValue, (PolygonLabel)TargetLabelsListBox.SelectedValue, sourcePointsAnglesTuple, targetPointsAnglesTuple, stepsFromSourceToTarget);
-                    Close();
-              
+                    newNegativeSourcePolygon[i].Y *= -1;
                 }
-                else
+
+                for (int i = 0; i < newNegativeTargetPolygon.Count; i++)
                 {
-                    MessageBox.Show("You can just interpolate between same labels.", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                    newNegativeTargetPolygon[i].Y *= -1;
+                }
+
+                // Step 3: Add points of the source polygon, to the target polygon and and vice versa 
+                double angleOfPointToAdd;
+                Point pointToAdd = new Point();
+                foreach (PolygonPoint point in selectedSourcePolygon.Polygon)
+                {
+                    pointToAdd = new Point(point.X, -point.Y);
+                    angleOfPointToAdd = calculateAngle(negativeMidPointSource, pointToAdd);
+                    newNegativeTargetPolygon = addPoint(angleOfPointToAdd, negativeMidPointTarget, newNegativeTargetPolygon);
+                }
+
+                foreach (PolygonPoint point in selectedTargetPolygon.Polygon)
+                {
+                    pointToAdd = new Point(point.X, -point.Y);
+                    angleOfPointToAdd = calculateAngle(negativeMidPointTarget, pointToAdd);
+                    newNegativeSourcePolygon = addPoint(angleOfPointToAdd, negativeMidPointSource, newNegativeSourcePolygon);
+                }
+
+                // 4. Check the results: we must have two polygons with the same amount of points and each angle of a point must be in both polygons 
+                List<PointAngleTuple> sourcePointsAnglesTuple = new List<PointAngleTuple>();
+                List<PointAngleTuple> targetPointsAnglesTuple = new List<PointAngleTuple>();
+
+                foreach (PolygonPoint point in newNegativeSourcePolygon)
+                {
+                    sourcePointsAnglesTuple.Add(new PointAngleTuple(new PolygonPoint(point.X, -point.Y), Math.Round(calculateAngle(negativeMidPointSource, getMathPoint(point)), 2)));
+                }
+
+                foreach (PolygonPoint point in newNegativeTargetPolygon)
+                {
+                    targetPointsAnglesTuple.Add(new PointAngleTuple(new PolygonPoint(point.X, -point.Y), Math.Round(calculateAngle(negativeMidPointTarget, getMathPoint(point)), 2)));
+                }
+
+                sourcePointsAnglesTuple.Sort(delegate (PointAngleTuple first, PointAngleTuple second) { return first.angle.CompareTo(second.angle); });
+                targetPointsAnglesTuple.Sort(delegate (PointAngleTuple first, PointAngleTuple second) { return first.angle.CompareTo(second.angle); });
+
+                if (sourcePointsAnglesTuple.Count != targetPointsAnglesTuple.Count)
+                    throw new Exception("Implementation Error: New source and new target polygon have not the same amount of points!");
+
+                for (int i = 0; i < sourcePointsAnglesTuple.Count; i++)
+                {
+                    if (Math.Truncate(sourcePointsAnglesTuple[i].angle) != Math.Truncate(targetPointsAnglesTuple[i].angle))
+                        throw new Exception("At least one angle not equal!");
+                }
+
+                int stepsFromSourceToTarget = TargetFrames.SelectedIndex - SourceFrames.SelectedIndex;
+                List<double> xStepsPerFrame = new List<double>();
+                List<double> yStepsPerFrame = new List<double>();
+
+                for (int i = 0; i < sourcePointsAnglesTuple.Count; i++)
+                {
+                    xStepsPerFrame.Add((targetPointsAnglesTuple[i].point.X - sourcePointsAnglesTuple[i].point.X) / stepsFromSourceToTarget);
+                    yStepsPerFrame.Add((targetPointsAnglesTuple[i].point.Y - sourcePointsAnglesTuple[i].point.Y) / stepsFromSourceToTarget);
+                }
+
+                polygonUtilities.handle3DInterpolation(xStepsPerFrame, yStepsPerFrame, (ComboboxItem)SourceFrames.SelectedItem, (PolygonLabel)SourceLabelsListBox.SelectedValue, (PolygonLabel)TargetLabelsListBox.SelectedValue, sourcePointsAnglesTuple, targetPointsAnglesTuple, stepsFromSourceToTarget);
+                updateItmes();
+                this.lastInterpolatedSourceFrameIndex = SourceFrames.SelectedIndex;
+                this.lastInterpolatedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
+            }
+        }
+
+        private bool selectedLabelsCorrect()
+        {
+            if(!(SourceFrames.SelectedIndex + 1 < TargetFrames.SelectedIndex && SourceLabelsListBox.SelectedValue != null && TargetLabelsListBox.SelectedValue != null))
+            {
+                MessageBox.Show("Not able to interpolate with the selected values! \nMake sure your source frame is smaller than your target frame \nand it is at least one frame between them. ", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                return false;
+            }
+            
+            if(((PolygonLabel)SourceLabelsListBox.SelectedValue).Label != ((PolygonLabel)TargetLabelsListBox.SelectedValue).Label)
+            {
+                MessageBox.Show("You can just interpolate between same labels.", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                return false;
+            }
+            
+            if(this.lastInterpolatedSourceFrameIndex == SourceFrames.SelectedIndex && this.lastInterpolatedSourcePolygon == (PolygonLabel)SourceLabelsListBox.SelectedValue)
+            {
+                MessageBoxResult answer = MessageBox.Show("You try to interpolate with the same values the second time.  You possibly add \nsimilar labels. Are you sure you want to do this? ", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                if (answer == MessageBoxResult.No)
+                {
+                    return false;
                 }
             }
-            else
-            {
-                MessageBox.Show("Not able to interpolate with the selected values.", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+
+            return true;
         }
 
 
         private List<PolygonPoint> addPointToPolygonAfterSpecificPosition(PolygonPoint newPoint, PolygonPoint posPoint, List<PolygonPoint> polygon)
         {
             List<PolygonPoint> newPolygon = new List<PolygonPoint>();
-            
-            foreach(PolygonPoint polygonPoint in polygon)
+            bool pointSet = false; 
+            foreach (PolygonPoint polygonPoint in polygon)
             {
                 newPolygon.Add(polygonPoint);
                 
-                if (posPoint.isOnTheSameSpot(polygonPoint))
+                if (posPoint.isOnTheSameSpot(polygonPoint) && pointSet == false)
                 {
+                    pointSet = true;
                     newPolygon.Add(newPoint);
                 }
             }
@@ -250,6 +286,10 @@ namespace ssi
         // Checks whether the point is between A and B and also whether the angle of the point is between the angles of A and B
         private bool isPointWithinSection(Point midPoint, double angleOfPointToAdd, Point intersectionPoint, Point p1, Point p2)
         {
+            intersectionPoint = truncPoint(intersectionPoint);
+            p1 = truncPoint(p1);
+            p2 = truncPoint(p2);
+
             double x_start = p1.X <= p2.X ? p1.X : p2.X;
             double y_start = p1.Y <= p2.Y ? p1.Y : p2.Y;
             double x_end = p1.X > p2.X ? p1.X : p2.X;
@@ -285,6 +325,11 @@ namespace ssi
             }
 
             return true;
+        }
+
+        private Point truncPoint(Point input)
+        {
+            return new Point(Math.Truncate(100 * input.X) / 100, Math.Truncate(100 * input.Y) / 100);
         }
 
 
@@ -382,21 +427,24 @@ namespace ssi
             return new Point(Math.Round(Cx, 6), Math.Round(Cy, 6));
         }
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
+        private void Close_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
         private void sourceFrameChanged(object sender, RoutedEventArgs e)
         {
-            ObservableCollection<PolygonLabel> items = new ObservableCollection<PolygonLabel>();
-            PolygonList polygonList = ((ComboboxItem)SourceFrames.SelectedValue).Value.PolygonList;
-            foreach (PolygonLabel label in polygonList.Polygons)
+            if(SourceFrames.SelectedItem != null)
             {
-                items.Add(label);
+                ObservableCollection<PolygonLabel> items = new ObservableCollection<PolygonLabel>();
+                PolygonList polygonList = this.list[((ComboboxItem)SourceFrames.SelectedValue).FrameIndex].PolygonList;
+                foreach (PolygonLabel label in polygonList.Polygons)
+                {
+                    items.Add(label);
+                }
+                SourceLabelsListBox.ItemsSource = items;
+                this.SourceLabelsListBox.SelectedIndex = 0;
             }
-            SourceLabelsListBox.ItemsSource = items;
-            sourceLabelChanged(sender, e);
         }
 
         private void SourceLabelsListBox_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -407,28 +455,34 @@ namespace ssi
         private void SourceLabelsListBox_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             sourceLabelChanged(sender, null);
-
         }
 
         private void sourceLabelChanged(object sender, RoutedEventArgs e)
         {
-            AnnoListItem newSelectedAnnoListItem = ((ComboboxItem)SourceFrames.SelectedValue).Value;
-            PolygonLabel newSelectedPolygonLabel = (PolygonLabel) SourceLabelsListBox.SelectedItem;
+            if(SourceLabelsListBox.SelectedValue != null)
+            {
+                AnnoListItem newSelectedAnnoListItem = this.list[((ComboboxItem)SourceFrames.SelectedValue).FrameIndex];
+                int newSelectedAnnoListItemIndex = SourceFrames.SelectedIndex;
+                PolygonLabel newSelectedPolygonLabel = (PolygonLabel)SourceLabelsListBox.SelectedItem;
 
-            this.mainHandler.changeSelection(newSelectedAnnoListItem, newSelectedPolygonLabel);
+                this.polygonUtilities.changeSelection(newSelectedAnnoListItemIndex, newSelectedAnnoListItem, newSelectedPolygonLabel);
+            }
         }
 
         private void targetFrameChanged(object sender, RoutedEventArgs e)
         {
-            ObservableCollection<PolygonLabel> items = new ObservableCollection<PolygonLabel>();
-            PolygonList polygonList = ((ComboboxItem)TargetFrames.SelectedValue).Value.PolygonList;
-            foreach (PolygonLabel label in polygonList.Polygons)
+            if(TargetFrames.SelectedItem != null)
             {
-                items.Add(label);
-            }
-            TargetLabelsListBox.ItemsSource = items;
+                ObservableCollection<PolygonLabel> items = new ObservableCollection<PolygonLabel>();
+                PolygonList polygonList = this.list[((ComboboxItem)TargetFrames.SelectedValue).FrameIndex].PolygonList;
+                foreach (PolygonLabel label in polygonList.Polygons)
+                {
+                    items.Add(label);
+                }
+                TargetLabelsListBox.ItemsSource = items;
 
-            targetLabelChanged(sender, e);
+                this.TargetLabelsListBox.SelectedIndex = 0;
+            }
         }
 
         private void TargetLabelsListBox_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -439,20 +493,48 @@ namespace ssi
         private void TargetLabelsListBox_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             targetLabelChanged(sender, null);
-
         }
 
         private void targetLabelChanged(object sender, RoutedEventArgs e)
         {
-            AnnoListItem newSelectedAnnoListItem = ((ComboboxItem)TargetFrames.SelectedValue).Value;
-            PolygonLabel newSelectedPolygonLabel = (PolygonLabel)TargetLabelsListBox.SelectedItem;
+            if(TargetLabelsListBox.SelectedItem != null)
+            {
+                AnnoListItem newSelectedAnnoListItem = this.list[((ComboboxItem)TargetFrames.SelectedValue).FrameIndex];
+                int newSelectedAnnoListItemIndex = TargetFrames.SelectedIndex;
+                PolygonLabel newSelectedPolygonLabel = (PolygonLabel)TargetLabelsListBox.SelectedItem;
 
-            this.mainHandler.changeSelection(newSelectedAnnoListItem, newSelectedPolygonLabel);
+                this.polygonUtilities.changeSelection(newSelectedAnnoListItemIndex, newSelectedAnnoListItem, newSelectedPolygonLabel);
+            }
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            this.mainHandler.enableOrDisableControlButtons(true);
+            this.polygonUtilities.enableOrDisableControlButtons(true);
+            this.polygonUtilities.setInterpolationWindowClosed();
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.KeyboardDevice.IsKeyDown(Key.Escape))
+            {
+                this.Close();
+            }
+        }
+
+        private void Next_Click(object sender, RoutedEventArgs e)
+        {
+           
+            int indexSource = SourceFrames.SelectedIndex;
+            int indexTarget = TargetFrames.SelectedIndex;
+            
+            if (indexSource >= indexTarget)
+                return;
+
+            // Just in case we start with the first frame, we have to add an extra value to the target frame
+            int plus = indexSource == 0 ? 1 : 0;
+            int dif = indexTarget - indexSource;
+            SourceFrames.SelectedIndex += dif;
+            TargetFrames.SelectedIndex += dif + plus;
         }
     }
 
@@ -460,12 +542,12 @@ namespace ssi
     public class ComboboxItem
     {
         public string Text { get; set; }
-        public AnnoListItem Value { get; set; }
+        public int FrameIndex { get; set; }
 
-        public ComboboxItem(string text, AnnoListItem value)
+        public ComboboxItem(string text, int frameIndex)
         {
             Text = text;
-            Value = value;
+            FrameIndex = frameIndex;
         }
 
         public override string ToString()
