@@ -18,10 +18,10 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.1.0.5";
+        public static string BuildVersion = "1.2.1.0";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
-        public static bool ENABLE_LIGHTNING = false;
+        public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
         public static bool ENABLE_VIEWONLY = false;
         public static int pythonProcessID;
         public static int pythonWindowHandle;
@@ -649,6 +649,7 @@ namespace ssi
                 Properties.Settings.Default.DrawVideoWavform = s.DrawvideoWavform();
                 Properties.Settings.Default.EnablePython = s.EnablePython();
                 Properties.Settings.Default.EnablePythonDebug = s.EnablePythonDebug();
+                Properties.Settings.Default.EnableLightning = s.EnableLightning();
 
                 Properties.Settings.Default.Save();
                 
