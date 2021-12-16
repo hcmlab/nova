@@ -111,6 +111,11 @@ namespace ssi
             return (DrawwaveformCheckbox.IsChecked == true);
         }
 
+        public bool EnableLightning()
+        {
+            return (EnableLightningCheckbox.IsChecked == true);
+        }
+
         public string ContinuousHotkeyLevels()
         {
             return ContinuousHotkeysnum.Text;

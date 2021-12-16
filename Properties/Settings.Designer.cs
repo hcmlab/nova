@@ -12,7 +12,6 @@ namespace ssi.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.4.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
@@ -227,22 +226,7 @@ namespace ssi.Properties {
                 this["DefaultDiscreteSampleRate"] = value;
             }
         }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("15")]
-        public double DefaultPolygonPointDistance
-        {
-            get
-            {
-                return ((double)(this["DefaultPolygonPointDistance"]));
-            }
-            set
-            {
-                this["DefaultPolygonPointDistance"] = value;
-            }
-        }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -672,6 +656,30 @@ namespace ssi.Properties {
             }
             set {
                 this["CMLTempTrainerName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableLightning {
+            get {
+                return ((bool)(this["EnableLightning"]));
+            }
+            set {
+                this["EnableLightning"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15")]
+        public double DefaultPolygonPointDistance {
+            get {
+                return ((double)(this["DefaultPolygonPointDistance"]));
+            }
+            set {
+                this["DefaultPolygonPointDistance"] = value;
             }
         }
     }
