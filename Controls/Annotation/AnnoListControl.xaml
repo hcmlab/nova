@@ -1,11 +1,14 @@
 ﻿<UserControl x:Class="ssi.AnnoListControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
     xmlns:local="clr-namespace:ssi"
     Height="Auto" Width="Auto">
 
     <UserControl.Resources>
         <local:ValueRoundConverter x:Key="roundConverter" />
+        <local:ValueRoundConverter01 x:Key="roundConverter01" />
+        <local:ValueRoundConverterminDur x:Key="roundConverterminDur" />
     </UserControl.Resources>
 
     <Grid>
@@ -21,7 +24,7 @@
     
 
 
-        <Border Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5,0,5,0">
+        <Border Name="border" Grid.Column="0" Grid.Row="0" BorderThickness="2" Margin="5,0,5,0">
             <Grid>
 
                 <Grid.RowDefinitions>
@@ -35,7 +38,7 @@
                     <TextBox x:Name="searchTextBox" TextChanged="searchTextBox_TextChanged" DockPanel.Dock="Right" Margin="2,0,0,0"/>
                 </DockPanel>
 
-                <ListView Name="annoDataGrid" Grid.Row="0" SourceUpdated ="AnnoDataGrid_SourceUpdated" GridViewColumnHeader.Click="SortListView"  >
+                <ListView Name="annoDataGrid" Grid.Row="0" SourceUpdated ="AnnoDataGrid_SourceUpdated" GridViewColumnHeader.Click="SortListView" Foreground="Black"  >
                 <ListView.ContextMenu>
                     <ContextMenu Name="InvoiceDetailsList">
                         <ContextMenu.BitmapEffect>
@@ -55,31 +58,71 @@
                         </ContextMenu>
                 </ListView.ContextMenu>
                 <ListView.View>
-                    <GridView>
+                    <GridView x:Name="annolistgrid">
 
-                            <GridViewColumn x:Name="LabelColumn" Width="70" Header="Label" DisplayMemberBinding="{Binding Label}">
+                            <GridViewColumn x:Name="LabelColumn" Width="70" Header="Label" DisplayMemberBinding="{Binding Label}" TextBlock.Foreground="Black">
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ScoreColumn" Header="Score" Width="70" DisplayMemberBinding="{Binding Score}">
+                            <GridViewColumn x:Name="ScoreColumn" Header="Score" Width="70" DisplayMemberBinding="{Binding Score}" TextBlock.Foreground="Black">
                             </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="From">
-                            <GridViewColumn.DisplayMemberBinding>
+                            <GridViewColumn x:Name="StartBox" Width="Auto" Header="From">
+                            <!--<GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Start" Converter="{StaticResource roundConverter}" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="To">
-                            <GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn.DisplayMemberBinding>-->
+
+                               <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <p:TextBoxEx Text="{Binding Start, Converter={StaticResource roundConverter}}" Keyboard.KeyDown="editTextBox_KeyDown" GotFocus="TextBoxEx_GotFocus" LostFocus="TextBoxEx_LostFocus"  IsEnabled="True" Foreground="Black" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+
+
+
+
+                            <GridViewColumn x:Name="StopBox"  Width="Auto" Header="To">
+                            <!--<GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Stop" Converter="{StaticResource roundConverter}" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-                        <GridViewColumn Width="Auto" Header="Duration">
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="Duration" Converter="{StaticResource roundConverter}" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-                        <GridViewColumn x:Name="MetaColumn" Width="Auto" Header="Confidence" DisplayMemberBinding="{Binding Confidence}" />
-                        <GridViewColumn x:Name="ConfidenceColumn" Width="Auto" Header="Meta" DisplayMemberBinding="{Binding Meta}" />
-                        <GridViewColumn x:Name="LabelCountColumn" Width="Auto" Header="Label Count" DisplayMemberBinding="{Binding LabelCount}" />
+                            </GridViewColumn.DisplayMemberBinding>-->
+
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <p:TextBoxEx Text="{Binding Stop, Converter={StaticResource roundConverter}}" Keyboard.KeyDown="editTextBox_KeyDown" GotFocus="TextBoxEx_GotFocus" LostFocus="TextBoxEx_LostFocus" IsEnabled="True" Foreground="Black" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Duration" TextBlock.Foreground="Black">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Duration" Converter="{StaticResource roundConverter}"/>
+                                </GridViewColumn.DisplayMemberBinding>
+                                <!--<GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                            <p:TextBoxEx Text="{Binding Duration, Converter={StaticResource roundConverterminDur}}" Keyboard.KeyDown="editTextBox_KeyDown" GotFocus="TextBoxEx_GotFocus" LostFocus="TextBoxEx_LostFocus" IsEnabled="True" Foreground="Black" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>-->
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="MetaColumn" Width="Auto" Header="Confidence"  >
+
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                            <p:TextBoxEx Text="{Binding Confidence,  Converter={StaticResource roundConverter01}}" Keyboard.KeyDown="editTextBox_KeyDown" GotFocus="TextBoxEx_GotFocus"   LostFocus="TextBoxEx_LostFocus" IsEnabled="True" Foreground="Black" Background="{x:Null}" BorderBrush="{x:Null}">
+                                            </p:TextBoxEx>
+                                        </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn x:Name="ConfidenceColumn" Width="Auto" Header="Meta" DisplayMemberBinding="{Binding Meta}" TextBlock.Foreground="Black" />
+                            <GridViewColumn x:Name="LabelCountColumn" Width="Auto" Header="Label Count" DisplayMemberBinding="{Binding LabelCount}" TextBlock.Foreground="Black" />
                     </GridView>
                 </ListView.View>
             </ListView>

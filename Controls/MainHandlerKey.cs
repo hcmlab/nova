@@ -339,86 +339,90 @@ namespace ssi
                             break;
                     /*No Modifier keys are pressed*/
                     case 0:
-                        if (e.KeyboardDevice.IsKeyDown(Key.S))
-                        {
-                            if (AnnoTierStatic.Label != null)
+
+                            if (e.KeyboardDevice.IsKeyDown(Key.S))
                             {
-                                SplitSegment(sender, e);
+                                if (AnnoTierStatic.Label != null)
+                                {
+                                    SplitSegment(sender, e);
+                                }
+
+                                else
+                                {
+                                    annoCursor.X = signalCursor.X;
+                                    timeline.CurrentSelectPosition = annoCursor.X;
+                                    timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
+                                }
+                                e.Handled = true;
                             }
 
-                            else
+                            else if (e.KeyboardDevice.IsKeyDown(Key.A))
                             {
-                               annoCursor.X = signalCursor.X;
-                               timeline.CurrentSelectPosition = annoCursor.X;
-                               timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                            }
-                            e.Handled = true;
-                        }
 
-                        else if (e.KeyboardDevice.IsKeyDown(Key.A))
-                        {
-                            
                                 annoCursor.X = signalCursor.X;
                                 timeline.CurrentSelectPosition = annoCursor.X;
                                 timeline.CurrentPlayPosition = Time.TimeFromPixel(signalCursor.X);
-                            
-                            e.Handled = true;
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
-                        {
-                            ChangeTier();
-                            e.Handled = true;
-                        }
-                        if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Up))
-                        {
-                            ChangeTier(false);
-                            e.Handled = true;
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.Left))
-                        {
-                            MoveFrameMedia(false);
-
-                            e.Handled = true;
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.Right))
-                        {
-                            MoveFrameMedia();
-                            e.Handled = true;
-                        }
-
-                        else if (e.KeyboardDevice.IsKeyDown(Key.Space))
-                        {
-                            TogglePlay();
-                            e.Handled = true;
-                        }
-
-                        else if (AnnoTierStatic.Selected != null)
-                        {
-                            if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                               
+;
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Down))
                             {
-                                if ((e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
-                                { 
-                                    SetLabelForSegment(e);                            
+                                ChangeTier();
+                                e.Handled = true;
+                            }
+                            if (e.KeyboardDevice.IsKeyDown(Key.T) && e.KeyboardDevice.IsKeyDown(Key.Up))
+                            {
+                                ChangeTier(false);
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Left) && !this.control.annoListControl.itemhasFocus)
+                            {
+                                MoveFrameMedia(false);
+
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Right)  && !this.control.annoListControl.itemhasFocus)
+                            {
+                                MoveFrameMedia();
+                                e.Handled = true;
+                            }
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Space))
+                            {
+                                TogglePlay();
+                                e.Handled = true;
+                            }
+
+                            else if (AnnoTierStatic.Selected != null && !this.control.annoListControl.itemhasFocus)
+                            {
+                                if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                                {
+                                    if ((e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+                                    {
+                                        SetLabelForSegment(e);
+                                    }
+                                }
+                                else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && AnnoTierStatic.isNotLiveAnnoMode)
+                                {
+                                    if (e.KeyboardDevice.IsKeyDown(Key.Up))
+                                    {
+                                        SetContinuousLevelUp();
+                                        e.Handled = true;
+                                    }
+                                    else if (e.KeyboardDevice.IsKeyDown(Key.Down))
+                                    {
+                                        SetContinuousLevelDown();
+                                        e.Handled = true;
+                                    }
+                                    else if ((e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+                                    {
+                                        SetContinuousLevel(e);
+                                    }
                                 }
                             }
-                            else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && AnnoTierStatic.isNotLiveAnnoMode)
-                            {                                
-                                if (e.KeyboardDevice.IsKeyDown(Key.Up))
-                                {
-                                    SetContinuousLevelUp();
-                                    e.Handled = true;
-                                }                                
-                                else if (e.KeyboardDevice.IsKeyDown(Key.Down))
-                                {
-                                    SetContinuousLevelDown();
-                                    e.Handled = true;
-                                }
-                                else if ((e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
-                                {
-                                    SetContinuousLevel(e);
-                                }
-                            }
-                        }
+                        
+                        
 
                         break;
                     default:
