@@ -271,32 +271,28 @@ namespace ssi.Types.Polygon
             return editInfos.ImageHeight > y_val;
         }
 
+        public void addNewPointToDonePolygon(double x, double y)
+        {
+            PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
+            this.UndoRedoStack.Do(new AddOrRemoveExtraPolygonPointCommand(editInfos.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel, TYPE.EXTRA_POINT));
+            polygonDrawUnit.polygonOverlayUpdate(((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem));
+        }
+
         public void editPolygon(double x, double y)
         {
-            if (editInfos.IsAboveSelectedPolygonLineAndCtrlPressed)
-            {
-                PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
-                this.UndoRedoStack.Do(new AddOrRemoveExtraPolygonPointCommand(editInfos.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel, TYPE.EXTRA_POINT));
-                polygonDrawUnit.polygonOverlayUpdate(((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem));
-            }
-            else
-            {
-                if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
-                {
-                    enableOrDisableAllControls(false);
-                    PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
-                    List<Point> polygonPoints = new List<Point>();
+            enableOrDisableAllControls(false);
+            PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
+            List<Point> polygonPoints = new List<Point>();
 
-                    foreach (PolygonPoint point in polygonLabel.Polygon)
-                    {
-                        polygonPoints.Add(new Point(point.X, point.Y));
-                    }
-
-                    editInfos.PolygonStartPosition = polygonPoints;
-                    control.Cursor = Cursors.SizeAll;
-                }
+            foreach (PolygonPoint point in polygonLabel.Polygon)
+            {
+                polygonPoints.Add(new Point(point.X, point.Y));
             }
+
+            editInfos.PolygonStartPosition = polygonPoints;
+            control.Cursor = Cursors.SizeAll;
         }
+
 
         public bool addNewPoint(double x, double y)
         {

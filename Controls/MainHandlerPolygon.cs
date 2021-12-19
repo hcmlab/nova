@@ -336,7 +336,18 @@ namespace ssi
                     }
                     else
                     {
-                        polygonUtilities.editPolygon(x, y);
+                        if (editInfos.IsAboveSelectedPolygonLineAndCtrlPressed)
+                        {
+                            polygonUtilities.addNewPointToDonePolygon(x, y);
+                        }
+                        else if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
+                        {
+                            polygonUtilities.editPolygon(x, y);
+                        }
+                        else
+                        {
+
+                        }
                     }
                 }
             }
