@@ -190,6 +190,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Polygon\RemoveLabelsCommand.cs" />
     <Compile Include="Commands\Polygon\AddOrRemoveExtraPolygonPointCommand.cs" />
     <Compile Include="Commands\Polygon\AddOrRemovePolygonPointCommand.cs" />
     <Compile Include="Commands\Polygon\ChangeCompletePolygonCommand .cs" />
