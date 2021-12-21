@@ -454,20 +454,25 @@ namespace ssi
             }
 
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
-            if (e.KeyboardDevice.IsKeyDown(Key.Z))
+
+            if (e.KeyboardDevice.IsKeyDown(Key.Y) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
             {
-                if (e.KeyboardDevice.IsKeyDown(Key.LeftShift) || e.KeyboardDevice.IsKeyDown(Key.RightShift))
-                {
+                
                     int pointsBeforeRedo = 0;
                     if (control.polygonListControl.polygonDataGrid.SelectedItem != null)
                     {
                         pointsBeforeRedo = ((PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem).Polygon.Count;
                     }
 
-                    PolygonLabel label = polygonUtilities.UndoRedoStack.Redo();
+                    if(polygonUtilities.UndoRedoStack != null)
+                {
 
-                    if (label != null)
+                
+                    PolygonLabel label = polygonUtilities.UndoRedoStack.Redo();
+                    if(label != null)
                     {
+
+                    
                         if (label.Informations.Type == TYPE.CREATION)
                         {
                             if (!creationInfos.IsCreateModeOn)
@@ -512,11 +517,18 @@ namespace ssi
                         }
                     }
                 }
-                else
+            }
+            if (e.KeyboardDevice.IsKeyDown(Key.Z) && e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+            {
                 {
-                    PolygonLabel label = polygonUtilities.UndoRedoStack.Undo();
-                    if(label != null)
+                    if(polygonUtilities.UndoRedoStack != null)
                     {
+                        PolygonLabel label = polygonUtilities.UndoRedoStack.Undo();
+                        if(label != null)
+                        {
+
+                       
+
                         if(label.Informations.Type == TYPE.CREATION)
                         {
                             
@@ -560,6 +572,7 @@ namespace ssi
                                 creationInfos.IsCreateModeOn = false;
                                 polygonUtilities.enableOrDisableControls(true);
                             }
+                        }
                         }
                     }
                 }
