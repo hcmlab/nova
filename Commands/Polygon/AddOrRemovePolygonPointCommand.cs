@@ -18,22 +18,22 @@ namespace ssi.Types.Polygon
             this.type = type;
         }
 
-        public PolygonLabel Do()
+        public PolygonLabel[] Do()
         {
             if (point.X != -1 && point.Y != -1)
                 polygonToChange.addPoint(point);
 
             polygonToChange.Informations = new LabelInformations(this.type);
-            return polygonToChange;
+            return new PolygonLabel[] { polygonToChange };
         }
 
-        public PolygonLabel Undo()
+        public PolygonLabel[] Undo()
         {
             if(point.X != -1 && point.Y != -1)
                 polygonToChange.removeLastPoint();
 
             polygonToChange.Informations = new LabelInformations(this.type);
-            return polygonToChange;
+            return new PolygonLabel[] { polygonToChange };
         }
     }
 }

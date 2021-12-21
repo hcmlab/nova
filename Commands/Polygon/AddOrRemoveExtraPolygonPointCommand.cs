@@ -20,18 +20,18 @@ namespace ssi.Types.Polygon
             this.type = type;
         }
 
-        public PolygonLabel Do()
+        public PolygonLabel[] Do()
         {
             polygonToChange.addPointAfterSpecificID(this.lastID, this.newPoint);
             polygonToChange.Informations = new LabelInformations(this.type);
-            return polygonToChange;
+            return new PolygonLabel[]{polygonToChange};
         }
 
-        public PolygonLabel Undo()
+        public PolygonLabel[] Undo()
         {
             polygonToChange.removePointAfterSpecificID(this.lastID);
             polygonToChange.Informations = new LabelInformations(this.type);
-            return polygonToChange;
+            return new PolygonLabel[] { polygonToChange };
         }
     }
 }

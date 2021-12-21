@@ -30,12 +30,12 @@ namespace ssi.Types
             _Redo.Clear();
         }
 
-        public PolygonLabel Undo()
+        public PolygonLabel[] Undo()
         {
             if (_Undo.Count > 0)
             {
                 ICommand cmd = _Undo.Pop();
-                PolygonLabel label = cmd.Undo();
+                PolygonLabel[] label = cmd.Undo();
                 _Redo.Push(cmd);
                 return label;
             }
@@ -43,12 +43,12 @@ namespace ssi.Types
             return null;
         }
 
-        public PolygonLabel Redo()
+        public PolygonLabel[] Redo()
         {
             if (_Redo.Count > 0)
             {
                 ICommand cmd = _Redo.Pop();
-                PolygonLabel label = cmd.Do();
+                PolygonLabel[] label = cmd.Do();
                 _Undo.Push(cmd);
                 return label;
             }

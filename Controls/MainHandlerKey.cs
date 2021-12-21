@@ -589,7 +589,7 @@ namespace ssi
 
         public void OnKeyUp(object sender, KeyEventArgs e)
         {
-            handleKeyUpEvent(sender, e);
+            handlePolygonKeyUpEvent(sender, e);
             isKeyDown = false;
         }
 

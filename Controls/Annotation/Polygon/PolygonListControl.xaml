@@ -33,7 +33,7 @@
                     <ContextMenu.BitmapEffect>
                         <BitmapEffectGroup />
                     </ContextMenu.BitmapEffect>
-                    <MenuItem Header="Delete" Name="polygonListElementDelete"/>
+                    <MenuItem Header="Delete" InputGestureText="Ctrl+Back, Del" Name="polygonListElementDelete"/>
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.View>

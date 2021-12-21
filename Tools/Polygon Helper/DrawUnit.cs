@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -29,7 +27,7 @@ namespace ssi.Types.Polygon
             this.PolygonUtilities = polygonUtilities;
         }
 
-        public void polygonOverlayUpdate(AnnoListItem item)
+        public void polygonOverlayUpdate(AnnoListItem item, List<int> selectionRectPoints = null)
         {
             if (item == null)
                 return;
@@ -51,17 +49,23 @@ namespace ssi.Types.Polygon
             overlay.Lock();
             overlay.Clear();
 
-            drawLabels(polygonList, overlay);
+            drawLabels(polygonList, overlay, selectionRectPoints);
 
             overlay.Unlock();
         }
 
-        private void drawLabels(PolygonList polygonList, WriteableBitmap overlay)
+        private void drawLabels(PolygonList polygonList, WriteableBitmap overlay, List<int> selectionRectPoints = null)
         {
             List<int> allPoints = new List<int>();
             int thickness = 1;
             Color lastColor = new Color();
 
+            if (selectionRectPoints != null)
+            {
+                editInfos.ShowingSelectionRect = true;
+                overlay.DrawPolyline(selectionRectPoints.ToArray(), Color.FromRgb(0, 120, 215));
+                overlay.FillPolygon(selectionRectPoints.ToArray(), Color.FromArgb(100, 0, 102, 204));
+            }
 
             foreach (PolygonLabel polygonLabel in polygonList.Polygons)
             {
@@ -191,21 +195,41 @@ namespace ssi.Types.Polygon
             if (!polygonUtilities.posIs5pxFromBottomAway(y))
                 y = editInfos.ImageHeight;
 
+            polygonOverlayUpdate(item);
             if (PolygonUtilities.isNewPointNextToStartPoint(polygonLabel.Polygon.First(), new Point(x, y)))
             {
-                polygonOverlayUpdate(item);
                 overlay.DrawLineAa((int)polygonLabel.Polygon.Last().X, (int)polygonLabel.Polygon.Last().Y, (int)x, (int)y, color, thickness);
             }
             else
             {
-                polygonOverlayUpdate(item);
                 overlay.FillEllipseCentered((int)x, (int)y, thickness + 2, thickness + 2, color);
                 overlay.DrawLineAa((int)polygonLabel.Polygon.Last().X, (int)polygonLabel.Polygon.Last().Y, (int)x, (int)y, color, thickness);
             }
             overlay.Unlock();
         }
 
-        
+
+        public List<int> getRectanglePointsAsList(double xStart, double yStart, double xDestiny, double yDestiny)
+        {
+            if (!polygonUtilities.posIs5pxFromBottomAway(yStart))
+                yStart = editInfos.ImageHeight;
+            if (!polygonUtilities.posIs5pxFromBottomAway(yDestiny))
+                yDestiny = editInfos.ImageHeight;
+
+            List<int> allPoints = new List<int>();
+            allPoints.Add((int)xStart);
+            allPoints.Add((int)yStart);
+            allPoints.Add((int)xStart);
+            allPoints.Add((int)yDestiny);
+            allPoints.Add((int)xDestiny);
+            allPoints.Add((int)yDestiny);
+            allPoints.Add((int)xDestiny);
+            allPoints.Add((int)yStart);
+            allPoints.Add((int)xStart);
+            allPoints.Add((int)yStart);
+
+            return allPoints;
+        }
 
         public void drawNew(PolygonLabel currentPolygonLabel, AnnoListItem item)
         {

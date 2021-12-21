@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using static ssi.Types.Polygon.LabelInformations;
 
 namespace ssi.Types.Polygon
@@ -125,32 +124,42 @@ namespace ssi.Types.Polygon
         public bool isMouseWithinPolygonArea(double x, double y)
         {
             PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedValue;
+            if (polygonLabel == null)
+                return false;
 
-            var contains = false;
-            if (polygonLabel != null)
+            bool contains = arePointsInPolygonArea(new Point[]{new Point(x, y)}, polygonLabel.Polygon);
+            
+            if (contains)
+                editInfos.StartPosition = new Point(x, y);
+
+            return contains;
+        }
+
+        public bool arePointsInPolygonArea(Point[] points, List<PolygonPoint> polygon)
+        {
+            if (polygon != null)
             {
                 using (var gp = new System.Drawing.Drawing2D.GraphicsPath())
                 {
-                    System.Drawing.Point[] points = new System.Drawing.Point[polygonLabel.Polygon.Count];
+                    System.Drawing.Point[] polygonPoints = new System.Drawing.Point[polygon.Count];
 
-                    for (int i = 0; i < polygonLabel.Polygon.Count; i++)
+                    for (int i = 0; i < polygon.Count; i++)
                     {
-                        PolygonPoint polygonPoint = polygonLabel.Polygon.ElementAt(i);
-                        points[i] = new System.Drawing.Point((int)polygonPoint.X, (int)polygonPoint.Y);
+                        PolygonPoint polygonPoint = polygon.ElementAt(i);
+                        polygonPoints[i] = new System.Drawing.Point((int)polygonPoint.X, (int)polygonPoint.Y);
                     }
 
-                    if (points.Length < 3)
-                        return false;
+                    gp.AddPolygon(polygonPoints);
 
-                    gp.AddPolygon(points);
-                    contains = gp.IsVisible(new System.Drawing.Point((int)x, (int)y));
-
-                    if (contains)
-                        editInfos.StartPosition = new Point(x, y);
+                    foreach (Point point in points)
+                    {
+                        if (!gp.IsVisible(new System.Drawing.Point((int)point.X, (int)point.Y)))
+                            return false;
+                    }
                 }
             }
-            
-            return contains;
+
+            return true;
         }
 
         public bool isMouseAbovePoint(double x, double y)
@@ -271,6 +280,37 @@ namespace ssi.Types.Polygon
             return editInfos.ImageHeight > y_val;
         }
 
+        public bool controlPressed()
+        {
+            return Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+        }
+
+        public void selectLabelsInSelectionRectangle(double xStart, double yStart, double xDestiny, double yDestiny)
+        {
+            List<PolygonPoint> rectangle = rectangleAsList(xStart, yStart, xDestiny, yDestiny);
+            List<PolygonLabel> labelsToSelect = new List<PolygonLabel>();
+
+            for (int i = 0; i < control.polygonListControl.polygonDataGrid.Items.Count; i++)
+            {
+                PolygonLabel label = (PolygonLabel)control.polygonListControl.polygonDataGrid.Items[i];
+                Point[] currentPolygonAsArray = label.Polygon.Select(point => new Point(point.X, point.Y)).ToArray();
+                if (arePointsInPolygonArea(currentPolygonAsArray, rectangle))
+                    control.polygonListControl.polygonDataGrid.SelectedItems.Add(control.polygonListControl.polygonDataGrid.Items[i]);
+            }
+        }
+
+        private List<PolygonPoint> rectangleAsList(double xStart, double yStart, double xDestiny, double yDestiny)
+        {
+            List<PolygonPoint> rectangle = new List<PolygonPoint>();
+
+            rectangle.Add(new PolygonPoint(xStart, yStart));
+            rectangle.Add(new PolygonPoint(xStart, yDestiny));
+            rectangle.Add(new PolygonPoint(xDestiny, yDestiny));
+            rectangle.Add(new PolygonPoint(xDestiny, yStart));
+
+            return rectangle;
+        }
+
         public void addNewPointToDonePolygon(double x, double y)
         {
             PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
@@ -291,6 +331,14 @@ namespace ssi.Types.Polygon
 
             editInfos.PolygonStartPosition = polygonPoints;
             control.Cursor = Cursors.SizeAll;
+        }
+
+        public void startSelectionRectangle(double x, double y)
+        {
+            editInfos.StartPosition = new Point(x, y);
+            control.polygonListControl.polygonDataGrid.SelectedItem = null;
+            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+            polygonDrawUnit.polygonOverlayUpdate(item);
         }
 
 
@@ -519,10 +567,6 @@ namespace ssi.Types.Polygon
                 item = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
             control.polygonListControl.polygonDataGrid.ItemsSource = item.PolygonList.getRealList();
             this.polygonTableUpdate();
-            if(control.polygonListControl.polygonDataGrid.Items.Count > 0)
-            {
-                control.polygonListControl.polygonDataGrid.SelectedItem = control.polygonListControl.polygonDataGrid.Items[control.polygonListControl.polygonDataGrid.Items.Count - 1];
-            }
             polygonDrawUnit.polygonOverlayUpdate(item);
         }
 
@@ -577,11 +621,11 @@ namespace ssi.Types.Polygon
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
             if (currentPolygonLabel is object && currentPolygonLabel.Polygon is object && currentPolygonLabel.Polygon.Count > 0)
             {
-                PolygonLabel label = this.UndoRedoStack.Undo();
+                PolygonLabel label = this.UndoRedoStack.Undo()[0];
 
                 while (label.Polygon.Count > 0)
                 {
-                    label = this.UndoRedoStack.Undo();
+                    label = this.UndoRedoStack.Undo()[0];
                 }
 
                 item.PolygonList.removeExplicitPolygon(label);
