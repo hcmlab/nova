@@ -313,6 +313,8 @@
     <Compile Include="Tools\PluginCaller.cs" />
     <Compile Include="Tools\Polygon Helper\DataGridChecker.cs" />
     <Compile Include="Tools\Polygon Helper\DrawUnit.cs" />
+    <Compile Include="Tools\Polygon Helper\InterpolationHandler.cs" />
+    <Compile Include="Tools\Polygon Helper\UndoRedoHandler.cs" />
     <Compile Include="Tools\Polygon Helper\Utilities.cs" />
     <Compile Include="Tools\Screenshot.cs" />
     <Compile Include="Tools\VolumeControl.xaml.cs">
