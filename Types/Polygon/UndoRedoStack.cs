@@ -55,5 +55,15 @@ namespace ssi.Types
 
             return null;
         }
+
+        public int getUndoSize()
+        {
+            return this._Undo.Count();
+        }
+
+        public int getRedoSize()
+        {
+            return this._Redo.Count();
+        }
     }
 }
