@@ -241,7 +241,7 @@ namespace ssi
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             handleKeyDownEvent(sender, e);
-            if (!control.annoListControl.editTextBox.IsFocused && !control.annoListControl.searchTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
+            if (!(control.annoListControl.editTextBox.IsFocused || control.annoListControl.searchTextBox.IsFocused || this.control.polygonListControl.editTextBox.IsFocused || this.control.geometricListControl.editTextBox.IsFocused))
             {
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
                 switch (level)
@@ -254,7 +254,7 @@ namespace ssi
                         break;
                     /*One Modifier keys are pressed*/
                     case 1:
-                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.RightCtrl))
                         {
                             if (e.KeyboardDevice.IsKeyDown(Key.B))
                             {
@@ -295,8 +295,15 @@ namespace ssi
 
                             else if (e.KeyboardDevice.IsKeyDown(Key.Z))
                             {
-                                Undo();
-                                e.Handled = true;
+                                if (dataGridChecker.isSchemeTypePolygon())
+                                {
+
+                                }
+                                else
+                                {
+                                    Undo();
+                                    e.Handled = true;
+                                }
                             }
 
                             else if (e.KeyboardDevice.IsKeyDown(Key.Y))
@@ -332,11 +339,7 @@ namespace ssi
                                 e.Handled = true;
                             }
                         }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                        {
-
-                        }
-                            break;
+                        break;
                     /*No Modifier keys are pressed*/
                     case 0:
                         if (e.KeyboardDevice.IsKeyDown(Key.S))
@@ -430,7 +433,7 @@ namespace ssi
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (!this.control.annoListControl.editTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
+            if (!(control.annoListControl.editTextBox.IsFocused || control.annoListControl.searchTextBox.IsFocused || this.control.polygonListControl.editTextBox.IsFocused || this.control.geometricListControl.editTextBox.IsFocused))
             {
 
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
@@ -466,7 +469,7 @@ namespace ssi
                         break;
                     /*One Modifier keys are pressed*/
                     case 1:
-                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.RightCtrl))
                         {                            
                             if (e.KeyboardDevice.IsKeyDown(Key.S))
                             {
