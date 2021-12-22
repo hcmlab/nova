@@ -1,4 +1,5 @@
-﻿using ssi.Interfaces;
+﻿using PropertyTools.Wpf;
+using ssi.Interfaces;
 using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace ssi
@@ -21,6 +23,7 @@ namespace ssi
         private GridViewColumnHeader _lastHeaderClicked = null;
         private ListSortDirection _lastDirection = ListSortDirection.Ascending;
         private Utilities polygonUtilities;
+        public bool itemhasFocus = false;
 
         public AnnoListControl()
         {
@@ -219,6 +222,14 @@ namespace ssi
 
         private void editTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            if (e.Key == System.Windows.Input.Key.Return)
+            {
+                e.Handled = true;
+                // Kill logical focus
+                FocusManager.SetFocusedElement(FocusManager.GetFocusScope(editTextBox), null);
+                // Kill keyboard focus
+                Keyboard.ClearFocus();
+            }
         }
 
         private void MenuItemSetConfidenceZeroClick(object sender, RoutedEventArgs e)
@@ -346,5 +357,20 @@ namespace ssi
         }
 
         internal Utilities PolygonUtilities { set => polygonUtilities = value; }
+
+        private void TextBoxEx_GotFocus(object sender, RoutedEventArgs e)
+        {
+            itemhasFocus = true;
+            
+        }
+
+        private void TextBoxEx_LostFocus(object sender, RoutedEventArgs e)
+        {
+            itemhasFocus = false;
+        }
+
     }
+
+
+    
 }
