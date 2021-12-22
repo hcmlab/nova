@@ -16,10 +16,11 @@ namespace ssi
         private PolygonLabel lastInterpolatedSourcePolygon = null;
 
         internal InterpolationWindow(Utilities polygonUtilities)
-        {
+        {   
             InitializeComponent();
             this.polygonUtilities = polygonUtilities;
-            this.polygonUtilities.enableOrDisableControlButtons(false);
+            this.polygonUtilities.enableOrDisableControlsBesidesPolygon(false);
+            this.polygonUtilities.enableOrDisablePolygonControlElements(false, false);
             this.updateItmes();
             
             int currentIndex = this.polygonUtilities.getCurrentAnnoListIndex();
@@ -509,7 +510,8 @@ namespace ssi
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            this.polygonUtilities.enableOrDisableControlButtons(true);
+            this.polygonUtilities.enableOrDisablePolygonControlElements(true, true);
+            this.polygonUtilities.enableOrDisableControlsBesidesPolygon(true);
             this.polygonUtilities.setInterpolationWindowClosed();
         }
 
