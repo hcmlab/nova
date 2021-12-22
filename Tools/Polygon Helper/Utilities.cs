@@ -15,12 +15,13 @@ namespace ssi.Types.Polygon
         private MainControl control;
         private EditInformations editInfos;
         private CreationInformation creationInfos;
-        private IDrawUnit polygonDrawUnit;
         private DataGridChecker dataGridChecker;
-        private UndoRedoStack undoRedoStack;
         private Window interpolationWindow = null;
-        private bool isNextToStartPoint;
+        private InterpolationHandler interpolationHandler;
+        private UndoRedoHandler undoRedoHandler;
+        private IDrawUnit polygonDrawUnit;
 
+        private bool isNextToStartPoint;
         static private double idCounter = 0;
 
         public static double IDcounter { get => idCounter; set => idCounter = value; }
@@ -31,7 +32,6 @@ namespace ssi.Types.Polygon
             set => isNextToStartPoint = value; 
         }
         public Window InterpolationWindow { get => interpolationWindow; set => interpolationWindow = value; }
-        public UndoRedoStack UndoRedoStack { get => undoRedoStack; set => undoRedoStack = value; }
 
         public Utilities(MainControl control, MainHandler handler, CreationInformation creationInfos, EditInformations editInfos, DataGridChecker dataGridChecker, IDrawUnit polygonDrawUnit)
         {
@@ -42,18 +42,11 @@ namespace ssi.Types.Polygon
             this.dataGridChecker = dataGridChecker;
             this.polygonDrawUnit = polygonDrawUnit;
             this.isNextToStartPoint = false;
+            this.interpolationHandler = new InterpolationHandler(this.control);
+            this.undoRedoHandler = new UndoRedoHandler(this.control, this.creationInfos, this, this.polygonDrawUnit);
         }
 
         public void enableOrDisableControls(bool enable)
-        {
-            enableOrDisablePolygonListControl(enable);
-            control.annoListControl.IsEnabled = enable;
-            control.navigator.IsEnabled = enable;
-            control.signalAndAnnoGrid.IsEnabled = enable;
-            control.mediaCloseButton.IsEnabled = enable;
-        }
-
-        public void enableOrDisableAllControls(bool enable)
         {
             control.annoListControl.IsEnabled = enable;
             control.navigator.IsEnabled = enable;
@@ -62,7 +55,7 @@ namespace ssi.Types.Polygon
             control.polygonListControl.IsEnabled = enable;
         }
 
-        public void enableOrDisablePolygonListControl(bool enable)
+        public void enableOrDisablePolygonControlElements(bool enable, bool withInterpolationButton = true)
         {
             control.polygonListControl.polygonSelectAllButton.IsEnabled = enable;
             control.polygonListControl.polygonSetDefaultLabelButton.IsEnabled = enable;
@@ -71,9 +64,25 @@ namespace ssi.Types.Polygon
             control.polygonListControl.editTextBox.IsEnabled = enable;
             control.polygonListControl.editComboBox.IsEnabled = enable;
             control.polygonListControl.polygonDataGrid.IsEnabled = enable;
-            control.polygonListControl.interpolateLabels.IsEnabled = enable;
+            control.polygonListControl.addLabels.IsEnabled = enable;
+            control.polygonListControl.polygonListElementDelete.IsEnabled = enable;
+            control.polygonListControl.stopInsertion.IsEnabled = enable;
 
-            if(enable)
+            if (withInterpolationButton)
+                control.polygonListControl.interpolateLabels.IsEnabled = enable;
+        }
+
+        public void enableOrDisableControlsBesidesPolygon(bool enable)
+        {
+            control.annoListControl.IsEnabled = enable;
+            control.navigator.IsEnabled = enable;
+            control.signalAndAnnoGrid.IsEnabled = enable;
+            control.mediaCloseButton.IsEnabled = enable;
+        }
+
+        public void switchAddLabelButton()
+        {
+            if (control.polygonListControl.addLabels.Visibility != Visibility.Visible)
             {
                 control.polygonListControl.addLabels.Visibility = Visibility.Visible;
                 control.polygonListControl.stopInsertion.Visibility = Visibility.Hidden;
@@ -84,25 +93,6 @@ namespace ssi.Types.Polygon
                 control.polygonListControl.stopInsertion.Visibility = Visibility.Visible;
             }
         }
-        
-
-        public void enableOrDisableControlButtons(bool enable, bool withInterpolationButton = false)
-        {
-            control.polygonListControl.polygonSelectAllButton.IsEnabled = enable;
-            control.polygonListControl.polygonSetDefaultLabelButton.IsEnabled = enable;
-            control.polygonListControl.polygonCopyButton.IsEnabled = enable;
-            control.polygonListControl.polygonRelabelButton.IsEnabled = enable;
-            control.polygonListControl.editTextBox.IsEnabled = enable;
-            control.polygonListControl.editComboBox.IsEnabled = enable;
-            control.polygonListControl.addLabels.IsEnabled = enable;
-            control.navigator.IsEnabled = enable;
-            control.signalAndAnnoGrid.IsEnabled = enable;
-            control.mediaCloseButton.IsEnabled = enable;
-            if (withInterpolationButton)
-                control.polygonListControl.interpolateLabels.IsEnabled = enable;
-        }
-
-
 
         public void endCreationMode(AnnoListItem item, PolygonLabel currentPolygonLabel = null)
         {
@@ -110,7 +100,9 @@ namespace ssi.Types.Polygon
             creationInfos.IsCreateModeOn = false;
 
             this.isNextToStartPoint = false;
-            this.enableOrDisableControls(true);
+            this.enableOrDisableControlsBesidesPolygon(true);
+            enableOrDisablePolygonControlElements(true);
+            switchAddLabelButton();
             this.polygonSelectItem(item);
             this.control.Cursor = Cursors.Arrow;
 
@@ -120,6 +112,17 @@ namespace ssi.Types.Polygon
                 creationInfos.LastSelectedLabel = null;
             }
         }
+        public void startCreationMode()
+        {
+            creationInfos.IsCreateModeOn = true;
+            enableOrDisableControlsBesidesPolygon(false);
+            enableOrDisablePolygonControlElements(false);
+            switchAddLabelButton();
+            control.polygonListControl.stopInsertion.IsEnabled = true;
+            control.polygonListControl.polygonDataGrid.SelectedItem = null;
+        }
+
+
 
         public bool isMouseWithinPolygonArea(double x, double y)
         {
@@ -314,13 +317,14 @@ namespace ssi.Types.Polygon
         public void addNewPointToDonePolygon(double x, double y)
         {
             PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
-            this.UndoRedoStack.Do(new AddOrRemoveExtraPolygonPointCommand(editInfos.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel, TYPE.EXTRA_POINT));
+            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+            item.UndoRedoStack.Do(new AddOrRemoveExtraPolygonPointCommand(editInfos.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel, TYPE.EXTRA_POINT));
             polygonDrawUnit.polygonOverlayUpdate(((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem));
         }
 
         public void editPolygon(double x, double y)
         {
-            enableOrDisableAllControls(false);
+            enableOrDisableControls(false);
             PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
             List<Point> polygonPoints = new List<Point>();
 
@@ -369,7 +373,7 @@ namespace ssi.Types.Polygon
                 item.updateLabelCount();
                 refreshAnnoDataGrid();
                 AnnoTierStatic.Selected.AnnoList.HasChanged = true;
-                this.UndoRedoStack.Do(new AddOrRemovePolygonPointCommand(new PolygonPoint(-1, -1), polygonLabel, TYPE.CREATION));
+                item.UndoRedoStack.Do(new AddOrRemovePolygonPointCommand(new PolygonPoint(-1, -1), polygonLabel, TYPE.CREATION));
 
                 return true;
             }
@@ -384,7 +388,7 @@ namespace ssi.Types.Polygon
             {
                 if (label.ID == polygonLabel.ID)
                 {
-                    this.UndoRedoStack.Do(new AddOrRemovePolygonPointCommand(polygonPoint, polygonLabel, TYPE.CREATION));
+                    item.UndoRedoStack.Do(new AddOrRemovePolygonPointCommand(polygonPoint, polygonLabel, TYPE.CREATION));
                     selectedItem = label;
                     break;
                 }
@@ -565,9 +569,24 @@ namespace ssi.Types.Polygon
         {
             if (!dataGridChecker.annonDGIsNotNullAndCountsOne())
                 item = (AnnoListItem)control.annoListControl.annoDataGrid.Items[0];
+
+            enableOrDisableUndoRedoMenuItems(item);
             control.polygonListControl.polygonDataGrid.ItemsSource = item.PolygonList.getRealList();
             this.polygonTableUpdate();
             polygonDrawUnit.polygonOverlayUpdate(item);
+        }
+
+        private void enableOrDisableUndoRedoMenuItems(AnnoListItem item)
+        {
+            if (item.UndoRedoStack.getRedoSize() > 0)
+                control.redo.IsEnabled = true;
+            else
+                control.redo.IsEnabled = false;
+
+            if (item.UndoRedoStack.getUndoSize() > 0)
+                control.undo.IsEnabled = true;
+            else
+                control.undo.IsEnabled = false;
         }
 
         public void activateEditMode()
@@ -621,11 +640,11 @@ namespace ssi.Types.Polygon
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
             if (currentPolygonLabel is object && currentPolygonLabel.Polygon is object && currentPolygonLabel.Polygon.Count > 0)
             {
-                PolygonLabel label = this.UndoRedoStack.Undo()[0];
+                PolygonLabel label = item.UndoRedoStack.Undo()[0];
 
                 while (label.Polygon.Count > 0)
                 {
-                    label = this.UndoRedoStack.Undo()[0];
+                    label = item.UndoRedoStack.Undo()[0];
                 }
 
                 item.PolygonList.removeExplicitPolygon(label);
@@ -809,46 +828,8 @@ namespace ssi.Types.Polygon
 
         public void handle2DInterpolation(ComboboxItem targetFrame, ComboboxItem sourceFrame, PolygonLabel sourceLabel, PolygonLabel targetLabel, double xStepPerFrame, double yStepPerFrame, int framesBetween)
         {
-            AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
-            list[sourceFrame.FrameIndex].PolygonList.removeExplicitPolygon(sourceLabel);
-            list[targetFrame.FrameIndex].PolygonList.removeExplicitPolygon(targetLabel);
-            list[sourceFrame.FrameIndex].PolygonList.removeExplicitPolygon(targetLabel);
-            list[targetFrame.FrameIndex].PolygonList.removeExplicitPolygon(sourceLabel);
-
-
-            int newLabelCounter = -1;
-            foreach (AnnoListItem listItem in list)
-            {
-                if (listItem.Equals(list[sourceFrame.FrameIndex]))
-                {
-                    newLabelCounter++;
-                }
-
-                if (newLabelCounter >= 0)
-                {
-                    List<PolygonPoint> newPolygon = new List<PolygonPoint>();
-
-                    foreach (PolygonPoint point in sourceLabel.Polygon)
-                    {
-                        newPolygon.Add(new PolygonPoint(point.X + (newLabelCounter * xStepPerFrame), point.Y + (newLabelCounter * yStepPerFrame)));
-                    }
-
-                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color);
-                    listItem.PolygonList.addPolygonLabel(newLabel);
-                    listItem.updateLabelCount();
-                    newLabelCounter++;
-
-                    if (newLabelCounter == (framesBetween + 1))
-                    {
-                        listItem.PolygonList.removeExplicitPolygon(targetLabel);
-                        this.refreshAnnoDataGrid();
-                        listItem.updateLabelCount();
-                        break;
-                    }
-                    AnnoTierStatic.Selected.AnnoList.HasChanged = true;
-                }
-            }
-
+            this.interpolationHandler.handle2DInterpolation(targetFrame, sourceFrame, sourceLabel, targetLabel, xStepPerFrame, yStepPerFrame, framesBetween);
+            this.refreshAnnoDataGrid();
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
             polygonDrawUnit.polygonOverlayUpdate(item);
         }
@@ -857,47 +838,20 @@ namespace ssi.Types.Polygon
                                           PolygonLabel targetLabel, List<PointAngleTuple> sourcePointsAnglesTuple, List<PointAngleTuple> targetPointsAnglesTuple,
                                           int stepsFromSourceToTarget)
         {
-
-            AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
-            int newLabelCounter = 0;
-
-            foreach (AnnoListItem listItem in list)
-            {
-                // We don't change the selected frame
-                if (listItem.Equals(list[sourceFrame.FrameIndex]))
-                {
-                    newLabelCounter++;
-                    continue;
-                }
-
-                if (newLabelCounter > 0)
-                {
-                    List<PolygonPoint> newPolygon = new List<PolygonPoint>();
-
-                    int pointCounter = 0;
-                    foreach (PointAngleTuple tuple in sourcePointsAnglesTuple)
-                    {
-                        newPolygon.Add(new PolygonPoint(tuple.point.X + (newLabelCounter * xStepsPerFrame[pointCounter]),
-                                                        tuple.point.Y + (newLabelCounter * yStepsPerFrame[pointCounter])));
-                        pointCounter++;
-                    }
-
-                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color);
-                    listItem.PolygonList.addPolygonLabel(newLabel);
-                    listItem.updateLabelCount();
-                    newLabelCounter++;
-
-                    if (newLabelCounter == (stepsFromSourceToTarget))
-                    {
-                        this.refreshAnnoDataGrid();
-                        break;
-                    }
-                    AnnoTierStatic.Selected.AnnoList.HasChanged = true;
-                }
-            }
-
+            this.interpolationHandler.handle3DInterpolation(xStepsPerFrame, yStepsPerFrame, sourceFrame, sourceLabel, targetLabel, sourcePointsAnglesTuple, targetPointsAnglesTuple, stepsFromSourceToTarget);
+            this.refreshAnnoDataGrid();
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
             polygonDrawUnit.polygonOverlayUpdate(item);
+        }
+
+        public void handleUndo()
+        {
+            this.undoRedoHandler.handleUndo();
+        }
+
+        public void handleRedo()
+        {
+            this.undoRedoHandler.handleRedo();
         }
     }
 }
