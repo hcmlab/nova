@@ -168,6 +168,12 @@ namespace ssi
             control.polygonListControl.stopInsertion.Click += polygonStopInsertion_Click;
             control.polygonListControl.addLabels.Click += polygonAddLabels_Click;
 
+            control.undo.Click += polygonUndo_Click;
+            control.redo.Click += polygonRedo_Click;
+            control.copy.Click += polygonCopy_Click;
+            control.paste.Click += polygonPaste_Click;
+
+
             control.polygonListControl.editComboBox.SelectionChanged += discretePolygon_SelectionChanged;
             control.polygonListControl.polygonDataGrid.SelectionChanged += polygonList_SelectionChanged;
 
