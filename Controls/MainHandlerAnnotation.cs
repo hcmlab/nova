@@ -754,7 +754,6 @@ namespace ssi
                 else if (item.Type == AnnoListItem.TYPE.POLYGON)
                 {
                     polygonUtilities.polygonSelectItem(item);
-                    polygonUtilities.UndoRedoStack = new UndoRedoStack();
                 }
             }
         }
