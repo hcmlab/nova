@@ -47,6 +47,7 @@ namespace ssi
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
             CMLDirectory.Text = Properties.Settings.Default.CMLDirectory;
+            EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
 
         }
 

@@ -101,7 +101,7 @@ namespace ssi
                     int.TryParse(tokens[0], out width);
                     int.TryParse(tokens[1], out height);
                 }
-                else if (type == MediaType.AUDIO)
+                else if (type == MediaType.AUDIO && inputFile.Metadata.AudioData != null)
                 {
                     string[] tokens = inputFile.Metadata.AudioData.SampleRate.Split(' ');
                     double.TryParse(tokens[0], out sampleRate);
