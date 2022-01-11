@@ -631,9 +631,7 @@ namespace ssi
                                         List<PolygonPoint> points = new List<PolygonPoint>();
                                         foreach (var point in polygon.points)
                                         {
-                                            double id = Utilities.IDcounter;
-                                            Utilities.IDcounter++;
-                                            points.Add(new PolygonPoint((double)point.First, (double)point.Last, id));
+                                            points.Add(new PolygonPoint((double)point.First, (double)point.Last));
                                         }
 
                                         polygonLabels.Add(new PolygonLabel(points, label, labelColor));
