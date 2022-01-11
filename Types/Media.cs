@@ -23,6 +23,9 @@ namespace ssi
         public delegate void MediaMouseMove(Media media, double x, double y);
         public event MediaMouseMove OnMediaMouseMove;
 
+        public delegate void MediaRightMouseDown(Media media, double x, double y);
+        public event MediaRightMouseDown OnMediaRightMouseDown;
+
 
         private Grid grid;
         private WriteableBitmap overlayBitmap;
@@ -113,6 +116,7 @@ namespace ssi
             grid.MouseDown += OnMouseDown;
             grid.MouseUp += OnMouseUp;
             grid.MouseMove += OnMouseMove;
+            grid.MouseRightButtonDown += OnRightMouseDown;
 
             // add video
             Grid.SetColumn(this, 0);
@@ -203,5 +207,17 @@ namespace ssi
             }
         }
 
+        public void OnRightMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (this.HasVideo)
+            {
+                Point p = e.GetPosition(this);
+                double pixelWidth = this.Width;
+                double pixelHeight = this.Height;
+                double x = pixelWidth * p.X / this.ActualWidth;
+                double y = pixelHeight * p.Y / this.ActualHeight;
+                OnMediaRightMouseDown?.Invoke(this, x, y);
+            }
+        }
     }
 }
