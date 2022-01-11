@@ -13,7 +13,8 @@ namespace ssi.Types.Polygon
             EDIT,
             CREATION,
             EXTRA_POINT,
-            REMOVE
+            REMOVE,
+            COPY
         }
         public TYPE Type { get; set; }
 
