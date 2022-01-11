@@ -29,11 +29,14 @@
 
         <ListView Name="polygonDataGrid" Margin="6,0,6,5">
             <ListView.ContextMenu>
-                <ContextMenu Name="InvoiceDetailsList" StaysOpen="true">
+                <ContextMenu Name="InvoiceDetailsList">
                     <ContextMenu.BitmapEffect>
                         <BitmapEffectGroup />
                     </ContextMenu.BitmapEffect>
-                    <MenuItem Header="Delete" InputGestureText="Ctrl+Back, Del" Name="polygonListElementDelete"/>
+                    <MenuItem Header="Copy" InputGestureText="Ctrl+C" Name="copy" IsEnabled="false"/>
+                    <MenuItem Header="Paste" InputGestureText="Ctrl+V" Name="paste" IsEnabled="False"/>
+                    <MenuItem Header="Cut" InputGestureText="Ctrl+X" Name="cut" IsEnabled="false"/>
+                    <MenuItem Header="Delete" InputGestureText="Ctrl+Back, Del" Name="delete" IsEnabled="false"/>
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.View>

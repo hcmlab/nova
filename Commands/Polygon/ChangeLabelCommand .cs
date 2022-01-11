@@ -5,19 +5,18 @@ using static ssi.Types.Polygon.LabelInformations;
 
 namespace ssi.Types.Polygon
 {
-    class ChangeCompletePolygonCommand : ICommand
+    class ChangeLabelCommand : ICommand
     {   
         private PolygonLabel polygonToChange;
         private List<Point> oldPoints;
         private List<Point> newPoints;
-        private TYPE type;
+        private readonly TYPE type = TYPE.EDIT;
 
-        public ChangeCompletePolygonCommand(List<Point> oldPoints, List<Point> newPoints, PolygonLabel polygonToChange, TYPE type)
+        public ChangeLabelCommand(List<Point> oldPoints, List<Point> newPoints, PolygonLabel polygonToChange)
         {
             this.polygonToChange = polygonToChange;
             this.oldPoints = oldPoints;
             this.newPoints = newPoints;
-            this.type = type;
         }
 
         public PolygonLabel[] Do()

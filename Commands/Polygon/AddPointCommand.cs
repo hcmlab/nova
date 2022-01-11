@@ -5,31 +5,33 @@ using static ssi.Types.Polygon.LabelInformations;
 
 namespace ssi.Types.Polygon
 {
-    class AddOrRemoveExtraPolygonPointCommand : ICommand
+    // Adds a point to label non finished label
+    class AddPointCommand : ICommand
     {
         private PolygonLabel polygonToChange;
-        private double lastID;
-        private PolygonPoint newPoint;
-        private TYPE type;
+        private PolygonPoint point;
+        private readonly TYPE type = TYPE.CREATION;
 
-        public AddOrRemoveExtraPolygonPointCommand(double ID, PolygonPoint point, PolygonLabel polygonToChange, TYPE type)
+        public AddPointCommand(PolygonPoint point, PolygonLabel polygonToChange)
         {
             this.polygonToChange = polygonToChange;
-            this.lastID = ID;
-            this.newPoint = point;
-            this.type = type;
+            this.point = point;
         }
 
         public PolygonLabel[] Do()
         {
-            polygonToChange.addPointAfterSpecificID(this.lastID, this.newPoint);
+            if (point.X != -1 && point.Y != -1)
+                polygonToChange.addPoint(point);
+
             polygonToChange.Informations = new LabelInformations(this.type);
-            return new PolygonLabel[]{polygonToChange};
+            return new PolygonLabel[] { polygonToChange };
         }
 
         public PolygonLabel[] Undo()
         {
-            polygonToChange.removePointAfterSpecificID(this.lastID);
+            if(point.X != -1 && point.Y != -1)
+                polygonToChange.removeLastPoint();
+
             polygonToChange.Informations = new LabelInformations(this.type);
             return new PolygonLabel[] { polygonToChange };
         }

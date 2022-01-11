@@ -63,6 +63,7 @@ namespace ssi
                         AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
                     {
                         control.polygonListControl.Visibility = Visibility.Collapsed;
+                        control.edit.Visibility = Visibility.Collapsed;
 
                         foreach (AnnoListItem item in control.annoListControl.annoDataGrid.Items)
                         {
@@ -188,10 +189,10 @@ namespace ssi
                 {
                     control.polygonListControl.Visibility = Visibility.Visible;
                     control.polygonListControl.Height = control.ActualHeight / 2;
+                    control.edit.Visibility = Visibility.Visible;
 
                     if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                     {
-
                         control.polygonListControl.editComboBox.Visibility = Visibility.Visible; 
                         control.polygonListControl.editComboBox.IsEnabled = true;
                         control.polygonListControl.editTextBox.Visibility = Visibility.Collapsed;
@@ -222,7 +223,6 @@ namespace ssi
 
                         control.polygonListControl.polygonCopyButton.SetValue(Grid.ColumnProperty, 1);
                         control.polygonListControl.polygonCopyButton.SetValue(Grid.ColumnSpanProperty, 1);
-
                     }
 
                     GridView gView = control.polygonListControl.polygonDataGrid.View as GridView;

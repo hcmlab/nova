@@ -8,8 +8,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Label = ssi.Types.Label;
-using static ssi.Types.Polygon.LabelInformations;
 using System.Linq;
+using ssi.Tools.Polygon_Helper;
 
 namespace ssi
 {
@@ -17,27 +17,46 @@ namespace ssi
     {
         #region INIT
 
-        private CreationInformation creationInfos;
-        private EditInformations editInfos;
-        private DataGridChecker dataGridChecker;
-        private IDrawUnit polygonDrawUnit;
-        private Utilities polygonUtilities;
-        private String currentLabelName = "";
         private Color currentLabelColor;
+        private IDrawUnit polygonDrawUnit;
+        private LabelCreator labelCreator;
+        private EditInformations editInfos;
+        private PolygonEditor polygonEditor;
+        private String currentLabelName = "";
+        private DataGridChecker dataGridChecker;
+        private CreationInformation creationInfos;
+        private PolygonUtilities polygonUtilities;
+        private PolygonKeyHandler polygonKeyHandler;
+        private UIElementsController uIElementsController;
+        private PolygonHandlerPerformer polygonHandlerPerformer;
+        private MousePositionInformation mousePositionInformation;
 
         public string CurrentLabelName { get => currentLabelName; set => currentLabelName = value; }
         public Color CurrentLabelColor { get => currentLabelColor; set => currentLabelColor = value; }
 
-
         public void polygonHandlerInit()
         {
-            creationInfos = new CreationInformation();
             editInfos = new EditInformations();
-            dataGridChecker = new DataGridChecker(this.control);
-            polygonDrawUnit = new DrawUnit(this.control, creationInfos, editInfos);
-            polygonUtilities = new Utilities(this.control, this, creationInfos, editInfos, dataGridChecker, polygonDrawUnit);
-            polygonDrawUnit.PolygonUtilities = polygonUtilities;
+            creationInfos = new CreationInformation();
+            dataGridChecker = new DataGridChecker(control);
+            uIElementsController = new UIElementsController(control);
             control.annoListControl.PolygonUtilities = polygonUtilities;
+            mousePositionInformation = new MousePositionInformation(control, creationInfos, editInfos);
+
+            polygonDrawUnit = new DrawUnit();
+            labelCreator = new LabelCreator();
+            polygonEditor = new PolygonEditor();
+            polygonUtilities = new PolygonUtilities();
+            polygonKeyHandler = new PolygonKeyHandler();
+            polygonHandlerPerformer = new PolygonHandlerPerformer(control, this, editInfos);
+
+            polygonUtilities.setObjects(control, this, creationInfos, editInfos, dataGridChecker, polygonDrawUnit);
+            polygonDrawUnit.setObjects(control, creationInfos, editInfos, polygonUtilities);
+            polygonEditor.setObjects(polygonDrawUnit, control, editInfos, polygonUtilities);
+            polygonKeyHandler.setObjects(control, labelCreator, creationInfos, polygonUtilities);
+            polygonHandlerPerformer.setObjects(creationInfos, polygonDrawUnit, uIElementsController, polygonUtilities);
+            labelCreator.setObjects(control, this, polygonDrawUnit.getDrawUtilities(), creationInfos, uIElementsController,
+                dataGridChecker, polygonUtilities);
         }
 
         #endregion INIT
@@ -60,17 +79,34 @@ namespace ssi
             }
         }
 
-        private void polygonListElementDelete_Click(object sender, RoutedEventArgs e)
+        private void polygonDelete_Click(object sender, RoutedEventArgs e)
         {
             if (dataGridChecker.polygonDGIsNotNullAndCountsNotZero())
             {
-                PolygonLabel[] labelsToDelete = control.polygonListControl.polygonDataGrid.SelectedItems.Cast<PolygonLabel>().ToArray();
-                AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
+                polygonHandlerPerformer.handleRemove();
+            }
+        }
 
-                item.UndoRedoStack.Do(new RemoveLabelsCommand(labelsToDelete, item));
-                
-                polygonUtilities.refreshAnnoDataGrid();
-                polygonUtilities.polygonSelectItem(item);
+        public void polygonPasteContextMenue_Click(object sender, EventArgs e)
+        {
+            polygonHandlerPerformer.handlePaste();
+        }
+
+        public void polygonCopyContextMenue_Click(object sender, EventArgs e)
+        {
+            polygonHandlerPerformer.handleCopy();
+        }
+
+        public void polygonCutContextMenue_Click(object sender, EventArgs e)
+        {
+            polygonHandlerPerformer.handleCut();
+        }
+
+        public void polygonDeleteContextMenue_Click(object sender, EventArgs e)
+        {
+            if (dataGridChecker.polygonDGIsNotNullAndCountsNotZero())
+            {
+                polygonHandlerPerformer.handleRemove();
             }
         }
 
@@ -93,7 +129,7 @@ namespace ssi
                 {
                     AnnoList list = (AnnoList)control.annoListControl.annoDataGrid.ItemsSource;
                     int i = control.annoListControl.annoDataGrid.SelectedIndex;
-                    this.polygonUtilities.InterpolationWindow = new InterpolationWindow(polygonUtilities);
+                    this.polygonUtilities.InterpolationWindow = new InterpolationWindow(polygonUtilities, uIElementsController, polygonHandlerPerformer);
                     this.polygonUtilities.InterpolationWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     this.polygonUtilities.InterpolationWindow.Show();
                 }
@@ -218,47 +254,17 @@ namespace ssi
         private void polygonStopInsertion_Click(object sender, RoutedEventArgs e)
         {
             // We have to end the CreateMode -> simulate one or two esc-clicks (one if we didnt start a polygon 
-            polygonUtilities.escClickedCWhileProbablyCreatingPolygon();
+            polygonKeyHandler.escClickedCWhileProbablyCreatingPolygon();
             if (creationInfos.IsCreateModeOn)
-                polygonUtilities.escClickedCWhileProbablyCreatingPolygon();
-        }
-
-        private void OnPolygonMedia_MouseUp(IMedia media, double x, double y)
-        {
-            x = Math.Round(x);
-            y = Math.Round(y);
-
-            if (dataGridChecker.isSchemeTypePolygon() && dataGridChecker.annonDGIsNotNull() && dataGridChecker.polygonDGIsNotNull())
-            {
-                if (!creationInfos.IsCreateModeOn)
-                {
-                    if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
-                    {
-                        PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
-                        List<Point> polygonPoints = new List<Point>();
-
-                        foreach (PolygonPoint point in polygonLabel.Polygon)
-                        {
-                            polygonPoints.Add(new Point(point.X, point.Y));
-                        }
-
-                        AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
-
-                        if (!polygonUtilities.targetPositionEqualsSource(editInfos.PolygonStartPosition, polygonPoints))
-                            item.UndoRedoStack.Do(new ChangeCompletePolygonCommand(editInfos.PolygonStartPosition, polygonPoints, polygonLabel, TYPE.EDIT));
-                    }
-                }
-            }
+                polygonKeyHandler.escClickedCWhileProbablyCreatingPolygon();
         }
 
         private void polygonAddLabels_Click(object sender, RoutedEventArgs e)
         {
             if (dataGridChecker.annonDGIsNotNullAndCountsZero() && dataGridChecker.polygonDGIsNotNullAndCountsZero())
                 control.annoListControl.annoDataGrid.SelectedItem = control.annoListControl.annoDataGrid.Items[0];
-
-            // TODO MARCO: nur machen wenn video geladen und wenn z.B. zwei videos vorhanden und das erste gelöscht wird
-            polygonUtilities.updateImageSize();
-            polygonUtilities.startCreationMode();
+            
+            labelCreator.startCreationMode();
         }
         #endregion CLICKS 
 
@@ -269,7 +275,7 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
 
-            // TODO MARCO Paste
+            polygonHandlerPerformer.handlePaste();
         }
 
         private void polygonCopy_Click(object sender, RoutedEventArgs e)
@@ -277,7 +283,15 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
 
-            // TODO MARCO Copy
+            polygonHandlerPerformer.handleCopy();
+        }
+
+        private void polygonCut_Click(object sender, RoutedEventArgs e)
+        {
+            if (!dataGridChecker.isSchemeTypePolygon())
+                return;
+
+            polygonHandlerPerformer.handleCut();
         }
 
         private void polygonRedo_Click(object sender, RoutedEventArgs e)
@@ -285,7 +299,7 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
 
-            this.polygonUtilities.handleRedo();
+            polygonHandlerPerformer.handleRedo();
         }
 
         private void polygonUndo_Click(object sender, RoutedEventArgs e)
@@ -293,7 +307,7 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
 
-            this.polygonUtilities.handleUndo();
+            polygonHandlerPerformer.handleUndo();
         }
 
         #endregion MENU_CLICK
@@ -316,20 +330,23 @@ namespace ssi
 
         private void polygonList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (dataGridChecker.polygonDGIsNotNullAndCountsOne())
+            if (dataGridChecker.polygonDGIsNotNullAndCountsNotZero())
             {
+                uIElementsController.enableOrDisableMenuControls(true, polygonHandlerPerformer.getItemsToChange());
                 creationInfos.LastSelectedLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[0];
-
-                PolygonLabel polygon = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[0];
 
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
                 {
-                    control.polygonListControl.editTextBox.Text = polygon.Label;
+                    control.polygonListControl.editTextBox.Text = creationInfos.LastSelectedLabel.Label;
                 }
                 else
                 {
-                    control.polygonListControl.editComboBox.SelectedItem = new Label(polygon.Label, polygon.Color);
+                    control.polygonListControl.editComboBox.SelectedItem = new Label(creationInfos.LastSelectedLabel.Label, creationInfos.LastSelectedLabel.Color);
                 }
+            }
+            else
+            {
+                uIElementsController.enableOrDisableMenuControls(false, polygonHandlerPerformer.getItemsToChange());
             }
 
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
@@ -338,6 +355,13 @@ namespace ssi
         #endregion SELECTION_CHANGED
 
         #region MOUSE
+        void OnPolygonMedia_RightMouseDown(IMedia media, double x, double y)
+        {
+            if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+            {
+                polygonHandlerPerformer.handleRightMouseDown(media, x, y);
+            }
+        }
 
         private void OnPolygonMainControlMouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -345,63 +369,98 @@ namespace ssi
                 return;
 
             if (!creationInfos.IsCreateModeOn)
-                polygonUtilities.enableOrDisableControls(true);
+                uIElementsController.enableOrDisableControls(true);
 
-            if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
+            if ((editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null) && !polygonHandlerPerformer.ContextMenuOpen)
             {
-                control.Cursor = Cursors.Hand;
+                 control.Cursor = Cursors.Hand;
             }
 
-            if(editInfos.ShowingSelectionRect && !(editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea || editInfos.IsAboveSelectedPolygonLineAndCtrlPressed))
+            if(editInfos.ShowingSelectionRect && !(editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null || editInfos.IsAboveSelectedPolygonLineAndCtrlPressed))
             {
                 editInfos.ShowingSelectionRect = false;
                 polygonDrawUnit.polygonOverlayUpdate((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem);
                 editInfos.restetInfos();
             }
-
         }
+
+        private void OnPolygonMedia_MouseUp(IMedia media, double x, double y)
+        {
+            x = Math.Round(x);
+            y = Math.Round(y);
+
+            if (dataGridChecker.isSchemeTypePolygon() && dataGridChecker.annonDGIsNotNull() && dataGridChecker.polygonDGIsNotNull())
+            {
+                if (!creationInfos.IsCreateModeOn)
+                {
+                    if (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null)
+                    {
+                        PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
+                        List<Point> polygonPoints = new List<Point>();
+
+                        foreach (PolygonPoint point in polygonLabel.Polygon)
+                        {
+                            polygonPoints.Add(new Point(point.X, point.Y));
+                        }
+
+                        AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
+
+                        if (!polygonUtilities.polygonPositionsEqual(editInfos.PolygonStartPosition, polygonPoints))
+                            item.UndoRedoStack.Do(new ChangeLabelCommand(editInfos.PolygonStartPosition, polygonPoints, polygonLabel));
+                    }
+                }
+            }
+        }
+
 
         private void OnPolygonMedia_MouseDown(IMedia media, double x, double y)
         {
-            if (!dataGridChecker.isSchemeTypePolygon())
+            if (!dataGridChecker.isSchemeTypePolygon() || Mouse.LeftButton != MouseButtonState.Pressed)
                 return;
 
             x = Math.Round(x);
             y = Math.Round(y);
 
-            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            if (polygonHandlerPerformer.ContextMenuOpen)
             {
-                if (dataGridChecker.isSchemeTypePolygon() && dataGridChecker.annonDGIsNotNull() && dataGridChecker.polygonDGIsNotNull())
-                {
-                    // TODO MARCO: nur machen wenn video geladen und wenn z.B. zwei videos vorhanden und das erste gelöscht wird
-                    polygonUtilities.updateImageSize();
-                    if (creationInfos.IsCreateModeOn)
-                    {
-                        if(polygonUtilities.posIs5pxFromBottomAway(y))
-                        {
-                            bool lastPoint = polygonUtilities.addNewPoint(x, y);
+                editInfos.resetSelectedElements();
+                polygonHandlerPerformer.ContextMenuOpen = false;
+                polygonUtilities.setPossiblySelectedPolygonAndSelectedPoint(x, y);
+                polygonDrawUnit.polygonOverlayUpdate((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem);
+                creationInfos.LastKnownPoint = new System.Windows.Point(x, y);
+                return;
+            }
 
-                            if (lastPoint)
-                            {
-                                creationInfos.IsPolylineToDraw = false;
-                                control.polygonListControl.polygonDataGrid.SelectedItem = null;
-                            }
+            creationInfos.LastKnownPoint = new System.Windows.Point(x, y);
+
+            if (dataGridChecker.annonDGIsNotNull() && dataGridChecker.polygonDGIsNotNull())
+            {
+                if (creationInfos.IsCreateModeOn)
+                {
+                    if(polygonUtilities.isPos5pxFromBottomAway(y))
+                    {
+                        bool lastPoint = labelCreator.addNewPoint(x, y);
+
+                        if (lastPoint)
+                        {
+                            creationInfos.IsPolylineToDraw = false;
+                            control.polygonListControl.polygonDataGrid.SelectedItem = null;
                         }
+                    }
+                }
+                else
+                {
+                    if (editInfos.IsAboveSelectedPolygonLineAndCtrlPressed && polygonUtilities.controlPressed())
+                    {
+                        polygonEditor.addNewPointToDonePolygon(x, y);
+                    }
+                    else if (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null)
+                    {
+                        polygonEditor.editPolygon(x, y);
                     }
                     else
                     {
-                        if (editInfos.IsAboveSelectedPolygonLineAndCtrlPressed && polygonUtilities.controlPressed())
-                        {
-                            polygonUtilities.addNewPointToDonePolygon(x, y);
-                        }
-                        else if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
-                        {
-                            polygonUtilities.editPolygon(x, y);
-                        }
-                        else
-                        {
-                            polygonUtilities.startSelectionRectangle(x, y);
-                        }
+                        polygonUtilities.startSelectionRectangle(x, y);
                     }
                 }
             }
@@ -409,7 +468,7 @@ namespace ssi
 
         void OnPolygonMedia_MouseMove(IMedia media, double x, double y)
         {
-            if (!dataGridChecker.isSchemeTypePolygon())
+            if (!dataGridChecker.isSchemeTypePolygon() || polygonHandlerPerformer.ContextMenuOpen)
                 return;
 
             this.editInfos.MouseOnMedia = true;
@@ -439,45 +498,37 @@ namespace ssi
             {
                 AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
 
-                if (Mouse.LeftButton == MouseButtonState.Pressed && (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea))
+                if (Mouse.LeftButton == MouseButtonState.Pressed && (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null))
                 {
-                    if (editInfos.IsAboveSelectedPolygonPoint)
+                    if (editInfos.SelectedPoint != null)
                     {
                         polygonUtilities.updatePoint(x, y, item);
                     }
-                    else if (editInfos.IsWithinSelectedPolygonArea)
+                    else if (editInfos.SelectedPolygon != null)
                     {
-                        polygonUtilities.updatePolygon(x, y, item);
+                        polygonEditor.updatePolygon(x, y);
                     }
 
                     polygonDrawUnit.polygonOverlayUpdate(item);
                 }
-                else if(Mouse.LeftButton == MouseButtonState.Pressed && !(editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea || editInfos.IsAboveSelectedPolygonLineAndCtrlPressed))
+                else if(Mouse.LeftButton == MouseButtonState.Pressed && !(editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null || editInfos.IsAboveSelectedPolygonLineAndCtrlPressed))
                 {
-                    polygonUtilities.enableOrDisableControls(false);
+                    uIElementsController.enableOrDisableControls(false);
                     control.polygonListControl.polygonDataGrid.SelectedItem = null;
                     polygonUtilities.selectLabelsInSelectionRectangle(editInfos.StartPosition.X, editInfos.StartPosition.Y, x, y);
-                    List<int> rectAsPolyline = polygonDrawUnit.getRectanglePointsAsList(editInfos.StartPosition.X, editInfos.StartPosition.Y, x, y);
+                    List<int> rectAsPolyline = polygonDrawUnit.getDrawUtilities().getRectanglePointsAsList(editInfos.StartPosition.X, editInfos.StartPosition.Y, x, y);
                     polygonDrawUnit.polygonOverlayUpdate(item, rectAsPolyline);
                 }
                 else
                 { 
                     editInfos.restetInfos();
-                    if (polygonUtilities.controlPressed() && polygonUtilities.mouseIsOnLine())
+                    if (polygonUtilities.controlPressed() && mousePositionInformation.mouseIsOnLine())
                     {
                         editInfos.IsAboveSelectedPolygonLineAndCtrlPressed = true;
                     }
                     else
                     {
-                        if (polygonUtilities.isMouseAbovePoint(x, y))
-                        {
-                            editInfos.IsAboveSelectedPolygonPoint = true;
-                        }
-                        else if (polygonUtilities.isMouseWithinPolygonArea(x, y))
-                        {
-                            editInfos.IsWithinSelectedPolygonArea = true;
-                        }
-
+                        polygonUtilities.setPossiblySelectedPolygonAndSelectedPoint(x, y);
                         polygonDrawUnit.polygonOverlayUpdate(item);
                     }
                 }
@@ -492,7 +543,7 @@ namespace ssi
 
             if (this.editInfos.MouseOnMedia)
             {
-                if (creationInfos.IsCreateModeOn && polygonUtilities.posIs5pxFromBottomAway(creationInfos.LastKnownPoint.Y)) 
+                if (creationInfos.IsCreateModeOn && polygonUtilities.isPos5pxFromBottomAway(creationInfos.LastKnownPoint.Y)) 
                 {
                     control.Cursor = Cursors.Cross;
                 }
@@ -502,7 +553,7 @@ namespace ssi
                     {
                         control.Cursor = Cursors.Cross;
                     }
-                    else if (editInfos.IsAboveSelectedPolygonPoint || editInfos.IsWithinSelectedPolygonArea)
+                    else if (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null)
                     {
                         if (Mouse.LeftButton == MouseButtonState.Pressed)
                             control.Cursor = Cursors.SizeAll;
@@ -520,6 +571,11 @@ namespace ssi
             {
                 control.Cursor = Cursors.Arrow;
             }
+        }
+
+        private void OnPolygonDataGridMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            control.polygonListControl.polygonDataGrid.SelectedItem = null;
         }
         #endregion MOUSE
 
@@ -546,68 +602,25 @@ namespace ssi
             {
                 if (Keyboard.IsKeyDown(Key.Escape))
                 {
-                    polygonUtilities.escClickedCWhileProbablyCreatingPolygon();
+                    polygonKeyHandler.escClickedCWhileProbablyCreatingPolygon();
                     return;
                 }
             }
 
             if(Keyboard.IsKeyDown(Key.Delete) || (Keyboard.IsKeyDown(Key.Back) && (Keyboard.IsKeyDown(Key.RightCtrl) || (Keyboard.IsKeyDown(Key.LeftCtrl)))))
             {
-                polygonListElementDelete_Click(sender, null);
+                polygonDelete_Click(sender, null);
                 return;
             }
 
-            if (polygonUtilities.controlPressed() && polygonUtilities.mouseIsOnLine() && !Keyboard.IsKeyDown(Key.Z))
+            if (polygonUtilities.controlPressed() && mousePositionInformation.mouseIsOnLine() && !Keyboard.IsKeyDown(Key.Z))
             {
                 editInfos.IsAboveSelectedPolygonLineAndCtrlPressed = true;
                 control.Cursor = Cursors.Cross;
                 return;
             }
-
-            if (Keyboard.IsKeyDown(Key.Z) && (Keyboard.IsKeyDown(Key.RightCtrl) || (Keyboard.IsKeyDown(Key.LeftCtrl))))
-            {
-                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
-                {
-                    this.polygonUtilities.handleRedo();
-                }
-                else
-                {
-                    this.polygonUtilities.handleUndo();
-                }
-            }
-        }
-
-        #endregion KEY
-
-        #region REST
-
-        private void polygonContextMenue_Open(object sender, RoutedEventArgs e)
-        {
-            int amountOfSelectedPolygons = control.polygonListControl.polygonDataGrid.SelectedItems.Count;
-            int amountOfSelectedFrames = control.annoListControl.annoDataGrid.SelectedItems.Count;
-            if (amountOfSelectedPolygons > 1 || amountOfSelectedFrames > 1 || amountOfSelectedPolygons == 0 || amountOfSelectedFrames == 0)
-            {
-                foreach (MenuItem item in control.polygonListControl.InvoiceDetailsList.Items)
-                {
-                    if (item.Name == "editPolygon")
-                    {
-                        item.IsEnabled = false;
-                    }
-                }
-            }
-            else
-            {
-                foreach (MenuItem item in control.polygonListControl.InvoiceDetailsList.Items)
-                {
-                    if (item.Name == "editPolygon")
-                    {
-                        item.IsEnabled = true;
-                    }
-                }
-            }
         }
     
-        #endregion REST
-        
+        #endregion KEY
     }
 }

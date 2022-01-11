@@ -112,7 +112,8 @@ namespace ssi
         {           
             if (box != null)
             {
-                control.mediaBoxControl.Remove(box);                
+                control.mediaBoxControl.Remove(box);
+                polygonUtilities.updateImageSize();
 
                 MediaBoxStatic.Unselect();
                 mediaBoxes.Remove(box);

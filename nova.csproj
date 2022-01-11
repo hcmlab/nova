@@ -190,10 +190,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Polygon\AddCopiedLabelsCommand.cs" />
     <Compile Include="Commands\Polygon\RemoveLabelsCommand.cs" />
-    <Compile Include="Commands\Polygon\AddOrRemoveExtraPolygonPointCommand.cs" />
-    <Compile Include="Commands\Polygon\AddOrRemovePolygonPointCommand.cs" />
-    <Compile Include="Commands\Polygon\ChangeCompletePolygonCommand .cs" />
+    <Compile Include="Commands\Polygon\AddExtraPointCommand.cs" />
+    <Compile Include="Commands\Polygon\AddPointCommand.cs" />
+    <Compile Include="Commands\Polygon\ChangeLabelCommand .cs" />
     <Compile Include="Controls\Annotation\AnnoTierNewFreeSchemeWindow.xaml.cs">
       <DependentUpon>AnnoTierNewFreeSchemeWindow.xaml</DependentUpon>
     </Compile>
@@ -313,9 +314,17 @@
     <Compile Include="Tools\PluginCaller.cs" />
     <Compile Include="Tools\Polygon Helper\DataGridChecker.cs" />
     <Compile Include="Tools\Polygon Helper\DrawUnit.cs" />
+    <Compile Include="Tools\Polygon Helper\DrawUtilities.cs" />
     <Compile Include="Tools\Polygon Helper\InterpolationHandler.cs" />
+    <Compile Include="Tools\Polygon Helper\LabelCreator.cs" />
+    <Compile Include="Tools\Polygon Helper\PolygonEditor.cs" />
+    <Compile Include="Tools\Polygon Helper\PolygonKeyHandler.cs" />
+    <Compile Include="Tools\Polygon Helper\PolygonRevisor.cs" />
+    <Compile Include="Tools\Polygon Helper\MousePositionInformation.cs" />
+    <Compile Include="Tools\Polygon Helper\UIElementsController.cs" />
     <Compile Include="Tools\Polygon Helper\UndoRedoHandler.cs" />
-    <Compile Include="Tools\Polygon Helper\Utilities.cs" />
+    <Compile Include="Tools\Polygon Helper\PolygonHandlerPerformer.cs" />
+    <Compile Include="Tools\Polygon Helper\PolygonUtilities.cs" />
     <Compile Include="Tools\Screenshot.cs" />
     <Compile Include="Tools\VolumeControl.xaml.cs">
       <DependentUpon>VolumeControl.xaml</DependentUpon>

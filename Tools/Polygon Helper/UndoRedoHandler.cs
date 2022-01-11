@@ -1,4 +1,5 @@
 ﻿using ssi.Interfaces;
+using ssi.Tools.Polygon_Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,16 +14,18 @@ namespace ssi.Types.Polygon
     {
         private MainControl control;
         private CreationInformation creationInfos;
-        private Utilities polygonUtilities;
+        private PolygonUtilities generalPolygonUtilities;
         private IDrawUnit polygonDrawUnit;
+        private UIElementsController uIElementController;
 
 
-        public UndoRedoHandler(MainControl control, CreationInformation creationInfos, Utilities polygonUtilities, IDrawUnit polygonDrawUnit)
+        public UndoRedoHandler(MainControl control, CreationInformation creationInfos, PolygonUtilities generalPolygonUtilities, IDrawUnit polygonDrawUnit, UIElementsController uIElementController)
         {
             this.control = control;
             this.creationInfos = creationInfos;
-            this.polygonUtilities = polygonUtilities;
+            this.generalPolygonUtilities = generalPolygonUtilities;
             this.polygonDrawUnit = polygonDrawUnit;
+            this.uIElementController = uIElementController;
         }
 
         public void handleUndo()
@@ -52,18 +55,19 @@ namespace ssi.Types.Polygon
                     else
                     {
                         item.PolygonList.removeExplicitPolygon(label);
-                        polygonUtilities.refreshAnnoDataGrid();
-                        polygonUtilities.polygonSelectItem(item);
+                        generalPolygonUtilities.refreshAnnoDataGrid();
+                        generalPolygonUtilities.polygonSelectItem(item);
                         control.polygonListControl.polygonDataGrid.SelectedItem = null;
                         creationInfos.IsPolylineToDraw = false;
                     }
                 }
                 else if (label.Informations.Type == TYPE.REMOVE)
                 {
-                    control.polygonListControl.polygonDataGrid.SelectedItem = null;
-                    polygonUtilities.polygonSelectItem(item);
-                    polygonUtilities.refreshAnnoDataGrid();
-                    polygonUtilities.polygonTableUpdate();
+                    selectLabels(allLabels);
+                }
+                else if (label.Informations.Type == TYPE.COPY)
+                {
+                    selectNoLabel();
                 }
             }
             setPossiblyCreationMode(label);
@@ -103,8 +107,8 @@ namespace ssi.Types.Polygon
                     if (control.polygonListControl.polygonDataGrid.SelectedItem == null)
                     {
                         item.PolygonList.addPolygonLabel(label);
-                        polygonUtilities.refreshAnnoDataGrid();
-                        polygonUtilities.polygonSelectItem(item);
+                        generalPolygonUtilities.refreshAnnoDataGrid();
+                        generalPolygonUtilities.polygonSelectItem(item);
                         creationInfos.IsPolylineToDraw = true;
                     }
                     if (pointsBeforeRedo == pointsAfterRedo)
@@ -115,16 +119,11 @@ namespace ssi.Types.Polygon
                 }
                 else if (label.Informations.Type == TYPE.REMOVE)
                 {
-                    control.polygonListControl.polygonDataGrid.SelectedItem = null;
-
-                    foreach (PolygonLabel currentLabel in allLabels)
-                    {
-                        control.polygonListControl.polygonDataGrid.SelectedItems.Add(currentLabel);
-                    }
-
-                    polygonUtilities.refreshAnnoDataGrid();
-                    polygonUtilities.polygonSelectItem(item);
-                    polygonUtilities.polygonTableUpdate();
+                    selectNoLabel();
+                }
+                else if (label.Informations.Type == TYPE.COPY)
+                {
+                    selectLabels(allLabels);
                 }
             }
 
@@ -141,7 +140,10 @@ namespace ssi.Types.Polygon
                     if (!creationInfos.IsCreateModeOn)
                     {
                         creationInfos.IsCreateModeOn = true;
-                        polygonUtilities.enableOrDisableControls(false);
+                        uIElementController.enableOrDisableControlsBesidesPolygon(false);
+                        uIElementController.enableOrDisablePolygonControlElements(false);
+                        uIElementController.switchAddLabelButton();
+                        control.polygonListControl.stopInsertion.IsEnabled = true;
                     }
                 }
                 else
@@ -149,7 +151,9 @@ namespace ssi.Types.Polygon
                     if (creationInfos.IsCreateModeOn)
                     {
                         creationInfos.IsCreateModeOn = false;
-                        polygonUtilities.enableOrDisableControls(true);
+                        uIElementController.enableOrDisableControls(true);
+                        uIElementController.enableOrDisablePolygonControlElements(true);
+                        uIElementController.switchAddLabelButton();
                     }
                 }
             }
@@ -161,6 +165,26 @@ namespace ssi.Types.Polygon
             polygonDrawUnit.polygonOverlayUpdate(item);
             if (creationInfos.IsPolylineToDraw)
                 polygonDrawUnit.drawLineToMousePosition(creationInfos.LastKnownPoint.X, creationInfos.LastKnownPoint.Y);
+        }
+
+        public void selectLabels(PolygonLabel[] allLabels)
+        {
+            control.polygonListControl.polygonDataGrid.SelectedItem = null;
+
+            foreach (PolygonLabel currentLabel in allLabels)
+            {
+                control.polygonListControl.polygonDataGrid.SelectedItems.Add(currentLabel);
+            }
+
+            generalPolygonUtilities.refreshAnnoDataGrid();
+            generalPolygonUtilities.polygonTableUpdate();
+        }
+
+        public void selectNoLabel()
+        {
+            control.polygonListControl.polygonDataGrid.SelectedItem = null;
+            generalPolygonUtilities.refreshAnnoDataGrid();
+            generalPolygonUtilities.polygonTableUpdate();
         }
     }
 }

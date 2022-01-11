@@ -1,18 +1,10 @@
-﻿using ssi.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
-using static ssi.Types.Polygon.LabelInformations;
+﻿using System.Collections.Generic;
 
 namespace ssi.Types.Polygon
 {
     internal class InterpolationHandler
     {
         private MainControl control;
-       
 
         public InterpolationHandler(MainControl control)
         {
@@ -26,7 +18,6 @@ namespace ssi.Types.Polygon
             list[targetFrame.FrameIndex].PolygonList.removeExplicitPolygon(targetLabel);
             list[sourceFrame.FrameIndex].PolygonList.removeExplicitPolygon(targetLabel);
             list[targetFrame.FrameIndex].PolygonList.removeExplicitPolygon(sourceLabel);
-
 
             int newLabelCounter = -1;
             foreach (AnnoListItem listItem in list)

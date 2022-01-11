@@ -3290,10 +3290,7 @@ namespace ssi
                                 {
                                     foreach (BsonDocument point in b_points)
                                     {
-                                        double id = Utilities.IDcounter;
-                                        Utilities.IDcounter++;
-
-                                        points.Add(new PolygonPoint(point["x"].ToDouble(), point["y"].ToDouble(), id));
+                                        points.Add(new PolygonPoint(point["x"].ToDouble(), point["y"].ToDouble()));
                                     }
 
                                     polygonLabels.Add(new PolygonLabel(points, label, labelColor));
