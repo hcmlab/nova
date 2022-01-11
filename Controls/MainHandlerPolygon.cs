@@ -397,11 +397,11 @@ namespace ssi
                     {
                         PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
                         List<Point> polygonPoints = new List<Point>();
-
-                        foreach (PolygonPoint point in polygonLabel.Polygon)
-                        {
-                            polygonPoints.Add(new Point(point.X, point.Y));
-                        }
+                        if(polygonLabel != null)
+                            foreach (PolygonPoint point in polygonLabel.Polygon)
+                            {
+                                polygonPoints.Add(new Point(point.X, point.Y));
+                            }
 
                         AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
 
@@ -450,6 +450,9 @@ namespace ssi
                 }
                 else
                 {
+                    if (!polygonUtilities.selectOrUnselectDependentOnMousePos(x, y))
+                        return;
+
                     if (editInfos.IsAboveSelectedPolygonLineAndCtrlPressed && polygonUtilities.controlPressed())
                     {
                         polygonEditor.addNewPointToDonePolygon(x, y);
