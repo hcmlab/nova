@@ -67,6 +67,51 @@ namespace ssi.Types.Polygon
             }
         }
 
+        public bool selectOrUnselectDependentOnMousePos(double x, double y)
+        {
+            PolygonLabel[] polygonLabels = control.polygonListControl.polygonDataGrid.Items.Cast<PolygonLabel>().ToArray();
+            if (polygonLabels.Length == 0)
+                return true;
+
+            PolygonLabel labelToChange = null;
+            int counter = 0;
+            foreach (PolygonLabel polygonLabel in polygonLabels)
+            {
+                if (arePointsInPolygonArea(new Point[] { new Point(x, y) }, polygonLabel.Polygon))
+                {
+                    labelToChange = polygonLabel;
+                    break;
+                }
+                counter++;
+            }
+
+            if (labelToChange == null)
+                return true;
+
+            bool returnValue = true;
+            if (!control.polygonListControl.polygonDataGrid.SelectedItems.Cast<PolygonLabel>().Contains(labelToChange))
+            {
+                if (!(Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
+                    control.polygonListControl.polygonDataGrid.SelectedItems.Clear();
+                control.polygonListControl.polygonDataGrid.SelectedItems.Add(control.polygonListControl.polygonDataGrid.Items[counter]);
+                setPossiblySelectedPolygonAndSelectedPoint(x, y);
+            }
+            else
+            {
+                if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+                {
+                    control.polygonListControl.polygonDataGrid.SelectedItems.Remove(control.polygonListControl.polygonDataGrid.Items[counter]);
+                    editInfos.restetInfos();
+                    returnValue = false;
+                }
+            }
+
+            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+            polygonDrawUnit.polygonOverlayUpdate(item);
+
+            return returnValue;
+        }
+
         private bool arePointsInPolygonArea(Point[] points, List<PolygonPoint> polygon)
         {
             if (polygon != null)
@@ -275,7 +320,7 @@ namespace ssi.Types.Polygon
 
         public bool polygonPositionsEqual(List<Point> start, List<Point> target)
         {
-            if (start is null || target is null)
+            if (start is null || target is null || start.Count != target.Count)
                 return true;
 
             for (int i = 0; i < start.Count; i++)
