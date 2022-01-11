@@ -67,7 +67,6 @@ namespace ssi.Types.Polygon
 
         private void drawLabels(PolygonList polygonList, WriteableBitmap overlay, List<int> selectionRectPoints = null)
         {
-            List<int> allPoints = new List<int>();
             int thickness = 1;
             Color lastColor = new Color();
 
@@ -78,29 +77,6 @@ namespace ssi.Types.Polygon
                 overlay.FillPolygon(selectionRectPoints.ToArray(), Color.FromArgb(100, 0, 102, 204));
             }
 
-            // we dont want to draw the area over the points -> so we have to draw the area first
-            foreach (PolygonLabel polygonLabel in polygonList.Polygons)
-            {
-                if (polygonLabel.Equals(editInfos.SelectedPolygon) && !creationInfos.IsCreateModeOn && (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null))
-                {
-                    lastColor.R = polygonLabel.Color.R;
-                    lastColor.G = polygonLabel.Color.G;
-                    lastColor.B = polygonLabel.Color.B;
-                    lastColor.A = polygonLabel.Color.A;
-
-                    foreach (PolygonPoint pp in polygonLabel.Polygon)
-                    {
-                        allPoints.Add((int)pp.X);
-                        allPoints.Add((int)pp.Y);
-                    }
-
-                    allPoints.Add((int)polygonLabel.Polygon.First().X);
-                    allPoints.Add((int)polygonLabel.Polygon.First().Y);
-                    Color contentColor = polygonLabel.Color;
-                    contentColor.A = 126;
-                    overlay.FillPolygon(allPoints.ToArray(), contentColor);
-                }
-            }
 
             foreach (PolygonLabel polygonLabel in polygonList.Polygons)
             {
@@ -113,6 +89,32 @@ namespace ssi.Types.Polygon
                         {
                             currentPolygonLabelEqualSelectedOne = true;
                             break;
+                        }
+                    }
+
+                    // we dont want to draw the area over the points -> so we have to draw the area first
+                    if (!creationInfos.IsCreateModeOn)
+                    {
+                        if(currentPolygonLabelEqualSelectedOne && editInfos.SelectedPolygon != null)
+                        {
+                                        List<int> allPoints = new List<int>();
+
+                            lastColor.R = polygonLabel.Color.R;
+                            lastColor.G = polygonLabel.Color.G;
+                            lastColor.B = polygonLabel.Color.B;
+                            lastColor.A = polygonLabel.Color.A;
+
+                            foreach (PolygonPoint pp in polygonLabel.Polygon)
+                            {
+                                allPoints.Add((int)pp.X);
+                                allPoints.Add((int)pp.Y);
+                            }
+
+                            allPoints.Add((int)polygonLabel.Polygon.First().X);
+                            allPoints.Add((int)polygonLabel.Polygon.First().Y);
+                            Color contentColor = polygonLabel.Color;
+                            contentColor.A = 126;
+                            overlay.FillPolygon(allPoints.ToArray(), contentColor);
                         }
                     }
 

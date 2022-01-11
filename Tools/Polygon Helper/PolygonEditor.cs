@@ -42,12 +42,15 @@ namespace ssi.Tools.Polygon_Helper
         public void editPolygon(double x, double y)
         {
             uIElementsController.enableOrDisableControls(false);
-            PolygonLabel polygonLabel = editInfos.SelectedPolygon;
-            List<Point> polygonPoints = new List<Point>();
 
-            foreach (PolygonPoint point in polygonLabel.Polygon)
+            List<Point> polygonPoints = new List<Point>();
+            for (int i = 0; i < control.polygonListControl.polygonDataGrid.SelectedItems.Count; i++)
             {
-                polygonPoints.Add(new Point(point.X, point.Y));
+                PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[i];
+                foreach (PolygonPoint point in polygonLabel.Polygon)
+                {
+                    polygonPoints.Add(new Point(point.X, point.Y));
+                }
             }
 
             editInfos.setSelectedPolygonPointsAsDistanceToMouse(polygonPoints, x, y);
@@ -102,8 +105,17 @@ namespace ssi.Tools.Polygon_Helper
 
         public void updatePolygon(double x, double y)
         {
-            PolygonLabel polygonLabel = editInfos.SelectedPolygon;
-            List<PolygonPoint> polygon = polygonLabel.Polygon;
+            List<PolygonPoint> polygon = new List<PolygonPoint>();
+
+            for (int i = 0; i < control.polygonListControl.polygonDataGrid.SelectedItems.Count; i++)
+            {
+                PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[i];
+                polygon.AddRange(polygonLabel.Polygon);
+            }
+
+            if (polygon.Count == 0)
+                return;
+
             int counter = 0;
 
             editInfos.PolygonPointsXandYDistances.ForEach(distances =>
@@ -138,26 +150,37 @@ namespace ssi.Tools.Polygon_Helper
             if (MIN_IMAGE_X > polygon[minXIndex].X)
             {
                 double x_dif = MIN_IMAGE_X - polygon[minXIndex].X;
-                polygon.ForEach(point => point.X += x_dif);
+                foreach(PolygonLabel label in control.polygonListControl.polygonDataGrid.SelectedItems)
+                {
+                    label.Polygon.ForEach(point => point.X += x_dif);
+                }
             }
 
             if (MAX_IMAGE_X < polygon[maxXIndex].X)
             {
                 double x_dif = MAX_IMAGE_X - polygon[maxXIndex].X;
-                polygon.ForEach(point => point.X += x_dif);
+                foreach (PolygonLabel label in control.polygonListControl.polygonDataGrid.SelectedItems)
+                {
+                    label.Polygon.ForEach(point => point.X += x_dif);
+                }
             }
 
             if (MIN_IMAGE_Y > polygon[minYIndex].Y)
             {
                 double y_dif = MIN_IMAGE_Y - polygon[minYIndex].Y;
-                polygon.ForEach(point => point.Y += y_dif);
+                foreach (PolygonLabel label in control.polygonListControl.polygonDataGrid.SelectedItems)
+                {
+                    label.Polygon.ForEach(point => point.Y += y_dif);
+                }
             }
 
             if (MAX_IMAGE_Y < polygon[maxYIndex].Y)
             {
                 double y_dif = MAX_IMAGE_Y - polygon[maxYIndex].Y;
-                polygon.ForEach(point => point.Y += y_dif);
-
+                foreach (PolygonLabel label in control.polygonListControl.polygonDataGrid.SelectedItems)
+                {
+                    label.Polygon.ForEach(point => point.Y += y_dif);
+                }
             }
 
             editInfos.StartPosition = new Point(x, y);
