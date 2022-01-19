@@ -14,8 +14,7 @@ namespace ssi.Types.Polygon
     class DrawUnit : IDrawUnit
     {
         private MainControl control;
-        private EditInformations editInfos;
-        private CreationInformation creationInfos;
+        private PolygonInformations polygonInformations;
         private DrawUtilities drawUtilities;
         private PolygonUtilities polygonUtilities;
 
@@ -24,13 +23,12 @@ namespace ssi.Types.Polygon
 
         }
 
-        public void setObjects(MainControl control, CreationInformation creationInfos, EditInformations editInfos, PolygonUtilities polygonUtilities)
+        public void setObjects(MainControl control, PolygonInformations polygonInformations, PolygonUtilities polygonUtilities)
         {
             this.control = control;
-            this.editInfos = editInfos;
-            this.creationInfos = creationInfos;
+            this.polygonInformations = polygonInformations;
             this.polygonUtilities = polygonUtilities;
-            this.drawUtilities = new DrawUtilities(editInfos, polygonUtilities);
+            this.drawUtilities = new DrawUtilities(this.polygonInformations, this.polygonUtilities);
         }
 
         public DrawUtilities getDrawUtilities()
@@ -72,11 +70,49 @@ namespace ssi.Types.Polygon
 
             if (selectionRectPoints != null)
             {
-                editInfos.ShowingSelectionRect = true;
+                polygonInformations.ShowingSelectionRect = true;
                 overlay.DrawPolyline(selectionRectPoints.ToArray(), Color.FromRgb(0, 120, 215));
                 overlay.FillPolygon(selectionRectPoints.ToArray(), Color.FromArgb(100, 0, 102, 204));
             }
 
+            // we dont want to draw the area over the points -> so we have to draw the area first
+            foreach (PolygonLabel polygonLabel in polygonList.Polygons)
+            {
+                bool currentPolygonLabelEqualSelectedOne = false;
+                for (int i = 0; i < control.polygonListControl.polygonDataGrid.SelectedItems.Count; i++)
+                {
+                    if (polygonLabel.Equals(control.polygonListControl.polygonDataGrid.SelectedItems[i]))
+                    {
+                        currentPolygonLabelEqualSelectedOne = true;
+                        break;
+                    }
+                }
+
+                if (!polygonInformations.IsCreateModeOn)
+                {
+                    if (currentPolygonLabelEqualSelectedOne && polygonInformations.SelectedPolygon != null)
+                    {
+                        List<int> allPoints = new List<int>();
+
+                        lastColor.R = polygonLabel.Color.R;
+                        lastColor.G = polygonLabel.Color.G;
+                        lastColor.B = polygonLabel.Color.B;
+                        lastColor.A = polygonLabel.Color.A;
+
+                        foreach (PolygonPoint pp in polygonLabel.Polygon)
+                        {
+                            allPoints.Add((int)pp.X);
+                            allPoints.Add((int)pp.Y);
+                        }
+
+                        allPoints.Add((int)polygonLabel.Polygon.First().X);
+                        allPoints.Add((int)polygonLabel.Polygon.First().Y);
+                        Color contentColor = polygonLabel.Color;
+                        contentColor.A = 126;
+                        overlay.FillPolygon(allPoints.ToArray(), contentColor);
+                    }
+                }
+            }
 
             foreach (PolygonLabel polygonLabel in polygonList.Polygons)
             {
@@ -89,32 +125,6 @@ namespace ssi.Types.Polygon
                         {
                             currentPolygonLabelEqualSelectedOne = true;
                             break;
-                        }
-                    }
-
-                    // we dont want to draw the area over the points -> so we have to draw the area first
-                    if (!creationInfos.IsCreateModeOn)
-                    {
-                        if(currentPolygonLabelEqualSelectedOne && editInfos.SelectedPolygon != null)
-                        {
-                                        List<int> allPoints = new List<int>();
-
-                            lastColor.R = polygonLabel.Color.R;
-                            lastColor.G = polygonLabel.Color.G;
-                            lastColor.B = polygonLabel.Color.B;
-                            lastColor.A = polygonLabel.Color.A;
-
-                            foreach (PolygonPoint pp in polygonLabel.Polygon)
-                            {
-                                allPoints.Add((int)pp.X);
-                                allPoints.Add((int)pp.Y);
-                            }
-
-                            allPoints.Add((int)polygonLabel.Polygon.First().X);
-                            allPoints.Add((int)polygonLabel.Polygon.First().Y);
-                            Color contentColor = polygonLabel.Color;
-                            contentColor.A = 126;
-                            overlay.FillPolygon(allPoints.ToArray(), contentColor);
                         }
                     }
 
@@ -133,7 +143,7 @@ namespace ssi.Types.Polygon
                 }
             }
 
-            if (editInfos.SelectedPoint != null)
+            if (polygonInformations.SelectedPoint != null)
             {
                 fillRect(overlay, lastColor);
             }
@@ -175,7 +185,7 @@ namespace ssi.Types.Polygon
             }
 
             // we finish the polygon when we are not in the creation mode or when we dont draw the polygon of the selected label
-            if (!isSelectedOne || !creationInfos.IsCreateModeOn)
+            if (!isSelectedOne || !polygonInformations.IsCreateModeOn)
             {
                 overlay.DrawLineAa((int)(polygonLabel.Polygon.First().X), (int)(polygonLabel.Polygon.First().Y), (int)nextPoint.X, (int)nextPoint.Y, color, thickness);
             }
@@ -184,8 +194,8 @@ namespace ssi.Types.Polygon
         private void fillRect(WriteableBitmap overlay, Color lastColor)
         {
             const int LINE_THICKNESS = 7;
-            overlay.FillRectangle((int)editInfos.SelectedPoint.X - LINE_THICKNESS, (int)editInfos.SelectedPoint.Y - LINE_THICKNESS, (int)editInfos.SelectedPoint.X + LINE_THICKNESS, (int)editInfos.SelectedPoint.Y + LINE_THICKNESS, lastColor);
-            overlay.FillRectangle((int)editInfos.SelectedPoint.X - LINE_THICKNESS + 2, (int)editInfos.SelectedPoint.Y - LINE_THICKNESS + 2, (int)editInfos.SelectedPoint.X + LINE_THICKNESS - 2, (int)editInfos.SelectedPoint.Y + LINE_THICKNESS - 2, Colors.White);
+            overlay.FillRectangle((int)polygonInformations.SelectedPoint.X - LINE_THICKNESS, (int)polygonInformations.SelectedPoint.Y - LINE_THICKNESS, (int)polygonInformations.SelectedPoint.X + LINE_THICKNESS, (int)polygonInformations.SelectedPoint.Y + LINE_THICKNESS, lastColor);
+            overlay.FillRectangle((int)polygonInformations.SelectedPoint.X - LINE_THICKNESS + 2, (int)polygonInformations.SelectedPoint.Y - LINE_THICKNESS + 2, (int)polygonInformations.SelectedPoint.X + LINE_THICKNESS - 2, (int)polygonInformations.SelectedPoint.Y + LINE_THICKNESS - 2, Colors.White);
         }
 
         public void drawLineToMousePosition(double x, double y)
@@ -205,7 +215,7 @@ namespace ssi.Types.Polygon
             overlay.Lock();
 
             if (!polygonUtilities.isPos5pxFromBottomAway(y))
-                y = editInfos.ImageHeight;
+                y = polygonInformations.ImageHeight;
 
             polygonOverlayUpdate(item);
             if (drawUtilities.isNewPointNextToStartPoint(polygonLabel.Polygon.First(), new Point(x, y)))
@@ -226,7 +236,7 @@ namespace ssi.Types.Polygon
             {
                 polygonOverlayUpdate(item);
                 if(currentPolygonLabel.Polygon.Count > 0)
-                    drawLineToMousePosition(creationInfos.LastKnownPoint.X, creationInfos.LastKnownPoint.Y);
+                    drawLineToMousePosition(polygonInformations.LastKnownPoint.X, polygonInformations.LastKnownPoint.Y);
             }
         }
 
