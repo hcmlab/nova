@@ -16,29 +16,28 @@ namespace ssi.Types.Polygon
         private MainControl control;
         private IDrawUnit polygonDrawUnit;
         private Window interpolationWindow;
-        private EditInformations editInfos;
+        private PolygonInformations polygonInformations;
         private DataGridChecker dataGridChecker;
-        private CreationInformation creationInfos;
         private MousePositionInformation mousePositionInformation;
 
         private bool controlInStacksSet = false;
 
         public Window InterpolationWindow { get => interpolationWindow; set => interpolationWindow = value; }
+        public bool ControlInStacksSet { set => controlInStacksSet = value; }
 
         public PolygonUtilities()
         {
  
         }
 
-        public void setObjects(MainControl control, MainHandler handler, CreationInformation creationInfos, EditInformations editInfos, DataGridChecker dataGridChecker, IDrawUnit polygonDrawUnit)
+        public void setObjects(MainControl control, MainHandler handler, PolygonInformations polygonInformations, DataGridChecker dataGridChecker, IDrawUnit polygonDrawUnit)
         {
             this.handler = handler;
             this.control = control;
-            this.editInfos = editInfos;
-            this.creationInfos = creationInfos;
+            this.polygonInformations = polygonInformations;
             this.dataGridChecker = dataGridChecker;
             this.polygonDrawUnit = polygonDrawUnit;
-            this.mousePositionInformation = new MousePositionInformation(control, creationInfos, editInfos);
+            this.mousePositionInformation = new MousePositionInformation(control, polygonInformations);
 
         }
 
@@ -46,7 +45,7 @@ namespace ssi.Types.Polygon
         {
             setPossiblySelectedPoint(x, y);
             // we did not set it  in the method above
-            if (editInfos.SelectedPolygon == null)
+            if (polygonInformations.SelectedPolygon == null)
                 setPossiblySelectedPolygon(x, y);
         }
 
@@ -60,8 +59,8 @@ namespace ssi.Types.Polygon
             {
                 if (arePointsInPolygonArea(new Point[] { new Point(x, y) }, polygonLabel.Polygon))
                 {
-                    editInfos.SelectedPolygon = polygonLabel;
-                    editInfos.StartPosition = new Point(x, y);
+                    polygonInformations.SelectedPolygon = polygonLabel;
+                    polygonInformations.StartPosition = new Point(x, y);
                     return;
                 }
             }
@@ -75,12 +74,23 @@ namespace ssi.Types.Polygon
 
             PolygonLabel labelToChange = null;
             int counter = 0;
+            int labelIndex = 0;
             foreach (PolygonLabel polygonLabel in polygonLabels)
-            {
+            {                
                 if (arePointsInPolygonArea(new Point[] { new Point(x, y) }, polygonLabel.Polygon))
                 {
-                    labelToChange = polygonLabel;
-                    break;
+                    if(labelToChange == null)
+                    {
+                        labelToChange = polygonLabel;
+                        labelIndex = counter;
+                    }
+
+                    if (control.polygonListControl.polygonDataGrid.SelectedItems.Cast<PolygonLabel>().Contains(polygonLabel))
+                    {
+                        labelToChange = polygonLabel;
+                        labelIndex = counter;
+                        break;
+                    }
                 }
                 counter++;
             }
@@ -93,15 +103,15 @@ namespace ssi.Types.Polygon
             {
                 if (!(Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
                     control.polygonListControl.polygonDataGrid.SelectedItems.Clear();
-                control.polygonListControl.polygonDataGrid.SelectedItems.Add(control.polygonListControl.polygonDataGrid.Items[counter]);
+                control.polygonListControl.polygonDataGrid.SelectedItems.Add(control.polygonListControl.polygonDataGrid.Items[labelIndex]);
                 setPossiblySelectedPolygonAndSelectedPoint(x, y);
             }
             else
             {
                 if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
                 {
-                    control.polygonListControl.polygonDataGrid.SelectedItems.Remove(control.polygonListControl.polygonDataGrid.Items[counter]);
-                    editInfos.restetInfos();
+                    control.polygonListControl.polygonDataGrid.SelectedItems.Remove(control.polygonListControl.polygonDataGrid.Items[labelIndex]);
+                    polygonInformations.restetInfos();
                     returnValue = false;
                 }
             }
@@ -151,9 +161,9 @@ namespace ssi.Types.Polygon
                     {
                         if (mousePositionInformation.isMouseAbovePoint(x, y, polygonPoint.X, polygonPoint.Y))
                         {
-                            editInfos.StartPosition = new Point(polygonPoint.X, polygonPoint.Y);
-                            editInfos.SelectedPoint = polygonPoint;
-                            editInfos.SelectedPolygon = polygonLabel;
+                            polygonInformations.StartPosition = new Point(polygonPoint.X, polygonPoint.Y);
+                            polygonInformations.SelectedPoint = polygonPoint;
+                            polygonInformations.SelectedPolygon = polygonLabel;
                             return;
                         }
                     }
@@ -163,23 +173,25 @@ namespace ssi.Types.Polygon
 
         public void updatePoint(double x, double y, AnnoListItem item)
         {
-            foreach (PolygonPoint polygonPoint in editInfos.SelectedPolygon.Polygon)
+            foreach (PolygonPoint polygonPoint in polygonInformations.SelectedPolygon.Polygon)
             {
-                if (polygonPoint.Equals(editInfos.SelectedPoint))
+                if (polygonPoint.Equals(polygonInformations.SelectedPoint))
                 {
-                    if (x > editInfos.ImageWidth)
-                        polygonPoint.X = editInfos.ImageWidth;
+                    if (x > polygonInformations.ImageWidth)
+                        polygonPoint.X = polygonInformations.ImageWidth;
                     else if (x < 0)
                         polygonPoint.X = 0;
                     else
                         polygonPoint.X = x;
 
-                    if (y > editInfos.ImageHeight)
-                        polygonPoint.Y = editInfos.ImageHeight;
+                    if (y > polygonInformations.ImageHeight)
+                        polygonPoint.Y = polygonInformations.ImageHeight;
                     else if (y < 0)
                         polygonPoint.Y = 0;
                     else
                         polygonPoint.Y = y;
+
+                    AnnoTierStatic.Selected.AnnoList.HasChanged = true;
                 }
             }
         }
@@ -191,14 +203,14 @@ namespace ssi.Types.Polygon
             if (video != null)
             {
                 Tuple<int, int> imageSize = video.GetImageSize();
-                editInfos.ImageWidth = (double)imageSize.Item1;
-                editInfos.ImageHeight = (double)imageSize.Item2 - 5;
+                polygonInformations.ImageWidth = (double)imageSize.Item1;
+                polygonInformations.ImageHeight = (double)imageSize.Item2 - 5;
             }
         }
 
         public bool isPos5pxFromBottomAway(double y_val)
         {
-            return editInfos.ImageHeight > y_val;
+            return polygonInformations.ImageHeight > y_val;
         }
 
         public bool controlPressed()
@@ -236,7 +248,7 @@ namespace ssi.Types.Polygon
 
         public void startSelectionRectangle(double x, double y)
         {
-            editInfos.StartPosition = new Point(x, y);
+            polygonInformations.StartPosition = new Point(x, y);
             control.polygonListControl.polygonDataGrid.SelectedItem = null;
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
             polygonDrawUnit.polygonOverlayUpdate(item);

@@ -12,7 +12,7 @@ namespace ssi.Types.Polygon
         private MainHandler handler;
         private MainControl control;
         private PolygonLabel[] copyLabels;
-        private EditInformations editInfos;
+        private PolygonInformations polygonInformations;
         private PolygonUtilities polygonUtilities;
         private UndoRedoHandler undoRedoHandler;
         private IDrawUnit polygonDrawUnit;
@@ -29,20 +29,20 @@ namespace ssi.Types.Polygon
         public CMS ContextMenu { get => contextMenu; set => contextMenu = value; }
         public bool ContextMenuOpen { get => contextMenuOpen; set => contextMenuOpen = value; }
 
-        public PolygonHandlerPerformer(MainControl control, MainHandler handler, EditInformations editInfos)
+        public PolygonHandlerPerformer(MainControl control, MainHandler handler, PolygonInformations polygonInformations)
         {
             this.control = control;
             this.handler = handler;
-            this.editInfos = editInfos;
+            this.polygonInformations = polygonInformations;
             initContextMenu();
         }
 
-        public void setObjects(CreationInformation creationInfos, IDrawUnit polygonDrawUnit, UIElementsController uIElementController, PolygonUtilities polygonUtilities)
+        public void setObjects(PolygonInformations polygonInformations, IDrawUnit polygonDrawUnit, UIElementsController uIElementController, PolygonUtilities polygonUtilities)
         {
             this.polygonDrawUnit = polygonDrawUnit;
             this.polygonUtilities = polygonUtilities;
             this.interpolationHandler = new InterpolationHandler(this.control);
-            this.undoRedoHandler = new UndoRedoHandler(this.control, creationInfos, polygonUtilities, polygonDrawUnit, uIElementController);
+            this.undoRedoHandler = new UndoRedoHandler(this.control, polygonInformations, polygonUtilities, polygonDrawUnit, uIElementController);
         }
 
         public CMSItem[] getItemsToChange()
@@ -124,11 +124,11 @@ namespace ssi.Types.Polygon
         {
             if(this.contextMenuOpen)
             {
-                editInfos.resetSelectedElements();
+                polygonInformations.resetSelectedElements();
                 polygonUtilities.setPossiblySelectedPolygonAndSelectedPoint(x, y);
             }
 
-            if (editInfos.SelectedPolygon != null)
+            if (polygonInformations.SelectedPolygon != null)
             {
                 this.ContextMenu.Show(System.Windows.Forms.Cursor.Position);
             }

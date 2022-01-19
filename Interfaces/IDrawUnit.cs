@@ -11,6 +11,6 @@ namespace ssi.Interfaces
         void drawNew(PolygonLabel currentPolygonLabel, AnnoListItem item);
         void clearOverlay();
         DrawUtilities getDrawUtilities();
-        void setObjects(MainControl control, CreationInformation creationInfos, EditInformations editInfos, PolygonUtilities polygonUtilities);
+        void setObjects(MainControl control, PolygonInformations polygonInformations, PolygonUtilities polygonUtilities);
     }
 }

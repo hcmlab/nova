@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace ssi.Types.Polygon
 {
-    class EditInformations
+    class PolygonInformations
     {
         private bool mouseOnMedia = false;
         private bool showingSelectionRect = false;
@@ -21,6 +21,12 @@ namespace ssi.Types.Polygon
         private PolygonPoint lastPolygonPoint;
         private double imageWidth = 0;
         private double imageHeight = 0;
+        private bool isCreateModeOn = false;
+        private bool isPolylineToDraw = false;
+        private System.Windows.Point lastKnownPoint;
+        private PolygonLabel lastSelectedLabel;
+        private System.Windows.Point lastPrintedPoint;
+        private PolygonLabel overLinePolygon = null;
 
         public bool MouseOnMedia { get => mouseOnMedia; set => mouseOnMedia = value; }
         public bool ShowingSelectionRect { get => showingSelectionRect; set => showingSelectionRect = value; }
@@ -35,8 +41,14 @@ namespace ssi.Types.Polygon
         public double ImageWidth { get => imageWidth; set => imageWidth = value; }
         public double ImageHeight { get => imageHeight; set => imageHeight = value; }
         public List<Tuple<double, double>> PolygonPointsXandYDistances { get => polygonPointsXandYDistances; set => polygonPointsXandYDistances = value; }
+        public bool IsCreateModeOn { get => isCreateModeOn; set => isCreateModeOn = value; }
+        public bool IsPolylineToDraw { get => isPolylineToDraw; set => isPolylineToDraw = value; }
+        public Point LastKnownPoint { get => lastKnownPoint; set => lastKnownPoint = value; }
+        public Point LastPrintedPoint { get => lastPrintedPoint; set => lastPrintedPoint = value; }
+        public PolygonLabel LastSelectedLabel { get => lastSelectedLabel; set => lastSelectedLabel = value; }
+        public PolygonLabel OverLinePolygon { get => overLinePolygon; set => overLinePolygon = value; }
 
-        public EditInformations()
+        public PolygonInformations()
         {
 
         }

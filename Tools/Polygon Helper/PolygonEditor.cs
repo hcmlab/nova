@@ -10,7 +10,7 @@ namespace ssi.Tools.Polygon_Helper
     {
         private IDrawUnit drawUnit;
         private MainControl control;
-        private EditInformations editInfos;
+        private PolygonInformations polygonInformations;
         private DataGridChecker dataGridChecker;
         private PolygonUtilities polygonUtilities;
         private UIElementsController uIElementsController;
@@ -21,11 +21,11 @@ namespace ssi.Tools.Polygon_Helper
 
         }
 
-        public void setObjects(IDrawUnit drawUnit, MainControl control, EditInformations editInfos, PolygonUtilities polygonUtilities)
+        public void setObjects(IDrawUnit drawUnit, MainControl control, PolygonInformations polygonInformations, PolygonUtilities polygonUtilities)
         {
             this.control = control;
             this.drawUnit = drawUnit;
-            this.editInfos = editInfos;
+            this.polygonInformations = polygonInformations;
             this.polygonUtilities = polygonUtilities;
             this.dataGridChecker = new DataGridChecker(control);
             this.uIElementsController = new UIElementsController(control);
@@ -33,9 +33,9 @@ namespace ssi.Tools.Polygon_Helper
 
         public void addNewPointToDonePolygon(double x, double y)
         {
-            PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
+            PolygonLabel polygonLabel = polygonInformations.OverLinePolygon;
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
-            item.UndoRedoStack.Do(new AddExtraPointCommand(editInfos.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel));
+            item.UndoRedoStack.Do(new AddExtraPointCommand(polygonInformations.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel));
             drawUnit.polygonOverlayUpdate(((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem));
         }
 
@@ -53,8 +53,8 @@ namespace ssi.Tools.Polygon_Helper
                 }
             }
 
-            editInfos.setSelectedPolygonPointsAsDistanceToMouse(polygonPoints, x, y);
-            editInfos.PolygonStartPosition = polygonPoints;
+            polygonInformations.setSelectedPolygonPointsAsDistanceToMouse(polygonPoints, x, y);
+            polygonInformations.PolygonStartPosition = polygonPoints;
             control.Cursor = Cursors.SizeAll;
         }
 
@@ -118,7 +118,7 @@ namespace ssi.Tools.Polygon_Helper
 
             int counter = 0;
 
-            editInfos.PolygonPointsXandYDistances.ForEach(distances =>
+            polygonInformations.PolygonPointsXandYDistances.ForEach(distances =>
             {
                 polygon[counter].X = x + distances.Item1;
                 polygon[counter].Y = y + distances.Item2;
@@ -143,9 +143,9 @@ namespace ssi.Tools.Polygon_Helper
             }
 
             double MIN_IMAGE_X = 0;
-            double MAX_IMAGE_X = editInfos.ImageWidth;
+            double MAX_IMAGE_X = polygonInformations.ImageWidth;
             double MIN_IMAGE_Y = 0;
-            double MAX_IMAGE_Y = editInfos.ImageHeight;
+            double MAX_IMAGE_Y = polygonInformations.ImageHeight;
 
             if (MIN_IMAGE_X > polygon[minXIndex].X)
             {
@@ -183,7 +183,8 @@ namespace ssi.Tools.Polygon_Helper
                 }
             }
 
-            editInfos.StartPosition = new Point(x, y);
+            polygonInformations.StartPosition = new Point(x, y);
+            AnnoTierStatic.Selected.AnnoList.HasChanged = true;
         }
     }
 }

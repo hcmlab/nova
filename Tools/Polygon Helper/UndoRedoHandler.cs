@@ -13,16 +13,16 @@ namespace ssi.Types.Polygon
     internal class UndoRedoHandler
     {
         private MainControl control;
-        private CreationInformation creationInfos;
+        private PolygonInformations polygonInformations;
         private PolygonUtilities generalPolygonUtilities;
         private IDrawUnit polygonDrawUnit;
         private UIElementsController uIElementController;
 
 
-        public UndoRedoHandler(MainControl control, CreationInformation creationInfos, PolygonUtilities generalPolygonUtilities, IDrawUnit polygonDrawUnit, UIElementsController uIElementController)
+        public UndoRedoHandler(MainControl control, PolygonInformations polygonInformations, PolygonUtilities generalPolygonUtilities, IDrawUnit polygonDrawUnit, UIElementsController uIElementController)
         {
             this.control = control;
-            this.creationInfos = creationInfos;
+            this.polygonInformations = polygonInformations;
             this.generalPolygonUtilities = generalPolygonUtilities;
             this.polygonDrawUnit = polygonDrawUnit;
             this.uIElementController = uIElementController;
@@ -50,7 +50,7 @@ namespace ssi.Types.Polygon
                     // We draw the line to the mouse and select the label
                     if (label.Polygon.Count > 0)
                     {
-                        creationInfos.IsPolylineToDraw = true;
+                        polygonInformations.IsPolylineToDraw = true;
                     }
                     else
                     {
@@ -58,7 +58,7 @@ namespace ssi.Types.Polygon
                         generalPolygonUtilities.refreshAnnoDataGrid();
                         generalPolygonUtilities.polygonSelectItem(item);
                         control.polygonListControl.polygonDataGrid.SelectedItem = null;
-                        creationInfos.IsPolylineToDraw = false;
+                        polygonInformations.IsPolylineToDraw = false;
                     }
                 }
                 else if (label.Informations.Type == TYPE.REMOVE)
@@ -109,12 +109,12 @@ namespace ssi.Types.Polygon
                         item.PolygonList.addPolygonLabel(label);
                         generalPolygonUtilities.refreshAnnoDataGrid();
                         generalPolygonUtilities.polygonSelectItem(item);
-                        creationInfos.IsPolylineToDraw = true;
+                        polygonInformations.IsPolylineToDraw = true;
                     }
                     if (pointsBeforeRedo == pointsAfterRedo)
                     {
                         control.polygonListControl.polygonDataGrid.SelectedItem = null;
-                        creationInfos.IsPolylineToDraw = false;
+                        polygonInformations.IsPolylineToDraw = false;
                     }
                 }
                 else if (label.Informations.Type == TYPE.REMOVE)
@@ -137,9 +137,9 @@ namespace ssi.Types.Polygon
             {
                 if (label.Informations.Type == TYPE.CREATION)
                 {
-                    if (!creationInfos.IsCreateModeOn)
+                    if (!polygonInformations.IsCreateModeOn)
                     {
-                        creationInfos.IsCreateModeOn = true;
+                        polygonInformations.IsCreateModeOn = true;
                         uIElementController.enableOrDisableControlsBesidesPolygon(false);
                         uIElementController.enableOrDisablePolygonControlElements(false);
                         uIElementController.switchAddLabelButton();
@@ -148,9 +148,9 @@ namespace ssi.Types.Polygon
                 }
                 else
                 {
-                    if (creationInfos.IsCreateModeOn)
+                    if (polygonInformations.IsCreateModeOn)
                     {
-                        creationInfos.IsCreateModeOn = false;
+                        polygonInformations.IsCreateModeOn = false;
                         uIElementController.enableOrDisableControls(true);
                         uIElementController.enableOrDisablePolygonControlElements(true);
                         uIElementController.switchAddLabelButton();
@@ -163,8 +163,8 @@ namespace ssi.Types.Polygon
         {
             item.updateLabelCount();
             polygonDrawUnit.polygonOverlayUpdate(item);
-            if (creationInfos.IsPolylineToDraw)
-                polygonDrawUnit.drawLineToMousePosition(creationInfos.LastKnownPoint.X, creationInfos.LastKnownPoint.Y);
+            if (polygonInformations.IsPolylineToDraw)
+                polygonDrawUnit.drawLineToMousePosition(polygonInformations.LastKnownPoint.X, polygonInformations.LastKnownPoint.Y);
         }
 
         public void selectLabels(PolygonLabel[] allLabels)

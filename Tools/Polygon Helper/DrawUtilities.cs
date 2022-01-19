@@ -7,7 +7,7 @@ namespace ssi.Tools.Polygon_Helper
 {
     class DrawUtilities
     {
-        private EditInformations editInfos;
+        private PolygonInformations polygonInformations;
         private PolygonUtilities polygonUtilities;
         private bool isNextToStartPoint = false;
 
@@ -17,9 +17,9 @@ namespace ssi.Tools.Polygon_Helper
             set => isNextToStartPoint = value;
         }
 
-        public DrawUtilities(EditInformations editInfos, PolygonUtilities polygonUtilities)
+        public DrawUtilities(PolygonInformations polygonInformations, PolygonUtilities polygonUtilities)
         {
-            this.editInfos = editInfos;
+            this.polygonInformations = polygonInformations;
             this.polygonUtilities = polygonUtilities;
         }
 
@@ -43,9 +43,9 @@ namespace ssi.Tools.Polygon_Helper
         public List<int> getRectanglePointsAsList(double xStart, double yStart, double xDestiny, double yDestiny)
         {
             if (!polygonUtilities.isPos5pxFromBottomAway(yStart))
-                yStart = editInfos.ImageHeight;
+                yStart = polygonInformations.ImageHeight;
             if (!polygonUtilities.isPos5pxFromBottomAway(yDestiny))
-                yDestiny = editInfos.ImageHeight;
+                yDestiny = polygonInformations.ImageHeight;
 
             List<int> allPoints = new List<int>
             {

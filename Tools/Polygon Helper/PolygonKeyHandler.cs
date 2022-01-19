@@ -6,19 +6,19 @@ namespace ssi.Tools.Polygon_Helper
     class PolygonKeyHandler
     {
         private MainControl control;
-        private LabelCreator labelCreator;
-        private CreationInformation creationInfos;
+        private PolygonCreator labelCreator;
+        private PolygonInformations polygonInformations;
         private PolygonUtilities polygonUtilities;
 
         public PolygonKeyHandler()
         {
         }
 
-        public void setObjects(MainControl control, LabelCreator labelCreator, CreationInformation creationInfos, PolygonUtilities polygonUtilities)
+        public void setObjects(MainControl control, PolygonCreator labelCreator, PolygonInformations polygonInformations, PolygonUtilities polygonUtilities)
         {
             this.control = control;
             this.labelCreator = labelCreator;
-            this.creationInfos = creationInfos;
+            this.polygonInformations = polygonInformations;
             this.polygonUtilities = polygonUtilities;
         }
 
@@ -40,7 +40,7 @@ namespace ssi.Tools.Polygon_Helper
                 polygonUtilities.refreshAnnoDataGrid();
                 polygonUtilities.polygonSelectItem(item);
                 control.polygonListControl.polygonDataGrid.SelectedItem = null;
-                creationInfos.IsPolylineToDraw = false;
+                polygonInformations.IsPolylineToDraw = false;
             }
             else
             {
