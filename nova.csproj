@@ -316,7 +316,7 @@
     <Compile Include="Tools\Polygon Helper\DrawUnit.cs" />
     <Compile Include="Tools\Polygon Helper\DrawUtilities.cs" />
     <Compile Include="Tools\Polygon Helper\InterpolationHandler.cs" />
-    <Compile Include="Tools\Polygon Helper\LabelCreator.cs" />
+    <Compile Include="Tools\Polygon Helper\PolygonCreator.cs" />
     <Compile Include="Tools\Polygon Helper\PolygonEditor.cs" />
     <Compile Include="Tools\Polygon Helper\PolygonKeyHandler.cs" />
     <Compile Include="Tools\Polygon Helper\PolygonRevisor.cs" />
@@ -341,8 +341,7 @@
     <Compile Include="Types\Pipeline.cs" />
     <Compile Include="Types\PointList.cs" />
     <Compile Include="Types\PointListItem.cs" />
-    <Compile Include="Types\Polygon\CreationInformation.cs" />
-    <Compile Include="Types\Polygon\EditInformations.cs" />
+    <Compile Include="Types\Polygon\PolygonInformations.cs" />
     <Compile Include="Types\Polygon\LabelInformations.cs" />
     <Compile Include="Types\Polygon\PolygonLabel.cs" />
     <Compile Include="Types\Polygon\PolygonList.cs" />

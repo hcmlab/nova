@@ -7,38 +7,37 @@ using System.Windows.Media;
 
 namespace ssi.Tools.Polygon_Helper
 {
-    class LabelCreator
+    class PolygonCreator
     {
         private MainHandler handler;
         private MainControl control;
         private DrawUtilities drawUtilities;
         private PolygonRevisor polygonRevisor;
         private DataGridChecker dataGridChecker;
-        private CreationInformation creationInfos;
+        private PolygonInformations polygonInformations;
         private PolygonUtilities polygonUtilities;
         private UIElementsController uIElementsController;
 
-        public LabelCreator()
+        public PolygonCreator()
         {
-
+            this.polygonRevisor = new PolygonRevisor();
         }
 
-        public void setObjects(MainControl control, MainHandler handler, DrawUtilities drawUtilities, CreationInformation creationInfos,
+        public void setObjects(MainControl control, MainHandler handler, DrawUtilities drawUtilities, PolygonInformations polygonInformations,
                             UIElementsController uIElementsController, DataGridChecker dataGridChecker, PolygonUtilities polygonUtilities)
         {
             this.control = control;
             this.handler = handler;
             this.drawUtilities = drawUtilities;
-            this.creationInfos = creationInfos;
+            this.polygonInformations = polygonInformations;
             this.dataGridChecker = dataGridChecker;
             this.polygonUtilities = polygonUtilities;
-            this.polygonRevisor = new PolygonRevisor();
             this.uIElementsController = uIElementsController;
         }
 
         public void startCreationMode()
         {
-            creationInfos.IsCreateModeOn = true;
+            polygonInformations.IsCreateModeOn = true;
             uIElementsController.enableOrDisableControlsBesidesPolygon(false);
             uIElementsController.enableOrDisablePolygonControlElements(false);
             uIElementsController.switchAddLabelButton();
@@ -78,7 +77,7 @@ namespace ssi.Tools.Polygon_Helper
             if (control.polygonListControl.polygonDataGrid.SelectedItem == null)
                 addNewLabel();
 
-            creationInfos.IsPolylineToDraw = true;
+            polygonInformations.IsPolylineToDraw = true;
             AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
 
             PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
@@ -108,7 +107,7 @@ namespace ssi.Tools.Polygon_Helper
             PolygonPoint polygonPoint = new PolygonPoint(x, y);
             PolygonLabel selectedItem = null;
             List<PolygonLabel> polygonLabels = item.PolygonList.getRealList();
-            creationInfos.LastPrintedPoint = new Point(x, y);
+            polygonInformations.LastPrintedPoint = new Point(x, y);
             foreach (PolygonLabel label in polygonLabels)
             {
                 if (label.ID == polygonLabel.ID)
@@ -130,8 +129,8 @@ namespace ssi.Tools.Polygon_Helper
 
         public void endCreationMode(AnnoListItem item, PolygonLabel currentPolygonLabel = null)
         {
-            creationInfos.IsPolylineToDraw = false;
-            creationInfos.IsCreateModeOn = false;
+            polygonInformations.IsPolylineToDraw = false;
+            polygonInformations.IsCreateModeOn = false;
 
             drawUtilities.IsNextToStartPoint = false;
             uIElementsController.enableOrDisableControlsBesidesPolygon(true);
@@ -140,10 +139,10 @@ namespace ssi.Tools.Polygon_Helper
             polygonUtilities.polygonSelectItem(item);
             this.control.Cursor = Cursors.Arrow;
 
-            if (creationInfos.LastSelectedLabel != null)
+            if (polygonInformations.LastSelectedLabel != null)
             {
-                control.polygonListControl.polygonDataGrid.SelectedItem = creationInfos.LastSelectedLabel;
-                creationInfos.LastSelectedLabel = null;
+                control.polygonListControl.polygonDataGrid.SelectedItem = polygonInformations.LastSelectedLabel;
+                polygonInformations.LastSelectedLabel = null;
             }
         }
 
