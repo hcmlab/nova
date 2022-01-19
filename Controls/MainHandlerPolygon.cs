@@ -19,12 +19,12 @@ namespace ssi
 
         private Color currentLabelColor;
         private IDrawUnit polygonDrawUnit;
-        private LabelCreator labelCreator;
-        private EditInformations editInfos;
+        private PolygonCreator labelCreator = null;
+        private PolygonInformations polygonInformations;
         private PolygonEditor polygonEditor;
+        private PolygonRevisor polygonRevisor;            
         private String currentLabelName = "";
         private DataGridChecker dataGridChecker;
-        private CreationInformation creationInfos;
         private PolygonUtilities polygonUtilities;
         private PolygonKeyHandler polygonKeyHandler;
         private UIElementsController uIElementsController;
@@ -36,27 +36,28 @@ namespace ssi
 
         public void polygonHandlerInit()
         {
-            editInfos = new EditInformations();
-            creationInfos = new CreationInformation();
+            polygonRevisor = new PolygonRevisor();
+            polygonInformations = new PolygonInformations();
             dataGridChecker = new DataGridChecker(control);
             uIElementsController = new UIElementsController(control);
-            control.annoListControl.PolygonUtilities = polygonUtilities;
-            mousePositionInformation = new MousePositionInformation(control, creationInfos, editInfos);
+            mousePositionInformation = new MousePositionInformation(control, polygonInformations);
 
             polygonDrawUnit = new DrawUnit();
-            labelCreator = new LabelCreator();
+            labelCreator = new PolygonCreator();
             polygonEditor = new PolygonEditor();
             polygonUtilities = new PolygonUtilities();
             polygonKeyHandler = new PolygonKeyHandler();
-            polygonHandlerPerformer = new PolygonHandlerPerformer(control, this, editInfos);
+            polygonHandlerPerformer = new PolygonHandlerPerformer(control, this, polygonInformations);
 
-            polygonUtilities.setObjects(control, this, creationInfos, editInfos, dataGridChecker, polygonDrawUnit);
-            polygonDrawUnit.setObjects(control, creationInfos, editInfos, polygonUtilities);
-            polygonEditor.setObjects(polygonDrawUnit, control, editInfos, polygonUtilities);
-            polygonKeyHandler.setObjects(control, labelCreator, creationInfos, polygonUtilities);
-            polygonHandlerPerformer.setObjects(creationInfos, polygonDrawUnit, uIElementsController, polygonUtilities);
-            labelCreator.setObjects(control, this, polygonDrawUnit.getDrawUtilities(), creationInfos, uIElementsController,
+            polygonUtilities.setObjects(control, this, polygonInformations, dataGridChecker, polygonDrawUnit);
+            polygonDrawUnit.setObjects(control, polygonInformations, polygonUtilities);
+            polygonEditor.setObjects(polygonDrawUnit, control, polygonInformations, polygonUtilities);
+            polygonKeyHandler.setObjects(control, labelCreator, polygonInformations, polygonUtilities);
+            polygonHandlerPerformer.setObjects(polygonInformations, polygonDrawUnit, uIElementsController, polygonUtilities);
+            labelCreator.setObjects(control, this, polygonDrawUnit.getDrawUtilities(), polygonInformations, uIElementsController,
                 dataGridChecker, polygonUtilities);
+
+            control.annoListControl.PolygonUtilities = polygonUtilities;
         }
 
         #endregion INIT
@@ -255,7 +256,7 @@ namespace ssi
         {
             // We have to end the CreateMode -> simulate one or two esc-clicks (one if we didnt start a polygon 
             polygonKeyHandler.escClickedCWhileProbablyCreatingPolygon();
-            if (creationInfos.IsCreateModeOn)
+            if (polygonInformations.IsCreateModeOn)
                 polygonKeyHandler.escClickedCWhileProbablyCreatingPolygon();
         }
 
@@ -333,15 +334,15 @@ namespace ssi
             if (dataGridChecker.polygonDGIsNotNullAndCountsNotZero())
             {
                 uIElementsController.enableOrDisableMenuControls(true, polygonHandlerPerformer.getItemsToChange());
-                creationInfos.LastSelectedLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[0];
+                polygonInformations.LastSelectedLabel = (PolygonLabel)e.AddedItems[0];
 
                 if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
                 {
-                    control.polygonListControl.editTextBox.Text = creationInfos.LastSelectedLabel.Label;
+                    control.polygonListControl.editTextBox.Text = polygonInformations.LastSelectedLabel.Label;
                 }
                 else
                 {
-                    control.polygonListControl.editComboBox.SelectedItem = new Label(creationInfos.LastSelectedLabel.Label, creationInfos.LastSelectedLabel.Color);
+                    control.polygonListControl.editComboBox.SelectedItem = new Label(polygonInformations.LastSelectedLabel.Label, polygonInformations.LastSelectedLabel.Color);
                 }
             }
             else
@@ -368,19 +369,19 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
 
-            if (!creationInfos.IsCreateModeOn)
+            if (!polygonInformations.IsCreateModeOn)
                 uIElementsController.enableOrDisableControls(true);
 
-            if ((editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null) && !polygonHandlerPerformer.ContextMenuOpen)
+            if ((polygonInformations.SelectedPoint != null || polygonInformations.SelectedPolygon != null) && !polygonHandlerPerformer.ContextMenuOpen)
             {
                  control.Cursor = Cursors.Hand;
             }
 
-            if(editInfos.ShowingSelectionRect && !(editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null || editInfos.IsAboveSelectedPolygonLineAndCtrlPressed))
+            if(polygonInformations.ShowingSelectionRect && !(polygonInformations.SelectedPoint != null || polygonInformations.SelectedPolygon != null || polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed))
             {
-                editInfos.ShowingSelectionRect = false;
+                polygonInformations.ShowingSelectionRect = false;
                 polygonDrawUnit.polygonOverlayUpdate((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem);
-                editInfos.restetInfos();
+                polygonInformations.restetInfos();
             }
         }
 
@@ -391,9 +392,9 @@ namespace ssi
 
             if (dataGridChecker.isSchemeTypePolygon() && dataGridChecker.annonDGIsNotNull() && dataGridChecker.polygonDGIsNotNull())
             {
-                if (!creationInfos.IsCreateModeOn)
+                if (!polygonInformations.IsCreateModeOn)
                 {
-                    if (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null)
+                    if (polygonInformations.SelectedPoint != null || polygonInformations.SelectedPolygon != null)
                     {
                         PolygonLabel polygonLabel = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItem;
                         List<Point> polygonPoints = new List<Point>();
@@ -404,9 +405,19 @@ namespace ssi
                             }
 
                         AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
-
-                        if (!polygonUtilities.polygonPositionsEqual(editInfos.PolygonStartPosition, polygonPoints))
-                            item.UndoRedoStack.Do(new ChangeLabelCommand(editInfos.PolygonStartPosition, polygonPoints, polygonLabel));
+                        if (!polygonUtilities.polygonPositionsEqual(polygonInformations.PolygonStartPosition, polygonPoints))
+                        {
+                            if (polygonRevisor.isPolygonComplex(polygonLabel.Polygon))
+                            {
+                                polygonUtilities.updatePoint(polygonInformations.StartPosition.X, polygonInformations.StartPosition.Y, item);
+                                polygonDrawUnit.polygonOverlayUpdate(item);
+                                MessageBox.Show("You are trying to create a complex polygon. Complex polygons cannot be used for image segmentation in Nova.", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                            else
+                            {
+                                item.UndoRedoStack.Do(new ChangeLabelCommand(polygonInformations.PolygonStartPosition, polygonPoints, polygonLabel));
+                            }
+                        }
                     }
                 }
             }
@@ -423,19 +434,19 @@ namespace ssi
 
             if (polygonHandlerPerformer.ContextMenuOpen)
             {
-                editInfos.resetSelectedElements();
+                polygonInformations.resetSelectedElements();
                 polygonHandlerPerformer.ContextMenuOpen = false;
                 polygonUtilities.setPossiblySelectedPolygonAndSelectedPoint(x, y);
                 polygonDrawUnit.polygonOverlayUpdate((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem);
-                creationInfos.LastKnownPoint = new System.Windows.Point(x, y);
+                polygonInformations.LastKnownPoint = new System.Windows.Point(x, y);
                 return;
             }
 
-            creationInfos.LastKnownPoint = new System.Windows.Point(x, y);
+            polygonInformations.LastKnownPoint = new System.Windows.Point(x, y);
 
             if (dataGridChecker.annonDGIsNotNull() && dataGridChecker.polygonDGIsNotNull())
             {
-                if (creationInfos.IsCreateModeOn)
+                if (polygonInformations.IsCreateModeOn)
                 {
                     if(polygonUtilities.isPos5pxFromBottomAway(y))
                     {
@@ -443,21 +454,25 @@ namespace ssi
 
                         if (lastPoint)
                         {
-                            creationInfos.IsPolylineToDraw = false;
+                            polygonInformations.IsPolylineToDraw = false;
                             control.polygonListControl.polygonDataGrid.SelectedItem = null;
                         }
                     }
                 }
                 else
                 {
-                    if (!polygonUtilities.selectOrUnselectDependentOnMousePos(x, y))
-                        return;
-
-                    if (editInfos.IsAboveSelectedPolygonLineAndCtrlPressed && polygonUtilities.controlPressed())
+                    if (polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed && polygonUtilities.controlPressed())
                     {
                         polygonEditor.addNewPointToDonePolygon(x, y);
+                        return;
                     }
-                    else if (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null)
+
+                    if (!polygonUtilities.selectOrUnselectDependentOnMousePos(x, y))
+                    {
+                        return;
+                    }
+
+                    if (polygonInformations.SelectedPoint != null || polygonInformations.SelectedPolygon != null)
                     {
                         polygonEditor.editPolygon(x, y);
                     }
@@ -474,21 +489,21 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon() || polygonHandlerPerformer.ContextMenuOpen)
                 return;
 
-            this.editInfos.MouseOnMedia = true;
+            this.polygonInformations.MouseOnMedia = true;
             x = Math.Round(x);
             y = Math.Round(y);
-            creationInfos.LastKnownPoint = new System.Windows.Point(x, y);
+            polygonInformations.LastKnownPoint = new System.Windows.Point(x, y);
 
-            if (creationInfos.IsCreateModeOn)
+            if (polygonInformations.IsCreateModeOn)
             {
-                if(creationInfos.IsPolylineToDraw)
+                if(polygonInformations.IsPolylineToDraw)
                 {
                     polygonDrawUnit.drawLineToMousePosition(x, y);
 
                     if (Mouse.LeftButton == MouseButtonState.Pressed)
                     {
                         int MAX_DISTANCE = Convert.ToInt32(Properties.Settings.Default.DefaultPolygonPointDistance);
-                        double currentDistance = Math.Sqrt(Math.Pow(creationInfos.LastPrintedPoint.X - x, 2) + Math.Pow(creationInfos.LastPrintedPoint.Y - y, 2));
+                        double currentDistance = Math.Sqrt(Math.Pow(polygonInformations.LastPrintedPoint.X - x, 2) + Math.Pow(polygonInformations.LastPrintedPoint.Y - y, 2));
 
                         if (currentDistance > MAX_DISTANCE)
                         {
@@ -501,38 +516,36 @@ namespace ssi
             {
                 AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
 
-                if (Mouse.LeftButton == MouseButtonState.Pressed && (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null))
+                if (Mouse.LeftButton == MouseButtonState.Pressed && (polygonInformations.SelectedPoint != null || polygonInformations.SelectedPolygon != null))
                 {
-                    if (editInfos.SelectedPoint != null)
+                    if (polygonInformations.SelectedPoint != null)
                     {
                         polygonUtilities.updatePoint(x, y, item);
                     }
-                    else if (editInfos.SelectedPolygon != null)
+                    else if (polygonInformations.SelectedPolygon != null)
                     {
                         polygonEditor.updatePolygon(x, y);
                     }
 
                     polygonDrawUnit.polygonOverlayUpdate(item);
                 }
-                else if(Mouse.LeftButton == MouseButtonState.Pressed && !(editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null || editInfos.IsAboveSelectedPolygonLineAndCtrlPressed))
+                else if(Mouse.LeftButton == MouseButtonState.Pressed && !(polygonInformations.SelectedPoint != null || polygonInformations.SelectedPolygon != null || polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed))
                 {
                     uIElementsController.enableOrDisableControls(false);
                     control.polygonListControl.polygonDataGrid.SelectedItem = null;
-                    polygonUtilities.selectLabelsInSelectionRectangle(editInfos.StartPosition.X, editInfos.StartPosition.Y, x, y);
-                    List<int> rectAsPolyline = polygonDrawUnit.getDrawUtilities().getRectanglePointsAsList(editInfos.StartPosition.X, editInfos.StartPosition.Y, x, y);
+                    polygonUtilities.selectLabelsInSelectionRectangle(polygonInformations.StartPosition.X, polygonInformations.StartPosition.Y, x, y);
+                    List<int> rectAsPolyline = polygonDrawUnit.getDrawUtilities().getRectanglePointsAsList(polygonInformations.StartPosition.X, polygonInformations.StartPosition.Y, x, y);
                     polygonDrawUnit.polygonOverlayUpdate(item, rectAsPolyline);
                 }
                 else
                 { 
-                    editInfos.restetInfos();
+                    polygonInformations.restetInfos();
+                    polygonUtilities.setPossiblySelectedPolygonAndSelectedPoint(x, y);
+                    polygonDrawUnit.polygonOverlayUpdate(item);
+
                     if (polygonUtilities.controlPressed() && mousePositionInformation.mouseIsOnLine())
                     {
-                        editInfos.IsAboveSelectedPolygonLineAndCtrlPressed = true;
-                    }
-                    else
-                    {
-                        polygonUtilities.setPossiblySelectedPolygonAndSelectedPoint(x, y);
-                        polygonDrawUnit.polygonOverlayUpdate(item);
+                        polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed = true;
                     }
                 }
             }
@@ -544,19 +557,19 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
 
-            if (this.editInfos.MouseOnMedia)
+            if (this.polygonInformations.MouseOnMedia)
             {
-                if (creationInfos.IsCreateModeOn && polygonUtilities.isPos5pxFromBottomAway(creationInfos.LastKnownPoint.Y)) 
+                if (polygonInformations.IsCreateModeOn && polygonUtilities.isPos5pxFromBottomAway(polygonInformations.LastKnownPoint.Y)) 
                 {
                     control.Cursor = Cursors.Cross;
                 }
                 else
                 {
-                    if (polygonUtilities.controlPressed() && editInfos.IsAboveSelectedPolygonLineAndCtrlPressed)
+                    if (polygonUtilities.controlPressed() && polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed)
                     {
                         control.Cursor = Cursors.Cross;
                     }
-                    else if (editInfos.SelectedPoint != null || editInfos.SelectedPolygon != null)
+                    else if (polygonInformations.SelectedPoint != null || polygonInformations.SelectedPolygon != null)
                     {
                         if (Mouse.LeftButton == MouseButtonState.Pressed)
                             control.Cursor = Cursors.SizeAll;
@@ -568,7 +581,7 @@ namespace ssi
                         control.Cursor = Cursors.Arrow;
                     }
                 }
-                this.editInfos.MouseOnMedia = false;
+                this.polygonInformations.MouseOnMedia = false;
             }
             else
             {
@@ -589,9 +602,9 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
 
-            if (!polygonUtilities.controlPressed() && editInfos.IsAboveSelectedPolygonLineAndCtrlPressed)
+            if (!polygonUtilities.controlPressed() && polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed)
             {
-                editInfos.IsAboveSelectedPolygonLineAndCtrlPressed = false;
+                polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed = false;
                 control.Cursor = Cursors.Hand;
             }
         }
@@ -601,7 +614,7 @@ namespace ssi
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
 
-            if (creationInfos.IsCreateModeOn)
+            if (polygonInformations.IsCreateModeOn)
             {
                 if (Keyboard.IsKeyDown(Key.Escape))
                 {
@@ -618,7 +631,7 @@ namespace ssi
 
             if (polygonUtilities.controlPressed() && mousePositionInformation.mouseIsOnLine() && !Keyboard.IsKeyDown(Key.Z))
             {
-                editInfos.IsAboveSelectedPolygonLineAndCtrlPressed = true;
+                polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed = true;
                 control.Cursor = Cursors.Cross;
                 return;
             }
