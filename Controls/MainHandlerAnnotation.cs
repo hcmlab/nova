@@ -187,6 +187,7 @@ namespace ssi
                 }
                 else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                 {
+                    polygonUtilities.ControlInStacksSet = false;
                     control.polygonListControl.Visibility = Visibility.Visible;
                     control.polygonListControl.Height = control.ActualHeight / 2;
                     control.edit.Visibility = Visibility.Visible;
