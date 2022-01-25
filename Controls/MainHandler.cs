@@ -18,7 +18,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.1.2";
+        public static string BuildVersion = "1.2.1.3";
         public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -211,7 +211,7 @@ namespace ssi
             control.convertSignalToAnnoContinuousMenu.Click += convertSignalToAnnoContinuous_Click;
             control.removeRemainingSegmentsMenu.Click += removeRemainingSegmentsMenu_Click;
 
-            control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+            //control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
             bool LightningWindowActive = false;
 
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;

@@ -70,33 +70,38 @@ namespace ssi
             if (isConnected && ENABLE_LIGHTNING)
             {
 
-                    Lightning lightning = new Lightning();
-                    try
+                Lightning lightning = new Lightning();
+                try
+                {
+
+                    DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                    int balance = await lightning.GetWalletBalance(user.ln_admin_key);
+                    //if error we don't have a wallet, returns -1.
+                    if (balance == -1)
+                        myWallet = null;
+                    else
                     {
-                        DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
-                        int balance = await lightning.GetWalletBalance(user.ln_admin_key);
-                        //if error we don't have a wallet, returns -1.
-                        if (balance == -1)
-                            myWallet = null;
-                        else
-                        {
-                            myWallet.admin_key = user.ln_admin_key;
-                            myWallet.invoice_key = user.ln_invoice_key;
-                            myWallet.wallet_id = user.ln_wallet_id;
-                            myWallet.user_id = user.ln_user_id;
-                            myWallet.balance = balance;
-                        }
+                        myWallet.admin_key = user.ln_admin_key;
+                        myWallet.invoice_key = user.ln_invoice_key;
+                        myWallet.wallet_id = user.ln_wallet_id;
+                        myWallet.user_id = user.ln_user_id;
+                        myWallet.balance = balance;
+                    }
+                    control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
                     updateNavigator();
+
                     //InitCheckLightningBalanceTimer();
                 }
-                    catch (Exception e)
-                    {
+                catch (Exception e)
+                {
 
-                    }
+                }
             }
 
-            
-        
+  
+
+
+
         }
 
         public void viewonlyMode(bool on)
