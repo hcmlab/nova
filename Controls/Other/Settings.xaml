@@ -52,30 +52,61 @@
                     <TextBox Grid.Row="1" Name="Annotator" Margin="5,0,5,5" />
                     <Label Grid.Row="2" Content="Default zoom in seconds (0 for max. duration):" />
                     <TextBox Grid.Row="3" Name="DefaultZoom" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
-                    <Label Grid.Row="4" Content="Correction certainty level:"  />
-                    <TextBox Grid.Row="5" Name="Certainty" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
-                    <Label Grid.Row="6" Content="Segment min duration in seconds:" />
-                    <TextBox Grid.Row="7" Name="Segmentmindur" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
-                    <Label Grid.Row="8" Content="Discrete sample rate in Hz (0 for none):" />
-                    <TextBox Grid.Row="9" Name="Samplerate" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
-                    <Label Grid.Row="10" Content="Number of levels in live mode (continuous annotations):"  />
-                    <TextBox Grid.Row="11" Name="ContinuousHotkeysnum" Margin="5,0,5,5"  PreviewTextInput="IntNumberValidationTextBoxContinuous"/>
-                    <Label Grid.Row="12" Content="Distance between points (free hand drawing - polygon anno):" />
-                    <TextBox Grid.Row="13" Name="PointDistance" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
-                    <Label Grid.Row="14" Content="Draw wavform from video (might be slower) :"  />
-                    <CheckBox Grid.Row="15" Name="DrawwaveformCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="16" Content="Enable Lightning Network (Experimental, requires restart)"  />
-                    <CheckBox Grid.Row="17" Name="EnableLightningCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="18" Content="Check for updates on startup:"  />
-                    <CheckBox Grid.Row="19" Name="UpdatesCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="20" Content="Enable Python extensions (requires restart):"  />
-                    <Grid Grid.Row="21">
+                    
+                    <Label Grid.Row="4" Content="Draw wavform from video (might be slower) :"  />
+                    <CheckBox Grid.Row="5" Name="DrawwaveformCheckbox" Margin="5,0,5,5" />
+                    <Label Grid.Row="6" Content="Enable Lightning Network (Experimental, requires restart)"  />
+                    <CheckBox Grid.Row="7" Name="EnableLightningCheckbox" Margin="5,0,5,5" />
+                    <Label Grid.Row="8" Content="Check for updates on startup:"  />
+                    <CheckBox Grid.Row="9" Name="UpdatesCheckbox" Margin="5,0,5,5" />
+                    <Label Grid.Row="10" Content="Mediabackend: (requires restart)"  />
+                    <ComboBox Grid.Row="11" Name="mbackend" Margin="5,0,5,5">
+                        <ComboBoxItem Content="Hardware"/>
+                        <ComboBoxItem Content="Software"/>
+                    </ComboBox>
+                        <Label Grid.Row="12" Content="Enable Python extensions (requires restart):" ToolTip="Hardware accelerated media backend is faster and should be used. If you installed a codec and you still don't see a video, e.g. on a remote connection, you can chose software backend (it will be less reactive)"  />
+                    <Grid Grid.Row="13">
                         <CheckBox Grid.Row="0" Grid.Column="0" Name="EnablePythonCheckbox" Margin="5,0,5,5" />
                         <Label Grid.Row="0" Grid.Column="1"  Content="Debug Mode"  Margin="240,-7,0,0"/>
                         <CheckBox Grid.Row="0" Grid.Column="2" Name="EnablePythonDebugCheckbox"  Margin="220,0,5,5" />
                     </Grid>
                     
 
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Annotation">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Row="0" Content="Correction certainty level:"  />
+                    <TextBox Grid.Row="1" Name="Certainty" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Grid.Row="2" Content="Segment min duration in seconds:" />
+                    <TextBox Grid.Row="3" Name="Segmentmindur" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Grid.Row="4" Content="Discrete sample rate in Hz (0 for none):" />
+                    <TextBox Grid.Row="5" Name="Samplerate" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
+                    <Label Grid.Row="6" Content="Number of levels in live mode (continuous annotations):"  />
+                    <TextBox Grid.Row="7" Name="ContinuousHotkeysnum" Margin="5,0,5,5"  PreviewTextInput="IntNumberValidationTextBoxContinuous"/>
+                    <Label Grid.Row="8" Content="Distance between points (free hand drawing - polygon anno):" />
+                    <TextBox Grid.Row="9" Name="PointDistance" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
                 </Grid>
             </TabItem>
 

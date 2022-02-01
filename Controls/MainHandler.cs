@@ -18,8 +18,8 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.1.3";
-        public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
+        public static string BuildVersion = "1.2.1.4";
+        public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
         public static bool ENABLE_VIEWONLY = false;
@@ -650,6 +650,7 @@ namespace ssi
                 Properties.Settings.Default.EnablePython = s.EnablePython();
                 Properties.Settings.Default.EnablePythonDebug = s.EnablePythonDebug();
                 Properties.Settings.Default.EnableLightning = s.EnableLightning();
+                Properties.Settings.Default.MediaBackend = s.Mediabackend();
 
                 Properties.Settings.Default.Save();
                 
