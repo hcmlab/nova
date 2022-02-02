@@ -32,6 +32,7 @@ namespace ssi
         double sampleRate;
         int width;
         int height;
+        
 
         public Tuple<int, int> GetImageSize()
         {
@@ -84,7 +85,7 @@ namespace ssi
             this.Pause();
             this.filepath = filepath;
             this.type = type;
-
+            this.ScrubbingEnabled = true;
 
             this.filepath = filepath;
             this.type = type;
@@ -154,7 +155,9 @@ namespace ssi
 
         public double GetLength()
         {
-            return this.NaturalDuration.TimeSpan.TotalSeconds;
+            if (this.NaturalDuration.HasTimeSpan)
+                return this.NaturalDuration.TimeSpan.TotalSeconds;
+            else return 0;
         }
 
         public void Clear()
