@@ -71,7 +71,7 @@ namespace ssi
 
         public double GetSampleRate()
         {
-            return 0;
+            return sampleRate;
         }
 
         public Media(string filepath, MediaType type)
@@ -151,6 +151,7 @@ namespace ssi
         public WriteableBitmap GetOverlay()
         {
             return overlayBitmap;
+
         }
 
         public double GetLength()
