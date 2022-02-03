@@ -150,7 +150,7 @@ namespace ssi
 
         public WriteableBitmap GetOverlay()
         {
-            throw new NotImplementedException();
+            return overlayBitmap;
         }
 
         public double GetLength()
