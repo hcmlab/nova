@@ -74,7 +74,6 @@ namespace ssi
         public class Lightning
         {
             public static string LNBitsEndpoint = MainHandler.Decode("aHR0cDovL2hjYWkuYml0Y29pbmZpeGVzdGhpcy5vcmc6NTAwMA==");
-            public static string LNBitsServer = MainHandler.Decode("aHR0cDovL2xuYml0cy5iaXRjb2luZml4ZXN0aGlzLm9yZzozMDA3");
             public static string LNTippingInvoiceID = "7cdd5e6ca21b47889d9ae42740bb9031";
 
 

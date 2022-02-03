@@ -81,7 +81,7 @@
         </StackPanel>
         <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="statusBar" Margin="0">
             <!--<StatusBarItem Name="balance">0 Sats</StatusBarItem>-->
-            <StatusBarItem Name="walletid" MouseDoubleClick="walletid_MouseDoubleClick"></StatusBarItem>
+            <StatusBarItem Name="walletid"></StatusBarItem>
         </StatusBar>
 
 

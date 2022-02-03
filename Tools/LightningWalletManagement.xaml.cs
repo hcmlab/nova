@@ -287,12 +287,7 @@ namespace ssi
             Lightning.Visibility = Visibility.Visible;
         }
 
-        private void walletid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            string export = Defaults.Lightning.LNBitsServer + "/wallet?usr=" + MainHandler.myWallet.user_id + "&wal=" + MainHandler.myWallet.wallet_id + "&admin=" + MainHandler.myWallet.admin_key;
-            System.Windows.Clipboard.SetText(export);
-            clipboard.Content = "Copied to clipboard";
-        }
+
     }
 
 }
