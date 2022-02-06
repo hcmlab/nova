@@ -1014,7 +1014,7 @@ namespace ssi
 
             try
             {
-                dbuser.ln_admin_key = MainHandler.Cipher.DecryptString(Customdata["ln_admin_key"].ToString(), MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+                dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(Customdata["ln_admin_key"].ToString(), MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
 
             }
             catch
