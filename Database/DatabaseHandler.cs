@@ -271,7 +271,7 @@ namespace ssi
                 return false;
             }
 
-            List<string> databases = GetDatabasesAll();
+            List<string> databases = GetDatabases();
             return databases.Any(s => name.Equals(s));
         }
 
@@ -280,6 +280,10 @@ namespace ssi
             List<string> items = new List<string>();
 
             if (IsConnected)
+            {
+
+               
+            if (CheckAuthentication(Properties.Settings.Default.MongoDBUser, "admin") >= 3)
             {
                 var databases = client.ListDatabasesAsync().Result.ToListAsync().Result;
                 foreach (var c in databases)
@@ -293,7 +297,37 @@ namespace ssi
                 items.Sort();
             }
 
-            return items;
+                else
+                {
+
+                    string user = Properties.Settings.Default.MongoDBUser;
+                    try
+                    {
+                        var adminDB = client.GetDatabase("admin");
+                        var cmd = new BsonDocument("usersInfo", user);
+                        var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
+                        var roles = (BsonArray)queryResult[0][0]["roles"];
+
+                        for (int i = 0; i < roles.Count; i++)
+                        {
+
+                            if (roles[i]["db"].ToString() != "admin" && roles[i]["db"].ToString() != "local" && roles[i]["db"].ToString() != "config" && !items.Contains(roles[i]["db"].ToString()))
+                            {
+                                items.Add(roles[i]["db"].ToString());
+                            }
+
+                        }
+                    }
+                    catch
+                    { }
+
+                    items.Sort();
+                }
+
+              
+                return items;
+            }
+            else return new List<string>();
         }
 
         public static List<string> GetDatabasesAll()
@@ -875,7 +909,6 @@ namespace ssi
                     { "createUser", user.Name },
                     { "pwd", user.Password },
                     { "roles", new BsonArray {
-                        new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } },
                         new BsonDocument { { "role", "changeOwnPasswordCustomDataRole" }, { "db", "admin" } },
                     } } };
             }

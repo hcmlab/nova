@@ -275,18 +275,11 @@ bin/MongoDB.Bson.dll
 bin/MongoDB.Driver.dll
 bin/python
 bin/ssi
-packages\MahApps.Metro.1.3.0
-packages/MahApps.Metro.1.3.0/lib/net40/MahApps.Metro.dll
-packages/MahApps.Metro.1.3.0/MahApps.Metro.1.3.0.nupkg
-packages/MahApps.Metro.1.3.0/lib/net45/MahApps.Metro.dll
-packages/MahApps.Metro.1.3.0/lib/net40/System.Windows.Interactivity.dll
+
 bin/MongoDB.Driver.dll
-bin/MongoDB.Driver.dll
-packages/MahApps.Metro.1.3.0/tools/install.ps1
-packages/MahApps.Metro.1.3.0/lib/net45/System.Windows.Interactivity.dll
-packages/MahApps.Metro.1.3.0/lib/net45/MahApps.Metro.XML
-packages/MahApps.Metro.1.3.0/lib/net40/MahApps.Metro.XML
-packages/WPFExtensions
+
+packages/
+Core/
 bin/MongoDB.Driver.Core.dll
 bin/MongoDB.Bson.dll
 bin/MongoDB.Driver.dll
@@ -393,177 +386,33 @@ bin/cml/models/templates/continuous/video/tensorflow/nova_sessions
 bin/cml/models/templates/continuous/video/tensorflow/nova_db_info
 bin/PythonScripts/db.cfg
 bin/PythonScripts/example.py
-/Packages/Microsoft.Toolkit.Wpf.UI.Controls.WebView.6.1.2
-/Packages/Microsoft.Web.WebView2.1.0.864.35
-/Packages/Microsoft.Windows.SDK.Contracts.10.0.18362.2005
-/Packages/Microsoft.CSharp.4.5.0
-/Packages/System.Runtime.WindowsRuntime.4.6.0
-/Packages/System.Runtime.WindowsRuntime.UI.Xaml.4.6.0
-bin/nova.exe.WebView2/EBWebView/BrowserMetrics/BrowserMetrics-6103E224-5BD8.pma
-bin/nova.exe.WebView2/EBWebView/Crashpad/metadata
-bin/nova.exe.WebView2/EBWebView/Crashpad/settings.dat
-bin/nova.exe.WebView2/EBWebView/Crashpad/throttle_store.dat
-bin/nova.exe.WebView2/EBWebView/CrashpadMetrics-active.pma
-bin/nova.exe.WebView2/EBWebView/Default/Cache/data_0
-bin/nova.exe.WebView2/EBWebView/Default/Cache/data_1
-bin/nova.exe.WebView2/EBWebView/Default/Cache/data_2
-bin/nova.exe.WebView2/EBWebView/Default/Cache/data_3
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000001
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000002
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000003
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000004
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000005
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000006
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000007
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000008
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_000009
-bin/nova.exe.WebView2/EBWebView/Default/Cache/index
-bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/c98ac1720e34d622_0
-bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/index
-bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/index-dir/the-real-index
-bin/nova.exe.WebView2/EBWebView/Default/Code Cache/wasm/index
-bin/nova.exe.WebView2/EBWebView/Default/Code Cache/wasm/index-dir/the-real-index
-bin/nova.exe.WebView2/EBWebView/Default/Cookies
-bin/nova.exe.WebView2/EBWebView/Default/Cookies-journal
-bin/nova.exe.WebView2/EBWebView/Default/Extension State/CURRENT
-bin/nova.exe.WebView2/EBWebView/Default/Extension State/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Extension State/LOG
-bin/nova.exe.WebView2/EBWebView/Default/Extension State/MANIFEST-000001
-bin/nova.exe.WebView2/EBWebView/Default/Favicons
-bin/nova.exe.WebView2/EBWebView/Default/Favicons-journal
-bin/nova.exe.WebView2/EBWebView/Default/GPUCache/data_0
-bin/nova.exe.WebView2/EBWebView/Default/GPUCache/data_1
-bin/nova.exe.WebView2/EBWebView/Default/GPUCache/data_2
-bin/nova.exe.WebView2/EBWebView/Default/GPUCache/data_3
-bin/nova.exe.WebView2/EBWebView/Default/GPUCache/index
-bin/nova.exe.WebView2/EBWebView/Default/History
-bin/nova.exe.WebView2/EBWebView/Default/History-journal
-bin/nova.exe.WebView2/EBWebView/Default/Local Storage/leveldb/CURRENT
-bin/nova.exe.WebView2/EBWebView/Default/Local Storage/leveldb/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Local Storage/leveldb/LOG
-bin/nova.exe.WebView2/EBWebView/Default/Local Storage/leveldb/MANIFEST-000001
-bin/nova.exe.WebView2/EBWebView/Default/Login Data
-bin/nova.exe.WebView2/EBWebView/Default/Login Data-journal
-bin/nova.exe.WebView2/EBWebView/Default/Network Persistent State
-bin/nova.exe.WebView2/EBWebView/Default/Preferences
-bin/nova.exe.WebView2/EBWebView/Default/README
-bin/nova.exe.WebView2/EBWebView/Default/Reporting and NEL
-bin/nova.exe.WebView2/EBWebView/Default/Reporting and NEL-journal
-bin/nova.exe.WebView2/EBWebView/Default/Secure Preferences
-bin/nova.exe.WebView2/EBWebView/Default/Session Storage/CURRENT
-bin/nova.exe.WebView2/EBWebView/Default/Session Storage/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Session Storage/LOG
-bin/nova.exe.WebView2/EBWebView/Default/Session Storage/MANIFEST-000001
-bin/nova.exe.WebView2/EBWebView/Default/Site Characteristics Database/CURRENT
-bin/nova.exe.WebView2/EBWebView/Default/Site Characteristics Database/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Site Characteristics Database/LOG
-bin/nova.exe.WebView2/EBWebView/Default/Site Characteristics Database/MANIFEST-000001
-bin/nova.exe.WebView2/EBWebView/Default/Sync Data/LevelDB/CURRENT
-bin/nova.exe.WebView2/EBWebView/Default/Sync Data/LevelDB/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Sync Data/LevelDB/LOG
-bin/nova.exe.WebView2/EBWebView/Default/Sync Data/LevelDB/MANIFEST-000001
-bin/nova.exe.WebView2/EBWebView/Default/TransportSecurity
-bin/nova.exe.WebView2/EBWebView/Default/Visited Links
-bin/nova.exe.WebView2/EBWebView/Default/Web Data
-bin/nova.exe.WebView2/EBWebView/Default/Web Data-journal
-bin/nova.exe.WebView2/EBWebView/Default/WebAssistDatabase
-bin/nova.exe.WebView2/EBWebView/Default/WebAssistDatabase-journal
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/data_0
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/data_1
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/data_2
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/data_3
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000001
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000002
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/index
-bin/nova.exe.WebView2/EBWebView/Last Version
-bin/nova.exe.WebView2/EBWebView/Local State
-bin/nova.exe.WebView2/EBWebView/ShaderCache/GPUCache/data_0
-bin/nova.exe.WebView2/EBWebView/ShaderCache/GPUCache/data_1
-bin/nova.exe.WebView2/EBWebView/ShaderCache/GPUCache/data_2
-bin/nova.exe.WebView2/EBWebView/ShaderCache/GPUCache/data_3
-bin/nova.exe.WebView2/EBWebView/ShaderCache/GPUCache/index
-bin/nova.exe.WebView2/EBWebView/SmartScreen/local/cache
-bin/nova.exe.WebView2/EBWebView/SmartScreen/local/download_cache
-bin/nova.exe.WebView2/EBWebView/SmartScreen/local/warnStateCache
-bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/edgeSettings
-bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/edgeSettings_2.0-2f9188b68640dbf72295f9083a21d674a314721ef06f82db281cbcb052ff8ec1
-bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/synchronousLookupUris
-bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/synchronousLookupUris_637632400625304717
-bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/topTraffic
-bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/topTraffic_637582443620690300
-bin/nova.exe.WebView2/EBWebView/BrowserMetrics/BrowserMetrics-6103E602-780.pma
-bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/synchronousLookupUris_637637476152106980
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000004
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000003
-bin/nova.exe.WebView2/EBWebView/Default/Top Sites-journal
-bin/nova.exe.WebView2/EBWebView/Default/Top Sites
-bin/nova.exe.WebView2/EBWebView/Default/Sync Data/LevelDB/LOG.old
-bin/nova.exe.WebView2/EBWebView/Default/Site Characteristics Database/LOG.old
-bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/metadata/MANIFEST-000001
-bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/metadata/LOG
-bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/metadata/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/metadata/CURRENT
-bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/MANIFEST-000001
-bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/LOG
-bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/shared_proto_db/CURRENT
-bin/nova.exe.WebView2/EBWebView/Default/Session Storage/LOG.old
-bin/nova.exe.WebView2/EBWebView/Default/PreferredApps
-bin/nova.exe.WebView2/EBWebView/Default/optimization_guide_model_and_features_store/LOG
-bin/nova.exe.WebView2/EBWebView/Default/optimization_guide_model_and_features_store/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/optimization_guide_hint_cache_store/LOG
-bin/nova.exe.WebView2/EBWebView/Default/optimization_guide_hint_cache_store/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Network Action Predictor-journal
-bin/nova.exe.WebView2/EBWebView/Default/Network Action Predictor
-bin/nova.exe.WebView2/EBWebView/Default/LOG
-bin/nova.exe.WebView2/EBWebView/Default/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Local Storage/leveldb/LOG.old
-bin/nova.exe.WebView2/EBWebView/Default/heavy_ad_intervention_opt_out.db-journal
-bin/nova.exe.WebView2/EBWebView/Default/heavy_ad_intervention_opt_out.db
-bin/nova.exe.WebView2/EBWebView/Default/Feature Engagement Tracker/EventDB/LOG
-bin/nova.exe.WebView2/EBWebView/Default/Feature Engagement Tracker/EventDB/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Feature Engagement Tracker/AvailabilityDB/LOG
-bin/nova.exe.WebView2/EBWebView/Default/Feature Engagement Tracker/AvailabilityDB/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/Extension State/LOG.old
-bin/nova.exe.WebView2/EBWebView/Default/Download Service/EntryDB/LOG
-bin/nova.exe.WebView2/EBWebView/Default/Download Service/EntryDB/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/data_reduction_proxy_leveldb/MANIFEST-000002
-bin/nova.exe.WebView2/EBWebView/Default/data_reduction_proxy_leveldb/LOG
-bin/nova.exe.WebView2/EBWebView/Default/data_reduction_proxy_leveldb/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/data_reduction_proxy_leveldb/CURRENT
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000a
-bin/nova.exe.WebView2/EBWebView/Default/BudgetDatabase/LOG
-bin/nova.exe.WebView2/EBWebView/Default/BudgetDatabase/LOCK
-bin/nova.exe.WebView2/EBWebView/Default/AutofillStrikeDatabase/LOG
-bin/nova.exe.WebView2/EBWebView/Default/AutofillStrikeDatabase/LOCK
-bin/nova.exe.WebView2/EBWebView/BrowserMetrics/BrowserMetrics-610B9E9E-9E60.pma
-bin/nova.exe.WebView2/EBWebView/BrowserMetrics-spare.pma
 *.old
 *.db
 *.db-journal
-bin/nova.exe.WebView2/EBWebView/BrowserMetrics/BrowserMetrics-61360194-19EB4.pma
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000b
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000c
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000d
-bin/nova.exe.WebView2/EBWebView/Default/Cache/f_00000e
-bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/0737b1db6a890051_0
-bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/442eea43b0825207_0
-bin/nova.exe.WebView2/EBWebView/Default/Code Cache/js/95facfd04898a965_0
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000005
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000006
-bin/nova.exe.WebView2/EBWebView/GrShaderCache/GPUCache/f_000007
-bin/nova.exe.WebView2/EBWebView/SmartScreen/remote/synchronousLookupUris_637665232204592820
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Cookies
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Cookies-journal
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Favicons
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Favicons-journal
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/History
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/History-journal
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Login Data
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Login Data-journal
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Preferences
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Secure Preferences
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Web Data
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Default/Web Data-journal
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Last Version
-bin/nova.exe.WebView2/EBWebView/Snapshots/92.0.902.62/Local State
+bin/nova.exe.WebView2/*
+bin/DnsClient.dll
+bin/DnsClient.xml
+bin/libsnappy64.dylib
+bin/libsnappy64.so
+bin/libzstd.dll
+bin/libzstd.dylib
+bin/libzstd.so
+bin/mongocrypt.dll
+bin/MongoDB.Bson.xml
+bin/MongoDB.Driver.Core.xml
+bin/MongoDB.Driver.xml
+bin/MongoDB.Libmongocrypt.dll
+bin/nova.exe
+bin/SharpCompress.dll
+bin/snappy32.dll
+bin/snappy64.dll
+bin/System.Buffers.dll
+bin/System.Buffers.xml
+bin/System.Memory.dll
+bin/System.Memory.xml
+bin/System.Numerics.Vectors.dll
+bin/System.Numerics.Vectors.xml
+bin/System.Runtime.CompilerServices.Unsafe.dll
+bin/System.Runtime.CompilerServices.Unsafe.xml
+bin/System.Text.Encoding.CodePages.dll
+bin/System.Text.Encoding.CodePages.xml
