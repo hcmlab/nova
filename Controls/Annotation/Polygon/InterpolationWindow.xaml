@@ -98,6 +98,7 @@
             <Button x:Name="Next" Click="Next_Click" Height="25" Width="75" Margin="5,8" Content="Next"/>
             <Button x:Name="Cancel" Click="Close_Click" Height="25" Width="75" Content="Close"/>
         </StackPanel>
+        <Label x:Name="Status_Label" Grid.Row="3" Foreground="Red" Margin="0,25,231,0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Content="Interpolation not done..." Height="25" Width="150" Grid.ColumnSpan="2"/>
 
     </Grid>
 </Window>
