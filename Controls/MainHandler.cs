@@ -18,8 +18,8 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.1.2";
-        public static MEDIABACKEND MediaBackend = MEDIABACKEND.MEDIAKIT;
+        public static string BuildVersion = "1.2.2.0";
+        public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
         public static bool ENABLE_VIEWONLY = false;
@@ -217,7 +217,7 @@ namespace ssi
             control.convertSignalToAnnoContinuousMenu.Click += convertSignalToAnnoContinuous_Click;
             control.removeRemainingSegmentsMenu.Click += removeRemainingSegmentsMenu_Click;
 
-            control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+            //control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
             bool LightningWindowActive = false;
 
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
@@ -657,6 +657,7 @@ namespace ssi
                 Properties.Settings.Default.EnablePython = s.EnablePython();
                 Properties.Settings.Default.EnablePythonDebug = s.EnablePythonDebug();
                 Properties.Settings.Default.EnableLightning = s.EnableLightning();
+                Properties.Settings.Default.MediaBackend = s.Mediabackend();
 
                 Properties.Settings.Default.Save();
                 

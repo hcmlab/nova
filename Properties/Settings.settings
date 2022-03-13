@@ -167,5 +167,8 @@
     <Setting Name="DefaultPolygonPointDistance" Type="System.Double" Scope="User">
       <Value Profile="(Default)">15</Value>
     </Setting>
+    <Setting Name="MediaBackend" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Hardware</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

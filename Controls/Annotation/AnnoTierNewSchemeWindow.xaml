@@ -10,7 +10,7 @@
         Icon="..\..\Resources\ui.ico"
         SizeToContent="WidthAndHeight">
 
-    <Grid Margin="5" Height="422">
+    <Grid Margin="5" Height="480">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>

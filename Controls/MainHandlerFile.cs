@@ -238,6 +238,7 @@ namespace ssi
         {
             media.Play();
             media.Pause();
+            media.Move(0);
             mediaList.Add(media);
 
             if (media.GetMediaType() != MediaType.AUDIO)

@@ -272,7 +272,7 @@ namespace ssi
                 return false;
             }
 
-            List<string> databases = GetDatabasesAll();
+            List<string> databases = GetDatabases();
             return databases.Any(s => name.Equals(s));
         }
 
@@ -281,6 +281,10 @@ namespace ssi
             List<string> items = new List<string>();
 
             if (IsConnected)
+            {
+
+               
+            if (CheckAuthentication(Properties.Settings.Default.MongoDBUser, "admin") >= 3)
             {
                 var databases = client.ListDatabasesAsync().Result.ToListAsync().Result;
                 foreach (var c in databases)
@@ -294,7 +298,37 @@ namespace ssi
                 items.Sort();
             }
 
-            return items;
+                else
+                {
+
+                    string user = Properties.Settings.Default.MongoDBUser;
+                    try
+                    {
+                        var adminDB = client.GetDatabase("admin");
+                        var cmd = new BsonDocument("usersInfo", user);
+                        var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
+                        var roles = (BsonArray)queryResult[0][0]["roles"];
+
+                        for (int i = 0; i < roles.Count; i++)
+                        {
+
+                            if (roles[i]["db"].ToString() != "admin" && roles[i]["db"].ToString() != "local" && roles[i]["db"].ToString() != "config" && !items.Contains(roles[i]["db"].ToString()))
+                            {
+                                items.Add(roles[i]["db"].ToString());
+                            }
+
+                        }
+                    }
+                    catch
+                    { }
+
+                    items.Sort();
+                }
+
+              
+                return items;
+            }
+            else return new List<string>();
         }
 
         public static List<string> GetDatabasesAll()
@@ -876,7 +910,6 @@ namespace ssi
                     { "createUser", user.Name },
                     { "pwd", user.Password },
                     { "roles", new BsonArray {
-                        new BsonDocument { { "role", "readAnyDatabase" }, { "db", "admin" } },
                         new BsonDocument { { "role", "changeOwnPasswordCustomDataRole" }, { "db", "admin" } },
                     } } };
             }
@@ -1015,7 +1048,7 @@ namespace ssi
 
             try
             {
-                dbuser.ln_admin_key = MainHandler.Cipher.DecryptString(Customdata["ln_admin_key"].ToString(), MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+                dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(Customdata["ln_admin_key"].ToString(), MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
 
             }
             catch
@@ -2170,14 +2203,14 @@ namespace ssi
             {
                 for (int i = 0; i < annoList.Count; i++)
                 {
-                    data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "name", annoList[i].Label }, { "conf", annoList[i].Confidence }, { "meta", annoList[i].Meta } });
+                    data.Add(new BsonDocument { { "from", annoList[i].Start }, { "to", annoList[i].Stop }, { "name", annoList[i].Label }, { "conf", annoList[i].Confidence }, { "color", annoList[i].Color.ToString() }, { "meta", annoList[i].Meta } });
                 }
             }
             else if (schemeType == AnnoScheme.TYPE.CONTINUOUS)
             {
                 for (int i = 0; i < annoList.Count; i++)
                 {
-                    data.Add(new BsonDocument { { "score", annoList[i].Score }, { "conf", annoList[i].Confidence }, /*{ "Color", a.AnnoList[i].Bg }*/ });
+                    data.Add(new BsonDocument { { "score", annoList[i].Score }, { "conf", annoList[i].Confidence }});
                 }
             }
             else if (schemeType == AnnoScheme.TYPE.POINT)
@@ -3173,6 +3206,7 @@ namespace ssi
                         string label = labels[i]["name"].ToString();
                         string confidence = labels[i]["conf"].ToString();
                         string meta = "";
+                        Color color = Colors.Black;
                         try
                         {
                             meta = labels[i]["meta"].ToString();
@@ -3181,8 +3215,17 @@ namespace ssi
                         {
 
                         }
-                        //string colorstring = labels[i]["color"].ToString();
-                        AnnoListItem ali = new AnnoListItem(start, duration, label, meta, Colors.Black, double.Parse(confidence));
+
+                        try
+                        {
+                            color = (Color)ColorConverter.ConvertFromString(labels[i]["color"].ToString());
+                        }
+                        catch (Exception e)
+                        {
+
+                        }
+
+                        AnnoListItem ali = new AnnoListItem(start, duration, label, meta, color, double.Parse(confidence));
                         annoList.AddSorted(ali);
                     }
                 }

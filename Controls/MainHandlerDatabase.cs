@@ -70,33 +70,38 @@ namespace ssi
             if (isConnected && ENABLE_LIGHTNING)
             {
 
-                    Lightning lightning = new Lightning();
-                    try
+                Lightning lightning = new Lightning();
+                try
+                {
+
+                    DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                    int balance = await lightning.GetWalletBalance(user.ln_admin_key);
+                    //if error we don't have a wallet, returns -1.
+                    if (balance == -1)
+                        myWallet = null;
+                    else
                     {
-                        DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
-                        int balance = await lightning.GetWalletBalance(user.ln_admin_key);
-                        //if error we don't have a wallet, returns -1.
-                        if (balance == -1)
-                            myWallet = null;
-                        else
-                        {
-                            myWallet.admin_key = user.ln_admin_key;
-                            myWallet.invoice_key = user.ln_invoice_key;
-                            myWallet.wallet_id = user.ln_wallet_id;
-                            myWallet.user_id = user.ln_user_id;
-                            myWallet.balance = balance;
-                        }
+                        myWallet.admin_key = user.ln_admin_key;
+                        myWallet.invoice_key = user.ln_invoice_key;
+                        myWallet.wallet_id = user.ln_wallet_id;
+                        myWallet.user_id = user.ln_user_id;
+                        myWallet.balance = balance;
+                    }
+                    control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
                     updateNavigator();
+
                     //InitCheckLightningBalanceTimer();
                 }
-                    catch (Exception e)
-                    {
+                catch (Exception e)
+                {
 
-                    }
+                }
             }
 
-            
-        
+  
+
+
+
         }
 
         public void viewonlyMode(bool on)
@@ -231,7 +236,7 @@ namespace ssi
                         MessageBox.Show("Password Change successful!");
                         if(MainHandler.myWallet != null)
                         {
-                            user.ln_admin_key = MainHandler.Cipher.EncryptString(MainHandler.myWallet.admin_key, user.Password);
+                            user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key, user.Password);
                             DatabaseHandler.ChangeUserCustomData(user);
 
                         }
@@ -664,97 +669,128 @@ namespace ssi
 
         public static class Cipher
         {
-            private const int Keysize = 256;
-
-            // This constant determines the number of iterations for the password bytes generation function.
-            private const int DerivationIterations = 1000;
-
-            public static string EncryptString(string plainText, string passPhrase)
+            internal static class AES
             {
-                // Salt and IV is randomly generated each time, but is preprended to encrypted cipher text
-                // so that the same Salt and IV values can be used when decrypting.  
-                var saltStringBytes = Generate256BitsOfRandomEntropy();
-                var ivStringBytes = Generate256BitsOfRandomEntropy();
-                var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-                using (var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations))
+                private static byte[] AES_Encrypt(byte[] bytesToBeEncrypted, byte[] passwordBytes)
                 {
-                    var keyBytes = password.GetBytes(Keysize / 8);
-                    using (var symmetricKey = new RijndaelManaged())
+                    byte[] encryptedBytes;
+                    byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        symmetricKey.BlockSize = 256;
-                        symmetricKey.Mode = CipherMode.CBC;
-                        symmetricKey.Padding = PaddingMode.PKCS7;
-                        using (var encryptor = symmetricKey.CreateEncryptor(keyBytes, ivStringBytes))
+                        var AES = Aes.Create("AesManaged");
+                        AES.KeySize = 256;
+                        AES.BlockSize = 128;
+                        var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+                        AES.Key = key.GetBytes(AES.KeySize / 8);
+                        AES.IV = key.GetBytes(AES.BlockSize / 8);
+                        AES.Mode = CipherMode.CBC;
+                        using (var cs = new CryptoStream(ms, AES.CreateEncryptor(), CryptoStreamMode.Write))
                         {
-                            using (var memoryStream = new MemoryStream())
-                            {
-                                using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
-                                {
-                                    cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
-                                    cryptoStream.FlushFinalBlock();
-                                    // Create the final bytes as a concatenation of the random salt bytes, the random iv bytes and the cipher bytes.
-                                    var cipherTextBytes = saltStringBytes;
-                                    cipherTextBytes = cipherTextBytes.Concat(ivStringBytes).ToArray();
-                                    cipherTextBytes = cipherTextBytes.Concat(memoryStream.ToArray()).ToArray();
-                                    memoryStream.Close();
-                                    cryptoStream.Close();
-                                    return Convert.ToBase64String(cipherTextBytes);
-                                }
-                            }
+                            cs.Write(bytesToBeEncrypted, 0, bytesToBeEncrypted.Length);
+                            cs.Close();
                         }
+                        encryptedBytes = ms.ToArray();
+                    }
+                    return encryptedBytes;
+                }
+
+                private static byte[] AES_Decrypt(byte[] bytesToBeDecrypted, byte[] passwordBytes)
+                {
+                    byte[] decryptedBytes = null;
+                    byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        var AES = Aes.Create("AesManaged");
+                        AES.KeySize = 256;
+                        AES.BlockSize = 128;
+                        var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+                        AES.Key = key.GetBytes(AES.KeySize / 8);
+                        AES.IV = key.GetBytes(AES.BlockSize / 8);
+                        AES.Mode = CipherMode.CBC;
+                        using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write))
+                        {
+                            cs.Write(bytesToBeDecrypted, 0, bytesToBeDecrypted.Length);
+                            cs.Close();
+                        }
+                        decryptedBytes = ms.ToArray();
+                    }
+                    return decryptedBytes;
+                }
+
+                public static string EncryptText(string password, string salt)
+                {
+                    byte[] bytesToBeEncrypted = Encoding.UTF8.GetBytes(password);
+                    byte[] passwordBytes = Encoding.UTF8.GetBytes(salt);
+                    passwordBytes = SHA256.Create().ComputeHash(passwordBytes);
+                    byte[] bytesEncrypted = AES_Encrypt(bytesToBeEncrypted, passwordBytes);
+                    string result = Convert.ToBase64String(bytesEncrypted);
+                    return result;
+                }
+
+                public static string DecryptText(string hash, string salt)
+                {
+                    try
+                    {
+                        byte[] bytesToBeDecrypted = Convert.FromBase64String(hash);
+                        byte[] passwordBytes = Encoding.UTF8.GetBytes(salt);
+                        passwordBytes = SHA256.Create().ComputeHash(passwordBytes);
+                        byte[] bytesDecrypted = AES_Decrypt(bytesToBeDecrypted, passwordBytes);
+                        string result = Encoding.UTF8.GetString(bytesDecrypted);
+                        return result;
+                    }
+                    catch (Exception e)
+                    {
+                        return e.Message;
                     }
                 }
-            }
 
-            public static string DecryptString(string cipherText, string passPhrase)
-            {
-                // Get the complete stream of bytes that represent:
-                // [32 bytes of Salt] + [32 bytes of IV] + [n bytes of CipherText]
-                var cipherTextBytesWithSaltAndIv = Convert.FromBase64String(cipherText);
-                // Get the saltbytes by extracting the first 32 bytes from the supplied cipherText bytes.
-                var saltStringBytes = cipherTextBytesWithSaltAndIv.Take(Keysize / 8).ToArray();
-                // Get the IV bytes by extracting the next 32 bytes from the supplied cipherText bytes.
-                var ivStringBytes = cipherTextBytesWithSaltAndIv.Skip(Keysize / 8).Take(Keysize / 8).ToArray();
-                // Get the actual cipher text bytes by removing the first 64 bytes from the cipherText string.
-                var cipherTextBytes = cipherTextBytesWithSaltAndIv.Skip((Keysize / 8) * 2).Take(cipherTextBytesWithSaltAndIv.Length - ((Keysize / 8) * 2)).ToArray();
+                private const int SALT_BYTE_SIZE = 24;
+                private const int HASH_BYTE_SIZE = 24;
+                private const int PBKDF2_ITERATIONS = 1000;
+                private const int ITERATION_INDEX = 0;
+                private const int SALT_INDEX = 1;
+                private const int PBKDF2_INDEX = 2;
 
-                using (var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations))
+                public static string PBKDF2_CreateHash(string password)
                 {
-                    var keyBytes = password.GetBytes(Keysize / 8);
-                    using (var symmetricKey = new RijndaelManaged())
+                    RNGCryptoServiceProvider csprng = new RNGCryptoServiceProvider(); // This reports SYSLIB0023 'RNGCryptoServiceProvider' is obsolete: 'RNGCryptoServiceProvider is obsolete. To generate a random number, use one of the RandomNumberGenerator static methods instead.'
+                    byte[] salt = new byte[SALT_BYTE_SIZE];
+                    csprng.GetBytes(salt);
+                    byte[] hash = PBKDF2(password, salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
+                    return PBKDF2_ITERATIONS + ":" + Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash);
+                }
+
+                public static bool PBKDF2_ValidatePassword(string password, string correctHash)
+                {
+                    char[] delimiter = { ':' };
+                    string[] split = correctHash.Split(delimiter);
+                    int iterations = Int32.Parse(split[ITERATION_INDEX]);
+                    byte[] salt = Convert.FromBase64String(split[SALT_INDEX]);
+                    byte[] hash = Convert.FromBase64String(split[PBKDF2_INDEX]);
+                    byte[] testHash = PBKDF2(password, salt, iterations, hash.Length);
+                    return SlowEquals(hash, testHash);
+                }
+
+                private static bool SlowEquals(byte[] a, byte[] b)
+                {
+                    uint diff = (uint)a.Length ^ (uint)b.Length;
+                    for (int i = 0; i < a.Length && i < b.Length; i++)
+                        diff |= (uint)(a[i] ^ b[i]);
+                    return diff == 0;
+                }
+
+                private static byte[] PBKDF2(string password, byte[] salt, int iterations, int outputBytes)
+                {
+                    Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, salt)
                     {
-                        symmetricKey.BlockSize = 256;
-                        symmetricKey.Mode = CipherMode.CBC;
-                        symmetricKey.Padding = PaddingMode.PKCS7;
-                        using (var decryptor = symmetricKey.CreateDecryptor(keyBytes, ivStringBytes))
-                        {
-                            using (var memoryStream = new MemoryStream(cipherTextBytes))
-                            {
-                                using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
-                                {
-                                    var plainTextBytes = new byte[cipherTextBytes.Length];
-                                    var decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                                    memoryStream.Close();
-                                    cryptoStream.Close();
-                                    return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
-                                }
-                            }
-                        }
-                    }
+                        IterationCount = iterations
+                    };
+                    return pbkdf2.GetBytes(outputBytes);
                 }
-            }
-
-            private static byte[] Generate256BitsOfRandomEntropy()
-            {
-                var randomBytes = new byte[32]; // 32 Bytes will give us 256 bits.
-                using (var rngCsp = new RNGCryptoServiceProvider())
-                {
-                    // Fill the array with cryptographically secure random bytes.
-                    rngCsp.GetBytes(randomBytes);
-                }
-                return randomBytes;
             }
         }
+    
 
 
         public static string Encode(string plainText)

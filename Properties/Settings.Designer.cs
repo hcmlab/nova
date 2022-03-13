@@ -682,5 +682,17 @@ namespace ssi.Properties {
                 this["DefaultPolygonPointDistance"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Hardware")]
+        public string MediaBackend {
+            get {
+                return ((string)(this["MediaBackend"]));
+            }
+            set {
+                this["MediaBackend"] = value;
+            }
+        }
     }
 }

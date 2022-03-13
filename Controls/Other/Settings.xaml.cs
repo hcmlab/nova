@@ -23,6 +23,7 @@ namespace ssi
             PointDistance.Text = Properties.Settings.Default.DefaultPolygonPointDistance.ToString();
             DrawwaveformCheckbox.IsChecked = Properties.Settings.Default.DrawVideoWavform;
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
+            mbackend.SelectedIndex = (Properties.Settings.Default.MediaBackend == "Software") ? 1 : 0; 
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
             if (tokens.Length == 2)
             {
@@ -130,6 +131,15 @@ namespace ssi
         public bool EnablePython()
         {
             return (EnablePythonCheckbox.IsChecked == true);
+        }
+
+        public string Mediabackend()
+        {
+
+            if (mbackend.SelectedIndex == 1)
+                return "Software";
+
+            else return "Hardware";
         }
 
         public bool EnablePythonDebug()

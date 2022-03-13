@@ -250,7 +250,7 @@ namespace ssi
             string wallet_id = response["wallet_id"];
             string user_id = response["user_id"];
             string pass = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
-            user.ln_admin_key = MainHandler.Cipher.EncryptString(admin_key, pass);  //encrypt
+            user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(admin_key, pass);  //encrypt
             user.ln_invoice_key = invoice_key;
             user.ln_wallet_id = wallet_id;
             user.ln_user_id = user_id;
@@ -287,12 +287,7 @@ namespace ssi
             Lightning.Visibility = Visibility.Visible;
         }
 
-        private void walletid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            string export = Defaults.Lightning.LNBitsServer + "/wallet?usr=" + MainHandler.myWallet.user_id + "&wal=" + MainHandler.myWallet.wallet_id + "&admin=" + MainHandler.myWallet.admin_key;
-            System.Windows.Clipboard.SetText(export);
-            clipboard.Content = "Copied to clipboard";
-        }
+
     }
 
 }
