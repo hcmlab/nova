@@ -350,12 +350,10 @@ namespace ssi
             DBPassword.SelectAll();
         }
 
-        private void drpAge_TextChanged(object sender, RoutedEventArgs e)
+        private void DB_IP_TextChanged(object sender, RoutedEventArgs e)
         {
-            //if (tbAge != null)
-            //{
-            //    tbAge.Text = DBHost.Text;
-            //}
+            Regex regexObj = new Regex(@"[^\d.]");
+            this.DBHost.Text = regexObj.Replace(this.DBHost.Text, "");
         }
 
         private void clear_Click(object sender, RoutedEventArgs e)
@@ -364,6 +362,12 @@ namespace ssi
 
             DBHost.DropItems = null;
 
+        }
+
+        private void DBPort_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Regex regexObj = new Regex(@"[^\d]");
+            this.DBPort.Text = regexObj.Replace(this.DBPort.Text, "");
         }
     }
 }

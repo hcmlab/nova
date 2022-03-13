@@ -518,6 +518,7 @@ namespace ssi
         private void targetLabelChanged(object sender, RoutedEventArgs e)
         {
             if(TargetLabelsListBox.SelectedItem != null)
+            
             {
                 this.setStatus();
 

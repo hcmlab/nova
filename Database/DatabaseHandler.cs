@@ -123,6 +123,7 @@ namespace ssi
             {
                 if (client == null)
                 {
+                    clientAddress = clientAddress.Replace(" ", "");
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
                     settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
                     client = new MongoClient(settings);
