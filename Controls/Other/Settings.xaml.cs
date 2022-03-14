@@ -362,8 +362,7 @@ namespace ssi
 
         private void DB_IP_TextChanged(object sender, RoutedEventArgs e)
         {
-            Regex regexObj = new Regex(@"[^\d.]");
-            this.DBHost.Text = regexObj.Replace(this.DBHost.Text, "");
+            
         }
 
         private void clear_Click(object sender, RoutedEventArgs e)
