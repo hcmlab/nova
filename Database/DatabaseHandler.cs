@@ -3262,6 +3262,25 @@ namespace ssi
                 }
                 else if(annoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                 {
+                    int videoCount = 0;
+                    foreach (IMedia media in MainHandler.mediaList)
+                    {
+                        if (media.GetMediaType() == MediaType.VIDEO)
+                            videoCount++;
+                    }
+
+                    if (videoCount > 1)
+                    {
+                        foreach (AnnoList anno in MainHandler.annoLists)
+                        {
+                            if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON || anno.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                            {
+                                MessageBox.Show("Polygon annotations are only allowed with exactly one media file!", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                                return;
+                            }
+                        }
+                    }
+
                     BsonArray schemelabels = null;
                     annoList.Scheme.Labels.Clear();
 

@@ -19,7 +19,7 @@ namespace ssi
             POLYGON,
             DISCRETE_POLYGON,
             GRAPH,
-            SEGMENTATION,
+            SEGMENTATION
         }
 
 
