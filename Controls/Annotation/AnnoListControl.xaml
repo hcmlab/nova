@@ -122,7 +122,7 @@
                             </GridViewColumn>
 
                             <GridViewColumn x:Name="ConfidenceColumn" Width="Auto" Header="Meta" DisplayMemberBinding="{Binding Meta}" TextBlock.Foreground="Black" />
-                            <GridViewColumn x:Name="LabelCountColumn" Width="Auto" Header="Label Count" DisplayMemberBinding="{Binding LabelCount}" TextBlock.Foreground="Black" />
+                            <GridViewColumn x:Name="LabelCountColumn" Width="0" Header="Label Count" DisplayMemberBinding="{Binding LabelCount}" TextBlock.Foreground="Black" />
                     </GridView>
                 </ListView.View>
             </ListView>
