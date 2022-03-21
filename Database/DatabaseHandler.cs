@@ -123,6 +123,7 @@ namespace ssi
             {
                 if (client == null)
                 {
+                    clientAddress = clientAddress.Replace(" ", "");
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
                     settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
                     client = new MongoClient(settings);
@@ -3352,10 +3353,7 @@ namespace ssi
                                 {
                                     foreach (BsonDocument point in b_points)
                                     {
-                                        double id = Utilities.IDcounter;
-                                        Utilities.IDcounter++;
-
-                                        points.Add(new PolygonPoint(point["x"].ToDouble(), point["y"].ToDouble(), id));
+                                        points.Add(new PolygonPoint(point["x"].ToDouble(), point["y"].ToDouble()));
                                     }
 
                                     polygonLabels.Add(new PolygonLabel(points, label, labelColor));

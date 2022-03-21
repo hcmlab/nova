@@ -245,6 +245,9 @@ namespace ssi
 
             hideShadowBox();            
 
+            if(loaded)
+                polygonUtilities.updateImageSize();
+
             return loaded;
         }
 
@@ -301,9 +304,11 @@ namespace ssi
             if(media != null)
             {
                 media.OnMediaMouseDown += OnMediaMouseDown;
+                media.ContextMenu = new ContextMenu();
                 media.OnMediaMouseUp += OnMediaMouseUp;
                 media.OnMediaMouseMove += OnMediaMouseMove;
                 media.OnMediaMouseDown += OnPolygonMedia_MouseDown;
+                media.OnMediaRightMouseDown += OnPolygonMedia_RightMouseDown;
                 media.OnMediaMouseUp += OnPolygonMedia_MouseUp;
                 media.OnMediaMouseMove += OnPolygonMedia_MouseMove;
             }
@@ -313,12 +318,11 @@ namespace ssi
                 mediaKit.OnMediaMouseUp += OnMediaMouseUp;
                 mediaKit.OnMediaMouseMove += OnMediaMouseMove;
                 mediaKit.OnMediaMouseDown += OnPolygonMedia_MouseDown;
+                mediaKit.OnMediaRightMouseDown += OnPolygonMedia_RightMouseDown;
                 mediaKit.OnMediaMouseUp += OnPolygonMedia_MouseUp;
                 mediaKit.OnMediaMouseMove += OnPolygonMedia_MouseMove;
             }
         }
-
-       
 
         private void loadAnnoFile(string filename)
         {

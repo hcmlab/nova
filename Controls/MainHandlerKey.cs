@@ -8,9 +8,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 using SharpDX.XInput;
 using System.Threading;
-using System.Windows.Threading;
-using System.Runtime.InteropServices;
-
 
 
 namespace ssi
@@ -241,9 +238,11 @@ namespace ssi
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             handleKeyDownEvent(sender, e);
-            if (!control.annoListControl.editTextBox.IsFocused && !control.annoListControl.searchTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
+            if (!(control.annoListControl.editTextBox.IsFocused || control.annoListControl.searchTextBox.IsFocused || this.control.polygonListControl.editTextBox.IsFocused || this.control.geometricListControl.editTextBox.IsFocused))
             {
-                int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
+                int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true || e.KeyboardDevice.IsKeyDown(Key.RightAlt) == true ? 1 : 0) + 
+                            (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true || e.KeyboardDevice.IsKeyDown(Key.RightCtrl) == true ? 1 : 0) + 
+                            (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true || e.KeyboardDevice.IsKeyDown(Key.RightShift) == true ? 1 : 0);
                 switch (level)
                 {
                     /*All Modifier keys are pressed*/
@@ -251,10 +250,22 @@ namespace ssi
                         break;
                     /*Two Modifier keys are pressed*/
                     case 2:
+                        if ((e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.RightCtrl)) &&
+                            (e.KeyboardDevice.IsKeyDown(Key.LeftShift) || e.KeyboardDevice.IsKeyDown(Key.RightShift)))
+                        {
+                            if (e.KeyboardDevice.IsKeyDown(Key.Z))
+                            {
+                                if (dataGridChecker.isSchemeTypePolygon())
+                                {
+                                    polygonHandlerPerformer.handleRedo();
+                                }
+                            }
+                        }
                         break;
+
                     /*One Modifier keys are pressed*/
                     case 1:
-                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.RightCtrl))
                         {
                             if (e.KeyboardDevice.IsKeyDown(Key.B))
                             {
@@ -263,9 +274,15 @@ namespace ssi
                             }
                             else if (e.KeyboardDevice.IsKeyDown(Key.C))
                             {
-                                CopySegment();
-
-                                e.Handled = true;
+                                if (dataGridChecker.isSchemeTypePolygon())
+                                {
+                                    this.polygonHandlerPerformer.handleCopy();
+                                }
+                                else
+                                {
+                                    CopySegment();
+                                    e.Handled = true;
+                                }
                             }
 
                             else if (e.KeyboardDevice.IsKeyDown(Key.L))
@@ -282,8 +299,23 @@ namespace ssi
 
                             else if (e.KeyboardDevice.IsKeyDown(Key.V))
                             {
-                                PasteSegment();
-                                e.Handled = true;
+                                if (dataGridChecker.isSchemeTypePolygon())
+                                {
+                                    this.polygonHandlerPerformer.handlePaste();
+                                }
+                                else
+                                {
+                                    PasteSegment();
+                                    e.Handled = true;
+                                }
+                            }
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.A))
+                            {
+                                if (dataGridChecker.isSchemeTypePolygon())
+                                {
+                                    this.polygonHandlerPerformer.handleSelectAll();
+                                }
                             }
 
                             else if (e.KeyboardDevice.IsKeyDown(Key.X))
@@ -292,11 +324,17 @@ namespace ssi
                                 e.Handled = true;
                             }
 
-
                             else if (e.KeyboardDevice.IsKeyDown(Key.Z))
                             {
-                                Undo();
-                                e.Handled = true;
+                                if (dataGridChecker.isSchemeTypePolygon())
+                                {
+                                    this.polygonHandlerPerformer.handleUndo();
+                                }
+                                else
+                                {
+                                    Undo();
+                                    e.Handled = true;
+                                }
                             }
 
                             else if (e.KeyboardDevice.IsKeyDown(Key.Y))
@@ -332,11 +370,7 @@ namespace ssi
                                 e.Handled = true;
                             }
                         }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.LeftShift))
-                        {
-
-                        }
-                            break;
+                        break;
                     /*No Modifier keys are pressed*/
                     case 0:
 
@@ -434,7 +468,7 @@ namespace ssi
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (!this.control.annoListControl.editTextBox.IsFocused && !this.control.polygonListControl.editTextBox.IsFocused && !this.control.geometricListControl.editTextBox.IsFocused)
+            if (!(control.annoListControl.editTextBox.IsFocused || control.annoListControl.searchTextBox.IsFocused || this.control.polygonListControl.editTextBox.IsFocused || this.control.geometricListControl.editTextBox.IsFocused))
             {
 
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);
@@ -470,7 +504,7 @@ namespace ssi
                         break;
                     /*One Modifier keys are pressed*/
                     case 1:
-                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+                        if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.RightCtrl))
                         {                            
                             if (e.KeyboardDevice.IsKeyDown(Key.S))
                             {
@@ -593,7 +627,11 @@ namespace ssi
 
         public void OnKeyUp(object sender, KeyEventArgs e)
         {
-            handleKeyUpEvent(sender, e);
+            if (dataGridChecker.isSchemeTypePolygon())
+            {
+                handlePolygonKeyUpEvent(sender, e);
+            }
+
             isKeyDown = false;
         }
 

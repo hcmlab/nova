@@ -5,25 +5,24 @@ using static ssi.Types.Polygon.LabelInformations;
 
 namespace ssi.Types.Polygon
 {
-    class ChangeCompletePolygonCommand : ICommand
-    {
+    class ChangeLabelCommand : ICommand
+    {   
         private PolygonLabel polygonToChange;
         private List<Point> oldPoints;
         private List<Point> newPoints;
-        private TYPE type;
+        private readonly TYPE type = TYPE.EDIT;
 
-        public ChangeCompletePolygonCommand(List<Point> oldPoints, List<Point> newPoints, PolygonLabel polygonToChange, TYPE type)
+        public ChangeLabelCommand(List<Point> oldPoints, List<Point> newPoints, PolygonLabel polygonToChange)
         {
             this.polygonToChange = polygonToChange;
             this.oldPoints = oldPoints;
             this.newPoints = newPoints;
-            this.type = type;
         }
 
-        public PolygonLabel Do()
+        public PolygonLabel[] Do()
         {
             int counter = 0;
-            foreach(PolygonPoint point in polygonToChange.Polygon)
+            foreach (PolygonPoint point in polygonToChange.Polygon)
             {
                 point.X = newPoints[counter].X;
                 point.Y = newPoints[counter].Y;
@@ -31,10 +30,10 @@ namespace ssi.Types.Polygon
             }
 
             polygonToChange.Informations = new LabelInformations(this.type);
-            return polygonToChange;
+            return new PolygonLabel[] { polygonToChange };
         }
 
-        public PolygonLabel Undo()
+        public PolygonLabel[] Undo()
         {
             int counter = 0;
             foreach (PolygonPoint point in polygonToChange.Polygon)
@@ -45,7 +44,7 @@ namespace ssi.Types.Polygon
             }
 
             polygonToChange.Informations = new LabelInformations(this.type);
-            return polygonToChange;
+            return new PolygonLabel[] { polygonToChange };
         }
     }
 }

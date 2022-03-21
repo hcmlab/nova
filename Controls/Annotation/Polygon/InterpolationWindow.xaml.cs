@@ -1,33 +1,42 @@
-﻿using ssi.Types.Polygon;
+﻿using ssi.Tools.Polygon_Helper;
+using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ssi
 {
     partial class InterpolationWindow : Window
     {
         private AnnoList list;
-        private Utilities polygonUtilities;
+        private PolygonUtilities polygonUtilities;
+        private UIElementsController uIElementsController;
+        private PolygonHandlerPerformer polygonHandlerPerformer;
         private int lastInterpolatedSourceFrameIndex = -1;
         private PolygonLabel lastInterpolatedSourcePolygon = null;
 
-        internal InterpolationWindow(Utilities polygonUtilities)
-        {
+        internal InterpolationWindow(PolygonUtilities polygonUtilities, UIElementsController uIElementsController, PolygonHandlerPerformer polygonHandlerPerformer)
+        {   
             InitializeComponent();
             this.polygonUtilities = polygonUtilities;
-            this.polygonUtilities.enableOrDisableControlButtons(false);
+            this.uIElementsController = uIElementsController;
+            this.polygonHandlerPerformer = polygonHandlerPerformer;
+            this.uIElementsController.enableOrDisableControlsBesidesPolygon(false);
+            this.uIElementsController.enableOrDisablePolygonControlElements(false, false);
             this.updateItmes();
-            
-            int currentIndex = this.polygonUtilities.getCurrentAnnoListIndex();
+
+            this.setStatus();
+
+            int currentIndex = polygonUtilities.getCurrentAnnoListIndex();
             TargetFrames.SelectedIndex = currentIndex;
             SourceFrames.SelectedIndex = currentIndex;
             
             if (SourceFrames.SelectedItem != null)
-                SourceLabelsListBox.SelectedIndex = this.polygonUtilities.getCurrentLabelIndex();
+                SourceLabelsListBox.SelectedIndex = polygonUtilities.getCurrentLabelIndex();
 
         }
 
@@ -82,10 +91,11 @@ namespace ssi
                 double xStepPerFrame = xDif / framesBetween;
                 double yStepPerFrame = yDif / framesBetween;
 
-                polygonUtilities.handle2DInterpolation((ComboboxItem)TargetFrames.SelectedItem, (ComboboxItem)SourceFrames.SelectedItem, selectedSourcePolygon, selectedTargetPolygon, xStepPerFrame, yStepPerFrame, framesBetween);
+                polygonHandlerPerformer.handle2DInterpolation((ComboboxItem)TargetFrames.SelectedItem, (ComboboxItem)SourceFrames.SelectedItem, selectedSourcePolygon, selectedTargetPolygon, xStepPerFrame, yStepPerFrame, framesBetween);
                 updateItmes();
                 this.lastInterpolatedSourceFrameIndex = SourceFrames.SelectedIndex;
                 this.lastInterpolatedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
+                this.setStatus();
             }
         }
 
@@ -154,12 +164,17 @@ namespace ssi
                 targetPointsAnglesTuple.Sort(delegate (PointAngleTuple first, PointAngleTuple second) { return first.angle.CompareTo(second.angle); });
 
                 if (sourcePointsAnglesTuple.Count != targetPointsAnglesTuple.Count)
-                    throw new Exception("Implementation Error: New source and new target polygon have not the same amount of points!");
+                {
+                    MessageBox.Show("Not able to interpolate with the selected values!", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
 
                 for (int i = 0; i < sourcePointsAnglesTuple.Count; i++)
                 {
                     if (Math.Truncate(sourcePointsAnglesTuple[i].angle) != Math.Truncate(targetPointsAnglesTuple[i].angle))
-                        throw new Exception("At least one angle not equal!");
+                    {
+                        sourcePointsAnglesTuple.RemoveAt(i);
+                        targetPointsAnglesTuple.RemoveAt(i);
+                    }
                 }
 
                 int stepsFromSourceToTarget = TargetFrames.SelectedIndex - SourceFrames.SelectedIndex;
@@ -172,10 +187,11 @@ namespace ssi
                     yStepsPerFrame.Add((targetPointsAnglesTuple[i].point.Y - sourcePointsAnglesTuple[i].point.Y) / stepsFromSourceToTarget);
                 }
 
-                polygonUtilities.handle3DInterpolation(xStepsPerFrame, yStepsPerFrame, (ComboboxItem)SourceFrames.SelectedItem, (PolygonLabel)SourceLabelsListBox.SelectedValue, (PolygonLabel)TargetLabelsListBox.SelectedValue, sourcePointsAnglesTuple, targetPointsAnglesTuple, stepsFromSourceToTarget);
+                polygonHandlerPerformer.handle3DInterpolation(xStepsPerFrame, yStepsPerFrame, (ComboboxItem)SourceFrames.SelectedItem, (PolygonLabel)SourceLabelsListBox.SelectedValue, (PolygonLabel)TargetLabelsListBox.SelectedValue, sourcePointsAnglesTuple, targetPointsAnglesTuple, stepsFromSourceToTarget);
                 updateItmes();
                 this.lastInterpolatedSourceFrameIndex = SourceFrames.SelectedIndex;
                 this.lastInterpolatedSourcePolygon = (PolygonLabel)SourceLabelsListBox.SelectedValue;
+                this.setStatus();
             }
         }
 
@@ -265,7 +281,7 @@ namespace ssi
                 return addPointToPolygonAfterSpecificPosition(getPolygonPoint(intersectionPoint), getPolygonPoint(veryLast), listToBeAttached);
             }
 
-            throw new Exception("Point not fitted in the polygon");
+            return listToBeAttached;
         }
 
         private double AngleToRadians(double angle)
@@ -331,8 +347,6 @@ namespace ssi
         {
             return new Point(Math.Truncate(100 * input.X) / 100, Math.Truncate(100 * input.Y) / 100);
         }
-
-
 
         private Point getIntersectionPoint(Point A, Point B, Point C, Point D)
         {
@@ -436,6 +450,8 @@ namespace ssi
         {
             if(SourceFrames.SelectedItem != null)
             {
+                this.setStatus();
+
                 ObservableCollection<PolygonLabel> items = new ObservableCollection<PolygonLabel>();
                 PolygonList polygonList = this.list[((ComboboxItem)SourceFrames.SelectedValue).FrameIndex].PolygonList;
                 foreach (PolygonLabel label in polygonList.Polygons)
@@ -461,6 +477,8 @@ namespace ssi
         {
             if(SourceLabelsListBox.SelectedValue != null)
             {
+                this.setStatus();
+
                 AnnoListItem newSelectedAnnoListItem = this.list[((ComboboxItem)SourceFrames.SelectedValue).FrameIndex];
                 int newSelectedAnnoListItemIndex = SourceFrames.SelectedIndex;
                 PolygonLabel newSelectedPolygonLabel = (PolygonLabel)SourceLabelsListBox.SelectedItem;
@@ -473,6 +491,8 @@ namespace ssi
         {
             if(TargetFrames.SelectedItem != null)
             {
+                this.setStatus();
+
                 ObservableCollection<PolygonLabel> items = new ObservableCollection<PolygonLabel>();
                 PolygonList polygonList = this.list[((ComboboxItem)TargetFrames.SelectedValue).FrameIndex].PolygonList;
                 foreach (PolygonLabel label in polygonList.Polygons)
@@ -498,7 +518,10 @@ namespace ssi
         private void targetLabelChanged(object sender, RoutedEventArgs e)
         {
             if(TargetLabelsListBox.SelectedItem != null)
+            
             {
+                this.setStatus();
+
                 AnnoListItem newSelectedAnnoListItem = this.list[((ComboboxItem)TargetFrames.SelectedValue).FrameIndex];
                 int newSelectedAnnoListItemIndex = TargetFrames.SelectedIndex;
                 PolygonLabel newSelectedPolygonLabel = (PolygonLabel)TargetLabelsListBox.SelectedItem;
@@ -509,8 +532,9 @@ namespace ssi
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            this.polygonUtilities.enableOrDisableControlButtons(true);
-            this.polygonUtilities.setInterpolationWindowClosed();
+            this.uIElementsController.enableOrDisablePolygonControlElements(true, true);
+            uIElementsController.enableOrDisableControlsBesidesPolygon(true);
+            this.polygonUtilities.InterpolationWindow = null;
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -536,8 +560,25 @@ namespace ssi
             SourceFrames.SelectedIndex += dif;
             TargetFrames.SelectedIndex += dif + plus;
         }
-    }
 
+        private void setStatus()
+        {
+            if (this.lastInterpolatedSourceFrameIndex == SourceFrames.SelectedIndex)
+            {
+                if(this.lastInterpolatedSourcePolygon != null)
+                    if(this.lastInterpolatedSourcePolygon.Equals((PolygonLabel)SourceLabelsListBox.SelectedValue))
+                    {
+                        this.Status_Label.Foreground = Brushes.Green;
+                        this.Status_Label.Content = "Interpolation done!";
+                    }
+            }
+            else
+            {
+                this.Status_Label.Foreground = Brushes.Red;
+                this.Status_Label.Content = "Interpolation not done...";
+            }
+        }
+    }
 
     public class ComboboxItem
     {

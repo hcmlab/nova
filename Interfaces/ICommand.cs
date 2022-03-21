@@ -8,7 +8,7 @@ namespace ssi.Interfaces
 {
     public interface ICommand
     {
-        PolygonLabel Do();
-        PolygonLabel Undo();
+        PolygonLabel[] Do();
+        PolygonLabel[] Undo();
     }
 }

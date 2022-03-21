@@ -37,6 +37,17 @@
                     </MenuItem>
                 </MenuItem>
             </MenuItem>
+
+            <MenuItem Header="EDIT" Name="edit" Visibility="Collapsed">
+                <MenuItem Header="Undo" InputGestureText="Ctrl+Z" Name="undo" IsEnabled="False" />
+                <MenuItem Header="Redo" InputGestureText="Ctrl+Shift+Z" Name="redo" IsEnabled="False" />
+                <Separator></Separator>
+                <MenuItem Header="Copy" InputGestureText="Ctrl+C" Name="copy"/>
+                <MenuItem Header="Paste" InputGestureText="Ctrl+V" Name="paste" IsEnabled="False" />
+                <MenuItem Header="Cut" InputGestureText="Ctrl+V" Name="cut" IsEnabled="False" />
+                <MenuItem Header="Delete" InputGestureText="Ctrl+Back, Del" Name="delete"/>
+            </MenuItem>
+
             <MenuItem Header="DATABASE" Name="databasemenu">
                 <MenuItem Header="Load Session" Name="databaseLoadSessionMenu" />
                 <MenuItem Header="Administration" Name="databaseAdminMenu">

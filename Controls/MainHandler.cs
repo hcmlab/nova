@@ -160,27 +160,33 @@ namespace ssi
             // Polygon
             control.polygonListControl.Visibility = Visibility.Collapsed;
             control.polygonListControl.polygonSetDefaultLabelButton.Click += polygonSetDefaultLabelButton_Click;
-            control.polygonListControl.polygonListElementDelete.Click += polygonListElementDelete_Click;
             control.polygonListControl.polygonSelectAllButton.Click += polygonSelectAllButton_Click;
             control.polygonListControl.interpolateLabels.Click += polygonInterpolateLabels_Click;
             control.polygonListControl.polygonRelabelButton.Click += polygonRelabelButton_Click;
             control.polygonListControl.polygonCopyButton.Click += polygonCopyButton_Click;
             control.polygonListControl.stopInsertion.Click += polygonStopInsertion_Click;
             control.polygonListControl.addLabels.Click += polygonAddLabels_Click;
+            control.polygonListControl.delete.Click += polygonDelete_Click;
+            control.polygonListControl.paste.Click += polygonPaste_Click;
+            control.polygonListControl.copy.Click += polygonCopy_Click;
+            control.polygonListControl.cut.Click += polygonCut_Click;
+
+            control.cut.Click += polygonCut_Click;
+            control.undo.Click += polygonUndo_Click;
+            control.redo.Click += polygonRedo_Click;
+            control.copy.Click += polygonCopy_Click;
+            control.paste.Click += polygonPaste_Click;
+            control.delete.Click += polygonDelete_Click;
 
             control.polygonListControl.editComboBox.SelectionChanged += discretePolygon_SelectionChanged;
             control.polygonListControl.polygonDataGrid.SelectionChanged += polygonList_SelectionChanged;
 
-            control.polygonListControl.InvoiceDetailsList.Opened += polygonContextMenue_Open;
-
             control.MouseUp += OnPolygonMainControlMouseUp;
             control.MouseMove += OnPolygonMainControlMouseMove;
+            control.polygonListControl.polygonDataGrid.MouseDown += OnPolygonDataGridMouseDown;
 
             polygonHandlerInit();
-            control.polygonListControl.setPolygonUtilitiesManager(this.polygonUtilities);
-
-            
-
+            control.polygonListControl.setPolygonUtilitiesManagerAndEditor(this.polygonEditor, this.polygonUtilities);
 
 
             // Menu
@@ -528,6 +534,7 @@ namespace ssi
             control.timeLineControl.rangeSlider.slider.RangeStopSelected = 100000;
             control.geometricListControl.Visibility = Visibility.Collapsed;
             control.polygonListControl.Visibility = Visibility.Collapsed;
+            control.edit.Visibility = Visibility.Collapsed;
 
             return true;
         }

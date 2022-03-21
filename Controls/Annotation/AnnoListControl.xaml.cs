@@ -22,7 +22,7 @@ namespace ssi
 
         private GridViewColumnHeader _lastHeaderClicked = null;
         private ListSortDirection _lastDirection = ListSortDirection.Ascending;
-        private Utilities polygonUtilities;
+        private PolygonUtilities polygonUtilities;
         public bool itemhasFocus = false;
 
         public AnnoListControl()
@@ -356,7 +356,7 @@ namespace ssi
             }
         }
 
-        internal Utilities PolygonUtilities { set => polygonUtilities = value; }
+        internal PolygonUtilities PolygonUtilities { set => polygonUtilities = value; }
 
         private void TextBoxEx_GotFocus(object sender, RoutedEventArgs e)
         {
