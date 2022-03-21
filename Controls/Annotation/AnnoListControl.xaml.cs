@@ -70,35 +70,38 @@ namespace ssi
 
         private void MenuItemDeleteClick(object sender, RoutedEventArgs e)
         {
-            if (AnnoTierStatic.Selected.IsDiscreteOrFree)
+            if (AnnoTierStatic.Selected != null)
             {
-                if (annoDataGrid.SelectedItems.Count > 0)
+                if (AnnoTierStatic.Selected.IsDiscreteOrFree)
+                {
+                    if (annoDataGrid.SelectedItems.Count > 0)
+                    {
+                        AnnoListItem[] selected = new AnnoListItem[annoDataGrid.SelectedItems.Count];
+                        annoDataGrid.SelectedItems.CopyTo(selected, 0);
+                        annoDataGrid.SelectedIndex = -1;
+
+                        AnnoTier track = AnnoTierStatic.Selected;
+                        foreach (AnnoListItem s in selected)
+                        {
+                            AnnoTierSegment segment = track.GetSegment(s);
+                            if (segment != null)
+                            {
+                                track.RemoveSegment(segment);
+                            }
+                        }
+                    }
+                }
+                else if (AnnoTierStatic.Selected.IsContinuous)
                 {
                     AnnoListItem[] selected = new AnnoListItem[annoDataGrid.SelectedItems.Count];
                     annoDataGrid.SelectedItems.CopyTo(selected, 0);
                     annoDataGrid.SelectedIndex = -1;
-
-                    AnnoTier track = AnnoTierStatic.Selected;
                     foreach (AnnoListItem s in selected)
                     {
-                        AnnoTierSegment segment = track.GetSegment(s);
-                        if (segment != null)
-                        {
-                            track.RemoveSegment(segment);
-                        }
+                        s.Score = double.NaN;
                     }
+                    AnnoTier.Selected.TimeRangeChanged(MainHandler.Time);
                 }
-            }
-            else if (AnnoTierStatic.Selected.IsContinuous)
-            {
-                AnnoListItem[] selected = new AnnoListItem[annoDataGrid.SelectedItems.Count];
-                annoDataGrid.SelectedItems.CopyTo(selected, 0);
-                annoDataGrid.SelectedIndex = -1;
-                foreach (AnnoListItem s in selected)
-                {
-                    s.Score = double.NaN;
-                }
-                AnnoTier.Selected.TimeRangeChanged(MainHandler.Time);
             }
         }
 
