@@ -738,9 +738,6 @@ namespace ssi
         }
 
 
-
-
-
         public void NewAnnoKey()
         {
             if (IsDiscreteOrFree)
@@ -853,7 +850,8 @@ namespace ssi
 
                 if (!alreadyinlist)
                 {
-                    if (this.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS) AnnoList.AddSorted(temp);
+                    if (this.AnnoList.Scheme.Type != AnnoScheme.TYPE.CONTINUOUS) 
+                        AnnoList.AddSorted(temp);
                     AnnoTierSegment segment = new AnnoTierSegment(temp, this);
                     annorightdirection = true;
                     ChangeRepresentationObject ChangeRepresentationObjectforInsert = UnDoObject.MakeChangeRepresentationObjectForInsert(segment);
