@@ -34,7 +34,13 @@
         <Label Name="SourceLabel" Grid.Row="0" Foreground="DarkBlue" Grid.Column="1" Margin="20.667,8,141,8" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" FontWeight="Bold">Source</Label>
         <Label Name="TargetLabel" Grid.Row="0" Foreground="DarkBlue" Grid.Column="3" Margin="148,8" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" FontWeight="Bold">Target</Label>
 
-        <ComboBox Name="SourceFrames" SelectionChanged="sourceFrameChanged" Grid.Column="0" Grid.Row="1" Margin="5" Grid.ColumnSpan="2"/>
+        <ComboBox Name="SourceFrames" SelectionChanged="sourceFrameChanged" Grid.Column="0" Grid.Row="1" Margin="5" Grid.ColumnSpan="2" ItemsSource="{Binding}">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
 
         <ListView Name="SourceLabelsListBox" PreviewMouseLeftButtonDown="SourceLabelsListBox_PreviewMouseLeftButtonDown" PreviewMouseRightButtonDown="SourceLabelsListBox_PreviewMouseRightButtonDown"  SelectionChanged="sourceLabelChanged" Grid.Row="2" Grid.Column="0" Margin="5,5,5,0" SelectionMode="Single" Grid.ColumnSpan="2">
             <ListView.View>
@@ -64,7 +70,13 @@
 
         <GridSplitter ResizeDirection="Columns" Grid.Column="2" Background="DarkBlue" Grid.RowSpan="4" Height="Auto" Width="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="3,0"/>
 
-        <ComboBox Name="TargetFrames" SelectionChanged="targetFrameChanged" Grid.Column="3" Grid.Row="1" Margin="5"/>
+        <ComboBox Name="TargetFrames" SelectionChanged="targetFrameChanged" Grid.Column="3" Grid.Row="1" Margin="5" ItemsSource="{Binding}">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
 
         <ListView Name="TargetLabelsListBox" PreviewMouseLeftButtonDown="TargetLabelsListBox_PreviewMouseLeftButtonDown" PreviewMouseRightButtonDown="TargetLabelsListBox_PreviewMouseRightButtonDown"  SelectionChanged="targetLabelChanged" Grid.Row="2" Grid.Column="3" Margin="5,5,5,0" SelectionMode="Single">
             <ListView.View>
