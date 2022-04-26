@@ -1984,7 +1984,9 @@ namespace ssi
             }
            
         }
-        public static bool DeleteScheme(string name)
+
+
+        public static bool DeleteSchemeIfNoAnnoExists(string name)
         {
             if (!IsConnected && !IsDatabase)
             {
@@ -1996,16 +1998,33 @@ namespace ssi
                 return false;
             }
 
-            var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var builder = Builders<BsonDocument>.Filter;
+            var schemeCollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var filter = builder.Eq("name", name);
-            var update = Builders<BsonDocument>.Update.Set("isValid", false);
-            collection.UpdateOne(filter, update);
+            var schemeResult = schemeCollection.Find(filter).ToList();
+            ObjectId schemeID = ((BsonDocument)schemeResult[0])["_id"].AsObjectId;
 
-            schemes = GetSchemes();
+            var annoCollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var filterData = builder.Eq("scheme_id", schemeID);
+            var collections = annoCollection.Find(filterData).ToList();
 
-            return true;
+            if (collections.Count == 0)
+            {
+                // TODO MARCO: hier kann nun wirklich gelöscht werden -> Man kann auch abfragen, ob man es nur deaktivieren möchte (ist aber glaub schwachsinn)
+                var update = Builders<BsonDocument>.Update.Set("isValid", false);
+                schemeCollection.UpdateOne(filter, update);
+
+                schemes = GetSchemes();
+
+                return true;
+            }
+            else
+            {
+                MessageBox.Show("It is not possible to delete a scheme that is still used as an annotations. Please delete the annotations that are based on this scheme (DATABASE ➙ Administration ➙ Manage Annotations ➙ Remove the mentioned annotations).", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                return false;
+            }
         }
+
 
         private static List<DatabaseSession> GetSessions(bool onlyValid = true)
         {

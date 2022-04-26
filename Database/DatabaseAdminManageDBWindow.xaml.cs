@@ -474,7 +474,7 @@ namespace ssi
             if (SchemesBox.SelectedItem != null)
             {
                 string name = (string)SchemesBox.SelectedItem;
-                if (DatabaseHandler.DeleteScheme(name))
+                if (DatabaseHandler.DeleteSchemeIfNoAnnoExists(name))
                 {
                     GetSchemes();
                 }
