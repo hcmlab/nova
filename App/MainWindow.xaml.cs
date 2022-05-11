@@ -133,24 +133,23 @@ namespace ssi
 
             finally
             {
-                if (MainHandler.ENABLE_PYTHON)
+                if (!e.Cancel)
                 {
-                    MainHandler.killPythonBackend();
+                    if (MainHandler.ENABLE_PYTHON)
+                    {
+                        MainHandler.killPythonBackend();
 
-                    //Process[] p = Process.GetProcessesByName("Python");
-                    //foreach(Process pr in p)
-                    //{
-                    //    pr.Kill();
-                    //}
+                        //Process[] p = Process.GetProcessesByName("Python");
+                        //foreach(Process pr in p)
+                        //{
+                        //    pr.Kill();
+                        //}
+                    }
+                    Application.Current.Shutdown();
+                    Process.GetCurrentProcess().Kill();
+
                 }
-                Application.Current.Shutdown();
-                Process.GetCurrentProcess().Kill();
             }
-
-
-
-
-
         }
 
         private void Window_Closed(object sender, EventArgs e)
