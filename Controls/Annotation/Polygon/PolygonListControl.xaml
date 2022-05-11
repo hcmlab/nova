@@ -46,6 +46,11 @@
                             <GridViewColumnHeader Tag="Label">Label</GridViewColumnHeader>
                         </GridViewColumn.Header>
                     </GridViewColumn>
+                    <GridViewColumn Width="Auto" DisplayMemberBinding="{Binding Confidence}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Tag="Confidence">Confidence</GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
                     <GridViewColumn Width="Auto" Header="Color">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>

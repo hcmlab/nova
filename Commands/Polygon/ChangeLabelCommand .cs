@@ -10,11 +10,13 @@ namespace ssi.Types.Polygon
         private PolygonLabel polygonToChange;
         private List<Point> oldPoints;
         private List<Point> newPoints;
+        private string oldConf;
         private readonly TYPE type = TYPE.EDIT;
 
         public ChangeLabelCommand(List<Point> oldPoints, List<Point> newPoints, PolygonLabel polygonToChange)
         {
             this.polygonToChange = polygonToChange;
+            this.oldConf = polygonToChange.Confidence;
             this.oldPoints = oldPoints;
             this.newPoints = newPoints;
         }
@@ -30,6 +32,7 @@ namespace ssi.Types.Polygon
             }
 
             polygonToChange.Informations = new LabelInformations(this.type);
+            polygonToChange.Confidence = "100";
             return new PolygonLabel[] { polygonToChange };
         }
 
@@ -44,6 +47,7 @@ namespace ssi.Types.Polygon
             }
 
             polygonToChange.Informations = new LabelInformations(this.type);
+            polygonToChange.Confidence = this.oldConf;
             return new PolygonLabel[] { polygonToChange };
         }
     }

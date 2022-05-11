@@ -229,7 +229,8 @@ namespace ssi
                     GridView gView = control.polygonListControl.polygonDataGrid.View as GridView;
                     const int GRID_VIEW_COLUMN_HEADER_COLOR_WIDTH = 60;
                     var workingWidth = control.polygonListControl.polygonDataGrid.ActualWidth - SystemParameters.VerticalScrollBarWidth - GRID_VIEW_COLUMN_HEADER_COLOR_WIDTH;
-                    gView.Columns[0].Width = workingWidth;
+                    gView.Columns[0].Width = workingWidth/2;
+                    gView.Columns[1].Width = workingWidth / 2;
 
                     control.annoListControl.editButton.Visibility = Visibility.Collapsed;
                     control.annoListControl.editComboBox.Visibility = Visibility.Collapsed;

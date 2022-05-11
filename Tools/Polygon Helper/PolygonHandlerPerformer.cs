@@ -74,7 +74,7 @@ namespace ssi.Types.Polygon
             List<PolygonLabel> newCopyList = new List<PolygonLabel>();
             foreach (PolygonLabel label in control.polygonListControl.polygonDataGrid.SelectedItems.Cast<PolygonLabel>())
             {
-                PolygonLabel newLabel = new PolygonLabel(label.getPolygonAsCopy(), label.Label, label.Color);
+                PolygonLabel newLabel = new PolygonLabel(label.getPolygonAsCopy(), label.Label, label.Color, label.Confidence);
                 newCopyList.Add(newLabel);
             }
 

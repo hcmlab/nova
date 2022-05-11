@@ -36,7 +36,7 @@ namespace ssi.Types.Polygon
                         newPolygon.Add(new PolygonPoint(point.X + (newLabelCounter * xStepPerFrame), point.Y + (newLabelCounter * yStepPerFrame)));
                     }
 
-                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color);
+                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color, sourceLabel.Confidence);
                     listItem.PolygonList.addPolygonLabel(newLabel);
                     listItem.updateLabelCount();
                     newLabelCounter++;
@@ -81,7 +81,7 @@ namespace ssi.Types.Polygon
                         pointCounter++;
                     }
 
-                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color);
+                    PolygonLabel newLabel = new PolygonLabel(newPolygon, sourceLabel.Label, sourceLabel.Color, sourceLabel.Confidence);
                     listItem.PolygonList.addPolygonLabel(newLabel);
                     listItem.updateLabelCount();
                     newLabelCounter++;
