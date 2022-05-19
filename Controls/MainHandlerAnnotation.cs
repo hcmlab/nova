@@ -62,6 +62,7 @@ namespace ssi
                     if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON ||
                         AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON)
                     {
+                        control.annoListControl.LabelCountColumn.Width = 0;
                         control.polygonListControl.Visibility = Visibility.Collapsed;
                         control.edit.Visibility = Visibility.Collapsed;
 
@@ -190,6 +191,8 @@ namespace ssi
                     polygonUtilities.ControlInStacksSet = false;
                     control.polygonListControl.Visibility = Visibility.Visible;
                     control.polygonListControl.Height = control.ActualHeight / 2;
+
+                    control.annoListControl.LabelCountColumn.Width = 70;
                     control.edit.Visibility = Visibility.Visible;
 
                     if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
