@@ -237,8 +237,8 @@ namespace ssi
 
         public void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            handleKeyDownEvent(sender, e);
-            if (!(control.annoListControl.editTextBox.IsFocused || control.annoListControl.searchTextBox.IsFocused || this.control.polygonListControl.editTextBox.IsFocused || this.control.geometricListControl.editTextBox.IsFocused))
+            handlePolygonKeyDownEvent(sender, e);
+           if (!(control.annoListControl.editTextBox.IsFocused || control.annoListControl.searchTextBox.IsFocused || this.control.polygonListControl.editTextBox.IsFocused || this.control.geometricListControl.editTextBox.IsFocused))
             {
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true || e.KeyboardDevice.IsKeyDown(Key.RightAlt) == true ? 1 : 0) + 
                             (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true || e.KeyboardDevice.IsKeyDown(Key.RightCtrl) == true ? 1 : 0) + 
@@ -468,7 +468,7 @@ namespace ssi
 
         public void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (!(control.annoListControl.editTextBox.IsFocused || control.annoListControl.searchTextBox.IsFocused || this.control.polygonListControl.editTextBox.IsFocused || this.control.geometricListControl.editTextBox.IsFocused))
+            //if (!(control.annoListControl.editTextBox.IsFocused || control.annoListControl.searchTextBox.IsFocused || this.control.polygonListControl.editTextBox.IsFocused || this.control.geometricListControl.editTextBox.IsFocused))
             {
 
                 int level = (e.KeyboardDevice.IsKeyDown(Key.LeftAlt) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) == true ? 1 : 0) + (e.KeyboardDevice.IsKeyDown(Key.LeftShift) == true ? 1 : 0);

@@ -609,7 +609,7 @@ namespace ssi
             }
         }
 
-        public void handleKeyDownEvent(object sender, KeyEventArgs e)
+        public void handlePolygonKeyDownEvent(object sender, KeyEventArgs e)
         {
             if (!dataGridChecker.isSchemeTypePolygon())
                 return;
@@ -624,7 +624,7 @@ namespace ssi
             }
 
             if(Keyboard.IsKeyDown(Key.Delete) || (Keyboard.IsKeyDown(Key.Back) && (Keyboard.IsKeyDown(Key.RightCtrl) || (Keyboard.IsKeyDown(Key.LeftCtrl)))))
-            {
+            {   
                 polygonDelete_Click(sender, null);
                 return;
             }
