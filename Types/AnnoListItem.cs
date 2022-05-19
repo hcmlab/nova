@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ssi.Types;
+using System;
 using System.Collections.Generic;
 using System.Windows.Media;
 
@@ -16,6 +17,7 @@ namespace ssi
         private PointList points;
         private PolygonList polygonList;
         private int labelCount;
+        private UndoRedoStack undoRedoStack;
 
         public enum TYPE
         {
@@ -126,6 +128,7 @@ namespace ssi
 
         public PolygonList PolygonList { get => polygonList; set => polygonList = value; }
         public int LabelCount { get => labelCount; set => labelCount = value; }
+        public UndoRedoStack UndoRedoStack { get => undoRedoStack; set => undoRedoStack = value; }
 
         public AnnoListItem(double start, double duration, string label, string meta = "", Color color = new Color(), double confidence = 1.0, TYPE type = TYPE.NONE, PointList points = null, PolygonList polygonList = null)
         {
@@ -144,10 +147,12 @@ namespace ssi
                     this.points = points;
                 }
             }
-
-            if(this.Type == TYPE.POLYGON)
+            else if(this.Type == TYPE.POLYGON)
+            {
                 this.labelCount = polygonList.Polygons.Count;
-            
+                this.undoRedoStack = new UndoRedoStack();
+            }
+
             this.polygonList = polygonList;
             if(this.polygonList != null)
                 this.labelCount = this.polygonList.getRealList().Count;
@@ -162,7 +167,6 @@ namespace ssi
             this.meta = meta;
             this.color = color;
             this.confidence = confidence;
-
         }
 
         public void updateLabelCount()

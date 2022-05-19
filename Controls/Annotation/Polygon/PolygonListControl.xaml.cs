@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 using PropertyTools.Wpf;
+using ssi.Tools.Polygon_Helper;
 using ssi.Types.Polygon;
 
 namespace ssi
@@ -11,9 +12,10 @@ namespace ssi
     /// </summary>
     public partial class PolygonListControl : UserControl
     {
-        private GridViewColumnHeader listViewSortCol = null;
-        private ListViewSortAdorner listViewSortAdorner = null;
-        private Utilities polygonUtilitiesManager;
+        private ListViewSortAdorner listViewSortAdorner;
+        private PolygonEditor polygonUtilitiesManager;
+        private GridViewColumnHeader listViewSortCol;
+        private PolygonUtilities PolygonUtilities;
         private Color color;
 
         public PolygonListControl()
@@ -21,9 +23,10 @@ namespace ssi
             InitializeComponent();
         }
 
-        internal void setPolygonUtilitiesManager(Utilities manager)
+        internal void setPolygonUtilitiesManagerAndEditor(PolygonEditor polygonEditor, PolygonUtilities utilities)
         {
-            this.polygonUtilitiesManager = manager;
+            this.polygonUtilitiesManager = polygonEditor;
+            this.PolygonUtilities = utilities;
         }
 
         public void setDefaultLabel(String defaultLabel)
@@ -35,7 +38,7 @@ namespace ssi
         {
             PolygonLabel pl = (PolygonLabel)((ColorPicker)sender).DataContext;
 
-            if (!this.polygonUtilitiesManager.updateFrameData(pl))
+            if (!this.polygonUtilitiesManager.updateLabelColor(pl))
             {
                 this.polygonUtilitiesManager.undoColorChanges(pl, this.color);
             }
@@ -50,8 +53,8 @@ namespace ssi
             else
             {
                 PolygonLabel pl = (PolygonLabel)((ColorPicker)sender).DataContext;
-                this.color = pl.Color;
-                this.polygonUtilitiesManager.selectSpecificLabel(pl);
+                color = pl.Color;
+                PolygonUtilities.selectSpecificLabel(pl);
             }
         }
     }

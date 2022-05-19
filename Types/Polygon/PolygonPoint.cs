@@ -12,10 +12,11 @@ namespace ssi
     {
         private double x;
         private double y;
-        private double pointID;
-        private static List<double> allIDs = new List<double>();
+        private long pointID;
+        private static long IDcounter;
+        private static List<long> allIDs = new List<long>();
 
-        public PolygonPoint(double x, double y, double pointID, bool check = true)
+        public PolygonPoint(double x, double y, long pointID, bool check = true)
         {
             if(check)
                 checkID(pointID);
@@ -24,29 +25,29 @@ namespace ssi
             this.y = y;
             this.pointID = pointID;
         }
+
         public PolygonPoint(double x, double y)
         {
-            double id = Utilities.IDcounter;
-            Utilities.IDcounter++;
+            long id = IDcounter;
+            IDcounter++;
 
             this.x = x;
             this.y = y;
             this.pointID = id;
         }
 
-        
+        public double X { get => x; set => x = value; }
+        public double Y { get => y; set => y = value; }
+        public long PointID { get => pointID; }
+        public static long IDcounter1 { get => IDcounter; set => IDcounter = value; }
 
-        private void checkID(double pointID)
+        private void checkID(long pointID)
         {
             if (allIDs.Contains(pointID))
                 throw new Exception("This id is already taken!");
             else
                 allIDs.Add(pointID);
         }
-
-        public double X { get => x; set => x = value; }
-        public double Y { get => y; set => y = value; }
-        public double PointID { get => pointID; }
 
         public bool isOnTheSameSpot(PolygonPoint point)
         {

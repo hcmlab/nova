@@ -64,6 +64,7 @@ namespace ssi
                     {
                         control.annoListControl.LabelCountColumn.Width = 0;
                         control.polygonListControl.Visibility = Visibility.Collapsed;
+                        control.edit.Visibility = Visibility.Collapsed;
 
                         foreach (AnnoListItem item in control.annoListControl.annoDataGrid.Items)
                         {
@@ -187,9 +188,12 @@ namespace ssi
                 }
                 else if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                 {
+                    polygonUtilities.ControlInStacksSet = false;
                     control.polygonListControl.Visibility = Visibility.Visible;
                     control.polygonListControl.Height = control.ActualHeight / 2;
+
                     control.annoListControl.LabelCountColumn.Width = 70;
+                    control.edit.Visibility = Visibility.Visible;
 
                     if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                     {
@@ -754,7 +758,6 @@ namespace ssi
                 else if (item.Type == AnnoListItem.TYPE.POLYGON)
                 {
                     polygonUtilities.polygonSelectItem(item);
-                    polygonUtilities.UndoRedoStack = new UndoRedoStack();
                 }
             }
         }

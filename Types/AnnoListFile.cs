@@ -18,6 +18,22 @@ namespace ssi
     public partial class AnnoList
     {
 
+        public static AnnoScheme.TYPE getTypeFromFile(string filepath)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(filepath);
+            XmlNode annotation = doc.SelectSingleNode("annotation");
+            XmlNode scheme = annotation.SelectSingleNode("scheme");
+
+            string type = "FREE";
+            if (scheme.Attributes["type"] != null)
+            {
+                type = scheme.Attributes["type"].Value;
+            }
+
+            return (AnnoScheme.TYPE) Enum.Parse(typeof(AnnoScheme.TYPE), type);
+        }
+
         #region SAVE TO FILE
 
         public bool SaveToFile(string filePath, string delimiter = ";")
@@ -382,45 +398,8 @@ namespace ssi
                 {
                     list.Scheme.Name = scheme.Attributes["name"].Value;
                 }
-                string type = "FREE";
-                if (scheme.Attributes["type"] != null)
-                {
-                    type = scheme.Attributes["type"].Value;
-                }
 
-                if (type == AnnoScheme.TYPE.DISCRETE.ToString())
-                {
-                    list.Scheme.Type = AnnoScheme.TYPE.DISCRETE;
-                }
-                else if (type == AnnoScheme.TYPE.CONTINUOUS.ToString())
-                {
-                    list.Scheme.Type = AnnoScheme.TYPE.CONTINUOUS;
-                }
-                else if (type == AnnoScheme.TYPE.FREE.ToString())
-                {
-                    list.Scheme.Type = AnnoScheme.TYPE.FREE;
-                }
-
-                else if (type == AnnoScheme.TYPE.POINT.ToString())
-                {
-                    list.Scheme.Type = AnnoScheme.TYPE.POINT;
-                }
-                else if (type == AnnoScheme.TYPE.POLYGON.ToString())
-                {
-                    list.Scheme.Type = AnnoScheme.TYPE.POLYGON;
-                }
-                else if (type == AnnoScheme.TYPE.DISCRETE_POLYGON.ToString())
-                {
-                    list.Scheme.Type = AnnoScheme.TYPE.DISCRETE_POLYGON;
-                }
-                else if (type == AnnoScheme.TYPE.GRAPH.ToString())
-                {
-                    list.Scheme.Type = AnnoScheme.TYPE.GRAPH;
-                }
-                else if (type == AnnoScheme.TYPE.SEGMENTATION.ToString())
-                {
-                    list.Scheme.Type = AnnoScheme.TYPE.SEGMENTATION;
-                }
+                list.Scheme.Type = getTypeFromFile(filepath);
 
                 if (scheme.Attributes["color"] != null)
                 {
@@ -631,9 +610,7 @@ namespace ssi
                                         List<PolygonPoint> points = new List<PolygonPoint>();
                                         foreach (var point in polygon.points)
                                         {
-                                            double id = Utilities.IDcounter;
-                                            Utilities.IDcounter++;
-                                            points.Add(new PolygonPoint((double)point.First, (double)point.Last, id));
+                                            points.Add(new PolygonPoint((double)point.First, (double)point.Last));
                                         }
 
                                         polygonLabels.Add(new PolygonLabel(points, label, labelColor));

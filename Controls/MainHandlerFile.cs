@@ -142,25 +142,42 @@ namespace ssi
             {
                 case SSI_FILE_TYPE.VIDEO:
 
- 
-                        loadMediaFile(filepath, MediaType.VIDEO);
+                    int videoCount = 0;
+                    foreach(IMedia media in mediaList)
+                    {
+                        if (media.GetMediaType() == MediaType.VIDEO)
+                            videoCount++;
+                    }
 
-                        if (Properties.Settings.Default.DrawVideoWavform)
+                    if (videoCount > 0)
+                    {
+                        foreach(AnnoList anno in annoLists)
                         {
-                            Signal signal = loadAudioSignalFile(filepath, foreground, background);
-
-                            if (signal != null)
+                            if (anno.Scheme.Type == AnnoScheme.TYPE.POLYGON || anno.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                             {
-                            signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                                MessageBox.Show("Only one video can be loaded with the polygon annotation!", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                                hideShadowBox();
+                                return false;
                             }
-
                         }
+                    }
 
-                        else loadMediaFile(filepath, MediaType.AUDIO);
+                    loadMediaFile(filepath, MediaType.VIDEO);
+
+                    if (Properties.Settings.Default.DrawVideoWavform)
+                    {
+                        Signal signal = loadAudioSignalFile(filepath, foreground, background);
+
+                        if (signal != null)
+                        {
+                            signal.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                        }
+                    }
+
+                    else loadMediaFile(filepath, MediaType.AUDIO);
 
                     loaded = true;
                     break;
-
 
                 case SSI_FILE_TYPE.AUDIO:
 
@@ -228,6 +245,9 @@ namespace ssi
 
             hideShadowBox();            
 
+            if(loaded)
+                polygonUtilities.updateImageSize();
+
             return loaded;
         }
 
@@ -284,9 +304,11 @@ namespace ssi
             if(media != null)
             {
                 media.OnMediaMouseDown += OnMediaMouseDown;
+                media.ContextMenu = new ContextMenu();
                 media.OnMediaMouseUp += OnMediaMouseUp;
                 media.OnMediaMouseMove += OnMediaMouseMove;
                 media.OnMediaMouseDown += OnPolygonMedia_MouseDown;
+                media.OnMediaRightMouseDown += OnPolygonMedia_RightMouseDown;
                 media.OnMediaMouseUp += OnPolygonMedia_MouseUp;
                 media.OnMediaMouseMove += OnPolygonMedia_MouseMove;
             }
@@ -296,18 +318,31 @@ namespace ssi
                 mediaKit.OnMediaMouseUp += OnMediaMouseUp;
                 mediaKit.OnMediaMouseMove += OnMediaMouseMove;
                 mediaKit.OnMediaMouseDown += OnPolygonMedia_MouseDown;
+                mediaKit.OnMediaRightMouseDown += OnPolygonMedia_RightMouseDown;
                 mediaKit.OnMediaMouseUp += OnPolygonMedia_MouseUp;
                 mediaKit.OnMediaMouseMove += OnPolygonMedia_MouseMove;
             }
         }
-
-       
 
         private void loadAnnoFile(string filename)
         {
             if (!File.Exists(filename))
             {
                 MessageTools.Error("Annotation file not found '" + filename + "'");
+                return;
+            }
+
+            AnnoScheme.TYPE newAnnoType = AnnoList.getTypeFromFile(filename);
+            int videoCount = 0;
+            foreach (IMedia media in mediaList)
+            {
+                if (media.GetMediaType() == MediaType.VIDEO)
+                    videoCount++;
+            }
+
+            if (videoCount > 1 && (newAnnoType == AnnoScheme.TYPE.POLYGON || newAnnoType == AnnoScheme.TYPE.DISCRETE_POLYGON))
+            {
+                MessageBox.Show("You can't use a polygon annotation while more than one videos are open!", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
