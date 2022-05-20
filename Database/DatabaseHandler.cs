@@ -2496,7 +2496,7 @@ namespace ssi
                 annoList.Source.Database.DataBackupOID = annoList.Source.Database.DataOID;
 
                 // insert new annotation data
-
+                // if the data is too large we split it and bind the parts with the next-part-id (the last part got not such id)
                 annoList.Source.Database.DataOID = ObjectId.GenerateNewId();
                 BsonArray data = AnnoListToBsonArray(annoList, schemeDoc);
                 BsonDocument newAnnotationDataDoc = new BsonDocument();
@@ -2513,20 +2513,24 @@ namespace ssi
                     newAnnotationDataDoc = new BsonDocument();
                     newAnnotationDataDoc.Add(new BsonElement("_id", annoList.Source.Database.DataOID));
                     newAnnotationDataDoc.Add("labels", data);
+                    ObjectId nextId = ObjectId.GenerateNewId();
+                    newAnnotationDataDoc.Add("nextEntry", nextId);
                     annotationData.InsertOne(newAnnotationDataDoc);
 
-                    ObjectId lastID = annoList.Source.Database.DataOID;
 
                     for (int i = 1; i < fittedParts.Count; i++)
                     {
-                        ObjectId currentID = ObjectId.GenerateNewId();
+                        ObjectId currentId = nextId;
                         data = AnnoListToBsonArray(fittedParts[i], schemeDoc);
                         newAnnotationDataDoc = new BsonDocument();
-                        newAnnotationDataDoc.Add(new BsonElement("_id", currentID));
+                        newAnnotationDataDoc.Add(new BsonElement("_id", currentId));
                         newAnnotationDataDoc.Add("labels", data);
-                        newAnnotationDataDoc.Add("previousEntry", lastID);
+                        if(i+1 != fittedParts.Count)
+                        {
+                            nextId = ObjectId.GenerateNewId();
+                            newAnnotationDataDoc.Add("nextEntry", nextId);
+                        }
                         annotationData.InsertOne(newAnnotationDataDoc);
-                        lastID = currentID;
                     }
                 }
                 else
@@ -2535,7 +2539,6 @@ namespace ssi
                 }
 
                 // insert/update annotation
-
                 BsonDocument newAnnotationDoc = new BsonDocument();
                 newAnnotationDoc.Add(new BsonElement("data_id", annoList.Source.Database.DataOID));
                 if (annoList.Source.Database.DataBackupOID != AnnoSource.DatabaseSource.ZERO)
@@ -3743,28 +3746,28 @@ namespace ssi
             if (headList.Count == 0)
                 return new BsonArray();
 
-            BsonArray head = headList[0]["labels"].AsBsonArray;
+            BsonArray body = headList[0]["labels"].AsBsonArray;
+            BsonValue current_val = null;
 
-            bool done = false;
-            ObjectId currentID = dataID;
-            while (!done)
+            if (!headList[0].TryGetValue("nextEntry", out current_val))
+                return body;
+
+            ObjectId currentID = current_val.AsObjectId;
+            while (current_val != null)
             {
-                var tailData = builder.Eq("previousEntry", currentID);
+                var tailData = builder.Eq("_id", currentID);
                 var tailList = annotationData.Find(tailData).ToList();
 
-                if (tailList.Count > 0)
-                {
-                    BsonDocument tail = (BsonDocument)tailList[0];
-                    head.AddRange(tail["labels"].AsBsonArray);
-                    currentID = tail["_id"].AsObjectId;
-                }
+                BsonDocument tail = (BsonDocument)tailList[0];
+                body.AddRange(tail["labels"].AsBsonArray);
+                tail.TryGetValue("nextEntry", out current_val);
+                if (current_val != null)
+                    currentID = current_val.AsObjectId;
                 else
-                {
-                    done = true;
-                }
+                    current_val = null;
             }
 
-            return head;
+            return body;
         }
 
         public static List<DatabaseAnnotation> GetAnnotations(DatabaseScheme scheme, DatabaseRole role, DatabaseAnnotator annotator)
