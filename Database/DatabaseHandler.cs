@@ -3329,7 +3329,9 @@ namespace ssi
                             {
                                 String label = "";
                                 Color labelColor = Colors.Black;
-                                String conf = polygon["confidence"].ToString();
+                                String conf = "100";
+                                if (polygon.TryGetElement("confidence", out value))
+                                    conf = value.Value.ToString();
 
                                 if (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                                 {
