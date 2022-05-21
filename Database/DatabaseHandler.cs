@@ -2010,13 +2010,19 @@ namespace ssi
 
             if (collections.Count == 0)
             {
-                // TODO MARCO: hier kann nun wirklich gelöscht werden -> Man kann auch abfragen, ob man es nur deaktivieren möchte (ist aber glaub schwachsinn)
-                var update = Builders<BsonDocument>.Update.Set("isValid", false);
-                schemeCollection.UpdateOne(filter, update);
+                MessageBoxResult mbres = MessageBox.Show("You try to delete the scheme \"" + name + "\". The deletion process cannot be undone. Delete anyway?", "Attention", MessageBoxButton.YesNo);
+                if (mbres == MessageBoxResult.Yes)
+                {
+                    var deleteFilter = Builders<BsonDocument>.Filter.Eq("_id", schemeID);
+                    schemeCollection.DeleteOne(filter);
 
-                schemes = GetSchemes();
+                    schemes = GetSchemes();
 
-                return true;
+                    return true;
+                }
+                else
+                    return false;
+        
             }
             else
             {
