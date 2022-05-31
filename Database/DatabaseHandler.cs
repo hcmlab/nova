@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using ssi.Controls.Annotation.Polygon;
 using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace ssi
 {
@@ -2172,7 +2174,7 @@ namespace ssi
         //    return data;
         //}
 
-        private static BsonArray AnnoListToBsonArray(AnnoList annoList, BsonDocument schemeDoc)
+        public static BsonArray AnnoListToBsonArray(AnnoList annoList, BsonDocument schemeDoc)
         {
             BsonArray data = new BsonArray();
             AnnoScheme.TYPE schemeType = annoList.Scheme.Type;
@@ -2291,7 +2293,7 @@ namespace ssi
                     data.Add(new BsonDocument { { "name", item.Label.Split(' ')[1] }, { "polygons", polygons } });
                 }
             }
-
+            
             return data;
         }
 
@@ -2508,30 +2510,9 @@ namespace ssi
                 
                 if (current_lenght >= MAX_DOCUMENT_SIZE)
                 {
-                    List<AnnoList> fittedParts = splitDataInFittingParts(annoList, schemeDoc, MAX_DOCUMENT_SIZE);
-                    data = AnnoListToBsonArray(fittedParts[0], schemeDoc);
-                    newAnnotationDataDoc = new BsonDocument();
-                    newAnnotationDataDoc.Add(new BsonElement("_id", annoList.Source.Database.DataOID));
-                    newAnnotationDataDoc.Add("labels", data);
-                    ObjectId nextId = ObjectId.GenerateNewId();
-                    newAnnotationDataDoc.Add("nextEntry", nextId);
-                    annotationData.InsertOne(newAnnotationDataDoc);
-
-
-                    for (int i = 1; i < fittedParts.Count; i++)
-                    {
-                        ObjectId currentId = nextId;
-                        data = AnnoListToBsonArray(fittedParts[i], schemeDoc);
-                        newAnnotationDataDoc = new BsonDocument();
-                        newAnnotationDataDoc.Add(new BsonElement("_id", currentId));
-                        newAnnotationDataDoc.Add("labels", data);
-                        if(i+1 != fittedParts.Count)
-                        {
-                            nextId = ObjectId.GenerateNewId();
-                            newAnnotationDataDoc.Add("nextEntry", nextId);
-                        }
-                        annotationData.InsertOne(newAnnotationDataDoc);
-                    }
+                    DatabaseSaveProgress progressWindow = new DatabaseSaveProgress(annoList, schemeDoc, annotationData);
+                    progressWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                    progressWindow.ShowDialog();
                 }
                 else
                 {
@@ -2613,7 +2594,7 @@ namespace ssi
             return true;
         }
 
-        private static List<AnnoList> splitDataInFittingParts(AnnoList annoList, BsonDocument schemeDoc, long max_size)
+        public static List<AnnoList> splitDataInFittingParts(AnnoList annoList, BsonDocument schemeDoc, long max_size)
         {
             List<AnnoList> resultList = new List<AnnoList>();
             AnnoList first = new AnnoList();
@@ -3758,6 +3739,9 @@ namespace ssi
                 var tailData = builder.Eq("_id", currentID);
                 var tailList = annotationData.Find(tailData).ToList();
 
+                if (tailList.Count == 0)
+                    break;
+
                 BsonDocument tail = (BsonDocument)tailList[0];
                 body.AddRange(tail["labels"].AsBsonArray);
                 tail.TryGetValue("nextEntry", out current_val);
@@ -3890,8 +3874,6 @@ namespace ssi
                     }
                 }
             }
-
-          
 
             return annoLists;
         }

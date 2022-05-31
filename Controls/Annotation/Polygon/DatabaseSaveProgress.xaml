@@ -1,0 +1,18 @@
+﻿<Window x:Class="ssi.Controls.Annotation.Polygon.DatabaseSaveProgress"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Database progress" WindowStyle="None"  Height="120" Width="400" WindowStartupLocation="CenterOwner">
+    <Grid Margin="0,0,0,0">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="80"></RowDefinition>
+        </Grid.RowDefinitions>
+
+
+        <Label Name="label" Grid.Row="0" Foreground="DarkBlue"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" FontWeight="Bold">Saving data to database...</Label>
+
+        <ProgressBar Grid.Row="1" Height="20" Width="260" Minimum="0" Maximum="100" Value="0" Name="pbStatus" Margin="70,20,70,40" />
+        <TextBlock Grid.Row="1" Text="{Binding ElementName=pbStatus, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,22,0,0" RenderTransformOrigin="0.171,1.111" />
+    </Grid>
+</Window>
