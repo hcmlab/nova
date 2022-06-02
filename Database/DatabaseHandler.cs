@@ -4000,31 +4000,55 @@ namespace ssi
         }
 
 
+        public static AnnoList ConvertDiscreteAnnoListToContinuousList(AnnoList annolist, double chunksize, double end, string restclass = "Rest")
+        {
+            AnnoList result = new AnnoList();
+            result.Scheme = annolist.Scheme;
+            result.Meta = annolist.Meta;
+            result.Source.StoreToDatabase = true;
+            result.Source.Database.Session = annolist.Source.Database.Session;
+            double currentpos = 0;
+
+            bool foundlabel = false;
+
+            while (currentpos < end)
+            {
+                foundlabel = false;
+                foreach (AnnoListItem orgitem in annolist)
+                {
+                    if (orgitem.Start < currentpos && orgitem.Stop > currentpos)
+                    {
+                        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
+                        result.Add(ali);
+                        foundlabel = true;
+                        break;
+                    }
+                }
+
+                if (foundlabel == false)
+                {
+                    AnnoListItem ali = new AnnoListItem(currentpos, chunksize, restclass);
+                    result.Add(ali);
+                }
+
+                currentpos = currentpos + chunksize;
+            }
+
+            return result;
+        }
+
+
         public static  bool ExportMultipleCSV(List<DatabaseAnnotation> annos, List<StreamItem> streams, DatabaseSession session,  string delimiter = ";" )
         {
+
+
 
             //Get Storage Location
             string filePath = FileTools.SaveFileDialog(SessionName, ".csv", "Annotation(*.csv)|*.csv", "");
             if (filePath == null) return false;
 
 
-            //Fetch actual Annolists from DatabaseAnnotations
-            List<AnnoList> annoLists = new List<AnnoList>();
-            foreach (DatabaseAnnotation annotation in annos)
-            {
-                AnnoList annoList = LoadAnnoList(annotation, false);
-
-
-                //Only continuous for now, need convertion for discrete labels;
-                if (annoList != null && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-                {
-                    annoLists.Add(annoList);
-                }
-            }
-
-
-            if (annoLists.Count == 0) return false;
-
+        
 
             //make some more advanced logic to get maximum/fill with zeros
            // int length = annoLists.Min(annoLists)
@@ -4051,11 +4075,53 @@ namespace ssi
             }
 
 
-
-            int length = annoLists.Max(e => e.Count);
             double sr = signals[0].rate;
             double time = 0;
             double srtime = 1 / sr;
+
+
+            //Fetch actual Annolists from DatabaseAnnotations
+            List<AnnoList> annoLists = new List<AnnoList>();
+            foreach (DatabaseAnnotation annotation in annos)
+            {
+                AnnoList annoList = LoadAnnoList(annotation, false);
+
+
+                //Only continuous for now, need convertion for discrete labels;
+                if (annoList != null && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    annoLists.Add(annoList);
+                }
+
+              
+            }
+
+            int length = annoLists.Max(e => e.Count);
+
+            foreach (DatabaseAnnotation annotation in annos)
+            {
+                AnnoList annoList = LoadAnnoList(annotation, false);
+
+
+                //Only continuous for now, need convertion for discrete labels;
+                if (annoList != null && (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoList.Scheme.Type == AnnoScheme.TYPE.FREE))
+                {
+                    AnnoList converted = ConvertDiscreteAnnoListToContinuousList(annoList, srtime, length * srtime, "None");
+                    annoLists.Add(converted);
+                }
+
+            }
+
+
+
+           
+
+            if (annoLists.Count == 0) return false;
+
+           
+
+
+
 
             var records = new List<object>();
             for (int i = 0; i < length; i++)
@@ -4075,8 +4141,9 @@ namespace ssi
                 //Add annotations to columns
                 for (int j = 0; j < annoLists.Count; j++)
                     {
-                       if(i < annoLists[j].Count)  dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Score); // Adding dynamically named property     
-                    }
+                       if(i < annoLists[j].Count && annoLists[j].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)  dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Score); // Adding dynamically named property     
+                       else if (i < annoLists[j].Count && (annoLists[j].Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoLists[j].Scheme.Type == AnnoScheme.TYPE.FREE)) dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Label);
+                }
 
 
                 for (int j = 0; j < signals.Count; j++)
@@ -4118,47 +4185,6 @@ namespace ssi
 
 
             return true;
-
-
-
-            //    if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
-            //    {
-            //        try
-            //        {
-            //            StreamWriter sw = new StreamWriter(filePath, false, System.Text.Encoding.Default);
-
-            //            foreach (AnnoListItem e in this)
-            //            {
-            //                sw.WriteLine(e.Start.ToString() + ";" + e.Score + ";" + e.Confidence);
-            //            }
-            //            sw.Close();
-
-            //            return true;
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            MessageTools.Error(ex.ToString());
-            //        }
-            //    }
-            //    else
-            //    {
-            //        try
-            //        {
-            //            StreamWriter sw = new StreamWriter(filePath, false, System.Text.Encoding.Default);
-
-            //            foreach (AnnoListItem e in this)
-            //            {
-            //                sw.WriteLine(e.Start.ToString() + delimiter + e.Stop.ToString() + delimiter + e.Label + delimiter + e.Confidence);
-            //            }
-            //            sw.Close();
-
-            //            return true;
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            MessageTools.Error(ex.ToString());
-            //        }
-            //    }
 
 
         }
