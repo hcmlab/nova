@@ -108,6 +108,9 @@ namespace ssi
         {
             control = view;
 
+            //TEST
+            //DatabaseHandler.ExportMultipleCSV();
+
             // Shadow box
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
 
@@ -646,6 +649,7 @@ namespace ssi
                 Properties.Settings.Default.MongoDBUser = s.MongoUser() != "" ?  s.MongoUser() : "invalid username";
                 Properties.Settings.Default.MongoDBPass = MainHandler.Encode(s.MongoPass());
                 Properties.Settings.Default.DatabaseAutoLogin= s.DBAutoConnect();
+                Properties.Settings.Default.ShowExportDatabase = s.ExportDB();
                 Properties.Settings.Default.DefaultZoomInSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());

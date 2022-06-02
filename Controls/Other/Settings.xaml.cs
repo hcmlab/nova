@@ -49,6 +49,7 @@ namespace ssi
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
             CMLDirectory.Text = Properties.Settings.Default.CMLDirectory;
             EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
+            Showexport.IsChecked = Properties.Settings.Default.ShowExportDatabase;
 
         }
 
@@ -151,6 +152,11 @@ namespace ssi
         public bool DBAutoConnect()
         {
             return (DBConnnect.IsChecked == true);
+        }
+
+        public bool ExportDB()
+        {
+            return (Showexport.IsChecked == true);
         }
 
         public bool DBAskforOverwrite()

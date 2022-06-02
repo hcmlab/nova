@@ -1,8 +1,13 @@
-﻿using MongoDB.Bson;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -3866,6 +3871,171 @@ namespace ssi
 
             return id;
         }
+
+
+        public static  bool ExportMultipleCSV(List<DatabaseAnnotation> annos, List<StreamItem> streams, DatabaseSession session,  string delimiter = ";" )
+        {
+
+            //Get Storage Location
+            string filePath = FileTools.SaveFileDialog(SessionName, ".csv", "Annotation(*.csv)|*.csv", "");
+            if (filePath == null) return false;
+
+
+            //Fetch actual Annolists from DatabaseAnnotations
+            List<AnnoList> annoLists = new List<AnnoList>();
+            foreach (DatabaseAnnotation annotation in annos)
+            {
+                AnnoList annoList = LoadAnnoList(annotation, false);
+
+
+                //Only continuous for now, need convertion for discrete labels;
+                if (annoList != null && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    annoLists.Add(annoList);
+                }
+            }
+
+
+            if (annoLists.Count == 0) return false;
+
+
+            //make some more advanced logic to get maximum/fill with zeros
+           // int length = annoLists.Min(annoLists)
+
+
+
+
+
+
+            List<Signal> signals = new List<Signal>();
+            string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\";
+
+
+            foreach (var file in streams)
+            {
+
+                if(file.Extension == "stream")
+                {
+                    Signal signal = null;
+
+                    signal = Signal.LoadStreamFile(localPath + file.Name);
+                    signals.Add(signal);
+                }
+            }
+
+
+
+            int length = annoLists.Max(e => e.Count);
+            double sr = signals[0].rate;
+            double time = 0;
+            double srtime = 1 / sr;
+
+            var records = new List<object>();
+            for (int i = 0; i < length; i++)
+            {
+
+                dynamic dynamicLineObject = new ExpandoObject();
+                IDictionary<string, object> dictobject = dynamicLineObject;
+
+                //Add ID to columns
+                dictobject.Add("Session", session.Name);
+
+                //Add time to columns
+                dictobject.Add("Time", time);
+                time += srtime;
+
+
+                //Add annotations to columns
+                for (int j = 0; j < annoLists.Count; j++)
+                    {
+                       if(i < annoLists[j].Count)  dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Score); // Adding dynamically named property     
+                    }
+
+
+                for (int j = 0; j < signals.Count; j++)
+                {
+                    for(int k=0; k< signals[j].dim; k++)
+
+                        if(i< (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property     
+                }
+
+
+                records.Add(dynamicLineObject);
+
+
+              
+
+            }
+
+
+            using (var textWriter = new StreamWriter(filePath))
+            {
+                var config = new CsvConfiguration(CultureInfo.InstalledUICulture)
+                {
+                    PrepareHeaderForMatch = args => args.Header.ToLower(),
+                    Delimiter = delimiter
+                };
+
+                using (var csv = new CsvWriter(textWriter,config))
+                {
+
+                    foreach (var record in records)
+                    {
+                        csv.WriteRecord(record);
+                        csv.NextRecord();
+                    }
+                }
+
+            }
+
+
+
+            return true;
+
+
+
+            //    if (Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            //    {
+            //        try
+            //        {
+            //            StreamWriter sw = new StreamWriter(filePath, false, System.Text.Encoding.Default);
+
+            //            foreach (AnnoListItem e in this)
+            //            {
+            //                sw.WriteLine(e.Start.ToString() + ";" + e.Score + ";" + e.Confidence);
+            //            }
+            //            sw.Close();
+
+            //            return true;
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            MessageTools.Error(ex.ToString());
+            //        }
+            //    }
+            //    else
+            //    {
+            //        try
+            //        {
+            //            StreamWriter sw = new StreamWriter(filePath, false, System.Text.Encoding.Default);
+
+            //            foreach (AnnoListItem e in this)
+            //            {
+            //                sw.WriteLine(e.Start.ToString() + delimiter + e.Stop.ToString() + delimiter + e.Label + delimiter + e.Confidence);
+            //            }
+            //            sw.Close();
+
+            //            return true;
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            MessageTools.Error(ex.ToString());
+            //        }
+            //    }
+
+
+        }
+
     }
 
     #region DATABASE TYPES
