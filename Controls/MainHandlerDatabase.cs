@@ -323,14 +323,16 @@ namespace ssi
 
                 if (streams != null && streams.Count > 0)
                 {
-                    List<string> streamsAll = new List<string>();
+                    List<StreamItem> streamsAll = new List<StreamItem>();
                     foreach (StreamItem stream in streams)
                     {
                         if (stream.Extension == "stream")
                         {
-                            streamsAll.Add(stream.Name + "~");
+                            StreamItem tilde = new StreamItem();
+                            tilde.Name = stream.Name + "~";
+                            streamsAll.Add(tilde);
                         }
-                        streamsAll.Add(stream.Name);
+                        streamsAll.Add(stream);
 
                     }
 
@@ -387,19 +389,35 @@ namespace ssi
                         Directory.CreateDirectory(Path.GetDirectoryName(localPath));
 
                         List<string> streamstoDownload = new List<string>();
-                        foreach (string stream in streamsAll)
+                        foreach (StreamItem stream in streamsAll)
                         {
 
 
-                            string llocal = localPath + stream;
-                            string lurl = url + stream;
+                            string llocal = localPath + stream.Name;
+                            string lurl = url + stream.Name;
+
+
                             if (File.Exists(llocal))
                             {
-                                loadFile(llocal);
+                                DatabaseStream temp = new DatabaseStream();
+                                string filename = Path.GetFileNameWithoutExtension(stream.Name);
+                                string[] withoutRole = filename.Split('.');
+                                string fname = "";
+                                //add all strings but the first (role)
+                                for(int i = 1; i <withoutRole.Length; i++)
+                                {
+                                    fname = fname + withoutRole[i] + ".";
+                                }
+
+                                temp.Name = fname.Remove(fname.Length - 1, 1);
+                                temp.FileExt = stream.Extension;
+                                temp.Type = stream.Type;
+                                DatabaseHandler.GetStream(ref temp);
+                                loadFile(llocal, temp.DimLabels);
                                 continue;
                             }
 
-                            streamstoDownload.Add(stream);
+                            streamstoDownload.Add(stream.Name);
 
                             Thread.Sleep(100);
                            

@@ -1579,6 +1579,17 @@ namespace ssi
                     {
                         stream.SampleRate = document["sr"].ToDouble();
                     }
+                    stream.DimLabels = new Dictionary<int, string>();
+                    if (document.TryGetElement("dimlabels", out value))
+                    {
+                        BsonArray array = document["dimlabels"].AsBsonArray;
+
+                        foreach(var element in array)
+                        {
+                            stream.DimLabels.Add(element["id"].AsInt32, element["name"].AsString);
+                        }
+                       
+                    }
                 }
                 else
                 {
@@ -1595,13 +1606,27 @@ namespace ssi
             {
                 return false;
             }
+            BsonArray array = new BsonArray();
+
+            foreach(var item in stream.DimLabels)
+            {
+                array.Add(new BsonDocument() {
+                    { "id", item.Key },
+                    { "name", item.Value }
+                    }
+                  );
+            }
+          
+  
+           
 
             BsonDocument document = new BsonDocument {
                     {"name",  stream.Name},
                     {"fileExt",  stream.FileExt},
                     {"type",  stream.Type},
                     {"isValid",  true},
-                    {"sr", stream.SampleRate }
+                    {"sr", stream.SampleRate },
+                    {"dimlabels", array }
             };
 
             var builder = Builders<BsonDocument>.Filter;
@@ -4308,6 +4333,7 @@ namespace ssi
         public string Type { get; set; }
         public double SampleRate { get; set; }
         public double Duration { get; set; }
+        public Dictionary<int,string> DimLabels { get; set; }
 
         public override string ToString()
         {
