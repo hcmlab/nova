@@ -11,11 +11,12 @@ namespace ssi
         private List<PolygonPoint> polygon;
         private string label;
         private Color color;
+        private string confidence;
         private static int sID = 0;
         private readonly int id;
         private LabelInformations informations;
 
-        public PolygonLabel(List<PolygonPoint> polygon, string label, Color color)
+        public PolygonLabel(List<PolygonPoint> polygon, string label, Color color, string conf)
         {
             if (polygon is null)
                 this.polygon = new List<PolygonPoint>();
@@ -24,12 +25,13 @@ namespace ssi
             
             this.label = label;
             this.color = color;
+            this.Confidence = conf;
 
             id = sID;
             sID++;
         }
 
-        public PolygonLabel(List<PolygonPoint> polygon, string label, Color color, LabelInformations infos)
+        public PolygonLabel(List<PolygonPoint> polygon, string label, Color color, string conf, LabelInformations infos)
         {
             if (polygon is null)
                 this.polygon = new List<PolygonPoint>();
@@ -38,13 +40,14 @@ namespace ssi
 
             this.label = label;
             this.color = color;
+            this.Confidence = conf;
             this.informations = infos;
 
             id = sID;
             sID++;
         }
 
-        public PolygonLabel(List<PolygonPoint> polygon2, string label, Color color, int ID)
+        public PolygonLabel(List<PolygonPoint> polygon2, string label, Color color, string conf, int ID)
         {
             if (polygon2 is null)
                 this.polygon = new List<PolygonPoint>();
@@ -59,6 +62,7 @@ namespace ssi
 
             this.label = label;
             this.color = color;
+            this.Confidence = conf;
 
             id = ID;
         }
@@ -137,6 +141,7 @@ namespace ssi
         public int ID => id;
 
         internal LabelInformations Informations { get => informations; set => informations = value; }
+        public string Confidence { get => confidence; set => confidence = value; }
 
         public override bool Equals(object obj)
         {

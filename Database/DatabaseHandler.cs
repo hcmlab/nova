@@ -2260,6 +2260,7 @@ namespace ssi
                                     polygon = new BsonDocument
                                     {
                                         new BsonElement("label", index),
+                                        new BsonElement("confidence", label.Confidence)
                                     };
 
                                     break;
@@ -2271,7 +2272,8 @@ namespace ssi
                             polygon = new BsonDocument
                             {
                                 new BsonElement("label", label.Label),
-                                new BsonElement("label_color", new SolidColorBrush(label.Color).Color.ToString())
+                                new BsonElement("label_color", new SolidColorBrush(label.Color).Color.ToString()),
+                                new BsonElement("confidence", label.Confidence)
                             };
                         }
 
@@ -3389,6 +3391,9 @@ namespace ssi
                             {
                                 String label = "";
                                 Color labelColor = Colors.Black;
+                                String conf = "100";
+                                if (polygon.TryGetElement("confidence", out value))
+                                    conf = value.Value.ToString();
 
                                 if (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                                 {
@@ -3417,8 +3422,7 @@ namespace ssi
                                     {
                                         points.Add(new PolygonPoint(point["x"].ToDouble(), point["y"].ToDouble()));
                                     }
-
-                                    polygonLabels.Add(new PolygonLabel(points, label, labelColor));
+                                    polygonLabels.Add(new PolygonLabel(points, label, labelColor, conf));
                                 }
                             }
                         }

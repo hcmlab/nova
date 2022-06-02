@@ -218,7 +218,10 @@ namespace ssi
                                             writer.WritePropertyName("label_color");
                                             writer.WriteValue(pl.Color.ToString());
                                         }
-                                        
+
+                                        writer.WritePropertyName("confidence");
+                                        writer.WriteValue(pl.Confidence);
+
                                         writer.WritePropertyName("points");
                                         writer.WriteStartArray();
                                         foreach (PolygonPoint pp in pl.Polygon)
@@ -588,6 +591,7 @@ namespace ssi
                                     {
                                         String label = "";
                                         String color = "";
+                                        String conf = polygon.confidence;
                                         Color labelColor = Colors.Black;
 
                                         if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
@@ -613,7 +617,7 @@ namespace ssi
                                             points.Add(new PolygonPoint((double)point.First, (double)point.Last));
                                         }
 
-                                        polygonLabels.Add(new PolygonLabel(points, label, labelColor));
+                                        polygonLabels.Add(new PolygonLabel(points, label, labelColor, conf));
                                     }
                                 }
                                 const double defaultConfidence = 1.0;

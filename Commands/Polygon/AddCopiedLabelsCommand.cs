@@ -23,7 +23,7 @@ namespace ssi.Types.Polygon
             List<PolygonLabel> newCopyList = new List<PolygonLabel>();
             foreach (PolygonLabel label in copyLabels)
             {
-                PolygonLabel newLabel = new PolygonLabel(label.getPolygonAsCopy(), label.Label, label.Color);
+                PolygonLabel newLabel = new PolygonLabel(label.getPolygonAsCopy(), label.Label, label.Color, label.Confidence);
                 newLabel.Informations = new LabelInformations(this.type);
                 newCopyList.Add(newLabel);
                 this.item.PolygonList.addPolygonLabel(newLabel);
