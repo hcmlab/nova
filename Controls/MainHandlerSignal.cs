@@ -125,15 +125,7 @@ namespace ssi
               
 
                 control.signalStatusDimComboBox.SelectedIndex = signal.ShowDim;
-                //if(signal.DimLabels != null)
-                //{
-                
-                //    if (signal.DimLabels.TryGetValue(signal.ShowDim, out value))
-                //    {
-                //        control.signalStatusDimLabel.Text =  signal.ShowDim.ToString()  + " | " + value;
-                //    }
-                //    else control.signalStatusDimLabel.Text = signal.ShowDim.ToString();
-                //}
+
                 control.signalStatusDimLabel.Text = signal.dim.ToString() ;
                 control.signalStatusSrLabel.Text = signal.rate + " Hz";
                 control.signalStatusTypeLabel.Text = Signal.TypeName[(int)signal.type];

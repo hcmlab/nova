@@ -4087,14 +4087,34 @@ namespace ssi
             string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\";
 
 
+
+
             foreach (var file in streams)
             {
 
                 if(file.Extension == "stream")
                 {
+
+
+                    DatabaseStream temp = new DatabaseStream();
+                    string filename = Path.GetFileNameWithoutExtension(file.Name);
+                    string[] withoutRole = filename.Split('.');
+                    string fname = "";
+                    //add all strings but the first (role)
+                    for (int i = 1; i < withoutRole.Length; i++)
+                    {
+                        fname = fname + withoutRole[i] + ".";
+                    }
+
+                    temp.Name = fname.Remove(fname.Length - 1, 1);
+                    temp.FileExt = file.Extension;
+                    temp.Type = file.Type;
+                    DatabaseHandler.GetStream(ref temp);
+
+
                     Signal signal = null;
 
-                    signal = Signal.LoadStreamFile(localPath + file.Name);
+                    signal = Signal.LoadStreamFile(localPath + file.Name, temp.DimLabels);
                     signals.Add(signal);
                 }
             }
@@ -4121,7 +4141,16 @@ namespace ssi
               
             }
 
-            int length = annoLists.Max(e => e.Count);
+            int length = 0;
+            if (annoLists.Count > 0)
+            {
+                length = annoLists.Max(e => e.Count);
+            }
+            if(signals.Count > 0)
+            {
+               length = (int)Math.Max(length, signals.Max(e => e.number));
+            }
+           
 
             foreach (DatabaseAnnotation annotation in annos)
             {
@@ -4141,11 +4170,10 @@ namespace ssi
 
            
 
-            if (annoLists.Count == 0) return false;
-
-           
+        
 
 
+        
 
 
             var records = new List<object>();
@@ -4174,15 +4202,27 @@ namespace ssi
                 for (int j = 0; j < signals.Count; j++)
                 {
                     for(int k=0; k< signals[j].dim; k++)
+                    {
+                            string value;
+                            if (signals[j].DimLabels.Count > 0)
+                            {
+                                if(signals[j].DimLabels.TryGetValue(k, out value))
+                                {
+                                    if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (" + value + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property    
+                                }
+                                else if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property  
 
-                        if(i< (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property     
+
+                        }
+                             else if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property    
+
+                    }
+                         
                 }
 
 
                 records.Add(dynamicLineObject);
 
-
-              
 
             }
 
