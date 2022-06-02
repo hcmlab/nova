@@ -3408,9 +3408,11 @@ namespace ssi
                         string frameName = "Frame " + entry["name"].AsString;
                         List<PolygonLabel> polygonLabels = new List<PolygonLabel>();
 
-                        BsonArray polygons = entry["polygons"].AsBsonArray;
+                        BsonArray polygons = null;
+                        if (entry.TryGetElement("polygons", out value))
+                            polygons = value.Value.AsBsonArray;
 
-                        if (polygons.Count > 0)
+                        if (polygons != null && polygons.Count > 0)
                         {
                             foreach (BsonDocument polygon in polygons)
                             {
