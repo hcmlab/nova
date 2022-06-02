@@ -25,7 +25,7 @@ namespace ssi
                     foreach (PolygonLabel p in this.polygons)
                     {
                         List<PolygonPoint> polygon = p.Polygon;
-                        polygonListClone.Add(new PolygonLabel(polygon, p.Label, p.Color, p.ID));
+                        polygonListClone.Add(new PolygonLabel(polygon, p.Label, p.Color, p.Confidence, p.ID));
                     }
 
                 return polygonListClone;

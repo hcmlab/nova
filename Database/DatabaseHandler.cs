@@ -2,6 +2,7 @@
 using CsvHelper.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using ssi.Controls.Annotation.Polygon;
 using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace ssi
 {
@@ -1989,7 +1991,9 @@ namespace ssi
             }
            
         }
-        public static bool DeleteScheme(string name)
+
+
+        public static bool DeleteSchemeIfNoAnnoExists(string name)
         {
             if (!IsConnected && !IsDatabase)
             {
@@ -2001,16 +2005,39 @@ namespace ssi
                 return false;
             }
 
-            var collection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var builder = Builders<BsonDocument>.Filter;
+            var schemeCollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var filter = builder.Eq("name", name);
-            var update = Builders<BsonDocument>.Update.Set("isValid", false);
-            collection.UpdateOne(filter, update);
+            var schemeResult = schemeCollection.Find(filter).ToList();
+            ObjectId schemeID = ((BsonDocument)schemeResult[0])["_id"].AsObjectId;
 
-            schemes = GetSchemes();
+            var annoCollection = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+            var filterData = builder.Eq("scheme_id", schemeID);
+            var collections = annoCollection.Find(filterData).ToList();
 
-            return true;
+            if (collections.Count == 0)
+            {
+                MessageBoxResult mbres = MessageBox.Show("You try to delete the scheme \"" + name + "\". The deletion process cannot be undone. Delete anyway?", "Attention", MessageBoxButton.YesNo);
+                if (mbres == MessageBoxResult.Yes)
+                {
+                    var deleteFilter = Builders<BsonDocument>.Filter.Eq("_id", schemeID);
+                    schemeCollection.DeleteOne(filter);
+
+                    schemes = GetSchemes();
+
+                    return true;
+                }
+                else
+                    return false;
+        
+            }
+            else
+            {
+                MessageBox.Show("It is not possible to delete a scheme that is still used as an annotations. Please delete the annotations that are based on this scheme (DATABASE ➙ Administration ➙ Manage Annotations ➙ Remove the mentioned annotations).", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                return false;
+            }
         }
+
 
         private static List<DatabaseSession> GetSessions(bool onlyValid = true)
         {
@@ -2177,7 +2204,7 @@ namespace ssi
         //    return data;
         //}
 
-        private static BsonArray AnnoListToBsonArray(AnnoList annoList, BsonDocument schemeDoc)
+        public static BsonArray AnnoListToBsonArray(AnnoList annoList, BsonDocument schemeDoc)
         {
             BsonArray data = new BsonArray();
             AnnoScheme.TYPE schemeType = annoList.Scheme.Type;
@@ -2263,6 +2290,7 @@ namespace ssi
                                     polygon = new BsonDocument
                                     {
                                         new BsonElement("label", index),
+                                        new BsonElement("confidence", label.Confidence)
                                     };
 
                                     break;
@@ -2274,7 +2302,8 @@ namespace ssi
                             polygon = new BsonDocument
                             {
                                 new BsonElement("label", label.Label),
-                                new BsonElement("label_color", new SolidColorBrush(label.Color).Color.ToString())
+                                new BsonElement("label_color", new SolidColorBrush(label.Color).Color.ToString()),
+                                new BsonElement("confidence", label.Confidence)
                             };
                         }
 
@@ -2296,7 +2325,7 @@ namespace ssi
                     data.Add(new BsonDocument { { "name", item.Label.Split(' ')[1] }, { "polygons", polygons } });
                 }
             }
-
+            
             return data;
         }
 
@@ -2501,17 +2530,28 @@ namespace ssi
                 annoList.Source.Database.DataBackupOID = annoList.Source.Database.DataOID;
 
                 // insert new annotation data
-
+                // if the data is too large we split it and bind the parts with the next-part-id (the last part got not such id)
                 annoList.Source.Database.DataOID = ObjectId.GenerateNewId();
-
                 BsonArray data = AnnoListToBsonArray(annoList, schemeDoc);
                 BsonDocument newAnnotationDataDoc = new BsonDocument();
                 newAnnotationDataDoc.Add(new BsonElement("_id", annoList.Source.Database.DataOID));
                 newAnnotationDataDoc.Add("labels", data);
-                annotationData.InsertOne(newAnnotationDataDoc);
+
+                const long MAX_DOCUMENT_SIZE = 16777216;
+                int current_lenght = newAnnotationDataDoc.ToBson().Length + 1;
+                
+                if (current_lenght >= MAX_DOCUMENT_SIZE)
+                {
+                    DatabaseSaveProgress progressWindow = new DatabaseSaveProgress(annoList, schemeDoc, annotationData);
+                    progressWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                    progressWindow.ShowDialog();
+                }
+                else
+                {
+                    annotationData.InsertOne(newAnnotationDataDoc);
+                }
 
                 // insert/update annotation
-
                 BsonDocument newAnnotationDoc = new BsonDocument();
                 newAnnotationDoc.Add(new BsonElement("data_id", annoList.Source.Database.DataOID));
                 if (annoList.Source.Database.DataBackupOID != AnnoSource.DatabaseSource.ZERO)
@@ -2541,9 +2581,7 @@ namespace ssi
                                 SaveBounty(bounty);
                             }
                            
-                        }
-                       
-
+                        }                       
                     }
                 }
                 newAnnotationDoc.Add(new BsonElement("annotator_id", annotatorID));
@@ -2586,6 +2624,59 @@ namespace ssi
             };
 
             return true;
+        }
+
+        public static List<AnnoList> splitDataInFittingParts(AnnoList annoList, BsonDocument schemeDoc, long max_size)
+        {
+            List<AnnoList> resultList = new List<AnnoList>();
+            AnnoList first = new AnnoList();
+            first.Scheme = annoList.Scheme;
+            first.Meta = annoList.Meta;
+            for (int i = 0; i < annoList.Count / 2; i++)
+            {
+                first.Add(annoList[i]);
+            }
+
+            AnnoList second = new AnnoList();
+            second.Scheme = annoList.Scheme;
+            second.Meta = annoList.Meta;
+            for (int i = annoList.Count / 2; i < annoList.Count; i++)
+            {
+                second.Add(annoList[i]);
+            }
+
+            ObjectId testID = ObjectId.GenerateNewId();
+            BsonArray data = AnnoListToBsonArray(first, schemeDoc);
+            BsonDocument newAnnotationDataDoc = new BsonDocument();
+            newAnnotationDataDoc.Add(new BsonElement("_id", testID));
+            newAnnotationDataDoc.Add("labels", data);
+            newAnnotationDataDoc.Add("previousEntry", testID);
+            
+            if(newAnnotationDataDoc.ToBson().Length >= max_size)
+            {
+                resultList.AddRange(splitDataInFittingParts(first, schemeDoc, max_size));
+            }
+            else
+            {
+                resultList.Add(first);
+            }
+
+            data = AnnoListToBsonArray(second, schemeDoc);
+            newAnnotationDataDoc = new BsonDocument();
+            newAnnotationDataDoc.Add(new BsonElement("_id", testID));
+            newAnnotationDataDoc.Add("labels", data);
+            newAnnotationDataDoc.Add("previousEntry", testID);
+
+            if (newAnnotationDataDoc.ToBson().Length >= max_size)
+            {
+                resultList.AddRange(splitDataInFittingParts(second, schemeDoc, max_size));
+            }
+            else
+            {
+                resultList.Add(second);
+            }
+
+            return resultList;
         }
 
         public static ObjectId GetAnnotationId(string role, string scheme, string annotator, string session)
@@ -3091,7 +3182,7 @@ namespace ssi
             return LoadAnnoList(annotation, false);
         }
 
-        private static void loadAnnoListSchemeAndData(ref AnnoList annoList, BsonDocument scheme, BsonDocument data)
+        private static void loadAnnoListSchemeAndData(ref AnnoList annoList, BsonDocument scheme, BsonArray labels)
         {
             BsonElement value;
             var builder = Builders<BsonDocument>.Filter;
@@ -3107,8 +3198,6 @@ namespace ssi
                 annoList.Source.Database.BountyIsPaid = scheme["bountyIsPaid"].AsBoolean;
             }
 
-
-            BsonArray labels = data["labels"].AsBsonArray;
             if (labels != null)
             {
                 if (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -3324,14 +3413,19 @@ namespace ssi
                         string frameName = "Frame " + entry["name"].AsString;
                         List<PolygonLabel> polygonLabels = new List<PolygonLabel>();
 
-                        BsonArray polygons = entry["polygons"].AsBsonArray;
+                        BsonArray polygons = null;
+                        if (entry.TryGetElement("polygons", out value))
+                            polygons = value.Value.AsBsonArray;
 
-                        if (polygons.Count > 0)
+                        if (polygons != null && polygons.Count > 0)
                         {
                             foreach (BsonDocument polygon in polygons)
                             {
                                 String label = "";
                                 Color labelColor = Colors.Black;
+                                String conf = "100";
+                                if (polygon.TryGetElement("confidence", out value))
+                                    conf = value.Value.ToString();
 
                                 if (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                                 {
@@ -3360,8 +3454,7 @@ namespace ssi
                                     {
                                         points.Add(new PolygonPoint(point["x"].ToDouble(), point["y"].ToDouble()));
                                     }
-
-                                    polygonLabels.Add(new PolygonLabel(points, label, labelColor));
+                                    polygonLabels.Add(new PolygonLabel(points, label, labelColor, conf));
                                 }
                             }
                         }
@@ -3563,14 +3656,13 @@ namespace ssi
                 annoList.Meta.Annotator = Annotator;
                 annoList.Meta.AnnotatorFullName = GetUserInfo(Annotator).Fullname;
                 annoList.Meta.Role = Role;
-               // annoList.Meta.isLocked = IsLocked;
-               // annoList.Meta.isFinished = IsFinished;
+                // annoList.Meta.isLocked = IsLocked;
+                // annoList.Meta.isFinished = IsFinished;
 
                 // load scheme and data
-
-                var filterData = builder.Eq("_id", dataID);
-                var annotationDataDoc = annotationsData.Find(filterData).ToList();
-                if (annotationDataDoc.Count > 0) loadAnnoListSchemeAndData(ref annoList, scheme, annotationDataDoc[0]);
+                BsonArray annotationData = getData(dataID, annotationsData);
+                if (annotationData.Count > 0)
+                    loadAnnoListSchemeAndData(ref annoList, scheme, annotationData);
 
                 // update source
 
@@ -3644,9 +3736,9 @@ namespace ssi
 
                 // load scheme and data
 
-                var filterData = builder.Eq("_id", dataID);
-                var annotationDataDoc = annotationsData.Find(filterData).ToList();
-                if (annotationDataDoc.Count > 0) loadAnnoListSchemeAndData(ref annoList, scheme, annotationDataDoc[0]);
+                BsonArray annotationData = getData(dataID, annotationsData);
+                if (annotationData.Count > 0) 
+                    loadAnnoListSchemeAndData(ref annoList, scheme, annotationData);
 
                 // update source
 
@@ -3659,6 +3751,43 @@ namespace ssi
             }
 
             return null;
+        }
+
+        private static BsonArray getData(ObjectId dataID, IMongoCollection<BsonDocument> annotationData)
+        {
+            var builder = Builders<BsonDocument>.Filter;
+
+            var filterData = builder.Eq("_id", dataID);
+            var headList = annotationData.Find(filterData).ToList();
+
+            if (headList.Count == 0)
+                return new BsonArray();
+
+            BsonArray body = headList[0]["labels"].AsBsonArray;
+            BsonValue current_val = null;
+
+            if (!headList[0].TryGetValue("nextEntry", out current_val))
+                return body;
+
+            ObjectId currentID = current_val.AsObjectId;
+            while (current_val != null)
+            {
+                var tailData = builder.Eq("_id", currentID);
+                var tailList = annotationData.Find(tailData).ToList();
+
+                if (tailList.Count == 0)
+                    break;
+
+                BsonDocument tail = (BsonDocument)tailList[0];
+                body.AddRange(tail["labels"].AsBsonArray);
+                tail.TryGetValue("nextEntry", out current_val);
+                if (current_val != null)
+                    currentID = current_val.AsObjectId;
+                else
+                    current_val = null;
+            }
+
+            return body;
         }
 
         public static List<DatabaseAnnotation> GetAnnotations(DatabaseScheme scheme, DatabaseRole role, DatabaseAnnotator annotator)
@@ -3781,8 +3910,6 @@ namespace ssi
                     }
                 }
             }
-
-          
 
             return annoLists;
         }

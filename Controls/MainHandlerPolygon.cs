@@ -229,7 +229,7 @@ namespace ssi
                                 for (int j = 0; j < control.polygonListControl.polygonDataGrid.SelectedItems.Count; j++)
                                 {
                                     PolygonLabel pl = (PolygonLabel)control.polygonListControl.polygonDataGrid.SelectedItems[j];
-                                    list[i].PolygonList.addPolygonLabel(new PolygonLabel(pl.Polygon, pl.Label, pl.Color));
+                                    list[i].PolygonList.addPolygonLabel(new PolygonLabel(pl.Polygon, pl.Label, pl.Color, pl.Confidence));
                                     list[i].updateLabelCount();
                                 }
                                 polygonUtilities.refreshAnnoDataGrid();
@@ -407,16 +407,8 @@ namespace ssi
                         AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
                         if (!polygonUtilities.polygonPositionsEqual(polygonInformations.PolygonStartPosition, polygonPoints))
                         {
-                            if (polygonRevisor.isPolygonComplex(polygonLabel.Polygon))
-                            {
-                                polygonUtilities.updatePoint(polygonInformations.StartPosition.X, polygonInformations.StartPosition.Y, item);
-                                polygonDrawUnit.polygonOverlayUpdate(item);
-                                MessageBox.Show("You are trying to create a complex polygon. Complex polygons cannot be used for image segmentation in Nova.", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
-                            }
-                            else
-                            {
-                                item.UndoRedoStack.Do(new ChangeLabelCommand(polygonInformations.PolygonStartPosition, polygonPoints, polygonLabel));
-                            }
+                            item.UndoRedoStack.Do(new ChangeLabelCommand(polygonInformations.PolygonStartPosition, polygonPoints, polygonLabel));
+                            polygonUtilities.polygonTableUpdate();
                         }
                     }
                 }
