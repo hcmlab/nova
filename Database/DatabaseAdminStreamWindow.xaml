@@ -51,7 +51,7 @@
         
         <Label Grid.Row="8" Content="Optional: Add Names to Stream Dimensions" Grid.Column="0" Grid.ColumnSpan="2"/>
 
-        <Border Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" CornerRadius="10" BorderThickness="1" BorderBrush="White" Background="DarkGray" AllowDrop="True" Drop="AnnoList_Drop" Visibility="Collapsed">
+        <Border Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" CornerRadius="10" BorderThickness="1" BorderBrush="White" Background="DarkGray" AllowDrop="True" Drop="AnnoList_Drop" Visibility="Visible">
             <Label FontSize="16" Foreground="White" Content="Drag an existing Dimension naming file here" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="-1" />
         </Border>
 

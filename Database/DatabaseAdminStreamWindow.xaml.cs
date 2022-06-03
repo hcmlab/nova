@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -44,7 +46,7 @@ namespace ssi
 
         private void AddLabel_Click(object sender, RoutedEventArgs e)
         {
-            DimLabel item = new DimLabel() { Name = "", Dim = 0 };
+            DimLabel item = new DimLabel() { Name = "", Dim = LabelsListBox.Items.Count };
             items.Add(item);
             LabelsListBox.SelectedItem = item;
             LabelsListBox.ScrollIntoView(item);
@@ -106,40 +108,76 @@ namespace ssi
                 string[] filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 if (filenames != null && filenames[0].EndsWith(".streamdict"))
                 {
-                    //try
-                    //{
-                    //    AnnoList list = AnnoList.LoadfromFile(filenames[0]);
+                    try
+                    {
 
-                    //    if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
-                    //    {
-                    //        foreach (var item in list.Scheme.Labels)
-                    //        {
-                    //            Label label = new Label() { Name = item.Name, Color = item.Color };
-                    //            if (!items.Contains(label) && label.Name != "GARBAGE" && label.Name != "") items.Add(label);
-                    //        }
-                    //    }
-                    //    else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
-                    //    {
-                    //        HashSet<string> labelNames = new HashSet<string>();
-                    //        foreach (AnnoListItem item in list)
-                    //        {
-                    //            labelNames.Add(item.Label);
-                    //        }
-                    //        foreach (string name in labelNames)
-                    //        {
-                    //            Label label = new Label() { Name = name, Color = list.Scheme.MaxOrForeColor };
-                    //            if (!items.Contains(label) && label.Name != "GARBAGE" && label.Name != "") items.Add(label);
-                    //        }
-                    //    }
-                    //    else return;
+                       var input = File.ReadAllLines(filenames[0]);
 
-                    //    schemeNameTextField.Text = list.Scheme.Name;
+                        if (!input[0].Contains("="))
+                        {
+                            for (int i = 0; i < input.Length; i++)
+                            {
+                                if (input[i] != "" && input[i] != ",")
+                                {
+                                    if (input[i].EndsWith(","))
+                                    {
+                                        input[i] = input[i].Remove(input[i].Length - 1, 1);
+                                    }
 
-                    //}
-                    //catch
-                    //{
-                    //    MessageTools.Warning("This is not a valid Stream Dimension Dictionary file");
-                    //}
+                                    DimLabel item = new DimLabel() { Name = input[i], Dim = i };
+                                    items.Add(item);
+
+                                }
+                            }
+                        }
+
+                        else
+                        {
+                            for (int i = 0; i < input.Length; i++)
+                            {
+                                if (input[i] != "" && input[i] != ",")
+                                {
+                                    if (input[i].EndsWith(","))
+                                    {
+                                        input[i] = input[i].Remove(input[i].Length - 1, 1);
+                                    }
+
+
+                                    string[] split = input[i].Split('=');
+
+                                    int value;
+                                    DimLabel item;
+                                    if (int.TryParse(split[0], out value))
+                                    {
+                                        item = new DimLabel() { Name = split[1], Dim = value };
+
+                                    }
+                                    else  if (int.TryParse(split[1], out value))
+                                    {
+                                        item = new DimLabel() { Name = split[0], Dim = value };
+                                    }
+
+
+
+                                    else return ;
+
+                                
+                                 
+                                    items.Add(item);
+
+                                }
+                            }
+                        }
+
+                       
+
+  
+
+                    }
+                    catch
+                    {
+                        MessageTools.Warning("This is not a valid Stream Dimension Dictionary (streamdict) file");
+                    }
                 }
             }
         }
