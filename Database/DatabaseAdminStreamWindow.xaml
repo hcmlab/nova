@@ -43,19 +43,19 @@
         <Label Grid.Row="0" Content="Name:" Grid.Column="0" Grid.ColumnSpan="2"/>
         <TextBox Grid.Row="1" Name="name" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2"/>
         <Label Grid.Row="2" Content="File Extension:" Grid.Column="0" Grid.ColumnSpan="2"/>
-        <TextBox Grid.Row="3" Name="fileExt" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <TextBox Grid.Row="3" Name="fileExt" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2" TextChanged="fileExt_TextChanged"/>
         <Label Grid.Row="4" Content="Type: (video, audio, stream, ..)" Grid.Column="0" Grid.ColumnSpan="2" />
         <TextBox Grid.Row="5" Name="type" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2" />
         <Label Grid.Row="6" Content="Samplerate:" Grid.Column="0" Grid.ColumnSpan="2"/>
         <TextBox Grid.Row="7" Name="sr" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2"/>
         
-        <Label Grid.Row="8" Content="Optional: Add Names to Stream Dimensions" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <Label Name="l1" Grid.Row="8" Content="Optional: Add Names to Stream Dimensions" Grid.Column="0" Grid.ColumnSpan="2"/>
 
-        <Border Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" CornerRadius="10" BorderThickness="1" BorderBrush="White" Background="DarkGray" AllowDrop="True" Drop="AnnoList_Drop" Visibility="Visible">
+        <Border Name="l2" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" CornerRadius="10" BorderThickness="1" BorderBrush="White" Background="DarkGray" AllowDrop="True" Drop="AnnoList_Drop" Visibility="Visible">
             <Label FontSize="16" Foreground="White" Content="Drag an existing Dimension naming file here" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="-1" />
         </Border>
 
-        <Label Grid.Row="10" Grid.Column="0" Margin="5">Dimension Names</Label>
+        <Label Name="l3" Grid.Row="10" Grid.Column="0" Margin="5">Dimension Names</Label>
         <ListView Name="LabelsListBox" Grid.Row="10" Grid.Column="1" Margin="5,5,5,0" SelectionMode="Single">
             <ListView.View>
                 <GridView>
@@ -82,7 +82,7 @@
             </ListView.View>
         </ListView>
 
-        <StackPanel Grid.Row="11" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Name="l4" Grid.Row="11" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Style="{StaticResource MyButton}" Name="AddLabel" Content="ADD" Click="AddLabel_Click"/>
             <Button Style="{StaticResource MyButton}" Name="DeleteLabel" Content="REM" Click="DeleteLabel_Click"/>
         </StackPanel>

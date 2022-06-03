@@ -35,6 +35,15 @@ namespace ssi
             
             name.Text = stream.Name;
             fileExt.Text = stream.FileExt;
+            if (fileExt.Text == "stream")
+            {
+                manageLabelesvisibility(true);
+            }
+
+            else
+            {
+                manageLabelesvisibility(false);
+            }
             sr.Text = stream.SampleRate.ToString();
             type.Text = stream.Type;
 
@@ -186,6 +195,40 @@ namespace ssi
         {
             public int Dim { get; set; }
             public string Name { get; set; }
+        }
+
+        private void manageLabelesvisibility(bool isVisible)
+        {
+            if (isVisible)
+            {
+                LabelsListBox.Visibility = Visibility.Visible;
+                l1.Visibility = Visibility.Visible;
+                l2.Visibility = Visibility.Visible;
+                l3.Visibility = Visibility.Visible;
+                l4.Visibility = Visibility.Visible;
+            }
+
+            else
+            {
+                LabelsListBox.Visibility = Visibility.Collapsed;
+                l1.Visibility = Visibility.Collapsed;
+                l2.Visibility = Visibility.Collapsed;
+                l3.Visibility = Visibility.Collapsed;
+                l4.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void fileExt_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if(fileExt.Text == "stream")
+            {
+                manageLabelesvisibility(true);
+            }
+
+            else
+            {
+                manageLabelesvisibility(false);
+            }
         }
     }
 }
