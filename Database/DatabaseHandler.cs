@@ -1,9 +1,14 @@
-﻿using MongoDB.Bson;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using ssi.Controls.Annotation.Polygon;
 using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -1574,6 +1579,17 @@ namespace ssi
                     {
                         stream.SampleRate = document["sr"].ToDouble();
                     }
+                    stream.DimLabels = new Dictionary<int, string>();
+                    if (document.TryGetElement("dimlabels", out value))
+                    {
+                        BsonArray array = document["dimlabels"].AsBsonArray;
+
+                        foreach(var element in array)
+                        {
+                            stream.DimLabels.Add(element["id"].AsInt32, element["name"].AsString);
+                        }
+                       
+                    }
                 }
                 else
                 {
@@ -1590,13 +1606,27 @@ namespace ssi
             {
                 return false;
             }
+            BsonArray array = new BsonArray();
+
+            foreach(var item in stream.DimLabels)
+            {
+                array.Add(new BsonDocument() {
+                    { "id", item.Key },
+                    { "name", item.Value }
+                    }
+                  );
+            }
+          
+  
+           
 
             BsonDocument document = new BsonDocument {
                     {"name",  stream.Name},
                     {"fileExt",  stream.FileExt},
                     {"type",  stream.Type},
                     {"isValid",  true},
-                    {"sr", stream.SampleRate }
+                    {"sr", stream.SampleRate },
+                    {"dimlabels", array }
             };
 
             var builder = Builders<BsonDocument>.Filter;
@@ -3993,6 +4023,237 @@ namespace ssi
 
             return id;
         }
+
+
+        public static AnnoList ConvertDiscreteAnnoListToContinuousList(AnnoList annolist, double chunksize, double end, string restclass = "Rest")
+        {
+            AnnoList result = new AnnoList();
+            result.Scheme = annolist.Scheme;
+            result.Meta = annolist.Meta;
+            result.Source.StoreToDatabase = true;
+            result.Source.Database.Session = annolist.Source.Database.Session;
+            double currentpos = 0;
+
+            bool foundlabel = false;
+
+            while (currentpos < end)
+            {
+                foundlabel = false;
+                foreach (AnnoListItem orgitem in annolist)
+                {
+                    if (orgitem.Start < currentpos && orgitem.Stop > currentpos)
+                    {
+                        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
+                        result.Add(ali);
+                        foundlabel = true;
+                        break;
+                    }
+                }
+
+                if (foundlabel == false)
+                {
+                    AnnoListItem ali = new AnnoListItem(currentpos, chunksize, restclass);
+                    result.Add(ali);
+                }
+
+                currentpos = currentpos + chunksize;
+            }
+
+            return result;
+        }
+
+
+        public static  bool ExportMultipleCSV(List<DatabaseAnnotation> annos, List<StreamItem> streams, DatabaseSession session,  string delimiter = ";" )
+        {
+
+
+
+            //Get Storage Location
+            string filePath = FileTools.SaveFileDialog(SessionName, ".csv", "Annotation(*.csv)|*.csv", "");
+            if (filePath == null) return false;
+
+
+        
+
+            //make some more advanced logic to get maximum/fill with zeros
+           // int length = annoLists.Min(annoLists)
+
+
+
+
+
+
+            List<Signal> signals = new List<Signal>();
+            string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\";
+
+
+
+
+            foreach (var file in streams)
+            {
+
+                if(file.Extension == "stream")
+                {
+
+
+                    DatabaseStream temp = new DatabaseStream();
+                    string filename = Path.GetFileNameWithoutExtension(file.Name);
+                    string[] withoutRole = filename.Split('.');
+                    string fname = "";
+                    //add all strings but the first (role)
+                    for (int i = 1; i < withoutRole.Length; i++)
+                    {
+                        fname = fname + withoutRole[i] + ".";
+                    }
+
+                    temp.Name = fname.Remove(fname.Length - 1, 1);
+                    temp.FileExt = file.Extension;
+                    temp.Type = file.Type;
+                    DatabaseHandler.GetStream(ref temp);
+
+
+                    Signal signal = null;
+
+                    signal = Signal.LoadStreamFile(localPath + file.Name, temp.DimLabels);
+                    signals.Add(signal);
+                }
+            }
+
+
+            double sr = signals[0].rate;
+            double time = 0;
+            double srtime = 1 / sr;
+
+
+            //Fetch actual Annolists from DatabaseAnnotations
+            List<AnnoList> annoLists = new List<AnnoList>();
+            foreach (DatabaseAnnotation annotation in annos)
+            {
+                AnnoList annoList = LoadAnnoList(annotation, false);
+
+
+                //Only continuous for now, need convertion for discrete labels;
+                if (annoList != null && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    annoLists.Add(annoList);
+                }
+
+              
+            }
+
+            int length = 0;
+            if (annoLists.Count > 0)
+            {
+                length = annoLists.Max(e => e.Count);
+            }
+            if(signals.Count > 0)
+            {
+               length = (int)Math.Max(length, signals.Max(e => e.number));
+            }
+           
+
+            foreach (DatabaseAnnotation annotation in annos)
+            {
+                AnnoList annoList = LoadAnnoList(annotation, false);
+
+
+                //Only continuous for now, need convertion for discrete labels;
+                if (annoList != null && (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoList.Scheme.Type == AnnoScheme.TYPE.FREE))
+                {
+                    AnnoList converted = ConvertDiscreteAnnoListToContinuousList(annoList, srtime, length * srtime, "None");
+                    annoLists.Add(converted);
+                }
+
+            }
+
+
+
+           
+
+        
+
+
+        
+
+
+            var records = new List<object>();
+            for (int i = 0; i < length; i++)
+            {
+
+                dynamic dynamicLineObject = new ExpandoObject();
+                IDictionary<string, object> dictobject = dynamicLineObject;
+
+                //Add ID to columns
+                dictobject.Add("Session", session.Name);
+
+                //Add time to columns
+                dictobject.Add("Time", time);
+                time += srtime;
+
+
+                //Add annotations to columns
+                for (int j = 0; j < annoLists.Count; j++)
+                    {
+                       if(i < annoLists[j].Count && annoLists[j].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)  dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Score); // Adding dynamically named property     
+                       else if (i < annoLists[j].Count && (annoLists[j].Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoLists[j].Scheme.Type == AnnoScheme.TYPE.FREE)) dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Label);
+                }
+
+
+                for (int j = 0; j < signals.Count; j++)
+                {
+                    for(int k=0; k< signals[j].dim; k++)
+                    {
+                            string value;
+                            if (signals[j].DimLabels.Count > 0)
+                            {
+                                if(signals[j].DimLabels.TryGetValue(k, out value))
+                                {
+                                    if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (" + value + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property    
+                                }
+                                else if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property  
+
+
+                        }
+                             else if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property    
+
+                    }
+                         
+                }
+
+
+                records.Add(dynamicLineObject);
+
+
+            }
+
+
+            using (var textWriter = new StreamWriter(filePath))
+            {
+                var config = new CsvConfiguration(CultureInfo.InstalledUICulture)
+                {
+                    PrepareHeaderForMatch = args => args.Header.ToLower(),
+                    Delimiter = delimiter
+                };
+
+                using (var csv = new CsvWriter(textWriter,config))
+                {
+
+                    foreach (var record in records)
+                    {
+                        csv.WriteRecord(record);
+                        csv.NextRecord();
+                    }
+                }
+
+            }
+
+
+
+            return true;
+
+
+        }
+
     }
 
     #region DATABASE TYPES
@@ -4112,6 +4373,7 @@ namespace ssi
         public string Type { get; set; }
         public double SampleRate { get; set; }
         public double Duration { get; set; }
+        public Dictionary<int,string> DimLabels { get; set; }
 
         public override string ToString()
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Xml;
@@ -9,6 +10,9 @@ namespace ssi
     public partial class Signal
     {
         #region LOAD FILE
+
+
+        public Dictionary<int, string> DimLabels { get; set; }
 
         public static Signal LoadARFFFile(string filepath)
         {
@@ -108,10 +112,11 @@ namespace ssi
             return signal;
         }
 
-        public static Signal LoadStreamFile(string filepath)
+        public static Signal LoadStreamFile(string filepath, Dictionary<int, string> dimnames = null)
         {
 
             Signal signal = new Signal();
+            signal.DimLabels = dimnames;
             try
             {
                

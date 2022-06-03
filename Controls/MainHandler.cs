@@ -18,7 +18,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.2.1";
+        public static string BuildVersion = "1.2.2.2";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -107,6 +107,9 @@ namespace ssi
         public MainHandler(MainControl view)
         {
             control = view;
+
+            //TEST
+            //DatabaseHandler.ExportMultipleCSV();
 
             // Shadow box
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
@@ -646,6 +649,7 @@ namespace ssi
                 Properties.Settings.Default.MongoDBUser = s.MongoUser() != "" ?  s.MongoUser() : "invalid username";
                 Properties.Settings.Default.MongoDBPass = MainHandler.Encode(s.MongoPass());
                 Properties.Settings.Default.DatabaseAutoLogin= s.DBAutoConnect();
+                Properties.Settings.Default.ShowExportDatabase = s.ExportDB();
                 Properties.Settings.Default.DefaultZoomInSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());

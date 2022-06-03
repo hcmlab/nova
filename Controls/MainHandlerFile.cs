@@ -47,14 +47,15 @@ namespace ssi
          
         }
 
-        public bool loadFile(string filepath)
+        public bool loadFile(string filepath, Dictionary<int, string> dimnames = null)
         {
-            return loadFile(filepath, Defaults.Colors.Foreground, Defaults.Colors.Background);
+            return loadFile(filepath, Defaults.Colors.Foreground, Defaults.Colors.Background, dimnames);
         }
 
         private bool loadFile(string filepath,
             Color foreground,
-            Color background)
+            Color background,
+            Dictionary<int,string> dimnames)
         {
             if (filepath == null || filepath.EndsWith("~") || !File.Exists(filepath))
             {
@@ -195,7 +196,7 @@ namespace ssi
                     break;
 
                 case SSI_FILE_TYPE.STREAM:
-                    loadSignalFile(filepath, foreground, background);
+                    loadSignalFile(filepath, foreground, background, dimnames);
                     loaded = true;
                     break;
 
@@ -387,10 +388,10 @@ namespace ssi
 
         private void loadSignalFile(string filename)
         {
-            loadSignalFile(filename, Defaults.Colors.Foreground, Defaults.Colors.Background);
+            loadSignalFile(filename, Defaults.Colors.Foreground, Defaults.Colors.Background, null);
         }
 
-        private void loadSignalFile(string filename, Color signalColor, Color backgroundColor)
+        private void loadSignalFile(string filename, Color signalColor, Color backgroundColor, Dictionary<int, string> dimnames)
         {
             if (!File.Exists(filename) || !File.Exists(filename + "~"))
             {
@@ -399,7 +400,7 @@ namespace ssi
             }
             Signal signal = null;
         
-             signal = Signal.LoadStreamFile(filename);
+             signal = Signal.LoadStreamFile(filename, dimnames);
          
             if (signal != null && signal.loaded)
             {                
@@ -651,7 +652,7 @@ namespace ssi
                         foreground = (Color)ColorConverter.ConvertFromString(node.Attributes["fg"].LastChild.Value);
                     }
                     string path = FileTools.GetAbsolutePath(node.InnerText, workdir);
-                    loadFile(path, foreground, background);
+                    loadFile(path, foreground, background, null);
                 }
 
                 if (DatabaseHandler.IsConnected)

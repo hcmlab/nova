@@ -231,10 +231,12 @@
 
             </DockPanel>
         </Grid>
-
+      
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
+         
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
                 <Label Name="LoadingLabel" Visibility="Collapsed">Loading...</Label>
+                 <Button Name="Export" Margin="0,0,120,0"   Content="Export to csv" Grid.Column="0" Height="25" Width="85"  Click="Export_Click" />
                 <Button Name="Ok" Margin="0,0,5,0"  Content="Ok" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click" />
                 <Button Name="Cancel" Content="Cancel" Height="25" Width="50" Click="Cancel_Click" />
             </StackPanel>

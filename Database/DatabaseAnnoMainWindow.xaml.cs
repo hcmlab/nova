@@ -84,6 +84,9 @@ namespace ssi
             showonlymine.IsChecked = Properties.Settings.Default.DatabaseShowOnlyMine;
             showOnlyUnfinished.IsChecked = Properties.Settings.Default.DatabaseShowOnlyFinished;
             hideMissing.IsChecked = Properties.Settings.Default.DBHideMissingStreams;
+            Export.Visibility = Properties.Settings.Default.ShowExportDatabase ? Visibility.Visible : Visibility.Collapsed;
+
+       
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
@@ -841,6 +844,31 @@ namespace ssi
                 }
             }
         }
+
+        private void Export_Click(object sender, RoutedEventArgs e)
+        {
+            List<StreamItem> selectedStreams = new List<StreamItem>();
+            List<DatabaseAnnotation> selectedAnnos = new List<DatabaseAnnotation>();
+
+
+            foreach (StreamItem stream in StreamsBox.SelectedItems)
+            {
+                selectedStreams.Add(stream);
+            }
+
+            foreach (DatabaseAnnotation anno in AnnotationsBox.SelectedItems)
+            {
+                selectedAnnos.Add(anno);
+            }
+
+           if(DatabaseHandler.ExportMultipleCSV(selectedAnnos, selectedStreams, (DatabaseSession)SessionsBox.SelectedItem))
+            {
+                MessageTools.Information("Sucessfully exported data to csv");
+            };
+
+        }
+
+     
     }
 }
 

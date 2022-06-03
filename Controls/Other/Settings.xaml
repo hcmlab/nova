@@ -127,6 +127,7 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -173,6 +174,7 @@
                     </DockPanel>
                     <CheckBox Grid.Row="10" Name="DBConnnect" Margin="5,0,5,5" Grid.ColumnSpan="2">Connect to database at start up</CheckBox>
                     <CheckBox Grid.Row="11" Name="OverwriteAnnotation" Margin="5,0,5,5" Grid.ColumnSpan="2">Always ask before overwriting an annotation</CheckBox>
+                    <CheckBox Grid.Row="12" Name="Showexport" Margin="5,0,5,5" Grid.ColumnSpan="2">Show export to csv in Database menu</CheckBox>
 
                 </Grid>
             </TabItem>
