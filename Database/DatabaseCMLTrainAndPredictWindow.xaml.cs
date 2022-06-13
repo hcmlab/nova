@@ -92,7 +92,7 @@ namespace ssi
         private bool handleSelectionChanged = false;
 
         public DatabaseCMLTrainAndPredictWindow(MainHandler handler, Mode mode)
-        {
+        {   
             InitializeComponent();
 
             this.handler = handler;
@@ -121,7 +121,7 @@ namespace ssi
             Loaded += Window_Loaded;
            
             HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.";
-            HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";            
+            HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";
         }
 
         #region Window
@@ -429,7 +429,7 @@ namespace ssi
         
 
         private void Apply_Click(object sender, RoutedEventArgs e)
-        {       
+        {
             Trainer trainer = (Trainer) TrainerPathComboBox.SelectedItem;
             bool force = mode == Mode.COMPLETE || ForceCheckBox.IsChecked.Value;
 
@@ -1440,7 +1440,6 @@ namespace ssi
             GetSessions();
             GetTrainers();
             ApplySessionSet();
-
             UpdateGUI();
         }
 
@@ -1514,6 +1513,15 @@ namespace ssi
                 TrainerPathComboBox.IsEnabled = true;
             }
 
+            DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
+
+            if (scheme != null)
+            {
+                double cmlbegintime = (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                                                                                    MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
+
+                CMLEndpointTextBox.Text = Math.Round(cmlbegintime, 2).ToString();
+            }
         }
 
         #endregion
@@ -1572,6 +1580,7 @@ namespace ssi
                 GetStreams();
             }
         }
+
 
         private void DatabasesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
