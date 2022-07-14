@@ -4120,10 +4120,15 @@ namespace ssi
             }
 
 
-            double sr = signals[0].rate;
             double time = 0;
-            double srtime = 1 / sr;
+            double sr = 25;
 
+            if (signals.Count> 0)
+            {
+            sr = signals[0].rate;
+            }
+
+            double srtime = 1 / sr;
 
             //Fetch actual Annolists from DatabaseAnnotations
             List<AnnoList> annoLists = new List<AnnoList>();
@@ -4156,13 +4161,12 @@ namespace ssi
             {
                 AnnoList annoList = LoadAnnoList(annotation, false);
 
-
-                //Only continuous for now, need convertion for discrete labels;
                 if (annoList != null && (annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoList.Scheme.Type == AnnoScheme.TYPE.FREE))
                 {
                     AnnoList converted = ConvertDiscreteAnnoListToContinuousList(annoList, srtime, length * srtime, "None");
                     annoLists.Add(converted);
                 }
+                
 
             }
 
