@@ -527,21 +527,24 @@ namespace ssi
 
                     ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, item.Name, bounty.Session, bounty.Database);
 
-                    IMongoDatabase db = DatabaseHandler.Client.GetDatabase(bounty.Database);
-                    var annos = db.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
-                    var builder = Builders<BsonDocument>.Filter;
-
-                    var filter = builder.Eq("_id", id);
-                    var annotationDoc = annos.Find(filter).Single();
-
-                    BsonElement value;
-                    if (annotationDoc.TryGetElement("bountyIsPaid", out value))
+                    if(id != new ObjectId())
                     {
-                        stat.isPaid = annotationDoc["bountyIsPaid"].AsBoolean;
+
+                        IMongoDatabase db = DatabaseHandler.Client.GetDatabase(bounty.Database);
+                        var annos = db.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+                        var builder = Builders<BsonDocument>.Filter;
+
+                        var filter = builder.Eq("_id", id);
+                        var annotationDoc = annos.Find(filter).Single();
+
+                        BsonElement value;
+                        if (annotationDoc.TryGetElement("bountyIsPaid", out value))
+                        {
+                            stat.isPaid = annotationDoc["bountyIsPaid"].AsBoolean;
+                        }
+
+                        annostatus.Add(stat);
                     }
-
-                    annostatus.Add(stat);
-
                 }
 
                 BountiesJobDone.ItemsSource = annostatus;
