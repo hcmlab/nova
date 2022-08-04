@@ -852,6 +852,7 @@
     <Content Include="PythonScripts\LimeExplain.py" />
     <Content Include="PythonScripts\SpearmanR.py" />
     <Content Include="PythonScripts\__init__.py" />
+    <Resource Include="Resources\suc.png" />
     <Resource Include="Resources\lightning.png" />
     <Resource Include="Resources\Question_16x.png" />
     <Resource Include="Resources\dropmodel.png" />

@@ -25,11 +25,12 @@ namespace ssi
         Lightning lightning = new Lightning();
         MainHandler handler;
         private System.Timers.Timer checkInvoicePaidTimer;
+        Lightning.LightningInvoice currentinvoice = null;
         public LightningWalletMangement(MainHandler handler)
         {
             InitializeComponent();
             if(checkInvoicePaidTimer != null) checkInvoicePaidTimer.Stop();
-            InitCheckLightningBalanceTimer();
+         
             this.handler = handler;
             //createWallet();
             if (MainHandler.myWallet == null)
@@ -61,6 +62,9 @@ namespace ssi
             {
                 Lightning.LightningInvoice invoice = await lightning.CreateInvoice(MainHandler.myWallet.invoice_key, Convert.ToUInt32(DepositSats.Text), "Deposit to NOVA Wallet");
                 //InitCheckInvoicePaidTimer(invoice);
+                currentinvoice = invoice;
+                InitCheckLightningBalanceTimer();
+
                 DepositAdress.Text = invoice.payment_request;
                 System.Windows.Clipboard.SetText(invoice.payment_request);
                 clipboard.Content = "Copied to clipboard";
@@ -79,11 +83,13 @@ namespace ssi
         }
         public void InitCheckLightningBalanceTimer()
         {
-
-            if (checkInvoicePaidTimer != null) checkInvoicePaidTimer.Stop();
+            if (checkInvoicePaidTimer != null){
+                checkInvoicePaidTimer.Stop();
+                checkInvoicePaidTimer.Close();
+            }
             checkInvoicePaidTimer = new System.Timers.Timer();
             checkInvoicePaidTimer.Elapsed += new ElapsedEventHandler(timer_Tick);
-            checkInvoicePaidTimer.Interval = 5000; // in miliseconds
+            checkInvoicePaidTimer.Interval = 2000; // in miliseconds
             checkInvoicePaidTimer.Start();
         }
 
@@ -93,40 +99,52 @@ namespace ssi
             //checkInvoicePaidTimer.Stop();
             if (MainHandler.ENABLE_LIGHTNING && MainHandler.myWallet != null)
             {
-                Lightning lightning = new Lightning();
-                try
-                {
+               
+             
 
-                
-                MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
-                    string sats = "Loading";
+                bool ispaid = await lightning.checkInvoiceIsPaid(MainHandler.myWallet, currentinvoice) == "Success";
+                if (ispaid)
+                {
+                    checkInvoicePaidTimer.Stop();
+                    checkInvoicePaidTimer.Close();
+                    this.QR.Dispatcher.Invoke(() => {
+                        QR.Source = new BitmapImage(new Uri("/Resources/suc.png", UriKind.Relative));
+                    });
+                  
+
                     try
                     {
-                         sats = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats (" + (await lightning.PriceinCurrency(MainHandler.myWallet.balance / 1000, "EUR")).ToString("0.00") + "€)";
+
+
+                        MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
+                        string sats = "Loading";
+                        try
+                        {
+                            sats = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats (" + (await lightning.PriceinCurrency(MainHandler.myWallet.balance / 1000, "EUR")).ToString("0.00") + "€)";
+                        }
+                        catch (Exception exp)
+                        {
+                            sats = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats";
+                        }
+
+                        handler.control.navigator.satsbalance.Dispatcher.Invoke(() => {
+                            handler.control.navigator.satsbalance.Content = "\u26a1 " + (MainHandler.myWallet.balance / 1000) + " Sats";
+                        });
+                        this.balance.Dispatcher.Invoke(() => {
+                            balance.Content = sats;
+                        });
+
                     }
-                    catch (Exception exp)
+                    catch (Exception ex)
                     {
-                         sats = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats";
+                        handler.control.navigator.satsbalance.Dispatcher.Invoke(() => {
+                            handler.control.navigator.satsbalance.Content = "\u26a1 " + "Error connecting to Lightning wallet.. please try again later.";
+                        });
+                        this.balance.Dispatcher.Invoke(() => {
+                            balance.Content = ex;
+                        });
                     }
-              
-                    handler.control.navigator.satsbalance.Dispatcher.Invoke(() => {
-                    handler.control.navigator.satsbalance.Content = "\u26a1 " + (MainHandler.myWallet.balance / 1000) + " Sats";
-                });
-                this.balance.Dispatcher.Invoke(() => {
-                    balance.Content = sats;
-                });
-
                 }
-                catch(Exception ex)
-                {
-                    handler.control.navigator.satsbalance.Dispatcher.Invoke(() => {
-                        handler.control.navigator.satsbalance.Content = "\u26a1 " + "Error connecting to Lightning wallet.. please try again later.";
-                    });
-                    this.balance.Dispatcher.Invoke(() => {
-                        balance.Content = ex;
-                    });
-                }
-
 
 
             }
@@ -287,7 +305,15 @@ namespace ssi
             Lightning.Visibility = Visibility.Visible;
         }
 
-
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            if(checkInvoicePaidTimer != null)
+            {
+                checkInvoicePaidTimer.Stop();
+                checkInvoicePaidTimer.Close();
+            }
+           
+        }
     }
 
 }

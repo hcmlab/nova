@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
         WindowStyle="ToolWindow"
-        Title="Lightning Wallet" Height="660" Width="270">
+        Title="Lightning Wallet" Height="660" Width="270"
+        Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>

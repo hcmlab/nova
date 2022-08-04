@@ -241,6 +241,24 @@ namespace ssi
 
         }
 
+        public Bitmap GetQRLoginImage()
+        {
+
+            WebClient client = new WebClient();
+            Stream stream = client.OpenRead("http://82.165.19.208:5000/auth");
+            Bitmap bitmap; bitmap = new Bitmap(stream);
+            stream.Flush();
+            stream.Close();
+            client.Dispose();
+            if (bitmap != null)
+            {
+                return bitmap;
+            }
+            else return null;
+
+
+        }
+
         public async Task<string> checkInvoiceIsPaid(Lightning.LightningWallet wallet, Lightning.LightningInvoice invoice)
         {
 
