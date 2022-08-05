@@ -23,6 +23,22 @@ namespace ssi
             PointDistance.Text = Properties.Settings.Default.DefaultPolygonPointDistance.ToString();
             DrawwaveformCheckbox.IsChecked = Properties.Settings.Default.DrawVideoWavform;
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
+            if (Properties.Settings.Default.LoggedInWithLightning)
+            {
+                LoginWithLightning.Content = "\u26a1 Logout of with Lightning";
+                this.DBPassword.Visibility = Visibility.Collapsed;
+                this.passwordtext.Visibility = Visibility.Collapsed;
+                this.DBUser.IsEnabled = false;
+            }
+            else
+            {
+                LoginWithLightning.Content = "\u26a1 Login with with Lightning";
+                this.DBPassword.Visibility = Visibility.Visible;
+                this.passwordtext.Visibility = Visibility.Visible;
+                this.DBUser.IsEnabled = true;
+
+            }
+           
             mbackend.SelectedIndex = (Properties.Settings.Default.MediaBackend == "Software") ? 1 : 0; 
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
             if (tokens.Length == 2)
@@ -132,6 +148,7 @@ namespace ssi
         public bool EnablePython()
         {
             return (EnablePythonCheckbox.IsChecked == true);
+           
         }
 
         public string Mediabackend()
@@ -231,6 +248,7 @@ namespace ssi
             }
 
             DialogResult = true;
+            
             Close();
 
             }
@@ -384,5 +402,47 @@ namespace ssi
             Regex regexObj = new Regex(@"[^\d]");
             this.DBPort.Text = regexObj.Replace(this.DBPort.Text, "");
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (Properties.Settings.Default.LoggedInWithLightning == false)
+            {
+                LNBrowser browser = new LNBrowser("http://novaannotation.com:666");
+                browser.ShowDialog();
+                if (browser.DialogResult == true)
+                {
+                    this.DBUser.Text = browser.LNID();
+                    this.DBPassword.Password = browser.LNID();
+                    this.DBUser.IsEnabled = false;
+                    Properties.Settings.Default.MongoDBUser = browser.LNID();
+                    Properties.Settings.Default.MongoDBPass = browser.LNID(); ;
+                    Properties.Settings.Default.LoggedInWithLightning = true;
+                    Properties.Settings.Default.Save();
+                    this.DBPassword.Visibility = Visibility.Collapsed;
+                    this.passwordtext.Visibility = Visibility.Collapsed;
+                    LoginWithLightning.Content = "\u26a1 Logout from Lightning";
+
+                }
+            }
+            else
+            {
+                LNBrowser browser = new LNBrowser("http://novaannotation.com:666/logout");
+                browser.Show();
+                Properties.Settings.Default.LoggedInWithLightning = false;
+                this.DBUser.Text = "";
+                this.DBPassword.Password = "";
+                this.DBPassword.Visibility = Visibility.Visible;
+                this.passwordtext.Visibility = Visibility.Visible;
+                this.DBUser.IsEnabled = true;
+                Properties.Settings.Default.Save();
+                LoginWithLightning.Content = "\u26a1 Login with Lightning";
+                
+                browser.Close();
+            }
+
+
+           
+        }
+
     }
 }

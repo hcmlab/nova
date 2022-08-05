@@ -273,9 +273,9 @@ namespace ssi
         }
 
 
-        public void DownloadFile(string urlAddress, string location)
+        public static void DownloadFile(string urlAddress, string location)
         {
-            using (webClient = new WebClient())
+            using (WebClient webClient = new WebClient())
             {
 
                 Uri URL = new Uri(urlAddress);

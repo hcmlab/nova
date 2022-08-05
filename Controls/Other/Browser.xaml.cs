@@ -23,23 +23,26 @@ namespace ssi
     /// <summary>
     /// Interaktionslogik für Browser.xaml
     /// </summary>
-    public partial class Browser : Window
+    public partial class LNBrowser : Window
     {
-        public Browser(string url, MainHandler handler)
+        string id = "0";
+
+        public LNBrowser(string url)
         {
             InitializeComponent();
-
             try
             {
                 var version = CoreWebView2Environment.GetAvailableBrowserVersionString();
                 //browser.CoreWebView2.Navigate("https://microsoft.com");
                 browser.Source = new Uri(url);
+             
+
             }
             catch (WebView2RuntimeNotFoundException exception)
             {
                 string webview = "webview2.exe";
                 string webviewpath = AppDomain.CurrentDomain.BaseDirectory + webview;
-                handler.DownloadFile("https://go.microsoft.com/fwlink/p/?LinkId=2124703", webviewpath);
+                MainHandler.DownloadFile("https://go.microsoft.com/fwlink/p/?LinkId=2124703", webviewpath);
                 Process process = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -53,6 +56,27 @@ namespace ssi
         
 
             //  this.webView.CoreWebView2.Navigate(url);
+        }
+
+        void ReceiveLoginData(object sender, CoreWebView2WebMessageReceivedEventArgs args)
+        {
+            string reply = args.WebMessageAsJson;
+            id = reply.Remove(reply.Length - 1).Remove(0, 1);
+
+            DialogResult = true;
+            // this.Close();
+            // parse the JSON string into an object
+            // ...
+        }
+
+        public string LNID()
+        {
+            return (id);
+        }
+
+        private void browser_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
+        {
+            browser.CoreWebView2.WebMessageReceived += ReceiveLoginData;
         }
     }
 }

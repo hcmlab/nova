@@ -220,9 +220,6 @@ namespace ssi
             control.convertSignalToAnnoContinuousMenu.Click += convertSignalToAnnoContinuous_Click;
             control.removeRemainingSegmentsMenu.Click += removeRemainingSegmentsMenu_Click;
 
-            //control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
-            bool LightningWindowActive = false;
-
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
             control.databaseCMLFusionMenu.Click += databaseCMLFusion_Click;
