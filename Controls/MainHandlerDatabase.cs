@@ -27,7 +27,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static Lightning.LightningWallet myWallet = new Lightning.LightningWallet();
+        public static Lightning.LightningWallet myWallet = null;
         public void paymentReceived(uint amount)
         {
             updateNavigator();           
@@ -73,28 +73,36 @@ namespace ssi
                 Lightning lightning = new Lightning();
                 try
                 {
-
-                    DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
-                    int balance = await lightning.GetWalletBalance(user.ln_admin_key);
-                    //if error we don't have a wallet, returns -1.
-                    if (balance == -1)
-                        myWallet = null;
-                    else
+                    int balance = 0;
+                    DatabaseUser user =  DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                    if(user.ln_admin_key == "")
                     {
-                        myWallet.admin_key = user.ln_admin_key;
-                        myWallet.invoice_key = user.ln_invoice_key;
-                        myWallet.wallet_id = user.ln_wallet_id;
-                        myWallet.user_id = user.ln_user_id;
-                        myWallet.balance = balance;
+                        MainHandler.myWallet = null;
                     }
-                    control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+                    else 
+                    {
+                        balance = await lightning.GetWalletBalance(user.ln_admin_key);
+                        //if error we don't have a wallet, returns -1.
+                        if (balance == -1)
+                         MainHandler.myWallet = null;
+                        else
+                        {
+                            myWallet = new Lightning.LightningWallet();
+                            myWallet.admin_key = user.ln_admin_key;
+                            myWallet.invoice_key = user.ln_invoice_key;
+                            myWallet.wallet_id = user.ln_wallet_id;
+                            myWallet.user_id = user.ln_user_id;
+                            myWallet.balance = balance;
+                        }
+                    }
+
                     updateNavigator();
 
                     //InitCheckLightningBalanceTimer();
                 }
                 catch (Exception e)
                 {
-
+                    Console.WriteLine(e);
                 }
             }
 

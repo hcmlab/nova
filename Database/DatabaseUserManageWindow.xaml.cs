@@ -34,7 +34,14 @@ namespace ssi
                 FullNameField.Text = fullname;
                 Emailfield.Text = email;
                 Expertisefield.SelectedIndex = expertise;       
-            }               
+            }
+            if (Properties.Settings.Default.LoggedInWithLightning)
+            {
+                CurrentPasswordField.Visibility = Visibility.Hidden;
+                PasswordField.Visibility = Visibility.Hidden;
+                CurrentPasswordLabel.Visibility = Visibility.Hidden;
+                NewPasswordLabel.Visibility = Visibility.Hidden;
+            }
         }
 
         public string GetName()

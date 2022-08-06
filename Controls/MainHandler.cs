@@ -634,11 +634,13 @@ namespace ssi
 
                 if (Properties.Settings.Default.MongoDBUser != s.MongoUser()
                     || Properties.Settings.Default.DatabaseAddress != s.DatabaseAddress()
-                    || Properties.Settings.Default.MongoDBPass != MainHandler.Encode(s.MongoPass()))
+                    || Properties.Settings.Default.MongoDBPass != MainHandler.Encode(s.MongoPass())
+                    || Properties.Settings.Default.LoggedInWithLightning == true)
                 {
                     reconnect = true;
                 }
 
+            
 
                 Properties.Settings.Default.UncertaintyLevel = s.Uncertainty();
                 Properties.Settings.Default.Annotator = s.AnnotatorName();
@@ -674,8 +676,14 @@ namespace ssi
                 }
 
             }
-
-        }
+            else
+            {
+                if (Properties.Settings.Default.LoggedInWithLightning == true)
+                {
+                    databaseConnect();
+                }
+            }
+        }     
 
         private void showSettings_Click(object sender, RoutedEventArgs e)
         {

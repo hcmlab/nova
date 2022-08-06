@@ -25,14 +25,14 @@ namespace ssi
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
             if (Properties.Settings.Default.LoggedInWithLightning)
             {
-                LoginWithLightning.Content = "\u26a1 Logout of with Lightning";
+                LoginWithLightning.Content = "\u26a1 Logout of Lightning";
                 this.DBPassword.Visibility = Visibility.Collapsed;
                 this.passwordtext.Visibility = Visibility.Collapsed;
                 this.DBUser.IsEnabled = false;
             }
             else
             {
-                LoginWithLightning.Content = "\u26a1 Login with with Lightning";
+                LoginWithLightning.Content = "\u26a1 Login with Lightning";
                 this.DBPassword.Visibility = Visibility.Visible;
                 this.passwordtext.Visibility = Visibility.Visible;
                 this.DBUser.IsEnabled = true;
@@ -356,6 +356,13 @@ namespace ssi
         private void DBHost_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if(DBHost.Text == "") DBHost.IsDropdownOpened = true;
+
+            //For now LNAuth only works on test server.
+            if(DBHost.Text != "137.250.171.233")
+                { LoginWithLightning.Visibility = Visibility.Hidden;
+                Properties.Settings.Default.LoggedInWithLightning = false;
+                Properties.Settings.Default.Save();
+                }
            // DBHost.SelectAll();
         }
 
@@ -407,7 +414,7 @@ namespace ssi
         {
             if (Properties.Settings.Default.LoggedInWithLightning == false)
             {
-                LNBrowser browser = new LNBrowser("http://novaannotation.com:666");
+                LNBrowser browser = new LNBrowser("http://novaannotation.com:666/login");
                 browser.ShowDialog();
                 if (browser.DialogResult == true)
                 {
@@ -421,6 +428,8 @@ namespace ssi
                     this.DBPassword.Visibility = Visibility.Collapsed;
                     this.passwordtext.Visibility = Visibility.Collapsed;
                     LoginWithLightning.Content = "\u26a1 Logout from Lightning";
+
+                   
 
                 }
             }

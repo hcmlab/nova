@@ -43,10 +43,10 @@
             <ComboBoxItem>5</ComboBoxItem>
         </ComboBox>
 
-        <Label Content="Current Password:" Grid.Row="4" Grid.Column="0" Margin="5"></Label>
+        <Label Name="CurrentPasswordLabel" Content="Current Password:" Grid.Row="4" Grid.Column="0" Margin="5"></Label>
         <PasswordBox Name="CurrentPasswordField" Grid.Row="4" Grid.Column="1" Password="" Margin="5"></PasswordBox>
 
-        <Label Content="New Password:" Grid.Row="5" Grid.Column="0" Margin="5"></Label>
+        <Label  Name="NewPasswordLabel" Content="New Password:" Grid.Row="5" Grid.Column="0" Margin="5"></Label>
         <PasswordBox Name="PasswordField" Grid.Row="5" Grid.Column="1" Password="" Margin="5"></PasswordBox>
 
       

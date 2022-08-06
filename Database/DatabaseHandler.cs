@@ -1018,7 +1018,12 @@ namespace ssi
             var adminDB = client.GetDatabase("admin");
             var cmd = new BsonDocument("usersInfo", dbuser.Name);
             var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-            var Customdata = (BsonDocument)queryResult[0][0]["customData"];
+            BsonDocument Customdata = new BsonDocument();
+            if(queryResult != null)
+            {
+               Customdata = (BsonDocument)queryResult[0][0]["customData"];
+            }
+           
             try
             {
                 dbuser.Fullname = Customdata["fullname"].ToString();
