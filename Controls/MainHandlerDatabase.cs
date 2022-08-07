@@ -34,13 +34,15 @@ namespace ssi
         }
         #region DATABASELOGIC
 
-        private async void databaseConnect()
+        private async void databaseConnect(bool reconnect = false)
         {
             Action EmptyDelegate = delegate () { };
             control.ShadowBoxText.Text = "Connecting to Database...";
             control.ShadowBox.Visibility = Visibility.Visible;
             control.UpdateLayout();
             control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+          
+            if (reconnect) DatabaseHandler.reconnectClient();
 
             bool isConnected = DatabaseHandler.Connect();
 
@@ -57,7 +59,7 @@ namespace ssi
             }
             else
             {
-                MessageTools.Warning("Unable to connect to database, please check your settings");
+                MessageTools.Warning("Unable to connect to database, please check your settings\nIf you created a new account, please restart the Software");
                 Properties.Settings.Default.DatabaseAutoLogin = false;
                 Properties.Settings.Default.Save();                           
             }

@@ -634,8 +634,7 @@ namespace ssi
 
                 if (Properties.Settings.Default.MongoDBUser != s.MongoUser()
                     || Properties.Settings.Default.DatabaseAddress != s.DatabaseAddress()
-                    || Properties.Settings.Default.MongoDBPass != MainHandler.Encode(s.MongoPass())
-                    || Properties.Settings.Default.LoggedInWithLightning == true)
+                    || Properties.Settings.Default.MongoDBPass != MainHandler.Encode(s.MongoPass()))
                 {
                     reconnect = true;
                 }
@@ -672,7 +671,7 @@ namespace ssi
 
                 if (reconnect)
                 {                    
-                    databaseConnect();
+                    databaseConnect(true);
                 }
 
             }
@@ -680,7 +679,9 @@ namespace ssi
             {
                 if (Properties.Settings.Default.LoggedInWithLightning == true)
                 {
-                    databaseConnect();
+
+                    databaseConnect(true);
+                   
                 }
             }
         }     

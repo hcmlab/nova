@@ -68,8 +68,8 @@
     <Reference Include="CsvHelper, Version=27.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>packages\CsvHelper.27.2.1\lib\net47\CsvHelper.dll</HintPath>
     </Reference>
-    <Reference Include="DnsClient, Version=1.4.0.0, Culture=neutral, PublicKeyToken=4574bb5573c51424, processorArchitecture=MSIL">
-      <HintPath>packages\DnsClient.1.4.0\lib\net471\DnsClient.dll</HintPath>
+    <Reference Include="DnsClient, Version=1.6.1.0, Culture=neutral, PublicKeyToken=4574bb5573c51424, processorArchitecture=MSIL">
+      <HintPath>packages\DnsClient.1.6.1\lib\net471\DnsClient.dll</HintPath>
     </Reference>
     <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -106,26 +106,29 @@
     <Reference Include="Microsoft.Toolkit.Wpf.UI.Controls.WebView">
       <HintPath>References\Microsoft.Toolkit.Wpf.UI.Controls.WebView.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Web.WebView2.Core">
-      <HintPath>References\Microsoft.Web.WebView2.Core.dll</HintPath>
+    <Reference Include="Microsoft.Web.WebView2.Core, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Web.WebView2.WinForms">
-      <HintPath>References\Microsoft.Web.WebView2.WinForms.dll</HintPath>
+    <Reference Include="Microsoft.Web.WebView2.WinForms, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Web.WebView2.Wpf">
-      <HintPath>References\Microsoft.Web.WebView2.Wpf.dll</HintPath>
+    <Reference Include="Microsoft.Web.WebView2.Wpf, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="MongoDB.Bson, Version=2.14.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MongoDB.Bson.2.14.1\lib\net472\MongoDB.Bson.dll</HintPath>
+    <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
     </Reference>
-    <Reference Include="MongoDB.Driver, Version=2.14.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MongoDB.Driver.2.14.1\lib\net472\MongoDB.Driver.dll</HintPath>
+    <Reference Include="MongoDB.Bson, Version=2.17.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MongoDB.Bson.2.17.1\lib\net472\MongoDB.Bson.dll</HintPath>
     </Reference>
-    <Reference Include="MongoDB.Driver.Core, Version=2.14.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MongoDB.Driver.Core.2.14.1\lib\net472\MongoDB.Driver.Core.dll</HintPath>
+    <Reference Include="MongoDB.Driver, Version=2.17.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MongoDB.Driver.2.17.1\lib\net472\MongoDB.Driver.dll</HintPath>
     </Reference>
-    <Reference Include="MongoDB.Libmongocrypt, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MongoDB.Libmongocrypt.1.3.0\lib\net472\MongoDB.Libmongocrypt.dll</HintPath>
+    <Reference Include="MongoDB.Driver.Core, Version=2.17.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MongoDB.Driver.Core.2.17.1\lib\net472\MongoDB.Driver.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Libmongocrypt, Version=1.5.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MongoDB.Libmongocrypt.1.5.5\lib\net472\MongoDB.Libmongocrypt.dll</HintPath>
     </Reference>
     <Reference Include="NAudio">
       <HintPath>References\NAudio.dll</HintPath>
@@ -202,6 +205,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Security.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.AccessControl.5.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
       <Private>True</Private>
@@ -221,6 +227,9 @@
       <HintPath>packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
       <Private>True</Private>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
     </Reference>
     <Reference Include="System.Text.Encoding.CodePages, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Text.Encoding.CodePages.5.0.0\lib\net461\System.Text.Encoding.CodePages.dll</HintPath>
@@ -819,6 +828,8 @@
     <None Include="Core\Compression\Snappy\lib\osx\libsnappy64.dylib" />
     <None Include="Core\Compression\Zstandard\lib\linux\libzstd.so" />
     <None Include="Core\Compression\Zstandard\lib\osx\libzstd.dylib" />
+    <None Include="libmongocrypt.dylib" />
+    <None Include="libmongocrypt.so" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -845,6 +856,7 @@
     <Content Include="EVRPresenter64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="mongocrypt.dll" />
     <Content Include="PythonScripts\EnumScriptType.py" />
     <Content Include="PythonScripts\explanation_backend.py" />
     <Content Include="PythonScripts\ImageExplainerLime.py" />
@@ -881,14 +893,14 @@
       <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\Fody.2.4.1\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Fody.2.4.1\build\Fody.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.864.35\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.864.35\build\Microsoft.Web.WebView2.targets'))" />
-    <Error Condition="!Exists('packages\MongoDB.Libmongocrypt.1.3.0\build\MongoDB.Libmongocrypt.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MongoDB.Libmongocrypt.1.3.0\build\MongoDB.Libmongocrypt.targets'))" />
-    <Error Condition="!Exists('packages\MongoDB.Driver.Core.2.14.1\build\MongoDB.Driver.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MongoDB.Driver.Core.2.14.1\build\MongoDB.Driver.Core.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets'))" />
+    <Error Condition="!Exists('packages\MongoDB.Libmongocrypt.1.5.5\build\MongoDB.Libmongocrypt.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MongoDB.Libmongocrypt.1.5.5\build\MongoDB.Libmongocrypt.targets'))" />
+    <Error Condition="!Exists('packages\MongoDB.Driver.Core.2.17.1\build\MongoDB.Driver.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MongoDB.Driver.Core.2.17.1\build\MongoDB.Driver.Core.targets'))" />
   </Target>
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(ProjectDir)PythonScripts\*.*" "$(TargetDir)\PythonScripts" /Y /I /E</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="packages\Microsoft.Web.WebView2.1.0.864.35\build\Microsoft.Web.WebView2.targets" Condition="Exists('packages\Microsoft.Web.WebView2.1.0.864.35\build\Microsoft.Web.WebView2.targets')" />
-  <Import Project="packages\MongoDB.Libmongocrypt.1.3.0\build\MongoDB.Libmongocrypt.targets" Condition="Exists('packages\MongoDB.Libmongocrypt.1.3.0\build\MongoDB.Libmongocrypt.targets')" />
-  <Import Project="packages\MongoDB.Driver.Core.2.14.1\build\MongoDB.Driver.Core.targets" Condition="Exists('packages\MongoDB.Driver.Core.2.14.1\build\MongoDB.Driver.Core.targets')" />
+  <Import Project="packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets" Condition="Exists('packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets')" />
+  <Import Project="packages\MongoDB.Libmongocrypt.1.5.5\build\MongoDB.Libmongocrypt.targets" Condition="Exists('packages\MongoDB.Libmongocrypt.1.5.5\build\MongoDB.Libmongocrypt.targets')" />
+  <Import Project="packages\MongoDB.Driver.Core.2.17.1\build\MongoDB.Driver.Core.targets" Condition="Exists('packages\MongoDB.Driver.Core.2.17.1\build\MongoDB.Driver.Core.targets')" />
 </Project>

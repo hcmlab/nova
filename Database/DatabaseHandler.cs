@@ -91,21 +91,41 @@ namespace ssi
 
             clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address;
 
-            client = Client;
+           
 
             int count = 0;
-            while (client.Cluster.Description.State.ToString() == "Disconnected")
+
+            try
             {
-                Thread.Sleep(100);
-                if (count++ >= 25)
+               
+                client = Client;
+                while (client.Cluster.Description.State.ToString() == "Disconnected")
                 {
-                    client.Cluster.Dispose();
-                    client = null;
-                    return false;
+                    Thread.Sleep(100);
+                    if (count++ >= 25)
+                    {
+                        client.Cluster.Dispose();
+                        client = null;
+                       
+                        return false;
+                    }
                 }
+
+
+                var adminDB = client.GetDatabase("admin");
+                var cmd = new BsonDocument("usersInfo", user);
+                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
+
+            }
+            catch
+            {
+               
+                return false;
             }
 
- 
+
+
+
             return true;
         }
 
@@ -128,14 +148,32 @@ namespace ssi
         {
             get
             {
+                
                 if (client == null)
                 {
+
                     clientAddress = clientAddress.Replace(" ", "");
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
+    
                     settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
+                   
                     client = new MongoClient(settings);
+                   
                 }
+
+
                 return client;
+            }
+        }
+
+
+        public static void reconnectClient()
+        {
+            if(client != null)
+            {
+                     // client.Cluster.Dispose();
+                     // client.Cluster.StartSession();
+
             }
         }
 
@@ -1021,7 +1059,12 @@ namespace ssi
             BsonDocument Customdata = new BsonDocument();
             if(queryResult != null)
             {
-               Customdata = (BsonDocument)queryResult[0][0]["customData"];
+                try
+                {
+                    Customdata = (BsonDocument)queryResult[0][0]["customData"];
+                }
+                catch { }
+              
             }
            
             try
@@ -1612,7 +1655,10 @@ namespace ssi
                 return false;
             }
             BsonArray array = new BsonArray();
-
+            if(stream.DimLabels == null)
+            {
+                stream.DimLabels = new Dictionary<int, string>();
+            }
             foreach(var item in stream.DimLabels)
             {
                 array.Add(new BsonDocument() {
