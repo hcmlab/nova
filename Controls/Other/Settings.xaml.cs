@@ -414,7 +414,7 @@ namespace ssi
         {
             if (Properties.Settings.Default.LoggedInWithLightning == false)
             {
-                LNBrowser browser = new LNBrowser("http://novaannotation.com:666/login");
+                LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/login");
                 browser.ShowDialog();
                 if (browser.DialogResult == true)
                 {
@@ -435,7 +435,7 @@ namespace ssi
             }
             else
             {
-                LNBrowser browser = new LNBrowser("http://novaannotation.com:666/logout");
+                LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/logout");
                 browser.Show();
                 Properties.Settings.Default.LoggedInWithLightning = false;
                 this.DBUser.Text = "";
