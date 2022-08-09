@@ -35,23 +35,31 @@ namespace ssi
                 var version = CoreWebView2Environment.GetAvailableBrowserVersionString();
                 //browser.CoreWebView2.Navigate("https://microsoft.com");
                 browser.Source = new Uri(url);
-             
-
+              
             }
             catch (WebView2RuntimeNotFoundException exception)
             {
-                string webview = "webview2.exe";
-                string webviewpath = AppDomain.CurrentDomain.BaseDirectory + webview;
-                MainHandler.DownloadFile("https://go.microsoft.com/fwlink/p/?LinkId=2124703", webviewpath);
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.FileName = "\"" + webviewpath + "\"";
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                process.Close();
-                this.Close();
+
+                try
+                {
+                    string webview = "webview2.exe";
+                    string webviewpath = AppDomain.CurrentDomain.BaseDirectory + webview;
+                    MainHandler.DownloadFile("https://go.microsoft.com/fwlink/p/?LinkId=2124703", webviewpath);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "\"" + webviewpath + "\"";
+                    process.StartInfo = startInfo;
+                    process.Start();
+                    process.WaitForExit();
+                    process.Close();
+                   // this.Close();
+                }
+                catch(Exception e)
+                {
+                    MessageTools.Warning("You need webview2 in Order to access webtools. Please manually install from https://go.microsoft.com/fwlink/p/?LinkId=2124703");
+                }
+               
             }
         
 
