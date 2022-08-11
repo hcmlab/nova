@@ -429,6 +429,16 @@ namespace ssi
                 applylnbutton.Visibility = Visibility.Hidden;
          
         }
+
+        private void walletid_GotFocus(object sender, RoutedEventArgs e)
+        {
+            walletid.BorderThickness = new Thickness(1);
+        }
+
+        private void walletid_LostFocus(object sender, RoutedEventArgs e)
+        {
+            walletid.BorderThickness = new Thickness(0);
+        }
     }
 
 }

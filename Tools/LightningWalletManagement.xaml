@@ -83,7 +83,7 @@
         </StackPanel>
         <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Name="statusBar" HorizontalAlignment="left" Margin="0" MouseDoubleClick="walletid_MouseDoubleClick">
             <!--<StatusBarItem Name="balance">0 Sats</StatusBarItem>-->
-            <p:TextBoxEx Margin="0,0,0,0" BorderBrush="DarkGray" BorderThickness="1" TextAlignment="Right" Background="Transparent" Name="walletid" Width="80" Focusable="true" KeyUp="walletid_KeyUp_1"></p:TextBoxEx>
+            <p:TextBoxEx Margin="0,0,-2,0" BorderBrush="DarkGray" BorderThickness="0" TextAlignment="Right" Background="Transparent" Name="walletid" Width="80" GotFocus="walletid_GotFocus" LostFocus="walletid_LostFocus" KeyUp="walletid_KeyUp_1"></p:TextBoxEx>
             <Label  Margin="-10,0,0,0" Name="statusbar" Content="@novaannotation.com" ToolTip="This LNaddress is assosicated with your wallet. People can send you sats there. You can change your address as many times as you want, but your old address gets deleted. Double click to copy to clipboard"  Width="130"/>
             <Button Margin="-5,0,0,0" Background="Blue" Width="40" Foreground="White" Name="applylnbutton" Visibility="Hidden" Click="applylnbutton_Click">Save</Button>
 
