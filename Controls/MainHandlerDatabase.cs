@@ -94,6 +94,8 @@ namespace ssi
                             myWallet.invoice_key = user.ln_invoice_key;
                             myWallet.wallet_id = user.ln_wallet_id;
                             myWallet.user_id = user.ln_user_id;
+                            myWallet.lnaddressname = user.ln_addressname;
+                            myWallet.lnaddresspin = user.ln_addresspin;
                             myWallet.balance = balance;
                         }
                     }

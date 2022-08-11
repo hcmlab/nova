@@ -963,6 +963,8 @@ namespace ssi
             user.ln_invoice_key = "";
             user.ln_user_id = "";
             user.ln_wallet_id = "";
+            user.ln_addressname = "";
+            user.ln_addresspin = "";
             try
             {
                 adminDatabase.RunCommand<BsonDocument>(createUser);
@@ -1103,7 +1105,11 @@ namespace ssi
 
             try
             {
-                dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(Customdata["ln_admin_key"].ToString(), MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+                string ln_admin_key = Customdata["ln_admin_key"].ToString();
+                if(ln_admin_key == "Length of the data to decrypt is invalid.")
+                    dbuser.ln_admin_key = "";
+                else
+                dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
 
             }
             catch
@@ -1132,6 +1138,28 @@ namespace ssi
             };
 
 
+            try
+            {
+                dbuser.ln_addresspin = Customdata["ln_addresspin"].ToString();
+
+            }
+            catch
+            {
+                dbuser.ln_addresspin = "";
+            };
+
+
+
+            try
+            {
+                dbuser.ln_addressname = Customdata["ln_addressname"].ToString();
+
+            }
+            catch
+            {
+                dbuser.ln_addressname = "";
+            };
+
 
 
             return dbuser;
@@ -1145,7 +1173,7 @@ namespace ssi
             }
 
             var database = Client.GetDatabase("admin");
-            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id } } } };
+            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname } , { "ln_addresspin", user.ln_addresspin } } } };
             try
             {
                 database.RunCommand<BsonDocument>(updatecustomdata);
@@ -4365,8 +4393,11 @@ namespace ssi
         public string ln_invoice_key { get; set; }
         public string ln_wallet_id{ get; set; }
         public string ln_user_id { get; set; }
+        public string ln_addressname { get; set; }
+        public string ln_addresspin { get; set; }
 
-
+        
+            
 
 
         public override string ToString()

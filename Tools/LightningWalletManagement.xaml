@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
         WindowStyle="ToolWindow"
@@ -38,9 +39,9 @@
             <Separator Height="30" Visibility="Hidden"></Separator>
             <Button x:Name="createButton"  Content="Generate Wallet" Click="createButton_Click" IsEnabled="True" />
             <Separator Height="30" Visibility="Hidden"></Separator>
-            <TextBlock HorizontalAlignment="Left" Width="242" Margin="10,0,0,0"><Run Text="This feature is still in beta. Use at own risk."/>
-              
-                
+            <TextBlock Name="stat" HorizontalAlignment="Left" Width="242" Margin="10,0,0,0"><Run Text="This feature is still in beta. Use at own risk."/>
+
+
             </TextBlock>
 
 
@@ -54,7 +55,7 @@
                     </Style>
                 </Button.Resources>
             </Button>
-            <Label x:Name="balance" Height="25" Content="0 Sats"/>
+            <Label x:Name="balance" Height="25" MouseDoubleClick="balance_MouseDoubleClick" Content="0 Sats"/>
             <Separator Height="10" Visibility="Hidden"/>
             <Label Content="Deposit Funds"/>
             <TextBox x:Name="DepositSats" Text="100"/>
@@ -69,20 +70,23 @@
             <Label Content="Withdraw Funds"/>
 
             <TextBox x:Name="WithdrawUrl" TextChanged="WithdrawUrl_TextChanged" GotFocus="WithdrawUrl_GotFocus" Text="Enter Invoice / LN address here" />
-        <StackPanel Name="withdrawsatspanel" Visibility="Collapsed">
-           <Label Content="Withdraw Sats:"/>
-           <TextBox x:Name="WithdrawAmount" Text="100"/>
-        </StackPanel>
-        <Label x:Name="satsWithdrawLabel" Foreground="Green" Content="0 Sats"/>
+            <StackPanel Name="withdrawsatspanel" Visibility="Collapsed">
+                <Label Content="Withdraw Sats:"/>
+                <TextBox x:Name="WithdrawAmount" Text="100"/>
+            </StackPanel>
+            <Label x:Name="satsWithdrawLabel" Foreground="Green" Content="0 Sats"/>
             <Button x:Name="Withdraw"  Content="Withdraw" Grid.Column="0" Click="Withdraw_Click" IsEnabled="True" />
             <Label x:Name="statuswithdraw" Foreground="Green"/>
             <Separator Height="10" Visibility="Hidden"/>
 
 
         </StackPanel>
-        <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="statusBar" Margin="0">
+        <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Name="statusBar" HorizontalAlignment="left" Margin="0" MouseDoubleClick="walletid_MouseDoubleClick">
             <!--<StatusBarItem Name="balance">0 Sats</StatusBarItem>-->
-            <StatusBarItem Name="walletid"></StatusBarItem>
+            <p:TextBoxEx Margin="0,0,0,0" BorderBrush="DarkGray" BorderThickness="1" TextAlignment="Right" Background="Transparent" Name="walletid" Width="80" Focusable="true" KeyUp="walletid_KeyUp_1"></p:TextBoxEx>
+            <Label  Margin="-10,0,0,0" Name="statusbar" Content="@novaannotation.com" ToolTip="This LNaddress is assosicated with your wallet. People can send you sats there. You can change your address as many times as you want, but your old address gets deleted. Double click to copy to clipboard"  Width="130"/>
+            <Button Margin="-5,0,0,0" Background="Blue" Width="40" Foreground="White" Name="applylnbutton" Visibility="Hidden" Click="applylnbutton_Click">Save</Button>
+
         </StatusBar>
 
 

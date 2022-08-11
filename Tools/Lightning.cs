@@ -31,7 +31,10 @@ namespace ssi
             public string admin_id { get; set; }
             public string user_id { get; set; }
             public string wallet_id { get; set; }
-           
+            public string lnaddresspin { get; set; }
+            public string lnaddressname { get; set; }
+
+
         }
 
 
@@ -68,6 +71,9 @@ namespace ssi
                 {
                     return null;
                 }
+
+               
+
                 return responseDic;
 
             }
@@ -138,8 +144,40 @@ namespace ssi
             return invoice;
         }
 
-        
+       
+        public async Task<string> TestLNaddress(string name, string key, string pin=" ", string prevname=" ")
+        {
+            var content = new MultipartFormDataContent
+            {
+               
+            };
+           string url = "";
+           if(pin == " ")
+            {
+                url = "http://novaannotation.com/" + "create?name=" + name + "&key=" + key;
+            }
+           else
+            {
+                url = "http://novaannotation.com/" + "create?name=" + name + "&key=" + key + "&currentname=" + prevname + "&pin=" + pin;
+            }
+            var client = new HttpClient();
+            var response = await client.PostAsync(url, content);
 
+            var responseString = await response.Content.ReadAsStringAsync();
+            if(responseString.Contains("Success"))
+                {
+                string[] array =  responseString.Split('&');
+                string[] array2 = array[1].Split('=');
+                string retpin = array2[1];
+                return retpin;
+                }
+            else return "Error: " + responseString;
+
+            //var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+            //dynamic responseDic = JObject.Parse(responseString);
+
+
+        }
 
 
         public async Task<string> PayInvoice (Lightning.LightningWallet wallet, string payment_request)
@@ -238,24 +276,6 @@ namespace ssi
             }
             else return null;
                
-
-        }
-
-        public Bitmap GetQRLoginImage()
-        {
-
-            WebClient client = new WebClient();
-            Stream stream = client.OpenRead("http://82.165.19.208:5000/auth");
-            Bitmap bitmap; bitmap = new Bitmap(stream);
-            stream.Flush();
-            stream.Close();
-            client.Dispose();
-            if (bitmap != null)
-            {
-                return bitmap;
-            }
-            else return null;
-
 
         }
 

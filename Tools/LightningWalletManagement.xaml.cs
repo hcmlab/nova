@@ -32,21 +32,25 @@ namespace ssi
             if(checkInvoicePaidTimer != null) checkInvoicePaidTimer.Stop();
          
             this.handler = handler;
+          
             //createWallet();
             if (MainHandler.myWallet == null)
             {
                 Lightning.Visibility = Visibility.Collapsed;
                 LightningCreate.Visibility = Visibility.Visible;
-                walletid.Content = " ";
+                walletid.Text = " ";
+                statusBar.Visibility = Visibility.Hidden;
             }
 
             else
             {
-                walletid.Content = "ID: " + MainHandler.myWallet.wallet_id;
+                walletid.Text = MainHandler.myWallet.lnaddressname;
+               // walletid.Content = "ID: " + MainHandler.myWallet.wallet_id;
                 balance.Content = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats";
                 loadbalancewithCurrency();
                 Lightning.Visibility = Visibility.Visible;
                 LightningCreate.Visibility = Visibility.Collapsed;
+                statusBar.Visibility = Visibility.Visible;
             }
         }
 
@@ -110,45 +114,49 @@ namespace ssi
                     this.QR.Dispatcher.Invoke(() => {
                         QR.Source = new BitmapImage(new Uri("/Resources/suc.png", UriKind.Relative));
                     });
-                  
-
-                    try
-                    {
 
 
-                        MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
-                        string sats = "Loading";
-                        try
-                        {
-                            sats = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats (" + (await lightning.PriceinCurrency(MainHandler.myWallet.balance / 1000, "EUR")).ToString("0.00") + "€)";
-                        }
-                        catch (Exception exp)
-                        {
-                            sats = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats";
-                        }
-
-                        handler.control.navigator.satsbalance.Dispatcher.Invoke(() => {
-                            handler.control.navigator.satsbalance.Content = "\u26a1 " + (MainHandler.myWallet.balance / 1000) + " Sats";
-                        });
-                        this.balance.Dispatcher.Invoke(() => {
-                            balance.Content = sats;
-                        });
-
-                    }
-                    catch (Exception ex)
-                    {
-                        handler.control.navigator.satsbalance.Dispatcher.Invoke(() => {
-                            handler.control.navigator.satsbalance.Content = "\u26a1 " + "Error connecting to Lightning wallet.. please try again later.";
-                        });
-                        this.balance.Dispatcher.Invoke(() => {
-                            balance.Content = ex;
-                        });
-                    }
+                    UpdateBalance();
                 }
-
-
             }
 
+        }
+
+
+        public async void UpdateBalance()
+        {
+            try
+            {
+
+
+                MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
+                string sats = "Loading";
+                try
+                {
+                    sats = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats (" + (await lightning.PriceinCurrency(MainHandler.myWallet.balance / 1000, "EUR")).ToString("0.00") + "€)";
+                }
+                catch (Exception exp)
+                {
+                    sats = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats";
+                }
+
+                handler.control.navigator.satsbalance.Dispatcher.Invoke(() => {
+                    handler.control.navigator.satsbalance.Content = "\u26a1 " + (MainHandler.myWallet.balance / 1000) + " Sats";
+                });
+                this.balance.Dispatcher.Invoke(() => {
+                    balance.Content = sats;
+                });
+
+            }
+            catch (Exception ex)
+            {
+                handler.control.navigator.satsbalance.Dispatcher.Invoke(() => {
+                    handler.control.navigator.satsbalance.Content = "\u26a1 " + "Error connecting to Lightning wallet.. please try again later.";
+                });
+                this.balance.Dispatcher.Invoke(() => {
+                    balance.Content = ex;
+                });
+            }
         }
 
 
@@ -263,6 +271,7 @@ namespace ssi
             Dictionary<string, string> response = await lightning.CreateWallet(DatabaseHandler.GetUserInfo(username), Properties.Settings.Default.DatabaseAddress);
 
             DatabaseUser user = DatabaseHandler.GetUserInfo(username);
+            if (response == null) return;
             string admin_key = response["adminkey"];
             string invoice_key = response["inkey"];
             string wallet_id = response["wallet_id"];
@@ -273,21 +282,55 @@ namespace ssi
             user.ln_wallet_id = wallet_id;
             user.ln_user_id = user_id;
 
+            string rnd = RandomString(8);
+            string lnaddressname = "user-" + rnd;
+            string pin = await lightning.TestLNaddress(lnaddressname, invoice_key);
+
+            user.ln_addressname = lnaddressname;
+            user.ln_addresspin = pin;
+
             DatabaseHandler.ChangeUserCustomData(user);
             MainHandler.myWallet = new Lightning.LightningWallet();
             MainHandler.myWallet.admin_key = admin_key;
             MainHandler.myWallet.invoice_key = invoice_key;
             MainHandler.myWallet.wallet_id = wallet_id;
             MainHandler.myWallet.user_id = user_id;
+            MainHandler.myWallet.user_id = user_id;
+            MainHandler.myWallet.lnaddressname = lnaddressname;
+            MainHandler.myWallet.lnaddresspin = pin;
             MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
             Lightning.Visibility = Visibility.Visible;
             LightningCreate.Visibility = Visibility.Collapsed;
-            walletid.Content = "ID: " + MainHandler.myWallet.wallet_id;
+            walletid.Text = MainHandler.myWallet.lnaddressname;
+            statusBar.Visibility = Visibility.Visible;
+        }
 
+        public string RandomString(int size, bool lowerCase = false)
+        {
+            var builder = new StringBuilder(size);
+
+            // Unicode/ASCII Letters are divided into two blocks
+            // (Letters 65–90 / 97–122):
+            // The first group containing the uppercase letters and
+            // the second group containing the lowercase.  
+
+            // char is a single Unicode character  
+            char offset = lowerCase ? 'a' : 'A';
+            const int lettersOffset = 26; // A...Z or a..z: length=26  
+            Random _random = new Random();
+            for (var i = 0; i < size; i++)
+            {
+                var @char = (char)_random.Next(offset, offset + lettersOffset);
+                builder.Append(@char);
+            }
+
+            return lowerCase ? builder.ToString().ToLower() : builder.ToString();
         }
 
         private void createButton_Click(object sender, RoutedEventArgs e)
         {
+           createButton.IsEnabled = false;
+           stat.Text = "Please wait, wallet is being created..";
            createWallet();
         }
 
@@ -313,6 +356,78 @@ namespace ssi
                 checkInvoicePaidTimer.Close();
             }
            
+        }
+
+        private async void walletid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+
+            if (Keyboard.IsKeyDown(Key.LeftCtrl))
+            {
+                System.Windows.Clipboard.SetText("http://lnbits.novaannotation.com/wallet?usr=" + MainHandler.myWallet.user_id + "&wal=" + MainHandler.myWallet.wallet_id);
+            }
+
+            else 
+            {
+                //testcode, replace random
+          
+                System.Windows.Clipboard.SetText(MainHandler.myWallet.lnaddressname + "@novaannotation.com");
+
+            }
+        }
+
+        private void balance_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            UpdateBalance();
+        }
+
+        private async void walletid_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+            
+          
+        }
+
+    
+
+        private async void walletid_KeyUp_1(object sender, KeyEventArgs e)
+        {
+            if (walletid.Text != MainHandler.myWallet.lnaddressname)
+            {
+                applylnbutton.Visibility = Visibility.Visible;
+            }
+            else applylnbutton.Visibility = Visibility.Hidden;
+            
+            e.Handled = true;
+        }
+
+        private async void applylnbutton_Click(object sender, RoutedEventArgs e)
+        {
+                DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+
+                string lnaddressname = walletid.Text;
+                string pin = await lightning.TestLNaddress(lnaddressname, MainHandler.myWallet.invoice_key, MainHandler.myWallet.lnaddresspin, MainHandler.myWallet.lnaddressname);
+                if (pin.Contains("Error"))
+                {
+                    MessageBox.Show(pin);
+                    return;
+                }
+    
+
+                user.Password = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
+                user.ln_invoice_key = MainHandler.myWallet.invoice_key;
+                user.ln_wallet_id = MainHandler.myWallet.wallet_id;
+                user.ln_user_id = MainHandler.myWallet.user_id;
+                user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key, user.Password);
+                user.ln_addressname = lnaddressname;
+                user.ln_addresspin = pin;
+                DatabaseHandler.ChangeUserCustomData(user);
+                MainHandler.myWallet.lnaddresspin = user.ln_addresspin;
+                MainHandler.myWallet.lnaddressname = user.ln_addressname;
+
+                walletid.Text = MainHandler.myWallet.lnaddressname;
+              
+                applylnbutton.Visibility = Visibility.Hidden;
+         
         }
     }
 
