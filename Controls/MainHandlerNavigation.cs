@@ -215,11 +215,22 @@ namespace ssi
             control.navigator.statusBarDatabase.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
             if (ENABLE_LIGHTNING && isConnected)
             {
-                control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
-                control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+               
 
-                if (myWallet == null) control.navigator.satsbalance.Content = "\u26a1 ";
-                else control.navigator.satsbalance.Content = "\u26a1 " + (myWallet.balance / 1000) + " Sats";
+                if (myWallet == null) { 
+                    control.navigator.satsbalance.Content = "\u26a1 ";
+                    control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                    control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+                }
+                else if (myWallet.balance == -1) 
+                {
+                    control.navigator.satsbalance.Content = "\u26a1 Error connecting to Server, try again later. ";
+                    control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                }
+                else { control.navigator.satsbalance.Content = "\u26a1 " + (myWallet.balance / 1000) + " Sats";
+                    control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                    control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+                }
             }
 
             if (ENABLE_LIGHTNING && !isConnected)

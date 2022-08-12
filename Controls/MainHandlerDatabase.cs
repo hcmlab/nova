@@ -83,13 +83,14 @@ namespace ssi
                     }
                     else 
                     {
+                        myWallet = new Lightning.LightningWallet();
                         balance = await lightning.GetWalletBalance(user.ln_admin_key);
                         //if error we don't have a wallet, returns -1.
-                        if (balance == -1)
-                         MainHandler.myWallet = null;
-                        else
-                        {
-                            myWallet = new Lightning.LightningWallet();
+                        //if (balance == -1)
+                        // MainHandler.myWallet = null;
+                        //else
+                        //{
+                           
                             myWallet.admin_key = user.ln_admin_key;
                             myWallet.invoice_key = user.ln_invoice_key;
                             myWallet.wallet_id = user.ln_wallet_id;
@@ -97,7 +98,7 @@ namespace ssi
                             myWallet.lnaddressname = user.ln_addressname;
                             myWallet.lnaddresspin = user.ln_addresspin;
                             myWallet.balance = balance;
-                        }
+                        //}
                     }
 
                     updateNavigator();

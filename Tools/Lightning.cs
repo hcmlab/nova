@@ -92,19 +92,29 @@ namespace ssi
             {
                 { new StringContent(admin_key), "wallet_admin_key" },
             };
-            string url = Defaults.Lightning.LNBitsEndpoint + "/getWalletBalance";
-            var client = new HttpClient();
-            var response = await client.PostAsync(url, content);
+            try
+            {
+                string url = Defaults.Lightning.LNBitsEndpoint + "/getWalletBalance";
+                var client = new HttpClient();
+                var response = await client.PostAsync(url, content);
 
-            var responseString = await response.Content.ReadAsStringAsync();
-            var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
 
-            if (responseDic["success"] == "failed")
+                if (responseDic["success"] == "failed")
+                {
+                    return -1;
+                }
+
+                return Int32.Parse(responseDic["balance"]);
+            }
+            catch(Exception e)
             {
                 return -1;
             }
+          
 
-            return Int32.Parse(responseDic["balance"]);
+       
             
 
         }
