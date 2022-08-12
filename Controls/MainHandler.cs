@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using FileMode = System.IO.FileMode;
 
 namespace ssi
 {
@@ -403,12 +405,10 @@ namespace ssi
 
             if (!(File.Exists(webview23path)))
             {
-                DownloadFile("https://github.com/hcmlab/nova/tree/" + repo + "/bin/runtimes/win-x64/native/" + "WebView2Loaderalt.dll", webview23path);
+                DownloadFile("https://github.com/hcmlab/nova/raw/" + repo + "/bin/runtimes/win-x64/native/" + webview23, webview23path);
             }
 
-
-
-
+   
 
             string cmltrainexe = "cmltrain.exe";
             string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "ssi\\" + cmltrainexe;
