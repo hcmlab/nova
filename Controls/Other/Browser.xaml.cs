@@ -30,14 +30,22 @@ namespace ssi
         public LNBrowser(string url)
         {
             InitializeComponent();
+
+            InitializeBrowser(url);
+
+           
+        }
+
+        private async Task InitializeBrowser(string url = null)
+        {
+            var userDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\nova";
+            var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+            await browser.EnsureCoreWebView2Async(env);
             try
             {
                 var version = CoreWebView2Environment.GetAvailableBrowserVersionString();
-                //browser.CoreWebView2.Navigate("https://microsoft.com");
-                browser.Source = new Uri(url);
-              
             }
-          
+
             catch (WebView2RuntimeNotFoundException exception)
             {
 
@@ -54,24 +62,27 @@ namespace ssi
                     process.Start();
                     process.WaitForExit();
                     process.Close();
-                   // this.Close();
+                    DialogResult = false;
+                    // this.Close();
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
+
                     MessageTools.Warning("You need webview2 in Order to access webtools. Please manually install from https://go.microsoft.com/fwlink/p/?LinkId=2124703");
+                    DialogResult = false;
                 }
-               
+
             }
 
             catch (Exception ex)
             {
                 MessageTools.Warning(ex.InnerException.ToString() + " " + ex.Message);
+                DialogResult = false;
                 //MessageTools.Warning("You need webview2 in Order to access webtools. Please manually install from https://go.microsoft.com/fwlink/p/?LinkId=2124703");
             }
+            browser.Source = new UriBuilder(url).Uri;
         }
 
-
- 
         void ReceiveLoginData(object sender, CoreWebView2WebMessageReceivedEventArgs args)
         {
             string reply = args.WebMessageAsJson;

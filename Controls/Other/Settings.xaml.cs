@@ -417,8 +417,6 @@ namespace ssi
             {
                 try
                 {
-
-               
                     LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/login");
                     browser.ShowDialog();
                     if (browser.DialogResult == true)
@@ -438,7 +436,7 @@ namespace ssi
                 }
                 catch(Exception ec)
                 {
-                    MessageTools.Warning(ec.Message);
+                    MessageTools.Warning(ec.GetBaseException() + " " + ec.Message);
 
                 }
             }
@@ -447,7 +445,7 @@ namespace ssi
                 try
                 {
 
-                    LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/logout");
+                LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/logout");
                 browser.Show();
                 Properties.Settings.Default.LoggedInWithLightning = false;
                 this.DBUser.Text = "";
@@ -462,7 +460,7 @@ namespace ssi
                 }
                 catch (Exception ec)
                 {
-                    MessageTools.Warning(ec.Message);
+                    MessageTools.Warning(ec.GetBaseException() + " " + ec.Message);
 
                 }
             }
