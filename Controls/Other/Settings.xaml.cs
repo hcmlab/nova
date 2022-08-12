@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -414,28 +415,39 @@ namespace ssi
         {
             if (Properties.Settings.Default.LoggedInWithLightning == false)
             {
-                LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/login");
-                browser.ShowDialog();
-                if (browser.DialogResult == true)
+                try
                 {
-                    this.DBUser.Text = browser.LNID();
-                    this.DBPassword.Password = browser.LNID();
-                    this.DBUser.IsEnabled = false;
-                    Properties.Settings.Default.MongoDBUser = browser.LNID();
-                    Properties.Settings.Default.MongoDBPass = browser.LNID(); ;
-                    Properties.Settings.Default.LoggedInWithLightning = true;
-                    Properties.Settings.Default.Save();
-                    this.DBPassword.Visibility = Visibility.Collapsed;
-                    this.passwordtext.Visibility = Visibility.Collapsed;
-                    LoginWithLightning.Content = "\u26a1 Logout from Lightning";
 
-                   
+               
+                    LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/login");
+                    browser.ShowDialog();
+                    if (browser.DialogResult == true)
+                    {
+                        this.DBUser.Text = browser.LNID();
+                        this.DBPassword.Password = browser.LNID();
+                        this.DBUser.IsEnabled = false;
+                        Properties.Settings.Default.MongoDBUser = browser.LNID();
+                        Properties.Settings.Default.MongoDBPass = browser.LNID(); ;
+                        Properties.Settings.Default.LoggedInWithLightning = true;
+                        Properties.Settings.Default.Save();
+                        this.DBPassword.Visibility = Visibility.Collapsed;
+                        this.passwordtext.Visibility = Visibility.Collapsed;
+                        LoginWithLightning.Content = "\u26a1 Logout from Lightning";
+
+                    }
+                }
+                catch(Exception ec)
+                {
+                    MessageTools.Warning(ec.Message);
 
                 }
             }
             else
             {
-                LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/logout");
+                try
+                {
+
+                    LNBrowser browser = new LNBrowser("http://auth.novaannotation.com/logout");
                 browser.Show();
                 Properties.Settings.Default.LoggedInWithLightning = false;
                 this.DBUser.Text = "";
@@ -447,6 +459,12 @@ namespace ssi
                 LoginWithLightning.Content = "\u26a1 Login with Lightning";
                 
                 browser.Close();
+                }
+                catch (Exception ec)
+                {
+                    MessageTools.Warning(ec.Message);
+
+                }
             }
 
 
