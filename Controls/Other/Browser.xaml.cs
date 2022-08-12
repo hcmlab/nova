@@ -40,10 +40,12 @@ namespace ssi
         {
             var userDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\nova";
             var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+            MessageTools.Warning(env.BrowserVersionString);
             await browser.EnsureCoreWebView2Async(env);
             try
             {
                 var version = CoreWebView2Environment.GetAvailableBrowserVersionString();
+                MessageTools.Warning(version);
             }
 
             catch (WebView2RuntimeNotFoundException exception)
