@@ -37,6 +37,7 @@ namespace ssi
                 browser.Source = new Uri(url);
               
             }
+          
             catch (WebView2RuntimeNotFoundException exception)
             {
 
@@ -61,11 +62,16 @@ namespace ssi
                 }
                
             }
-        
 
-            //  this.webView.CoreWebView2.Navigate(url);
+            catch (Exception ex)
+            {
+                MessageTools.Warning(ex.InnerException.ToString() + " " + ex.Message);
+                //MessageTools.Warning("You need webview2 in Order to access webtools. Please manually install from https://go.microsoft.com/fwlink/p/?LinkId=2124703");
+            }
         }
 
+
+ 
         void ReceiveLoginData(object sender, CoreWebView2WebMessageReceivedEventArgs args)
         {
             string reply = args.WebMessageAsJson;
