@@ -84,20 +84,22 @@ namespace ssi
                     else 
                     {
                         myWallet = new Lightning.LightningWallet();
+                        myWallet.admin_key = user.ln_admin_key;
+                        myWallet.invoice_key = user.ln_invoice_key;
+                        myWallet.wallet_id = user.ln_wallet_id;
+                        myWallet.user_id = user.ln_user_id;
+                        myWallet.lnaddressname = user.ln_addressname;
+                        myWallet.lnaddresspin = user.ln_addresspin;
                         balance = await lightning.GetWalletBalance(user.ln_admin_key);
+                        myWallet.balance = balance;
                         //if error we don't have a wallet, returns -1.
                         //if (balance == -1)
                         // MainHandler.myWallet = null;
                         //else
                         //{
-                           
-                            myWallet.admin_key = user.ln_admin_key;
-                            myWallet.invoice_key = user.ln_invoice_key;
-                            myWallet.wallet_id = user.ln_wallet_id;
-                            myWallet.user_id = user.ln_user_id;
-                            myWallet.lnaddressname = user.ln_addressname;
-                            myWallet.lnaddresspin = user.ln_addresspin;
-                            myWallet.balance = balance;
+
+
+
                         //}
                     }
 
