@@ -433,6 +433,7 @@ namespace ssi
                         LoginWithLightning.Content = "\u26a1 Logout from Lightning";
 
                     }
+                    else browser.Close();
                 }
                 catch(Exception ec)
                 {

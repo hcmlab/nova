@@ -38,7 +38,7 @@ namespace ssi
 
         private async Task InitializeBrowser(string url = null)
         {
-
+            bool performedWebview2Installation = false;
             try
             {
 
@@ -65,14 +65,18 @@ namespace ssi
                     process.Start();
                     process.WaitForExit();
                     process.Close();
-                    DialogResult = false;
-                    // this.Close();
-                }
+                    File.Delete(webviewpath);
+                    performedWebview2Installation = true;
+                    InitializeBrowser(url);
+        
+                  
+                    }
                 catch (Exception e)
                 {
 
                     MessageTools.Warning("You need webview2 in Order to access webtools. Please manually install from https://go.microsoft.com/fwlink/p/?LinkId=2124703");
-                    DialogResult = false;
+                   
+
                 }
 
             }
@@ -80,10 +84,11 @@ namespace ssi
             catch (Exception ex)
             {
                 MessageTools.Warning(ex.Message);
-                DialogResult = false;
+                this.Close();
                 //MessageTools.Warning("You need webview2 in Order to access webtools. Please manually install from https://go.microsoft.com/fwlink/p/?LinkId=2124703");
             }
-            browser.Source = new UriBuilder(url).Uri;
+            if (!performedWebview2Installation) browser.Source = new UriBuilder(url).Uri;
+   
         }
 
         void ReceiveLoginData(object sender, CoreWebView2WebMessageReceivedEventArgs args)
