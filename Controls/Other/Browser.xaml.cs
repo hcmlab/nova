@@ -33,19 +33,20 @@ namespace ssi
 
             InitializeBrowser(url);
 
-           
+
         }
 
         private async Task InitializeBrowser(string url = null)
         {
-            var userDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\nova";
-            var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
-            MessageTools.Warning(env.BrowserVersionString);
-            await browser.EnsureCoreWebView2Async(env);
+
             try
             {
+
                 var version = CoreWebView2Environment.GetAvailableBrowserVersionString();
-                MessageTools.Warning(version);
+                var userDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\nova";
+                var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+                await browser.EnsureCoreWebView2Async(env);
+
             }
 
             catch (WebView2RuntimeNotFoundException exception)
@@ -78,7 +79,7 @@ namespace ssi
 
             catch (Exception ex)
             {
-                MessageTools.Warning(ex.InnerException.ToString() + " " + ex.Message);
+                MessageTools.Warning(ex.Message);
                 DialogResult = false;
                 //MessageTools.Warning("You need webview2 in Order to access webtools. Please manually install from https://go.microsoft.com/fwlink/p/?LinkId=2124703");
             }

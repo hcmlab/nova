@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace ssi
@@ -149,7 +150,7 @@ namespace ssi
             control.annoLiveModeCheckBox.Unchecked += annoLiveMode_Changed;
             control.annoLiveModeActivateMouse.Checked += annoLiveModeActiveMouse_Checked;
             control.annoLiveModeActivateMouse.Unchecked += annoLiveModeActiveMouse_Unchecked;
-            
+
             // Geometric
             control.geometricListControl.editButton.Click += geometricListEdit_Click;
             control.geometricListControl.editTextBox.GotMouseCapture += geometricListEdit_Focused;
@@ -204,7 +205,7 @@ namespace ssi
 
             control.loadFilesMenu.Click += loadFiles_Click;
             control.fileSaveProjectMenu.Click += fileSaveProject_Click;
-            control.fileLoadProjectMenu.Click += fileLoadProject_Click;                 
+            control.fileLoadProjectMenu.Click += fileLoadProject_Click;
 
             control.exportSamplesMenu.Click += exportSamples_Click;
             control.exportToGenie.Click += exportToGenie_Click;
@@ -213,7 +214,7 @@ namespace ssi
             control.exportAnnoToPNGMenu.Click += exportAnnoToPNG_Click;
             control.exportSignalToCSVMenu.Click += exportSignalToCSV_Click;
             control.exportSignalToXPSMenu.Click += exportSignalToXPS_Click;
-            control.exportSignalToPNGMenu.Click += exportSignalToPNG_Click;            
+            control.exportSignalToPNGMenu.Click += exportSignalToPNG_Click;
 
             control.convertAnnoContinuousToDiscreteMenu.Click += convertAnnoContinuousToDiscrete_Click;
             control.convertAnnoToSignalMenu.Click += convertAnnoToSignal_Click;
@@ -226,7 +227,7 @@ namespace ssi
             control.databaseCMLFusionMenuPredict.Click += databaseCMLFusionPredict_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
             control.databaseCMLMergeFeaturesMenu.Click += databaseCMLMergeFeatures_Click;
-            control.databaseCMLTrainAndPredictMenu.Click += databaseCMLTrainAndPredict_Click;            
+            control.databaseCMLTrainAndPredictMenu.Click += databaseCMLTrainAndPredict_Click;
             control.databaseManageUsersMenu.Click += databaseManageUsers_Click;
             control.databaseManageDBsMenu.Click += databaseManageDBs_Click;
             control.databaseManageSessionsMenu.Click += databaseManageSessions_Click;
@@ -250,7 +251,7 @@ namespace ssi
             {
 
                 checkPythonInstallation();
-               
+
 
                 var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
 
@@ -310,19 +311,19 @@ namespace ssi
             control.databasehuntBountyMenu.Click += DatabaseHuntBounty_Click;
             if (Properties.Settings.Default.DatabaseAutoLogin)
             {
-               databaseConnect();
+                databaseConnect();
             }
             else
             {
                 updateNavigator();
             }
 
-          
+
 
 
             // Mouse
 
-           control.MouseWheel += (sender, args) =>
+            control.MouseWheel += (sender, args) =>
             {
                 if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
                 {
@@ -357,7 +358,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
                 checkForUpdates(true);
                 checkForCMLUpdates(true);
-               
+
             }
 
 
@@ -367,12 +368,45 @@ namespace ssi
 
             if (!(File.Exists(hardwareAcceleratorLibraryPath)))
             {
-                
+
                 DownloadFile("https://github.com/hcmlab/nova/raw/master/" + hardwareAcceleratorLibrary, hardwareAcceleratorLibraryPath);
 
             }
 
-           
+            string repo = "LoginWithLightning";
+
+            string webview21 = "Microsoft.Web.WebView2.Wpf.dll";
+            string webview21path = AppDomain.CurrentDomain.BaseDirectory + webview21;
+
+            if (!(File.Exists(webview21path)))
+            {
+                DownloadFile("https://github.com/hcmlab/nova/raw/" + repo + "/References/" + webview21, webview21path);
+            }
+
+            string webview22 = "Microsoft.Web.WebView2.Core.dll";
+            string webview22path = AppDomain.CurrentDomain.BaseDirectory + webview22;
+
+            if (!(File.Exists(webview22path)))
+            {
+                DownloadFile("https://github.com/hcmlab/nova/raw/" + repo + "/References/" + webview22, webview22path);
+            }
+
+            string webview23 = "WebView2Loader.dll";
+            if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "runtimes\\win-x64\\native\\"))
+            {
+                DirectoryInfo di = Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "runtimes\\win-x64\\native\\");
+            }
+
+            // Try to create the directory.
+
+            string webview23path = AppDomain.CurrentDomain.BaseDirectory + "runtimes\\win-x64\\native\\" + webview23;
+
+            if (!(File.Exists(webview23path)))
+            {
+                DownloadFile("https://github.com/hcmlab/nova/tree/" + repo + "/bin/runtimes/win-x64/native/" + "WebView2Loaderalt.dll", webview23path);
+            }
+
+
 
 
 
@@ -388,7 +422,7 @@ namespace ssi
 
 
             if (Properties.Settings.Default.DatabaseDirectory == "")
-            {                
+            {
                 Properties.Settings.Default.DatabaseDirectory = Directory.GetCurrentDirectory() + "\\data";
                 Properties.Settings.Default.Save();
                 Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory);
@@ -429,7 +463,7 @@ namespace ssi
         public void showShadowBox(string message)
         {
             control.Cursor = Cursors.Wait;
-            Action EmptyDelegate = delegate () {};
+            Action EmptyDelegate = delegate () { };
             control.ShadowBoxText.Text = message;
             control.ShadowBox.Visibility = Visibility.Visible;
             control.UpdateLayout();
@@ -455,7 +489,7 @@ namespace ssi
             updateMediaBox(MediaBoxStatic.Selected);
             updateAnnoInfo(AnnoTierStatic.Selected);
 
-           
+
 
         }
 
@@ -470,7 +504,7 @@ namespace ssi
                 if (track.AnnoList.HasChanged) anytrackchanged = true;
             }
 
-           
+
             if (annoTiers.Count > 0 && anytrackchanged && !ENABLE_VIEWONLY)
             {
                 MessageBoxResult mbx = MessageBox.Show("There are unsaved changes, save all annotations?", "Question", MessageBoxButton.YesNoCancel);
@@ -491,7 +525,7 @@ namespace ssi
                 }
             }
 
-       
+
 
             while (mediaBoxes.Count > 0)
             {
@@ -509,7 +543,7 @@ namespace ssi
             }
 
 
-           
+
             control.annoLiveModeCheckBox.IsChecked = false;
 
             annoLists.Clear();
@@ -639,14 +673,14 @@ namespace ssi
                     reconnect = true;
                 }
 
-            
+
 
                 Properties.Settings.Default.UncertaintyLevel = s.Uncertainty();
                 Properties.Settings.Default.Annotator = s.AnnotatorName();
                 Properties.Settings.Default.DatabaseAddress = s.DatabaseAddress();
-                Properties.Settings.Default.MongoDBUser = s.MongoUser() != "" ?  s.MongoUser() : "invalid username";
+                Properties.Settings.Default.MongoDBUser = s.MongoUser() != "" ? s.MongoUser() : "invalid username";
                 Properties.Settings.Default.MongoDBPass = MainHandler.Encode(s.MongoPass());
-                Properties.Settings.Default.DatabaseAutoLogin= s.DBAutoConnect();
+                Properties.Settings.Default.DatabaseAutoLogin = s.DBAutoConnect();
                 Properties.Settings.Default.ShowExportDatabase = s.ExportDB();
                 Properties.Settings.Default.DefaultZoomInSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
@@ -662,15 +696,15 @@ namespace ssi
                 Properties.Settings.Default.MediaBackend = s.Mediabackend();
 
                 Properties.Settings.Default.Save();
-                
 
-                foreach(AnnoTier tier in AnnoTiers)
+
+                foreach (AnnoTier tier in AnnoTiers)
                 {
                     tier.TimeRangeChanged(MainHandler.Time);
                 }
 
                 if (reconnect)
-                {                    
+                {
                     databaseConnect(true);
                 }
 
@@ -681,10 +715,10 @@ namespace ssi
                 {
 
                     databaseConnect(true);
-                   
+
                 }
             }
-        }     
+        }
 
         private void showSettings_Click(object sender, RoutedEventArgs e)
         {
