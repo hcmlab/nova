@@ -119,7 +119,7 @@ namespace ssi
             }
             catch
             {
-               
+                client = null;
                 return false;
             }
 
@@ -141,7 +141,7 @@ namespace ssi
 
         public static bool IsConnected
         {
-            get { return client != null; }
+            get { return client != null && client.Cluster.Description.State.ToString() != "Disconnected"; }
         }
 
         public static MongoClient Client
@@ -171,6 +171,7 @@ namespace ssi
         {
             if(client != null)
             {
+                
                      // client.Cluster.Dispose();
                      // client.Cluster.StartSession();
 

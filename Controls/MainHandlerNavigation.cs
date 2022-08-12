@@ -221,7 +221,13 @@ namespace ssi
                 if (myWallet == null) control.navigator.satsbalance.Content = "\u26a1 ";
                 else control.navigator.satsbalance.Content = "\u26a1 " + (myWallet.balance / 1000) + " Sats";
             }
-               
+
+            if (ENABLE_LIGHTNING && !isConnected)
+            {
+                control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                control.navigator.satsbalance.Content = "\u26a1 ";  
+            }
+
             control.navigator.satsbalance.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
             
 

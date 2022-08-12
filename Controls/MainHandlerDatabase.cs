@@ -46,7 +46,7 @@ namespace ssi
 
             bool isConnected = DatabaseHandler.Connect();
 
-            
+            MainHandler.myWallet = null;
 
             if (isConnected)
             {
