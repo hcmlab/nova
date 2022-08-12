@@ -213,7 +213,7 @@ namespace ssi
             control.navigator.statusBarServer.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
             control.navigator.statusBarDatabase.Content = DatabaseHandler.DatabaseInfo;
             control.navigator.statusBarDatabase.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
-            if (ENABLE_LIGHTNING)
+            if (ENABLE_LIGHTNING && isConnected)
             {
                 control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
                 control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
