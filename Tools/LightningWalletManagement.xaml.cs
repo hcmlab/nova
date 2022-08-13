@@ -38,13 +38,13 @@ namespace ssi
             {
                 Lightning.Visibility = Visibility.Collapsed;
                 LightningCreate.Visibility = Visibility.Visible;
-                walletid.Text = " ";
+                walletaddress.Text = " ";
                 statusBar.Visibility = Visibility.Hidden;
             }
 
             else
             {
-                walletid.Text = MainHandler.myWallet.lnaddressname;
+                walletaddress.Text = MainHandler.myWallet.lnaddressname;
                // walletid.Content = "ID: " + MainHandler.myWallet.wallet_id;
                 balance.Content = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats";
                 loadbalancewithCurrency();
@@ -301,7 +301,7 @@ namespace ssi
             MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
             Lightning.Visibility = Visibility.Visible;
             LightningCreate.Visibility = Visibility.Collapsed;
-            walletid.Text = MainHandler.myWallet.lnaddressname;
+            walletaddress.Text = MainHandler.myWallet.lnaddressname;
             statusBar.Visibility = Visibility.Visible;
         }
 
@@ -391,7 +391,7 @@ namespace ssi
 
         private async void walletid_KeyUp_1(object sender, KeyEventArgs e)
         {
-            if (walletid.Text != MainHandler.myWallet.lnaddressname)
+            if (walletaddress.Text != MainHandler.myWallet.lnaddressname)
             {
                 applylnbutton.Visibility = Visibility.Visible;
             }
@@ -404,7 +404,7 @@ namespace ssi
         {
                 DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
 
-                string lnaddressname = walletid.Text;
+                string lnaddressname = walletaddress.Text;
                 string pin = await lightning.TestLNaddress(lnaddressname, MainHandler.myWallet.invoice_key, MainHandler.myWallet.lnaddresspin, MainHandler.myWallet.lnaddressname);
                 if (pin.Contains("Error"))
                 {
@@ -424,7 +424,7 @@ namespace ssi
                 MainHandler.myWallet.lnaddresspin = user.ln_addresspin;
                 MainHandler.myWallet.lnaddressname = user.ln_addressname;
 
-                walletid.Text = MainHandler.myWallet.lnaddressname;
+                walletaddress.Text = MainHandler.myWallet.lnaddressname;
               
                 applylnbutton.Visibility = Visibility.Hidden;
          
@@ -432,12 +432,12 @@ namespace ssi
 
         private void walletid_GotFocus(object sender, RoutedEventArgs e)
         {
-            walletid.BorderThickness = new Thickness(1);
+            walletaddress.BorderThickness = new Thickness(1);
         }
 
         private void walletid_LostFocus(object sender, RoutedEventArgs e)
         {
-            walletid.BorderThickness = new Thickness(0);
+            walletaddress.BorderThickness = new Thickness(0);
         }
     }
 
