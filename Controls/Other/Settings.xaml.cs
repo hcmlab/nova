@@ -422,10 +422,10 @@ namespace ssi
                     if (browser.DialogResult == true)
                     {
                         this.DBUser.Text = browser.LNID();
-                        this.DBPassword.Password = browser.LNID();
+                        this.DBPassword.Password = browser.PW();
                         this.DBUser.IsEnabled = false;
                         Properties.Settings.Default.MongoDBUser = browser.LNID();
-                        Properties.Settings.Default.MongoDBPass = browser.LNID(); ;
+                        Properties.Settings.Default.MongoDBPass = browser.PW(); ;
                         Properties.Settings.Default.LoggedInWithLightning = true;
                         Properties.Settings.Default.Save();
                         this.DBPassword.Visibility = Visibility.Collapsed;

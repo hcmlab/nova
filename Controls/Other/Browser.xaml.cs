@@ -26,6 +26,7 @@ namespace ssi
     public partial class LNBrowser : Window
     {
         string id = "0";
+        string pw = "0";
 
         public LNBrowser(string url)
         {
@@ -94,7 +95,10 @@ namespace ssi
         void ReceiveLoginData(object sender, CoreWebView2WebMessageReceivedEventArgs args)
         {
             string reply = args.WebMessageAsJson;
-            id = reply.Remove(reply.Length - 1).Remove(0, 1);
+            string clean = (reply.Remove(reply.Length - 1).Remove(0, 1));
+            string[] split = clean.Split(':');
+            id = split[0];
+            pw = split[1];
 
             DialogResult = true;
             // this.Close();
@@ -105,6 +109,11 @@ namespace ssi
         public string LNID()
         {
             return (id);
+        }
+
+        public string PW()
+        {
+            return (pw);
         }
 
         private void browser_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
