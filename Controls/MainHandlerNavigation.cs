@@ -219,6 +219,7 @@ namespace ssi
 
                 if (myWallet == null) { 
                     control.navigator.satsbalance.Content = "\u26a1 ";
+                    control.navigator.satsbalance.MouseDoubleClick -= LightningReset_Click;
                     control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
                     control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
                 }
@@ -226,8 +227,12 @@ namespace ssi
                 {
                     control.navigator.satsbalance.Content = "\u26a1 Error connecting to Server, try again later. ";
                     control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                    control.navigator.satsbalance.MouseDoubleClick += LightningReset_Click;
+
+                    
                 }
                 else { control.navigator.satsbalance.Content = "\u26a1 " + (myWallet.balance / 1000) + " Sats";
+                    control.navigator.satsbalance.MouseDoubleClick -= LightningReset_Click;
                     control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
                     control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
                 }

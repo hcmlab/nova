@@ -69,11 +69,12 @@
 
             <Label Content="Withdraw Funds"/>
 
-            <TextBox x:Name="WithdrawUrl" TextChanged="WithdrawUrl_TextChanged" GotFocus="WithdrawUrl_GotFocus" Text="Enter Invoice / LN address here" />
+            <TextBox x:Name="WithdrawUrl" TextChanged="WithdrawUrl_TextChanged" GotFocus="WithdrawUrl_GotFocus" Text="Enter Amount / Invoice / LN address here" />
             <StackPanel Name="withdrawsatspanel" Visibility="Collapsed">
                 <Label Content="Withdraw Sats:"/>
                 <TextBox x:Name="WithdrawAmount" Text="100"/>
             </StackPanel>
+            <Image x:Name="QR2" Width="256"/>
             <Label x:Name="satsWithdrawLabel" Foreground="Green" Content="0 Sats"/>
             <Button x:Name="Withdraw"  Content="Withdraw" Grid.Column="0" Click="Withdraw_Click" IsEnabled="True" />
             <Label x:Name="statuswithdraw" Foreground="Green"/>

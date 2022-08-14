@@ -460,6 +460,33 @@ namespace ssi
 
         }
 
+        private async void LightningReset_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                MessageBoxResult res = MessageBox.Show("This will overwrite existing Wallet, all funds will be lost","Lightning Wallet reset", MessageBoxButton.YesNo);
+
+                if (res == MessageBoxResult.Yes)
+                {
+                    MainHandler.myWallet = null;
+                    LightningWalletMangement lwm = new LightningWalletMangement(this);
+                    lwm.Left = System.Windows.Application.Current.MainWindow.Left + 425;
+                    lwm.Top = System.Windows.Application.Current.MainWindow.Top + System.Windows.Application.Current.MainWindow.ActualHeight - 680;
+                    lwm.Topmost = true;
+                    lwm.ShowDialog();
+                    updateNavigator();
+                }
+              
+            }
+
+            Lightning lightning = new Lightning();
+            int balance = await lightning.GetWalletBalance(myWallet.admin_key);
+            if(balance != -1)
+            {
+                updateNavigator();
+            }
+        }
+
         public void showShadowBox(string message)
         {
             control.Cursor = Cursors.Wait;

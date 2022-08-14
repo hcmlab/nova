@@ -179,15 +179,18 @@ namespace ssi
             Lightning.LightningInvoice invoice = new Lightning.LightningInvoice();
             string payment_request = "";
 
-            if (WithdrawUrl.Text.Contains("@")) //Check for Lightning address
+            if (WithdrawUrl.Text.Contains("@") || WithdrawUrl.Text.ToLower().StartsWith("ln")) { 
+
+                if (WithdrawUrl.Text.Contains("@")) //Check for Lightning address
             {
                 string[] split = WithdrawUrl.Text.Split('@');
                 payment_request = await lightning.resolveLNaddress(split[0], split[1], Convert.ToUInt32(WithdrawAmount.Text) * 1000);
                 if(payment_request != "error")
                 {
                     invoice.payment_request = payment_request;
-                    
-                }
+                      
+
+                    }
                 else
                 {
                     statuswithdraw.Content = "Error resolving LN Address";
@@ -195,12 +198,13 @@ namespace ssi
                 }
             }
 
-            else
+            else if(WithdrawUrl.Text.ToLower().StartsWith("ln"))
 
             {
                 invoice.payment_request = WithdrawUrl.Text;
             }
 
+          
 
             if (payment_request != "error")
             {
@@ -219,8 +223,31 @@ namespace ssi
                     statuswithdraw.Foreground = System.Windows.Media.Brushes.Red;
                 }
             }
-           
-            
+
+            }
+
+            else if (Int32.TryParse(WithdrawUrl.Text, out int value))
+            {
+                if(value >= 10)
+                {
+                    statuswithdraw.Content = "Generating Withdraw Url";
+                    statuswithdraw.Foreground = System.Windows.Media.Brushes.Black;
+                    var lnurl = await lightning.getLNURLw(MainHandler.myWallet, value);
+                    string lnurlwstring = "lightning:" + lnurl["lnurl"];
+                    Bitmap bmp = await lightning.GetQRImage(lnurlwstring);
+                    QR2.Source = ConvertBitmap(bmp);
+                    System.Windows.Clipboard.SetText(lnurlwstring);
+                    statuswithdraw.Content = "Copied LNURL to clipboard";
+                }
+                else 
+                {
+                   statuswithdraw.Content = "Amount in Withdraw LNURL must be > 10 sats";
+                   statuswithdraw.Foreground = System.Windows.Media.Brushes.Red;
+                }
+
+            }
+
+
 
         }
 
@@ -361,9 +388,9 @@ namespace ssi
         private async void walletid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
 
-            if (Keyboard.IsKeyDown(Key.LeftCtrl))
+            if (Keyboard.IsKeyDown(Key.LeftShift))
             {
-                System.Windows.Clipboard.SetText("http://lnbits.novaannotation.com/wallet?usr=" + MainHandler.myWallet.user_id + "&wal=" + MainHandler.myWallet.wallet_id);
+                System.Windows.Clipboard.SetText("https://lnbits.novaannotation.com/wallet?usr=" + MainHandler.myWallet.user_id + "&wal=" + MainHandler.myWallet.wallet_id);
             }
 
             else 

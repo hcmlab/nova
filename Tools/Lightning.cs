@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Windows.Media.Imaging;
 
 namespace ssi
 {
@@ -164,11 +165,11 @@ namespace ssi
            string url = "";
            if(pin == " ")
             {
-                url = "http://novaannotation.com/" + "create?name=" + name + "&key=" + key;
+                url = "https://novaannotation.com/" + "create?name=" + name + "&key=" + key;
             }
            else
             {
-                url = "http://novaannotation.com/" + "create?name=" + name + "&key=" + key + "&currentname=" + prevname + "&pin=" + pin;
+                url = "https://novaannotation.com/" + "create?name=" + name + "&key=" + key + "&currentname=" + prevname + "&pin=" + pin;
             }
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);
@@ -285,9 +286,24 @@ namespace ssi
                 return bitmap;
             }
             else return null;
-               
-
         }
+
+        public async Task<Bitmap> GetQRImageLNURL(string lnurlwid)
+        {
+
+            WebClient client = new WebClient();
+            Stream stream = client.OpenRead("https://lnbits.novaannotation.com/withdraw/img/" + lnurlwid);
+            Bitmap bitmap; bitmap = new Bitmap(stream);
+            stream.Flush();
+            stream.Close();
+            client.Dispose();
+            if (bitmap != null)
+            {
+                return bitmap;
+            }
+            else return null;
+        }
+
 
         public async Task<string> checkInvoiceIsPaid(Lightning.LightningWallet wallet, Lightning.LightningInvoice invoice)
         {
@@ -312,6 +328,54 @@ namespace ssi
 
             else return "Transaction failed";
         }
+
+        //public async Task<BitmapImage> getLNURLwQR(string lnurlwid)
+        //{
+        //    var content = new MultipartFormDataContent
+        //    {
+        //        { new StringContent(lnurlwid), "lnurl" },
+        //    };
+
+        //    string url = "https://lnbits.novaannotation.com/withdraw/img/" + lnurlwid;
+        //    var client = new HttpClient();
+        //    var response = await client.GetAsync(url);
+        //    var responseString = await response.Content.ReadAsByteArrayAsync();
+        //    //byte[] explanation = System.Convert.FromBase64String(responseString);
+
+        //    //BitmapImage LnUrlWQR = new BitmapImage();
+        //    //LnUrlWQR.BeginInit();
+        //    //LnUrlWQR.StreamSource = new System.IO.MemoryStream(explanation);
+        //    //LnUrlWQR.EndInit();
+        //    //LnUrlWQR.Freeze();
+
+        //    return responseString;
+
+        //}
+
+        public async Task<Dictionary<string,string>> getLNURLw(Lightning.LightningWallet wallet, int amount)
+        {
+            var content = new MultipartFormDataContent
+            {
+                { new StringContent(wallet.admin_key), "wallet_admin_key" },
+                { new StringContent(amount.ToString()), "amount" },
+
+            };
+
+            string url = Defaults.Lightning.LNBitsEndpoint + "/getLNURLw";
+            var client = new HttpClient();
+            var response = await client.PostAsync(url, content);
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+            if (responseDic["success"] == "success")
+            {
+                return responseDic;
+
+            }
+
+            else return responseDic;
+        }
+
 
         public async Task<string> resolveLNaddress(string username, string domain, uint sats)
         {
