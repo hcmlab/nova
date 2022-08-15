@@ -21,8 +21,8 @@
         <StackPanel Name="LightningCreate" Visibility="Collapsed" Grid.Row="0">
 
 
-            <Label Content="Lightning Network support is here!"/>
-            <Separator Height="20" Visibility="Hidden"></Separator>
+            <!--<Label Content="Lightning Network support is here!"/>
+            <Separator Height="20" Visibility="Hidden"></Separator>-->
 
             <TextBlock HorizontalAlignment="Left" Width="242" Margin="10,0,0,0"><Run Text="NOVA now features fast and easy transactions"/>
                 <LineBreak/><Run Text="on the Bitcoin Lightning Layer."/>
@@ -39,9 +39,12 @@
             <Separator Height="30" Visibility="Hidden"></Separator>
             <Button x:Name="createButton"  Content="Generate Wallet" Click="createButton_Click" IsEnabled="True" />
             <Separator Height="30" Visibility="Hidden"></Separator>
-            <TextBlock Name="stat" HorizontalAlignment="Left" Width="242" Margin="10,0,0,0"><Run Text="This feature is still in beta. Use at own risk."/>
+           
+            <TextBlock Name="export" HorizontalAlignment="Left" Width="242" Margin="10,0,0,0"><Run Text="Export Wallet to BlueWallet or Zeus"/></TextBlock>
 
-
+            <Image x:Name="ExportToWallet" Width="200" Visibility="Collapsed"/>
+            <TextBlock Name="stat" HorizontalAlignment="Left" Width="242" Margin="10,0,0,0"><Run Text="The Lightning Wallet feature is still in beta"/>
+              <!--<LineBreak/><Run Text="It is recommended that you move funds to your main wallet!"></Run>-->
             </TextBlock>
 
 
@@ -74,9 +77,11 @@
                 <Label Content="Withdraw Sats:"/>
                 <TextBox x:Name="WithdrawAmount" Text="100"/>
             </StackPanel>
-            <Image x:Name="QR2" Width="256"/>
+            <Image x:Name="QR2" Width="180"/>
             <Label x:Name="satsWithdrawLabel" Foreground="Green" Content="0 Sats"/>
             <Button x:Name="Withdraw"  Content="Withdraw" Grid.Column="0" Click="Withdraw_Click" IsEnabled="True" />
+            <TextBox x:Name="Withdrawaddress" Visibility="Collapsed" Text="Invoice will appear here, copy to your wallet"/>
+
             <Label x:Name="statuswithdraw" Foreground="Green"/>
             <Separator Height="10" Visibility="Hidden"/>
 

@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace ssi
 {
@@ -74,9 +75,13 @@ namespace ssi
                 clipboard.Content = "Copied to clipboard";
 
                 Bitmap bmp = await lightning.GetQRImage(invoice.payment_request);
+                QR2.Visibility = Visibility.Collapsed;
+                Withdrawaddress.Text = "";
+                QR.Visibility = Visibility.Visible;
                 QR.Source = ConvertBitmap(bmp);
+              
 
-                
+
 
             }
             catch(Exception ex)
@@ -235,8 +240,14 @@ namespace ssi
                     var lnurl = await lightning.getLNURLw(MainHandler.myWallet, value);
                     string lnurlwstring = "lightning:" + lnurl["lnurl"];
                     Bitmap bmp = await lightning.GetQRImage(lnurlwstring);
+                    //bmp.SetResolution(200, 200);
+                    QR2.Visibility = Visibility.Visible;
                     QR2.Source = ConvertBitmap(bmp);
-                    System.Windows.Clipboard.SetText(lnurlwstring);
+                    DepositAdress.Text = "";
+                    QR.Visibility = Visibility.Collapsed;
+                    System.Windows.Clipboard.SetText(lnurl["lnurl"]);
+                    Withdrawaddress.Visibility = Visibility.Visible;
+                    Withdrawaddress.Text = lnurl["lnurl"];
                     statuswithdraw.Content = "Copied LNURL to clipboard";
                 }
                 else 
@@ -361,13 +372,17 @@ namespace ssi
            createWallet();
         }
 
-        private void help_Click(object sender, RoutedEventArgs e)
+        private async void help_Click(object sender, RoutedEventArgs e)
         {
             LightningCreate.Visibility = Visibility.Visible;
             Lightning.Visibility = Visibility.Collapsed;
             createButton.Content = "Back to Wallet";
             createButton.Click -= createButton_Click;
             createButton.Click += help_Click2;
+            ExportToWallet.Visibility = Visibility.Visible;
+            Bitmap bmp = await lightning.GetQRImage("lndhub://admin:" + MainHandler.myWallet.admin_key + "@"+ Defaults.Lightning.LNBitsEndPoint + "/lndhub/ext/");
+            ExportToWallet.Source = ConvertBitmap(bmp);
+
         }
         private void help_Click2(object sender, RoutedEventArgs e)
         {
@@ -387,33 +402,15 @@ namespace ssi
 
         private async void walletid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-
-            if (Keyboard.IsKeyDown(Key.LeftShift))
-            {
-                System.Windows.Clipboard.SetText("https://lnbits.novaannotation.com/wallet?usr=" + MainHandler.myWallet.user_id + "&wal=" + MainHandler.myWallet.wallet_id);
-            }
-
-            else 
-            {
-                //testcode, replace random
-          
-                System.Windows.Clipboard.SetText(MainHandler.myWallet.lnaddressname + "@novaannotation.com");
-
-            }
+            statuswithdraw.Foreground = Brushes.Black;
+            statuswithdraw.Content = "Copied LNaddress to clipboard";
+            System.Windows.Clipboard.SetText(MainHandler.myWallet.lnaddressname + Defaults.Lightning.LnAddressHost);  
         }
 
         private void balance_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             UpdateBalance();
         }
-
-        private async void walletid_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-            
-          
-        }
-
     
 
         private async void walletid_KeyUp_1(object sender, KeyEventArgs e)

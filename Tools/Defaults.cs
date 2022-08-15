@@ -73,9 +73,11 @@ namespace ssi
 
         public class Lightning
         {
-            public static string LNBitsEndpoint = "https://ln.novaannotation.com";
-                
-              //  MainHandler.Decode("aHR0cDovL2hjYWkuYml0Y29pbmZpeGVzdGhpcy5vcmc6NTAwMA==");
+            public static string LNEndPoint = "https://ln.novaannotation.com";
+            public static string LNBitsEndPoint = "https://lnbits.novaannotation.com";
+            public static string LnAddressHost = "@novaannotation.com";
+
+            //  MainHandler.Decode("aHR0cDovL2hjYWkuYml0Y29pbmZpeGVzdGhpcy5vcmc6NTAwMA==");
             public static string LNTippingInvoiceID = "7cdd5e6ca21b47889d9ae42740bb9031";
 
 

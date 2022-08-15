@@ -61,7 +61,7 @@ namespace ssi
                     { new StringContent("-"), "password" },
                 };
 
-                string url = Defaults.Lightning.LNBitsEndpoint + "/createLightningWallet";
+                string url = Defaults.Lightning.LNEndPoint + "/createLightningWallet";
                 var client = new HttpClient();
                 var response = await client.PostAsync(url, content);
 
@@ -95,7 +95,7 @@ namespace ssi
             };
             try
             {
-                string url = Defaults.Lightning.LNBitsEndpoint + "/getWalletBalance";
+                string url = Defaults.Lightning.LNEndPoint + "/getWalletBalance";
                 var client = new HttpClient();
                 var response = await client.PostAsync(url, content);
 
@@ -131,7 +131,7 @@ namespace ssi
                 { new StringContent(sats.ToString()), "sats" },
                 { new StringContent(memo), "memo" },
             };
-            string url = Defaults.Lightning.LNBitsEndpoint + "/createLightningInvoice";
+            string url = Defaults.Lightning.LNEndPoint + "/createLightningInvoice";
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);
 
@@ -199,7 +199,7 @@ namespace ssi
                 { new StringContent(wallet.admin_key), "wallet_admin_key" },
                 { new StringContent(payment_request), "payment_request" },
             };
-            string url = Defaults.Lightning.LNBitsEndpoint + "/payLightningInvoice";
+            string url = Defaults.Lightning.LNEndPoint + "/payLightningInvoice";
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);
 
@@ -313,7 +313,7 @@ namespace ssi
                 { new StringContent(wallet.admin_key), "wallet_admin_key" },
                 { new StringContent(invoice.payment_hash), "payment_hash" },
             };
-            string url = Defaults.Lightning.LNBitsEndpoint + "/checkInvoiceIsPaid";
+            string url = Defaults.Lightning.LNEndPoint + "/checkInvoiceIsPaid";
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);
 
@@ -361,7 +361,7 @@ namespace ssi
 
             };
 
-            string url = Defaults.Lightning.LNBitsEndpoint + "/getLNURLw";
+            string url = Defaults.Lightning.LNEndPoint + "/getLNURLw";
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);
             var responseString = await response.Content.ReadAsStringAsync();
