@@ -60,12 +60,13 @@
             </Button>
             <Label x:Name="balance" Height="25" MouseDoubleClick="balance_MouseDoubleClick" Content="0 Sats"/>
             <Separator Height="10" Visibility="Hidden"/>
-            <Label Content="Deposit Funds"/>
-            <TextBox x:Name="DepositSats" Text="100"/>
-            <Label Content="Sats"/>
+            <Label Content="Deposit Funds (Amount in Sats or LNurl) "/>
+            <TextBox x:Name="DepositSats" Text="100"  TextChanged="DepositSats_TextChanged"/>
+            <!--<Label Content="Sats"/>-->
+            <Separator Height="10" Visibility="Hidden"/>
             <Button x:Name="GenerateInvoice"  Content="Generate Invoice" Click="GenerateInvoice_Click" IsEnabled="True" />
             <Image x:Name="QR" Width="256"/>
-            <TextBox x:Name="DepositAdress" Text="Invoice will appear here, copy to your wallet"/>
+            <TextBox x:Name="DepositAdress" Text="Invoice will appear here, copy to your wallet" />
             <Label x:Name="clipboard" Content=""/>
             <Separator Height="10" Visibility="Hidden"/>
 

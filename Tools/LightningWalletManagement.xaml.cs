@@ -65,7 +65,38 @@ namespace ssi
            clipboard.Content = "Creating invoice, please wait..";
             try
             {
-                Lightning.LightningInvoice invoice = await lightning.CreateInvoice(MainHandler.myWallet.invoice_key, Convert.ToUInt32(DepositSats.Text), "Deposit to NOVA Wallet");
+               int sats = -1;
+
+
+               if (DepositSats.Text.ToLower().StartsWith("ln") || DepositSats.Text.ToLower().StartsWith("lightning:ln"))
+                {
+                    clipboard.Content = "Reading LNURL..";
+
+                    if (lightning.lnurlcallbackpaylink != "" && lightning.lnurlcallbackpaylink != "error")
+                    {
+                        string message = await lightning.payLNURLcb(lightning.lnurlcallbackpaylink);
+                        if (message == "Success")
+                        {
+                            clipboard.Foreground = Brushes.Green;
+                        }
+                        else clipboard.Foreground = Brushes.Red;
+                        clipboard.Content = message;
+                        UpdateBalance();
+                    }
+                    else {
+                        clipboard.Foreground = Brushes.Red;
+                        clipboard.Content = "Error";
+                    }
+
+
+
+                }
+               else if(Int32.TryParse(DepositSats.Text, out sats))
+                {
+
+                    clipboard.Content = "Creating invoice, please wait..";
+
+                    Lightning.LightningInvoice invoice = await lightning.CreateInvoice(MainHandler.myWallet.invoice_key, (uint)sats, "Deposit to NOVA Wallet");
                 //InitCheckInvoicePaidTimer(invoice);
                 currentinvoice = invoice;
                 InitCheckLightningBalanceTimer();
@@ -79,8 +110,8 @@ namespace ssi
                 Withdrawaddress.Text = "";
                 QR.Visibility = Visibility.Visible;
                 QR.Source = ConvertBitmap(bmp);
-              
 
+                }
 
 
             }
@@ -462,6 +493,26 @@ namespace ssi
         private void walletid_LostFocus(object sender, RoutedEventArgs e)
         {
             walletaddress.BorderThickness = new Thickness(0);
+        }
+
+        private async void DepositSats_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (DepositSats != null && (DepositSats.Text.ToLower().StartsWith("lnurl") || DepositSats.Text.ToLower().StartsWith("lightning:lnurl")))
+            {
+                string lnurl = DepositSats.Text;
+                if(DepositSats.Text.StartsWith("lightning:"))
+                {
+                    //if lnurl starts with lightning, that's fine but we remove it here for following steps.
+                    lnurl = lnurl.Replace("lightning:", "");
+                }
+
+                string value = await lightning.decodeLNURL(MainHandler.myWallet, lnurl);
+                clipboard.Foreground = Brushes.Green;
+                clipboard.Content = "You will receive " + value +" Sats";
+                if (GenerateInvoice != null)  GenerateInvoice.Content = "Receive";
+
+            }
+            else if (GenerateInvoice != null) GenerateInvoice.Content = "Generate Invoice";
         }
     }
 

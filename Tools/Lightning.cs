@@ -34,9 +34,10 @@ namespace ssi
             public string wallet_id { get; set; }
             public string lnaddresspin { get; set; }
             public string lnaddressname { get; set; }
+          
 
 
-        }
+    }
 
 
         public class LightningInvoice
@@ -47,6 +48,8 @@ namespace ssi
             public string payment_request { get; set; }
             public string checking_id { get; set; }
         }
+
+        public string lnurlcallbackpaylink { get; set; }
 
 
         public async Task<Dictionary<string, string>> CreateWallet(DatabaseUser user, string server)
@@ -190,16 +193,106 @@ namespace ssi
 
         }
 
+        public async Task<string> payLNURLcb(string callbacklink)
+        {
+            var client = new HttpClient();
+            var response = await client.GetAsync(callbacklink);
+            string responseString = await response.Content.ReadAsStringAsync();
+            var responseDic = JObject.Parse(responseString);
+            try
+            {
+                if(responseDic["status"] != null)
+                {
+                    string status = responseDic["status"].ToString();
+                    if (status == "OK")
+                    {
+                        return "Success";
+                    }
+
+                    else return responseDic["status"].ToString();
+                }
+                else return responseDic["detail"].ToString();
+
+            }
+         
+            catch(Exception ex)
+            {
+               return responseDic["detail"].ToString();
+               
+            }
+        
+    
+        }
+
+        
+        public async Task<string> decodeLNURL(LightningWallet wallet,  string lnurl)
+        {
+           
+
+            var content = new MultipartFormDataContent();
+            string url = "";
+
+            url = Defaults.Lightning.LNEndPoint + "/decodeLightningInvoice";
+            content = new MultipartFormDataContent
+            {
+                { new StringContent(wallet.invoice_key), "wallet_invoice_key" },
+                { new StringContent(lnurl), "payment_request" },
+            };
+
+            var client = new HttpClient();
+            var response = await client.PostAsync(url, content);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            //var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+            dynamic responseDic = JObject.Parse(responseString);
+
+            if (responseDic["success"] != "success")
+            {
+                return "error";
+            }
+
+            else if (responseDic["domain"] != null)
+            {
+                string domain = responseDic["domain"];
+                client = new HttpClient();
+                response = await client.GetAsync(domain);
+                responseString = await response.Content.ReadAsStringAsync();
+                //var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+                try
+                {
+                    responseDic = JObject.Parse(responseString);
+                    string cb = responseDic["callback"];
+                    string k1 = responseDic["k1"];
+                    string amountmilli = responseDic["maxWithdrawable"];
+                    int amountmillisats = Int32.Parse(amountmilli);
+                    uint sats = (uint)(amountmillisats / 1000);
+
+                    Lightning.LightningInvoice invoice = await CreateInvoice(MainHandler.myWallet.invoice_key, sats, "NOVA LNURL "
+                       + sats + " Sats");
+                    this.lnurlcallbackpaylink = cb + "?k1=" + k1 + "&pr=" + invoice.payment_request;
+                    return sats.ToString();
+                }
+                catch (Exception e)
+                {
+                    return "error";
+                }
+              
+            }
+
+            return "error";
+        }
 
         public async Task<string> PayInvoice (Lightning.LightningWallet wallet, string payment_request)
 
         {
-            var content = new MultipartFormDataContent
-            {
-                { new StringContent(wallet.admin_key), "wallet_admin_key" },
-                { new StringContent(payment_request), "payment_request" },
-            };
-            string url = Defaults.Lightning.LNEndPoint + "/payLightningInvoice";
+            var content = new MultipartFormDataContent();
+                string url = Defaults.Lightning.LNEndPoint + "/payLightningInvoice";
+                content = new MultipartFormDataContent
+                {
+                    { new StringContent(wallet.admin_key), "wallet_admin_key" },
+                    { new StringContent(payment_request), "payment_request" },
+                };
+
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);
 
