@@ -423,3 +423,6 @@ bin/Microsoft.Web.WebView2.WinForms.xml
 bin/Microsoft.Web.WebView2.Core.xml
 bin/System.Security.AccessControl.xml
 bin/System.Security.Principal.Windows.xml
+bin/ExCSS.dll
+bin/Fizzler.dll
+bin/Svg.dll
