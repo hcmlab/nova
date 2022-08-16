@@ -99,7 +99,7 @@ namespace ssi
                         Email = dialog.Getemail(),
                         Expertise = dialog.GetExpertise(),
                         Password = dialog.GetPassword(),
-                        ln_admin_key = blankuser.ln_admin_key,
+                        ln_admin_key = MainHandler.Cipher.AES.EncryptText(blankuser.ln_admin_key, dialog.GetPassword()),
                         ln_invoice_key = blankuser.ln_invoice_key,
                         ln_wallet_id = blankuser.ln_wallet_id,
                         ln_user_id = blankuser.ln_user_id

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Media.Imaging;
+using Svg;
 
 namespace ssi
 {
@@ -365,6 +366,50 @@ namespace ssi
             return input.Length;
         }
 
+        public async Task<Bitmap> GetLNURLQRImage(string payment_request)
+        {
+
+            var client = new HttpClient();
+            var response = await client.GetAsync("https://lnbits.novaannotation.com/withdraw/img/" + payment_request);
+            var responseString = await response.Content.ReadAsStringAsync();
+            //File.WriteAllText("test.svg", responseString);
+
+
+            try
+            {
+                var svgDocument = SvgDocument.FromSvg<SvgDocument>(responseString);
+                Bitmap bitmap = new Bitmap((int)svgDocument.Width.Value, (int)svgDocument.Height.Value) ;
+                using (Graphics graph = Graphics.FromImage(bitmap))
+                {
+                    Rectangle ImageSize = new Rectangle(0, 0, (int)svgDocument.Width.Value, (int)svgDocument.Height.Value);
+                    graph.FillRectangle(Brushes.White, ImageSize);
+                 
+
+                }
+                svgDocument.Draw(bitmap);
+
+
+                // Bitmap bitmap =   Svg.SvgDocument.OpenAsBitmap("test.svg");
+                //  svgDocument.ShapeRendering = SvgShapeRendering.Auto;
+                //Bitmap bitmap = 
+
+                //    svgDocument.Draw(rasterWidth: 24, rasterHeight: 24);
+                if (bitmap != null)
+                {
+                    return bitmap;
+                }
+                else return null;
+            }
+            catch (Exception ex1)
+            {
+                return null;
+                //Error handling
+            }
+
+            
+        }
+
+
         public async Task<Bitmap> GetQRImage(string payment_request)
         {
   
@@ -381,21 +426,6 @@ namespace ssi
             else return null;
         }
 
-        public async Task<Bitmap> GetQRImageLNURL(string lnurlwid)
-        {
-
-            WebClient client = new WebClient();
-            Stream stream = client.OpenRead("https://lnbits.novaannotation.com/withdraw/img/" + lnurlwid);
-            Bitmap bitmap; bitmap = new Bitmap(stream);
-            stream.Flush();
-            stream.Close();
-            client.Dispose();
-            if (bitmap != null)
-            {
-                return bitmap;
-            }
-            else return null;
-        }
 
 
         public async Task<string> checkInvoiceIsPaid(Lightning.LightningWallet wallet, Lightning.LightningInvoice invoice)
@@ -445,12 +475,17 @@ namespace ssi
 
         //}
 
-        public async Task<Dictionary<string,string>> getLNURLw(Lightning.LightningWallet wallet, int amount)
+        public async Task<Dictionary<string,string>> getLNURLw(Lightning.LightningWallet wallet, int amount, int uses = 1, int wait_time = 5)
         {
+            string usesstring = uses.ToString();
+            string waittimestring = wait_time.ToString();
             var content = new MultipartFormDataContent
             {
                 { new StringContent(wallet.admin_key), "wallet_admin_key" },
                 { new StringContent(amount.ToString()), "amount" },
+                { new StringContent(usesstring), "uses" },
+                { new StringContent(waittimestring), "wait_time" },
+                { new StringContent("True"), "unique" },
 
             };
 

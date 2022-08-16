@@ -78,7 +78,7 @@
                 <Label Content="Withdraw Sats:"/>
                 <TextBox x:Name="WithdrawAmount" Text="100"/>
             </StackPanel>
-            <Image x:Name="QR2" Width="180"/>
+            <Image x:Name="QR2" HorizontalAlignment="Center" Width="200"/>
             <Label x:Name="satsWithdrawLabel" Foreground="Green" Content="0 Sats"/>
             <Button x:Name="Withdraw"  Content="Withdraw" Grid.Column="0" Click="Withdraw_Click" IsEnabled="True" />
             <TextBox x:Name="Withdrawaddress" Visibility="Collapsed" Text="Invoice will appear here, copy to your wallet"/>

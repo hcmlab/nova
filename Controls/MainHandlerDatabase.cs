@@ -230,9 +230,11 @@ namespace ssi
                 DatabaseUser user = DatabaseHandler.GetUserInfo(dialog.GetName());
                 user.Name = dialog.GetName();
                 user.Fullname = dialog.GetFullName();
-                user.Password = dialog.GetPassword();
                 user.Email = dialog.Getemail();
                 user.Expertise = dialog.GetExpertise();
+                user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+                string newPassword = dialog.GetPassword();
+
                 //DatabaseUser user = new DatabaseUser()
                 //{
                 //    Name = dialog.GetName(),
@@ -243,15 +245,16 @@ namespace ssi
                 //};
 
                 DatabaseHandler.ChangeUserCustomData(user);
-                if (user.Password != "" && user.Password != null)
+                if (newPassword != "" && newPassword != null)
                 {
+                    user.Password = newPassword;
                     if (DatabaseHandler.ChangeUserPassword(user))
                     {
-                        Properties.Settings.Default.MongoDBPass = MainHandler.Encode(user.Password);
+                        Properties.Settings.Default.MongoDBPass = MainHandler.Encode(newPassword);
                         MessageBox.Show("Password Change successful!");
                         if(MainHandler.myWallet != null)
                         {
-                            user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key, user.Password);
+                            user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key, newPassword);
                             DatabaseHandler.ChangeUserCustomData(user);
 
                         }
