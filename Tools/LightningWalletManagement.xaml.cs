@@ -248,18 +248,28 @@ namespace ssi
             {
                 statuswithdraw.Content = "Transacting, please wait..";
                 statuswithdraw.Foreground = System.Windows.Media.Brushes.Black;
-                string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request);
-                statuswithdraw.Content = message;
-                if (message == "Success")
-                {
-                    statuswithdraw.Foreground = System.Windows.Media.Brushes.Green;
-                    MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
-                    balance.Content = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats";
-                }
-                else
-                {
-                    statuswithdraw.Foreground = System.Windows.Media.Brushes.Red;
-                }
+                    try
+                    {
+                        string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request);
+                        statuswithdraw.Content = message;
+                        if (message == "Success")
+                        {
+                            statuswithdraw.Foreground = System.Windows.Media.Brushes.Green;
+                            MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
+                            balance.Content = "Balance: " + (MainHandler.myWallet.balance / 1000) + " Sats";
+                        }
+                        else
+                        {
+                            statuswithdraw.Foreground = System.Windows.Media.Brushes.Red;
+
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        statuswithdraw.Foreground = System.Windows.Media.Brushes.Red;
+                        statuswithdraw.Content = ex;
+                    }
+              
             }
 
             }
@@ -410,6 +420,7 @@ namespace ssi
         private async void help_Click(object sender, RoutedEventArgs e)
         {
             LightningCreate.Visibility = Visibility.Visible;
+            createButton.IsEnabled = true;
             Lightning.Visibility = Visibility.Collapsed;
             createButton.Content = "Back to Wallet";
             createButton.Click -= createButton_Click;
