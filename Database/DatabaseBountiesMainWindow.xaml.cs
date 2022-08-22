@@ -71,22 +71,24 @@ namespace ssi
         {
             selectedBounty = (DatabaseBounty)FindBountiesOverviewBox.SelectedItem;
             bool hasWallet = (MainHandler.myWallet != null);
-
-            if(selectedBounty.valueInSats > 0 && !hasWallet)
+            if(selectedBounty != null)
             {
-                MessageBox.Show("This is a paid contract, but it seems you did not create a lightning wallet yet. You can do so in the lower status bar but clicking the \u26a1 symbol");
-            }
-
-            else
-            {
-                selectedBounty.annotatorsJobCandidates.Add(DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser));
-                if (DatabaseHandler.SaveBounty(selectedBounty))
+                if(selectedBounty.valueInSats > 0 && !hasWallet)
                 {
-                    MessageBox.Show("Contract succesfully accepted. Open Accepted bounties Menu to start working on your bounties.");
-                    updateFindBounties();
+                    MessageBox.Show("This is a paid contract, but it seems you did not create a lightning wallet yet. You can do so in the lower status bar but clicking the \u26a1 symbol");
+                }
+
+                else
+                {
+                    selectedBounty.annotatorsJobCandidates.Add(DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser));
+                    if (DatabaseHandler.SaveBounty(selectedBounty))
+                    {
+                        MessageBox.Show("Contract succesfully accepted. Open Accepted bounties Menu to start working on your bounties.");
+                        updateFindBounties();
+                    }
                 }
             }
-            
+
 
 
         }
@@ -123,6 +125,7 @@ namespace ssi
                 if (index > -1)
                 {
                     selectedAcceptedBounty.annotatorsJobCandidates.RemoveAt(index);
+                    selectedAcceptedBounty.numOfAnnotationsNeededCurrent += 1;
                     DatabaseHandler.SaveBounty(selectedAcceptedBounty);
                     updateAcceptedBounties();
 
@@ -130,6 +133,8 @@ namespace ssi
             }
 
         }
+
+
 
         private void AcceptedTabItem_Selected(object sender, RoutedEventArgs e)
         {

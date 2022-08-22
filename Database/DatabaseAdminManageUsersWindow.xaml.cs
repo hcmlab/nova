@@ -58,6 +58,41 @@ namespace ssi
             }
         }
 
+
+        private void removeAllBountiesFromUser(string username)
+        {
+            List<string> databases = DatabaseHandler.GetDatabases();
+            foreach (string databaseName in databases)
+            {
+                IMongoDatabase db = DatabaseHandler.Client.GetDatabase(databaseName);
+                List<DatabaseBounty> bounties = new List<DatabaseBounty>();
+                bounties = DatabaseHandler.LoadAcceptedBounties(db);
+                if(bounties != null)
+                {
+                    foreach (var bounty in bounties)
+                    {
+                        //accepted task
+                        int index = bounty.annotatorsJobCandidates.FindIndex(s => s.Name == username);
+                        if (index > -1)
+                        {
+                            bounty.annotatorsJobCandidates.RemoveAt(index);
+                            bounty.numOfAnnotationsNeededCurrent += 1;
+                            DatabaseHandler.SaveBounty(bounty);
+
+                        }
+
+                        //contractor
+                        if (bounty.Contractor == DatabaseHandler.GetUserInfo(username))
+                        {
+                            DatabaseHandler.DeleteBounty(bounty.OID);
+                        }
+                    }
+                }
+               
+
+            }
+        }
+
         private void DeleteUser_Click(object sender, RoutedEventArgs e)
         {
             if (UsersBox.SelectedItem != null)
@@ -67,8 +102,10 @@ namespace ssi
 
                 if (result == MessageBoxResult.Yes)
                 {
+                     
                     if (DatabaseHandler.DeleteUser(user))
                     {
+                        removeAllBountiesFromUser(user); //make sure 
                         GetUsers();
                     }
                 }
