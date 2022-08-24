@@ -515,7 +515,6 @@ namespace ssi
             if (BountiesOverviewBox.SelectedItem != null)
             {
 
-
                 BountiesCandidates.ItemsSource = ((DatabaseBounty)BountiesOverviewBox.SelectedItem).annotatorsJobCandidates;
 
                 List<AnnotatorStatus> annostatus = new List<AnnotatorStatus>();
