@@ -1,9 +1,10 @@
-﻿<Window x:Class="ssi.AnnoTierNewDiscreteSchemeWindow"
+﻿<Window x:Class="ssi.AnnoTierAttributesWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
+         xmlns:sys="clr-namespace:System;assembly=mscorlib"
           xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
         mc:Ignorable="d"
         Title="New Discrete Scheme" Height="450" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
@@ -15,6 +16,7 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
+
     </Window.Resources>
 
     <Grid>
@@ -31,21 +33,11 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" CornerRadius="10" BorderThickness="1" BorderBrush="White" Background="DarkGray" AllowDrop="True" Drop="AnnoList_Drop">
-            <Label FontSize="16" Foreground="White" Content="Drag an existing scheme file here" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="-1" />
-        </Border>
-
-        <Label Grid.Row="1" Grid.Column="0" Margin="5" >Scheme name</Label>
-        <TextBox x:Name="schemeNameTextField" Grid.Row="1" Grid.Column="1" Margin="5" />
-
-        <Label Name="Colorlabel" Grid.Row="2" Grid.Column="0" Margin="5" >Background color</Label>
-        <p:ColorPicker Name="backroundColorPicket" Grid.Row="2" Grid.Column="1" Margin="5" BorderBrush="DarkGray" Background="Transparent" />
-
         <Label Grid.Row="3" Grid.Column="0" Margin="5">Label names</Label>
         <ListView Name="LabelsListBox" Grid.Row="3" Grid.Column="1" Margin="5,5,5,0" SelectionMode="Single">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="140" Header="Label">
+                    <GridViewColumn Width="100" Header="Attribute">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -55,11 +47,11 @@
 
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="Auto" Header="Color">
+                    <GridViewColumn Width="Auto" Header="Values (Seperate by ; First is default)">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <p:ColorPicker SelectedColor="{Binding Color}" IsEnabled="true" Width="40" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                    <p:TextBoxEx Text="{Binding Values}" IsEnabled="true" Width="100" Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -71,7 +63,6 @@
         <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Style="{StaticResource MyButton}" Name="AddLabel" Content="ADD" Click="AddLabel_Click"/>
             <Button Style="{StaticResource MyButton}" Name="DeleteLabel" Content="REM" Click="DeleteLabel_Click"/>
-            <Button Style="{StaticResource MyButton}" Name="Attributes" Content="ATTRIBUTES" Click="Attributes_Click"/>
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Right">

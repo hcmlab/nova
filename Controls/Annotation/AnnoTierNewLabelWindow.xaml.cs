@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Svg;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
@@ -21,6 +22,20 @@ namespace ssi
             continuousSchemeGrid.Visibility = Visibility.Collapsed;
             freeSchemeGrid.Visibility = Visibility.Collapsed;
 
+            if(scheme.LabelAttributes.Count > 0)
+            {
+                foreach(var attribute in scheme.LabelAttributes) {
+                    if (attribute.AttributeType == AnnoScheme.AttributeTypes.BOOLEAN)
+                    {
+                        CheckBox cb = new CheckBox();
+                        cb.IsChecked = (attribute.Values[0].ToLower() == "false") ? false : true;
+                        Label label = new Label();
+                        label.Content = attribute.Name;
+                        //TODO ADD ELEMENTS TO UI
+                    }
+                }
+
+            }
       
 
             Result = item;
@@ -61,6 +76,14 @@ namespace ssi
 
             Result.Confidence = confidenceSlider.Value;
             Result.Color = colorPicker.SelectedColor.Value;
+
+            if(scheme.LabelAttributes.Count != 0)
+            {
+
+
+            }
+
+
             Result.Meta = descriptiontextBox.Text;
 
             switch (scheme.Type)
