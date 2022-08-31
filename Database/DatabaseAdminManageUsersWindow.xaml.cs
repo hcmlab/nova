@@ -129,6 +129,8 @@ namespace ssi
 
                 if (dialog.DialogResult == true)
                 {
+                    string pass = dialog.GetPassword();
+
                     DatabaseUser user = new DatabaseUser()
                     {
                         Name = dialog.GetName(),
@@ -136,29 +138,42 @@ namespace ssi
                         Email = dialog.Getemail(),
                         Expertise = dialog.GetExpertise(),
                         Password = dialog.GetPassword(),
-                        ln_admin_key = MainHandler.Cipher.AES.EncryptText(blankuser.ln_admin_key, dialog.GetPassword()),
+                        ln_admin_key = blankuser.ln_admin_key,
                         ln_invoice_key = blankuser.ln_invoice_key,
                         ln_wallet_id = blankuser.ln_wallet_id,
-                        ln_user_id = blankuser.ln_user_id
+                        ln_user_id = blankuser.ln_user_id,
+                        ln_addressname = blankuser.ln_addressname,
+                        ln_addresspin = blankuser.ln_addresspin,   
                     };
 
 
 
                     if (user.Password != "")
                     {
-                        if (DatabaseHandler.ChangeUserPassword(user))
+                        if(user.ln_wallet_id != null || user.ln_wallet_id != "")
                         {
-                         
+                            MessageBoxResult mb = MessageBox.Show("User has a Lightning Wallet, Changing Password will make it unaccessable if user didn't save admin key!","Attention",MessageBoxButton.OKCancel);
+                            if(mb == MessageBoxResult.OK)
+                            {
+                                DatabaseHandler.ChangeUserPassword(user);
+                            }
+
+                        }
+                        else if (DatabaseHandler.ChangeUserPassword(user))
+                        {
+                        
                         }
                     }
 
                     //if user has no wallet
-                    if (user.ln_wallet_id == null)
+                    if (user.ln_wallet_id == null || user.ln_wallet_id == "")
                     {
                         user.ln_wallet_id = "";
                         user.ln_user_id = "";
                         user.ln_invoice_key = "";
                         user.ln_admin_key = "";
+                        user.ln_addressname = "";
+                        user.ln_addresspin = "";
                     }
                   
 
