@@ -357,19 +357,6 @@ namespace ssi
         private void DBHost_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if(DBHost.Text == "") DBHost.IsDropdownOpened = true;
-
-            //For now LNAuth only works on test server.
-            if (DBHost.Text != "137.250.171.233")
-            {
-                LoginWithLightning.Visibility = Visibility.Hidden;
-                Properties.Settings.Default.LoggedInWithLightning = false;
-                Properties.Settings.Default.Save();
-            }
-            else
-            {
-                LoginWithLightning.Visibility = Visibility.Visible;
-            }
-
             // DBHost.SelectAll();
         }
 
@@ -480,7 +467,8 @@ namespace ssi
 
         private void DBHost_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            if (DBHost.Text != "137.250.171.233")
+            //For now only works on test server
+            if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
             {
                 LoginWithLightning.Visibility = Visibility.Hidden;
                 Properties.Settings.Default.LoggedInWithLightning = false;
