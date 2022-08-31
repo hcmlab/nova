@@ -52,7 +52,7 @@
                     <TextBox Grid.Row="1" Name="Annotator" Margin="5,0,5,5" />
                     <Label Grid.Row="2" Content="Default zoom in seconds (0 for max. duration):" />
                     <TextBox Grid.Row="3" Name="DefaultZoom" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
-                    
+
                     <Label Grid.Row="4" Content="Draw wavform from video (might be slower) :"  />
                     <CheckBox Grid.Row="5" Name="DrawwaveformCheckbox" Margin="5,0,5,5" />
                     <Label Grid.Row="6" Content="Enable Lightning Network (Experimental, requires restart)"  />
@@ -64,13 +64,13 @@
                         <ComboBoxItem Content="Hardware"/>
                         <ComboBoxItem Content="Software"/>
                     </ComboBox>
-                        <Label Grid.Row="12" Content="Enable Python extensions (requires restart):" ToolTip="Hardware accelerated media backend is faster and should be used. If you installed a codec and you still don't see a video, e.g. on a remote connection, you can chose software backend (it will be less reactive)"  />
+                    <Label Grid.Row="12" Content="Enable Python extensions (requires restart):" ToolTip="Hardware accelerated media backend is faster and should be used. If you installed a codec and you still don't see a video, e.g. on a remote connection, you can chose software backend (it will be less reactive)"  />
                     <Grid Grid.Row="13">
                         <CheckBox Grid.Row="0" Grid.Column="0" Name="EnablePythonCheckbox" Margin="5,0,5,5" />
                         <Label Grid.Row="0" Grid.Column="1"  Content="Debug Mode"  Margin="240,-7,0,0"/>
                         <CheckBox Grid.Row="0" Grid.Column="2" Name="EnablePythonDebugCheckbox"  Margin="220,0,5,5" />
                     </Grid>
-                    
+
 
                 </Grid>
             </TabItem>
@@ -145,15 +145,23 @@
                             <ColumnDefinition Width="70"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0">Host:</Label>
-                        <local:DropdownTextBox Grid.Column="1"  Width="Auto" x:Name="DBHost" Margin="5,3,5,2" TextChanged="DB_IP_TextChanged"  GotKeyboardFocus="DBHost_GotFocus" GotMouseCapture="DBHost_GotMouseCapture"/>
+                        <local:DropdownTextBox Grid.Column="1"  Width="Auto" x:Name="DBHost" Margin="5,3,5,2" LostKeyboardFocus="DBHost_LostKeyboardFocus" GotKeyboardFocus="DBHost_GotFocus" GotMouseCapture="DBHost_GotMouseCapture"/>
                         <Button Grid.Column="2" Height="20px" Click="clear_Click" Width="30px">Clear</Button>
                         <!--<TextBox Grid.Column="1" Name="DBHost" Margin="5,0,5,5" GotKeyboardFocus="DBHost_GotFocus" GotMouseCapture="DBHost_GotMouseCapture" />-->
                         <Label Grid.Column="3">Port:</Label>
                         <TextBox Grid.Column="4" Name="DBPort" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" TextChanged="DBPort_TextChanged"  GotKeyboardFocus="DBPort_GotFocus" GotMouseCapture="DBPort_GotMouseCapture" />
                     </Grid>
-                    <Label Grid.Row="2" Content="Database user:" Grid.ColumnSpan="2"/>
+                    <Label Grid.Row="2" Content="Database user:" Grid.ColumnSpan="2" Grid.Column="0"/>
+
+                    <Button Grid.Row="2" Name="LoginWithLightning" Background="Gold" Content="Login with Lightning" Click="Button_Click" Grid.ColumnSpan="1" Grid.Column="1" Margin="185,0,5,23" Grid.RowSpan="2">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
                     <TextBox Grid.Row="3" Name="DBUser" Margin="5,0,5,5" GotKeyboardFocus="DBUser_GotFocus" GotMouseCapture="DBUser_GotMouseCapture" Grid.ColumnSpan="2"/>
-                    <Label Grid.Row="4" Content="Database password:" Grid.ColumnSpan="2" />
+                    <Label Name="passwordtext" Grid.Row="4" Content="Database password:" Grid.ColumnSpan="2" />
                     <PasswordBox Grid.Row="5" Name="DBPassword" Margin="5,0,5,5" GotKeyboardFocus="DBPassword_GotFocus" GotMouseCapture="DBPassword_GotMouseCapture" Grid.ColumnSpan="2" />
                     <Label Grid.Row="6" Content="Download directory:" Grid.ColumnSpan="2"/>
                     <DockPanel Grid.Row="7" LastChildFill="True" Grid.ColumnSpan="2">

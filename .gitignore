@@ -416,3 +416,13 @@ bin/System.Runtime.CompilerServices.Unsafe.dll
 bin/System.Runtime.CompilerServices.Unsafe.xml
 bin/System.Text.Encoding.CodePages.dll
 bin/System.Text.Encoding.CodePages.xml
+bin/Microsoft.Win32.Registry.xml
+bin/Microsoft.Win32.Registry.dll
+bin/Microsoft.Web.WebView2.Wpf.xml
+bin/Microsoft.Web.WebView2.WinForms.xml
+bin/Microsoft.Web.WebView2.Core.xml
+bin/System.Security.AccessControl.xml
+bin/System.Security.Principal.Windows.xml
+bin/ExCSS.dll
+bin/Fizzler.dll
+bin/Svg.dll

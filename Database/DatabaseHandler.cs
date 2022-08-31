@@ -91,21 +91,41 @@ namespace ssi
 
             clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address;
 
-            client = Client;
+           
 
             int count = 0;
-            while (client.Cluster.Description.State.ToString() == "Disconnected")
+
+            try
             {
-                Thread.Sleep(100);
-                if (count++ >= 25)
+               
+                client = Client;
+                while (client.Cluster.Description.State.ToString() == "Disconnected")
                 {
-                    client.Cluster.Dispose();
-                    client = null;
-                    return false;
+                    Thread.Sleep(100);
+                    if (count++ >= 25)
+                    {
+                        client.Cluster.Dispose();
+                        client = null;
+                       
+                        return false;
+                    }
                 }
+
+
+                var adminDB = client.GetDatabase("admin");
+                var cmd = new BsonDocument("usersInfo", user);
+                var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
+
+            }
+            catch
+            {
+                client = null;
+                return false;
             }
 
- 
+
+
+
             return true;
         }
 
@@ -121,21 +141,40 @@ namespace ssi
 
         public static bool IsConnected
         {
-            get { return client != null; }
+            get { return client != null && client.Cluster.Description.State.ToString() != "Disconnected"; }
         }
 
         public static MongoClient Client
         {
             get
             {
+                
                 if (client == null)
                 {
+
                     clientAddress = clientAddress.Replace(" ", "");
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
+    
                     settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
+                   
                     client = new MongoClient(settings);
+                   
                 }
+
+
                 return client;
+            }
+        }
+
+
+        public static void reconnectClient()
+        {
+            if(client != null)
+            {
+                
+                     // client.Cluster.Dispose();
+                     // client.Cluster.StartSession();
+
             }
         }
 
@@ -925,6 +964,8 @@ namespace ssi
             user.ln_invoice_key = "";
             user.ln_user_id = "";
             user.ln_wallet_id = "";
+            user.ln_addressname = "";
+            user.ln_addresspin = "";
             try
             {
                 adminDatabase.RunCommand<BsonDocument>(createUser);
@@ -1018,7 +1059,17 @@ namespace ssi
             var adminDB = client.GetDatabase("admin");
             var cmd = new BsonDocument("usersInfo", dbuser.Name);
             var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
-            var Customdata = (BsonDocument)queryResult[0][0]["customData"];
+            BsonDocument Customdata = new BsonDocument();
+            if(queryResult != null)
+            {
+                try
+                {
+                    Customdata = (BsonDocument)queryResult[0][0]["customData"];
+                }
+                catch { }
+              
+            }
+           
             try
             {
                 dbuser.Fullname = Customdata["fullname"].ToString();
@@ -1055,7 +1106,11 @@ namespace ssi
 
             try
             {
-                dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(Customdata["ln_admin_key"].ToString(), MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+                string ln_admin_key = Customdata["ln_admin_key"].ToString();
+                if(ln_admin_key == "Length of the data to decrypt is invalid.")
+                    dbuser.ln_admin_key = "";
+                else
+                dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
 
             }
             catch
@@ -1084,6 +1139,28 @@ namespace ssi
             };
 
 
+            try
+            {
+                dbuser.ln_addresspin = Customdata["ln_addresspin"].ToString();
+
+            }
+            catch
+            {
+                dbuser.ln_addresspin = "";
+            };
+
+
+
+            try
+            {
+                dbuser.ln_addressname = Customdata["ln_addressname"].ToString();
+
+            }
+            catch
+            {
+                dbuser.ln_addressname = "";
+            };
+
 
 
             return dbuser;
@@ -1097,7 +1174,7 @@ namespace ssi
             }
 
             var database = Client.GetDatabase("admin");
-            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id } } } };
+            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname } , { "ln_addresspin", user.ln_addresspin } } } };
             try
             {
                 database.RunCommand<BsonDocument>(updatecustomdata);
@@ -1607,7 +1684,10 @@ namespace ssi
                 return false;
             }
             BsonArray array = new BsonArray();
-
+            if(stream.DimLabels == null)
+            {
+                stream.DimLabels = new Dictionary<int, string>();
+            }
             foreach(var item in stream.DimLabels)
             {
                 array.Add(new BsonDocument() {
@@ -4314,8 +4394,11 @@ namespace ssi
         public string ln_invoice_key { get; set; }
         public string ln_wallet_id{ get; set; }
         public string ln_user_id { get; set; }
+        public string ln_addressname { get; set; }
+        public string ln_addresspin { get; set; }
 
-
+        
+            
 
 
         public override string ToString()
