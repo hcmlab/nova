@@ -822,7 +822,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", meta.Name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Meta).ReplaceOne(filter, document, updateOptions);
@@ -1326,7 +1326,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", annotator.Name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).ReplaceOne(filter, document, updateOptions);
@@ -1501,7 +1501,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles).ReplaceOne(filter, document, updateOptions);
@@ -1717,7 +1717,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).ReplaceOne(filter, document, updateOptions);
@@ -2291,7 +2291,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).ReplaceOne(filter, document, updateOptions);
@@ -2558,7 +2558,7 @@ namespace ssi
             newBountyDoc.Add("streams", streamArray);
 
 
-            UpdateOptions newAnnotationDocUpdate = new UpdateOptions();
+            ReplaceOptions newAnnotationDocUpdate = new ReplaceOptions();
             newAnnotationDocUpdate.IsUpsert = true;
             bounties.ReplaceOne(filter_bounty, newBountyDoc, newAnnotationDocUpdate);
 
@@ -2775,7 +2775,7 @@ namespace ssi
                 }
                 newAnnotationDoc.Add("streams", streamArray);
 
-                UpdateOptions newAnnotationDocUpdate = new UpdateOptions();
+                ReplaceOptions newAnnotationDocUpdate = new ReplaceOptions();
                 newAnnotationDocUpdate.IsUpsert = true;
                 annotations.ReplaceOne(filter_anno, newAnnotationDoc, newAnnotationDocUpdate);
 
@@ -3400,6 +3400,7 @@ namespace ssi
                     annoList.Scheme.Labels = new List<AnnoScheme.Label>();
 
                     BsonArray schemelabels = scheme["labels"].AsBsonArray;
+                    BsonArray attributelabels = scheme["attributes"].AsBsonArray;
 
                     for (int j = 0; j < schemelabels.Count; j++)
                     {
@@ -3414,6 +3415,34 @@ namespace ssi
                     }
 
                     annoList.Scheme.Labels.Add(new AnnoScheme.Label(GARBAGELABEL, GARBAGECOLOR));
+
+                    if (scheme.Contains("attributes"))
+                    {
+                        BsonArray attributesArray = scheme["attributes"].AsBsonArray;
+                        foreach (BsonDocument doc in attributesArray)
+                        {
+                            List<string> values = new List<string>();
+                            BsonArray bsonvalues = doc["values"].AsBsonArray;
+                            AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.LIST;
+                            foreach (BsonDocument val in bsonvalues)
+                            {
+                                values.Add(val["value"].ToString());
+                            }
+                            if (values[0].ToLower().Contains("true") || values[0].ToLower().Contains("false"))
+                            {
+                                type = AnnoScheme.AttributeTypes.BOOLEAN;
+                            }
+                            if (values.Count == 1)
+                            {
+                                type = AnnoScheme.AttributeTypes.STRING;
+                            }
+
+                            AnnoScheme.Attribute attr = new AnnoScheme.Attribute(doc["name"].ToString(), values, type);
+                            annoList.Scheme.LabelAttributes.Add(attr);
+                        }
+                    }
+
+                
 
                     for (int i = 0; i < labels.Count; i++)
                     {
@@ -3459,6 +3488,33 @@ namespace ssi
                 else if (annoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
                     annoList.Scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(scheme["color"].ToString());
+                    if (scheme.Contains("attributes"))
+                    {
+                        BsonArray attributesArray = scheme["attributes"].AsBsonArray;
+                        foreach (BsonDocument doc in attributesArray)
+                        {
+                            List<string> values = new List<string>();
+                            BsonArray bsonvalues = doc["values"].AsBsonArray;
+                            AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.LIST;
+                            foreach (BsonDocument val in bsonvalues)
+                            {
+                                values.Add(val["value"].ToString());
+                            }
+                            if (values[0].ToLower().Contains("true") || values[0].ToLower().Contains("false"))
+                            {
+                                type = AnnoScheme.AttributeTypes.BOOLEAN;
+                            }
+                            if (values.Count == 1)
+                            {
+                                type = AnnoScheme.AttributeTypes.STRING;
+                            }
+
+                            AnnoScheme.Attribute attr = new AnnoScheme.Attribute(doc["name"].ToString(), values, type);
+                            annoList.Scheme.LabelAttributes.Add(attr);
+                        }
+                    }
+
+
 
                     for (int i = 0; i < labels.Count; i++)
                     {
@@ -3469,6 +3525,7 @@ namespace ssi
                         string confidence = labels[i]["conf"].ToString();
                         string meta = "";
                         Color color = Colors.Black;
+                       
                         try
                         {
                             meta = labels[i]["meta"].ToString();
