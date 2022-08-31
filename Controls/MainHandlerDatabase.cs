@@ -221,6 +221,7 @@ namespace ssi
             };
 
             blankuser = DatabaseHandler.GetUserInfo(blankuser);
+            blankuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(blankuser.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
 
             DatabaseUserManageWindow dialog = new DatabaseUserManageWindow(blankuser.Name, blankuser.Fullname, blankuser.Email, blankuser.Expertise);
             dialog.ShowDialog();

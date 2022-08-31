@@ -1051,7 +1051,16 @@ namespace ssi
         {
             DatabaseUser dbuser = new DatabaseUser();
             dbuser.Name = username;
-            return GetUserInfo(dbuser);
+
+
+           
+            dbuser = GetUserInfo(dbuser);
+            if(dbuser.ln_admin_key != "" && dbuser.ln_admin_key != null)
+            {
+                dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(dbuser.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+            }
+         
+            return dbuser;
         }
 
         public static DatabaseUser GetUserInfo(DatabaseUser dbuser)
@@ -1107,11 +1116,11 @@ namespace ssi
             try
             {
                 string ln_admin_key = Customdata["ln_admin_key"].ToString();
-                if(ln_admin_key == "Length of the data to decrypt is invalid.")
+                if (ln_admin_key == "Length of the data to decrypt is invalid.")
                     dbuser.ln_admin_key = "";
                 else
-                dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
-
+                    // dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+                    dbuser.ln_admin_key = ln_admin_key;
             }
             catch
             {
