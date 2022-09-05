@@ -1052,7 +1052,7 @@ namespace ssi
 
 
             dbuser = GetUserInfo(dbuser);
-            if (dbuser.ln_admin_key != "" && dbuser.ln_admin_key != null)
+            if (dbuser.ln_admin_key != "" && dbuser.ln_admin_key != null && username  == Properties.Settings.Default.MongoDBUser)
             {
                 dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(dbuser.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
             }
@@ -1076,98 +1076,50 @@ namespace ssi
 
             }
 
-            try
-            {
-                dbuser.Fullname = Customdata["fullname"].ToString();
-            }
-            catch
-            {
-                dbuser.Fullname = dbuser.Name;
-            };
-            try
-            {
-                dbuser.Email = Customdata["email"].ToString();
-            }
-            catch
-            {
-                dbuser.Email = "";
-            };
-            try
-            {
-                dbuser.Expertise = Customdata["expertise"].AsInt32;
-            }
-            catch
-            {
-                dbuser.Expertise = 0;
-            };
+                if (Customdata.Contains("fullname"))
+                    dbuser.Fullname = Customdata["fullname"].ToString();
+                else dbuser.Fullname = dbuser.Name;
+    
+                if (Customdata.Contains("email"))
+                    dbuser.Email = Customdata["email"].ToString();
+                else dbuser.Email = "";
 
-            try
-            {
-                dbuser.ln_invoice_key = Customdata["ln_invoice_key"].ToString();
-            }
-            catch
-            {
-                dbuser.ln_invoice_key = "";
-            };
+                if (Customdata.Contains("expertise"))
+                    dbuser.Expertise = Customdata["expertise"].AsInt32;
+                else dbuser.Expertise = 0;
+    
 
-            try
-            {
+                if (Customdata.Contains("ln_invoice_key"))
+                    dbuser.ln_invoice_key = Customdata["ln_invoice_key"].ToString();
+                else dbuser.ln_invoice_key = "";
+
+                if (Customdata.Contains("ln_admin_key"))
+                {
+
                 string ln_admin_key = Customdata["ln_admin_key"].ToString();
-                if (ln_admin_key == "Length of the data to decrypt is invalid.")
+                if (ln_admin_key == "Length of the data to decrypt is invalid." || ln_admin_key.StartsWith("The input is not a valid Base-64"))
                     dbuser.ln_admin_key = "";
                 else
-                    // dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
                     dbuser.ln_admin_key = ln_admin_key;
-            }
-            catch
-            {
-                dbuser.ln_admin_key = "";
-            };
-
-            try
-            {
-                dbuser.ln_wallet_id = Customdata["ln_wallet_id"].ToString();
-
-            }
-            catch
-            {
-                dbuser.ln_wallet_id = "";
-            };
-
-            try
-            {
-                dbuser.ln_user_id = Customdata["ln_user_id"].ToString();
-
-            }
-            catch
-            {
-                dbuser.ln_user_id = "";
-            };
+                }
+                else dbuser.ln_admin_key = "";
 
 
-            try
-            {
+                if (Customdata.Contains("ln_wallet_id"))
+                    dbuser.ln_wallet_id = Customdata["ln_wallet_id"].ToString();
+                else dbuser.ln_wallet_id = "";
+     
+                if (Customdata.Contains("ln_user_id"))
+                    dbuser.ln_user_id = Customdata["ln_user_id"].ToString();
+                else dbuser.ln_user_id = "";
+
+                if(Customdata.Contains("ln_addresspin"))
                 dbuser.ln_addresspin = Customdata["ln_addresspin"].ToString();
+                else dbuser.ln_addresspin = "";
 
-            }
-            catch
-            {
-                dbuser.ln_addresspin = "";
-            };
-
-
-
-            try
-            {
-                dbuser.ln_addressname = Customdata["ln_addressname"].ToString();
-
-            }
-            catch
-            {
-                dbuser.ln_addressname = "";
-            };
-
-
+                if (Customdata.Contains("ln_addressname"))
+                    dbuser.ln_addressname = Customdata["ln_addressname"].ToString();
+                else dbuser.ln_addressname = "";
 
             return dbuser;
         }

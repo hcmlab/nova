@@ -101,17 +101,26 @@ namespace ssi
             {
                 string url = Defaults.Lightning.LNEndPoint + "/getWalletBalance";
                 var client = new HttpClient();
-                var response = await client.PostAsync(url, content);
+                try
+                {
+                    var response = await client.PostAsync(url, content);
 
-                var responseString = await response.Content.ReadAsStringAsync();
-                var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
 
-                if (responseDic["success"] == "failed")
+
+                    if (responseDic["success"] == "failed")
+                    {
+                        return -1;
+                    }
+
+                    else return Int32.Parse(responseDic["balance"]); 
+                }
+                catch (Exception)
                 {
                     return -1;
                 }
-
-                return Int32.Parse(responseDic["balance"]);
+              
             }
             catch(Exception e)
             {
