@@ -399,18 +399,18 @@ namespace ssi
             }
 
             double[] array = new double[minSize];
-            foreach (AnnoList a in al)
+
+            for (int i = 0; i < minSize; i++)
             {
-                for (int i = 0; i < minSize; i++)
+
+                foreach (AnnoList a in al)
                 {
                     array[i] = array[i] + a[i].Score;
                 }
-            }
 
-            for (int i = 0; i < array.Length; i++)
-            {
                 newList[i].Score = array[i] / numberoftracks;
             }
+
             newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
 
             Ok.IsEnabled = true;
