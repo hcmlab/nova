@@ -288,6 +288,9 @@
     <Compile Include="Commands\Polygon\AddExtraPointCommand.cs" />
     <Compile Include="Commands\Polygon\AddPointCommand.cs" />
     <Compile Include="Commands\Polygon\ChangeLabelCommand .cs" />
+    <Compile Include="Controls\Annotation\AnnoTierAttributesWindow.xaml.cs">
+      <DependentUpon>AnnoTierAttributesWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Annotation\AnnoTierNewFreeSchemeWindow.xaml.cs">
       <DependentUpon>AnnoTierNewFreeSchemeWindow.xaml</DependentUpon>
     </Compile>
@@ -489,6 +492,10 @@
     <Compile Include="Types\AnnoScheme.cs" />
     <Compile Include="Tools\FileTools.cs" />
     <Page Include="Controls\Annotation\AnnoListControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Annotation\AnnoTierAttributesWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

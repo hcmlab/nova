@@ -21,6 +21,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
 
         </Grid.RowDefinitions>
 
@@ -64,7 +65,7 @@
             <TextBox Name="labelTextBox" Grid.Column="1" Margin="5" Grid.ColumnSpan="2"></TextBox>
             <p:ColorPicker Name="colorPicker" Grid.Column="3" Width="40" Margin="5" BorderBrush="Transparent" Background="Transparent"/>
         </Grid>
-        <Grid Name="descriptiongrid" Grid.Row="4" >
+        <!--<Grid Name="descriptiongrid" Grid.Row="4" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="16*" />
@@ -76,7 +77,13 @@
             </Grid.RowDefinitions>
             <Label Margin="5"  Grid.Column="0">Description</Label>
             <TextBox Name="descriptiontextBox" Grid.Column="1" Margin="5" Grid.ColumnSpan="2"></TextBox>
-           
+          
+        </Grid>-->
+        <Grid Name="inputGrid" Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
         </Grid>
         <DockPanel Grid.Row="5" Margin="5" LastChildFill="True">
             <DockPanel LastChildFill="True" DockPanel.Dock="Top">

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Xml.Serialization;
 
 namespace ssi
 {
@@ -136,6 +137,17 @@ namespace ssi
         {
             public string Name { get; set; }
             public Color Color { get; set; }
+        }
+
+        private void Attributes_Click(object sender, RoutedEventArgs e)
+        {
+            AnnoTierAttributesWindow aaw = new AnnoTierAttributesWindow(ref scheme);
+            aaw.ShowDialog();
+            if (aaw.DialogResult != true)
+            {
+                return;
+            }
+
         }
     }
 }

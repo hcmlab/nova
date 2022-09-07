@@ -3,7 +3,6 @@ using CsvHelper.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using ssi.Controls.Annotation.Polygon;
-using ssi.Types.Polygon;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -12,10 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace ssi
 {
@@ -77,7 +74,7 @@ namespace ssi
             return Connect(Properties.Settings.Default.MongoDBUser, Properties.Settings.Default.MongoDBPass, Properties.Settings.Default.DatabaseAddress);
         }
 
-        public static  bool Connect(string user, string password, string address)
+        public static bool Connect(string user, string password, string address)
         {
             client = null;
             databaseName = null;
@@ -91,13 +88,13 @@ namespace ssi
 
             clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address;
 
-           
+
 
             int count = 0;
 
             try
             {
-               
+
                 client = Client;
                 while (client.Cluster.Description.State.ToString() == "Disconnected")
                 {
@@ -106,7 +103,7 @@ namespace ssi
                     {
                         client.Cluster.Dispose();
                         client = null;
-                       
+
                         return false;
                     }
                 }
@@ -148,17 +145,17 @@ namespace ssi
         {
             get
             {
-                
+
                 if (client == null)
                 {
 
                     clientAddress = clientAddress.Replace(" ", "");
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
-    
+
                     settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
-                   
+
                     client = new MongoClient(settings);
-                   
+
                 }
 
 
@@ -169,11 +166,11 @@ namespace ssi
 
         public static void reconnectClient()
         {
-            if(client != null)
+            if (client != null)
             {
-                
-                     // client.Cluster.Dispose();
-                     // client.Cluster.StartSession();
+
+                // client.Cluster.Dispose();
+                // client.Cluster.StartSession();
 
             }
         }
@@ -329,20 +326,20 @@ namespace ssi
             if (IsConnected)
             {
 
-               
-            if (CheckAuthentication(Properties.Settings.Default.MongoDBUser, "admin") >= 3)
-            {
-                var databases = client.ListDatabasesAsync().Result.ToListAsync().Result;
-                foreach (var c in databases)
+
+                if (CheckAuthentication(Properties.Settings.Default.MongoDBUser, "admin") >= 3)
                 {
-                    string db = c.GetElement(0).Value.ToString();
-                    if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && c.GetElement(0).Value.ToString() != "config" && CheckAuthentication(db) >= (int)level)
+                    var databases = client.ListDatabasesAsync().Result.ToListAsync().Result;
+                    foreach (var c in databases)
                     {
-                        items.Add(db);
+                        string db = c.GetElement(0).Value.ToString();
+                        if (c.GetElement(0).Value.ToString() != "admin" && c.GetElement(0).Value.ToString() != "local" && c.GetElement(0).Value.ToString() != "config" && CheckAuthentication(db) >= (int)level)
+                        {
+                            items.Add(db);
+                        }
                     }
+                    items.Sort();
                 }
-                items.Sort();
-            }
 
                 else
                 {
@@ -371,7 +368,7 @@ namespace ssi
                     items.Sort();
                 }
 
-              
+
                 return items;
             }
             else return new List<string>();
@@ -440,7 +437,7 @@ namespace ssi
             return false;
         }
 
-        public static bool GetObjectName(ref string name, IMongoDatabase db,  string collection, ObjectId id)
+        public static bool GetObjectName(ref string name, IMongoDatabase db, string collection, ObjectId id)
         {
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("_id", id);
@@ -825,7 +822,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", meta.Name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Meta).ReplaceOne(filter, document, updateOptions);
@@ -1042,7 +1039,7 @@ namespace ssi
                 return false;
             }
 
-           
+
 
             return true;
         }
@@ -1053,13 +1050,13 @@ namespace ssi
             dbuser.Name = username;
 
 
-           
+
             dbuser = GetUserInfo(dbuser);
-            if(dbuser.ln_admin_key != "" && dbuser.ln_admin_key != null)
+            if (dbuser.ln_admin_key != "" && dbuser.ln_admin_key != null && username  == Properties.Settings.Default.MongoDBUser)
             {
                 dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(dbuser.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
             }
-         
+
             return dbuser;
         }
 
@@ -1069,108 +1066,60 @@ namespace ssi
             var cmd = new BsonDocument("usersInfo", dbuser.Name);
             var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
             BsonDocument Customdata = new BsonDocument();
-            if(queryResult != null)
+            if (queryResult != null)
             {
                 try
                 {
                     Customdata = (BsonDocument)queryResult[0][0]["customData"];
                 }
                 catch { }
-              
-            }
-           
-            try
-            {
-                dbuser.Fullname = Customdata["fullname"].ToString();
-            }
-            catch
-            {
-                dbuser.Fullname = dbuser.Name;
-            };
-            try
-            {
-                dbuser.Email = Customdata["email"].ToString();
-            }
-            catch
-            {
-                dbuser.Email = "";
-            };
-            try
-            {
-                dbuser.Expertise = Customdata["expertise"].AsInt32;
-            }
-            catch
-            {
-                dbuser.Expertise = 0;
-            };
 
-            try
-            {
-                dbuser.ln_invoice_key = Customdata["ln_invoice_key"].ToString();
             }
-            catch
-            {
-                dbuser.ln_invoice_key = "";
-            };
 
-            try
-            {
+                if (Customdata.Contains("fullname"))
+                    dbuser.Fullname = Customdata["fullname"].ToString();
+                else dbuser.Fullname = dbuser.Name;
+    
+                if (Customdata.Contains("email"))
+                    dbuser.Email = Customdata["email"].ToString();
+                else dbuser.Email = "";
+
+                if (Customdata.Contains("expertise"))
+                    dbuser.Expertise = Customdata["expertise"].AsInt32;
+                else dbuser.Expertise = 0;
+    
+
+                if (Customdata.Contains("ln_invoice_key"))
+                    dbuser.ln_invoice_key = Customdata["ln_invoice_key"].ToString();
+                else dbuser.ln_invoice_key = "";
+
+                if (Customdata.Contains("ln_admin_key"))
+                {
+
                 string ln_admin_key = Customdata["ln_admin_key"].ToString();
-                if (ln_admin_key == "Length of the data to decrypt is invalid.")
+                if (ln_admin_key == "Length of the data to decrypt is invalid." || ln_admin_key.StartsWith("The input is not a valid Base-64"))
                     dbuser.ln_admin_key = "";
                 else
-                    // dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
                     dbuser.ln_admin_key = ln_admin_key;
-            }
-            catch
-            {
-                dbuser.ln_admin_key = "";
-            };
-
-            try
-            {
-                dbuser.ln_wallet_id = Customdata["ln_wallet_id"].ToString();
-
-            }
-            catch
-            {
-                dbuser.ln_wallet_id = "";
-            };
-
-            try
-            {
-                dbuser.ln_user_id = Customdata["ln_user_id"].ToString();
-
-            }
-            catch
-            {
-                dbuser.ln_user_id = "";
-            };
+                }
+                else dbuser.ln_admin_key = "";
 
 
-            try
-            {
+                if (Customdata.Contains("ln_wallet_id"))
+                    dbuser.ln_wallet_id = Customdata["ln_wallet_id"].ToString();
+                else dbuser.ln_wallet_id = "";
+     
+                if (Customdata.Contains("ln_user_id"))
+                    dbuser.ln_user_id = Customdata["ln_user_id"].ToString();
+                else dbuser.ln_user_id = "";
+
+                if(Customdata.Contains("ln_addresspin"))
                 dbuser.ln_addresspin = Customdata["ln_addresspin"].ToString();
+                else dbuser.ln_addresspin = "";
 
-            }
-            catch
-            {
-                dbuser.ln_addresspin = "";
-            };
-
-
-
-            try
-            {
-                dbuser.ln_addressname = Customdata["ln_addressname"].ToString();
-
-            }
-            catch
-            {
-                dbuser.ln_addressname = "";
-            };
-
-
+                if (Customdata.Contains("ln_addressname"))
+                    dbuser.ln_addressname = Customdata["ln_addressname"].ToString();
+                else dbuser.ln_addressname = "";
 
             return dbuser;
         }
@@ -1183,7 +1132,7 @@ namespace ssi
             }
 
             var database = Client.GetDatabase("admin");
-            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname } , { "ln_addresspin", user.ln_addresspin } } } };
+            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname }, { "ln_addresspin", user.ln_addresspin } } } };
             try
             {
                 database.RunCommand<BsonDocument>(updatecustomdata);
@@ -1329,7 +1278,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", annotator.Name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).ReplaceOne(filter, document, updateOptions);
@@ -1504,7 +1453,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Roles).ReplaceOne(filter, document, updateOptions);
@@ -1670,11 +1619,11 @@ namespace ssi
                     {
                         BsonArray array = document["dimlabels"].AsBsonArray;
 
-                        foreach(var element in array)
+                        foreach (var element in array)
                         {
                             stream.DimLabels.Add(element["id"].AsInt32, element["name"].AsString);
                         }
-                       
+
                     }
                 }
                 else
@@ -1693,11 +1642,11 @@ namespace ssi
                 return false;
             }
             BsonArray array = new BsonArray();
-            if(stream.DimLabels == null)
+            if (stream.DimLabels == null)
             {
                 stream.DimLabels = new Dictionary<int, string>();
             }
-            foreach(var item in stream.DimLabels)
+            foreach (var item in stream.DimLabels)
             {
                 array.Add(new BsonDocument() {
                     { "id", item.Key },
@@ -1705,9 +1654,9 @@ namespace ssi
                     }
                   );
             }
-          
-  
-           
+
+
+
 
             BsonDocument document = new BsonDocument {
                     {"name",  stream.Name},
@@ -1720,7 +1669,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             ReplaceOneResult result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Streams).ReplaceOne(filter, document, updateOptions);
@@ -1811,6 +1760,31 @@ namespace ssi
             document.Add(documentName);
             document.Add(documentType);
 
+
+            //add attriutes to scheme.
+            BsonArray attributes = new BsonArray();
+            foreach (AnnoScheme.Attribute attribute in scheme.LabelAttributes)
+            {
+
+                BsonArray values = new BsonArray();
+                foreach(string value in attribute.Values)
+                {
+                    values.Add(new BsonDocument() {
+                    { "value", value},
+                    });
+                }
+
+                attributes.Add(new BsonDocument() {
+                    { "name", attribute.Name },
+                    { "type", attribute.AttributeType.ToString() },
+                    { "values", values },
+                    { "isValid", true } });
+            }
+
+
+
+            document.Add("attributes", attributes);
+
             if (scheme.Type == AnnoScheme.TYPE.DISCRETE)
             {
                 BsonArray labels = new BsonArray();
@@ -1854,7 +1828,7 @@ namespace ssi
                 document.Add(documentDefaultLabelColor);
                 document.Add(documentColor);
             }
-            else if(scheme.Type == AnnoScheme.TYPE.POLYGON)
+            else if (scheme.Type == AnnoScheme.TYPE.POLYGON)
             {
                 document.Add(documentSr);
                 document.Add(documentDefaultLabel);
@@ -1878,7 +1852,7 @@ namespace ssi
             var coll = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", name);
-            UpdateOptions update = new UpdateOptions();
+            ReplaceOptions update = new ReplaceOptions();
             update.IsUpsert = true;
 
             var result = coll.ReplaceOne(filter, document, update);
@@ -1935,7 +1909,8 @@ namespace ssi
                     scheme.Id = document["_id"].AsObjectId;
                     scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), document["type"].AsString);
                     scheme.SampleRate = 0;
-                   
+
+
                     if (document.Contains("sr"))
                     {
                         scheme.SampleRate = document["sr"].AsDouble;
@@ -1989,9 +1964,40 @@ namespace ssi
 
             FilterDefinition<BsonDocument> annoSchemeFilter = builder.Eq("name", name);
             BsonDocument annoSchemeDocument = null;
+
+
+          
+
+
             try
             {
                 annoSchemeDocument = annoSchemes.Find(annoSchemeFilter).Single();
+
+                if (annoSchemeDocument.Contains("attributes"))
+                {
+                    BsonArray attributesArray = annoSchemeDocument["attributes"].AsBsonArray;
+                    foreach(BsonDocument doc in attributesArray)
+                    {
+                        List<string> values = new List<string>();
+                        BsonArray bsonvalues = doc["values"].AsBsonArray;
+                        AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.LIST;
+                        foreach (BsonDocument value in bsonvalues)
+                        {
+                            values.Add(value["value"].ToString());
+                        }
+                        if (values[0].ToLower().Contains("true") || values[0].ToLower().Contains("false")){
+                           type = AnnoScheme.AttributeTypes.BOOLEAN;
+                        } 
+                        if (values.Count == 1){
+                            type = AnnoScheme.AttributeTypes.STRING;
+                        }
+                       
+                        AnnoScheme.Attribute attr = new AnnoScheme.Attribute(doc["name"].ToString(), values, type);
+                        scheme.LabelAttributes.Add(attr);
+                    }
+                }
+                
+
 
                 scheme.Name = annoSchemeDocument["name"].ToString();
                 scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), annoSchemeDocument["type"].ToString());
@@ -2040,14 +2046,14 @@ namespace ssi
                     scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
                     scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
                 }
-                else if(scheme.Type == AnnoScheme.TYPE.POLYGON || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                else if (scheme.Type == AnnoScheme.TYPE.POLYGON || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                 {
                     scheme.SampleRate = annoSchemeDocument["sr"].ToDouble();
                     scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["color"].ToString());
                     scheme.DefaultColor = (Color)ColorConverter.ConvertFromString(annoSchemeDocument["default-label-color"].ToString());
                     scheme.DefaultLabel = annoSchemeDocument["default-label"].ToString();
 
-                    if(scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                    if (scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                     {
                         BsonArray schemeLabelsArray = annoSchemeDocument["labels"].AsBsonArray;
                         string SchemeLabel = "";
@@ -2099,11 +2105,11 @@ namespace ssi
                 collection.DeleteOne(filter);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
-           
+
         }
 
 
@@ -2143,7 +2149,7 @@ namespace ssi
                 }
                 else
                     return false;
-        
+
             }
             else
             {
@@ -2237,7 +2243,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Eq("name", name);
-            UpdateOptions updateOptions = new UpdateOptions();
+            ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
             var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Sessions).ReplaceOne(filter, document, updateOptions);
@@ -2303,7 +2309,7 @@ namespace ssi
             BsonArray data = new BsonArray();
             for (int i = 0; i < annotators.Count; i++)
             {
-                data.Add(new BsonDocument { { "name", annotators[i].Name }, { "status", "default" }, { "value", contractvalue} });
+                data.Add(new BsonDocument { { "name", annotators[i].Name }, { "status", "default" }, { "value", contractvalue } });
             }
             return data;
         }
@@ -2356,7 +2362,7 @@ namespace ssi
             {
                 for (int i = 0; i < annoList.Count; i++)
                 {
-                    data.Add(new BsonDocument { { "score", annoList[i].Score }, { "conf", annoList[i].Confidence }});
+                    data.Add(new BsonDocument { { "score", annoList[i].Score }, { "conf", annoList[i].Confidence } });
                 }
             }
             else if (schemeType == AnnoScheme.TYPE.POINT)
@@ -2379,7 +2385,7 @@ namespace ssi
                     data.Add(new BsonDocument { { "label", annoList[i].Label }, { "conf", annoList[i].Confidence }, { "points", Points } });
                 }
             }
-            else if(schemeType == AnnoScheme.TYPE.POLYGON || schemeType == AnnoScheme.TYPE.DISCRETE_POLYGON)
+            else if (schemeType == AnnoScheme.TYPE.POLYGON || schemeType == AnnoScheme.TYPE.DISCRETE_POLYGON)
             {
                 BsonArray polygons;
                 BsonDocument polygon = null;
@@ -2390,7 +2396,7 @@ namespace ssi
                 {
                     polygons = new BsonArray();
 
-                    foreach(PolygonLabel label in item.PolygonList.Polygons)
+                    foreach (PolygonLabel label in item.PolygonList.Polygons)
                     {
                         if (schemeType == AnnoScheme.TYPE.DISCRETE_POLYGON)
                         {
@@ -2439,7 +2445,7 @@ namespace ssi
                     data.Add(new BsonDocument { { "name", item.Label.Split(' ')[1] }, { "polygons", polygons } });
                 }
             }
-            
+
             return data;
         }
 
@@ -2462,7 +2468,7 @@ namespace ssi
 
             var builder = Builders<BsonDocument>.Filter;
             var bounties = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Bounties);
-           
+
             // search if bounty exists
             ObjectId roleID = GetObjectID(DatabaseDefinitionCollections.Roles, "name", bounty.Role);
             ObjectId schemeID = GetObjectID(DatabaseDefinitionCollections.Schemes, "name", bounty.Scheme);
@@ -2477,42 +2483,42 @@ namespace ssi
 
             var bountyDoc = bounties.Find(filter_bounty).ToList();
 
-                BsonArray candidates = BountyListToBsonArray(bounty.annotatorsJobCandidates, bounty.valueInSats);
-                BsonArray jobdone = BountyListToBsonArray(bounty.annotatorsJobDone, bounty.valueInSats);
-                BsonArray streamArray = new BsonArray();
-                if (bounty.streams != null)
+            BsonArray candidates = BountyListToBsonArray(bounty.annotatorsJobCandidates, bounty.valueInSats);
+            BsonArray jobdone = BountyListToBsonArray(bounty.annotatorsJobDone, bounty.valueInSats);
+            BsonArray streamArray = new BsonArray();
+            if (bounty.streams != null)
+            {
+                foreach (StreamItem dmi in bounty.streams)
                 {
-                    foreach (StreamItem dmi in bounty.streams)
-                    {
-                        streamArray.Add(new BsonString(dmi.Name));
-                    }
+                    streamArray.Add(new BsonString(dmi.Name));
                 }
-               
-                BsonDocument newBountyDoc = new BsonDocument();
+            }
 
-                // insert/update annotation
-                newBountyDoc.Add(new BsonElement("contractor_id", contractorID));
-                newBountyDoc.Add(new BsonElement("role_id", roleID));
-                newBountyDoc.Add(new BsonElement("scheme_id", schemeID));
-                newBountyDoc.Add(new BsonElement("session_id", sessionID));
-                newBountyDoc.Add(new BsonElement("valueInSats", bounty.valueInSats));
-                newBountyDoc.Add(new BsonElement("type", bounty.Type));
-                newBountyDoc.Add(new BsonElement("numOfAnnotations", bounty.numOfAnnotations));
-                newBountyDoc.Add(new BsonElement("numOfAnnotationsNeededCurrent", bounty.numOfAnnotationsNeededCurrent));
-                newBountyDoc.Add("annotatorsJobCandidates", candidates);
-                newBountyDoc.Add("annotatorsJobDone", jobdone);
-                newBountyDoc.Add("streams", streamArray);
+            BsonDocument newBountyDoc = new BsonDocument();
+
+            // insert/update annotation
+            newBountyDoc.Add(new BsonElement("contractor_id", contractorID));
+            newBountyDoc.Add(new BsonElement("role_id", roleID));
+            newBountyDoc.Add(new BsonElement("scheme_id", schemeID));
+            newBountyDoc.Add(new BsonElement("session_id", sessionID));
+            newBountyDoc.Add(new BsonElement("valueInSats", bounty.valueInSats));
+            newBountyDoc.Add(new BsonElement("type", bounty.Type));
+            newBountyDoc.Add(new BsonElement("numOfAnnotations", bounty.numOfAnnotations));
+            newBountyDoc.Add(new BsonElement("numOfAnnotationsNeededCurrent", bounty.numOfAnnotationsNeededCurrent));
+            newBountyDoc.Add("annotatorsJobCandidates", candidates);
+            newBountyDoc.Add("annotatorsJobDone", jobdone);
+            newBountyDoc.Add("streams", streamArray);
 
 
-            UpdateOptions newAnnotationDocUpdate = new UpdateOptions();
-                newAnnotationDocUpdate.IsUpsert = true;
-                bounties.ReplaceOne(filter_bounty, newBountyDoc, newAnnotationDocUpdate);
+            ReplaceOptions newAnnotationDocUpdate = new ReplaceOptions();
+            newAnnotationDocUpdate.IsUpsert = true;
+            bounties.ReplaceOne(filter_bounty, newBountyDoc, newAnnotationDocUpdate);
 
-                if (bountyDoc.Count > 0)
-                {
-                    bounty.OID = bountyDoc[0]["_id"].AsObjectId;
-                }
-                else bounty.OID = ObjectId.GenerateNewId();
+            if (bountyDoc.Count > 0)
+            {
+                bounty.OID = bountyDoc[0]["_id"].AsObjectId;
+            }
+            else bounty.OID = ObjectId.GenerateNewId();
 
             return true;
         }
@@ -2584,7 +2590,7 @@ namespace ssi
                 annotatorDoc.Add(new BsonElement("name", annoList.Meta.Annotator));
                 //annotatorDoc.Add(new BsonElement("fullname", annoList.Meta.AnnotatorFullName == "" ? annoList.Meta.Annotator : annoList.Meta.AnnotatorFullName));
                 var filter = builder.Eq("name", annoList.Meta.Annotator);
-                UpdateOptions update = new UpdateOptions();
+                ReplaceOptions update = new ReplaceOptions();
                 update.IsUpsert = true;
                 annotators.ReplaceOne(filter, annotatorDoc, update);
                 annotatorID = annotators.Find(filter).Single()["_id"].AsObjectId;
@@ -2653,7 +2659,7 @@ namespace ssi
 
                 const long MAX_DOCUMENT_SIZE = 16777216;
                 int current_lenght = newAnnotationDataDoc.ToBson().Length + 1;
-                
+
                 if (current_lenght >= MAX_DOCUMENT_SIZE)
                 {
                     DatabaseSaveProgress progressWindow = new DatabaseSaveProgress(annoList, schemeDoc, annotationData);
@@ -2675,7 +2681,7 @@ namespace ssi
 
                 bool isfinished = annoList.Meta.isFinished;
                 if (markAsFinished)
-                { 
+                {
                     isfinished = true;
 
                     if (annoList.Source.Database.HasBounty)
@@ -2694,8 +2700,8 @@ namespace ssi
                                 MessageBox.Show("Bounty submitted, please wait for Contractor to approve.");
                                 SaveBounty(bounty);
                             }
-                           
-                        }                       
+
+                        }
                     }
                 }
                 newAnnotationDoc.Add(new BsonElement("annotator_id", annotatorID));
@@ -2709,7 +2715,7 @@ namespace ssi
                     newAnnotationDoc.Add(new BsonElement("bounty_id", annoList.Source.Database.BountyID));
                     newAnnotationDoc.Add(new BsonElement("bountyIsPaid", annoList.Source.Database.BountyIsPaid));
                 }
-               
+
                 newAnnotationDoc.Add(new BsonElement("date", new BsonDateTime(DateTime.Now)));
                 BsonArray streamArray = new BsonArray();
                 if (linkedStreams != null)
@@ -2721,7 +2727,7 @@ namespace ssi
                 }
                 newAnnotationDoc.Add("streams", streamArray);
 
-                UpdateOptions newAnnotationDocUpdate = new UpdateOptions();
+                ReplaceOptions newAnnotationDocUpdate = new ReplaceOptions();
                 newAnnotationDocUpdate.IsUpsert = true;
                 annotations.ReplaceOne(filter_anno, newAnnotationDoc, newAnnotationDocUpdate);
 
@@ -2765,8 +2771,8 @@ namespace ssi
             newAnnotationDataDoc.Add(new BsonElement("_id", testID));
             newAnnotationDataDoc.Add("labels", data);
             newAnnotationDataDoc.Add("previousEntry", testID);
-            
-            if(newAnnotationDataDoc.ToBson().Length >= max_size)
+
+            if (newAnnotationDataDoc.ToBson().Length >= max_size)
             {
                 resultList.AddRange(splitDataInFittingParts(first, schemeDoc, max_size));
             }
@@ -3042,7 +3048,7 @@ namespace ssi
                 }
 
                 bounty.annotatorsJobDone = new List<DatabaseUser>();
-               
+
                 foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
                 {
                     DatabaseUser user = GetUserInfo(cand["name"].AsString);
@@ -3082,7 +3088,7 @@ namespace ssi
             ObjectId id = new ObjectId();
             GetObjectID(ref id, db, DatabaseDefinitionCollections.Annotators, Properties.Settings.Default.MongoDBUser);
 
-        
+
 
 
             var filter = builder.Eq("contractor_id", id);
@@ -3140,7 +3146,7 @@ namespace ssi
                     bounty.streams.Add(dbst);
                 }
                 //todo ListofAnnotators
-               bounties.Add(bounty);
+                bounties.Add(bounty);
             }
 
             return bounties;
@@ -3162,7 +3168,7 @@ namespace ssi
             var filter = builder.Gt("numOfAnnotationsNeededCurrent", 0);
             var bountiesDoc = bountiesDB.Find(filter).ToList();
             if (bountiesDoc.Count == 0) return null;
-            foreach(BsonDocument doc in bountiesDoc)
+            foreach (BsonDocument doc in bountiesDoc)
             {
                 DatabaseBounty bounty = new DatabaseBounty();
 
@@ -3220,7 +3226,7 @@ namespace ssi
                     }
                 }
 
-               
+
                 bounty.streams = new List<StreamItem>();
                 foreach (BsonString stream in (doc["streams"].AsBsonArray))
                 {
@@ -3232,7 +3238,7 @@ namespace ssi
 
                 //todo ListofAnnotators
 
-                if(!handled) bounties.Add(bounty);
+                if (!handled) bounties.Add(bounty);
             }
 
             return bounties;
@@ -3346,6 +3352,7 @@ namespace ssi
                     annoList.Scheme.Labels = new List<AnnoScheme.Label>();
 
                     BsonArray schemelabels = scheme["labels"].AsBsonArray;
+                    BsonArray attributelabels = scheme["attributes"].AsBsonArray;
 
                     for (int j = 0; j < schemelabels.Count; j++)
                     {
@@ -3360,6 +3367,34 @@ namespace ssi
                     }
 
                     annoList.Scheme.Labels.Add(new AnnoScheme.Label(GARBAGELABEL, GARBAGECOLOR));
+
+                    if (scheme.Contains("attributes"))
+                    {
+                        BsonArray attributesArray = scheme["attributes"].AsBsonArray;
+                        foreach (BsonDocument doc in attributesArray)
+                        {
+                            List<string> values = new List<string>();
+                            BsonArray bsonvalues = doc["values"].AsBsonArray;
+                            AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.LIST;
+                            foreach (BsonDocument val in bsonvalues)
+                            {
+                                values.Add(val["value"].ToString());
+                            }
+                            if (values[0].ToLower().Contains("true") || values[0].ToLower().Contains("false"))
+                            {
+                                type = AnnoScheme.AttributeTypes.BOOLEAN;
+                            }
+                            if (values.Count == 1)
+                            {
+                                type = AnnoScheme.AttributeTypes.STRING;
+                            }
+
+                            AnnoScheme.Attribute attr = new AnnoScheme.Attribute(doc["name"].ToString(), values, type);
+                            annoList.Scheme.LabelAttributes.Add(attr);
+                        }
+                    }
+
+                
 
                     for (int i = 0; i < labels.Count; i++)
                     {
@@ -3395,7 +3430,7 @@ namespace ssi
                         }
                         catch (Exception e)
                         {
-                          
+
                         }
 
                         AnnoListItem ali = new AnnoListItem(start, duration, label, meta, SchemeColor, double.Parse(confidence));
@@ -3405,6 +3440,33 @@ namespace ssi
                 else if (annoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
                     annoList.Scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(scheme["color"].ToString());
+                    if (scheme.Contains("attributes"))
+                    {
+                        BsonArray attributesArray = scheme["attributes"].AsBsonArray;
+                        foreach (BsonDocument doc in attributesArray)
+                        {
+                            List<string> values = new List<string>();
+                            BsonArray bsonvalues = doc["values"].AsBsonArray;
+                            AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.LIST;
+                            foreach (BsonDocument val in bsonvalues)
+                            {
+                                values.Add(val["value"].ToString());
+                            }
+                            if (values[0].ToLower().Contains("true") || values[0].ToLower().Contains("false"))
+                            {
+                                type = AnnoScheme.AttributeTypes.BOOLEAN;
+                            }
+                            if (values.Count == 1)
+                            {
+                                type = AnnoScheme.AttributeTypes.STRING;
+                            }
+
+                            AnnoScheme.Attribute attr = new AnnoScheme.Attribute(doc["name"].ToString(), values, type);
+                            annoList.Scheme.LabelAttributes.Add(attr);
+                        }
+                    }
+
+
 
                     for (int i = 0; i < labels.Count; i++)
                     {
@@ -3415,6 +3477,7 @@ namespace ssi
                         string confidence = labels[i]["conf"].ToString();
                         string meta = "";
                         Color color = Colors.Black;
+                       
                         try
                         {
                             meta = labels[i]["meta"].ToString();
@@ -3441,7 +3504,7 @@ namespace ssi
                 {
                     annoList.Scheme.MinOrBackColor = (Color)ColorConverter.ConvertFromString(scheme["color"].ToString());
 
-                    if (scheme.TryGetElement("sr", out value)) 
+                    if (scheme.TryGetElement("sr", out value))
                         annoList.Scheme.SampleRate = double.Parse(scheme["sr"].ToString());
 
                     for (int i = 0; i < labels.Count; i++)
@@ -3469,7 +3532,7 @@ namespace ssi
                         annoList.Add(ali);
                     }
                 }
-                else if(annoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                else if (annoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
                 {
                     int videoCount = 0;
                     foreach (IMedia media in MainHandler.mediaList)
@@ -3561,8 +3624,8 @@ namespace ssi
 
                                 BsonArray b_points = polygon["points"].AsBsonArray;
                                 List<PolygonPoint> points = new List<PolygonPoint>();
-                                
-                                if(b_points.Count > 0)
+
+                                if (b_points.Count > 0)
                                 {
                                     foreach (BsonDocument point in b_points)
                                     {
@@ -3604,7 +3667,7 @@ namespace ssi
             AnnoList newList = new AnnoList();
 
 
-            
+
 
             double new_Samplerate = newScheme.SampleRate;
             double old_samplerate = oldScheme.SampleRate;
@@ -3612,14 +3675,14 @@ namespace ssi
             if (old_samplerate > new_Samplerate)
             {
                 double factor = old_samplerate / new_Samplerate;
-              
+
                 int index = 0;
                 double mean = 0;
                 double meanconf = 0;
                 double start = double.MaxValue;
                 foreach (AnnoListItem ali in al)
                 {
-                    if (index < factor-1)
+                    if (index < factor - 1)
                     {
                         mean += ali.Score;
                         meanconf += ali.Confidence;
@@ -3634,17 +3697,17 @@ namespace ssi
                         meanconf += ali.Confidence;
                         start = ali.Start < start ? ali.Start : start;
                         index++;
-                    
+
                         double duration = 1000.0 / new_Samplerate;
                         double score = mean / factor;
                         double conf = meanconf / factor;
 
 
-                        if(oldScheme.MinScore != newScheme.MinScore || oldScheme.MaxScore != newScheme.MaxScore)
+                        if (oldScheme.MinScore != newScheme.MinScore || oldScheme.MaxScore != newScheme.MaxScore)
                         {
                             score = convertRange(oldScheme.MinScore, oldScheme.MaxScore, newScheme.MinScore, newScheme.MaxScore, score);
                         }
-                       
+
 
                         AnnoListItem newali = new AnnoListItem(start, duration, score.ToString(), ali.Meta, ali.Color, conf);
                         newList.Add(newali);
@@ -3653,20 +3716,20 @@ namespace ssi
                         mean = 0;
                         meanconf = 0;
 
-                    }    
+                    }
                 }
             }
 
 
             else if (old_samplerate < new_Samplerate)
             {
-                double factor = new_Samplerate/old_samplerate;
+                double factor = new_Samplerate / old_samplerate;
                 double duration = 1000.0 / new_Samplerate;
 
                 foreach (AnnoListItem ali in al)
                 {
                     double start = ali.Start;
-                   
+
                     double score = ali.Score;
                     if (oldScheme.MinScore != newScheme.MinScore || oldScheme.MaxScore != newScheme.MaxScore)
                     {
@@ -3675,17 +3738,17 @@ namespace ssi
                     double conf = ali.Confidence;
                     string meta = ali.Meta;
                     Color color = ali.Color;
-                    for (int i=0; i< factor; i++)
+                    for (int i = 0; i < factor; i++)
                     {
                         AnnoListItem newal = new AnnoListItem(start, duration, score.ToString(), meta, color, conf);
                         start = start + duration;
                         newList.Add(newal);
-                    } 
-  
+                    }
+
                 }
             }
 
-            else if(old_samplerate == new_Samplerate)
+            else if (old_samplerate == new_Samplerate)
             {
                 foreach (AnnoListItem ali in al)
                 {
@@ -3699,7 +3762,7 @@ namespace ssi
                     {
                         newList.AddSorted(ali);
                     }
-                   
+
                 }
             }
 
@@ -3851,7 +3914,7 @@ namespace ssi
                 // load scheme and data
 
                 BsonArray annotationData = getData(dataID, annotationsData);
-                if (annotationData.Count > 0) 
+                if (annotationData.Count > 0)
                     loadAnnoListSchemeAndData(ref annoList, scheme, annotationData);
 
                 // update source
@@ -3992,7 +4055,7 @@ namespace ssi
                    onlyMe && onlyUnfinished && !isFinished && Properties.Settings.Default.MongoDBUser == annotatorName)
                 {
                     DatabaseAnnotation anno = new DatabaseAnnotation() { Id = id, Role = roleName, Scheme = schemeName, Annotator = annotatorName, AnnotatorFullName = annotatorFullName, Session = sessionName, IsFinished = isFinished, IsLocked = islocked, Date = date, IsOwner = isOwner };
-                   
+
                     if (isPaid || Properties.Settings.Default.MongoDBUser == annotatorName) items.Add(anno);
                 }
             }
@@ -4003,8 +4066,8 @@ namespace ssi
         #endregion Annotation
 
 
-   
-             public static List<AnnoList> LoadSession(System.Collections.IList collections, System.Collections.IList sessions)
+
+        public static List<AnnoList> LoadSession(System.Collections.IList collections, System.Collections.IList sessions)
         {
             if (!IsConnected)
             {
@@ -4152,7 +4215,7 @@ namespace ssi
         }
 
 
-        public static  bool ExportMultipleCSV(List<DatabaseAnnotation> annos, List<StreamItem> streams, DatabaseSession session,  string delimiter = ";" )
+        public static bool ExportMultipleCSV(List<DatabaseAnnotation> annos, List<StreamItem> streams, DatabaseSession session, string delimiter = ";")
         {
 
 
@@ -4162,10 +4225,10 @@ namespace ssi
             if (filePath == null) return false;
 
 
-        
+
 
             //make some more advanced logic to get maximum/fill with zeros
-           // int length = annoLists.Min(annoLists)
+            // int length = annoLists.Min(annoLists)
 
 
 
@@ -4181,7 +4244,7 @@ namespace ssi
             foreach (var file in streams)
             {
 
-                if(file.Extension == "stream")
+                if (file.Extension == "stream")
                 {
 
 
@@ -4212,9 +4275,9 @@ namespace ssi
             double time = 0;
             double sr = 25;
 
-            if (signals.Count> 0)
+            if (signals.Count > 0)
             {
-            sr = signals[0].rate;
+                sr = signals[0].rate;
             }
 
             double srtime = 1 / sr;
@@ -4232,7 +4295,7 @@ namespace ssi
                     annoLists.Add(annoList);
                 }
 
-              
+
             }
 
             int length = 0;
@@ -4240,11 +4303,11 @@ namespace ssi
             {
                 length = annoLists.Max(e => e.Count);
             }
-            if(signals.Count > 0)
+            if (signals.Count > 0)
             {
-               length = (int)Math.Max(length, signals.Max(e => e.number));
+                length = (int)Math.Max(length, signals.Max(e => e.number));
             }
-           
+
 
             foreach (DatabaseAnnotation annotation in annos)
             {
@@ -4255,18 +4318,18 @@ namespace ssi
                     AnnoList converted = ConvertDiscreteAnnoListToContinuousList(annoList, srtime, length * srtime, "None");
                     annoLists.Add(converted);
                 }
-                
+
 
             }
 
 
 
-           
-
-        
 
 
-        
+
+
+
+
 
 
             var records = new List<object>();
@@ -4286,31 +4349,31 @@ namespace ssi
 
                 //Add annotations to columns
                 for (int j = 0; j < annoLists.Count; j++)
-                    {
-                       if(i < annoLists[j].Count && annoLists[j].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)  dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Score); // Adding dynamically named property     
-                       else if (i < annoLists[j].Count && (annoLists[j].Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoLists[j].Scheme.Type == AnnoScheme.TYPE.FREE)) dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Label);
+                {
+                    if (i < annoLists[j].Count && annoLists[j].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Score); // Adding dynamically named property     
+                    else if (i < annoLists[j].Count && (annoLists[j].Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoLists[j].Scheme.Type == AnnoScheme.TYPE.FREE)) dictobject.Add(annoLists[j].Meta.Role + "." + annoLists[j].Scheme.Name + "." + annoLists[j].Meta.Annotator, annoLists[j][i].Label);
                 }
 
 
                 for (int j = 0; j < signals.Count; j++)
                 {
-                    for(int k=0; k< signals[j].dim; k++)
+                    for (int k = 0; k < signals[j].dim; k++)
                     {
-                            string value;
-                            if (signals[j].DimLabels.Count > 0)
+                        string value;
+                        if (signals[j].DimLabels.Count > 0)
+                        {
+                            if (signals[j].DimLabels.TryGetValue(k, out value))
                             {
-                                if(signals[j].DimLabels.TryGetValue(k, out value))
-                                {
-                                    if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (" + value + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property    
-                                }
-                                else if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property  
+                                if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (" + value + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property    
+                            }
+                            else if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property  
 
 
                         }
-                             else if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property    
+                        else if (i < (signals[j].data.Length / signals[j].dim)) dictobject.Add(signals[j].Name + " (Dim " + k + ")", signals[j].data[i * signals[j].dim + k]); // Adding dynamically named property    
 
                     }
-                         
+
                 }
 
 
@@ -4328,7 +4391,7 @@ namespace ssi
                     Delimiter = delimiter
                 };
 
-                using (var csv = new CsvWriter(textWriter,config))
+                using (var csv = new CsvWriter(textWriter, config))
                 {
 
                     foreach (var record in records)
@@ -4401,13 +4464,13 @@ namespace ssi
         //key for Lightning
         public string ln_admin_key { get; set; }
         public string ln_invoice_key { get; set; }
-        public string ln_wallet_id{ get; set; }
+        public string ln_wallet_id { get; set; }
         public string ln_user_id { get; set; }
         public string ln_addressname { get; set; }
         public string ln_addresspin { get; set; }
 
-        
-            
+
+
 
 
         public override string ToString()
@@ -4434,7 +4497,7 @@ namespace ssi
         public string Name { get; set; }
         public AnnoScheme.TYPE Type { get; set; }
         public double SampleRate { get; set; }
- 
+
 
         public override string ToString()
         {
@@ -4469,7 +4532,7 @@ namespace ssi
         public string Type { get; set; }
         public double SampleRate { get; set; }
         public double Duration { get; set; }
-        public Dictionary<int,string> DimLabels { get; set; }
+        public Dictionary<int, string> DimLabels { get; set; }
 
         public override string ToString()
         {
