@@ -121,6 +121,10 @@ namespace ssi
                         ftype = SSI_FILE_TYPE.EAF;
                         break;
 
+                    case "srt":
+                        ftype = SSI_FILE_TYPE.SRT;
+                        break;
+
                     case "arff":
                         ftype = SSI_FILE_TYPE.ARFF;
                         break;
@@ -212,6 +216,12 @@ namespace ssi
 
                 case SSI_FILE_TYPE.EAF:
                     ImportAnnoFromElan(filepath);
+                    loaded = true;
+                    break;
+
+                case SSI_FILE_TYPE.SRT:
+                    bool wordlevel = Properties.Settings.Default.SRTwordlevel;
+                    ImportAnnoFromSubtitles(filepath, wordlevel);
                     loaded = true;
                     break;
 
@@ -894,6 +904,47 @@ namespace ssi
             old = old.Replace("ß", "ss");
             return (old);
         }
+
+
+        private void ImportAnnoFromSubtitles(string filename, bool wordlevel)
+        {
+            int annoListnum = annoLists.Count;
+            bool addemptytiers = false;
+            List<AnnoList> lists = AnnoList.LoadfromSRTFile(filename, wordlevel);
+
+            if (lists.Exists(n => n.Count == 0))
+            {
+                MessageBoxResult mb = MessageBox.Show("At least one tier is empty, should empty tiers be excluded?", "Attention", MessageBoxButton.YesNo);
+                if (mb == MessageBoxResult.No)
+                {
+                    addemptytiers = true;
+                }
+            }
+
+            double maxdur = 0;
+
+            if (lists != null)
+            {
+                foreach (AnnoList list in lists)
+                {
+                    if (list.Count > 0) maxdur = list[list.Count - 1].Stop;
+
+                    if (list.Count > 0 || addemptytiers)
+                    {
+                        annoLists.Add(list);
+                        addAnnoTier(list);
+                    }
+
+                }
+            }
+            updateTimeRange(maxdur);
+            if (annoListnum == 0 && maxdur > Properties.Settings.Default.DefaultZoomInSeconds && Properties.Settings.Default.DefaultZoomInSeconds != 0)
+            {
+                fixTimeRange(Properties.Settings.Default.DefaultZoomInSeconds);
+            }
+        }
+
+        
 
         private void ImportAnnoFromElan(string filename)
         {

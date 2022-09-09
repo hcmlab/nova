@@ -21,7 +21,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.2.7";
+        public static string BuildVersion = "1.2.2.8";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -46,10 +46,11 @@ namespace ssi
             ARFF,
             PROJECT,
             NOLDUS,
+            SRT,
             IGNORE
         }
 
-        public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "odf", "annotation" };
+        public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "odf", "annotation", "srt" };
 
         public MainControl control;
 
@@ -721,6 +722,7 @@ namespace ssi
                 Properties.Settings.Default.EnablePythonDebug = s.EnablePythonDebug();
                 Properties.Settings.Default.EnableLightning = s.EnableLightning();
                 Properties.Settings.Default.MediaBackend = s.Mediabackend();
+                Properties.Settings.Default.SRTwordlevel = s.EnableSRTWordlevel();
 
                 Properties.Settings.Default.Save();
 
