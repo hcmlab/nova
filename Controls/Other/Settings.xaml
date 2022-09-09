@@ -45,27 +45,28 @@
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="77*"></ColumnDefinition>
+                        <ColumnDefinition Width="267*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="0" Content="Default annotator name:" />
-                    <TextBox Grid.Row="1" Name="Annotator" Margin="5,0,5,5" />
-                    <Label Grid.Row="2" Content="Default zoom in seconds (0 for max. duration):" />
-                    <TextBox Grid.Row="3" Name="DefaultZoom" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
+                    <Label Grid.Row="0" Content="Default annotator name:" Grid.ColumnSpan="2" Margin="0,0,0,23" Grid.RowSpan="2" />
+                    <TextBox Grid.Row="1" Name="Annotator" Margin="5,0,5,5" Grid.ColumnSpan="2" />
+                    <Label Grid.Row="2" Content="Default zoom in seconds (0 for max. duration):" Grid.ColumnSpan="2" Margin="0,0,0,23" Grid.RowSpan="2" />
+                    <TextBox Grid.Row="3" Name="DefaultZoom" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" Grid.ColumnSpan="2" />
 
-                    <Label Grid.Row="4" Content="Draw wavform from video (might be slower) :"  />
-                    <CheckBox Grid.Row="5" Name="DrawwaveformCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="6" Content="Enable Lightning Network (Experimental, requires restart)"  />
-                    <CheckBox Grid.Row="7" Name="EnableLightningCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="8" Content="Check for updates on startup:"  />
-                    <CheckBox Grid.Row="9" Name="UpdatesCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="10" Content="Mediabackend: (requires restart)"  />
-                    <ComboBox Grid.Row="11" Name="mbackend" Margin="5,0,5,5">
+                    <Label Grid.Row="4" Content="Draw wavform from video (might be slower) :" Grid.ColumnSpan="2" Margin="0,0,0,20" Grid.RowSpan="2"  />
+                    <CheckBox Grid.Row="5" Name="DrawwaveformCheckbox" Margin="5,0,5,5" Grid.ColumnSpan="2" />
+                    <Label Grid.Row="6" Content="Enable Lightning Network (Experimental, requires restart)" Grid.ColumnSpan="2" Margin="0,0,0,20" Grid.RowSpan="2"  />
+                    <CheckBox Grid.Row="7" Name="EnableLightningCheckbox" Margin="5,0,5,5" Grid.ColumnSpan="2" />
+                    <Label Grid.Row="8" Content="Check for updates on startup:" Grid.ColumnSpan="2" Margin="0,0,0,20" Grid.RowSpan="2"  />
+                    <CheckBox Grid.Row="9" Name="UpdatesCheckbox" Margin="5,0,5,5" Grid.ColumnSpan="2" />
+                    <Label Grid.Row="9" Content="Mediabackend: (requires restart)" Grid.ColumnSpan="2" Margin="0,20,0,27" Grid.RowSpan="3"  />
+                    <ComboBox Grid.Row="11" Name="mbackend" Margin="5,0,5,5" Grid.ColumnSpan="2">
                         <ComboBoxItem Content="Hardware"/>
                         <ComboBoxItem Content="Software"/>
                     </ComboBox>
-                    <Label Grid.Row="12" Content="Enable Python extensions (requires restart):" ToolTip="Hardware accelerated media backend is faster and should be used. If you installed a codec and you still don't see a video, e.g. on a remote connection, you can chose software backend (it will be less reactive)"  />
-                    <Grid Grid.Row="13">
+                    <Label Grid.Row="12" Content="Enable Python extensions (requires restart):" ToolTip="Hardware accelerated media backend is faster and should be used. If you installed a codec and you still don't see a video, e.g. on a remote connection, you can chose software backend (it will be less reactive)" Grid.ColumnSpan="2" Margin="0,0,0,20" Grid.RowSpan="2"  />
+                    <Grid Grid.Row="13" Grid.ColumnSpan="2" Grid.RowSpan="9">
                         <CheckBox Grid.Row="0" Grid.Column="0" Name="EnablePythonCheckbox" Margin="5,0,5,5" />
                         <Label Grid.Row="0" Grid.Column="1"  Content="Debug Mode"  Margin="240,-7,0,0"/>
                         <CheckBox Grid.Row="0" Grid.Column="2" Name="EnablePythonDebugCheckbox"  Margin="220,0,5,5" />
@@ -78,6 +79,8 @@
             <TabItem Header="Annotation">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
@@ -107,6 +110,8 @@
                     <TextBox Grid.Row="7" Name="ContinuousHotkeysnum" Margin="5,0,5,5"  PreviewTextInput="IntNumberValidationTextBoxContinuous"/>
                     <Label Grid.Row="8" Content="Distance between points (free hand drawing - polygon anno):" />
                     <TextBox Grid.Row="9" Name="PointDistance" Margin="5,0,5,5" PreviewTextInput="IntNumberValidationTextBox" />
+                    <Label Grid.Row="10" Content="Import Subtitle files on world-level (instead of sentence-level)"  />
+                    <CheckBox Grid.Row="11" Name="enableworldlevel" Margin="5,0,5,5" />
                 </Grid>
             </TabItem>
 

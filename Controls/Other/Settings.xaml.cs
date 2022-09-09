@@ -67,6 +67,7 @@ namespace ssi
             CMLDirectory.Text = Properties.Settings.Default.CMLDirectory;
             EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
             Showexport.IsChecked = Properties.Settings.Default.ShowExportDatabase;
+            enableworldlevel.IsChecked = Properties.Settings.Default.SRTwordlevel;
 
         }
 
@@ -151,6 +152,12 @@ namespace ssi
             return (EnablePythonCheckbox.IsChecked == true);
            
         }
+
+        public bool EnableSRTWordlevel()
+        {
+            return (enableworldlevel.IsChecked == true);
+        }
+
 
         public string Mediabackend()
         {
