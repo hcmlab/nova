@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
         Title="Raise and manage Bounties" Height="700" Width="1000">
@@ -307,7 +308,7 @@
                     <Label Grid.Row="0"  DockPanel.Dock="Top" Grid.Column="1">Applicants</Label>
                     <ListView  Name="BountiesCandidates"  SelectionMode="Single"  DockPanel.Dock="Top"/>
                     <Label Grid.Row="0"  DockPanel.Dock="Top" Grid.Column="1">Finished Jobs</Label>
-                    <ListView  Name="BountiesJobDone"  SelectionMode="Single"  DockPanel.Dock="Top" SelectionChanged="BountiesJobDone_SelectionChanged">
+                    <ListView  Name="BountiesJobDone"  SelectionMode="Single"  DockPanel.Dock="Bottom" SelectionChanged="BountiesJobDone_SelectionChanged">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Width="Auto" Header="Account">
@@ -325,9 +326,11 @@
                         </ListView.View>
                     </ListView>
                 </DockPanel>
-                <DockPanel Grid.Row="0" Grid.Column="3" HorizontalAlignment="Center" Width="180" VerticalAlignment="Bottom" Height="44">
-                    <Button Name="unlockButton" Height="25" Width="50" Grid.Column="1"  HorizontalAlignment="Left"  Click="Unlock_Click">Unlock</Button>
-
+                <Label  Name="unlockpanellabel" Visibility="Hidden" Grid.Row="0" Grid.Column="3" VerticalAlignment="Bottom" Height="80">Rate and Unlock</Label>
+                <DockPanel Margin="5,0,0,0" Name="unlockpanel" Visibility="Hidden"  Grid.Row="0" Grid.Column="3" HorizontalAlignment="Center" Width="160" VerticalAlignment="Bottom" Height="70">
+                    <local:Rating x:Name="stars" Height="25" Width="100" VerticalAlignment="Center" ></local:Rating>
+                    <Button Name="unlockButton" Height="25" Width="50" Grid.Column="1" Margin="5,0,0,0" HorizontalAlignment="Left"  Click="Unlock_Click">Unlock</Button>
+                   
                     <!--<Separator Visibility="Hidden" Width="20"></Separator>
         <Button Height="20" Width="40" Grid.Column="1"  HorizontalAlignment="Left"  Click="Button_Click_3">Unlock</Button>-->
                 </DockPanel>
@@ -335,7 +338,7 @@
                     <Button Name="RemoveButton" Width="80" Click="RemoveButton_Click">Remove</Button>
                 </DockPanel>
                 <DockPanel Grid.Row="1" Grid.Column="3" HorizontalAlignment="Right">
-                    <Button Width="80" Click="Button_Click">Open</Button>
+                    <Button Width="90" Name="OpenButton" Visibility="Hidden" Click="Button_Click">Preview</Button>
                     <Separator Visibility="Hidden" Width="20"></Separator>
                     <Button Width="80" Click="Button_Click_2">Cancel</Button>
                     <!--<Separator Visibility="Hidden" Width="20"></Separator>

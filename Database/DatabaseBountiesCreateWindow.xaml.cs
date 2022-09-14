@@ -443,14 +443,19 @@ namespace ssi
 
             bounty.Scheme = AnnoSchemesBox.SelectedItems.Count > 0 ? AnnoSchemesBox.SelectedItem.ToString() : DatabaseHandler.Schemes[0].Name.ToString();
             //bounty.Scheme = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Schemes, "name", scheme);
-            bounty.annotatorsJobDone = new List<DatabaseUser>();
-            bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+            bounty.annotatorsJobDone = new List<BountyJob>();
+            bounty.annotatorsJobCandidates = new List<BountyJob>();
 
             if(AnnotatorsBox.SelectedItems != null)
             {
                 foreach (DatabaseAnnotator annotator in AnnotatorsBox.SelectedItems)
                 {
-                    bounty.annotatorsJobCandidates.Add(DatabaseHandler.GetUserInfo(annotator.Name));
+                    BountyJob job = new BountyJob();
+                    job.user = DatabaseHandler.GetUserInfo(annotator.Name);
+                    job.status = "open";
+                    //job.pickedLNURL = false;
+                    //job.LNURLW = "TODO";
+                    bounty.annotatorsJobCandidates.Add(job);
                 }
 
             }
@@ -491,6 +496,7 @@ namespace ssi
             public string Name { get; set; }
 
             public bool isPaid { get; set; }
+            public double Rating { get; set; }
         }
 
 
@@ -519,12 +525,17 @@ namespace ssi
 
                 List<AnnotatorStatus> annostatus = new List<AnnotatorStatus>();
                 DatabaseBounty bounty = (DatabaseBounty)BountiesOverviewBox.SelectedItem;
-                foreach (DatabaseUser item in bounty.annotatorsJobDone)
+               
+                foreach (BountyJob item in bounty.annotatorsJobDone)
                 {
+                    //item.rating = stars.Value;
+                    //item.status = "finished";
+                    //item.LNURLW = "TODO";
+                    //item.pickedLNURL = false;
                     AnnotatorStatus stat = new AnnotatorStatus();
-                    stat.Name = item.Name;
-
-                    ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, item.Name, bounty.Session, bounty.Database);
+                    stat.Name = item.user.Name;
+                    stat.Rating = item.rating;
+                    ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, item.user.Name, bounty.Session, bounty.Database);
 
                     if(id != new ObjectId())
                     {
@@ -541,10 +552,19 @@ namespace ssi
                         {
                             stat.isPaid = annotationDoc["bountyIsPaid"].AsBoolean;
                         }
+                        //if (annotationDoc.TryGetElement("rating", out value))
+                        //{
+                        //    stat.Rating = annotationDoc["rating"].AsDouble;
+                        //}
 
                         annostatus.Add(stat);
+                       
                     }
+
+                   
                 }
+
+               
 
                 BountiesJobDone.ItemsSource = annostatus;
             }
@@ -607,10 +627,14 @@ namespace ssi
             var filter = builder.Eq("_id", id);
             var update = Builders<BsonDocument>.Update.Set("bountyIsPaid", state);
             annos.UpdateOne(filter, update);
+
+            //var updater = Builders<BsonDocument>.Update.Set("rating", rating);
+            //annos.UpdateOne(filter, updater);
         }
 
         private async void Unlock_Click(object sender, RoutedEventArgs e)
         {
+            double rating = stars.Value;
             DatabaseBounty bounty = (DatabaseBounty)BountiesOverviewBox.SelectedItem;
             string name = ((AnnotatorStatus)BountiesJobDone.SelectedItem).Name;
             DatabaseUser user = DatabaseHandler.GetUserInfo(name);
@@ -618,15 +642,21 @@ namespace ssi
             {
                 Lightning lightning = new Lightning();
                 Lightning.LightningInvoice invoice = await lightning.CreateInvoice(user.ln_invoice_key, (uint)bounty.valueInSats, bounty.Database + "/" + bounty.Session + "/" + bounty.Scheme + "/" + bounty.Role);
-                string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request);
-                if (message == "Success")
+                MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
+                if(MainHandler.myWallet.balance >= bounty.valueInSats)
                 {
-                    MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
-                    ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user.Name, bounty.Session, bounty.Database);
-                    ChangePaidState(id, true);
-                    MessageBox.Show("Congratulations, Annotation Unlocked");
+                    string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request);
+                    if (message == "Success")
+                    {
+                        MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
+                        ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user.Name, bounty.Session, bounty.Database);
+                        ChangePaidState(id, true);
+                        MessageBox.Show("Congratulations, Annotation Unlocked");
+                    }
+                    else MessageBox.Show("Error");
                 }
-                else MessageBox.Show(message);
+                else MessageBox.Show("Unsifficent Balance in Wallet");
+
 
             }
 
@@ -635,7 +665,27 @@ namespace ssi
                 ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user.Name, bounty.Session, bounty.Database);
                 ChangePaidState(id, true);
                 MessageBox.Show("Zero-Cost Annotation Unlocked");
+               
             }
+
+           // DatabaseHandler.ChangeUserCustomData(user);
+
+            foreach (BountyJob job in bounty.annotatorsJobDone)
+            {
+                if (job.user.Name == user.Name)
+                {
+                    job.rating = stars.Value;
+                    //if (bounty.valueInSats > 0)
+                    //{
+                    //    //var lnurl = await lightning.getLNURLw(MainHandler.myWallet, bounty.valueInSats, bounty.numOfAnnotations);
+                    //    job.pickedLNURL = true;
+                    //}
+
+                    break;
+                }
+
+            }
+            DatabaseHandler.SaveBounty(bounty);
 
             UpdateJobsDoneList();
         }
@@ -644,11 +694,30 @@ namespace ssi
         {
             if (BountiesJobDone.SelectedItem != null)
             {
+                stars.Value =  (int)((AnnotatorStatus)BountiesJobDone.SelectedItem).Rating;
+                unlockpanellabel.Visibility = Visibility.Visible;
+                unlockpanel.Visibility = Visibility.Visible;
+                OpenButton.Visibility = Visibility.Visible;
                 if (((AnnotatorStatus)BountiesJobDone.SelectedItem).isPaid)
                 {
+                    OpenButton.Content = "Open";
                     unlockButton.IsEnabled = false;
+                    stars.IsEnabled = false;
+                    unlockpanellabel.Visibility = Visibility.Hidden;
+
                 }
-                else unlockButton.IsEnabled = true;
+                else {
+                    unlockButton.IsEnabled = true;
+                    stars.IsEnabled = true;
+                    OpenButton.Content = "Preview";
+                }
+            }
+
+            else
+            {
+                unlockpanellabel.Visibility = Visibility.Hidden;
+                unlockpanel.Visibility = Visibility.Hidden;
+                OpenButton.Visibility = Visibility.Hidden;
             }
 
         }

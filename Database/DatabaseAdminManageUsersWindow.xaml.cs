@@ -66,13 +66,13 @@ namespace ssi
             {
                 IMongoDatabase db = DatabaseHandler.Client.GetDatabase(databaseName);
                 List<DatabaseBounty> bounties = new List<DatabaseBounty>();
-                bounties = DatabaseHandler.LoadAcceptedBounties(db);
+                bounties = DatabaseHandler.LoadAcceptedBounties(db, false);
                 if(bounties != null)
                 {
                     foreach (var bounty in bounties)
                     {
                         //accepted task
-                        int index = bounty.annotatorsJobCandidates.FindIndex(s => s.Name == username);
+                        int index = bounty.annotatorsJobCandidates.FindIndex(s => s.user.Name == username);
                         if (index > -1)
                         {
                             bounty.annotatorsJobCandidates.RemoveAt(index);
@@ -123,8 +123,9 @@ namespace ssi
 
                 blankuser = DatabaseHandler.GetUserInfo(blankuser);
 
+                double rating = (blankuser.ratingcount > 0) ? blankuser.ratingoverall / blankuser.ratingcount : 0;
 
-                DatabaseAdminUserWindow dialog = new DatabaseAdminUserWindow(blankuser.Name,blankuser.Fullname,blankuser.Email,blankuser.Expertise);
+                DatabaseAdminUserWindow dialog = new DatabaseAdminUserWindow(blankuser.Name,blankuser.Fullname,blankuser.Email,blankuser.Expertise, blankuser.XP, rating);
                 dialog.ShowDialog();
 
                 if (dialog.DialogResult == true)
@@ -143,7 +144,10 @@ namespace ssi
                         ln_wallet_id = blankuser.ln_wallet_id,
                         ln_user_id = blankuser.ln_user_id,
                         ln_addressname = blankuser.ln_addressname,
-                        ln_addresspin = blankuser.ln_addresspin,   
+                        ln_addresspin = blankuser.ln_addresspin,
+                        XP = blankuser.XP,
+                        ratingoverall = blankuser.ratingoverall,
+                        ratingcount = blankuser.ratingcount
                     };
 
 

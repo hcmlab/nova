@@ -963,6 +963,10 @@ namespace ssi
             user.ln_wallet_id = "";
             user.ln_addressname = "";
             user.ln_addresspin = "";
+            user.XP = 0;
+            user.ratingcount = 0;
+            user.ratingoverall = 0;
+
             try
             {
                 adminDatabase.RunCommand<BsonDocument>(createUser);
@@ -1087,9 +1091,21 @@ namespace ssi
                 if (Customdata.Contains("expertise"))
                     dbuser.Expertise = Customdata["expertise"].AsInt32;
                 else dbuser.Expertise = 0;
-    
 
-                if (Customdata.Contains("ln_invoice_key"))
+                if (Customdata.Contains("xp"))
+                    dbuser.XP = Customdata["xp"].AsInt32;
+                else dbuser.XP = 0;
+
+                if (Customdata.Contains("ratingoverall"))
+                    dbuser.ratingoverall = Customdata["ratingoverall"].AsDouble;
+                else dbuser.ratingoverall = 0;
+
+                if (Customdata.Contains("ratingcount"))
+                    dbuser.ratingcount = Customdata["ratingcount"].AsInt32;
+                else dbuser.ratingcount = 0;
+
+
+            if (Customdata.Contains("ln_invoice_key"))
                     dbuser.ln_invoice_key = Customdata["ln_invoice_key"].ToString();
                 else dbuser.ln_invoice_key = "";
 
@@ -1132,7 +1148,7 @@ namespace ssi
             }
 
             var database = Client.GetDatabase("admin");
-            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname }, { "ln_addresspin", user.ln_addresspin } } } };
+            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname }, { "ln_addresspin", user.ln_addresspin }, {"xp", user.XP }, { "ratingoverall", user.ratingoverall}, { "ratingcount", user.ratingcount}  } } };
             try
             {
                 database.RunCommand<BsonDocument>(updatecustomdata);
@@ -2304,12 +2320,12 @@ namespace ssi
 
         #region Annotation
 
-        private static BsonArray BountyListToBsonArray(List<DatabaseUser> annotators, int contractvalue)
+        private static BsonArray BountyListToBsonArray(List<BountyJob> annotators, int contractvalue)
         {
             BsonArray data = new BsonArray();
             for (int i = 0; i < annotators.Count; i++)
             {
-                data.Add(new BsonDocument { { "name", annotators[i].Name }, { "status", "default" }, { "value", contractvalue } });
+                data.Add(new BsonDocument { { "name", annotators[i].user.Name }, { "status", annotators[i].status }, { "value", contractvalue }, /*{ "LNURLW", annotators[i].LNURLW }, { "pickedLNURL", annotators[i].pickedLNURL },*/ { "rating", annotators[i].rating } });
             }
             return data;
         }
@@ -2690,12 +2706,22 @@ namespace ssi
                         //Simple Case, should probably not be used.
                         //if(bounty.Type == "Trust")
                         {
+                            BountyJob job = new BountyJob();
+                            job.user = GetUserInfo(dbuser);
+
+                            job.rating = 0;
+                            job.status = "finished";
+                            //job.pickedLNURL = false;
+                            //job.LNURLW = "TODO";
+
+                            
+
                             DatabaseUser user = GetUserInfo(dbuser);
-                            int index = bounty.annotatorsJobCandidates.FindIndex(s => s.Name == user.Name);
+                            int index = bounty.annotatorsJobCandidates.FindIndex(s => s.user.Name == user.Name);
                             if (index > -1)
                             {
                                 bounty.annotatorsJobCandidates.RemoveAt(index);
-                                bounty.annotatorsJobDone.Add(user);
+                                bounty.annotatorsJobDone.Add(job);
                                 bounty.numOfAnnotationsNeededCurrent -= 1;
                                 MessageBox.Show("Bounty submitted, please wait for Contractor to approve.");
                                 SaveBounty(bounty);
@@ -2959,19 +2985,36 @@ namespace ssi
             bounty.numOfAnnotationsNeededCurrent = doc["numOfAnnotationsNeededCurrent"].AsInt32;
             bounty.Database = database.DatabaseNamespace.DatabaseName;
 
-            bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+            bounty.annotatorsJobCandidates = new List<BountyJob>();
             foreach (BsonDocument cand in doc["annotatorsJobCandidates"].AsBsonArray)
             {
-                DatabaseUser user = GetUserInfo(cand["name"].AsString);
-                bounty.annotatorsJobCandidates.Add(user);
+        
+                BountyJob job = new BountyJob();
+                job.user = GetUserInfo(cand["name"].AsString);
+                if (cand.Contains("rating"))
+                {
+                    job.rating = cand["rating"].AsDouble;
+                    job.status = cand["status"].AsString;
+                    //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
+                    //job.LNURLW = cand["LNURLW"].AsString;
+                }
+                bounty.annotatorsJobCandidates.Add(job);
             }
 
-            bounty.annotatorsJobDone = new List<DatabaseUser>();
+            bounty.annotatorsJobDone = new List<BountyJob>();
             bool foundmine = false;
             foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
             {
-                DatabaseUser user = GetUserInfo(cand["name"].AsString);
-                bounty.annotatorsJobDone.Add(user);
+                BountyJob job = new BountyJob();
+                job.user = GetUserInfo(cand["name"].AsString);
+                if (cand.Contains("rating"))
+                {
+                    job.rating = cand["rating"].AsDouble;
+                    job.status = cand["status"].AsString;
+                    //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
+                    //job.LNURLW = cand["LNURLW"].AsString;
+                }
+                bounty.annotatorsJobDone.Add(job);
             }
 
             bounty.streams = new List<StreamItem>();
@@ -2985,7 +3028,7 @@ namespace ssi
             return bounty;
         }
 
-        public static List<DatabaseBounty> LoadAcceptedBounties(IMongoDatabase database)
+        public static List<DatabaseBounty> LoadAcceptedBounties(IMongoDatabase database, bool finished)
         {
 
             List<DatabaseBounty> bounties = new List<DatabaseBounty>();
@@ -2998,8 +3041,18 @@ namespace ssi
 
             var bountiesDB = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Bounties);
             //maybe need some more logic here
-            var filter = builder.Gt("numOfAnnotationsNeededCurrent", 0);
-            var bountiesDoc = bountiesDB.Find(filter).ToList();
+            List<BsonDocument> bountiesDoc;
+            if (!finished)
+            {
+                var filter = builder.Gt("numOfAnnotationsNeededCurrent", 0);
+                 bountiesDoc = bountiesDB.Find(filter).ToList();
+            }
+            else
+            {
+                var filter = builder.Gt("numOfAnnotationsNeededCurrent", -1); 
+                 bountiesDoc = bountiesDB.Find(filter).ToList();
+            }
+          
             if (bountiesDoc.Count == 0) return null;
             foreach (BsonDocument doc in bountiesDoc)
             {
@@ -3033,26 +3086,52 @@ namespace ssi
                 bounty.numOfAnnotationsNeededCurrent = doc["numOfAnnotationsNeededCurrent"].AsInt32;
                 bounty.Database = database.DatabaseNamespace.DatabaseName;
 
-                bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+                bounty.annotatorsJobCandidates = new List<BountyJob>();
                 bool foundmine = false;
                 foreach (BsonDocument cand in doc["annotatorsJobCandidates"].AsBsonArray)
                 {
-                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
-                    bounty.annotatorsJobCandidates.Add(user);
+                    BountyJob job = new BountyJob();
+                    job.user = GetUserInfo(cand["name"].AsString);
+                    if (cand.Contains("rating"))
+                    {
+                        job.rating = cand["rating"].AsDouble;
+                        job.status = cand["status"].AsString;
+                        //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
+                        //job.LNURLW = cand["LNURLW"].AsString;
+                    }
+                  
+                  
 
                     //Don't return contract if already accepted.
-                    if (user.Name == Properties.Settings.Default.MongoDBUser)
+                    if (job.user.Name == Properties.Settings.Default.MongoDBUser &&!finished)
                     {
+                      
                         foundmine = true;
                     }
+                    bounty.annotatorsJobCandidates.Add(job);
                 }
 
-                bounty.annotatorsJobDone = new List<DatabaseUser>();
+                bounty.annotatorsJobDone = new List<BountyJob>();
 
                 foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
                 {
-                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
-                    bounty.annotatorsJobDone.Add(user);
+                    BountyJob job = new BountyJob();
+                    job.user = GetUserInfo(cand["name"].AsString);
+                    if (cand.Contains("rating"))
+                    {
+                        job.rating = cand["rating"].AsDouble;
+                        job.status = cand["status"].AsString;
+                        //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
+                        //job.LNURLW = cand["LNURLW"].AsString;
+                    }
+
+                   
+                    if (job.user.Name == Properties.Settings.Default.MongoDBUser && finished)
+                    {
+                        bounty.RatingTemp = job.rating;
+                        foundmine = true;
+                    }
+                    bounty.annotatorsJobDone.Add(job);
                 }
 
                 bounty.streams = new List<StreamItem>();
@@ -3122,19 +3201,37 @@ namespace ssi
                 bounty.numOfAnnotationsNeededCurrent = doc["numOfAnnotationsNeededCurrent"].AsInt32;
                 bounty.Database = databaseName;
 
-                bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+                bounty.annotatorsJobCandidates = new List<BountyJob>();
                 foreach (BsonDocument cand in doc["annotatorsJobCandidates"].AsBsonArray)
                 {
-                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
-                    bounty.annotatorsJobCandidates.Add(user);
+                    BountyJob job = new BountyJob();
+                    job.user = GetUserInfo(cand["name"].AsString);
+                    if (cand.Contains("rating"))
+                    {
+                        job.rating = cand["rating"].AsDouble;
+                        job.status = cand["status"].AsString;
+                        //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
+                        //job.LNURLW = cand["LNURLW"].AsString;
+                    }
+
+                    bounty.annotatorsJobCandidates.Add(job);
                 }
 
-                bounty.annotatorsJobDone = new List<DatabaseUser>();
+                bounty.annotatorsJobDone = new List<BountyJob>();
 
                 foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
                 {
-                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
-                    bounty.annotatorsJobDone.Add(user);
+                    BountyJob job = new BountyJob();
+                    job.user = GetUserInfo(cand["name"].AsString);
+                    if (cand.Contains("rating"))
+                    {
+                        job.rating = cand["rating"].AsDouble;
+                        job.status = cand["status"].AsString;
+                        //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
+                        //job.LNURLW = cand["LNURLW"].AsString;
+                    }
+
+                    bounty.annotatorsJobDone.Add(job);
                 }
 
                 bounty.streams = new List<StreamItem>();
@@ -3201,26 +3298,44 @@ namespace ssi
                 bounty.Database = database.DatabaseNamespace.DatabaseName;
 
                 bool handled = false;
-                bounty.annotatorsJobCandidates = new List<DatabaseUser>();
+                bounty.annotatorsJobCandidates = new List<BountyJob>();
                 foreach (BsonDocument cand in doc["annotatorsJobCandidates"].AsBsonArray)
                 {
-                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
-                    bounty.annotatorsJobCandidates.Add(user);
+                    BountyJob job = new BountyJob();
+                    job.user = GetUserInfo(cand["name"].AsString);
+                    if (cand.Contains("rating"))
+                    {
+                        job.rating = cand["rating"].AsDouble;
+                        job.status = cand["status"].AsString;
+                        //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
+                        //job.LNURLW = cand["LNURLW"].AsString;
+                    }
+
+                    bounty.annotatorsJobCandidates.Add(job);
                     //Don't return contract if already accepted.
-                    if (user.Name == Properties.Settings.Default.MongoDBUser)
+                    if (job.user.Name == Properties.Settings.Default.MongoDBUser)
                     {
                         handled = true;
                     }
                 }
 
-                bounty.annotatorsJobDone = new List<DatabaseUser>();
+                bounty.annotatorsJobDone = new List<BountyJob>();
                 foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
                 {
-                    DatabaseUser user = GetUserInfo(cand["name"].AsString);
-                    bounty.annotatorsJobDone.Add(user);
+                    BountyJob job = new BountyJob();
+                    job.user = GetUserInfo(cand["name"].AsString);
+                    if (cand.Contains("rating"))
+                    {
+                        job.rating = cand["rating"].AsDouble;
+                        job.status = cand["status"].AsString;
+                        //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
+                        //job.LNURLW = cand["LNURLW"].AsString;
+                    }
+
+                    bounty.annotatorsJobDone.Add(job);
 
                     //Don't return contract if already finished.
-                    if (user.Name == Properties.Settings.Default.MongoDBUser)
+                    if (job.user.Name == Properties.Settings.Default.MongoDBUser)
                     {
                         handled = true;
                     }
@@ -3352,7 +3467,7 @@ namespace ssi
                     annoList.Scheme.Labels = new List<AnnoScheme.Label>();
 
                     BsonArray schemelabels = scheme["labels"].AsBsonArray;
-                    BsonArray attributelabels = scheme["attributes"].AsBsonArray;
+                    //BsonArray attributelabels = scheme["attributes"].AsBsonArray;
 
                     for (int j = 0; j < schemelabels.Count; j++)
                     {
@@ -4461,6 +4576,11 @@ namespace ssi
 
         public int Expertise { get; set; }
 
+        public int XP { get; set; }
+
+        public double ratingoverall { get; set; }
+        public int ratingcount { get; set; }
+
         //key for Lightning
         public string ln_admin_key { get; set; }
         public string ln_invoice_key { get; set; }
@@ -4517,12 +4637,25 @@ namespace ssi
         public int numOfAnnotationsNeededCurrent { get; set; }
         public string Database { get; set; }
         public string Type { get; set; }
-        public List<DatabaseUser> annotatorsJobCandidates { get; set; }
-        public List<DatabaseUser> annotatorsJobDone { get; set; }
+        public double RatingTemp { get; set; }
+        public string LNURLW { get; set; }
+        public List<BountyJob> annotatorsJobCandidates { get; set; }
+        public List<BountyJob> annotatorsJobDone { get; set; }
         public List<StreamItem> streams { get; set; }
 
     }
 
+
+    public class BountyJob
+    {
+      public DatabaseUser user { get; set; }
+      public double rating { get; set; }
+      //public bool pickedLNURL { get; set; }
+      //public string LNURLW { get; set; }
+      public string status { get; set; }
+        //open, finished
+
+    }
 
     public class DatabaseStream
     {

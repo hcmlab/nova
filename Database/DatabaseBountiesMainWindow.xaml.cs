@@ -1,5 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using Octokit;
+using ssi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +53,7 @@ namespace ssi
             FindBountiesOverviewBox.ItemsSource = findbounties;
         }
 
-        private void updateAcceptedBounties()
+        private void updateAcceptedBounties(bool onlyfinished)
         {
             AcceptedBountiesOverviewBox.ItemsSource = null;
             acceptedbounties.Clear();
@@ -60,14 +62,43 @@ namespace ssi
             {
                 IMongoDatabase db = DatabaseHandler.Client.GetDatabase(databaseName);
                 List<DatabaseBounty> bounties = new List<DatabaseBounty>();
-                bounties = DatabaseHandler.LoadAcceptedBounties(db);
+                bounties = DatabaseHandler.LoadAcceptedBounties(db, onlyfinished);
                 if (bounties != null) acceptedbounties.AddRange(bounties);
             }
-            AcceptedBountiesOverviewBox.ItemsSource = acceptedbounties;
+            if(onlyfinished)
+            {
+                CompletedBountiesOverviewBox.ItemsSource = acceptedbounties;
+                updateUserRatingandStats();
+        
+
+
+                }
+            else  AcceptedBountiesOverviewBox.ItemsSource = acceptedbounties;
         }
 
+        private void updateUserRatingandStats()
+        {
+            DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+            user.ratingcount = 0;
+            user.ratingoverall = 0;
+            user.XP = 0;
+            foreach (var item in acceptedbounties)
+            {
+                if (item.RatingTemp != 0)
+                {
+                    user.ratingcount++;
+                    user.ratingoverall = user.ratingoverall + item.RatingTemp;
+                    user.XP = user.XP + (int)(item.RatingTemp * 10);
 
-        private void AcceptButton_Click(object sender, RoutedEventArgs e)
+                }
+
+            }
+            user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key, MainHandler.Decode((Properties.Settings.Default.MongoDBPass)));  //encrypt
+            DatabaseHandler.ChangeUserCustomData(user);
+        }
+       
+
+private void AcceptButton_Click(object sender, RoutedEventArgs e)
         {
             selectedBounty = (DatabaseBounty)FindBountiesOverviewBox.SelectedItem;
             bool hasWallet = (MainHandler.myWallet != null);
@@ -80,7 +111,15 @@ namespace ssi
 
                 else
                 {
-                    selectedBounty.annotatorsJobCandidates.Add(DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser));
+                    BountyJob job = new BountyJob();
+                    job.user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                    job.rating = 0;
+                    job.status = "open";
+                    //job.pickedLNURL = false;
+                    //job.LNURLW = selectedBounty.LNURLW;
+                    
+
+                    selectedBounty.annotatorsJobCandidates.Add(job);
                     if (DatabaseHandler.SaveBounty(selectedBounty))
                     {
                         MessageBox.Show("Contract succesfully accepted. Open Accepted bounties Menu to start working on your bounties.");
@@ -121,13 +160,13 @@ namespace ssi
             if (AcceptedBountiesOverviewBox.SelectedItem != null)
             {
                 selectedAcceptedBounty = (DatabaseBounty)AcceptedBountiesOverviewBox.SelectedItem;
-                int index = selectedAcceptedBounty.annotatorsJobCandidates.FindIndex(s => s.Name == Properties.Settings.Default.MongoDBUser);
+                int index = selectedAcceptedBounty.annotatorsJobCandidates.FindIndex(s => s.user.Name == Properties.Settings.Default.MongoDBUser);
                 if (index > -1)
                 {
                     selectedAcceptedBounty.annotatorsJobCandidates.RemoveAt(index);
                     selectedAcceptedBounty.numOfAnnotationsNeededCurrent += 1;
                     DatabaseHandler.SaveBounty(selectedAcceptedBounty);
-                    updateAcceptedBounties();
+                    updateAcceptedBounties(false);
 
                 }
             }
@@ -138,12 +177,22 @@ namespace ssi
 
         private void AcceptedTabItem_Selected(object sender, RoutedEventArgs e)
         {
-            updateAcceptedBounties();
+            updateAcceptedBounties(false);
         }
 
         private void FindTabItem_Selected(object sender, RoutedEventArgs e)
         {
             updateFindBounties();
+        }
+
+        private void TabItem_Selected(object sender, RoutedEventArgs e)
+        {
+            updateAcceptedBounties(true);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

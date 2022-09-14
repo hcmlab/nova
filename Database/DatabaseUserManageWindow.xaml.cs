@@ -23,7 +23,7 @@ namespace ssi
 
     public partial class DatabaseUserManageWindow : Window
     {
-        public DatabaseUserManageWindow(string name = null, string fullname = null,  string email = null, int expertise = 0)
+        public DatabaseUserManageWindow(string name = null, string fullname = null,  string email = null, int expertise = 0, double xp = 0, double rating = 0)
         {
             InitializeComponent();
            
@@ -33,7 +33,23 @@ namespace ssi
                 NameField.IsEnabled = false;
                 FullNameField.Text = fullname;
                 Emailfield.Text = email;
-                Expertisefield.SelectedIndex = expertise;       
+                int xplevel = 0;
+                if (xp > 2100000) xplevel = 10;
+                else if (xp > 1000000) xplevel = 9;
+                else if (xp > 500000) xplevel = 8;
+                else if (xp > 250000) xplevel = 7;
+                else if (xp > 100000) xplevel = 6;
+                else if (xp > 50000) xplevel = 5;
+                else if (xp > 10000) xplevel = 4;
+                else if (xp > 5000) xplevel = 3;
+                else if (xp > 1000) xplevel = 2;
+                else if (xp > 200) xplevel = 1;
+
+                if(xplevel > expertise) expertise = xplevel;
+                Expertisefield.SelectedIndex = expertise;
+                Expertisefield.IsEnabled = false;
+                ratingLabel.Content = "Rating: " + rating.ToString("F2");
+                xpLabel.Content = "XP: " + xp;
             }
             if (Properties.Settings.Default.LoggedInWithLightning)
             {
@@ -42,6 +58,7 @@ namespace ssi
                 CurrentPasswordLabel.Visibility = Visibility.Hidden;
                 NewPasswordLabel.Visibility = Visibility.Hidden;
             }
+           
         }
 
         public string GetName()
