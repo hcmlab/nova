@@ -51,13 +51,14 @@ namespace ssi.Tools.Polygon_Helper
 
             String name = scheme.DefaultLabel;
             Color color = scheme.DefaultColor;
+            String conf = "100";
             if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
             {
                 name = handler.CurrentLabelName;
                 color = handler.CurrentLabelColor;
             }
 
-            PolygonLabel polygonLabel = new PolygonLabel(null, name, color);
+            PolygonLabel polygonLabel = new PolygonLabel(null, name, color, conf);
             this.addPolygonLabelToPolygonList(polygonLabel);
         }
 

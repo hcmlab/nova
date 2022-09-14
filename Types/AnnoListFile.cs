@@ -12,6 +12,10 @@ using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
 using ssi.Types.Polygon;
+using static ExCSS.AttributeSelectorFactory;
+using Octokit;
+using FileMode = System.IO.FileMode;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ssi
 {
@@ -218,7 +222,10 @@ namespace ssi
                                             writer.WritePropertyName("label_color");
                                             writer.WriteValue(pl.Color.ToString());
                                         }
-                                        
+
+                                        writer.WritePropertyName("confidence");
+                                        writer.WriteValue(pl.Confidence);
+
                                         writer.WritePropertyName("points");
                                         writer.WriteStartArray();
                                         foreach (PolygonPoint pp in pl.Polygon)
@@ -588,6 +595,7 @@ namespace ssi
                                     {
                                         String label = "";
                                         String color = "";
+                                        String conf = polygon.confidence;
                                         Color labelColor = Colors.Black;
 
                                         if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
@@ -613,7 +621,7 @@ namespace ssi
                                             points.Add(new PolygonPoint((double)point.First, (double)point.Last));
                                         }
 
-                                        polygonLabels.Add(new PolygonLabel(points, label, labelColor));
+                                        polygonLabels.Add(new PolygonLabel(points, label, labelColor, conf));
                                     }
                                 }
                                 const double defaultConfidence = 1.0;
@@ -1020,6 +1028,137 @@ namespace ssi
             return al;
         }
 
+
+
+        public static List<AnnoList> LoadfromSRTFile(String filepath, bool wordlevel = true)
+        {
+            List<AnnoList> list = new List<AnnoList>();
+            try
+            {
+                AnnoList al = new AnnoList();
+                int value;
+                bool readtime = false;
+                bool readtext = false;
+                AnnoListItem Ali = new AnnoListItem(0, 0, "");
+
+             
+
+                    foreach (var line in File.ReadAllLines(filepath).Where(l => !string.IsNullOrWhiteSpace(l)))
+                {
+                    if (Int32.TryParse(line, out value) && !readtime && !readtext)
+                    {
+                        Ali = new AnnoListItem(0, 0, "", value.ToString(), Colors.Black);
+                        readtime = true;
+
+                    }
+                    else if (readtime)
+                    {
+                        string l = line.Replace("--", " ");
+                        l = l.Replace(" ", "");
+                        string[] startend = l.Split('>');
+                        // startend[0].remove
+
+                        TimeSpan st = TimeSpan.Parse(startend[0]);
+                        Ali.Start = st.TotalSeconds;
+                        TimeSpan ed = TimeSpan.Parse(startend[1]);
+                        Ali.Stop = ed.TotalSeconds;
+                        readtime = false;
+                        readtext = true;
+                    }
+                    else if (readtext)
+                    {
+                        if (!wordlevel)
+                        {
+                            string[] split = line.Split(' ');
+                            bool first = true;
+                            foreach(string s in split)
+                            {
+
+                                if (first)
+                                {
+                                    string clean = s.Replace("<c>", "");
+                                    clean = clean.Replace("</c>", ""); ;
+
+                                    Ali.Label += clean;
+                                    first = false;
+                                }
+                                else
+                                {
+                                    string clean = s.Replace("<c>", "");
+                                    clean = clean.Replace("</c", "");
+
+                                    string[] splitintern = clean.Split('>');
+                                    string text = splitintern[1];
+
+
+                                    Ali.Label += " " + text;
+                                }
+
+                               
+
+                            }
+
+                            al.AddSorted(Ali);
+                        }
+
+                        else
+                        {
+                            string[] split = line.Split(' ');
+                            bool first = true;
+                            foreach (string s in split)
+                            {
+
+                                if (first)
+                                {
+                                    string clean = s.Replace("<c>", "");
+                                    clean = clean.Replace("</c>", ""); ;
+
+                                    AnnoListItem sali = new AnnoListItem(Ali.Start, 0, clean, Ali.Meta, Ali.Color);
+                                    al.AddSorted(sali);
+                                    first = false;
+                                }
+                                else
+                                {
+                                    string clean = s.Replace("<c>", "");
+                                    clean = clean.Replace("</c", "");
+
+                                    string[] splitintern = clean.Split('>');
+                                    string time = splitintern[0].Replace("<", "");
+                                    TimeSpan st = TimeSpan.Parse(time);
+                                    al.Items.Last<AnnoListItem>().Stop = st.TotalSeconds;
+
+
+                                    string text = splitintern[1];
+                                    AnnoListItem sali = new AnnoListItem(st.TotalSeconds, 0, text, Ali.Meta, Ali.Color);
+                                    al.AddSorted(sali);
+
+                                }
+
+                                al.Items.Last<AnnoListItem>().Stop = Ali.Stop;
+
+                            }
+                        }
+
+                    
+
+                        readtext = false;
+
+                     
+                    }
+              
+  
+                }
+
+
+
+                al.Scheme = new AnnoScheme();
+                al.Scheme.Type = AnnoScheme.TYPE.FREE;
+                list.Add(al);   
+            }
+            catch { 
+            }
+            return list;
+        }
 
 
 

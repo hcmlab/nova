@@ -27,24 +27,26 @@ namespace ssi
 {
     public partial class MainHandler
     {
-        public static Lightning.LightningWallet myWallet = new Lightning.LightningWallet();
+        public static Lightning.LightningWallet myWallet = null;
         public void paymentReceived(uint amount)
         {
             updateNavigator();           
         }
         #region DATABASELOGIC
 
-        private async void databaseConnect()
+        private async void databaseConnect(bool reconnect = false)
         {
             Action EmptyDelegate = delegate () { };
             control.ShadowBoxText.Text = "Connecting to Database...";
             control.ShadowBox.Visibility = Visibility.Visible;
             control.UpdateLayout();
             control.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+          
+            if (reconnect) DatabaseHandler.reconnectClient();
 
             bool isConnected = DatabaseHandler.Connect();
 
-            
+            MainHandler.myWallet = null;
 
             if (isConnected)
             {
@@ -57,7 +59,7 @@ namespace ssi
             }
             else
             {
-                MessageTools.Warning("Unable to connect to database, please check your settings");
+                MessageTools.Warning("Unable to connect to database, please check your settings\nIf you created a new account, please restart the Software");
                 Properties.Settings.Default.DatabaseAutoLogin = false;
                 Properties.Settings.Default.Save();                           
             }
@@ -73,28 +75,41 @@ namespace ssi
                 Lightning lightning = new Lightning();
                 try
                 {
-
-                    DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
-                    int balance = await lightning.GetWalletBalance(user.ln_admin_key);
-                    //if error we don't have a wallet, returns -1.
-                    if (balance == -1)
-                        myWallet = null;
-                    else
+                    int balance = 0;
+                    DatabaseUser user =  DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                    if(user.ln_admin_key == "")
                     {
+                        MainHandler.myWallet = null;
+                    }
+                    else 
+                    {
+                        myWallet = new Lightning.LightningWallet();
                         myWallet.admin_key = user.ln_admin_key;
                         myWallet.invoice_key = user.ln_invoice_key;
                         myWallet.wallet_id = user.ln_wallet_id;
                         myWallet.user_id = user.ln_user_id;
+                        myWallet.lnaddressname = user.ln_addressname;
+                        myWallet.lnaddresspin = user.ln_addresspin;
+                        balance = await lightning.GetWalletBalance(user.ln_admin_key);
                         myWallet.balance = balance;
+                        //if error we don't have a wallet, returns -1.
+                        //if (balance == -1)
+                        // MainHandler.myWallet = null;
+                        //else
+                        //{
+
+
+
+                        //}
                     }
-                    control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+
                     updateNavigator();
 
                     //InitCheckLightningBalanceTimer();
                 }
                 catch (Exception e)
                 {
-
+                    Console.WriteLine(e);
                 }
             }
 
@@ -206,6 +221,7 @@ namespace ssi
             };
 
             blankuser = DatabaseHandler.GetUserInfo(blankuser);
+            blankuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(blankuser.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
 
             DatabaseUserManageWindow dialog = new DatabaseUserManageWindow(blankuser.Name, blankuser.Fullname, blankuser.Email, blankuser.Expertise);
             dialog.ShowDialog();
@@ -215,9 +231,11 @@ namespace ssi
                 DatabaseUser user = DatabaseHandler.GetUserInfo(dialog.GetName());
                 user.Name = dialog.GetName();
                 user.Fullname = dialog.GetFullName();
-                user.Password = dialog.GetPassword();
                 user.Email = dialog.Getemail();
                 user.Expertise = dialog.GetExpertise();
+                user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+                string newPassword = dialog.GetPassword();
+
                 //DatabaseUser user = new DatabaseUser()
                 //{
                 //    Name = dialog.GetName(),
@@ -228,15 +246,16 @@ namespace ssi
                 //};
 
                 DatabaseHandler.ChangeUserCustomData(user);
-                if (user.Password != "" && user.Password != null)
+                if (newPassword != "" && newPassword != null)
                 {
+                    user.Password = newPassword;
                     if (DatabaseHandler.ChangeUserPassword(user))
                     {
-                        Properties.Settings.Default.MongoDBPass = MainHandler.Encode(user.Password);
+                        Properties.Settings.Default.MongoDBPass = MainHandler.Encode(newPassword);
                         MessageBox.Show("Password Change successful!");
                         if(MainHandler.myWallet != null)
                         {
-                            user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key, user.Password);
+                            user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key, newPassword);
                             DatabaseHandler.ChangeUserCustomData(user);
 
                         }
@@ -323,14 +342,16 @@ namespace ssi
 
                 if (streams != null && streams.Count > 0)
                 {
-                    List<string> streamsAll = new List<string>();
+                    List<StreamItem> streamsAll = new List<StreamItem>();
                     foreach (StreamItem stream in streams)
                     {
                         if (stream.Extension == "stream")
                         {
-                            streamsAll.Add(stream.Name + "~");
+                            StreamItem tilde = new StreamItem();
+                            tilde.Name = stream.Name + "~";
+                            streamsAll.Add(tilde);
                         }
-                        streamsAll.Add(stream.Name);
+                        streamsAll.Add(stream);
 
                     }
 
@@ -387,19 +408,35 @@ namespace ssi
                         Directory.CreateDirectory(Path.GetDirectoryName(localPath));
 
                         List<string> streamstoDownload = new List<string>();
-                        foreach (string stream in streamsAll)
+                        foreach (StreamItem stream in streamsAll)
                         {
 
 
-                            string llocal = localPath + stream;
-                            string lurl = url + stream;
+                            string llocal = localPath + stream.Name;
+                            string lurl = url + stream.Name;
+
+
                             if (File.Exists(llocal))
                             {
-                                loadFile(llocal);
+                                DatabaseStream temp = new DatabaseStream();
+                                string filename = Path.GetFileNameWithoutExtension(stream.Name);
+                                string[] withoutRole = filename.Split('.');
+                                string fname = "";
+                                //add all strings but the first (role)
+                                for(int i = 1; i <withoutRole.Length; i++)
+                                {
+                                    fname = fname + withoutRole[i] + ".";
+                                }
+
+                                temp.Name = fname.Remove(fname.Length - 1, 1);
+                                temp.FileExt = stream.Extension;
+                                temp.Type = stream.Type;
+                                DatabaseHandler.GetStream(ref temp);
+                                loadFile(llocal, temp.DimLabels);
                                 continue;
                             }
 
-                            streamstoDownload.Add(stream);
+                            streamstoDownload.Add(stream.Name);
 
                             Thread.Sleep(100);
                            

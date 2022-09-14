@@ -35,5 +35,16 @@ namespace ssi
             Close();
         }
 
+        private void Attributes_Click(object sender, RoutedEventArgs e)
+        {
+            AnnoTierAttributesWindow aaw = new AnnoTierAttributesWindow(ref scheme);
+            aaw.ShowDialog();
+            if (aaw.DialogResult != true)
+            {
+                return;
+            }
+
+        }
+
     }
 }

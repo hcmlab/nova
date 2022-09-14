@@ -86,6 +86,13 @@
             {
                 return ((time - selectionStart) / (selectionStop - selectionStart)) * selectionInPixel;
             }
+
+            if (time < selectionStart)
+            {
+                return ((selectionStart + time - selectionStart) / (selectionStop - selectionStart)) * selectionInPixel;
+            }
+
+
             else
             {
                 return 0;

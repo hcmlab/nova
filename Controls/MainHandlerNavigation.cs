@@ -213,12 +213,37 @@ namespace ssi
             control.navigator.statusBarServer.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
             control.navigator.statusBarDatabase.Content = DatabaseHandler.DatabaseInfo;
             control.navigator.statusBarDatabase.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
-            if (ENABLE_LIGHTNING)
+            if (ENABLE_LIGHTNING && isConnected)
             {
-                if (myWallet == null) control.navigator.satsbalance.Content = "\u26a1 ";
-                else control.navigator.satsbalance.Content = "\u26a1 " + (myWallet.balance / 1000) + " Sats";
-            }
                
+
+                if (myWallet == null) { 
+                    control.navigator.satsbalance.Content = "\u26a1 ";
+                    control.navigator.satsbalance.MouseDoubleClick -= LightningReset_Click;
+                    control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                    control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+                }
+                else if (myWallet.balance == -1) 
+                {
+                    control.navigator.satsbalance.Content = "\u26a1 Error connecting to Server, try again later. ";
+                    control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                    control.navigator.satsbalance.MouseDoubleClick += LightningReset_Click;
+
+                    
+                }
+                else { control.navigator.satsbalance.Content = "\u26a1 " + (myWallet.balance / 1000) + " Sats";
+                    control.navigator.satsbalance.MouseDoubleClick -= LightningReset_Click;
+                    control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                    control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
+                }
+            }
+
+            if (ENABLE_LIGHTNING && !isConnected)
+            {
+                control.navigator.satsbalance.MouseDoubleClick -= Lightning_Click;
+                control.navigator.satsbalance.Content = "\u26a1 ";  
+            }
+
             control.navigator.satsbalance.Foreground = isConnected ? Brushes.Black : Brushes.DarkGray;
             
 

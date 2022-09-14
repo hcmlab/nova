@@ -71,6 +71,7 @@
         <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Style="{StaticResource MyButton}" Name="AddLabel" Content="ADD" Click="AddLabel_Click"/>
             <Button Style="{StaticResource MyButton}" Name="DeleteLabel" Content="REM" Click="DeleteLabel_Click"/>
+            <Button Style="{StaticResource MyButton}" Name="Attributes" Content="ATTRIBUTES" Click="Attributes_Click"/>
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Right">

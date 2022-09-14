@@ -1,0 +1,96 @@
+﻿<Window x:Class="ssi.DatabaseAdminStreamWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+          xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
+        mc:Ignorable="d"
+        Title="Database Stream" Height="450" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="MyButton" >
+            <Setter Property="Margin" Value="2,0,2,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+
+        <Label Grid.Row="0" Content="Name:" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <TextBox Grid.Row="1" Name="name" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <Label Grid.Row="2" Content="File Extension:" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <TextBox Grid.Row="3" Name="fileExt" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2" TextChanged="fileExt_TextChanged"/>
+        <Label Grid.Row="4" Content="Type: (video, audio, stream, ..)" Grid.Column="0" Grid.ColumnSpan="2" />
+        <TextBox Grid.Row="5" Name="type" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2" />
+        <Label Grid.Row="6" Content="Samplerate:" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <TextBox Grid.Row="7" Name="sr" Margin="5,0,5,5" Grid.Column="0" Grid.ColumnSpan="2"/>
+        
+        <Label Name="l1" Grid.Row="8" Content="Optional: Add Names to Stream Dimensions" Grid.Column="0" Grid.ColumnSpan="2"/>
+
+        <Border Name="l2" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" CornerRadius="10" BorderThickness="1" BorderBrush="White" Background="DarkGray" AllowDrop="True" Drop="AnnoList_Drop" Visibility="Visible">
+            <Label FontSize="16" Foreground="White" Content="Drag an existing Dimension naming file here" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="-1" />
+        </Border>
+
+        <Label Name="l3" Grid.Row="10" Grid.Column="0" Margin="5">Dimension Names</Label>
+        <ListView Name="LabelsListBox" Grid.Row="10" Grid.Column="1" Margin="5,5,5,0" SelectionMode="Single">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="100" Header="Dimension">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <p:TextBoxEx Text="{Binding Dim}" IsEnabled="true" Width="30"  Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                </StackPanel>
+                            </DataTemplate>
+
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="140" Header="Name">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <p:TextBoxEx Text="{Binding Name}" IsEnabled="true" Width="140"  Height="20" Margin="5,0,0,0" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <StackPanel Name="l4" Grid.Row="11" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Style="{StaticResource MyButton}" Name="AddLabel" Content="ADD" Click="AddLabel_Click"/>
+            <Button Style="{StaticResource MyButton}" Name="DeleteLabel" Content="REM" Click="DeleteLabel_Click"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Name="Ok" Click="Ok_Click" Height="25" Width="50" Margin="5">Ok</Button>
+            <Button Name="Cancel" Click="Cancel_Click" Height="25" Width="50">Cancel</Button>
+        </StackPanel>
+
+    </Grid>
+</Window>

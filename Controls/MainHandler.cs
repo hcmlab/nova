@@ -4,13 +4,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Shapes;
 using System.Windows.Threading;
+using FileMode = System.IO.FileMode;
 
 namespace ssi
 {
@@ -18,7 +21,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.2.0";
+        public static string BuildVersion = "1.2.2.8";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -43,10 +46,11 @@ namespace ssi
             ARFF,
             PROJECT,
             NOLDUS,
+            SRT,
             IGNORE
         }
 
-        public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "odf", "annotation" };
+        public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "odf", "annotation", "srt" };
 
         public MainControl control;
 
@@ -108,6 +112,9 @@ namespace ssi
         {
             control = view;
 
+            //TEST
+            //DatabaseHandler.ExportMultipleCSV();
+
             // Shadow box
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
 
@@ -146,7 +153,7 @@ namespace ssi
             control.annoLiveModeCheckBox.Unchecked += annoLiveMode_Changed;
             control.annoLiveModeActivateMouse.Checked += annoLiveModeActiveMouse_Checked;
             control.annoLiveModeActivateMouse.Unchecked += annoLiveModeActiveMouse_Unchecked;
-            
+
             // Geometric
             control.geometricListControl.editButton.Click += geometricListEdit_Click;
             control.geometricListControl.editTextBox.GotMouseCapture += geometricListEdit_Focused;
@@ -201,7 +208,7 @@ namespace ssi
 
             control.loadFilesMenu.Click += loadFiles_Click;
             control.fileSaveProjectMenu.Click += fileSaveProject_Click;
-            control.fileLoadProjectMenu.Click += fileLoadProject_Click;                 
+            control.fileLoadProjectMenu.Click += fileLoadProject_Click;
 
             control.exportSamplesMenu.Click += exportSamples_Click;
             control.exportToGenie.Click += exportToGenie_Click;
@@ -210,15 +217,12 @@ namespace ssi
             control.exportAnnoToPNGMenu.Click += exportAnnoToPNG_Click;
             control.exportSignalToCSVMenu.Click += exportSignalToCSV_Click;
             control.exportSignalToXPSMenu.Click += exportSignalToXPS_Click;
-            control.exportSignalToPNGMenu.Click += exportSignalToPNG_Click;            
+            control.exportSignalToPNGMenu.Click += exportSignalToPNG_Click;
 
             control.convertAnnoContinuousToDiscreteMenu.Click += convertAnnoContinuousToDiscrete_Click;
             control.convertAnnoToSignalMenu.Click += convertAnnoToSignal_Click;
             control.convertSignalToAnnoContinuousMenu.Click += convertSignalToAnnoContinuous_Click;
             control.removeRemainingSegmentsMenu.Click += removeRemainingSegmentsMenu_Click;
-
-            //control.navigator.satsbalance.MouseDoubleClick += Lightning_Click;
-            bool LightningWindowActive = false;
 
             control.databaseLoadSessionMenu.Click += databaseLoadSession_Click;
             control.databaseCMLCompleteStepMenu.Click += databaseCMLCompleteStep_Click;
@@ -226,7 +230,7 @@ namespace ssi
             control.databaseCMLFusionMenuPredict.Click += databaseCMLFusionPredict_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
             control.databaseCMLMergeFeaturesMenu.Click += databaseCMLMergeFeatures_Click;
-            control.databaseCMLTrainAndPredictMenu.Click += databaseCMLTrainAndPredict_Click;            
+            control.databaseCMLTrainAndPredictMenu.Click += databaseCMLTrainAndPredict_Click;
             control.databaseManageUsersMenu.Click += databaseManageUsers_Click;
             control.databaseManageDBsMenu.Click += databaseManageDBs_Click;
             control.databaseManageSessionsMenu.Click += databaseManageSessions_Click;
@@ -250,7 +254,7 @@ namespace ssi
             {
 
                 checkPythonInstallation();
-               
+
 
                 var pythonPath = AppDomain.CurrentDomain.BaseDirectory + "python";
 
@@ -310,19 +314,19 @@ namespace ssi
             control.databasehuntBountyMenu.Click += DatabaseHuntBounty_Click;
             if (Properties.Settings.Default.DatabaseAutoLogin)
             {
-               databaseConnect();
+                databaseConnect();
             }
             else
             {
                 updateNavigator();
             }
 
-          
+
 
 
             // Mouse
 
-           control.MouseWheel += (sender, args) =>
+            control.MouseWheel += (sender, args) =>
             {
                 if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
                 {
@@ -357,7 +361,7 @@ namespace ssi
                 Properties.Settings.Default.Save();
                 checkForUpdates(true);
                 checkForCMLUpdates(true);
-               
+
             }
 
 
@@ -367,14 +371,45 @@ namespace ssi
 
             if (!(File.Exists(hardwareAcceleratorLibraryPath)))
             {
-                
+
                 DownloadFile("https://github.com/hcmlab/nova/raw/master/" + hardwareAcceleratorLibrary, hardwareAcceleratorLibraryPath);
 
             }
 
-           
+            string repo = "LoginWithLightning";
 
+            string webview21 = "Microsoft.Web.WebView2.Wpf.dll";
+            string webview21path = AppDomain.CurrentDomain.BaseDirectory + webview21;
 
+            if (!(File.Exists(webview21path)))
+            {
+                DownloadFile("https://github.com/hcmlab/nova/raw/" + repo + "/References/" + webview21, webview21path);
+            }
+
+            string webview22 = "Microsoft.Web.WebView2.Core.dll";
+            string webview22path = AppDomain.CurrentDomain.BaseDirectory + webview22;
+
+            if (!(File.Exists(webview22path)))
+            {
+                DownloadFile("https://github.com/hcmlab/nova/raw/" + repo + "/References/" + webview22, webview22path);
+            }
+
+            string webview23 = "WebView2Loader.dll";
+            if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "runtimes\\win-x64\\native\\"))
+            {
+                DirectoryInfo di = Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "runtimes\\win-x64\\native\\");
+            }
+
+            // Try to create the directory.
+
+            string webview23path = AppDomain.CurrentDomain.BaseDirectory + "runtimes\\win-x64\\native\\" + webview23;
+
+            if (!(File.Exists(webview23path)))
+            {
+                DownloadFile("https://github.com/hcmlab/nova/raw/" + repo + "/bin/runtimes/win-x64/native/" + webview23, webview23path);
+            }
+
+   
 
             string cmltrainexe = "cmltrain.exe";
             string cmltrainexePath = AppDomain.CurrentDomain.BaseDirectory + "ssi\\" + cmltrainexe;
@@ -388,7 +423,7 @@ namespace ssi
 
 
             if (Properties.Settings.Default.DatabaseDirectory == "")
-            {                
+            {
                 Properties.Settings.Default.DatabaseDirectory = Directory.GetCurrentDirectory() + "\\data";
                 Properties.Settings.Default.Save();
                 Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory);
@@ -426,10 +461,37 @@ namespace ssi
 
         }
 
+        private async void LightningReset_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                MessageBoxResult res = MessageBox.Show("This will overwrite existing Wallet, all funds will be lost","Lightning Wallet reset", MessageBoxButton.YesNo);
+
+                if (res == MessageBoxResult.Yes)
+                {
+                    MainHandler.myWallet = null;
+                    LightningWalletMangement lwm = new LightningWalletMangement(this);
+                    lwm.Left = System.Windows.Application.Current.MainWindow.Left + 425;
+                    lwm.Top = System.Windows.Application.Current.MainWindow.Top + System.Windows.Application.Current.MainWindow.ActualHeight - 680;
+                    lwm.Topmost = true;
+                    lwm.ShowDialog();
+                    updateNavigator();
+                }
+              
+            }
+
+            Lightning lightning = new Lightning();
+            int balance = await lightning.GetWalletBalance(myWallet.admin_key);
+            if(balance != -1)
+            {
+                updateNavigator();
+            }
+        }
+
         public void showShadowBox(string message)
         {
             control.Cursor = Cursors.Wait;
-            Action EmptyDelegate = delegate () {};
+            Action EmptyDelegate = delegate () { };
             control.ShadowBoxText.Text = message;
             control.ShadowBox.Visibility = Visibility.Visible;
             control.UpdateLayout();
@@ -455,7 +517,7 @@ namespace ssi
             updateMediaBox(MediaBoxStatic.Selected);
             updateAnnoInfo(AnnoTierStatic.Selected);
 
-           
+
 
         }
 
@@ -470,7 +532,7 @@ namespace ssi
                 if (track.AnnoList.HasChanged) anytrackchanged = true;
             }
 
-           
+
             if (annoTiers.Count > 0 && anytrackchanged && !ENABLE_VIEWONLY)
             {
                 MessageBoxResult mbx = MessageBox.Show("There are unsaved changes, save all annotations?", "Question", MessageBoxButton.YesNoCancel);
@@ -491,7 +553,7 @@ namespace ssi
                 }
             }
 
-       
+
 
             while (mediaBoxes.Count > 0)
             {
@@ -509,7 +571,7 @@ namespace ssi
             }
 
 
-           
+
             control.annoLiveModeCheckBox.IsChecked = false;
 
             annoLists.Clear();
@@ -640,12 +702,14 @@ namespace ssi
                 }
 
 
+
                 Properties.Settings.Default.UncertaintyLevel = s.Uncertainty();
                 Properties.Settings.Default.Annotator = s.AnnotatorName();
                 Properties.Settings.Default.DatabaseAddress = s.DatabaseAddress();
-                Properties.Settings.Default.MongoDBUser = s.MongoUser() != "" ?  s.MongoUser() : "invalid username";
+                Properties.Settings.Default.MongoDBUser = s.MongoUser() != "" ? s.MongoUser() : "invalid username";
                 Properties.Settings.Default.MongoDBPass = MainHandler.Encode(s.MongoPass());
-                Properties.Settings.Default.DatabaseAutoLogin= s.DBAutoConnect();
+                Properties.Settings.Default.DatabaseAutoLogin = s.DBAutoConnect();
+                Properties.Settings.Default.ShowExportDatabase = s.ExportDB();
                 Properties.Settings.Default.DefaultZoomInSeconds = double.Parse(s.ZoomInseconds());
                 Properties.Settings.Default.DefaultMinSegmentSize = double.Parse(s.SegmentMinDur());
                 Properties.Settings.Default.DefaultDiscreteSampleRate = double.Parse(s.SampleRate());
@@ -658,22 +722,31 @@ namespace ssi
                 Properties.Settings.Default.EnablePythonDebug = s.EnablePythonDebug();
                 Properties.Settings.Default.EnableLightning = s.EnableLightning();
                 Properties.Settings.Default.MediaBackend = s.Mediabackend();
+                Properties.Settings.Default.SRTwordlevel = s.EnableSRTWordlevel();
 
                 Properties.Settings.Default.Save();
-                
 
-                foreach(AnnoTier tier in AnnoTiers)
+
+                foreach (AnnoTier tier in AnnoTiers)
                 {
                     tier.TimeRangeChanged(MainHandler.Time);
                 }
 
                 if (reconnect)
-                {                    
-                    databaseConnect();
+                {
+                    databaseConnect(true);
                 }
 
             }
+            else
+            {
+                if (Properties.Settings.Default.LoggedInWithLightning == true)
+                {
 
+                    databaseConnect(true);
+
+                }
+            }
         }
 
         private void showSettings_Click(object sender, RoutedEventArgs e)

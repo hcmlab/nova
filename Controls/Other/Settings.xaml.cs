@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -23,6 +24,22 @@ namespace ssi
             PointDistance.Text = Properties.Settings.Default.DefaultPolygonPointDistance.ToString();
             DrawwaveformCheckbox.IsChecked = Properties.Settings.Default.DrawVideoWavform;
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
+            if (Properties.Settings.Default.LoggedInWithLightning)
+            {
+                LoginWithLightning.Content = "\u26a1 Logout of Lightning";
+                this.DBPassword.Visibility = Visibility.Collapsed;
+                this.passwordtext.Visibility = Visibility.Collapsed;
+                this.DBUser.IsEnabled = false;
+            }
+            else
+            {
+                LoginWithLightning.Content = "\u26a1 Login with Lightning";
+                this.DBPassword.Visibility = Visibility.Visible;
+                this.passwordtext.Visibility = Visibility.Visible;
+                this.DBUser.IsEnabled = true;
+
+            }
+           
             mbackend.SelectedIndex = (Properties.Settings.Default.MediaBackend == "Software") ? 1 : 0; 
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
             if (tokens.Length == 2)
@@ -49,6 +66,8 @@ namespace ssi
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
             CMLDirectory.Text = Properties.Settings.Default.CMLDirectory;
             EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
+            Showexport.IsChecked = Properties.Settings.Default.ShowExportDatabase;
+            enableworldlevel.IsChecked = Properties.Settings.Default.SRTwordlevel;
 
         }
 
@@ -131,7 +150,14 @@ namespace ssi
         public bool EnablePython()
         {
             return (EnablePythonCheckbox.IsChecked == true);
+           
         }
+
+        public bool EnableSRTWordlevel()
+        {
+            return (enableworldlevel.IsChecked == true);
+        }
+
 
         public string Mediabackend()
         {
@@ -151,6 +177,11 @@ namespace ssi
         public bool DBAutoConnect()
         {
             return (DBConnnect.IsChecked == true);
+        }
+
+        public bool ExportDB()
+        {
+            return (Showexport.IsChecked == true);
         }
 
         public bool DBAskforOverwrite()
@@ -225,6 +256,7 @@ namespace ssi
             }
 
             DialogResult = true;
+            
             Close();
 
             }
@@ -332,7 +364,7 @@ namespace ssi
         private void DBHost_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if(DBHost.Text == "") DBHost.IsDropdownOpened = true;
-           // DBHost.SelectAll();
+            // DBHost.SelectAll();
         }
 
         private void DBPort_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -377,6 +409,82 @@ namespace ssi
         {
             Regex regexObj = new Regex(@"[^\d]");
             this.DBPort.Text = regexObj.Replace(this.DBPort.Text, "");
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (Properties.Settings.Default.LoggedInWithLightning == false)
+            {
+                try
+                {
+                    LNBrowser browser = new LNBrowser("https://auth.novaannotation.com/login");
+                    browser.ShowDialog();
+                    if (browser.DialogResult == true)
+                    {
+                        this.DBUser.Text = browser.LNID();
+                        this.DBPassword.Password = browser.PW();
+                        this.DBUser.IsEnabled = false;
+                        Properties.Settings.Default.MongoDBUser = browser.LNID();
+                        Properties.Settings.Default.MongoDBPass = browser.PW(); ;
+                        Properties.Settings.Default.LoggedInWithLightning = true;
+                        Properties.Settings.Default.Save();
+                        this.DBPassword.Visibility = Visibility.Collapsed;
+                        this.passwordtext.Visibility = Visibility.Collapsed;
+                        LoginWithLightning.Content = "\u26a1 Logout from Lightning";
+
+                    }
+                    else browser.Close();
+                }
+                catch(Exception ec)
+                {
+                    MessageTools.Warning(ec.GetBaseException() + " " + ec.Message);
+
+                }
+            }
+            else
+            {
+                try
+                {
+
+                LNBrowser browser = new LNBrowser("https://auth.novaannotation.com/logout");
+                browser.Show();
+                Properties.Settings.Default.LoggedInWithLightning = false;
+                this.DBUser.Text = "";
+                this.DBPassword.Password = "";
+                this.DBPassword.Visibility = Visibility.Visible;
+                this.passwordtext.Visibility = Visibility.Visible;
+                this.DBUser.IsEnabled = true;
+                Properties.Settings.Default.Save();
+                LoginWithLightning.Content = "\u26a1 Login with Lightning";
+                
+                browser.Close();
+                }
+                catch (Exception ec)
+                {
+                    MessageTools.Warning(ec.GetBaseException() + " " + ec.Message);
+
+                }
+            }
+
+
+           
+        }
+
+ 
+
+        private void DBHost_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            //For now only works on test server
+            if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
+            {
+                LoginWithLightning.Visibility = Visibility.Hidden;
+                Properties.Settings.Default.LoggedInWithLightning = false;
+                Properties.Settings.Default.Save();
+            }
+            else
+            {
+                LoginWithLightning.Visibility = Visibility.Visible;
+            }
         }
     }
 }

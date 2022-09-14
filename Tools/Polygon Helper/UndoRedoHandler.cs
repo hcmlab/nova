@@ -39,6 +39,8 @@ namespace ssi.Types.Polygon
             PolygonLabel label = null;
 
             PolygonLabel[] allLabels = item.UndoRedoStack.Undo();
+            generalPolygonUtilities.polygonTableUpdate();
+
             if (allLabels != null && allLabels.Length > 0)
             {
                 control.polygonListControl.polygonDataGrid.SelectedItem = null;
@@ -90,6 +92,7 @@ namespace ssi.Types.Polygon
             }
 
             PolygonLabel[] allLabels = item.UndoRedoStack.Redo();
+            generalPolygonUtilities.polygonTableUpdate();
 
             if (allLabels != null && allLabels.Length > 0)
             {

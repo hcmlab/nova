@@ -1,4 +1,4 @@
-﻿<Window x:Class="ssi.Browser"
+﻿<Window x:Class="ssi.LNBrowser"
          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -12,7 +12,7 @@
         
     <Grid>
        <DockPanel>
-            <wv2:WebView2 Name="browser"/>
+            <wv2:WebView2 Name="browser" CoreWebView2InitializationCompleted="browser_CoreWebView2InitializationCompleted"/>
         </DockPanel>
     </Grid>
 </Window>

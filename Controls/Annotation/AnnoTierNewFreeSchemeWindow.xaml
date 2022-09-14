@@ -14,6 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -28,8 +29,9 @@
 
         <Label Grid.Row="2" Grid.Column="0" >Label color</Label>
         <p:ColorPicker Name="labelColorPicker" Grid.Row="2" Grid.Column="1" Margin="5" BorderBrush="DarkGray" Background="Transparent"/>
+        <Button Grid.Row="3" Grid.Column="1"  Background="Transparent" Name="Attributes" Content="ATTRIBUTES" Click="Attributes_Click"/>
 
-        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal" >
+        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal" >
             <Button Margin="5" Width="60" Height="25" Click="okButton_Click">OK</Button>
             <Button Margin="5" Width="60" Height="25" Click="cancelButton_Click">Cancel</Button>
         </StackPanel>

@@ -8,6 +8,73 @@
         Title="View and Find Tasks" Height="450" Width="1000">
 
     <TabControl Name="Tab">
+       
+        <TabItem Grid.Row="0" Header="Find Tasks" Selector.Selected="FindTabItem_Selected">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <ListView  Name="FindBountiesOverviewBox" SelectionMode="Single" DockPanel.Dock="Top">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="Auto" Header="Database">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Database" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Session">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Session" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+
+                            <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
+
+                            <GridViewColumn Width="Auto" Header="Role">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Role" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Contractor">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Contractor.Name" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Bounty (Sats)">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="valueInSats" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Overall Needed">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="numOfAnnotations" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Currently Needed">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="numOfAnnotationsNeededCurrent" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="Auto" Header="Verification">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Type" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+
+                            <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <DockPanel Grid.Row="1" HorizontalAlignment="Right">
+                    <Button Width="80" Click="AcceptButton_Click">Accept Bounty</Button>
+                    <Separator Visibility="Hidden" Width="20"></Separator>
+                    <Button Width="80" Click="CancelButton_Click">Cancel</Button>
+                </DockPanel>
+
+
+            </Grid>
+        </TabItem>
         <TabItem Grid.Row="0" Header="Accepted Tasks" Selector.Selected="AcceptedTabItem_Selected">
             <Grid>
                 <Grid.RowDefinitions>
@@ -75,73 +142,7 @@
 
             </Grid>
         </TabItem>
-        <TabItem Grid.Row="0" Header="Find Tasks" Selector.Selected="FindTabItem_Selected">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                </Grid.RowDefinitions>
-                <ListView  Name="FindBountiesOverviewBox" SelectionMode="Single" DockPanel.Dock="Top">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Width="Auto" Header="Database">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Database" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Session">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Session" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-
-                            <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
-
-                            <GridViewColumn Width="Auto" Header="Role">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Role" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Contractor">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Contractor.Name" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Bounty (Sats)">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="valueInSats" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Overall Needed">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="numOfAnnotations" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Currently Needed">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="numOfAnnotationsNeededCurrent" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Verification">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Type" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-
-                            <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
-                        </GridView>
-                    </ListView.View>
-                </ListView>
-                <DockPanel Grid.Row="1" HorizontalAlignment="Right">
-                    <Button Width="80" Click="AcceptButton_Click">Accept Bounty</Button>
-                    <Separator Visibility="Hidden" Width="20"></Separator>
-                    <Button Width="80" Click="CancelButton_Click">Cancel</Button>
-                </DockPanel>
 
 
-            </Grid>
-        </TabItem>
-
-        
     </TabControl>
 </Window>

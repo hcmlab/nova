@@ -101,12 +101,32 @@ namespace ssi
                 control.signalStatusFileNameLabel.ToolTip = signal.FilePath;
                 control.signalStatusBytesLabel.Text = signal.bytes + " bytes";
                 control.signalStatusDimComboBox.Items.Clear();
-                for (int i = 0; i < signal.dim; i++)
+                string value;
+                if (signal.DimLabels != null)
                 {
-                    control.signalStatusDimComboBox.Items.Add(i);
+                    for (int i = 0; i < signal.dim; i++)
+                {
+                    if (signal.DimLabels.TryGetValue(i, out value))
+                    {
+                       
+                        control.signalStatusDimComboBox.Items.Add(i.ToString() + " | " + value);
+                    }
+                    else control.signalStatusDimComboBox.Items.Add(i);
                 }
+                }
+
+                else
+                {
+                    for (int i = 0; i < signal.dim; i++)
+                    {
+                      control.signalStatusDimComboBox.Items.Add(i);
+                    }
+                }
+              
+
                 control.signalStatusDimComboBox.SelectedIndex = signal.ShowDim;
-                control.signalStatusDimLabel.Text = signal.dim.ToString();
+
+                control.signalStatusDimLabel.Text = signal.dim.ToString() ;
                 control.signalStatusSrLabel.Text = signal.rate + " Hz";
                 control.signalStatusTypeLabel.Text = Signal.TypeName[(int)signal.type];
                 control.signalStatusValueLabel.Text = signal.Value(timeline.SelectionStart).ToString();
