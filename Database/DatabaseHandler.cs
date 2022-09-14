@@ -1061,6 +1061,11 @@ namespace ssi
                 dbuser.ln_admin_key = MainHandler.Cipher.AES.DecryptText(dbuser.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
             }
 
+            if (dbuser.ln_admin_key_locked != "" && dbuser.ln_admin_key_locked != null && username == Properties.Settings.Default.MongoDBUser)
+            {
+                dbuser.ln_admin_key_locked = MainHandler.Cipher.AES.DecryptText(dbuser.ln_admin_key_locked, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+            }
+
             return dbuser;
         }
 
@@ -1124,8 +1129,28 @@ namespace ssi
                 if (Customdata.Contains("ln_wallet_id"))
                     dbuser.ln_wallet_id = Customdata["ln_wallet_id"].ToString();
                 else dbuser.ln_wallet_id = "";
-     
-                if (Customdata.Contains("ln_user_id"))
+
+            if (Customdata.Contains("ln_invoice_key_locked"))
+                dbuser.ln_invoice_key_locked = Customdata["ln_invoice_key_locked"].ToString();
+            else dbuser.ln_invoice_key_locked = "";
+
+            if (Customdata.Contains("ln_admin_key_locked"))
+            {
+
+                string ln_admin_key_locked = Customdata["ln_admin_key_locked"].ToString();
+                if (ln_admin_key_locked == "Length of the data to decrypt is invalid." || ln_admin_key_locked.StartsWith("The input is not a valid Base-64"))
+                    dbuser.ln_admin_key_locked = "";
+                else
+                    dbuser.ln_admin_key_locked = ln_admin_key_locked;
+            }
+            else dbuser.ln_admin_key_locked = "";
+
+
+            if (Customdata.Contains("ln_wallet_id_locked"))
+                dbuser.ln_wallet_id_locked = Customdata["ln_wallet_id_locked"].ToString();
+            else dbuser.ln_wallet_id_locked = "";
+
+            if (Customdata.Contains("ln_user_id"))
                     dbuser.ln_user_id = Customdata["ln_user_id"].ToString();
                 else dbuser.ln_user_id = "";
 
@@ -1148,7 +1173,7 @@ namespace ssi
             }
 
             var database = Client.GetDatabase("admin");
-            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname }, { "ln_addresspin", user.ln_addresspin }, {"xp", user.XP }, { "ratingoverall", user.ratingoverall}, { "ratingcount", user.ratingcount}  } } };
+            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_admin_key_locked", user.ln_admin_key_locked }, { "ln_invoice_key_locked", user.ln_invoice_key_locked }, { "ln_wallet_id_locked", user.ln_wallet_id_locked }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname }, { "ln_addresspin", user.ln_addresspin }, {"xp", user.XP }, { "ratingoverall", user.ratingoverall}, { "ratingcount", user.ratingcount}  } } };
             try
             {
                 database.RunCommand<BsonDocument>(updatecustomdata);
@@ -4585,6 +4610,11 @@ namespace ssi
         public string ln_admin_key { get; set; }
         public string ln_invoice_key { get; set; }
         public string ln_wallet_id { get; set; }
+
+        public string ln_admin_key_locked { get; set; }
+        public string ln_invoice_key_locked { get; set; }
+        public string ln_wallet_id_locked { get; set; }
+
         public string ln_user_id { get; set; }
         public string ln_addressname { get; set; }
         public string ln_addresspin { get; set; }

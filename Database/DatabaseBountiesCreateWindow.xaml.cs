@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -290,11 +291,16 @@ namespace ssi
 
         private void DatabasesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DatabasesBox.SelectedItem != null)
+          
+            if (DatabasesBox.SelectedItem == null)
             {
-                string name = DatabasesBox.SelectedItem.ToString();
-                DatabaseHandler.ChangeDatabase(name);
+                DatabasesBox.SelectedIndex = 0;
+                
             }
+            string name = DatabasesBox.SelectedItem.ToString();
+            DatabaseHandler.ChangeDatabase(name);
+
+
             GetRoles();
             GetAnnotationSchemes();
             GetSessions();
@@ -423,7 +429,7 @@ namespace ssi
             return selectedBounty;
         }
 
-        private void CreateBounty_Click(object sender, RoutedEventArgs e)
+        private async void CreateBounty_Click(object sender, RoutedEventArgs e)
         {
            
             bounty.Contractor = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
@@ -434,7 +440,35 @@ namespace ssi
             int satsperannotator = 0;
             Int32.TryParse(sats.Text.ToString(), out satsperannotator);
             bounty.valueInSats = satsperannotator;
-           
+
+            if(bounty.valueInSats > 0 && MainHandler.myWallet == null)
+            {
+                MessageBox.Show("You need to create a Wallet first to offer Bounties. Enable Lightning in the settings and create a wallet");
+                    return;
+            }
+
+            else if (bounty.valueInSats * bounty.numOfAnnotations > MainHandler.myWallet.balance)
+                {
+                MessageBox.Show("You don't have enough balance in your wallet to pay for the bounties");
+                    return;
+            }
+
+            Lightning.LightningInvoice invoice = await lightning.CreateInvoice(bounty.Contractor.ln_invoice_key_locked, (uint)(bounty.valueInSats*bounty.numOfAnnotations), bounty.Database + "/" + bounty.Session + "/" + bounty.Scheme + "/" + bounty.Role);
+            int lockedbalance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
+            if (lockedbalance >= bounty.valueInSats)
+            {
+                string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request, false);
+                if(message != "Success")
+                {
+                    MessageBox.Show(message);
+                }
+            }
+            else
+            {
+                MessageBox.Show("You don't have enough balance in your wallet to pay for the bounties");
+                return;
+
+            }
             bounty.Session = (SessionsResultsBox.SelectedItems.Count > 0 ? (DatabaseSession)SessionsResultsBox.SelectedItem : DatabaseHandler.Sessions[0]).Name;
             //bounty.Session = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", session.Name);
 
@@ -638,25 +672,45 @@ namespace ssi
             DatabaseBounty bounty = (DatabaseBounty)BountiesOverviewBox.SelectedItem;
             string name = ((AnnotatorStatus)BountiesJobDone.SelectedItem).Name;
             DatabaseUser user = DatabaseHandler.GetUserInfo(name);
-            if (bounty.valueInSats > 0 && MainHandler.ENABLE_LIGHTNING && MainHandler.myWallet != null)
+            if (bounty.valueInSats > 0 && MainHandler.ENABLE_LIGHTNING)
             {
-                Lightning lightning = new Lightning();
-                Lightning.LightningInvoice invoice = await lightning.CreateInvoice(user.ln_invoice_key, (uint)bounty.valueInSats, bounty.Database + "/" + bounty.Session + "/" + bounty.Scheme + "/" + bounty.Role);
-                MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
-                if(MainHandler.myWallet.balance >= bounty.valueInSats)
+                if (MainHandler.myWallet != null)
                 {
-                    string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request);
-                    if (message == "Success")
+                    Lightning lightning = new Lightning();
+                    Lightning.LightningInvoice invoice = await lightning.CreateInvoice(user.ln_invoice_key, (uint)bounty.valueInSats, bounty.Database + "/" + bounty.Session + "/" + bounty.Scheme + "/" + bounty.Role);
+                    int lockedbalance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key_locked);
+                    if (lockedbalance >= bounty.valueInSats)
                     {
-                        MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
-                        ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user.Name, bounty.Session, bounty.Database);
-                        ChangePaidState(id, true);
-                        MessageBox.Show("Congratulations, Annotation Unlocked");
-                    }
-                    else MessageBox.Show("Error");
-                }
-                else MessageBox.Show("Unsifficent Balance in Wallet");
+                        string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request,true);
+                        if (message == "Success")
+                        {
+                            MainHandler.myWallet.balance = await lightning.GetWalletBalance(MainHandler.myWallet.admin_key);
+                            ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user.Name, bounty.Session, bounty.Database);
+                            ChangePaidState(id, true);
+                            foreach (BountyJob job in bounty.annotatorsJobDone)
+                            {
+                                if (job.user.Name == user.Name)
+                                {
+                                    job.rating = stars.Value;
+                                    //if (bounty.valueInSats > 0)
+                                    //{
+                                    //    //var lnurl = await lightning.getLNURLw(MainHandler.myWallet, bounty.valueInSats, bounty.numOfAnnotations);
+                                    //    job.pickedLNURL = true;
+                                    //}
+                                    break;
+                                }
 
+                            }
+                            DatabaseHandler.SaveBounty(bounty);
+                            MessageBox.Show("Congratulations, Annotation Unlocked");
+                        }
+                        else MessageBox.Show("Error");
+                    }
+                    else MessageBox.Show("Unsifficent Balance in Wallet");
+
+                }
+
+                else MessageBox.Show("You need to create a Lightning Wallet first");
 
             }
 
@@ -664,28 +718,26 @@ namespace ssi
             {
                 ObjectId id = DatabaseHandler.GetAnnotationId(bounty.Role, bounty.Scheme, user.Name, bounty.Session, bounty.Database);
                 ChangePaidState(id, true);
-                MessageBox.Show("Zero-Cost Annotation Unlocked");
-               
-            }
-
-           // DatabaseHandler.ChangeUserCustomData(user);
-
-            foreach (BountyJob job in bounty.annotatorsJobDone)
-            {
-                if (job.user.Name == user.Name)
+              
+                foreach (BountyJob job in bounty.annotatorsJobDone)
                 {
-                    job.rating = stars.Value;
-                    //if (bounty.valueInSats > 0)
-                    //{
-                    //    //var lnurl = await lightning.getLNURLw(MainHandler.myWallet, bounty.valueInSats, bounty.numOfAnnotations);
-                    //    job.pickedLNURL = true;
-                    //}
+                    if (job.user.Name == user.Name)
+                    {
+                        job.rating = stars.Value;
+                        //if (bounty.valueInSats > 0)
+                        //{
+                        //    //var lnurl = await lightning.getLNURLw(MainHandler.myWallet, bounty.valueInSats, bounty.numOfAnnotations);
+                        //    job.pickedLNURL = true;
+                        //}
+                        break;
+                    }
 
-                    break;
                 }
+                MessageBox.Show("Zero-Cost Annotation Unlocked");
 
             }
-            DatabaseHandler.SaveBounty(bounty);
+
+   
 
             UpdateJobsDoneList();
         }
@@ -722,9 +774,20 @@ namespace ssi
 
         }
 
-        private void RemoveButton_Click(object sender, RoutedEventArgs e)
+        private async void RemoveButton_Click(object sender, RoutedEventArgs e)
         {
             DatabaseBounty bounty = (DatabaseBounty)BountiesOverviewBox.SelectedItem;
+
+            int amount = bounty.numOfAnnotationsNeededCurrent * bounty.valueInSats;
+
+            Lightning.LightningInvoice invoice = await lightning.CreateInvoice(bounty.Contractor.ln_invoice_key, (uint)(amount), bounty.Database + "/" + bounty.Session + "/" + bounty.Scheme + "/" + bounty.Role);
+
+                string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request, true);
+                if (message == "Success")
+                {
+                    MessageBox.Show(amount + " Sats have been refunded to Wallet");
+                }
+            
             DatabaseHandler.DeleteBounty(bounty.OID);
             updateBounties();
         }

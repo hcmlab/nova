@@ -87,6 +87,9 @@ namespace ssi
                         myWallet.admin_key = user.ln_admin_key;
                         myWallet.invoice_key = user.ln_invoice_key;
                         myWallet.wallet_id = user.ln_wallet_id;
+                        myWallet.admin_key_locked = user.ln_admin_key_locked;
+                        myWallet.invoice_key_locked = user.ln_invoice_key_locked;
+                        myWallet.wallet_id_locked = user.ln_wallet_id_locked;
                         myWallet.user_id = user.ln_user_id;
                         myWallet.lnaddressname = user.ln_addressname;
                         myWallet.lnaddresspin = user.ln_addresspin;
@@ -234,6 +237,8 @@ namespace ssi
                 user.Email = dialog.Getemail();
                 user.Expertise = dialog.GetExpertise();
                 user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+                user.ln_admin_key_locked = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key_locked, MainHandler.Decode(Properties.Settings.Default.MongoDBPass));
+
                 string newPassword = dialog.GetPassword();
 
                 //DatabaseUser user = new DatabaseUser()
@@ -256,6 +261,8 @@ namespace ssi
                         if(MainHandler.myWallet != null)
                         {
                             user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key, newPassword);
+                            user.ln_admin_key_locked = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key_locked, newPassword);
+
                             DatabaseHandler.ChangeUserCustomData(user);
 
                         }

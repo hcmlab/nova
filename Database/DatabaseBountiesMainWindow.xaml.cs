@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using NAudio.CoreAudioApi;
 using Octokit;
 using ssi;
 using System;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.DataVisualization.Charting;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -94,6 +96,8 @@ namespace ssi
 
             }
             user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key, MainHandler.Decode((Properties.Settings.Default.MongoDBPass)));  //encrypt
+            user.ln_admin_key_locked = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key_locked, MainHandler.Decode((Properties.Settings.Default.MongoDBPass)));  //encrypt
+
             DatabaseHandler.ChangeUserCustomData(user);
         }
        
@@ -104,28 +108,51 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
             bool hasWallet = (MainHandler.myWallet != null);
             if(selectedBounty != null)
             {
-                if(selectedBounty.valueInSats > 0 && !hasWallet)
-                {
-                    MessageBox.Show("This is a paid contract, but it seems you did not create a lightning wallet yet. You can do so in the lower status bar but clicking the \u26a1 symbol");
-                }
+                ObjectId schemeID = new ObjectId();
+                DatabaseHandler.GetObjectID(ref schemeID, DatabaseDefinitionCollections.Schemes, selectedBounty.Scheme);
+    
+                ObjectId roleID = new ObjectId();
+                DatabaseHandler.GetObjectID(ref roleID, DatabaseDefinitionCollections.Roles, selectedBounty.Role);
 
-                else
-                {
-                    BountyJob job = new BountyJob();
-                    job.user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
-                    job.rating = 0;
-                    job.status = "open";
-                    //job.pickedLNURL = false;
-                    //job.LNURLW = selectedBounty.LNURLW;
-                    
+                ObjectId sessionID = new ObjectId();
+                DatabaseHandler.GetObjectID(ref sessionID, DatabaseDefinitionCollections.Sessions, selectedBounty.Session);
 
-                    selectedBounty.annotatorsJobCandidates.Add(job);
-                    if (DatabaseHandler.SaveBounty(selectedBounty))
+                ObjectId annotatorID = new ObjectId();
+                DatabaseHandler.GetObjectID(ref annotatorID, DatabaseDefinitionCollections.Annotators, Properties.Settings.Default.MongoDBUser);
+
+
+
+                if (!DatabaseHandler.AnnotationExists(annotatorID, sessionID, roleID, schemeID))
+                {
+
+
+
+                    if (selectedBounty.valueInSats > 0 && !hasWallet)
                     {
-                        MessageBox.Show("Contract succesfully accepted. Open Accepted bounties Menu to start working on your bounties.");
-                        updateFindBounties();
+                        MessageBox.Show("This is a paid contract, but it seems you did not create a lightning wallet yet. You can do so in the lower status bar but clicking the \u26a1 symbol");
                     }
+
+                    else
+                    {
+                        BountyJob job = new BountyJob();
+                        job.user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                        job.rating = 0;
+                        job.status = "open";
+                        //job.pickedLNURL = false;
+                        //job.LNURLW = selectedBounty.LNURLW;
+
+
+                        selectedBounty.annotatorsJobCandidates.Add(job);
+                        if (DatabaseHandler.SaveBounty(selectedBounty))
+                        {
+                            MessageBox.Show("Contract succesfully accepted. Open Accepted bounties Menu to start working on your bounties.");
+                            updateFindBounties();
+                        }
+                    }
+
                 }
+
+                else MessageBox.Show("An annotation by you already exists");
             }
 
 

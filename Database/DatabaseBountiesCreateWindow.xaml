@@ -115,7 +115,7 @@
 
                     <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
                     <Label Content="Streams" DockPanel.Dock="Top" Margin="-3,0,0,0" />
-                    <ListView Name="StreamsBox" DockPanel.Dock="Top" Height="250" SelectionChanged="StreamsBox_SelectionChanged"  ItemContainerStyle="{StaticResource StreamItemColorStyle}" ItemsSource="{Binding}"  >
+                    <ListView Name="StreamsBox" DockPanel.Dock="Top" Height="250" SelectionMode="Extended" SelectionChanged="StreamsBox_SelectionChanged"  ItemContainerStyle="{StaticResource StreamItemColorStyle}" ItemsSource="{Binding}"  >
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="Role" Width="Auto">
@@ -306,12 +306,23 @@
                 </ListView>
                 <DockPanel Grid.Row="0" Grid.Column="3" HorizontalAlignment="Center" Width="180">
                     <Label Grid.Row="0"  DockPanel.Dock="Top" Grid.Column="1">Applicants</Label>
-                    <ListView  Name="BountiesCandidates"  SelectionMode="Single"  DockPanel.Dock="Top"/>
+                    <ListView  Name="BountiesCandidates"  SelectionMode="Single"  DockPanel.Dock="Top">
+                        <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="Auto" Header="Account">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="user.Name" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                        </ListView.View>
+                    </ListView>
+
                     <Label Grid.Row="0"  DockPanel.Dock="Top" Grid.Column="1">Finished Jobs</Label>
                     <ListView  Name="BountiesJobDone"  SelectionMode="Single"  DockPanel.Dock="Bottom" SelectionChanged="BountiesJobDone_SelectionChanged">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Width="Auto" Header="Account">
+                                <GridViewColumn Width="100" Header="Account">
                                     <GridViewColumn.DisplayMemberBinding>
                                         <Binding Path="Name" />
                                     </GridViewColumn.DisplayMemberBinding>
