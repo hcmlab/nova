@@ -23,7 +23,7 @@ namespace ssi
 
     public partial class DatabaseAdminUserWindow : Window
     {
-        public DatabaseAdminUserWindow(string name = null, string fullname = null, string email = null, int expertise = 0)
+        public DatabaseAdminUserWindow(string name = null, string fullname = null, string email = null, int expertise = 0, double xp = 0, double rating = 0)
         {
             InitializeComponent();
            
@@ -34,7 +34,9 @@ namespace ssi
                 FullNameField.Text = fullname;
                 Emailfield.Text = email;
                 Expertisefield.SelectedIndex = expertise;
-                UserAdminCheckBox.Visibility = Visibility.Hidden;           
+                UserAdminCheckBox.Visibility = Visibility.Hidden;
+                ratingLabel.Content = "Rating: " + rating.ToString("F2");
+                xpLabel.Content = "XP: " + xp;
             }               
         }
 

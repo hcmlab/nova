@@ -25,7 +25,10 @@ namespace ssi
             public int balance { get; set; }
 
             public string admin_key { get; set; }
+
+            public string admin_key_locked { get; set; }
             public string invoice_key { get; set; }
+            public string invoice_key_locked { get; set; }
             public string wallet_name { get; set; }
             public string user_name { get; set; }
             public string email { get; set; }
@@ -33,6 +36,7 @@ namespace ssi
             public string admin_id { get; set; }
             public string user_id { get; set; }
             public string wallet_id { get; set; }
+            public string wallet_id_locked { get; set; }
             public string lnaddresspin { get; set; }
             public string lnaddressname { get; set; }
           
@@ -87,8 +91,41 @@ namespace ssi
                 return null;
             }
         }
-       
-     
+
+        public async Task<Dictionary<string, string>> CreateLockedWallet(DatabaseUser user, string server)
+        {
+            try
+            {
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(user.ln_user_id), "user_id" },
+                    { new StringContent(user + "@" + server+"Locked"), "wallet_name" },
+                };
+
+                string url = Defaults.Lightning.LNEndPoint + "/createAdditionalLightningWallet";
+                var client = new HttpClient();
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                if (responseDic["success"] == "failed")
+                {
+                    return null;
+                }
+
+
+
+                return responseDic;
+
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+
 
 
         public async Task<int> GetWalletBalance(string admin_key)
@@ -235,7 +272,8 @@ namespace ssi
         }
 
         
-        public async Task<string> decodeLNURL(LightningWallet wallet,  string lnurl)
+        public async Task<string> decodeLNURL(Lightning.LightningWallet    
+            wallet,  string lnurl)
         {
            
 
@@ -292,16 +330,28 @@ namespace ssi
             return "error";
         }
 
-        public async Task<string> PayInvoice (Lightning.LightningWallet wallet, string payment_request)
+        public async Task<string> PayInvoice (Lightning.LightningWallet wallet, string payment_request, bool fromlockedWallet = false)
 
         {
             var content = new MultipartFormDataContent();
                 string url = Defaults.Lightning.LNEndPoint + "/payLightningInvoice";
-                content = new MultipartFormDataContent
+                if (!fromlockedWallet)
                 {
-                    { new StringContent(wallet.admin_key), "wallet_admin_key" },
-                    { new StringContent(payment_request), "payment_request" },
-                };
+                    content = new MultipartFormDataContent
+                    {
+                        { new StringContent(wallet.admin_key), "wallet_admin_key" },
+                        { new StringContent(payment_request), "payment_request" },
+                    };
+                }
+            else
+            {
+                content = new MultipartFormDataContent
+                    {
+                        { new StringContent(wallet.admin_key_locked), "wallet_admin_key" },
+                        { new StringContent(payment_request), "payment_request" },
+                    };
+            }
+                
 
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);
@@ -437,14 +487,27 @@ namespace ssi
 
 
 
-        public async Task<string> checkInvoiceIsPaid(Lightning.LightningWallet wallet, Lightning.LightningInvoice invoice)
+        public async Task<string> checkInvoiceIsPaid(Lightning.LightningWallet wallet, Lightning.LightningInvoice invoice, bool isLockedWallet = false)
         {
+            var content = new MultipartFormDataContent();
 
-            var content = new MultipartFormDataContent
+            if (!isLockedWallet)
+            {
+                 content = new MultipartFormDataContent
             {
                 { new StringContent(wallet.admin_key), "wallet_admin_key" },
                 { new StringContent(invoice.payment_hash), "payment_hash" },
             };
+            }
+            else
+            {
+                 content = new MultipartFormDataContent
+            {
+                { new StringContent(wallet.admin_key_locked), "wallet_admin_key" },
+                { new StringContent(invoice.payment_hash), "payment_hash" },
+            };
+            }
+           
             string url = Defaults.Lightning.LNEndPoint + "/checkInvoiceIsPaid";
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);

@@ -352,17 +352,27 @@ namespace ssi
         {
             string username = Properties.Settings.Default.MongoDBUser;
             Dictionary<string, string> response = await lightning.CreateWallet(DatabaseHandler.GetUserInfo(username), Properties.Settings.Default.DatabaseAddress);
+            Dictionary<string, string> response2 = await lightning.CreateLockedWallet(DatabaseHandler.GetUserInfo(username), Properties.Settings.Default.DatabaseAddress);
 
             DatabaseUser user = DatabaseHandler.GetUserInfo(username);
             if (response == null) return;
             string admin_key = response["adminkey"];
             string invoice_key = response["inkey"];
             string wallet_id = response["wallet_id"];
+
+            string admin_key_locked = response2["adminkey"];
+            string invoice_key_locked = response2["inkey"];
+            string wallet_id_locked = response2["wallet_id"];
+
             string user_id = response["user_id"];
             string pass = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
             user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(admin_key, pass);  //encrypt
             user.ln_invoice_key = invoice_key;
             user.ln_wallet_id = wallet_id;
+            user.ln_admin_key_locked = MainHandler.Cipher.AES.EncryptText(admin_key_locked, pass);  //encrypt
+            user.ln_invoice_key_locked = invoice_key_locked;
+            user.ln_wallet_id_locked = wallet_id_locked;
+
             user.ln_user_id = user_id;
 
             string rnd = RandomString(8);
@@ -377,7 +387,9 @@ namespace ssi
             MainHandler.myWallet.admin_key = admin_key;
             MainHandler.myWallet.invoice_key = invoice_key;
             MainHandler.myWallet.wallet_id = wallet_id;
-            MainHandler.myWallet.user_id = user_id;
+            MainHandler.myWallet.admin_key_locked = admin_key_locked;
+            MainHandler.myWallet.invoice_key_locked = invoice_key_locked;
+            MainHandler.myWallet.wallet_id_locked = wallet_id_locked;
             MainHandler.myWallet.user_id = user_id;
             MainHandler.myWallet.lnaddressname = lnaddressname;
             MainHandler.myWallet.lnaddresspin = pin;
@@ -488,7 +500,10 @@ namespace ssi
                 user.ln_wallet_id = MainHandler.myWallet.wallet_id;
                 user.ln_user_id = MainHandler.myWallet.user_id;
                 user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key, user.Password);
-                user.ln_addressname = lnaddressname;
+                user.ln_admin_key_locked = MainHandler.Cipher.AES.EncryptText(MainHandler.myWallet.admin_key_locked, user.Password);
+            user.ln_invoice_key_locked = MainHandler.myWallet.invoice_key_locked;
+            user.ln_wallet_id_locked = MainHandler.myWallet.wallet_id_locked;
+            user.ln_addressname = lnaddressname;
                 user.ln_addresspin = pin;
                 DatabaseHandler.ChangeUserCustomData(user);
                 MainHandler.myWallet.lnaddresspin = user.ln_addresspin;

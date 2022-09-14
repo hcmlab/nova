@@ -50,19 +50,24 @@
 
             <MenuItem Header="DATABASE" Name="databasemenu">
                 <MenuItem Header="Load Session" Name="databaseLoadSessionMenu" />
+
+                <MenuItem Header="Bounties" Name="bountiesMenu">
+                    <MenuItem Header="Raise/Manage Bounties" Name="databasecreateBountyMenu" />
+                    <MenuItem Header="Find/Manage Tasks" Name="databasehuntBountyMenu" />
+                </MenuItem>
+                
                 <MenuItem Header="Administration" Name="databaseAdminMenu">
                     <MenuItem Header="Manage Users" Name="databaseManageUsersMenu" />
                     <MenuItem Header="Manage Databases" Name="databaseManageDBsMenu" />
                     <MenuItem Header="Manage Sessions" Name="databaseManageSessionsMenu" />
                     <MenuItem Header="Manage Annotations" Name="databaseManageAnnotationsMenu" />
                 </MenuItem>
+                
+             
+             
                 <MenuItem Header="Manage Account" Name="databasePasswordMenu" />
                 <MenuItem Header="Update" Name="databaseUpdateMenu" />
                 <MenuItem Header="Connect" Name="databaseConnectMenu" />
-                <MenuItem Header="Bounties" Name="bountiesMenu">
-                    <MenuItem Header="Raise/Manage Bounties" Name="databasecreateBountyMenu" />
-                    <MenuItem Header="Find Tasks" Name="databasehuntBountyMenu" />
-                </MenuItem>
                 
             </MenuItem>
             <MenuItem Header="ANNOTATION" Name="annotationmenu">
