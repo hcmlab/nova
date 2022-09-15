@@ -23,7 +23,7 @@ namespace ssi
 
     public partial class DatabaseUserManageWindow : Window
     {
-        public DatabaseUserManageWindow(string name = null, string fullname = null,  string email = null, int expertise = 0, double xp = 0, double rating = 0)
+        public DatabaseUserManageWindow(string name = null, string fullname = null,  string email = null, int expertise = 0, double xp = 0, double rating = 0, double ratingContractor = 0)
         {
             InitializeComponent();
            
@@ -48,7 +48,8 @@ namespace ssi
                 if(xplevel > expertise) expertise = xplevel;
                 Expertisefield.SelectedIndex = expertise;
                 Expertisefield.IsEnabled = false;
-                ratingLabel.Content = "Rating: " + rating.ToString("F2");
+                ratingLabel.Content = "Rating as Annotator: " + rating.ToString("F2");
+                ratingContractorLabel.Content = "Rating as Contractor: " + ratingContractor.ToString("F2");
                 xpLabel.Content = "XP: " + xp;
             }
             if (Properties.Settings.Default.LoggedInWithLightning)

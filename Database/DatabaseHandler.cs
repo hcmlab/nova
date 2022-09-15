@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using DnsClient;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using ssi.Controls.Annotation.Polygon;
@@ -1110,6 +1111,16 @@ namespace ssi
                 else dbuser.ratingcount = 0;
 
 
+            if (Customdata.Contains("ratingContractoroverall"))
+                dbuser.ratingContractoroverall = Customdata["ratingContractoroverall"].AsDouble;
+            else dbuser.ratingContractoroverall = 0;
+
+            if (Customdata.Contains("ratingContractorcount"))
+                dbuser.ratingContractorcount = Customdata["ratingContractorcount"].AsInt32;
+            else dbuser.ratingContractorcount = 0;
+
+
+
             if (Customdata.Contains("ln_invoice_key"))
                     dbuser.ln_invoice_key = Customdata["ln_invoice_key"].ToString();
                 else dbuser.ln_invoice_key = "";
@@ -1173,7 +1184,12 @@ namespace ssi
             }
 
             var database = Client.GetDatabase("admin");
-            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, { "ln_admin_key_locked", user.ln_admin_key_locked }, { "ln_invoice_key_locked", user.ln_invoice_key_locked }, { "ln_wallet_id_locked", user.ln_wallet_id_locked }, { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname }, { "ln_addresspin", user.ln_addresspin }, {"xp", user.XP }, { "ratingoverall", user.ratingoverall}, { "ratingcount", user.ratingcount}  } } };
+            var updatecustomdata = new BsonDocument { { "updateUser", user.Name }, { "customData", new BsonDocument { { "fullname", user.Fullname }, { "email", user.Email }, { "expertise", user.Expertise }, 
+                { "ln_admin_key", user.ln_admin_key }, { "ln_invoice_key", user.ln_invoice_key }, { "ln_wallet_id", user.ln_wallet_id }, 
+                { "ln_admin_key_locked", user.ln_admin_key_locked }, { "ln_invoice_key_locked", user.ln_invoice_key_locked }, { "ln_wallet_id_locked", user.ln_wallet_id_locked },
+                { "ln_user_id", user.ln_user_id }, { "ln_addressname", user.ln_addressname }, { "ln_addresspin", user.ln_addresspin },
+                {"xp", user.XP }, { "ratingoverall", user.ratingoverall}, { "ratingcount", user.ratingcount},
+                { "ratingContractoroverall", user.ratingContractoroverall}, { "ratingContractorcount", user.ratingContractorcount}} } };
             try
             {
                 database.RunCommand<BsonDocument>(updatecustomdata);
@@ -2350,7 +2366,7 @@ namespace ssi
             BsonArray data = new BsonArray();
             for (int i = 0; i < annotators.Count; i++)
             {
-                data.Add(new BsonDocument { { "name", annotators[i].user.Name }, { "status", annotators[i].status }, { "value", contractvalue }, /*{ "LNURLW", annotators[i].LNURLW }, { "pickedLNURL", annotators[i].pickedLNURL },*/ { "rating", annotators[i].rating } });
+                data.Add(new BsonDocument { { "name", annotators[i].user.Name }, { "status", annotators[i].status }, { "value", contractvalue }, /*{ "LNURLW", annotators[i].LNURLW }, { "pickedLNURL", annotators[i].pickedLNURL },*/ { "rating", annotators[i].rating }, { "ratingContractor", annotators[i].ratingContractor } });
             }
             return data;
         }
@@ -3020,6 +3036,7 @@ namespace ssi
                 {
                     job.rating = cand["rating"].AsDouble;
                     job.status = cand["status"].AsString;
+                    job.ratingContractor = 0;
                     //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                     //job.LNURLW = cand["LNURLW"].AsString;
                 }
@@ -3027,7 +3044,6 @@ namespace ssi
             }
 
             bounty.annotatorsJobDone = new List<BountyJob>();
-            bool foundmine = false;
             foreach (BsonDocument cand in doc["annotatorsJobDone"].AsBsonArray)
             {
                 BountyJob job = new BountyJob();
@@ -3035,6 +3051,7 @@ namespace ssi
                 if (cand.Contains("rating"))
                 {
                     job.rating = cand["rating"].AsDouble;
+                    job.ratingContractor = cand["ratingContractor"].AsDouble;
                     job.status = cand["status"].AsString;
                     //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                     //job.LNURLW = cand["LNURLW"].AsString;
@@ -3145,6 +3162,10 @@ namespace ssi
                     if (cand.Contains("rating"))
                     {
                         job.rating = cand["rating"].AsDouble;
+                        if (cand.Contains("ratingContractor"))
+                        {
+                            job.ratingContractor = cand["ratingContractor"].AsDouble;
+                        }
                         job.status = cand["status"].AsString;
                         //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                         //job.LNURLW = cand["LNURLW"].AsString;
@@ -3154,6 +3175,7 @@ namespace ssi
                     if (job.user.Name == Properties.Settings.Default.MongoDBUser && finished)
                     {
                         bounty.RatingTemp = job.rating;
+                        bounty.RatingContractorTemp = job.ratingContractor;
                         foundmine = true;
                     }
                     bounty.annotatorsJobDone.Add(job);
@@ -3235,6 +3257,7 @@ namespace ssi
                     {
                         job.rating = cand["rating"].AsDouble;
                         job.status = cand["status"].AsString;
+                        job.ratingContractor = 0;
                         //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                         //job.LNURLW = cand["LNURLW"].AsString;
                     }
@@ -3251,6 +3274,7 @@ namespace ssi
                     if (cand.Contains("rating"))
                     {
                         job.rating = cand["rating"].AsDouble;
+                        job.ratingContractor = cand["ratingContractor"].AsDouble;
                         job.status = cand["status"].AsString;
                         //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                         //job.LNURLW = cand["LNURLW"].AsString;
@@ -4606,6 +4630,19 @@ namespace ssi
         public double ratingoverall { get; set; }
         public int ratingcount { get; set; }
 
+        public double Rating
+        {
+            get { return (ratingcount > 0) ? ratingoverall / ratingcount : 0; }
+        }
+
+        public double ratingContractoroverall { get; set; }
+        public int ratingContractorcount { get; set; }
+
+        public double RatingContractor
+        {
+            get { return (ratingContractoroverall > 0) ?  ratingContractoroverall / ratingContractorcount : 0; }
+        }
+
         //key for Lightning
         public string ln_admin_key { get; set; }
         public string ln_invoice_key { get; set; }
@@ -4668,6 +4705,7 @@ namespace ssi
         public string Database { get; set; }
         public string Type { get; set; }
         public double RatingTemp { get; set; }
+        public double RatingContractorTemp { get; set; }
         public string LNURLW { get; set; }
         public List<BountyJob> annotatorsJobCandidates { get; set; }
         public List<BountyJob> annotatorsJobDone { get; set; }
@@ -4680,9 +4718,10 @@ namespace ssi
     {
       public DatabaseUser user { get; set; }
       public double rating { get; set; }
-      //public bool pickedLNURL { get; set; }
-      //public string LNURLW { get; set; }
-      public string status { get; set; }
+      public double ratingContractor { get; set; }
+        //public bool pickedLNURL { get; set; }
+        //public string LNURLW { get; set; }
+        public string status { get; set; }
         //open, finished
 
     }

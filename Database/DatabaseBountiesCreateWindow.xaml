@@ -304,7 +304,9 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
+                
                 <DockPanel Grid.Row="0" Grid.Column="3" HorizontalAlignment="Center" Width="180">
+                    <Label  Grid.Row="0"  DockPanel.Dock="Top"  Name="RatingLabel">Rating: 0</Label>
                     <Label Grid.Row="0"  DockPanel.Dock="Top" Grid.Column="1">Applicants</Label>
                     <ListView  Name="BountiesCandidates"  SelectionMode="Single"  DockPanel.Dock="Top">
                         <ListView.View>
@@ -313,8 +315,15 @@
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="user.Name" />
                                 </GridViewColumn.DisplayMemberBinding>
+                                
                             </GridViewColumn>
-                        </GridView>
+                                <GridViewColumn Width="Auto" Header="Rating">
+                                    <GridViewColumn.DisplayMemberBinding>
+                                        <Binding Path="user.Rating" />
+                                    </GridViewColumn.DisplayMemberBinding>
+
+                                </GridViewColumn>
+                            </GridView>
                         </ListView.View>
                     </ListView>
 
@@ -332,6 +341,13 @@
                                         <Binding Path="isPaid" />
                                     </GridViewColumn.DisplayMemberBinding>
                                 </GridViewColumn>
+                               
+                                <GridViewColumn Width="Auto" Header="Rating">
+                                    <GridViewColumn.DisplayMemberBinding>
+                                        <Binding Path="Rating" />
+                                    </GridViewColumn.DisplayMemberBinding>
+                                </GridViewColumn>
+
                                 <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
                             </GridView>
                         </ListView.View>
