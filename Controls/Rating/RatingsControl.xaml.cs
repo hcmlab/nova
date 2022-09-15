@@ -21,7 +21,7 @@ namespace ssi
     /// </summary>
     public partial class Rating : UserControl
     {
-        public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Rating", typeof(int), typeof(Rating),
+        public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(int), typeof(Rating),
             new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, new PropertyChangedCallback(RatingChanged)));
 
         private int _max = 5;
@@ -48,6 +48,8 @@ namespace ssi
                 }
             }
         }
+
+
 
         private static void RatingChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {

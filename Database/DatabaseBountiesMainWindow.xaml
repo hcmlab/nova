@@ -142,13 +142,22 @@
 
             </Grid>
         </TabItem>
-        <TabItem Grid.Row="0" Header="Completed Tasks" Selector.Selected="TabItem_Selected">
+        <TabItem Grid.Row="0" Header="Completed Tasks" Selector.Selected="FinishedTabItem_Selected">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <ListView  Name="CompletedBountiesOverviewBox" SelectionMode="Single" DockPanel.Dock="Top">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="IsSelected" Value="True"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="Auto" Header="Database">
@@ -180,16 +189,24 @@
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
                             
-                            <GridViewColumn Width="Auto" Header="Rating">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="RatingTemp" />
-                                </GridViewColumn.DisplayMemberBinding>
-                                </GridViewColumn>
-                           <!--<GridViewColumn Width="Auto" Header="Claim">
+                            <GridViewColumn Width="Auto" Header="Your Rating">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <Button IsEnabled="{Binding LNURLWClaimed}" Click="Button_Click" Content="Claim"/>
+                                            <local:Rating x:Name="starsy" IsEnabled="False" Height="25" Width="100" Value="{Binding RatingTemp}" Foreground="Green" VerticalAlignment="Center"  >
+                                                <!--<Binding Path="RatingContractorTemp" ></Binding>-->
+                                            </local:Rating>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                           <GridViewColumn Width="Auto" Header="Rate Contractor">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <local:Rating x:Name="stars" Height="25" Width="100" Value="{Binding RatingContractorTemp}"  MouseLeave="stars_MouseLeave" VerticalAlignment="Center" >
+                                                <!--<Binding Path="RatingContractorTemp" ></Binding>-->
+                                            </local:Rating>
                                         </StackPanel>
                                     </DataTemplate>
 
@@ -197,8 +214,8 @@
                             </GridViewColumn>
 
 
-                            <GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />
-                            -->
+                            
+                          
                         </GridView>
                     </ListView.View>
                 </ListView>

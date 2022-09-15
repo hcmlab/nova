@@ -38,6 +38,8 @@ namespace ssi
             //updateAcceptedBounties();
             //AcceptedBountiesOverviewBox.ItemsSource = acceptedbounties;
 
+       
+
         }
 
         private void updateFindBounties()
@@ -212,7 +214,7 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
             updateFindBounties();
         }
 
-        private void TabItem_Selected(object sender, RoutedEventArgs e)
+        private void FinishedTabItem_Selected(object sender, RoutedEventArgs e)
         {
             updateAcceptedBounties(true);
         }
@@ -220,6 +222,18 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
         private void Button_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+   
+
+        private void stars_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var rating = ((Rating)sender).Value;
+            //CompletedBountiesOverviewBox.SelectedItem = CompletedBountiesOverviewBox.Items.
+            //CompletedBountiesOverviewBox.SelectedItem = ((StackPanel)((Rating)sender).Parent).Parent;
+            DatabaseBounty bounty = ((DatabaseBounty)CompletedBountiesOverviewBox.SelectedItem);
+            bounty.annotatorsJobDone.Find(s => s.user.Name == Properties.Settings.Default.MongoDBUser).ratingContractor = rating;
+            DatabaseHandler.SaveBounty(bounty);
         }
     }
 }

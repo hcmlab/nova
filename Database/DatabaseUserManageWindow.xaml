@@ -17,6 +17,8 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -55,13 +57,12 @@
         <Label  Name="NewPasswordLabel" Content="New Password:" Grid.Row="5" Grid.Column="0" Margin="5"></Label>
         <PasswordBox Name="PasswordField" Grid.Row="5" Grid.Column="1" Password="" Margin="5"></PasswordBox>
 
-        <DockPanel HorizontalAlignment="Left" Grid.Row="6">
-            <Label Name="xpLabel">XP:</Label>
-            <Label Name="ratingLabel">Rating:</Label>
 
-        </DockPanel>
+        <Label Grid.Row="6" Grid.ColumnSpan="2" Name="xpLabel">XP:</Label>
+        <Label Grid.Row="7" Grid.ColumnSpan="2" Name="ratingLabel">Rating:</Label>
+        <Label Grid.Row="8" Grid.ColumnSpan="2" Name="ratingContractorLabel">Rating:</Label>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+        <StackPanel Orientation="Horizontal" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
             <Button Content="OK" Click="OkClick" Margin="5"></Button>
             <Button Content="Cancel" Click="CancelClick" Margin="5"></Button>
         </StackPanel>

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -129,6 +130,9 @@ namespace ssi
         public void GetAnnotations(bool onlyme = false, string sessionname = null)
 
         {
+            try { 
+           
+
             CreateBounty.IsEnabled = true;
             AnnotationResultBox.ItemsSource = null;
             //  AnnotationResultBox.Items.Clear();
@@ -213,9 +217,17 @@ namespace ssi
                         items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = sessionname });
                     }
                 }
+
+                    AnnotationResultBox.ItemsSource = items;
+                }
+            }
+            catch (Exception ex)
+            {
+
             }
 
-            AnnotationResultBox.ItemsSource = items;
+           
+            
         }
 
         public void GetAnnotationSchemes()
@@ -297,6 +309,7 @@ namespace ssi
                 DatabasesBox.SelectedIndex = 0;
                 
             }
+            if (DatabasesBox.SelectedItem == null) return;
             string name = DatabasesBox.SelectedItem.ToString();
             DatabaseHandler.ChangeDatabase(name);
 
@@ -548,7 +561,35 @@ namespace ssi
                 if (bounties != null) allbounties.AddRange(bounties);
             }
             BountiesOverviewBox.ItemsSource = allbounties;
+            updateContractorRatingandStats();
         }
+
+        private void updateContractorRatingandStats()
+        {
+            DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+            user.ratingContractorcount = 0;
+            user.ratingContractoroverall = 0;
+            foreach (var item in allbounties)
+            {
+                foreach(var finished in item.annotatorsJobDone)
+                {
+                    if (finished.ratingContractor != 0)
+                    {
+                        user.ratingContractorcount++;
+                        user.ratingContractoroverall = user.ratingContractoroverall + finished.ratingContractor;
+
+                    }
+                }
+               
+
+            }
+            user.ln_admin_key = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key, MainHandler.Decode((Properties.Settings.Default.MongoDBPass)));  //encrypt
+            user.ln_admin_key_locked = MainHandler.Cipher.AES.EncryptText(user.ln_admin_key_locked, MainHandler.Decode((Properties.Settings.Default.MongoDBPass)));  //encrypt
+
+            DatabaseHandler.ChangeUserCustomData(user);
+            RatingLabel.Content = "Rating: " + user.RatingContractor.ToString("F2");
+        }
+
 
         private void UpdateJobsDoneList()
         {
@@ -586,10 +627,9 @@ namespace ssi
                         {
                             stat.isPaid = annotationDoc["bountyIsPaid"].AsBoolean;
                         }
-                        //if (annotationDoc.TryGetElement("rating", out value))
-                        //{
-                        //    stat.Rating = annotationDoc["rating"].AsDouble;
-                        //}
+                      
+                            stat.Rating = item.user.Rating;
+                        
 
                         annostatus.Add(stat);
                        
@@ -672,6 +712,7 @@ namespace ssi
             DatabaseBounty bounty = (DatabaseBounty)BountiesOverviewBox.SelectedItem;
             string name = ((AnnotatorStatus)BountiesJobDone.SelectedItem).Name;
             DatabaseUser user = DatabaseHandler.GetUserInfo(name);
+            
             if (bounty.valueInSats > 0 && MainHandler.ENABLE_LIGHTNING)
             {
                 if (MainHandler.myWallet != null)
