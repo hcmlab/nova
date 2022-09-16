@@ -156,7 +156,7 @@
                     </Grid>
                     <Label Grid.Row="2" Content="Database user:" Grid.ColumnSpan="2" Grid.Column="0"/>
 
-                    <Button Grid.Row="2" Name="LoginWithLightning" Background="Gold" Content="Login with Lightning" Click="Button_Click" Grid.ColumnSpan="1" Grid.Column="1" Margin="185,0,5,23" Grid.RowSpan="2">
+                    <Button Grid.Row="2" Name="LoginWithLightning" Visibility="Hidden" Background="Gold" Content="Login with Lightning" Click="Button_Click" Grid.ColumnSpan="1" Grid.Column="1" Margin="185,0,5,23" Grid.RowSpan="2">
                         <Button.Resources>
                             <Style TargetType="Border">
                                 <Setter Property="CornerRadius" Value="8"/>
