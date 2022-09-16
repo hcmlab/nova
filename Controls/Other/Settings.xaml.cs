@@ -24,21 +24,8 @@ namespace ssi
             PointDistance.Text = Properties.Settings.Default.DefaultPolygonPointDistance.ToString();
             DrawwaveformCheckbox.IsChecked = Properties.Settings.Default.DrawVideoWavform;
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
-            if (Properties.Settings.Default.LoggedInWithLightning)
-            {
-                LoginWithLightning.Content = "\u26a1 Logout of Lightning";
-                this.DBPassword.Visibility = Visibility.Collapsed;
-                this.passwordtext.Visibility = Visibility.Collapsed;
-                this.DBUser.IsEnabled = false;
-            }
-            else
-            {
-                LoginWithLightning.Content = "\u26a1 Login with Lightning";
-                this.DBPassword.Visibility = Visibility.Visible;
-                this.passwordtext.Visibility = Visibility.Visible;
-                this.DBUser.IsEnabled = true;
-
-            }
+            //For now only works on test server
+           
            
             mbackend.SelectedIndex = (Properties.Settings.Default.MediaBackend == "Software") ? 1 : 0; 
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
@@ -68,6 +55,32 @@ namespace ssi
             EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
             Showexport.IsChecked = Properties.Settings.Default.ShowExportDatabase;
             enableworldlevel.IsChecked = Properties.Settings.Default.SRTwordlevel;
+            if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
+            {
+                LoginWithLightning.Visibility = Visibility.Hidden;
+                Properties.Settings.Default.LoggedInWithLightning = false;
+                Properties.Settings.Default.Save();
+            }
+            else
+            {
+                LoginWithLightning.Visibility = Visibility.Visible;
+            }
+            if (Properties.Settings.Default.LoggedInWithLightning)
+            {
+                LoginWithLightning.Content = "\u26a1 Logout of Lightning";
+                this.DBPassword.Visibility = Visibility.Collapsed;
+                this.passwordtext.Visibility = Visibility.Collapsed;
+                this.DBUser.IsEnabled = false;
+            }
+            else
+            {
+                LoginWithLightning.Content = "\u26a1 Login with Lightning";
+                this.DBPassword.Visibility = Visibility.Visible;
+                this.passwordtext.Visibility = Visibility.Visible;
+                this.DBUser.IsEnabled = true;
+
+            }
+
 
         }
 
