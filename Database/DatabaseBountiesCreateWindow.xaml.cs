@@ -454,7 +454,12 @@ namespace ssi
             Int32.TryParse(sats.Text.ToString(), out satsperannotator);
             bounty.valueInSats = satsperannotator;
 
-            if(bounty.valueInSats > 0 && MainHandler.myWallet == null)
+            if (bounty.valueInSats > 0)
+            {
+
+           
+
+            if (bounty.valueInSats > 0 && MainHandler.myWallet == null)
             {
                 MessageBox.Show("You need to create a Wallet first to offer Bounties. Enable Lightning in the settings and create a wallet");
                     return;
@@ -480,6 +485,8 @@ namespace ssi
             {
                 MessageBox.Show("You don't have enough balance in your wallet to pay for the bounties");
                 return;
+
+            }
 
             }
             bounty.Session = (SessionsResultsBox.SelectedItems.Count > 0 ? (DatabaseSession)SessionsResultsBox.SelectedItem : DatabaseHandler.Sessions[0]).Name;
@@ -817,19 +824,27 @@ namespace ssi
 
         private async void RemoveButton_Click(object sender, RoutedEventArgs e)
         {
-            DatabaseBounty bounty = (DatabaseBounty)BountiesOverviewBox.SelectedItem;
+            foreach(var item in BountiesOverviewBox.SelectedItems)
+            {
+                DatabaseBounty bounty = (DatabaseBounty)item;
+                if (bounty.valueInSats > 0)
+                {
+                int amount = bounty.numOfAnnotationsNeededCurrent * bounty.valueInSats;
 
-            int amount = bounty.numOfAnnotationsNeededCurrent * bounty.valueInSats;
-
-            Lightning.LightningInvoice invoice = await lightning.CreateInvoice(bounty.Contractor.ln_invoice_key, (uint)(amount), bounty.Database + "/" + bounty.Session + "/" + bounty.Scheme + "/" + bounty.Role);
+                Lightning.LightningInvoice invoice = await lightning.CreateInvoice(bounty.Contractor.ln_invoice_key, (uint)(amount), bounty.Database + "/" + bounty.Session + "/" + bounty.Scheme + "/" + bounty.Role);
 
                 string message = await lightning.PayInvoice(MainHandler.myWallet, invoice.payment_request, true);
                 if (message == "Success")
                 {
                     MessageBox.Show(amount + " Sats have been refunded to Wallet");
                 }
-            
-            DatabaseHandler.DeleteBounty(bounty.OID);
+
+                }
+
+                DatabaseHandler.DeleteBounty(bounty.OID);
+            }
+
+         
             updateBounties();
         }
    
@@ -848,7 +863,10 @@ namespace ssi
         updateBounties();
     }
 
-
+        private void RolesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            GetAnnotations();
+        }
     }
 }
 
