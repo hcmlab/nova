@@ -3141,6 +3141,7 @@ namespace ssi
                         //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                         //job.LNURLW = cand["LNURLW"].AsString;
                     }
+                    else job.status = "default";
                   
                   
 
@@ -3261,6 +3262,7 @@ namespace ssi
                         //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                         //job.LNURLW = cand["LNURLW"].AsString;
                     }
+                    else job.status = "default";
 
                     bounty.annotatorsJobCandidates.Add(job);
                 }
@@ -3279,6 +3281,7 @@ namespace ssi
                         //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                         //job.LNURLW = cand["LNURLW"].AsString;
                     }
+                    else job.status = cand["status"].AsString;
 
                     bounty.annotatorsJobDone.Add(job);
                 }
@@ -3359,6 +3362,7 @@ namespace ssi
                         //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                         //job.LNURLW = cand["LNURLW"].AsString;
                     }
+                    job.status = "default";
 
                     bounty.annotatorsJobCandidates.Add(job);
                     //Don't return contract if already accepted.
@@ -3380,6 +3384,7 @@ namespace ssi
                         //job.pickedLNURL = cand["pickedLNURL"].AsBoolean;
                         //job.LNURLW = cand["LNURLW"].AsString;
                     }
+                    job.status = "default";
 
                     bounty.annotatorsJobDone.Add(job);
 
