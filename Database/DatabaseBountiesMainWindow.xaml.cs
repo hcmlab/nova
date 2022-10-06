@@ -5,8 +5,14 @@ using Octokit;
 using ssi;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.UI.DataVisualization.Charting;
 using System.Windows;
@@ -14,9 +20,11 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace ssi
 {
@@ -29,6 +37,23 @@ namespace ssi
         DatabaseBounty selectedAcceptedBounty = new DatabaseBounty();
         List<DatabaseBounty> findbounties = new List<DatabaseBounty>();
         List<DatabaseBounty> acceptedbounties = new List<DatabaseBounty>();
+        WebClient webClient;
+        Stopwatch sw = new Stopwatch();
+        string bountyDB;
+        string bountySession;
+        int remainingfiles = int.MaxValue;
+        List<string> streamstoDownload = new List<string>();
+
+        private const Int32 GWL_STYLE = -16;
+        private const uint MF_BYCOMMAND = 0x00000000;
+        private const uint MF_BYPOSITION = 0x00000400;
+        private const uint SC_CLOSE = 0xF060;
+
+        [DllImport("user32.dll")]
+        static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
+
+        [DllImport("user32.dll")]
+        static extern uint RemoveMenu(IntPtr hMenu, uint nPosition, uint wFlags);
         public DatabaseBountiesMainWindow()
         {
             InitializeComponent();
@@ -168,6 +193,8 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
+            sw.Stop();
+           
             DialogResult = false;
             this.Close();
 
@@ -178,9 +205,10 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
             if (AcceptedBountiesOverviewBox.SelectedItem != null)
             {
                 selectedAcceptedBounty = (DatabaseBounty)AcceptedBountiesOverviewBox.SelectedItem;
-                DialogResult = true;
+                downloadSelectedFiles();
+               // DialogResult = true;
             }
-            this.Close();
+            else this.Close();
 
         }
 
@@ -235,5 +263,212 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
             bounty.annotatorsJobDone.Find(s => s.user.Name == Properties.Settings.Default.MongoDBUser).ratingContractor = rating;
             DatabaseHandler.SaveBounty(bounty);
         }
+        private void downloadSelectedFiles()
+        {
+            OpenButton.IsEnabled = false;
+            CancelButton2.IsEnabled = false;
+            RemoveButton.IsEnabled = false;
+            WindowInteropHelper wih = new WindowInteropHelper(this);
+            IntPtr hWnd = wih.Handle;
+            IntPtr hMenu = GetSystemMenu(hWnd, false);
+
+            // CloseButton disabled
+            RemoveMenu(hMenu, SC_CLOSE, MF_BYCOMMAND);
+
+            DatabaseBounty selectedBounty = ((DatabaseBounty)(AcceptedBountiesOverviewBox.SelectedItem));
+
+            //labelDownloaded.Visibility = Visibility.Visible;
+            //labelPerc.Visibility = Visibility.Visible;
+            //labelSpeed.Visibility = Visibility.Visible;
+            //progressBar.Visibility = Visibility.Visible;
+            bountyDB = selectedBounty.Database;
+            bountySession = selectedBounty.Session;
+            string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + bountyDB + "\\" + bountySession + "\\";
+            Directory.CreateDirectory(Path.GetDirectoryName(localPath));
+            streamstoDownload = new List<string>();
+
+            foreach (StreamItem stream in selectedBounty.streams)
+            {
+
+                string localfile = localPath + stream.Name;
+
+                if (!File.Exists(localfile))
+                {
+                    streamstoDownload.Add(stream.Name);
+
+                }
+
+            }
+
+            if (streamstoDownload.Count == 0)
+            {
+                DialogResult = true;
+                Close();
+                return;
+            }
+
+            string url = "";
+            bool requiresAuth = false;
+
+            DatabaseDBMeta meta = new DatabaseDBMeta()
+            {
+                Name = DatabaseHandler.DatabaseName
+            };
+            if (!DatabaseHandler.GetDBMeta(ref meta))
+            {
+                return;
+            }
+
+            if (meta.Server == "" || meta.Server == null)
+            {
+                return;
+            }
+
+
+            if (meta.UrlFormat == UrlFormat.NEXTCLOUD)
+            {
+                url = meta.Server + "/download?path=%2F" + selectedBounty.Database + "%2F" + selectedBounty.Session + "&files=";
+            }
+            else
+            {
+                url = meta.Server + '/' + DatabaseHandler.SessionName + '/';
+                requiresAuth = meta.ServerAuth;
+            }
+
+
+
+
+
+            List<string> urls = new List<string>();
+
+            foreach (string file in streamstoDownload)
+            {
+                urls.Add(url + file);
+                if (file.EndsWith(".stream"))
+                {
+                    urls.Add(url + file + "~");
+                }
+            }
+
+
+            remainingfiles = urls.Count;
+            downloadFile(urls);
+        }
+
+
+
+
+        private Queue<string> _downloadUrls = new Queue<string>();
+  
+
+        private void downloadFile(IEnumerable<string> urls)
+        {
+            foreach (var url in urls)
+            {
+                _downloadUrls.Enqueue(url);
+                
+            }
+
+            DownloadFile();
+        }
+
+
+
+        public void DownloadFile()
+        {
+            if (_downloadUrls.Any())
+            {
+
+                using (webClient = new WebClient())
+                {
+                    webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
+                    webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
+
+                    string url = _downloadUrls.Dequeue();
+                    string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + bountyDB + "\\" + bountySession + "\\";
+                    string[] split = System.IO.Path.GetFileName(url).Split('=');
+
+                    string location = localPath + split[split.Length - 1];
+                    labelName.Content = split[split.Length - 1];
+                    Uri URL = new Uri(url);
+                    // Start the stopwatch which we will be using to calculate the download speed
+                    sw.Start();
+
+                    try
+                    {
+                        // Start downloading the file
+                        webClient.DownloadFileAsync(URL, location);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            }
+
+        }
+
+
+        // The event that will fire whenever the progress of the WebClient is changed
+        private void ProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+
+
+            // Calculate download speed and output it to labelSpeed.
+            labelSpeed.Content = string.Format("{0} kb/s", (e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds).ToString("0.00"));
+
+            // Update the progressbar percentage only when the value is not the same.
+            progressBar.Value = e.ProgressPercentage;
+
+            // Show the percentage on our label.
+            labelPerc.Content = e.ProgressPercentage.ToString() + "%";
+
+            // Update the label with how much data have been downloaded so far and the total size of the file we are currently downloading
+            labelDownloaded.Content = string.Format("{0} MB's / {1} MB's",
+                (e.BytesReceived / 1024d / 1024d).ToString("0.00"),
+                (e.TotalBytesToReceive / 1024d / 1024d).ToString("0.00"));
+        }
+
+        // The event that will trigger when the WebClient is completed
+        private void Completed(object sender, AsyncCompletedEventArgs e)
+        {
+            remainingfiles--;
+
+            if (e.Error != null)
+            {
+                // handle error scenario
+                //throw e.Error;
+            }
+            if (e.Cancelled)
+            {
+                string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + bountyDB + "\\" + bountySession + "\\";
+                foreach (string file in streamstoDownload)
+                {
+                    File.Delete(localPath + file);
+                }
+                // handle cancelled scenario
+            }
+            DownloadFile();
+
+            if (remainingfiles == 0)
+            {
+
+                //if (closeAfterDownload)
+                //{
+                    DialogResult = true;
+                    Close();
+                
+
+                //else
+                //{
+                //    System.Collections.IList test = StreamsBox.SelectedItems;
+
+                //    GetStreams(test);
+                //}
+            }
+        }
+
+
+
     }
 }
