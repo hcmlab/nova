@@ -66,10 +66,10 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-                <DockPanel Grid.Row="1" HorizontalAlignment="Right">
-                    <Button Width="80" Click="AcceptButton_Click">Accept Bounty</Button>
+                <DockPanel Name="Buttonpanel" Grid.Row="1" HorizontalAlignment="Right">
+                    <Button Name="AcceptButton" Width="80" Click="AcceptButton_Click">Accept Bounty</Button>
                     <Separator Visibility="Hidden" Width="20"></Separator>
-                    <Button Width="80" Click="CancelButton_Click">Cancel</Button>
+                    <Button Name="CancelButton" Width="80" Click="CancelButton_Click">Cancel</Button>
                 </DockPanel>
 
 
@@ -132,12 +132,23 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
+                <StackPanel Grid.Row="1" Margin="0,5,0,0" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <!--<Button Name="AddAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="+" Height="25"  Click="AddAnnotation_Click" Visibility="Collapsed" />-->
+                    <!--Button Name="CopyAnnotation" Margin="0,0,5,0" BorderBrush="Transparent" Background="Transparent" Content="COPY" Height="25"  Click="CopyAnnotation_Click" Visibility="Collapsed" /-->
+
+
+                    <Label Name="labelSpeed" HorizontalAlignment="Center"></Label>
+                    <Label Name="labelDownloaded" HorizontalAlignment="Center" ></Label>
+                    <Label Name="labelPerc" HorizontalAlignment="Center"></Label>
+                    <Label Name="labelName" HorizontalAlignment="Center"></Label>
+                    <ProgressBar Name="progressBar" Width="40" Height="12" Visibility="Hidden"></ProgressBar>
+                </StackPanel>
                 <DockPanel Grid.Row="1" HorizontalAlignment="Right">
-                    <Button Width="80" Click="OpenAcceptedButton_Click">Open</Button>
+                    <Button Name="OpenButton" Width="80" Click="OpenAcceptedButton_Click">Open</Button>
                     <Separator Visibility="Hidden" Width="20"></Separator>
-                    <Button Width="80" Click="RemoveAcceptedButton_Click">Remove</Button>
+                    <Button  Name="RemoveButton" Width="80" Click="RemoveAcceptedButton_Click">Remove</Button>
                     <Separator Visibility="Hidden" Width="20"></Separator>
-                    <Button Width="80" Click="CancelButton_Click">Cancel</Button>
+                    <Button Name="CancelButton2" Width="80" Click="CancelButton_Click">Cancel</Button>
                 </DockPanel>
 
             </Grid>
