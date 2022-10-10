@@ -74,7 +74,11 @@ namespace ssi
 
             }
 
-            if(dcoms == filenames.Count()) LoadDicomFile(filenames);
+            if(dcoms == filenames.Count()){
+                showShadowBox("Loading '" + filenames[0].ToString() + "'");
+                LoadDicomFile(filenames);
+                hideShadowBox();
+            }
 
 
         }
