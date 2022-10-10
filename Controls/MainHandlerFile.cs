@@ -1,16 +1,36 @@
-﻿using System;
+﻿
+using SharpCompress.Common;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 using System.Xml;
+using System.Linq;
+using Image = System.Windows.Controls.Image;
+using System.Drawing.Imaging;
 
+using Dicom;
+using Dicom.Imaging;
+using PropertyTools.Wpf;
+
+using System.Threading.Tasks;
+using System.Windows.Documents;
+using System.Windows.Media.Imaging;
+
+using CSJ2K.j2k.image;
+using FFMediaToolkit.Encoding;
+
+using VideoCodec = FFMediaToolkit.Encoding.VideoCodec;
+using Point = System.Drawing.Point;
+using FFMediaToolkit.Graphics;
+using System.Windows.Forms.VisualStyles;
 
 namespace ssi
 {
@@ -26,9 +46,16 @@ namespace ssi
         public void loadMultipleFilesOrDirectory(string[] filenames)
         {
             Array.Sort(filenames, StringComparer.InvariantCulture);
-
+            int dcoms = 0;
             foreach (string filename in filenames)
             {
+                if (filename.ToLower().EndsWith("dcm")){ //maybe use this for all images
+
+                    dcoms++;
+
+                }
+                else { 
+
                 if (File.Exists(filename) || Directory.Exists(filename))
                 {
                     FileAttributes attr = File.GetAttributes(filename);
@@ -42,9 +69,14 @@ namespace ssi
                         loadFile(filename);
                     }
                 }
+                }
+
+
             }
 
-         
+            if(dcoms == filenames.Count()) LoadDicomFile(filenames);
+
+
         }
 
         public bool loadFile(string filepath, Dictionary<int, string> dimnames = null)
@@ -136,6 +168,10 @@ namespace ssi
                     case "odf":
                         ftype = SSI_FILE_TYPE.NOLDUS;
                         break;
+                    case "dcm":
+                    case "dicom":
+                        ftype = SSI_FILE_TYPE.DICOM;
+                        break;
 
                     case "nova":
                         ftype = SSI_FILE_TYPE.PROJECT;
@@ -194,6 +230,12 @@ namespace ssi
 
                     break;
 
+                case SSI_FILE_TYPE.DICOM:
+                    string[] array = new string[1];
+                    array[0] = filepath;
+                    LoadDicomFile(array);
+                    loaded = true;
+                    break;
                 case SSI_FILE_TYPE.ANNOTATION:
                     loadAnnoFile(filepath);
                     loaded = true;
@@ -277,6 +319,101 @@ namespace ssi
             control.navigator.playButton.IsEnabled = true;
         }
 
+
+        public byte[] GetData(DicomFile m_File)
+        {
+            var image = new DicomImage(m_File.Dataset);
+            using (var image2 = image.RenderImage())
+            {
+                using (var bitmap = image2.As<System.Drawing.Bitmap>())
+                {
+                    var stream = new MemoryStream();
+                    bitmap.Save(stream, ImageFormat.Jpeg);
+                    return stream.ToArray();
+                }
+            }
+        }
+
+
+    
+
+        private IMedia LoadDicomFile(string[] fileNames)
+        {
+            string name = Path.GetFileNameWithoutExtension(fileNames[0]);
+            var userDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\nova";
+            int index = 0;
+
+            foreach (string fileName in fileNames)
+            {
+            DicomFile m_File = DicomFile.Open(fileName);
+            var dicomImage = new DicomImage(m_File.Dataset);
+            var frames =
+                Enumerable.Range(0, dicomImage.NumberOfFrames)
+                    .Select(selector: frame => dicomImage.RenderImage(frame).As<System.Drawing.Bitmap>());
+
+           
+
+           
+            Directory.CreateDirectory(userDataFolder + "\\dicom\\" + name + "\\");
+            int size = frames.Count<System.Drawing.Bitmap>();
+
+            foreach (var frame in frames)
+            {
+            
+                    frame.Save(userDataFolder + "\\dicom\\" + name + "\\" + index.ToString("0000") + ".bmp");
+                    index++; 
+            }
+            }
+
+            if (!File.Exists("runtimes\\win-x64\\native\\ffmpeg.exe"))
+            {
+
+                GetFFMPEG();
+            }
+
+
+            string inputFolder = userDataFolder + "\\dicom\\" + name + "\\";
+            var files = Directory.GetFiles(inputFolder,"*.bmp");
+            System.Drawing.Image img = System.Drawing.Image.FromFile(files[0]);
+            var settings = new VideoEncoderSettings(width: img.Width, height: img.Height, framerate: 25, codec: VideoCodec.H264)
+            {
+                EncoderPreset = EncoderPreset.Medium,
+                CRF = 18
+            };
+
+            var file = MediaBuilder.CreateContainer(userDataFolder + "\\dicom\\" + name + "\\" + name + ".mp4").WithVideo(settings).Create();
+            foreach (var inputFile in files)
+            {
+                var binInputFile = File.ReadAllBytes(inputFile);
+                var memInput = new MemoryStream(binInputFile);
+                var bitmap = System.Drawing.Bitmap.FromStream(memInput) as System.Drawing.Bitmap;
+                var rect = new System.Drawing.Rectangle(Point.Empty, bitmap.Size);
+                var bitLock = bitmap.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                ImageData bitmapData = ImageData.FromPointer(bitLock.Scan0, ImagePixelFormat.Bgr24, bitmap.Size);
+                file.Video.AddFrame(bitmapData);
+                bitmap.UnlockBits(bitLock);
+            }
+
+            file.Dispose();
+
+
+          
+            if (MediaBackend == MEDIABACKEND.MEDIAKIT)
+            {
+                MediaKit media = new MediaKit(userDataFolder + "\\dicom\\" + name + "\\" + name + ".mp4", MediaType.VIDEO);
+                addEvents(null, media);
+                addMedia(media);
+              
+                return media;
+            }
+            else if (MediaBackend == MEDIABACKEND.MEDIA)
+            {
+                MessageBox.Show("Dicom viewer needs Hardware acceleration, please change Settings to Hardware media backend");
+            }
+
+            return null;
+        }
+   
         private IMedia loadMediaFile(string filename, MediaType type)
         {
             if (!File.Exists(filename))

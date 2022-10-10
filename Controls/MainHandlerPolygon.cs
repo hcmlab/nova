@@ -543,7 +543,7 @@ namespace ssi
             }
         }
 
-        // We handel here all the cursor stuff
+        // We handle here all the cursor stuff
         private void OnPolygonMainControlMouseMove(object sender, MouseEventArgs e)
         {
             if (!dataGridChecker.isSchemeTypePolygon())

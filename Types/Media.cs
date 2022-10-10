@@ -100,13 +100,23 @@ namespace ssi
             }
             if (type == MediaType.VIDEO)
             {
-                sampleRate = inputFile.Metadata.VideoData.Fps;
-                string frameSize = inputFile.Metadata.VideoData.FrameSize;
-                string[] tokens = frameSize.Split('x');
-                int.TryParse(tokens[0], out width);
-                int.TryParse(tokens[1], out height);
+               
+                    if(inputFile.Metadata != null)
+                {
+                    sampleRate = inputFile.Metadata.VideoData.Fps;
+                    string frameSize = inputFile.Metadata.VideoData.FrameSize;
+                    string[] tokens = frameSize.Split('x');
+                    int.TryParse(tokens[0], out width);
+                    int.TryParse(tokens[1], out height);
+                }
+                  
+                    
+                
+                else{ sampleRate = 1; }
+             
+
             }
-            else if (type == MediaType.AUDIO)
+            else if (type == MediaType.AUDIO && inputFile.Metadata.AudioData != null)
             {
                 string[] tokens = inputFile.Metadata.AudioData.SampleRate.Split(' ');
                 double.TryParse(tokens[0], out sampleRate);
