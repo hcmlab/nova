@@ -27,6 +27,18 @@ namespace ssi
             Thread.CurrentThread.CurrentUICulture = ci;
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
             Title = "NOVA | v" + MainHandler.BuildVersion + " | Human-Centered Artificial Intelligence Lab, Augsburg University | http://github.com/hcmlab/nova";
+            try
+            {
+                var userDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\nova\\dicom";
+                Directory.Delete(userDataFolder, true);
+             
+            }
+            catch
+            {
+                ;
+            }
+
+
         }
 
         private void viewHandlerLoaded(MainHandler handler)
@@ -114,6 +126,11 @@ namespace ssi
             {
                 e.Cancel = true;
             }
+           
+
+
+
+
             try
             {
                 var dir = new DirectoryInfo(Path.GetDirectoryName(Properties.Settings.Default.CMLTempTrainerPath));
@@ -127,7 +144,9 @@ namespace ssi
                     file.Delete();
                 }
 
-               
+            
+
+
             }
             catch { }
 

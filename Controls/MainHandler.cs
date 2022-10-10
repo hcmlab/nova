@@ -21,7 +21,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.3.4";
+        public static string BuildVersion = "1.2.3.5";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -47,10 +47,11 @@ namespace ssi
             PROJECT,
             NOLDUS,
             SRT,
+            DICOM,
             IGNORE
         }
 
-        public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "odf", "annotation", "srt" };
+        public static readonly string[] SSIFileTypeNames = { "ssi", "audio", "video", "anno", "stream", "events", "eaf", "anvil", "vui", "arff", "odf", "annotation", "srt", "dicom" };
 
         public MainControl control;
 
@@ -570,7 +571,7 @@ namespace ssi
                 removeAnnoTier(annoTiers[0]);
             }
 
-
+          
 
             control.annoLiveModeCheckBox.IsChecked = false;
 

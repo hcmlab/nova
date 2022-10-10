@@ -748,6 +748,33 @@ namespace ssi
 
         }
 
+
+        public void GetFFMPEG()
+        {
+            using (webClient = new WebClient())
+            {
+                webClient.DownloadFile("https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip", "runtimes/FFmpeg.zip");
+                using (FileStream zipToOpen = new FileStream("runtimes/FFmpeg.zip", FileMode.Open))
+            {
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                {
+                    ZipArchiveExtension.ExtractToDirectory(archive, "runtimes/", true);
+                }
+            }
+            File.Delete("runtimes/FFmpeg.zip");
+            }
+
+            var ffmpegfiles = Directory.GetFiles("runtimes\\ffmpeg-master-latest-win64-gpl-shared\\bin");
+            foreach(var file in ffmpegfiles)
+            {
+                File.Move(file, "runtimes\\win-x64\\native\\" + Path.GetFileName(file));
+            }
+
+            Directory.Delete("runtimes\\ffmpeg-master-latest-win64-gpl-shared", true);
+
+
+        }
+
     }
 
 
