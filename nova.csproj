@@ -548,6 +548,9 @@
     <Compile Include="Database\DatabaseAdminStreamWindow.xaml.cs">
       <DependentUpon>DatabaseAdminStreamWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseAnnoStatisticsWindow.xaml.cs">
+      <DependentUpon>DatabaseAnnoStatisticsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseBountiesMainWindow.xaml.cs">
       <DependentUpon>DatabaseBountiesMainWindow.xaml</DependentUpon>
     </Compile>
@@ -870,6 +873,10 @@
     <Page Include="Database\DatabaseAdminStreamWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseAnnoStatisticsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Database\DatabaseBountiesMainWindow.xaml">
       <SubType>Designer</SubType>

@@ -89,6 +89,7 @@
             </MenuItem>
             <MenuItem Header="LEARNING" Name="databaseCMLMenu">
                 <MenuItem Header="Rater Agreement / Merge Annotations" Name="databaseCMLMergeAnnotationsMenu" />
+                <MenuItem Header="Annotation Statistics" Name="databaseAnnotationStatisticsMenu" />
                 <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
                 <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
                 <MenuItem Header="Train and Predict" Name="databaseCMLTrainAndPredictMenu"/>

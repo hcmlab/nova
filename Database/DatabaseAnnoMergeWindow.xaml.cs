@@ -116,6 +116,10 @@ namespace ssi
             if (AnnoSchemesBox.SelectedValue != null)
             {
                 var filteras = builder.Eq("name", AnnoSchemesBox.SelectedValue.ToString());
+                try
+                {
+
+               
                 result = annotationschemes.Find(filteras).Single();
                 if (result.ElementCount > 0) schemeid = result.GetValue(0).AsObjectId;
                 string type = result.GetValue(2).ToString();
@@ -126,6 +130,11 @@ namespace ssi
                 else
                 {
                     selectedisContinuous = false;
+                }
+                }
+                catch
+                {
+                    ;
                 }
             }
 
@@ -141,7 +150,7 @@ namespace ssi
             if (SessionsResultsBox.SelectedItem == null) SessionsResultsBox.SelectedIndex = 0;
 
             ObjectId sessionid = ObjectId.Empty;
-            if (sessionname == null)
+            if (sessionname == null && DatabaseHandler.Sessions.Count > 1)
             {
                 DatabaseSession session = SessionsResultsBox.SelectedItems.Count > 0 ? (DatabaseSession)SessionsResultsBox.SelectedItem : DatabaseHandler.Sessions[0];
                 sessionid = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", session.Name);
