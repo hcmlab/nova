@@ -472,3 +472,10 @@ bin/System.Threading.Channels.xml
 bin/System.Threading.Tasks.Extensions.dll
 bin/System.ValueTuple.dll
 bin/System.ValueTuple.xml
+bin/NDtw.dll
+bin/OxyPlot.dll
+bin/OxyPlot.Wpf.dll
+bin/OxyPlot.Wpf.xml
+bin/OxyPlot.xml
+bin/OxyPlot.Xps.dll
+bin/OxyPlot.Xps.xml

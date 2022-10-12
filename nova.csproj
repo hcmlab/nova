@@ -180,6 +180,9 @@
     <Reference Include="NAudio">
       <HintPath>References\NAudio.dll</HintPath>
     </Reference>
+    <Reference Include="NDtw, Version=0.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\NDtw.0.2.3.0\lib\net40\NDtw.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\Newtonsoft.Json.dll</HintPath>
@@ -190,6 +193,15 @@
     <Reference Include="Org.Mentalis.Security, Version=1.0.13.715, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\Org.Mentalis.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot, Version=2012.3.118.1, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
+      <HintPath>packages\OxyPlot.Wpf.2012.3.118.1\lib\OxyPlot.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.Wpf, Version=2012.3.118.1, Culture=neutral, PublicKeyToken=75e952ba404cdbb0, processorArchitecture=MSIL">
+      <HintPath>packages\OxyPlot.Wpf.2012.3.118.1\lib\OxyPlot.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.Xps, Version=2012.3.118.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\OxyPlot.Wpf.2012.3.118.1\lib\OxyPlot.Xps.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Classic" />
     <Reference Include="PropertyTools.Wpf">
@@ -600,6 +612,7 @@
     <Compile Include="Tools\Polygon Helper\PolygonHandlerPerformer.cs" />
     <Compile Include="Tools\Polygon Helper\PolygonUtilities.cs" />
     <Compile Include="Tools\Screenshot.cs" />
+    <Compile Include="Tools\Statistics.cs" />
     <Compile Include="Tools\VolumeControl.xaml.cs">
       <DependentUpon>VolumeControl.xaml</DependentUpon>
     </Compile>

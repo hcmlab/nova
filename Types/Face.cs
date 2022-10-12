@@ -47,7 +47,7 @@ namespace ssi
         private Color backColor;
 
 
-        private double size = 64.0;
+        private double size = 96.0;
         public double Size
         {
             get { return size; }

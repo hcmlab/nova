@@ -16,6 +16,11 @@ using System.Windows.Threading;
 using System.Web.UI.DataVisualization.Charting;
 using System.IO;
 using MongoDB.Driver.Linq;
+using System.Windows.Data;
+using Octokit;
+using Dicom.Imaging.LUT;
+using System.Printing;
+using NDtw;
 
 namespace ssi
 {
@@ -31,7 +36,8 @@ namespace ssi
 
         private CultureInfo culture = CultureInfo.InvariantCulture;
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
-
+        GridViewColumnHeader _lastHeaderClicked = null;
+        ListSortDirection _lastDirection = ListSortDirection.Ascending;
         public DatabaseAnnoStatisticsWindow()
         {
             InitializeComponent();
@@ -145,7 +151,8 @@ namespace ssi
             BsonDocument result2 = new BsonDocument();
             if (RolesBox.SelectedValue != null)
             {
-                var filterat = builder.Eq("name", RolesBox.SelectedValue.ToString());
+                var filterat = builder.AnyEq("name", RolesBox.Items.ToString());
+
                 try
                 {
                     result2 = roles.Find(filterat).Single();
@@ -217,7 +224,7 @@ namespace ssi
         public void GetAnnotationSchemes()
         {
             var annoschemes = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
-            var annosch = annoschemes.Find(_ => true).ToList();
+            var annosch = annoschemes.Find(_ => true).SortBy(bson => bson["name"]).ToList();
 
             if (annosch.Count > 0)
             {
@@ -228,6 +235,7 @@ namespace ssi
                     if (c["isValid"].AsBoolean == true) AnnoSchemesBox.Items.Add(c["name"]);
                 }
                 AnnoSchemesBox.SelectedItem = AnnoSchemesBox.Items.GetItemAt(0);
+                
             }
         }
 
@@ -248,125 +256,159 @@ namespace ssi
         private void AnnotationResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
-            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            if (al.Count == 0) return;
+            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+            if (annolists.Count == 0) return;
 
-            if (al[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            if (annolists[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
             {
+                DtwButton.Visibility = Visibility.Collapsed;
+                StatisticsLabel.Content = CalculateClassDistribution(annolists);
+            }
 
-           
+            else if (annolists[0].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            {
+                DtwButton.Visibility = Visibility.Visible;
+                StatisticsLabel.Content = "Correlation meassures:\n\n";
+                double cronbachalpha = 0;
+                string interpretation = "";
+                if (annolists.Count > 1)
+                {
+              
+
+                            cronbachalpha = Statistics.Cronbachsalpha(annolists);
+                            
+
+                        if (cronbachalpha < 0) cronbachalpha = 0.0; //can happen that it gets a little below 0, this is to avoid confusion.
+
+                        interpretation = Statistics.Cronbachinterpretation(cronbachalpha);
+                  
+
+                    StatisticsLabel.Content += "Samples: " + annolists[0].Count;
+                    StatisticsLabel.ToolTip = "Samples: " + annolists[0].Count;
+                    StatisticsLabel.Content = StatisticsLabel.Content + " \nCronbach's α: " + cronbachalpha.ToString("F3");
+                    StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Cronbach's α: " + interpretation;
+
+                        double spearmancorrelation = double.MaxValue;
+                        if (annolists.Count == 2)
+                        {
+                            spearmancorrelation = Statistics.SpearmanCorrelationMathNet(annolists[0], annolists[1]);
+
+                            if (spearmancorrelation != double.MaxValue)
+                            {
+                                interpretation = Statistics.Spearmaninterpretation(spearmancorrelation);
+
+                            StatisticsLabel.Content = StatisticsLabel.Content + " \nSpearman Correlation: " + spearmancorrelation.ToString("F3");
+                            StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Spearman Correlation: " + interpretation;
+                            }
+
+                            double concordancecorrelation = double.MaxValue;
+                            concordancecorrelation = Statistics.ConcordanceCorrelationCoefficient(annolists[0], annolists[1]);
+
+                            if (concordancecorrelation != double.MaxValue)
+                            {
+
+                                interpretation = Statistics.CCCinterpretation(concordancecorrelation);
+
+                            StatisticsLabel.Content = StatisticsLabel.Content + " \nConcordance Correlation: " + concordancecorrelation.ToString("F3");
+                            StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Concordance Correlation: " + interpretation;
+                            }
+
+                            double pearsoncorrelation = double.MaxValue;
+
+                            pearsoncorrelation = Statistics.PearsonCorrelationMathNet(annolists[0], annolists[1]);
+
+                            int N = annolists[0].Count;
+                            if (annolists[1].Count < annolists[0].Count) N = annolists[1].Count;
+
+                            interpretation = Statistics.Pearsoninterpretation(pearsoncorrelation, N);
+                            var fisherz = Statistics.transform_r_to_z(pearsoncorrelation, N);
+                            var lpvalue = Statistics.transform_z_to_p(fisherz);
+                            var rpvalue = 1 - lpvalue;
+                            var twopvalue = 2 * rpvalue;
+                            var confpvalue = 1 - twopvalue;
+
+                            if (pearsoncorrelation != double.MaxValue)
+                            {
+
+                                double ra = 0.794;
+                                double rb = 0.8;
+                                var testz = Statistics.transform_2r_to_z(ra, N, rb, N);
+                                var testp = Statistics.transform_z_to_p(testz);
+
+                                if (ra > rb)
+                                {
+                                    testp = 1 - testp;
+                                }
+
+                                var testtwopvalue = 2 * testp;
+
+
+
+                            StatisticsLabel.Content = StatisticsLabel.Content + " \nPearson Correlation r: " + pearsoncorrelation.ToString("F3") + " \nFisher z-score: " + fisherz.ToString("F3") + " \nTwo-tailed p value: " + twopvalue.ToString("F3"); ;
+                            StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Pearson Correlation r: " + interpretation + " | Fisher z-score: " + fisherz.ToString("F3");
+                            }
+
+                            double nmse = double.MaxValue;
+                            double mse = double.MaxValue;
+
+                            nmse = Statistics.MSE(annolists, true);
+                            mse = Statistics.MSE(annolists, false);
+
+                            if (nmse != double.MaxValue)
+                            {
+                             StatisticsLabel.Content = StatisticsLabel.Content + " \nMSE: " + mse.ToString("F6") + " \nNMSE: " + nmse.ToString("F6"); ;
+
+
+                        }
+                    }
+
+
+
+                }
+                    }
+            else
+            {
+                DtwButton.Visibility = Visibility.Collapsed;
+                StatisticsLabel.Content = "Only discrete/non empty Schemes are supported for now";
+            }
+
+        }
+
+
+        private string CalculateClassDistribution(List<AnnoList> al)
+        {
             string restclass = "REST";
-            List<AnnoList> convertedlists = convertAnnoListsToMatrix(al, restclass);
+            List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(al, restclass);
             List<AnnoScheme.Label> schemelabels = convertedlists[0].Scheme.Labels;
             schemelabels.Remove(schemelabels.ElementAt(schemelabels.Count - 1));
-            int[] counter = new int[schemelabels.Count+1];
+            int[] counter = new int[schemelabels.Count + 1];
 
-            for(int i=0; i < convertedlists[0].Count; i++)
+            for (int i = 0; i < convertedlists[0].Count; i++)
             {
-             
+                foreach (AnnoList list in convertedlists)
                 {
-                    AnnoScheme.Label label = schemelabels.Find(s => s.Name == convertedlists[0].ElementAt(i).Label);
-                    if(label == null) { counter[schemelabels.Count]++; }
+                    AnnoScheme.Label label = schemelabels.Find(s => s.Name == list.ElementAt(i).Label);
+                    if (label == null) { counter[schemelabels.Count]++; }
                     else counter[schemelabels.IndexOf(label)]++;
                 }
             }
 
             string result = "Class Distribution in %: \n\n";
             schemelabels.Add(new AnnoScheme.Label(restclass, Colors.Black));
-            foreach(var label in schemelabels)
+            foreach (var label in schemelabels)
             {
-                result += label.Name + ": " + ((float)counter[schemelabels.IndexOf(label)] / (float)convertedlists[0].Count) * 100 + "%" + "\n";
+                result += label.Name + ": " + ((float)counter[schemelabels.IndexOf(label)] / ((float)convertedlists[0].Count * convertedlists.Count)) * 100 + "%" + "\n";
             }
-
-            Statistics.Content = result;
-            }
-
-            else
-            {
-                Statistics.Content = "Only discrete/non empty Schemes are supported for now";
-            }
-
+            return result;
         }
 
         private void AnnoSchemesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
             GetAnnotations();
         }
 
-       
-    
-
-        private List<AnnoList> convertAnnoListsToMatrix(List<AnnoList> annolists, string restclass)
-        {
-            List<AnnoList> convertedlists = new List<AnnoList>();
-
-            double maxlength = GetAnnoListMinLength(annolists);
-            double chunksize = Properties.Settings.Default.DefaultMinSegmentSize; //Todo make option
-
-            foreach (AnnoList al in annolists)
-            {
-                AnnoList list = ConvertDiscreteAnnoListToContinuousList(al, chunksize, maxlength, restclass);
-                convertedlists.Add(list);
-            }
-
-            return convertedlists;
-        }
-
-        private double GetAnnoListMinLength(List<AnnoList> annolists)
-        {
-            double length = 0;
-            foreach (AnnoList al in annolists)
-            {
-                if (al.Count > 0 && al.ElementAt(al.Count - 1).Stop > length) length = al.ElementAt(al.Count - 1).Stop;
-            }
-
-            return length;
-        }
-
-        private AnnoList ConvertDiscreteAnnoListToContinuousList(AnnoList annolist, double chunksize, double end, string restclass = "Rest")
-        {
-            AnnoList result = new AnnoList();
-            result.Scheme = annolist.Scheme;
-            result.Meta = annolist.Meta;
-            result.Source.StoreToDatabase = true;
-            result.Source.Database.Session = annolist.Source.Database.Session;
-            double currentpos = 0;
-
-            bool foundlabel = false;
-            AnnoListItem lastitem = null;
-            while (currentpos < end)
-            {
-                foundlabel = false;
-                if (lastitem != null && lastitem.Stop < currentpos)
-                    annolist.Remove(lastitem);
-
-                foreach (AnnoListItem orgitem in annolist)
-                {
-                    if (orgitem.Start < currentpos && orgitem.Stop > currentpos)
-                    {
-                        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
-                        result.Add(ali);
-                        foundlabel = true;
-
-                        lastitem = orgitem;
-                        if (orgitem.Stop < currentpos + chunksize) annolist.Remove(orgitem);
-                        break;
-                    }
-                }
-
-                if (foundlabel == false)
-                {
-                    AnnoListItem ali = new AnnoListItem(currentpos, chunksize, restclass);
-                    result.Add(ali);
-                }
-
-                currentpos = currentpos + chunksize;
-            }
-
-            return result;
-        }
-
-     
+   
         private void RolesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             GetAnnotations();
@@ -414,8 +456,89 @@ namespace ssi
             GetAnnotations();
         }
 
-  
-   
-    
+
+        private void SortListView(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader headerClicked =
+             e.OriginalSource as GridViewColumnHeader;
+            ListSortDirection direction;
+
+            if (headerClicked != null)
+            {
+                if (headerClicked.Role != GridViewColumnHeaderRole.Padding)
+                {
+                    if (headerClicked != _lastHeaderClicked)
+                    {
+                        direction = ListSortDirection.Ascending;
+                    }
+                    else
+                    {
+                        if (_lastDirection == ListSortDirection.Ascending)
+                        {
+                            direction = ListSortDirection.Descending;
+                        }
+                        else
+                        {
+                            direction = ListSortDirection.Ascending;
+                        }
+                    }
+
+                    string header = headerClicked.Column.Header as string;
+                    ICollectionView dataView = CollectionViewSource.GetDefaultView(((ListView)sender).ItemsSource);
+
+                    dataView.SortDescriptions.Clear();
+                    SortDescription sd = new SortDescription(header, direction);
+                    dataView.SortDescriptions.Add(sd);
+                    dataView.Refresh();
+
+
+                    if (direction == ListSortDirection.Ascending)
+                    {
+                        headerClicked.Column.HeaderTemplate =
+                          Resources["HeaderTemplateArrowUp"] as DataTemplate;
+                    }
+                    else
+                    {
+                        headerClicked.Column.HeaderTemplate =
+                          Resources["HeaderTemplateArrowDown"] as DataTemplate;
+                    }
+
+                    // Remove arrow from previously sorted header  
+                    if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
+                    {
+                        _lastHeaderClicked.Column.HeaderTemplate = null;
+                    }
+
+                    _lastHeaderClicked = headerClicked;
+                    _lastDirection = direction;
+                }
+            }
+        }
+
+        private void DtwButton_Click(object sender, RoutedEventArgs e)
+            {
+            List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+            if (annolists.Count == 2)
+            {
+
+                double[] seriesA = new double[annolists[0].Count];
+                double[] seriesB = new double[annolists[1].Count];
+
+                for (int i = 0; i < annolists[0].Count; i++)
+                {
+                    seriesA[i] = annolists[0].ElementAt(i).Score;
+                }
+                for (int i = 0; i < annolists[1].Count; i++)
+                {
+                    seriesB[i] = annolists[1].ElementAt(i).Score;
+                }
+
+                Dtw dtw = new Dtw(seriesA, seriesB);
+                var cost = dtw.GetCost();
+                StatisticsLabel.Content += "\n\nDynamic Time Wrapping\nCost: " + cost.ToString();
+                GC.Collect();
+            }
+            else StatisticsLabel.Content = "For Dynamic Time Wrapping Cost calculation, select 2 Continuous Annotations";
+        }
     }
 }

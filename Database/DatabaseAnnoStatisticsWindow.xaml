@@ -55,9 +55,9 @@
 
         <DockPanel Grid.Column="2" Grid.Row="0" Margin="10">
             <Label Content="Schemes" DockPanel.Dock="Top" Margin="-3,0,0,0" />
-            <ListBox Name="AnnoSchemesBox" DockPanel.Dock="Top" Height="450" SelectionMode="Single" SelectionChanged="AnnoSchemesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-            <Label Content="Roles" DockPanel.Dock="Top" />
-            <ListBox x:Name="RolesBox" SelectionMode="Single" DockPanel.Dock="top" SelectionChanged="RolesBox_SelectionChanged"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+            <ListBox Name="AnnoSchemesBox" DockPanel.Dock="Top"  SelectionMode="Single" SelectionChanged="AnnoSchemesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+            <Label Content="Roles" DockPanel.Dock="Top" Visibility="Collapsed"  />
+            <ListBox x:Name="RolesBox" SelectionMode="Extended" DockPanel.Dock="top" SelectionChanged="RolesBox_SelectionChanged" Visibility="Collapsed"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
         </DockPanel>
 
        
@@ -67,10 +67,10 @@
             <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
 
 
-            <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended"  DockPanel.Dock="Top">
+            <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended"  DockPanel.Dock="Top" GridViewColumnHeader.Click="SortListView" >
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
+                        <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}"  />
 
                         <GridViewColumn Width="Auto" Header="Role">
                             <GridViewColumn.DisplayMemberBinding>
@@ -93,12 +93,13 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                   
                 </Grid.RowDefinitions>
 
-                <Label Name="Statistics" Content="Statistics appear here.." Margin="-3,0,0,0" />
-               
+                <Label Name="StatisticsLabel" Grid.Row="0" Content="Statistics appear here.." Margin="-3,0,0,0" />
+                <Button Grid.Row="2" ToolTip="Calculates Cost via Dynamic Time Wrapping for 2 Inputs. Might take a few minutes.." Click="DtwButton_Click" Name="DtwButton">DTW Cost</Button>
 
             </Grid>
         </DockPanel>
