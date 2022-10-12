@@ -498,6 +498,9 @@
     <Compile Include="Controls\MainHandlerPolygon.cs" />
     <Compile Include="Controls\MainHandlerSignal.cs" />
     <Compile Include="Controls\MainHandlerUpdate.cs" />
+    <Compile Include="Controls\Media\MediaTrackSettingsWindow.xaml.cs">
+      <DependentUpon>MediaTrackSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Navigation\TimeRangeSlider.xaml.cs">
       <DependentUpon>TimeRangeSlider.xaml</DependentUpon>
     </Compile>
@@ -719,6 +722,10 @@
     <Page Include="Controls\Annotation\Polygon\DatabaseSaveProgress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\MediaTrackSettingsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Navigation\TimeRangeSlider.xaml">
       <Generator>MSBuild:Compile</Generator>

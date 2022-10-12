@@ -57,6 +57,24 @@ namespace ssi
             handler?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
+
+        private double size = 96.0;
+        public double Size
+        {
+            get { return size; }
+            set
+            {
+                size = value;
+                RaisePropertyChanged("Size");
+                writeableBmp = new WriteableBitmap(width, height, size, size, PixelFormats.Bgr32, null);
+                //writeableBmp.Clear(BackColor);
+
+                Source = writeableBmp;
+
+            }
+        }
+
+
         public Skeleton(string filepath, Signal signal, int width = 640, int height = 480)
         {
             this.filepath = filepath;
@@ -103,7 +121,7 @@ namespace ssi
                 jointValues = (int)((signal.dim / numSkeletons) / numJoints);
             }
 
-            writeableBmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgr32, null);
+            writeableBmp = new WriteableBitmap(width, height, size, size, PixelFormats.Bgr32, null);
             writeableBmp.Clear(BackColor);
 
             Source = writeableBmp;

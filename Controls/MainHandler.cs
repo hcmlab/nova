@@ -124,6 +124,7 @@ namespace ssi
             MediaBoxStatic.OnBoxChange += onMediaBoxChange;
             control.mediaVolumeControl.volumeSlider.ValueChanged += mediaVolumeControl_ValueChanged;
             control.mediaCloseButton.Click += mediaBoxCloseButton_Click;
+            control.mediaSettingsButton.Click += MediaSettingsButton_Click;
 
             // Signal
             control.signalStatusBar.Background = Defaults.Brushes.Highlight;
@@ -449,6 +450,24 @@ namespace ssi
             // allow drag and drop
 
             control.Drop += controlDrop;
+        }
+
+        private void MediaSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MediaBoxStatic.Selected != null && (MediaBoxStatic.Selected.Media.GetMediaType() == MediaType.FACE ))
+            {
+                MediaTrackSettingsWindow window = new MediaTrackSettingsWindow();
+                window.DataContext = MediaBoxStatic.Selected.Media;
+                window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                window.ShowDialog();
+            }
+            else if (MediaBoxStatic.Selected != null && (MediaBoxStatic.Selected.Media.GetMediaType() == MediaType.SKELETON))
+            {
+                MediaTrackSettingsWindow window = new MediaTrackSettingsWindow(true);
+                window.DataContext = MediaBoxStatic.Selected.Media;
+                window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                window.ShowDialog();
+            }
         }
 
         private void DatabaseAnnotationStatisticsMenu_Click(object sender, RoutedEventArgs e)
