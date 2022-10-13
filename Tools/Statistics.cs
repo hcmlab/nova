@@ -186,13 +186,13 @@ namespace ssi
             return r;
         }
 
-        public static double FleissKappa(List<AnnoList> annolists, string restclass)
+        public static double FleissKappa(List<AnnoList> annolists)
         {
             int n = annolists.Count;   // n = number of raters, here number of annolists
 
             List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
-            AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
-            classes.Add(rest);
+            //AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
+            //classes.Add(rest);
 
             int k = 0;  //k = number of classes
 
@@ -289,14 +289,14 @@ namespace ssi
             //todo recheck the formula.
         }
 
-        public static double CohensKappa(List<AnnoList> annolists, string restclass)
+        public static double CohensKappa(List<AnnoList> annolists)
         {
             int n = annolists.Count;   // n = number of raters, here number of annolists
 
             List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
             //add the restclass we introduced in last step.
-            AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
-            classes.Add(rest);
+            //AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
+            //classes.Add(rest);
 
             int k = 0;  //k = number of classes
             //For Discrete Annotations find number of classes, todo, find number of classes on free annotations.
@@ -546,7 +546,7 @@ namespace ssi
         }
 
    
-        private static AnnoList ConvertDiscreteAnnoListToContinuousList(AnnoList annolist, double chunksize, double end, string restclass = "Rest")
+        private static AnnoList ConvertDiscreteAnnoListToContinuousList(AnnoList annolist, double chunksize, double end, string restclass = "REST")
         {
             AnnoList result = new AnnoList();
             result.Scheme = annolist.Scheme;
@@ -555,11 +555,9 @@ namespace ssi
             result.Source.Database.Session = annolist.Source.Database.Session;
             double currentpos = 0;
 
-            bool foundlabel = false;
-
             while (currentpos < end)
             {
-                foundlabel = false;
+                bool foundlabel = false;
                 foreach (AnnoListItem orgitem in annolist)
                 {
                     if (orgitem.Start < currentpos && orgitem.Stop > currentpos)
@@ -569,6 +567,41 @@ namespace ssi
                         foundlabel = true;
                         break;
                     }
+
+                    //else if (orgitem.Start < currentpos && orgitem.Stop < currentpos)
+                    //{
+                    //    if (orgitem.Stop - currentpos > chunksize / 2)
+                    //    {
+                    //        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
+                    //        result.Add(ali);
+                    //        foundlabel = true;
+                    //    }
+                        
+                    //    break;
+                    //}
+                    //else if (orgitem.Start > currentpos && orgitem.Stop > currentpos)
+                    //{
+                    //    if (currentpos - orgitem.Start > chunksize / 2)
+                    //    {
+                    //        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
+                    //        result.Add(ali);
+                    //        foundlabel = true;
+                    //    }
+                       
+                    //    break;
+                    //}
+                    //else if (orgitem.Start > currentpos && orgitem.Stop < currentpos)
+                    //{
+                    //    if (orgitem.Stop - currentpos + currentpos - orgitem.Start > chunksize / 2)
+                    //    {
+                    //        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
+                    //        result.Add(ali);
+                    //        foundlabel = true;
+                    //    }
+                     
+                    //    break;
+
+                    //}
                 }
 
                 if (foundlabel == false)

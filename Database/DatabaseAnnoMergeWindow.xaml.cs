@@ -589,13 +589,13 @@ namespace ssi
 
                         if (annolists.Count == 2)
                         {
-                            cohenkappa = Statistics.CohensKappa(convertedlists, restclass);
+                            cohenkappa = Statistics.CohensKappa(convertedlists);
                             kappa = cohenkappa;
                             kappatype = "Cohen's κ: ";
                         }
                         else if (annolists.Count > 2)
                         {
-                            fleisskappa = Statistics.FleissKappa(convertedlists, restclass);
+                            fleisskappa = Statistics.FleissKappa(convertedlists);
                             kappa = fleisskappa;
                             kappatype = "Fleiss' κ: ";
                         }

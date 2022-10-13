@@ -254,10 +254,58 @@ namespace ssi
         }
 
 
-        private void CalculateOverlaptingLabels(List<AnnoList> annolists)
+        private string CalculateOverlapingLabels(List<AnnoList> al)
         {
+            string restclass = "REST";
+            AnnoList cont = new AnnoList();
+            cont.Scheme = al[0].Scheme;
+            List<AnnoScheme.Label> schemelabels = al[0].Scheme.Labels;
 
+            int[] overlaps = new int[schemelabels.Count+1];
 
+            for (int i = 0; i < al[0].Count; i++)
+            {
+                string[] vec = new string[al.Count];
+
+                string maxRepeated = restclass;
+                bool issamelabel = false;
+                for (int j = 0; j < al.Count; j++)
+                {
+                    vec[j] = al[j][i].Label;
+                    if (j > 0)
+                    {
+                        if (vec[j] == vec[j - 1]) issamelabel = true;
+                        else {
+                            issamelabel = false;
+                            break;
+                              }
+                    }
+                 
+                }
+
+                if (issamelabel)
+                {
+                    overlaps[al[0].Scheme.Labels.FindIndex(s => s.Name == al[0][i].Label)] += 1;
+
+                }
+                else
+                {
+                    overlaps[al[0].Scheme.Labels.Count] += 1;
+                }
+            }
+
+            string result = "\n\nOverlapping Windows: ("+ Properties.Settings.Default.DefaultMinSegmentSize + "s)\n";
+            double overall = 0;
+            double overallpercentage = 0;
+            foreach (var label in schemelabels)
+            {
+                result += label.Name + ": " + (((float)overlaps[schemelabels.IndexOf(label)] / ((float)al[0].Count)) * 100).ToString("F3") + "% ("+ overlaps[schemelabels.IndexOf(label)] + ")\n";
+                overallpercentage += (float)(overlaps[schemelabels.IndexOf(label)] / ((float)al[0].Count) * 100);
+                overall += overlaps[schemelabels.IndexOf(label)];
+            }
+            result += "Overall: " + overallpercentage.ToString("F3") + "% ("+ overall + "/"+ al[0].Count+  ")\n";
+
+            return result;
         }
 
         private void AnnotationResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -269,9 +317,11 @@ namespace ssi
             if (annolists[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
             {
                 DtwButton.Visibility = Visibility.Collapsed;
-                StatisticsLabel.Content = CalculateClassDistribution(annolists);
                 string restclass = "REST";
                 List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(annolists, restclass);
+                StatisticsLabel.Content = CalculateClassDistribution(convertedlists);
+               
+              
 
                 if(annolists.Count > 1)
                 {
@@ -283,17 +333,22 @@ namespace ssi
 
                     if (annolists.Count == 2)
                     {
-                        cohenkappa = Statistics.CohensKappa(convertedlists, restclass);
+                        cohenkappa = Statistics.CohensKappa(convertedlists);
                         kappa = cohenkappa;
                         kappatype = "Cohen's κ: ";
                     }
                     else if (annolists.Count > 2)
                     {
-                        fleisskappa = Statistics.FleissKappa(convertedlists, restclass);
+                        fleisskappa = Statistics.FleissKappa(convertedlists);
                         kappa = fleisskappa;
                         kappatype = "Fleiss' κ: ";
                     }
                     StatisticsLabel.Content += "\n\nInterrater reliability:\n" + kappatype + kappa;
+
+
+
+                    
+                    StatisticsLabel.Content +=  CalculateOverlapingLabels(convertedlists);
                 }
               
                
@@ -410,10 +465,10 @@ namespace ssi
         }
 
 
-        private string CalculateClassDistribution(List<AnnoList> al)
+        private string CalculateClassDistribution(List<AnnoList> convertedlists)
         {
             string restclass = "REST";
-            List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(al, restclass);
+            //List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(al, restclass);
             List<AnnoScheme.Label> schemelabels = convertedlists[0].Scheme.Labels;
             schemelabels.Remove(schemelabels.ElementAt(schemelabels.Count - 1));
             int[] counter = new int[schemelabels.Count + 1];
@@ -432,7 +487,7 @@ namespace ssi
             schemelabels.Add(new AnnoScheme.Label(restclass, Colors.Black));
             foreach (var label in schemelabels)
             {
-                result += label.Name + ": " + ((float)counter[schemelabels.IndexOf(label)] / ((float)convertedlists[0].Count * convertedlists.Count)) * 100 + "%" + "\n";
+                result += label.Name + ": " + (((float)counter[schemelabels.IndexOf(label)] / ((float)convertedlists[0].Count * convertedlists.Count)) * 100).ToString("F3") + "%" + "\n";
             }
             return result;
         }
