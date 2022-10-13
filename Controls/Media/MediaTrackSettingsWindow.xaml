@@ -25,8 +25,8 @@
             <p:ColorPicker Name="signalColorPicker" SelectedColor="{Binding SignalColor}" IsEnabled="true" Margin="5" Background="{x:Null}" BorderBrush="DarkGray"/>
             <Label Name="FaceColorlabel" Margin="5,0,5,-5">Face color:</Label>
             <p:ColorPicker Name="backgroundColorPicker" SelectedColor="{Binding HeadColor}" Margin="5" Background="{x:Null}" BorderBrush="DarkGray"/>
-            <Label Margin="5,0,5,-5">Size:</Label>
-            <TextBox Name="autoScaleCheckBox" Text="{Binding Size}" Width="Auto" VerticalAlignment="Center" Margin="5"/>
+            <Label Margin="5,0,5,-5">Resolution:</Label>
+            <TextBox Name="resolutionTextBox" Text="{Binding Size}" Width="Auto" VerticalAlignment="Center" Margin="5"/>
         </StackPanel>
     </Grid>
     

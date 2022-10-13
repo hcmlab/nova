@@ -23,11 +23,13 @@ namespace ssi
             {
                 backgroundColorPicker.Visibility = Visibility.Visible;
                 FaceColorlabel.Visibility = Visibility.Visible;
+                resolutionTextBox.Visibility = Visibility.Collapsed;
             }
             else
             {
                 backgroundColorPicker.Visibility = Visibility.Collapsed;
                 FaceColorlabel.Visibility = Visibility.Collapsed;
+                resolutionTextBox.Visibility = Visibility.Visible;
             }
   
           

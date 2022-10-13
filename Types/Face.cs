@@ -47,16 +47,40 @@ namespace ssi
         private Color backColor;
 
 
-        private double size = 96.0;
-        public double Size
+        private int size = 300;
+        private double res = 96.0;
+        public int Size
         {
             get { return size; }
             set
             {
                 size = value;
                 RaisePropertyChanged("Size");
-                writeableBmp = new WriteableBitmap(width, height, size, size, PixelFormats.Bgr32, null);
-                //writeableBmp.Clear(BackColor);
+                writeableBmp = null;
+                writeableBmp = new WriteableBitmap(size, size, res, res, PixelFormats.Bgr32, null);
+                // writeableBmp.Clear(BackColor);
+
+
+                this.width = size;
+                this.height = size;
+
+                if (facetype == FaceType.OPENFACE)
+                {
+                    minMaxOF();
+                    scaleOF();
+                }
+
+                else if (facetype == FaceType.OPENFACE2)
+                {
+                    minMaxOF2();
+                    scaleOF2();
+                }
+
+                else
+                {
+                    minMax();
+                    scale();
+                }
 
                 Source = writeableBmp;
 
@@ -93,7 +117,7 @@ namespace ssi
             handler?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        public Face(string filepath, Signal signal, FaceType ftype, int width = 600, int height = 600)
+        public Face(string filepath, Signal signal, FaceType ftype, int width = 300, int height = 300)
         {
             this.filepath = filepath;
             this.signal = new Signal();
@@ -118,8 +142,8 @@ namespace ssi
 
 
 
-            this.width = width;
-            this.height = height;
+            this.width = Size;
+            this.height = Size;
 
             type = MediaType.FACE;
             facetype = ftype;
@@ -127,10 +151,9 @@ namespace ssi
             BackColor = Defaults.Colors.Background;
             SignalColor = Colors.Black; // Defaults.Colors.Foreground;
             HeadColor = Colors.Black;//Defaults.Colors.Foreground;
-            Size = 64.0;
             headColor = SignalColor;
 
-            writeableBmp = new WriteableBitmap(width, height, Size, Size, PixelFormats.Bgr32, null);
+            writeableBmp = new WriteableBitmap(this.width, this.height, res, res, PixelFormats.Bgr32, null);
             writeableBmp.Clear(BackColor);            
 
             Source = writeableBmp;

@@ -1,4 +1,5 @@
-﻿using MathNet.Numerics.LinearAlgebra;
+﻿using DirectShowLib;
+using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Statistics;
 using System;
 using System.Collections;
@@ -180,10 +181,6 @@ namespace ssi
             double mean = Math.Abs(list1.Mean() - list2.Mean());
 
             double p = MathNet.Numerics.ExcelFunctions.TDist(mean, list1.Count(), 2);
-
-
-
-
 
             double r = Correlation.Pearson(list1, list2);
             return r;
@@ -700,6 +697,7 @@ namespace ssi
             return interpretation;
         }
     }
+
 
 
 

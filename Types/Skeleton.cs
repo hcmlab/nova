@@ -3,6 +3,7 @@ using MediaToolkit.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Management.Instrumentation;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -41,6 +42,7 @@ namespace ssi
         private SkeletonType skelType;
 
         private WriteableBitmap writeableBmp;
+        private WriteableBitmap writeableBmpshadow;
         private DispatcherTimer timer;
         private List<Point3D> joints = new List<Point3D>();
 
@@ -69,7 +71,7 @@ namespace ssi
                 writeableBmp = new WriteableBitmap(width, height, size, size, PixelFormats.Bgr32, null);
                 //writeableBmp.Clear(BackColor);
 
-                Source = writeableBmp;
+             
 
             }
         }
@@ -121,9 +123,12 @@ namespace ssi
                 jointValues = (int)((signal.dim / numSkeletons) / numJoints);
             }
 
+            writeableBmpshadow = new WriteableBitmap(width, height, size, size, PixelFormats.Bgr32, null);
+            writeableBmpshadow.Clear(BackColor);
             writeableBmp = new WriteableBitmap(width, height, size, size, PixelFormats.Bgr32, null);
             writeableBmp.Clear(BackColor);
 
+            //Make option to select what to show.
             Source = writeableBmp;
 
             timer = new DispatcherTimer();
@@ -149,12 +154,15 @@ namespace ssi
             Color col = SignalColor;
             Color colhead = HeadColor;
 
+            writeableBmpshadow.Lock();
+
             writeableBmp.Lock();
             writeableBmp.Clear(BackColor);
 
             if (index < signal.number)
             {
                 Point[] points = new Point[numJoints];
+                float[] confs = new float[numJoints];
 
                 //Kinect Stream Resolution
                 uint dim = signal.dim;
@@ -169,8 +177,11 @@ namespace ssi
                             {
                                 case SkeletonType.SSI:
                                     {
+
+                                      
                                         points[i].X = (int)(signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 0] * 75 / width + width / 2);
                                         points[i].Y = (int)(height - signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 1] * 75 / height - height / 2);
+                                        confs[i] =    (float)(signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 3]);
                                         break;
                                     }
                                 case SkeletonType.KINECT1:
@@ -210,21 +221,40 @@ namespace ssi
 
 
                                 //head
-                                writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[21].X, (int)points[21].Y, getColor(21, true));
-                                writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[24].X, (int)points[24].Y, getColor(24, true));
-                                writeableBmp.DrawLine((int)points[24].X, (int)points[24].Y, (int)points[22].X, (int)points[22].Y, getColor(22, true));
-                                writeableBmp.DrawLine((int)points[22].X, (int)points[22].Y, (int)points[23].X, (int)points[23].Y, getColor(23, true));
+                                if (confs[23] > 0.1 && confs[21] > 0.1)
+                                    writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[21].X, (int)points[21].Y, getColor(21, true)); //Forehead to left ear
+                                if (confs[23] > 0.1 && confs[22] > 0.1)
+                                    writeableBmp.DrawLine((int)points[23].X, (int)points[23].Y, (int)points[22].X, (int)points[22].Y, getColor(23, true)); //Forehead to right ear
+
+                                if (confs[21] > 0.1 && confs[20] > 0.1)
+                                    writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[20].X, (int)points[20].Y, getColor(25, true)); //Left Ear to Nose
+
+                                if (confs[21] > 0.1 && confs[20] > 0.1)
+                                    writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[20].X, (int)points[20].Y, getColor(25, true)); //Left Ear to Nose
+
+                                if (confs[21] > 0.1 && confs[24] > 0.1)
+                                    writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[24].X, (int)points[24].Y, getColor(25, true)); //Left Ear to Chin
+                                if (confs[22] > 0.1 && confs[24] > 0.1)
+                                    writeableBmp.DrawLine((int)points[22].X, (int)points[22].Y, (int)points[24].X, (int)points[24].Y, getColor(22, true)); // Right ear to Chin
+
+
 
                                 writeableBmp.DrawLine((int)points[0].X, (int)points[0].Y, (int)points[1].X, (int)points[1].Y, getColor(1)); //Head to Neck
 
+                                writeableBmpshadow.DrawLine((int)points[0].X, (int)points[0].Y, (int)points[1].X, (int)points[1].Y, getColor(1));
                                 writeableBmp.DrawLine((int)points[1].X, (int)points[1].Y, (int)points[4].X, (int)points[4].Y, getColor(4)); //Neck to Left  Shoulder
                                 writeableBmp.DrawLine((int)points[1].X, (int)points[1].Y, (int)points[8].X, (int)points[8].Y, getColor(8)); //Neck to Right Shoulder
 
                                 writeableBmp.DrawLine((int)points[4].X, (int)points[4].Y, (int)points[5].X, (int)points[5].Y, getColor(5)); // Left Shoulder to Left Elbow
                                 writeableBmp.DrawLine((int)points[8].X, (int)points[8].Y, (int)points[9].X, (int)points[9].Y, getColor(9)); //Rigtht Shoulder to Right Elbow
 
+                                
                                 writeableBmp.DrawLine((int)points[5].X, (int)points[5].Y, (int)points[6].X, (int)points[6].Y, getColor(6)); // Left Elbow to Left Wrist
+                                writeableBmpshadow.DrawLine((int)points[5].X, (int)points[5].Y, (int)points[6].X, (int)points[6].Y, getColor(6));
+
+
                                 writeableBmp.DrawLine((int)points[9].X, (int)points[9].Y, (int)points[10].X, (int)points[10].Y, getColor(10)); //Rigth Elbow to Right Wrist
+                                writeableBmpshadow.DrawLine((int)points[9].X, (int)points[9].Y, (int)points[10].X, (int)points[10].Y, getColor(10));
 
                                 writeableBmp.DrawLine((int)points[6].X, (int)points[6].Y, (int)points[7].X, (int)points[7].Y, getColor(7)); // Left Wrist to Left Hand
                                 writeableBmp.DrawLine((int)points[10].X, (int)points[10].Y, (int)points[11].X, (int)points[11].Y, getColor(11)); //Rigth Wrist to Right Hand
@@ -308,11 +338,20 @@ namespace ssi
                 }
 
                 writeableBmp.Unlock();
-            }
+                writeableBmpshadow.Unlock();
+        }
 
         private Color getColor(int i, bool isheadcolor = false)
         {
             Color c = isheadcolor ? HeadColor : SignalColor;
+
+        
+            if (i == 11) c = Colors.Blue;
+            if (i == 10) c = Colors.Blue;
+            if (i == 7) c = Colors.Red;
+            if (i == 6) c = Colors.Red;
+
+
             double pos = MainHandler.Time.CurrentPlayPosition;
             int index = (int)(pos * signal.rate);
 

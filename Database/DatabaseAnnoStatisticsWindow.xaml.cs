@@ -253,6 +253,13 @@ namespace ssi
             }
         }
 
+
+        private void CalculateOverlaptingLabels(List<AnnoList> annolists)
+        {
+
+
+        }
+
         private void AnnotationResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
@@ -263,6 +270,34 @@ namespace ssi
             {
                 DtwButton.Visibility = Visibility.Collapsed;
                 StatisticsLabel.Content = CalculateClassDistribution(annolists);
+                string restclass = "REST";
+                List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(annolists, restclass);
+
+                if(annolists.Count > 1)
+                {
+                    double cohenkappa = 0;
+                    double fleisskappa = 0;
+                    double kappa = 0;
+                    string interpretation = "";
+                    string kappatype = "";
+
+                    if (annolists.Count == 2)
+                    {
+                        cohenkappa = Statistics.CohensKappa(convertedlists, restclass);
+                        kappa = cohenkappa;
+                        kappatype = "Cohen's κ: ";
+                    }
+                    else if (annolists.Count > 2)
+                    {
+                        fleisskappa = Statistics.FleissKappa(convertedlists, restclass);
+                        kappa = fleisskappa;
+                        kappatype = "Fleiss' κ: ";
+                    }
+                    StatisticsLabel.Content += "\n\nInterrater reliability:\n" + kappatype + kappa;
+                }
+              
+               
+                
             }
 
             else if (annolists[0].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
@@ -393,7 +428,7 @@ namespace ssi
                 }
             }
 
-            string result = "Class Distribution in %: \n\n";
+            string result = "Class Distribution in %: \n";
             schemelabels.Add(new AnnoScheme.Label(restclass, Colors.Black));
             foreach (var label in schemelabels)
             {
