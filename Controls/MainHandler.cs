@@ -21,7 +21,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.3.5";
+        public static string BuildVersion = "1.2.3.6";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -124,6 +124,7 @@ namespace ssi
             MediaBoxStatic.OnBoxChange += onMediaBoxChange;
             control.mediaVolumeControl.volumeSlider.ValueChanged += mediaVolumeControl_ValueChanged;
             control.mediaCloseButton.Click += mediaBoxCloseButton_Click;
+            control.mediaSettingsButton.Click += MediaSettingsButton_Click;
 
             // Signal
             control.signalStatusBar.Background = Defaults.Brushes.Highlight;
@@ -237,6 +238,7 @@ namespace ssi
             control.databaseManageSessionsMenu.Click += databaseManageSessions_Click;
             control.databaseManageAnnotationsMenu.Click += databaseManageAnnotations_Click;
             control.databaseCMLMergeAnnotationsMenu.Click += databaseCMLMergeAnnotations_Click;
+            control.databaseAnnotationStatisticsMenu.Click += DatabaseAnnotationStatisticsMenu_Click;
 
             control.showSettingsMenu.Click += showSettings_Click;
 
@@ -448,6 +450,30 @@ namespace ssi
             // allow drag and drop
 
             control.Drop += controlDrop;
+        }
+
+        private void MediaSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MediaBoxStatic.Selected != null && (MediaBoxStatic.Selected.Media.GetMediaType() == MediaType.FACE ))
+            {
+                MediaTrackSettingsWindow window = new MediaTrackSettingsWindow();
+                window.DataContext = MediaBoxStatic.Selected.Media;
+                window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                window.ShowDialog();
+            }
+            else if (MediaBoxStatic.Selected != null && (MediaBoxStatic.Selected.Media.GetMediaType() == MediaType.SKELETON))
+            {
+                MediaTrackSettingsWindow window = new MediaTrackSettingsWindow(true);
+                window.DataContext = MediaBoxStatic.Selected.Media;
+                window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                window.ShowDialog();
+            }
+        }
+
+        private void DatabaseAnnotationStatisticsMenu_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseAnnoStatisticsWindow window = new DatabaseAnnoStatisticsWindow();
+            window.ShowDialog();
         }
 
         private void Lightning_Click(object sender, MouseButtonEventArgs e)

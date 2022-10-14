@@ -14,6 +14,8 @@ namespace ssi
 
         static public event MediaBoxChangeEventHandler OnBoxChange;
 
+
+
         static public void Select(MediaBox box)
         {
             Unselect();

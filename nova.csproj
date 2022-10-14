@@ -180,6 +180,9 @@
     <Reference Include="NAudio">
       <HintPath>References\NAudio.dll</HintPath>
     </Reference>
+    <Reference Include="NDtw, Version=0.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\NDtw.0.2.3.0\lib\net40\NDtw.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\Newtonsoft.Json.dll</HintPath>
@@ -190,6 +193,15 @@
     <Reference Include="Org.Mentalis.Security, Version=1.0.13.715, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\Org.Mentalis.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot, Version=2012.3.118.1, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
+      <HintPath>packages\OxyPlot.Wpf.2012.3.118.1\lib\OxyPlot.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.Wpf, Version=2012.3.118.1, Culture=neutral, PublicKeyToken=75e952ba404cdbb0, processorArchitecture=MSIL">
+      <HintPath>packages\OxyPlot.Wpf.2012.3.118.1\lib\OxyPlot.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.Xps, Version=2012.3.118.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\OxyPlot.Wpf.2012.3.118.1\lib\OxyPlot.Xps.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Classic" />
     <Reference Include="PropertyTools.Wpf">
@@ -498,6 +510,9 @@
     <Compile Include="Controls\MainHandlerPolygon.cs" />
     <Compile Include="Controls\MainHandlerSignal.cs" />
     <Compile Include="Controls\MainHandlerUpdate.cs" />
+    <Compile Include="Controls\Media\MediaTrackSettingsWindow.xaml.cs">
+      <DependentUpon>MediaTrackSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Navigation\TimeRangeSlider.xaml.cs">
       <DependentUpon>TimeRangeSlider.xaml</DependentUpon>
     </Compile>
@@ -548,6 +563,9 @@
     <Compile Include="Database\DatabaseAdminStreamWindow.xaml.cs">
       <DependentUpon>DatabaseAdminStreamWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseAnnoStatisticsWindow.xaml.cs">
+      <DependentUpon>DatabaseAnnoStatisticsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseBountiesMainWindow.xaml.cs">
       <DependentUpon>DatabaseBountiesMainWindow.xaml</DependentUpon>
     </Compile>
@@ -594,6 +612,7 @@
     <Compile Include="Tools\Polygon Helper\PolygonHandlerPerformer.cs" />
     <Compile Include="Tools\Polygon Helper\PolygonUtilities.cs" />
     <Compile Include="Tools\Screenshot.cs" />
+    <Compile Include="Tools\Statistics.cs" />
     <Compile Include="Tools\VolumeControl.xaml.cs">
       <DependentUpon>VolumeControl.xaml</DependentUpon>
     </Compile>
@@ -716,6 +735,10 @@
     <Page Include="Controls\Annotation\Polygon\DatabaseSaveProgress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\MediaTrackSettingsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Navigation\TimeRangeSlider.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -870,6 +893,10 @@
     <Page Include="Database\DatabaseAdminStreamWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseAnnoStatisticsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Database\DatabaseBountiesMainWindow.xaml">
       <SubType>Designer</SubType>

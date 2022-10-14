@@ -116,6 +116,10 @@ namespace ssi
             if (AnnoSchemesBox.SelectedValue != null)
             {
                 var filteras = builder.Eq("name", AnnoSchemesBox.SelectedValue.ToString());
+                try
+                {
+
+               
                 result = annotationschemes.Find(filteras).Single();
                 if (result.ElementCount > 0) schemeid = result.GetValue(0).AsObjectId;
                 string type = result.GetValue(2).ToString();
@@ -126,6 +130,11 @@ namespace ssi
                 else
                 {
                     selectedisContinuous = false;
+                }
+                }
+                catch
+                {
+                    ;
                 }
             }
 
@@ -141,7 +150,7 @@ namespace ssi
             if (SessionsResultsBox.SelectedItem == null) SessionsResultsBox.SelectedIndex = 0;
 
             ObjectId sessionid = ObjectId.Empty;
-            if (sessionname == null)
+            if (sessionname == null && DatabaseHandler.Sessions.Count > 1)
             {
                 DatabaseSession session = SessionsResultsBox.SelectedItems.Count > 0 ? (DatabaseSession)SessionsResultsBox.SelectedItem : DatabaseHandler.Sessions[0];
                 sessionid = GetObjectID(DatabaseHandler.Database, DatabaseDefinitionCollections.Sessions, "name", session.Name);
@@ -197,7 +206,7 @@ namespace ssi
         public void GetAnnotationSchemes()
         {
             var annoschemes = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Schemes);
-            var annosch = annoschemes.Find(_ => true).ToList();
+            var annosch = annoschemes.Find(_ => true).SortBy(bson => bson["name"]).ToList();
 
             if (annosch.Count > 0)
             {
@@ -296,26 +305,6 @@ namespace ssi
 
                 GetAnnotations();
             }
-        }
-
-        private double normalizermvalue(double value, AnnoScheme scheme)
-        {
-            if (scheme.MinScore >= 0)
-            {
-                double norm = (value - scheme.MinScore) / (scheme.MaxScore - scheme.MinScore);
-                value = norm * 2 - 1;
-            }
-
-            return value;
-        }
-
-        private double denormalize(double value, AnnoScheme scheme)
-        {
-            double norm = value / 2 + 1;
-
-            double result = norm * (scheme.MaxScore - scheme.MinScore) + scheme.MinScore;
-
-            return value;
         }
 
         private void rootMeanSquare(List<AnnoList> al)
@@ -444,112 +433,9 @@ namespace ssi
             }
         }
 
-        public double MSE(List<AnnoList> al, bool normalize)
-        {
-            double mse = 0;
-            double nsm = 0;
-            if (AnnotationResultBox.SelectedItems.Count == 2)
-            {
-                double sum_sq = 0;
-                double minerr = double.MaxValue;
-                double maxerr = 0.0;
+  
 
-                double[] array = new double[al[0].Count];
-                double length = GetAnnoListMinLength(al);
-                // if (al[0].Meta.Annotator != null && al[0].Meta.Annotator.Contains("RootMeanSquare"))
-                {
-                    for (int i = 0; i < length; i++)
-                    {
-                        double err = al[0][i].Score - al[1][i].Score;
-                        if (err > maxerr) maxerr = err;
-                        if (err < minerr) minerr = err;
-                        sum_sq += err * err;
-                    }
-                    mse = (double)sum_sq / (al[0].Count);
-                    nsm = mse / (maxerr - minerr);
-                    //  MessageBox.Show("The Mean Square Error for Annotation " + al[1].Scheme.Name + " is " + mse + " (Normalized: " + mse / (maxerr - minerr) + "). This is for your information only, no new tier has been created!");
-                }
-            }
-
-            if (normalize) return nsm;
-            else return mse;
-        }
-
-
-        public Dictionary<string, double> PythonInterface(List<AnnoList> al)
-        {
-
-            //  Dictionary<string, double> measures = InvokePython.correlate(al[0], al[1]);
-
-            //    return measures;
-            return null;
-        }
-
-
-        private List<AnnoList> convertAnnoListsToMatrix(List<AnnoList> annolists, string restclass)
-        {
-            List<AnnoList> convertedlists = new List<AnnoList>();
-
-            double maxlength = GetAnnoListMinLength(annolists);
-            double chunksize = Properties.Settings.Default.DefaultMinSegmentSize; //Todo make option
-
-            foreach (AnnoList al in annolists)
-            {
-                AnnoList list = ConvertDiscreteAnnoListToContinuousList(al, chunksize, maxlength, restclass);
-                convertedlists.Add(list);
-            }
-
-            return convertedlists;
-        }
-
-        private double GetAnnoListMinLength(List<AnnoList> annolists)
-        {
-            double length = 0;
-            foreach (AnnoList al in annolists)
-            {
-                if (al.Count > 0 && al.ElementAt(al.Count - 1).Stop > length) length = al.ElementAt(al.Count - 1).Stop;
-            }
-
-            return length;
-        }
-
-        private AnnoList ConvertDiscreteAnnoListToContinuousList(AnnoList annolist, double chunksize, double end, string restclass = "Rest")
-        {
-            AnnoList result = new AnnoList();
-            result.Scheme = annolist.Scheme;
-            result.Meta = annolist.Meta;
-            result.Source.StoreToDatabase = true;
-            result.Source.Database.Session = annolist.Source.Database.Session;
-            double currentpos = 0;
-
-            bool foundlabel = false;
-
-            while (currentpos < end)
-            {
-                foundlabel = false;
-                foreach (AnnoListItem orgitem in annolist)
-                {
-                    if (orgitem.Start < currentpos && orgitem.Stop > currentpos)
-                    {
-                        AnnoListItem ali = new AnnoListItem(currentpos, chunksize, orgitem.Label);
-                        result.Add(ali);
-                        foundlabel = true;
-                        break;
-                    }
-                }
-
-                if (foundlabel == false)
-                {
-                    AnnoListItem ali = new AnnoListItem(currentpos, chunksize, restclass);
-                    result.Add(ali);
-                }
-
-                currentpos = currentpos + chunksize;
-            }
-
-            return result;
-        }
-
+     
         private void MergeDiscreteLists(List<AnnoList> al, string restclass = "Rest")
         {
             AnnoList cont = new AnnoList();
@@ -625,470 +511,7 @@ namespace ssi
             GetAnnotations();
         }
 
-        private double FleissKappa(List<AnnoList> annolists, string restclass)
-        {
-            int n = annolists.Count;   // n = number of raters, here number of annolists
-
-            List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
-            AnnoScheme.Label rest = new AnnoScheme.Label(restclass, Colors.Black);
-            classes.Add(rest);
-
-            int k = 0;  //k = number of classes
-
-            //For Discrete Annotations find number of classes, todo, find number of classes on free annotations.
-            if (annolists[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
-            {
-                k = classes.Count;
-            }
-
-            int N = annolists[0].Count;
-
-            double[] pj = new double[k];
-            double[] Pi = new double[N];
-
-            int dim = n * N;
-
-            //add  and initalize matrix
-            int[,] matrix = new int[N, k];
-
-            for (int i = 0; i < N; i++)
-            {
-                for (int j = 0; j < k; j++)
-                {
-                    matrix[i, j] = 0;
-                }
-            }
-
-            //fill the matrix
-
-            foreach (AnnoList al in annolists)
-            {
-                int count = 0;
-                foreach (AnnoListItem ali in al)
-                {
-                    for (int i = 0; i < classes.Count; i++)
-                    {
-                        if (ali.Label == classes[i].Name)
-                        {
-                            matrix[count, i] = matrix[count, i] + 1;
-                        }
-                    }
-
-                    count++;
-                }
-            }
-
-            //calculate pj
-            for (int j = 0; j < k; j++)
-            {
-                for (int i = 0; i < N; i++)
-                {
-                    pj[j] = pj[j] + matrix[i, j];
-                }
-
-                pj[j] = pj[j] / dim;
-            }
-
-            //Calculate Pi
-
-            for (int i = 0; i < N; i++)
-            {
-                double sum = 0;
-                for (int j = 0; j < k; j++)
-                {
-                    sum = sum + (Math.Pow(matrix[i, j], 2.0) - matrix[i, j]);
-                }
-
-                Pi[i] = (1.0 / (n * (n - 1.0))) * (sum);
-            }
-
-            //calculate Pd
-            double Pd = 0;
-
-            for (int i = 0; i < N; i++)
-            {
-                Pd = Pd + Pi[i];
-            }
-
-            Pd = (1.0 / (((double)N) * (n * n - 1.0))) * (Pd * (n * n - 1.0));
-
-            double Pe = 0;
-
-            for (int i = 0; i < k; i++)
-            {
-                Pe = Pe + Math.Pow(pj[i], 2.0);
-            }
-
-            double fleiss_kappa = 0.0;
-
-            fleiss_kappa = (Pd - Pe) / (1.0 - Pe);
-
-            return fleiss_kappa;
-
-            //todo recheck the formula.
-        }
-
-        public double CohensKappa(List<AnnoList> annolists, string restclass)
-        {
-            int n = annolists.Count;   // n = number of raters, here number of annolists
-
-            List<AnnoScheme.Label> classes = annolists[0].Scheme.Labels;
-            //add the restclass we introduced in last step.
-            AnnoScheme.Label rest = new AnnoScheme.Label(restclass, System.Windows.Media.Colors.Black);
-            classes.Add(rest);
-
-            int k = 0;  //k = number of classes
-            //For Discrete Annotations find number of classes, todo, find number of classes on free annotations.
-            if (annolists[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
-            {
-                k = classes.Count;
-            }
-
-            int N = int.MaxValue;
-
-            foreach (AnnoList a in annolists)
-            {
-                if (a.Count < N) N = a.Count;
-            }
-
-            double[] pj = new double[k];
-            double[] Pi = new double[N];
-
-            int dim = n * N;
-
-            //add  and initalize matrix
-            int[,] matrix = new int[N, k];
-
-            for (int i = 0; i < N; i++)
-            {
-                for (int j = 0; j < k; j++)
-                {
-                    matrix[i, j] = 0;
-                }
-            }
-
-            //fill the matrix
-
-            foreach (AnnoList al in annolists)
-            {
-                int count = 0;
-                foreach (AnnoListItem ali in al)
-                {
-                    for (int i = 0; i < classes.Count; i++)
-                    {
-                        if (ali.Label == classes[i].Name)
-                        {
-                            matrix[count, i] = matrix[count, i] + 1;
-                        }
-                    }
-
-                    count++;
-                }
-            }
-
-            //calculate pj
-            for (int j = 0; j < k; j++)
-            {
-                for (int i = 0; i < N; i++)
-                {
-                    pj[j] = pj[j] + matrix[i, j];
-                }
-
-                pj[j] = pj[j] / dim;
-            }
-
-            //here it differs from fleiss' kappa
-
-            //Calculate Pi
-
-            for (int i = 0; i < N; i++)
-            {
-                double sum = 0;
-                for (int j = 0; j < k; j++)
-                {
-                    sum = sum + (Math.Pow(matrix[i, j], 2.0) - matrix[i, j]);
-                }
-
-                Pi[i] = (sum / (n * (n - 1.0)));
-            }
-
-            //calculate Pd
-            double Pd = 0;
-
-            for (int i = 0; i < N; i++)
-            {
-                Pd = Pd + Pi[i];
-            }
-
-            Pd = (1.0 / (N * n * (n - 1.0))) * Pd * n * (n - 1);
-
-            double Pc = 0;
-
-            for (int i = 0; i < k; i++)
-            {
-                Pc = Pc + Math.Pow(pj[i], 2.0);
-            }
-
-            double cohens_kappa = 0.0;
-
-            cohens_kappa = (Pd - Pc) / (1.0 - Pc);
-
-            return cohens_kappa;
-        }
-
-        private double Cronbachsalpha(List<AnnoList> annolists, int decimals)
-        {
-            int n = annolists.Count;   // n = number of raters, here number of annolists
-
-            int N = int.MaxValue;
-
-            foreach (AnnoList a in annolists)
-            {
-                if (a.Count < N) N = a.Count;
-            }
-
-            double[] varj = new double[n];
-            double[] vari = new double[N];
-
-            double[][] data = new double[n][];
-
-            for (int i = 0; i < n; i++)
-            {
-                double[] row = new double[N];
-                for (int j = 0; j < N; j++)
-                {
-                    double inputValue = annolists[i][j].Score;
-                    row[j] = Math.Round(inputValue, decimals);
-                }
-
-                data[i] = row;
-            }
-
-            Matrix<double> CorrelationMatrix = SpearmanCorrelationMatrix(data);
-
-            Matrix<double> uppertriangle = CorrelationMatrix.UpperTriangle();
-
-            double rvec = 0.0;
-
-            for (int i = 0; i < CorrelationMatrix.ColumnCount; i++)
-            {
-                for (int j = 0; j < CorrelationMatrix.RowCount; j++)
-                {
-                    rvec += uppertriangle[i, j];
-                }
-            }
-
-            double factor = (n * (n - 1)) / 2.0;
-
-            rvec = (rvec - (double)n) / factor;
-
-            double alpha = (n * rvec) / (1 + (n - 1) * rvec);
-
-            return alpha;
-        }
-
-        #region Helper Functions
-
-        private MathNet.Numerics.LinearAlgebra.Matrix<double> SpearmanCorrelationMatrix(double[][] data)
-        {
-            var m = MathNet.Numerics.LinearAlgebra.Matrix<double>.Build.DenseIdentity(data.Length);
-            for (int i = 0; i < data.Length; i++)
-                for (int j = i + 1; j < data.Length; j++)
-                {
-                    var c = Correlation.Spearman(data[i], data[j]);
-                    m.At(i, j, c);
-                    m.At(j, i, c);
-                }
-            return m;
-        }
-
-        private double PearsonCorrelation(AnnoList xs, AnnoList ys)
-        {
-            // sums of x, y, x squared etc.
-            double sx = 0.0;
-            double sy = 0.0;
-            double sxx = 0.0;
-            double syy = 0.0;
-            double sxy = 0.0;
-
-            int n = 0;
-
-            using (var enX = xs.GetEnumerator())
-            {
-                using (var enY = ys.GetEnumerator())
-                {
-                    while (enX.MoveNext() && enY.MoveNext())
-                    {
-                        if (!double.IsNaN(enX.Current.Score) && !double.IsNaN(enX.Current.Score))
-                        {
-                            double x = enX.Current.Score;
-                            double y = enY.Current.Score;
-
-                            n += 1;
-                            sx += x;
-                            sy += y;
-                            sxx += x * x;
-                            syy += y * y;
-                            sxy += x * y;
-                        }
-                    }
-                }
-            }
-
-            // covariation
-            double cov = sxy / n - sx * sy / n / n;
-            // standard error of x
-            double sigmaX = Math.Sqrt(sxx / n - sx * sx / n / n);
-            // standard error of y
-            double sigmaY = Math.Sqrt(syy / n - sy * sy / n / n);
-
-            // correlation is just a normalized covariation
-            return cov / sigmaX / sigmaY;
-        }
-
-        private double PearsonCorrelationMathNet(AnnoList xs, AnnoList ys)
-        {
-            int N = ys.Count;
-            if (xs.Count < ys.Count) N = xs.Count;
-
-            double[] list1 = new double[N];
-            double[] list2 = new double[N];
-
- 
-            for (int i = 0; i < N; i++)
-            {
-                if(double.IsNaN(xs[i].Score))
-                {
-                    if (i > 0) xs[i].Score = xs[i - 1].Score;
-                    else xs[i].Score = ((xs.Scheme.MaxScore - xs.Scheme.MinScore) / 2.0);
-                }
-                if (double.IsNaN(ys[i].Score))
-                {
-                    if (i > 0) ys[i].Score = ys[i - 1].Score;
-                    else ys[i].Score = ((ys.Scheme.MaxScore - ys.Scheme.MinScore) / 2.0);
-                }
-
-                list1[i] = xs[i].Score;
-                list2[i] = ys[i].Score;
-            }
-
-            double mean = Math.Abs(list1.Mean() - list2.Mean());
-
-             double p = MathNet.Numerics.ExcelFunctions.TDist(mean, list1.Count(), 2);
-
-
-
-
-
-            double r = Correlation.Pearson(list1, list2);
-            return r;
-        }
-
-        private double SpearmanCorrelationMathNet(AnnoList xs, AnnoList ys)
-        {
-            int N = ys.Count;
-            if (xs.Count < ys.Count) N = xs.Count;
-
-            double[] list1 = new double[N];
-            double[] list2 = new double[N];
-
-            for (int i = 0; i < N; i++)
-            {
-                list1[i] = xs[i].Score;
-                list2[i] = ys[i].Score;
-            }
-
-            double r = Correlation.Spearman(list1, list2);
-            return r;
-        }
-
-        private double ConcordanceCorrelationCoefficient(AnnoList xs, AnnoList ys)
-        {
-            double meanxs, meanys;
-            double variancexs, varianceys;
-            double covariance = 0;
-            double p;
-
-            int n = xs.Count() > ys.Count() ? ys.Count() : xs.Count();
-
-            double[] listx = new double[n];
-            double[] listy = new double[n];
-
-            for(int i = 0; i < n; i++)
-            {
-                if(!Double.IsNaN(xs[i].Score) && !Double.IsNaN(ys[i].Score))
-                {
-                    listx[i] = xs[i].Score;
-                    listy[i] = ys[i].Score;
-                }
-            }
-
-            meanxs = listx.Mean();
-            meanys = listy.Mean();
-
-            variancexs = listx.Variance();
-            varianceys = listy.Variance();
-
-            for (int i = 0; i < n; i++)
-            {
-                covariance = covariance + ((listx[i] - meanxs) * (listy[i] - meanys));
-            }
-            covariance = covariance / (n - 1);
-
-            p = (2 * covariance) / (variancexs + varianceys + Math.Pow((meanxs - meanys), 2));
-
-            return p;
-        }
-
-        private double Variance(double[] nums)
-        {
-            if (nums.Length > 1)
-            {
-                double avg = Average(nums);
-
-                double sumofSquares = 0.0;
-
-                foreach (double num in nums)
-                {
-                    sumofSquares += Math.Pow(num - avg, 2.0);
-                }
-
-                return sumofSquares / (double)(nums.Length - 1);
-            }
-            else return 0.0;
-        }
-
-        private double Sum(double[] nums)
-        {
-            double sum = 0;
-            foreach (double num in nums)
-            {
-                sum += num;
-            }
-            return sum;
-        }
-
-        private double Average(double[] nums)
-        {
-            double sum = 0;
-
-            if (nums.Length > 1)
-            {
-                foreach (double num in nums)
-                {
-                    sum += num;
-                }
-                return sum / (double)nums.Length;
-            }
-            else return (double)nums[0];
-        }
-
-        private double StandardDeviation(double variance)
-        {
-            return Math.Sqrt(variance);
-        }
-
-        #endregion Helper Functions
+     
 
         private void CalculateMedian_Click(object sender, RoutedEventArgs e)
         {
@@ -1162,17 +585,17 @@ namespace ssi
                     {
                         string restclass = "Rest";
 
-                        List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
+                        List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(annolists, restclass);
 
                         if (annolists.Count == 2)
                         {
-                            cohenkappa = CohensKappa(convertedlists, restclass);
+                            cohenkappa = Statistics.CohensKappa(convertedlists);
                             kappa = cohenkappa;
                             kappatype = "Cohen's κ: ";
                         }
                         else if (annolists.Count > 2)
                         {
-                            fleisskappa = FleissKappa(convertedlists, restclass);
+                            fleisskappa = Statistics.FleissKappa(convertedlists);
                             kappa = fleisskappa;
                             kappatype = "Fleiss' κ: ";
                         }
@@ -1201,74 +624,6 @@ namespace ssi
             }
         }
 
-
-        private double transform_r_to_z(double r, int N)
-        {
-
-            double z = 0.5 * (Math.Log(1 + r) - Math.Log(1-r));
-            return z;
-        }
-
-
-        private double transform_2r_to_z (double r1, double N1, double r2, double N2)
-        {
-
-            double leftlog = (1.0 + r1) / (1.0 - r1);
-            double rightlog = (1.0 + r2) / (1.0 - r2);
-            double upperleftpart = 0.5 *  Math.Log(leftlog);
-            double upperrightpart = 0.5 * Math.Log(rightlog);
-            double upperpart = upperleftpart - upperrightpart;
-
-            double lowerinnerleftpart = 1.0 / ((double)N1 - 3.0);
-            double lowerinnerrightpart =  1.0 / ((double)N2 - 3.0);
-
-            double lowerinnerpart = lowerinnerleftpart + lowerinnerrightpart;
-            double lowerpart = Math.Sqrt(lowerinnerpart);
-            return upperpart / lowerpart;
-        }
-
-
-
-        private double transform_z_to_p(double z)
-        {
-            double Z_MAX = 6;
-            double y, x, w;
-            if (z == 0.0)
-            {
-                x = 0.0;
-            }
-            else
-            {
-                y = 0.5 * Math.Abs(z);
-                if (y > (Z_MAX * 0.5))
-                {
-                    x = 1.0;
-                }
-                else if (y < 1.0)
-                {
-                    w = y * y;
-                    x = ((((((((0.000124818987 * w
-                        - 0.001075204047) * w + 0.005198775019) * w
-                        - 0.019198292004) * w + 0.059054035642) * w
-                        - 0.151968751364) * w + 0.319152932694) * w
-                        - 0.531923007300) * w + 0.797884560593) * y * 2.0;
-                }
-                else
-                {
-                    y -= 2.0;
-                    x = (((((((((((((-0.000045255659 * y
-                        + 0.000152529290) * y - 0.000019538132) * y
-                        - 0.000676904986) * y + 0.001390604284) * y
-                        - 0.000794620820) * y - 0.002034254874) * y
-                        + 0.006549791214) * y - 0.010557625006) * y
-                        + 0.011630447319) * y - 0.009279453341) * y
-                        + 0.005353579108) * y - 0.002141268741) * y
-                        + 0.000535310849) * y + 0.999936657524;
-                }
-            }
-            return z > 0.0 ? ((x + 1.0) * 0.5) : ((1.0 - x) * 0.5);
-        }
-
         private async Task CalculateContinuousWrapper(List<AnnoList> annolists)
         {
             double cronbachalpha = 0;
@@ -1281,12 +636,12 @@ namespace ssi
                 {
                     lock (syncLock)
                     {
-                        cronbachalpha = Cronbachsalpha(annolists, 3);
+                        cronbachalpha = Statistics.Cronbachsalpha(annolists);
                     }
 
                     if (cronbachalpha < 0) cronbachalpha = 0.0; //can happen that it gets a little below 0, this is to avoid confusion.
 
-                    interpretation = Cronbachinterpretation(cronbachalpha);
+                    interpretation = Statistics.Cronbachinterpretation(cronbachalpha);
                 }, token);
 
                 Stats.Content = "Samples: " + annolists[0].Count;
@@ -1299,22 +654,22 @@ namespace ssi
                 double spearmancorrelation = double.MaxValue;
                 if (annolists.Count == 2)
                 {
-                    spearmancorrelation = SpearmanCorrelationMathNet(annolists[0], annolists[1]);
+                    spearmancorrelation = Statistics.SpearmanCorrelationMathNet(annolists[0], annolists[1]);
 
                     if (spearmancorrelation != double.MaxValue)
                     {
-                        interpretation = Spearmaninterpretation(spearmancorrelation);
+                        interpretation = Statistics.Spearmaninterpretation(spearmancorrelation);
 
                         Stats.Content = Stats.Content + " | Spearman Correlation: " + spearmancorrelation.ToString("F3");
                         Stats.ToolTip = Stats.ToolTip + " | Spearman Correlation: " + interpretation;
                     }
 
                     double concordancecorrelation = double.MaxValue;
-                    concordancecorrelation = ConcordanceCorrelationCoefficient(annolists[0], annolists[1]);
+                    concordancecorrelation = Statistics.ConcordanceCorrelationCoefficient(annolists[0], annolists[1]);
 
                     if (concordancecorrelation != double.MaxValue){
 
-                        interpretation = CCCinterpretation(concordancecorrelation);
+                        interpretation = Statistics.CCCinterpretation(concordancecorrelation);
 
                         Stats.Content = Stats.Content + " | Concordance Correlation: " + concordancecorrelation.ToString("F3");
                         Stats.ToolTip = Stats.ToolTip + " | Concordance Correlation: " + interpretation;
@@ -1322,14 +677,14 @@ namespace ssi
 
                     double pearsoncorrelation = double.MaxValue;
 
-                    pearsoncorrelation = PearsonCorrelationMathNet(annolists[0], annolists[1]);
+                    pearsoncorrelation = Statistics.PearsonCorrelationMathNet(annolists[0], annolists[1]);
 
                     int N = annolists[0].Count;
                     if (annolists[1].Count < annolists[0].Count) N = annolists[1].Count;
 
-                    interpretation = Pearsoninterpretation(pearsoncorrelation, N);
-                    var fisherz = transform_r_to_z(pearsoncorrelation, N);
-                    var lpvalue = transform_z_to_p(fisherz);
+                    interpretation = Statistics.Pearsoninterpretation(pearsoncorrelation, N);
+                    var fisherz = Statistics.transform_r_to_z(pearsoncorrelation, N);
+                    var lpvalue = Statistics.transform_z_to_p(fisherz);
                     var rpvalue = 1 - lpvalue;
                     var twopvalue = 2 * rpvalue;
                     var confpvalue = 1 - twopvalue;
@@ -1339,8 +694,8 @@ namespace ssi
 
                         double ra = 0.794;
                         double rb = 0.8;
-                        var testz = transform_2r_to_z(ra, N, rb, N);
-                        var testp = transform_z_to_p(testz);
+                        var testz = Statistics.transform_2r_to_z(ra, N, rb, N);
+                        var testp = Statistics.transform_z_to_p(testz);
 
                         if(ra > rb)
                         {
@@ -1358,15 +713,14 @@ namespace ssi
                     double nmse = double.MaxValue;
                     double mse = double.MaxValue;
 
-                    nmse = MSE(annolists, true);
-                    mse = MSE(annolists, false);
+                    nmse = Statistics.MSE(annolists, true);
+                    mse = Statistics.MSE(annolists, false);
 
                     if (nmse != double.MaxValue)
                     {
                         Stats.Content = Stats.Content + " | MSE: " + mse.ToString("F6") + " | NMSE: " + nmse.ToString("F6"); ;
                     }
 
-                    //PythonInterface(annolists);
 
                 }
 
@@ -1379,83 +733,7 @@ namespace ssi
             }
         }
 
-        private string Pearsoninterpretation(double r, int N)
-        {
-            string interpretation = "";
-            if (r <= -1) interpretation = "perfect downhill (negative) linear relationship";
-            else if (r > -1 && r <= -0.7) interpretation = "strong downhill (negative) linear relationship";
-            else if (r > -0.7 && r <= -0.5) interpretation = "moderate downhill (negative) relationship";
-            else if (r > -0.5 && r <= -0.3) interpretation = "weak downhill (negative) linear relationship";
-            else if (r > -0.3 && r <= 0.3) interpretation = "no linear relationship";
-            else if (r > 0.3 && r <= 0.5) interpretation = "weak uphill (positive) linear relationship";
-            else if (r > 0.5 && r <= 0.7) interpretation = "moderate uphill (positive) relationship";
-            else if (r > 0.7 && r < 1) interpretation = "strong uphill (positive) linear relationship";
-            else if (r >= 1.0) interpretation = "perfect uphill (positive) linear relationship";
-
-            //double t = r / (Math.Sqrt((1 - (r * r)) / (N - 2)));
-
-
-
-
-
-            //double t = r * Math.Sqrt(N-2) / (Math.Sqrt((1 - (r * r))));
-
-            //Chart Chart1 = new Chart();
-            //double p = Chart1.DataManipulator.Statistics.TDistribution(t, N - 2, false);
-            //string significance = "";
-
-
-            //if (p < 0.05) significance = p.ToString("F6") + "< 0.05" ;
-            //else  significance = p.ToString("F6") + ">= 0.05";
-
-            return interpretation; // + " " + significance;
-        }
-
-        private string CCCinterpretation(double ccc)
-        {
-            string interpretation = "";
-
-            if(ccc < 0.9)
-            {
-                interpretation = "Poor";
-            } else if (ccc >= 0.9 && ccc < 0.95)
-            {
-                interpretation = "Moderate";
-            } else if(ccc >= 0.95 && ccc <= 0.99)
-            {
-                interpretation = "Substantial";
-            } else
-            {
-                interpretation = "Almost perfext";
-            }
-
-            return interpretation;
-        }
-
-        private string Spearmaninterpretation(double spearmancorrelation)
-        {
-            string interpretation = "";
-            if (spearmancorrelation <= 0.19) interpretation = "Very week";
-            else if (spearmancorrelation >= 0.20 && spearmancorrelation < 0.39) interpretation = "Weak";
-            else if (spearmancorrelation >= 0.40 && spearmancorrelation < 0.59) interpretation = "Moderate";
-            else if (spearmancorrelation >= 0.60 && spearmancorrelation < 0.79) interpretation = "Strong";
-            else if (spearmancorrelation >= 0.8) interpretation = "Very strong";
-
-            return interpretation;
-        }
-
-        private string Cronbachinterpretation(double cronbachalpha)
-        {
-            string interpretation = "";
-            if (cronbachalpha <= 0.5) interpretation = "Unacceptable agreement";
-            else if (cronbachalpha >= 0.51 && cronbachalpha < 0.61) interpretation = "Poor agreement";
-            else if (cronbachalpha >= 0.61 && cronbachalpha < 0.71) interpretation = "Questionable agreement";
-            else if (cronbachalpha >= 0.71 && cronbachalpha < 0.81) interpretation = "Acceptable agreement";
-            else if (cronbachalpha >= 0.81 && cronbachalpha < 0.90) interpretation = "Good agreement";
-            else if (cronbachalpha >= 0.9) interpretation = "Excellent agreement";
-
-            return interpretation;
-        }
+ 
 
         private async Task CalculateRMSEWrapper(List<AnnoList> annolists)
         {
@@ -1508,7 +786,7 @@ namespace ssi
             {
                 string restclass = "Rest";
                 List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-                List<AnnoList> convertedlists = convertAnnoListsToMatrix(annolists, restclass);
+                List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(annolists, restclass);
 
                 if (WeightExpertise.IsChecked == true) //some option
                 {
@@ -1609,23 +887,6 @@ namespace ssi
             calculateStatistics();
         }
 
-        private void Stats_Click(object sender, RoutedEventArgs e)
-        {
-            if(AnnotationResultBox.SelectedItems.Count == 1)
-            {
  
-             List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems, SessionsResultsBox.SelectedItems);
-                
-              
-
-            }
-            else if(AnnotationResultBox.SelectedItems.Count > 1)
-            {
-                foreach(var entry in SessionsResultsBox.SelectedItems)
-                {
-
-                }
-            }
-        }
     }
 }

@@ -3,6 +3,7 @@ using MediaToolkit.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -10,6 +11,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using WPFMediaKit.DirectShow.Controls;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
+using Color = System.Windows.Media.Color;
+using Image = System.Windows.Controls.Image;
 
 namespace ssi
 {
@@ -34,10 +38,58 @@ namespace ssi
         private FaceType facetype;
 
 
+        private Color headColor;
+
 
         private Color signalColor;
-        private Color headColor;
+       
+
         private Color backColor;
+
+
+        private int size = 300;
+        private double res = 96.0;
+        public int Size
+        {
+            get { return size; }
+            set
+            {
+                size = value;
+                RaisePropertyChanged("Size");
+                writeableBmp = null;
+                writeableBmp = new WriteableBitmap(size, size, res, res, PixelFormats.Bgr32, null);
+                // writeableBmp.Clear(BackColor);
+
+
+                this.width = size;
+                this.height = size;
+
+                if (facetype == FaceType.OPENFACE)
+                {
+                    minMaxOF();
+                    scaleOF();
+                }
+
+                else if (facetype == FaceType.OPENFACE2)
+                {
+                    minMaxOF2();
+                    scaleOF2();
+                }
+
+                else
+                {
+                    minMax();
+                    scale();
+                }
+
+                Source = writeableBmp;
+
+            }
+        }
+
+
+
+
 
         private int width;
         private int height;
@@ -65,7 +117,7 @@ namespace ssi
             handler?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        public Face(string filepath, Signal signal, FaceType ftype, int width = 600, int height = 600)
+        public Face(string filepath, Signal signal, FaceType ftype, int width = 300, int height = 300)
         {
             this.filepath = filepath;
             this.signal = new Signal();
@@ -90,17 +142,18 @@ namespace ssi
 
 
 
-            this.width = width;
-            this.height = height;
+            this.width = Size;
+            this.height = Size;
 
             type = MediaType.FACE;
             facetype = ftype;
 
             BackColor = Defaults.Colors.Background;
-            SignalColor = Defaults.Colors.Foreground;
-            HeadColor = Defaults.Colors.Foreground;
-    
-            writeableBmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgr32, null);
+            SignalColor = Colors.Black; // Defaults.Colors.Foreground;
+            HeadColor = Colors.Black;//Defaults.Colors.Foreground;
+            headColor = SignalColor;
+
+            writeableBmp = new WriteableBitmap(this.width, this.height, res, res, PixelFormats.Bgr32, null);
             writeableBmp.Clear(BackColor);            
 
             Source = writeableBmp;
@@ -166,12 +219,7 @@ namespace ssi
                
 
 
-            }
-
-      
-                
-                
-                
+            }     
         }
 
         public void minMaxOF2()
@@ -358,11 +406,7 @@ namespace ssi
         public void Draw(double time)
         {
             postion = time;
-
-
-
-
-             uint index = (uint)((time * signal.rate) +0.5F);
+            uint index = (uint)((time * signal.rate) +0.5F);
 
             writeableBmp.Lock();
             writeableBmp.Clear(BackColor);
@@ -428,6 +472,9 @@ namespace ssi
                             if (X < width && Y < height)
                             {
                                 writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+                                //writeableBmp.SetPixel((int)X+1, (int)Y+1, SignalColor);
+                                //writeableBmp.SetPixel((int)X-1, (int)Y-1, SignalColor);
+                                //writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
                             }
 
                         }
