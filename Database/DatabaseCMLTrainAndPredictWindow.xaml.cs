@@ -101,8 +101,8 @@ namespace ssi
             if (mode == Mode.COMPLETE)
             {
                 ModeTabControl.Visibility = Visibility.Collapsed;
-                
-
+                CMLEndpointTextBox.Visibility = Visibility.Visible;
+                CMlEndpointLabel.Visibility = Visibility.Visible;
             }
 
             //if (MainHandler.ENABLE_PYTHON)
@@ -116,6 +116,8 @@ namespace ssi
             else
             {
                 ModeTabControl.SelectedIndex = (int)mode;
+                CMlEndpointLabel.Visibility = Visibility.Collapsed;
+                CMlEndpointLabel.Visibility = Visibility.Collapsed;
             }
 
             Loaded += Window_Loaded;
@@ -235,6 +237,7 @@ namespace ssi
                     removePair.Visibility = Visibility.Visible;
                     multidatabaseadd.Visibility = Visibility.Visible;
                     multidatabaselabel.Visibility = Visibility.Visible;
+                    TrainerNameTextBox.IsEnabled = true;
 
 
                     break;
