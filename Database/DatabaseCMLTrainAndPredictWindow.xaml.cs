@@ -104,7 +104,7 @@ namespace ssi
                 CMLEndpointLabel.Visibility = Visibility.Visible;
                 CMLEndpointTextBox.Visibility = Visibility.Visible;
                 TrainerNameTextBox.IsEnabled = false;
-                HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.";
+      
             }
 
             //if (MainHandler.ENABLE_PYTHON)
@@ -121,12 +121,11 @@ namespace ssi
                 CMLEndpointLabel.Visibility = Visibility.Collapsed;
                 CMLEndpointTextBox.Visibility = Visibility.Collapsed;
                 TrainerNameTextBox.IsEnabled = true;
-                HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.ainer file";
             }
 
             Loaded += Window_Loaded;
            
-        
+            HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.";
             HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";
         }
 
