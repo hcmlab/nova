@@ -1,0 +1,123 @@
+﻿<Window x:Class="ssi.DatabaseAnnoStatisticsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        mc:Ignorable="d"
+        Title="Annotation Statistics" Height="700" Width="1200"  Icon="..\Resources\ui.ico">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <DockPanel LastChildFill="True" Grid.Row="0" Grid.Column="0" Margin="10">
+            <Label Content="Database" DockPanel.Dock="Top" Margin="-3,0,0,0" />
+            <ListBox Name="DatabasesBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DatabasesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+        </DockPanel>
+
+        <DockPanel Grid.Column="1" Grid.Row="0" Margin="10">
+            <Label Content="Sessions" DockPanel.Dock="Top" Margin="-3,0,0,0" />
+            <ListView Name="SessionsResultsBox" SelectionChanged="CollectionResultsBox_SelectionChanged"  DockPanel.Dock="Top">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
+
+                        <GridViewColumn Width="Auto" Header="Language">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="Language" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Location">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="Location" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Date">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="Date" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
+
+                        <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DockPanel>
+
+        <DockPanel Grid.Column="2" Grid.Row="0" Margin="10">
+            <Label Content="Schemes" DockPanel.Dock="Top" Margin="-3,0,0,0" />
+            <ListBox Name="AnnoSchemesBox" DockPanel.Dock="Top"  SelectionMode="Single" SelectionChanged="AnnoSchemesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+            <Label Content="Roles" DockPanel.Dock="Top" Visibility="Collapsed"  />
+            <ListBox x:Name="RolesBox" SelectionMode="Extended" DockPanel.Dock="top" SelectionChanged="RolesBox_SelectionChanged" Visibility="Collapsed"  ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+        </DockPanel>
+
+       
+
+            <DockPanel Grid.Column="3" Grid.Row="0" Margin="10">
+            <Label Content="Annotations" DockPanel.Dock="Top" Margin="-3,0,0,0" />
+            <!--<ListBox Name="AnnotationResultBox" Grid.Row="0" Grid.Column="0" Margin="246,80,200,211" SelectionMode="Multiple" SelectionChanged="AnnotationResultBox_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>-->
+
+
+            <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended"  DockPanel.Dock="Top" GridViewColumnHeader.Click="SortListView" >
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}"  />
+
+                        <GridViewColumn Width="Auto" Header="Role">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="Role" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Annotator">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="AnnotatorFullName" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
+
+                        <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DockPanel>
+
+        <DockPanel Grid.Column="4" Grid.Row="0" Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                   
+                </Grid.RowDefinitions>
+
+                <Label Name="StatisticsLabel" Grid.Row="0" Content="Statistics appear here.." Margin="-3,0,0,0" />
+                <Button Grid.Row="2" ToolTip="Calculates Cost via Dynamic Time Wrapping for 2 Inputs. Might take a few minutes.." Click="DtwButton_Click" Name="DtwButton">DTW Cost</Button>
+
+            </Grid>
+        </DockPanel>
+
+
+
+
+
+        <!--<StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="4">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10">
+                <Label  MouseEnter="Stats_MouseEnter" Name="Stats">Hover here to calculate correlations</Label>
+            </StackPanel>
+        </StackPanel>-->
+
+        <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+                <Button Name="Ok" Margin="0,0,5,0"  Content="Close" Grid.Column="0" Height="25" Width="50"  Click="Ok_Click" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

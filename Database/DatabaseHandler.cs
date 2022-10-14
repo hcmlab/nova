@@ -3480,12 +3480,16 @@ namespace ssi
             annoList.Scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), scheme["type"].AsString);
             annoList.Scheme.Name = scheme["name"].ToString();
 
-            if (scheme.TryGetElement("bounty_id", out value))
+            if (scheme.Contains("bounty_id"))
             {
-                annoList.Source.Database.HasBounty = true;
-                annoList.Source.Database.BountyID = scheme["bounty_id"].AsObjectId;
-                annoList.Source.Database.BountyIsPaid = scheme["bountyIsPaid"].AsBoolean;
+                if (scheme.TryGetElement("bounty_id", out value))
+                {
+                    annoList.Source.Database.HasBounty = true;
+                    annoList.Source.Database.BountyID = scheme["bounty_id"].AsObjectId;
+                    annoList.Source.Database.BountyIsPaid = scheme["bountyIsPaid"].AsBoolean;
+                }
             }
+         
 
             if (labels != null)
             {
@@ -3595,7 +3599,7 @@ namespace ssi
                         string meta = "";
                         try
                         {
-                            meta = labels[i]["meta"].ToString();
+                            if (labels[i].ToString().Contains("meta")) meta = labels[i]["meta"].ToString();
                         }
                         catch (Exception e)
                         {
