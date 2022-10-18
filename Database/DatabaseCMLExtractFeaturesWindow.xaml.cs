@@ -514,10 +514,14 @@ namespace ssi
         private List<Chain> getChains(DatabaseStream stream)
         {
             List<Chain> chains = new List<Chain>();
+            string[] types = stream.Type.Split(';');
 
+
+            foreach(string type in types)
+            {
             string chainDir = Properties.Settings.Default.CMLDirectory +
                     "\\" + Defaults.CML.ChainFolderName +
-                    "\\" + stream.Type;
+                    "\\" + type;
             if (Directory.Exists(chainDir))
             {                
                 string[] chainFiles = Directory.GetFiles(chainDir, "*." + Defaults.CML.ChainFileExtension, SearchOption.AllDirectories);                    
@@ -529,6 +533,7 @@ namespace ssi
                         chains.Add(chain);
                     }
                 }                         
+            }
             }
 
             return chains;
