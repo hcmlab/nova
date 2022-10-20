@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ssi"
           xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
         mc:Ignorable="d"
-        Title="Database Stream" Height="450" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+        Title="Database Stream" Height="450" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Style="{StaticResource WinAll}">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >

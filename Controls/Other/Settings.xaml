@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         WindowStyle="ToolWindow"
         WindowStartupLocation="CenterOwner"
-        Title="Settings" SizeToContent="WidthAndHeight" Width="350" KeyDown="Window_KeyDown">
+        Title="Settings" SizeToContent="WidthAndHeight" Width="350" KeyDown="Window_KeyDown" Style="{StaticResource WinAll}">
     <Grid>
 
         <Grid.RowDefinitions>

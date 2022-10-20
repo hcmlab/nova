@@ -20,6 +20,10 @@ namespace ssi
         public MainWindow()
         {
             InitializeComponent();
+            FrameworkElement.StyleProperty.OverrideMetadata(typeof(Window), new FrameworkPropertyMetadata
+            {
+                DefaultValue = FindResource(typeof(Window))
+            });
 
             view.OnHandlerLoaded += viewHandlerLoaded;
             CultureInfo ci = CultureInfo.InvariantCulture;

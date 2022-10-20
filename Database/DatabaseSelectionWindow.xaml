@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="" Height="300" Width="300" WindowStyle="None">
+        Title="" Height="300" Width="300" WindowStyle="None" Style="{StaticResource WinAll}">
 
     <Grid>
         <Grid.RowDefinitions>

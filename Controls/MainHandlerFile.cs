@@ -31,6 +31,8 @@ using VideoCodec = FFMediaToolkit.Encoding.VideoCodec;
 using Point = System.Drawing.Point;
 using FFMediaToolkit.Graphics;
 using System.Windows.Forms.VisualStyles;
+using NAudio.CoreAudioApi;
+using Tamir.SharpSsh.jsch;
 
 namespace ssi
 {
@@ -746,7 +748,11 @@ namespace ssi
             
             foreach (StreamItem path in bounty.streams)
             {
-                loadFile(Properties.Settings.Default.DatabaseDirectory + "\\" + bounty.Database + "\\" + bounty.Session + "\\" + path.Name);       
+
+   
+                // string directory = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session + "\\";
+                string existingPath = Defaults.FileExistsinPath(path.Name, bounty.Database, bounty.Session);
+                loadFile(existingPath + "\\" + bounty.Database + "\\" + bounty.Session + "\\" + path.Name);       
             }
 
          

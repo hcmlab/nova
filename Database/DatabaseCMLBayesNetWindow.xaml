@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
-        Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico">
+        Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >

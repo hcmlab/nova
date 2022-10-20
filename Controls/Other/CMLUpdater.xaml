@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Updating Cooperative Machine Learning Tools" Height="200" Width="400" Background="White" Icon="../../Resources/ui.ico">
+        Title="Updating Cooperative Machine Learning Tools" Height="200" Width="400" Background="White" Icon="../../Resources/ui.ico" Style="{StaticResource WinAll}">
     <Grid>
         <StackPanel>
             <Label Name="labelDownloaded" HorizontalAlignment="Center">...</Label>

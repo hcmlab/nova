@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Database" Height="Auto" Width="300" SizeToContent="Height" WindowStyle="ToolWindow"  Icon="..\Resources\ui.ico">
+        Title="Database" Height="Auto" Width="300" SizeToContent="Height" WindowStyle="ToolWindow"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
     <Grid>
 
         <Grid.RowDefinitions>

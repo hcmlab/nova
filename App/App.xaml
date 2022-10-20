@@ -17,6 +17,22 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+
+        <Style x:Key="WinAll" TargetType="{x:Type Window}">
+            <!--<Setter Property="FontFamily"
+        Value="Calibri" />-->
+            <Setter Property="FontSize"
+        Value="11" />
+        </Style>
+
+        <Style x:Key="ControlAll" TargetType="{x:Type UserControl}">
+                <!--<Setter Property="FontFamily"
+        Value="Calibri" />-->
+            <Setter Property="FontSize"
+        Value="11" />
+        </Style>
+
         <SolidColorBrush x:Key="ComboBox.Static.Background" Color="Transparent"/>
         <SolidColorBrush x:Key="ComboBox.Static.Border" Color="LightGray"/>
         <SolidColorBrush x:Key="ComboBox.Static.Editable.Background" Color="#FFFFFFFF"/>
@@ -303,7 +319,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}">
                             <TextBlock x:Name="PART_Textpresenter" Margin="{TemplateBinding Padding}"
                                    FontSize="{TemplateBinding FontSize}"
-                                   FontFamily="{TemplateBinding FontFamily}"/>
+                                  />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -333,7 +349,7 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
                             <Grid>
-                                <TextBox x:Name="PART_InputBox" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" Text="{Binding Text, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox x:Name="PART_InputBox" FontSize="{TemplateBinding FontSize}" Text="{Binding Text, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}, UpdateSourceTrigger=PropertyChanged}"/>
                                 <Popup IsOpen="{Binding IsDropdownOpened, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}, UpdateSourceTrigger=PropertyChanged}" AllowsTransparency="True" MaxHeight="{Binding MaxDropdownHeight, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}}" Width="{TemplateBinding ActualWidth}" StaysOpen="False" PopupAnimation="Fade" MinHeight="{Binding MinDropdownHeighte, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DropdownTextBox}}}" >
                                     <Border Background="White" Margin="3">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

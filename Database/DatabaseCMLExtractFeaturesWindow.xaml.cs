@@ -124,7 +124,7 @@ namespace ssi
                     {
                         foreach (DatabaseRole role in roles)
                         {
-                            string fromPath = Properties.Settings.Default.DatabaseDirectory + "\\"
+                            string fromPath = Defaults.LocalDataLocations().First() + "\\"
                             + database + "\\"
                             + session.Name + "\\"
                             + role.Name + "." + stream.Name + "." + stream.FileExt;
@@ -250,7 +250,7 @@ namespace ssi
                 }
             }
 
-            string rootDir = Properties.Settings.Default.DatabaseDirectory + "\\" + database;
+            string rootDir = Defaults.LocalDataLocations().First() + "\\" + database;
 
             logTextBox.Text = handler.CMLMergeFeature(rootDir, sessionList, roleList, streamList, featureName, force);
 

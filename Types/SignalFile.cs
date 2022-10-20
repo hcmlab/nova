@@ -625,7 +625,7 @@ namespace ssi
             double dur = 1 / rate;
             for (int i = 0; i < number; i++)
             {
-                annoListItem = new AnnoListItem(i * dur, dur, data[i * dim + ShowDim].ToString(), "", annoList.Scheme.MaxOrForeColor);
+                annoListItem = new AnnoListItem(i * dur, dur, data[i * dim + ShowDim], "", annoList.Scheme.MaxOrForeColor);
                 annoList.Add(annoListItem);
                 annoList.Scheme.Name = Name;
             }

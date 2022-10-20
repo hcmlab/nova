@@ -8,7 +8,7 @@
         d:DesignHeight="300" d:DesignWidth="300" d:DataContext="{d:DesignInstance local:FeatureExplanationWindow}"
         mc:Ignorable="d"
         Title="LIME Explanation" Height="570" Width="800"
-        Closing="Window_Closing">
+        Closing="Window_Closing" Style="{StaticResource WinAll}">
     <Grid Name="container">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75*"></ColumnDefinition>

@@ -15,6 +15,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Tamir.SharpSsh.jsch;
 
 namespace ssi
 {
@@ -265,9 +266,14 @@ namespace ssi
                     if (role.HasStreams)
                     {
                         string filename = role.Name + "." + stream.Name + "." + stream.FileExt;
-                        string directory = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session + "\\";
-                        string filepath = directory + filename;
-                        items.Add(new StreamItem() { Name = filename, Extension = stream.FileExt, Role = role.Name, Type = stream.Name, Exists = File.Exists(filepath) });
+                       // string directory = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session + "\\";
+                        string existingPath = Defaults.FileExistsinPath(filename, DatabaseHandler.DatabaseName, session);
+                        string anyPath = existingPath + "\\" + DatabaseHandler.DatabaseName + "\\" + session + "\\" + filename;
+
+
+
+                        //string filepath = directory + filename;
+                        items.Add(new StreamItem() { Name = filename, Extension = stream.FileExt, Role = role.Name, Type = stream.Name, Exists = File.Exists(anyPath) });
                     }
                 }
             }
@@ -650,7 +656,7 @@ namespace ssi
             labelPerc.Visibility = Visibility.Visible;
             labelSpeed.Visibility = Visibility.Visible;
             progressBar.Visibility = Visibility.Visible;
-            string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseBox.SelectedItem.ToString() + "\\" + ((DatabaseSession)SessionsBox.SelectedItem).Name + "\\";
+            string localPath = Defaults.LocalDataLocations().First() + "\\" + DatabaseBox.SelectedItem.ToString() + "\\" + ((DatabaseSession)SessionsBox.SelectedItem).Name + "\\";
             Directory.CreateDirectory(Path.GetDirectoryName(localPath));
             List<string> streamstoDownload = new List<string>();
 
@@ -659,7 +665,11 @@ namespace ssi
 
                 string localfile = localPath + stream.Name;
 
-                if (!File.Exists(localfile))
+               
+                string existingPath = Defaults.FileExistsinPath(stream.Name, DatabaseBox.SelectedItem.ToString(), ((DatabaseSession)SessionsBox.SelectedItem).Name);
+                string anyPath = existingPath + "\\" + DatabaseBox.SelectedItem.ToString() + "\\" + ((DatabaseSession)SessionsBox.SelectedItem).Name + "\\" + stream.Name;
+
+                if (!File.Exists(anyPath))
                 {
                     streamstoDownload.Add(stream.Name);
 
@@ -750,7 +760,7 @@ namespace ssi
                     webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
 
                     string url = _downloadUrls.Dequeue();
-                    string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseBox.SelectedItem.ToString() + "\\" + ((DatabaseSession)SessionsBox.SelectedItem).Name + "\\";
+                    string localPath = Defaults.LocalDataLocations().First() + "\\" + DatabaseBox.SelectedItem.ToString() + "\\" + ((DatabaseSession)SessionsBox.SelectedItem).Name + "\\";
                     string[] split = System.IO.Path.GetFileName(url).Split('=');
 
                     string location = localPath + split[split.Length - 1];

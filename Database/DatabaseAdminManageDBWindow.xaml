@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="Manage Databases" Width="800" Height="400" Closed="Window_Closed"  Icon="..\Resources\ui.ico">
+        Title="Manage Databases" Width="800" Height="400" Closed="Window_Closed"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >

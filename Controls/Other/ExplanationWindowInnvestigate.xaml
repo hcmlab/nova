@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi.Controls.Other"
         mc:Ignorable="d"
-        Title="Innvestigate Explanation" Height="670" Width="800">
+        Title="Innvestigate Explanation" Height="670" Width="800" Style="{StaticResource WinAll}">
 
 <Grid Name="container">
         <Grid.ColumnDefinitions>

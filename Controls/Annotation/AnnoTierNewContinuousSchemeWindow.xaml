@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         SizeToContent="Height"
         WindowStyle="ToolWindow"
-        Title="New Continuous Scheme" Height="Auto" Width="300">
+        Title="New Continuous Scheme" Height="Auto" Width="300" Style="{StaticResource WinAll}">
     
     <Grid Name="continuousSchemeGrid" Grid.Row="1" >
         

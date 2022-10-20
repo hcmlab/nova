@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using static Dicom.Network.DicomServiceOptions;
 using FileMode = System.IO.FileMode;
 
 namespace ssi
@@ -21,7 +22,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.3.7";
+        public static string BuildVersion = "1.2.3.8";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -425,11 +426,11 @@ namespace ssi
             }
 
 
-            if (Properties.Settings.Default.DatabaseDirectory == "")
+            if (Defaults.LocalDataLocations().First() == "")
             {
                 Properties.Settings.Default.DatabaseDirectory = Directory.GetCurrentDirectory() + "\\data";
                 Properties.Settings.Default.Save();
-                Directory.CreateDirectory(Properties.Settings.Default.DatabaseDirectory);
+                Directory.CreateDirectory(Defaults.LocalDataLocations().First());
             }
 
 

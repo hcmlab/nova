@@ -1283,7 +1283,7 @@ namespace ssi
                      
 
                         string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
-                                            ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme + ";root=" + Properties.Settings.Default.DatabaseDirectory + ";cooperative=" + "True"  + ";cmlbegintime=" + completetrainoptionstemp[14]};
+                                            ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme + ";root=" + Defaults.LocalDataLocations().First() + ";cooperative=" + "True"  + ";cmlbegintime=" + completetrainoptionstemp[14]};
 
                          string trainertemplatedbinfo = Path.GetDirectoryName(trainerpath) + "\\nova_db_info";
                          System.IO.File.WriteAllLines(trainertemplatedbinfo, dbinfo);

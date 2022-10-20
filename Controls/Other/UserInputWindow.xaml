@@ -9,7 +9,7 @@
         Title="Input"
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
-        Height="Auto" Width="300">
+        Height="Auto" Width="300" Style="{StaticResource WinAll}">
     <Grid Margin="5">
 
         <Grid.RowDefinitions>

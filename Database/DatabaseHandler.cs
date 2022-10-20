@@ -4409,7 +4409,7 @@ namespace ssi
 
 
             List<Signal> signals = new List<Signal>();
-            string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\";
+            string localPath = Defaults.LocalDataLocations().First() + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\";
 
 
 
