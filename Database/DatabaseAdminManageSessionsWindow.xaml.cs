@@ -207,7 +207,7 @@ namespace ssi
 
             try
             {
-                dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseBox.SelectedItem.ToString();
+                dialog.SelectedPath = Defaults.LocalDataLocations().First() + "\\" + DatabaseBox.SelectedItem.ToString();
                 result = dialog.ShowDialog();
 
             }
@@ -272,7 +272,7 @@ namespace ssi
 
             try
             {
-                dialog.InitialDirectory = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseBox.SelectedItem.ToString();
+                dialog.InitialDirectory = Defaults.LocalDataLocations().First() + "\\" + DatabaseBox.SelectedItem.ToString();
                 result = dialog.ShowDialog();
 
             }

@@ -5,7 +5,7 @@
     SizeToContent="Height"
     WindowStyle="ToolWindow"
     WindowStartupLocation="CenterScreen"
-    Title=" Annotation"  Height="Auto" Width="300" >
+    Title=" Annotation"  Height="Auto" Width="300" Style="{StaticResource WinAll}" >
 
     <Grid>
 

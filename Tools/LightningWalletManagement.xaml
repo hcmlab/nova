@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         WindowStyle="ToolWindow"
         Title="Lightning Wallet" Height="660" Width="270"
-        Closed="Window_Closed" KeyDown="Window_KeyDown">
+        Closed="Window_Closed" KeyDown="Window_KeyDown" Style="{StaticResource WinAll}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>

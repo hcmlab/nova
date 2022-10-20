@@ -187,7 +187,7 @@ namespace ssi
 
 
 
-            logTextBox.Text += handler.CMLPredictBayesFusion(roleout, sessionsspath, schemespath, Properties.Settings.Default.DatabaseAddress, Properties.Settings.Default.MongoDBUser, MainHandler.Decode(Properties.Settings.Default.MongoDBPass), Properties.Settings.Default.DatabaseDirectory, database, outputscheme, rolesList, annotator, tocontinuous, netpath, filter);
+            logTextBox.Text += handler.CMLPredictBayesFusion(roleout, sessionsspath, schemespath, Properties.Settings.Default.DatabaseAddress, Properties.Settings.Default.MongoDBUser, MainHandler.Decode(Properties.Settings.Default.MongoDBPass), Defaults.LocalDataLocations().First(), database, outputscheme, rolesList, annotator, tocontinuous, netpath, filter);
         }
 
         private void Select(ListBox list, string select) 

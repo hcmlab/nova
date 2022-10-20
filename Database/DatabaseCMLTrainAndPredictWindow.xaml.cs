@@ -422,7 +422,7 @@ namespace ssi
 
 
                 string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
-                                    ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme.Name + ";root=" + Properties.Settings.Default.DatabaseDirectory + ";cooperative=" + (mode == Mode.COMPLETE)  + ";cmlbegintime=" + cmlbegintime};
+                                    ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme.Name + ";root=" + Defaults.LocalDataLocations().First() + ";cooperative=" + (mode == Mode.COMPLETE)  + ";cmlbegintime=" + cmlbegintime};
 
                 string trainertemplatedbinfo = Path.GetDirectoryName(trainer.Path) + "\\nova_db_info";
                 System.IO.File.WriteAllLines(trainertemplatedbinfo, dbinfo);
@@ -541,7 +541,7 @@ namespace ssi
 
                            logTextBox.Text += handler.CMLTrainModel(trainer.Path,
                            trainerOutPath,
-                           Properties.Settings.Default.DatabaseDirectory,
+                           Defaults.LocalDataLocations().First(),
                            Properties.Settings.Default.DatabaseAddress,
                            Properties.Settings.Default.MongoDBUser,
                            MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -570,7 +570,7 @@ namespace ssi
 
                            handler.PythonBackEndTraining(trainer.Path, trainer.Script,
                            trainerOutPath,
-                           Properties.Settings.Default.DatabaseDirectory,
+                           Defaults.LocalDataLocations().First(),
                            Properties.Settings.Default.DatabaseAddress,
                            Properties.Settings.Default.MongoDBUser,
                            MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -597,7 +597,7 @@ namespace ssi
 
                             logTextBox.Text += handler.CMLTrainModel(trainer.Path,
                             trainerOutPath,
-                            Properties.Settings.Default.DatabaseDirectory +  "\\" + database,
+                            Defaults.LocalDataLocations().First() +  "\\" + database,
                             Properties.Settings.Default.DatabaseAddress,
                             Properties.Settings.Default.MongoDBUser,
                             MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -668,7 +668,7 @@ namespace ssi
                     {
 
                         logTextBox.Text += handler.CMLPredictAnnos(mode == Mode.COMPLETE ? tempTrainerPath : trainer.Path,
-                        Properties.Settings.Default.DatabaseDirectory,
+                        Defaults.LocalDataLocations().First(),
                         Properties.Settings.Default.DatabaseAddress,
                         Properties.Settings.Default.MongoDBUser,
                         MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -704,7 +704,7 @@ namespace ssi
                 {                    
                     logTextBox.Text += handler.CMLEvaluateModel(evalOutPath, 
                         trainer.Path,
-                        Properties.Settings.Default.DatabaseDirectory,
+                        Defaults.LocalDataLocations().First(),
                         Properties.Settings.Default.DatabaseAddress,
                         Properties.Settings.Default.MongoDBUser,
                         MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -1292,7 +1292,7 @@ namespace ssi
                 });
             }
 
-            string root = Properties.Settings.Default.DatabaseDirectory + '\\' + DatabaseHandler.DatabaseName;
+            string root = Defaults.LocalDataLocations().First() + '\\' + DatabaseHandler.DatabaseName;
             if (Directory.Exists(root))
             {
                 string[] paths = Directory.GetFiles(root, "*." + Defaults.CML.SessionSetExtension);

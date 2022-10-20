@@ -6,7 +6,7 @@
 
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Raise and manage Bounties" Height="700" Width="1000">
+        Title="Raise and manage Bounties" Height="700" Width="1000" Style="{StaticResource WinAll}">
 
     <Window.Resources>
         <Style x:Key="StreamItemColorStyle" TargetType="{x:Type ListViewItem}">

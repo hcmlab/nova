@@ -21,6 +21,9 @@ using Octokit;
 using Dicom.Imaging.LUT;
 using System.Printing;
 using NDtw;
+using SharpDX;
+using MathNet.Numerics;
+using SharpCompress.Common;
 
 namespace ssi
 {
@@ -254,12 +257,14 @@ namespace ssi
         }
 
 
-        private string CalculateOverlapingLabels(List<AnnoList> al)
+        private string CalculateOverlapingLabels(List<AnnoList> al, bool singleLine = false, bool GetHeaderOnly = false)
         {
             string restclass = "REST";
             AnnoList cont = new AnnoList();
             cont.Scheme = al[0].Scheme;
             List<AnnoScheme.Label> schemelabels = al[0].Scheme.Labels;
+
+            if (!GetHeaderOnly) { 
 
             int[] overlaps = new int[schemelabels.Count+1];
 
@@ -294,7 +299,12 @@ namespace ssi
                 }
             }
 
-            string result = "\n\nOverlapping Windows: ("+ Properties.Settings.Default.DefaultMinSegmentSize + "s)\n";
+                string result = "";
+                if (!singleLine)
+                {
+
+                
+             result = "\n\nOverlapping Windows: ("+ Properties.Settings.Default.DefaultMinSegmentSize + "s)\n";
             double overall = 0;
             double overallpercentage = 0;
             foreach (var label in schemelabels)
@@ -306,6 +316,35 @@ namespace ssi
             result += "Overall: " + overallpercentage.ToString("F3") + "% ("+ overall + "/"+ al[0].Count+  ")\n";
 
             return result;
+
+                }
+                else
+                {
+                    double overall = 0;
+                    double overallpercentage = 0;
+                    foreach (var label in schemelabels)
+                    {
+                        result += (((float)overlaps[schemelabels.IndexOf(label)] / ((float)al[0].Count)) * 100).ToString("F3") + ";" + overlaps[schemelabels.IndexOf(label)]+";";
+                        overallpercentage += (float)(overlaps[schemelabels.IndexOf(label)] / ((float)al[0].Count) * 100);
+                        overall += overlaps[schemelabels.IndexOf(label)];
+                    }
+                    result += overallpercentage.ToString("F3") + ";" + overall + ";";
+
+                    return result;
+
+                }
+            }
+
+                else
+            {
+                string result = "";
+                foreach (var label in schemelabels)
+                {
+                    result += "Overlaps in % " + label.Name + ";Overlaps Num " + label.Name + ";";
+                }
+                result += " Overlaps in % Overall;Overlaps Num Overall;";
+                return result;
+            }
         }
 
         private void AnnotationResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -319,39 +358,10 @@ namespace ssi
                 DtwButton.Visibility = Visibility.Collapsed;
                 string restclass = "REST";
                 List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(annolists, restclass);
-                StatisticsLabel.Content = CalculateClassDistribution(convertedlists);
-               
-              
 
-                if(annolists.Count > 1)
-                {
-                    double cohenkappa = 0;
-                    double fleisskappa = 0;
-                    double kappa = 0;
-                    string interpretation = "";
-                    string kappatype = "";
+                StatisticsLabel.Content = "";
+                StatisticsLabel.Content = buildDiscreteStats(convertedlists);
 
-                    if (annolists.Count == 2)
-                    {
-                        cohenkappa = Statistics.CohensKappa(convertedlists);
-                        kappa = cohenkappa;
-                        kappatype = "Cohen's κ: ";
-                    }
-                    else if (annolists.Count > 2)
-                    {
-                        fleisskappa = Statistics.FleissKappa(convertedlists);
-                        kappa = fleisskappa;
-                        kappatype = "Fleiss' κ: ";
-                    }
-                    StatisticsLabel.Content += "\n\nInterrater reliability:\n" + kappatype + kappa;
-
-
-
-                    
-                    StatisticsLabel.Content +=  CalculateOverlapingLabels(convertedlists);
-                }
-              
-               
                 
             }
 
@@ -359,103 +369,10 @@ namespace ssi
             {
                 DtwButton.Visibility = Visibility.Visible;
                 StatisticsLabel.Content = "Correlation meassures:\n\n";
-                double cronbachalpha = 0;
-                string interpretation = "";
-                if (annolists.Count > 1)
-                {
-              
-
-                            cronbachalpha = Statistics.Cronbachsalpha(annolists);
-                            
-
-                        if (cronbachalpha < 0) cronbachalpha = 0.0; //can happen that it gets a little below 0, this is to avoid confusion.
-
-                        interpretation = Statistics.Cronbachinterpretation(cronbachalpha);
-                  
-
-                    StatisticsLabel.Content += "Samples: " + annolists[0].Count;
-                    StatisticsLabel.ToolTip = "Samples: " + annolists[0].Count;
-                    StatisticsLabel.Content = StatisticsLabel.Content + " \nCronbach's α: " + cronbachalpha.ToString("F3");
-                    StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Cronbach's α: " + interpretation;
-
-                        double spearmancorrelation = double.MaxValue;
-                        if (annolists.Count == 2)
-                        {
-                            spearmancorrelation = Statistics.SpearmanCorrelationMathNet(annolists[0], annolists[1]);
-
-                            if (spearmancorrelation != double.MaxValue)
-                            {
-                                interpretation = Statistics.Spearmaninterpretation(spearmancorrelation);
-
-                            StatisticsLabel.Content = StatisticsLabel.Content + " \nSpearman Correlation: " + spearmancorrelation.ToString("F3");
-                            StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Spearman Correlation: " + interpretation;
-                            }
-
-                            double concordancecorrelation = double.MaxValue;
-                            concordancecorrelation = Statistics.ConcordanceCorrelationCoefficient(annolists[0], annolists[1]);
-
-                            if (concordancecorrelation != double.MaxValue)
-                            {
-
-                                interpretation = Statistics.CCCinterpretation(concordancecorrelation);
-
-                            StatisticsLabel.Content = StatisticsLabel.Content + " \nConcordance Correlation: " + concordancecorrelation.ToString("F3");
-                            StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Concordance Correlation: " + interpretation;
-                            }
-
-                            double pearsoncorrelation = double.MaxValue;
-
-                            pearsoncorrelation = Statistics.PearsonCorrelationMathNet(annolists[0], annolists[1]);
-
-                            int N = annolists[0].Count;
-                            if (annolists[1].Count < annolists[0].Count) N = annolists[1].Count;
-
-                            interpretation = Statistics.Pearsoninterpretation(pearsoncorrelation, N);
-                            var fisherz = Statistics.transform_r_to_z(pearsoncorrelation, N);
-                            var lpvalue = Statistics.transform_z_to_p(fisherz);
-                            var rpvalue = 1 - lpvalue;
-                            var twopvalue = 2 * rpvalue;
-                            var confpvalue = 1 - twopvalue;
-
-                            if (pearsoncorrelation != double.MaxValue)
-                            {
-
-                                double ra = 0.794;
-                                double rb = 0.8;
-                                var testz = Statistics.transform_2r_to_z(ra, N, rb, N);
-                                var testp = Statistics.transform_z_to_p(testz);
-
-                                if (ra > rb)
-                                {
-                                    testp = 1 - testp;
-                                }
-
-                                var testtwopvalue = 2 * testp;
+                StatisticsLabel.Content +=  buildContinuousStats(annolists);
 
 
-
-                            StatisticsLabel.Content = StatisticsLabel.Content + " \nPearson Correlation r: " + pearsoncorrelation.ToString("F3") + " \nFisher z-score: " + fisherz.ToString("F3") + " \nTwo-tailed p value: " + twopvalue.ToString("F3"); ;
-                            StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Pearson Correlation r: " + interpretation + " | Fisher z-score: " + fisherz.ToString("F3");
-                            }
-
-                            double nmse = double.MaxValue;
-                            double mse = double.MaxValue;
-
-                            nmse = Statistics.MSE(annolists, true);
-                            mse = Statistics.MSE(annolists, false);
-
-                            if (nmse != double.MaxValue)
-                            {
-                             StatisticsLabel.Content = StatisticsLabel.Content + " \nMSE: " + mse.ToString("F6") + " \nNMSE: " + nmse.ToString("F6"); ;
-
-
-                        }
-                    }
-
-
-
-                }
-                    }
+            }
             else
             {
                 DtwButton.Visibility = Visibility.Collapsed;
@@ -465,12 +382,20 @@ namespace ssi
         }
 
 
-        private string CalculateClassDistribution(List<AnnoList> convertedlists)
+        private string CalculateClassDistribution(List<AnnoList> convertedlists, bool singleline = false, bool getHeaderonly = false)
         {
+            
             string restclass = "REST";
-            //List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(al, restclass);
             List<AnnoScheme.Label> schemelabels = convertedlists[0].Scheme.Labels;
             schemelabels.Remove(schemelabels.ElementAt(schemelabels.Count - 1));
+
+
+            if (!getHeaderonly)
+            {
+
+          
+                //List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(al, restclass);
+           
             int[] counter = new int[schemelabels.Count + 1];
 
             for (int i = 0; i < convertedlists[0].Count; i++)
@@ -483,13 +408,42 @@ namespace ssi
                 }
             }
 
-            string result = "Class Distribution in %: \n";
-            schemelabels.Add(new AnnoScheme.Label(restclass, Colors.Black));
-            foreach (var label in schemelabels)
-            {
-                result += label.Name + ": " + (((float)counter[schemelabels.IndexOf(label)] / ((float)convertedlists[0].Count * convertedlists.Count)) * 100).ToString("F3") + "%" + "\n";
+            string result = "";
+                if (!singleline)
+                    {
+                      result = "Class Distribution in %: \n";
+              
+                        schemelabels.Add(new AnnoScheme.Label(restclass, Colors.Black));
+                        foreach (var label in schemelabels)
+                        {
+                            result += label.Name + ": " + (((float)counter[schemelabels.IndexOf(label)] / ((float)convertedlists[0].Count * convertedlists.Count)) * 100).ToString("F3") + "%" + "\n";
+                        }
+                        return result;
+
+                }
+                else
+                {
+                    schemelabels.Add(new AnnoScheme.Label(restclass, Colors.Black));
+                    foreach (var label in schemelabels)
+                    {
+                        result += (((float)counter[schemelabels.IndexOf(label)] / ((float)convertedlists[0].Count * convertedlists.Count)) * 100).ToString("F3") + ";";
+                    }
+                    return result;
+
+                }
             }
-            return result;
+
+            else
+            {
+                string result = "";
+                schemelabels.Add(new AnnoScheme.Label(restclass, Colors.Black));
+                foreach (var label in schemelabels)
+                {
+                    result += "Distribution " + label.Name + ";";
+                }
+                return result;
+
+            }
         }
 
         private void AnnoSchemesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -629,6 +583,223 @@ namespace ssi
                 GC.Collect();
             }
             else StatisticsLabel.Content = "For Dynamic Time Wrapping Cost calculation, select 2 Continuous Annotations";
+        }
+
+        private void Stats_Click(object sender, RoutedEventArgs e)
+        {
+
+
+            string filepath = FileTools.SaveFileDialog(AnnoSchemesBox.SelectedItem.ToString(), "csv", "CSV (*.csv)|*.csv", Defaults.LocalDataLocations()[0] + "\\" + DatabasesBox.SelectedItem.ToString());
+
+            string header = "";
+            string data = "";
+
+            string headercont = "Session;Scheme;Samples;Cronbachs α;Spearman Correlation;Concordance Correlation;Pearson Correlation r;MSE;NMSE\n";
+
+            string headerdisc = buildDiscreteStats(DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems), false, "", true);
+
+            foreach (var session in SessionsResultsBox.SelectedItems)
+            {
+                List<DatabaseAnnotation> newList = new List<DatabaseAnnotation>();
+
+                foreach(DatabaseAnnotation anno in AnnotationResultBox.SelectedItems)
+                {
+                    DatabaseAnnotation newAnno = anno;
+                    newAnno.Session = ((DatabaseSession)(session)).Name;
+                    newList.Add(newAnno);
+                }
+
+
+                List<AnnoList> annolists = DatabaseHandler.LoadSession(newList);
+                if (annolists.Count == 0) return;
+
+                if (annolists[0].Scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                {
+                    header = headerdisc;
+                    string restclass = "REST";
+                    List<AnnoList> convertedLists = Statistics.convertAnnoListsToMatrix(annolists, restclass);
+                    data +=  buildDiscreteStats(convertedLists,true, ((DatabaseSession)session).Name);
+
+
+                }
+                else if (annolists[0].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+                {
+                    header = headercont;
+                    data += (buildContinuousStats(annolists, true, ((DatabaseSession)session).Name));
+                }
+            }
+
+            try
+            {
+                File.WriteAllText(filepath, header + data);
+                MessageBox.Show("File created!");
+            }
+            catch
+            {
+                MessageBox.Show("Error wrting file!");
+            }
+
+          
+
+        }
+
+        private string buildDiscreteStats(List<AnnoList> convertedlists, bool singleLine = false, string sessionname = "", bool GetHeaderOnly = false )
+        {
+            string returnstring = "";
+            string delimiter = ";";
+
+            if (singleLine) returnstring = sessionname + delimiter + convertedlists[0].Scheme.Name + delimiter;
+            else if(GetHeaderOnly) returnstring += "Session;Scheme;";
+            returnstring += CalculateClassDistribution(convertedlists, singleLine, GetHeaderOnly);
+
+            returnstring += CalculateOverlapingLabels(convertedlists, singleLine, GetHeaderOnly);
+
+            if (convertedlists.Count > 1)
+            {
+                double kappa = 0;
+                string kappatype = "";
+
+                if (convertedlists.Count == 2)
+                {
+                    if (!GetHeaderOnly)
+                    {
+                        double cohenkappa = Statistics.CohensKappa(convertedlists);
+                        kappa = cohenkappa;
+                    }
+                  
+                    kappatype = "Cohen's κ: ";
+                }
+                else if (convertedlists.Count > 2)
+                {
+                    if (!GetHeaderOnly)
+                    {
+                    double fleisskappa = Statistics.FleissKappa(convertedlists);
+                    kappa = fleisskappa;
+                    }
+                    kappatype = "Fleiss' κ: ";
+                }
+                if (GetHeaderOnly) returnstring += kappatype + delimiter;
+                else if (singleLine) returnstring += kappa.ToString("F3");
+                else returnstring += "\n\nInterrater reliability:\n" + kappatype + kappa.ToString("F3");
+
+
+
+
+                
+
+            }
+            if (GetHeaderOnly || singleLine) returnstring += "\n";
+            return returnstring;
+
+        }
+
+        private string buildContinuousStats(List<AnnoList> annolists, bool singleline = false, string sessionname = "")
+        {
+            string returnstring = "";
+            string delimiter = ";";
+
+            if (singleline) returnstring = sessionname + delimiter + annolists[0].Scheme.Name + delimiter;
+          
+            
+            double cronbachalpha = 0;
+            string interpretation = "";
+            if (annolists.Count > 1)
+            {
+                if (singleline) returnstring += annolists[0].Count + delimiter;
+                else returnstring += "Samples: " + annolists[0].Count;
+
+                cronbachalpha = Statistics.Cronbachsalpha(annolists);
+                if (cronbachalpha < 0) cronbachalpha = 0.0; //can happen that it gets a little below 0, this is to avoid confusion.
+
+                //interpretation = Statistics.Cronbachinterpretation(cronbachalpha);
+
+
+                // StatisticsLabel.ToolTip = "Samples: " + annolists[0].Count;
+                if (singleline) returnstring += cronbachalpha.ToString("F3") + delimiter;
+                else returnstring += " \nCronbach's α: " + cronbachalpha.ToString("F3");
+                // StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Cronbach's α: " + interpretation;
+
+                double spearmancorrelation = double.MaxValue;
+                if (annolists.Count == 2)
+                {
+                    spearmancorrelation = Statistics.SpearmanCorrelationMathNet(annolists[0], annolists[1]);
+
+                    if (spearmancorrelation != double.MaxValue)
+                    {
+                        //interpretation = Statistics.Spearmaninterpretation(spearmancorrelation);
+                        if (singleline) returnstring += spearmancorrelation.ToString("F3") + delimiter;
+                        else returnstring += " \nSpearman Correlation: " + spearmancorrelation.ToString("F3");
+                        //StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Spearman Correlation: " + interpretation;
+                    }
+
+                    double concordancecorrelation = double.MaxValue;
+                    concordancecorrelation = Statistics.ConcordanceCorrelationCoefficient(annolists[0], annolists[1]);
+
+                    if (concordancecorrelation != double.MaxValue)
+                    {
+
+                        //interpretation = Statistics.CCCinterpretation(concordancecorrelation);
+                        if (singleline) returnstring += spearmancorrelation.ToString("F3") + delimiter;
+                        else returnstring += " \nConcordance Correlation: " + concordancecorrelation.ToString("F3");
+                        //StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Concordance Correlation: " + interpretation;
+                    }
+
+                    double pearsoncorrelation = double.MaxValue;
+
+                    pearsoncorrelation = Statistics.PearsonCorrelationMathNet(annolists[0], annolists[1]);
+
+                    int N = annolists[0].Count;
+                    if (annolists[1].Count < annolists[0].Count) N = annolists[1].Count;
+
+                    //interpretation = Statistics.Pearsoninterpretation(pearsoncorrelation, N);
+                    var fisherz = Statistics.transform_r_to_z(pearsoncorrelation, N);
+                    var lpvalue = Statistics.transform_z_to_p(fisherz);
+                    var rpvalue = 1 - lpvalue;
+                    var twopvalue = 2 * rpvalue;
+                    var confpvalue = 1 - twopvalue;
+
+                    if (pearsoncorrelation != double.MaxValue)
+                    {
+
+                        double ra = 0.794;
+                        double rb = 0.8;
+                        var testz = Statistics.transform_2r_to_z(ra, N, rb, N);
+                        var testp = Statistics.transform_z_to_p(testz);
+
+                        if (ra > rb)
+                        {
+                            testp = 1 - testp;
+                        }
+
+                        var testtwopvalue = 2 * testp;
+
+
+                        if (singleline) returnstring += pearsoncorrelation.ToString("F3") + delimiter;
+                        else returnstring += " \nPearson Correlation r: " + pearsoncorrelation.ToString("F3") + " \nFisher z-score: " + fisherz.ToString("F3") + " \nTwo-tailed p value: " + twopvalue.ToString("F3"); ;
+                        //StatisticsLabel.ToolTip = StatisticsLabel.ToolTip + " | Pearson Correlation r: " + interpretation + " | Fisher z-score: " + fisherz.ToString("F3");
+                    }
+
+                    double nmse = double.MaxValue;
+                    double mse = double.MaxValue;
+
+                    nmse = Statistics.MSE(annolists, true);
+                    mse = Statistics.MSE(annolists, false);
+
+                    if (nmse != double.MaxValue)
+                    {
+                        if (singleline) returnstring += mse.ToString("F6") + delimiter + nmse.ToString("F6");
+                        else returnstring += " \nMSE: " + mse.ToString("F6") + " \nNMSE: " + nmse.ToString("F6"); ;
+
+
+                    }
+                }
+
+
+                return returnstring + "\n";
+            }
+
+            else return "";
+
         }
     }
 }

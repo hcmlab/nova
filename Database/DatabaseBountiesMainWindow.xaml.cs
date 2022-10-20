@@ -283,16 +283,18 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
             //progressBar.Visibility = Visibility.Visible;
             bountyDB = selectedBounty.Database;
             bountySession = selectedBounty.Session;
-            string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + bountyDB + "\\" + bountySession + "\\";
+            string localPath = Defaults.LocalDataLocations().First() + "\\" + bountyDB + "\\" + bountySession + "\\";
             Directory.CreateDirectory(Path.GetDirectoryName(localPath));
             streamstoDownload = new List<string>();
 
             foreach (StreamItem stream in selectedBounty.streams)
             {
+                string existingPath = Defaults.FileExistsinPath(stream.Name, DatabaseHandler.DatabaseName, DatabaseHandler.SessionName);
+                string anyPath = existingPath + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream.Name;
 
-                string localfile = localPath + stream.Name;
+               // string localfile = localPath + stream.Name;
 
-                if (!File.Exists(localfile))
+                if (!File.Exists(anyPath))
                 {
                     streamstoDownload.Add(stream.Name);
 
@@ -385,7 +387,8 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
                     webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
 
                     string url = _downloadUrls.Dequeue();
-                    string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + bountyDB + "\\" + bountySession + "\\";
+
+                    string localPath = Defaults.LocalDataLocations().First() + "\\" + bountyDB + "\\" + bountySession + "\\";
                     string[] split = System.IO.Path.GetFileName(url).Split('=');
 
                     string location = localPath + split[split.Length - 1];
@@ -441,7 +444,7 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
             }
             if (e.Cancelled)
             {
-                string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + bountyDB + "\\" + bountySession + "\\";
+                string localPath = Defaults.LocalDataLocations().First() + "\\" + bountyDB + "\\" + bountySession + "\\";
                 foreach (string file in streamstoDownload)
                 {
                     File.Delete(localPath + file);

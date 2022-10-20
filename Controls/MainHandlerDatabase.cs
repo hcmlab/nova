@@ -282,6 +282,7 @@ namespace ssi
         }
         
 
+    
 
 
         private void databaseManageDBs()
@@ -386,7 +387,6 @@ namespace ssi
                             return;
                         }
      
-                        string localPath = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\";
 
                         if (meta.UrlFormat == UrlFormat.NEXTCLOUD)
                         {
@@ -410,20 +410,25 @@ namespace ssi
                             string[] split = url.Split(':');
                             connection = split[0];
                         }
-                    
+
+
+                        string localPath = Defaults.LocalDataLocations().First() + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\";
+
+                       
 
                         Directory.CreateDirectory(Path.GetDirectoryName(localPath));
 
                         List<string> streamstoDownload = new List<string>();
                         foreach (StreamItem stream in streamsAll)
                         {
-
-
+                            string existingPath = Defaults.FileExistsinPath(stream.Name, DatabaseHandler.DatabaseName, DatabaseHandler.SessionName);
+                            string anyPath = existingPath  + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream.Name;
+                             
                             string llocal = localPath + stream.Name;
                             string lurl = url + stream.Name;
 
 
-                            if (File.Exists(llocal))
+                            if (File.Exists(anyPath))
                             {
                                 DatabaseStream temp = new DatabaseStream();
                                 string filename = Path.GetFileNameWithoutExtension(stream.Name);
@@ -439,7 +444,7 @@ namespace ssi
                                 temp.FileExt = stream.Extension;
                                 temp.Type = stream.Type;
                                 DatabaseHandler.GetStream(ref temp);
-                                loadFile(llocal, temp.DimLabels);
+                                loadFile(anyPath, temp.DimLabels);
                                 continue;
                             }
 

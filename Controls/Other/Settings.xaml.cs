@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -239,9 +240,9 @@ namespace ssi
             
             if (Properties.Settings.Default.DatabaseDirectory != DownloadDirectory.Text)                
             {
-                if (Directory.Exists(DownloadDirectory.Text))
+                if (Directory.Exists(DownloadDirectory.Text.Split(';')[0]))
                 {
-                    Directory.CreateDirectory(DownloadDirectory.Text);
+                    Directory.CreateDirectory(DownloadDirectory.Text.Split(';')[0]);
                     Properties.Settings.Default.DatabaseDirectory = DownloadDirectory.Text;
                     Properties.Settings.Default.Save();
                 }
@@ -291,14 +292,14 @@ namespace ssi
         private void PickDownloadDirectory_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
+            dialog.SelectedPath = Defaults.LocalDataLocations().First();
             dialog.ShowNewFolderButton = true;
             dialog.Description = "Select the folder where you want to store the media of your databases in.";
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
 
             try
             {
-                dialog.SelectedPath = Properties.Settings.Default.DatabaseDirectory;
+                dialog.SelectedPath = Defaults.LocalDataLocations().First();
                 result = dialog.ShowDialog();
 
             }

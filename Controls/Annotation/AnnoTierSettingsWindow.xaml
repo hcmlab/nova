@@ -9,7 +9,7 @@
         SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow"
         WindowStartupLocation="CenterOwner"
-        Title="Settings">
+        Title="Settings" Style="{StaticResource WinAll}">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />

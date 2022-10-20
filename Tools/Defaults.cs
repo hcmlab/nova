@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace ssi
     public class Defaults
     {
        
+  
 
         public class Colors
         {
@@ -51,6 +53,35 @@ namespace ssi
         public class Strings
         {
             public static string Unkown = "Unkown";         
+        }
+
+
+        public static List<string> LocalDataLocations()
+        {
+            string[] split = Properties.Settings.Default.DatabaseDirectory.Split(';');
+            List<string> localLocations = new List<string>();
+            foreach (string s in split)
+            {
+                localLocations.Add(s);
+            }
+            //localLocations.Add(Properties.Settings.Default.DatabaseDirectory);
+            //localLocations.Add("W:\\nova\\data"); //TODO
+            //localLocations.Add("K:\\nova\\data"); //TODO
+
+            return localLocations;
+        }
+
+        public static string FileExistsinPath(string filename, string database, string session)
+        {
+            foreach (var path in Defaults.LocalDataLocations())
+            {
+                if (File.Exists(path + "\\" + database + "\\" + session + "\\" + filename))
+                {
+                    return path;
+                }
+            }
+
+            return Defaults.LocalDataLocations().First();
         }
 
         public class CML

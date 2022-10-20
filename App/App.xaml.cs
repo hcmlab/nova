@@ -47,6 +47,8 @@ namespace ssi
                 application.Run();
                 // Allow single instance code to perform cleanup operations
                 SingleInstance<App>.Cleanup();
+
+               
             }
         }
 

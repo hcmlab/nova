@@ -371,7 +371,7 @@ namespace ssi
                     if (role.HasStreams)
                     {
                         string filename = role.Name + "." + stream.Name + "." + stream.FileExt;
-                        string directory = Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session + "\\";
+                        string directory = Defaults.LocalDataLocations().First() + "\\" + DatabaseHandler.DatabaseName + "\\" + session + "\\";
                         string filepath = directory + filename;
                         items.Add(new StreamItem() { Name = filename, Extension = stream.FileExt, Role = role.Name, Type = stream.Name, Exists = File.Exists(filepath) });
                     }

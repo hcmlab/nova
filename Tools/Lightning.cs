@@ -401,16 +401,24 @@ namespace ssi
 
         public async Task<double> PriceinCurrency(int sats, string currency = "USD")
         {
-            string url = "https://api.coinstats.app/public/v1/coins?skip=0&limit=5&currency=" + currency;
-            var client = new HttpClient();
-            var response = await client.GetAsync(url);
+            try
+            {
+                string url = "https://api.coinstats.app/public/v1/coins?skip=0&limit=5&currency=" + currency;
+                var client = new HttpClient();
+                var response = await client.GetAsync(url);
 
-            var responseString = await response.Content.ReadAsStringAsync();
-            dynamic data = JObject.Parse(responseString);
-            //var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
-            var bitcoinprice = data["coins"][0]["price"];
-            var pricepersat = bitcoinprice / 100000000.0;
-            return pricepersat * sats;
+                var responseString = await response.Content.ReadAsStringAsync();
+                dynamic data = JObject.Parse(responseString);
+                //var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+                var bitcoinprice = data["coins"][0]["price"];
+                var pricepersat = bitcoinprice / 100000000.0;
+                return pricepersat * sats;
+            }
+            catch
+            {
+                return double.NaN;
+            }
+           
         }
         //helper for DecodeBolt11
         int getIndexOfFirstLetter(string input)

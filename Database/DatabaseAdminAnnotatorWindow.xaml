@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
         mc:Ignorable="d"
-        Title="Annotator" SizeToContent="Height" Width="300" ResizeMode="NoResize">
+        Title="Annotator" SizeToContent="Height" Width="300" ResizeMode="NoResize" Style="{StaticResource WinAll}">
     <Grid>
 
         <Grid.RowDefinitions>

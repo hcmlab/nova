@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using static Dicom.Network.DicomServiceOptions;
 
 namespace ssi
 {
@@ -446,10 +448,10 @@ namespace ssi
                                 {
                                     string ext = DatabaseHandler.Streams.Find(s => s.Name == name).FileExt;
 
-                                    File.Delete(Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + "." + ext);
+                                    File.Delete(Defaults.LocalDataLocations().First() + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + "." + ext);
                                     if (ext == ("stream"))
                                     {
-                                        File.Delete(Properties.Settings.Default.DatabaseDirectory + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + ".stream~");
+                                        File.Delete(Defaults.LocalDataLocations().First() + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + ".stream~");
                                     }
                                 }
 

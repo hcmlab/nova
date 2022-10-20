@@ -8,7 +8,7 @@
         Title="New Scheme"  
         ResizeMode="NoResize"
         Icon="..\..\Resources\ui.ico"
-        SizeToContent="WidthAndHeight">
+        SizeToContent="WidthAndHeight" Style="{StaticResource WinAll}">
 
     <Grid Margin="5" Height="480">
 

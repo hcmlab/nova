@@ -7,7 +7,7 @@
         xmlns:DV="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:DVC="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         mc:Ignorable="d"
-        Title="SignalStatsWindow" Height="360" Width="360"  Closing="Window_Closing">
+        Title="SignalStatsWindow" Height="360" Width="360"  Closing="Window_Closing" Style="{StaticResource WinAll}">
 
     <Window.Resources>
 
