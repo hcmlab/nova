@@ -579,10 +579,10 @@ namespace ssi
 
                 Dtw dtw = new Dtw(seriesA, seriesB);
                 var cost = dtw.GetCost();
-                StatisticsLabel.Content += "\n\nDynamic Time Wrapping\nCost: " + cost.ToString();
+                StatisticsLabel.Content += "\n\nDynamic Time Warping\nCost: " + cost.ToString();
                 GC.Collect();
             }
-            else StatisticsLabel.Content = "For Dynamic Time Wrapping Cost calculation, select 2 Continuous Annotations";
+            else StatisticsLabel.Content = "For Dynamic Time Warping Cost calculation, select 2 Continuous Annotations";
         }
 
         private void Stats_Click(object sender, RoutedEventArgs e)
