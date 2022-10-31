@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Web.UI.DataVisualization.Charting;
 using System.Windows;
 using System.Windows.Media;
 
@@ -4409,7 +4410,7 @@ namespace ssi
 
 
             List<Signal> signals = new List<Signal>();
-            string localPath = Defaults.LocalDataLocations().First() + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\";
+            
 
 
 
@@ -4438,6 +4439,17 @@ namespace ssi
 
 
                     Signal signal = null;
+                    string localPath = "";
+                    foreach (var path in Defaults.LocalDataLocations())
+                    {
+                        if (File.Exists(path + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + file.Name))
+                        {
+                            localPath = path + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + file.Name;
+                            break;
+                        } 
+                    }
+                   
+
 
                     signal = Signal.LoadStreamFile(localPath + file.Name, temp.DimLabels);
                     signals.Add(signal);

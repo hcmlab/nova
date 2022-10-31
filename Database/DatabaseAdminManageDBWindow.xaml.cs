@@ -448,6 +448,7 @@ namespace ssi
                                 {
                                     string ext = DatabaseHandler.Streams.Find(s => s.Name == name).FileExt;
 
+
                                     File.Delete(Defaults.LocalDataLocations().First() + "\\" + DatabaseHandler.DatabaseName + "\\" + session.Name + "\\" + role.Name + "." + name + "." + ext);
                                     if (ext == ("stream"))
                                     {

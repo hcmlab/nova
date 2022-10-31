@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using NAudio.CoreAudioApi;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Xml;
+using Tamir.SharpSsh.jsch;
 
 namespace ssi
 {
@@ -124,12 +126,37 @@ namespace ssi
                     {
                         foreach (DatabaseRole role in roles)
                         {
-                            string fromPath = Defaults.LocalDataLocations().First() + "\\"
-                            + database + "\\"
-                            + session.Name + "\\"
-                            + role.Name + "." + stream.Name + "." + stream.FileExt;
+                            string fromPath = "";
+                            bool foundpath = false;
+                            foreach(string path in Defaults.LocalDataLocations())
+                            {
+                                if(File.Exists(path + "\\"
+                                + database + "\\"
+                                + session.Name + "\\"
+                                + role.Name + "." + stream.Name + "." + stream.FileExt))
+                                    
+                                {
+                                    fromPath = path + "\\"
+                                    + database + "\\"
+                                    + session.Name + "\\"
+                                    + role.Name + "." + stream.Name + "." + stream.FileExt;
+                                    foundpath = true;
+                                    break;
+                                }
 
-                            string toPath = Path.GetDirectoryName(fromPath) + "\\"
+
+                            }
+
+
+                            if (foundpath)
+                            {
+
+                            }
+                         
+
+
+
+                            string toPath = Path.GetDirectoryName(fromPath) + "\\" 
                             + role.Name + "." + featureName + ".stream";
 
                             if (force || !File.Exists(toPath))
@@ -250,7 +277,27 @@ namespace ssi
                 }
             }
 
-            string rootDir = Defaults.LocalDataLocations().First() + "\\" + database;
+          
+            string fromPath = "";
+            bool foundpath = false;
+            foreach (string path in Defaults.LocalDataLocations())
+            {
+                if (File.Exists(path + "\\"
+                + database + "\\"
+                + sessionList.Split(';')[0] + "\\"
+                + roleList.Split(';')[0] + "." + streamList.Split(';')[0] + ".stream"))
+
+                {
+                    fromPath = path;
+                    foundpath = true;
+                    break;
+                }
+
+
+            }
+            string rootDir = fromPath + "\\" + database;
+
+
 
             logTextBox.Text = handler.CMLMergeFeature(rootDir, sessionList, roleList, streamList, featureName, force);
 

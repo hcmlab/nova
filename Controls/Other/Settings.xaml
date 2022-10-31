@@ -166,7 +166,7 @@
                     <TextBox Grid.Row="3" Name="DBUser" Margin="5,0,5,5" GotKeyboardFocus="DBUser_GotFocus" GotMouseCapture="DBUser_GotMouseCapture" Grid.ColumnSpan="2"/>
                     <Label Name="passwordtext" Grid.Row="4" Content="Database password:" Grid.ColumnSpan="2" />
                     <PasswordBox Grid.Row="5" Name="DBPassword" Margin="5,0,5,5" GotKeyboardFocus="DBPassword_GotFocus" GotMouseCapture="DBPassword_GotMouseCapture" Grid.ColumnSpan="2" />
-                    <Label Grid.Row="6" Content="Download directory:" Grid.ColumnSpan="2"/>
+                    <Label Grid.Row="6" Content="Download/Data  directories:" Grid.ColumnSpan="2"/>
                     <DockPanel Grid.Row="7" LastChildFill="True" Grid.ColumnSpan="2">
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                             <Button Name="PickDownloadDirectory" Margin="5,0,5,5" Click="PickDownloadDirectory_Click">Pick</Button>
