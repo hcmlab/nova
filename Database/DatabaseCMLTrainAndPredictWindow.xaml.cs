@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using ExCSS;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
@@ -13,8 +14,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
+using Path = System.IO.Path;
 
 namespace ssi
 {
@@ -100,9 +103,9 @@ namespace ssi
 
             if (mode == Mode.COMPLETE)
             {
-                ModeTabControl.Visibility = Visibility.Collapsed;
-                CMLEndpointLabel.Visibility = Visibility.Visible;
-                CMLEndpointTextBox.Visibility = Visibility.Visible;
+                ModeTabControl.Visibility = System.Windows.Visibility.Collapsed;
+                CMLEndpointLabel.Visibility = System.Windows.Visibility.Visible;
+                CMLEndpointTextBox.Visibility = System.Windows.Visibility.Visible;
                 TrainerNameTextBox.IsEnabled = false;
       
             }
@@ -118,8 +121,8 @@ namespace ssi
             else
             {
                 ModeTabControl.SelectedIndex = (int)mode;
-                CMLEndpointLabel.Visibility = Visibility.Collapsed;
-                CMLEndpointTextBox.Visibility = Visibility.Collapsed;
+                CMLEndpointLabel.Visibility = System.Windows.Visibility.Collapsed;
+                CMLEndpointTextBox.Visibility = System.Windows.Visibility.Collapsed;
                 TrainerNameTextBox.IsEnabled = true;
             }
 
@@ -197,10 +200,10 @@ namespace ssi
                     ApplyButton.Content = "Complete";
                     TrainerLabel.Content = "Template";
 
-                    PredictOptionsPanel.Visibility = Visibility.Visible;
-                    TrainOptionsPanel.Visibility = Visibility.Visible;
-                    ForceCheckBox.Visibility = Visibility.Collapsed;
-                    SelectSessionSetComboBoxPanel.Visibility = Visibility.Collapsed;
+                    PredictOptionsPanel.Visibility = System.Windows.Visibility.Visible;
+                    TrainOptionsPanel.Visibility = System.Windows.Visibility.Visible;
+                    ForceCheckBox.Visibility = System.Windows.Visibility.Collapsed;
+                    SelectSessionSetComboBoxPanel.Visibility = System.Windows.Visibility.Collapsed;
 
                     TrainerNameTextBox.IsEnabled = false;
                     DatabasesBox.IsEnabled = false;
@@ -216,12 +219,12 @@ namespace ssi
                     ConfidenceTextBox.Text = Properties.Settings.Default.CMLDefaultConf.ToString();
                     FillGapTextBox.Text = Properties.Settings.Default.CMLDefaultGap.ToString();
                     RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
-                    LosoCheckBox.Visibility = Visibility.Collapsed;
+                    LosoCheckBox.Visibility = System.Windows.Visibility.Collapsed;
 
-                    AnnotationSelectionBox.Visibility = Visibility.Collapsed;
-                    removePair.Visibility = Visibility.Collapsed;
-                    multidatabaseadd.Visibility = Visibility.Collapsed;
-                    multidatabaselabel.Visibility = Visibility.Collapsed;
+                    AnnotationSelectionBox.Visibility = System.Windows.Visibility.Collapsed;
+                    removePair.Visibility = System.Windows.Visibility.Collapsed;
+                    multidatabaseadd.Visibility = System.Windows.Visibility.Collapsed;
+                    multidatabaselabel.Visibility = System.Windows.Visibility.Collapsed;
 
                     break;
 
@@ -231,15 +234,15 @@ namespace ssi
                     ApplyButton.Content = "Train";
                     TrainerLabel.Content = "Template";
 
-                    PredictOptionsPanel.Visibility = Visibility.Collapsed;
-                    TrainOptionsPanel.Visibility = Visibility.Visible;
-                    ForceCheckBox.Visibility = Visibility.Visible;
-                    LosoCheckBox.Visibility = Visibility.Collapsed;
+                    PredictOptionsPanel.Visibility = System.Windows.Visibility.Collapsed;
+                    TrainOptionsPanel.Visibility = System.Windows.Visibility.Visible;
+                    ForceCheckBox.Visibility = System.Windows.Visibility.Visible;
+                    LosoCheckBox.Visibility = System.Windows.Visibility.Collapsed;
 
-                    AnnotationSelectionBox.Visibility = Visibility.Visible;
-                    removePair.Visibility = Visibility.Visible;
-                    multidatabaseadd.Visibility = Visibility.Visible;
-                    multidatabaselabel.Visibility = Visibility.Visible;
+                    AnnotationSelectionBox.Visibility = System.Windows.Visibility.Visible;
+                    removePair.Visibility = System.Windows.Visibility.Visible;
+                    multidatabaseadd.Visibility = System.Windows.Visibility.Visible;
+                    multidatabaselabel.Visibility = System.Windows.Visibility.Visible;
 
 
                     break;
@@ -250,15 +253,15 @@ namespace ssi
                     ApplyButton.Content = "Evaluate";
                     TrainerLabel.Content = "Trainer";
 
-                    PredictOptionsPanel.Visibility = Visibility.Collapsed;
-                    TrainOptionsPanel.Visibility = Visibility.Collapsed;
-                    ForceCheckBox.Visibility = Visibility.Collapsed;
-                    LosoCheckBox.Visibility = Visibility.Visible;
+                    PredictOptionsPanel.Visibility = System.Windows.Visibility.Collapsed;
+                    TrainOptionsPanel.Visibility = System.Windows.Visibility.Collapsed;
+                    ForceCheckBox.Visibility = System.Windows.Visibility.Collapsed;
+                    LosoCheckBox.Visibility = System.Windows.Visibility.Visible;
 
-                    AnnotationSelectionBox.Visibility = Visibility.Collapsed;
-                    removePair.Visibility = Visibility.Collapsed;
-                    multidatabaseadd.Visibility = Visibility.Collapsed;
-                    multidatabaselabel.Visibility = Visibility.Collapsed;
+                    AnnotationSelectionBox.Visibility = System.Windows.Visibility.Collapsed;
+                    removePair.Visibility = System.Windows.Visibility.Collapsed;
+                    multidatabaseadd.Visibility = System.Windows.Visibility.Collapsed;
+                    multidatabaselabel.Visibility = System.Windows.Visibility.Collapsed;
 
                     break;
 
@@ -268,10 +271,10 @@ namespace ssi
                     ApplyButton.Content = "Predict";
                     TrainerLabel.Content = "Trainer";
 
-                    PredictOptionsPanel.Visibility = Visibility.Visible;
-                    TrainOptionsPanel.Visibility = Visibility.Collapsed;
-                    ForceCheckBox.Visibility = Visibility.Collapsed;
-                    LosoCheckBox.Visibility = Visibility.Collapsed;
+                    PredictOptionsPanel.Visibility = System.Windows.Visibility.Visible;
+                    TrainOptionsPanel.Visibility = System.Windows.Visibility.Collapsed;
+                    ForceCheckBox.Visibility = System.Windows.Visibility.Collapsed;
+                    LosoCheckBox.Visibility = System.Windows.Visibility.Collapsed;
 
                     ConfidenceCheckBox.IsChecked = Properties.Settings.Default.CMLSetConf;
                     FillGapCheckBox.IsChecked = Properties.Settings.Default.CMLFill;
@@ -281,10 +284,10 @@ namespace ssi
                     FillGapTextBox.Text = Properties.Settings.Default.CMLDefaultGap.ToString();
                     RemoveLabelTextBox.Text = Properties.Settings.Default.CMLDefaultMinDur.ToString();
 
-                    AnnotationSelectionBox.Visibility = Visibility.Collapsed;
-                    removePair.Visibility = Visibility.Collapsed;
-                    multidatabaseadd.Visibility = Visibility.Collapsed;
-                    multidatabaselabel.Visibility = Visibility.Collapsed;
+                    AnnotationSelectionBox.Visibility = System.Windows.Visibility.Collapsed;
+                    removePair.Visibility = System.Windows.Visibility.Collapsed;
+                    multidatabaseadd.Visibility = System.Windows.Visibility.Collapsed;
+                    multidatabaselabel.Visibility = System.Windows.Visibility.Collapsed;
 
                     break;
             }
@@ -486,6 +489,21 @@ namespace ssi
 
             logTextBox.Text = "";
 
+
+            string root = "";
+            foreach (var location in Defaults.LocalDataLocations())
+            {
+                if (File.Exists(location + "\\"
+                  + database + "\\"
+                  + sessionList.Split(';')[0] + "\\"
+                  + rolesList.Split(';')[0] + "." + stream.Name + "." + stream.FileExt))
+                {
+
+                    root = location;
+                    break;
+                }
+            }
+
             if (mode == Mode.TRAIN 
                 || mode == Mode.COMPLETE)
             {
@@ -532,6 +550,7 @@ namespace ssi
                     try
                     {
 
+
                         string infofile = createMetaFiles(database, annotator, rolesList, stream, sessionList, scheme, trainer);
 
                      
@@ -539,9 +558,11 @@ namespace ssi
                         if (trainer.Backend.ToUpper() == "SSI")
                         {
 
+                      
+
                            logTextBox.Text += handler.CMLTrainModel(trainer.Path,
                            trainerOutPath,
-                           Defaults.LocalDataLocations().First(),
+                           root,
                            Properties.Settings.Default.DatabaseAddress,
                            Properties.Settings.Default.MongoDBUser,
                            MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -570,7 +591,7 @@ namespace ssi
 
                            handler.PythonBackEndTraining(trainer.Path, trainer.Script,
                            trainerOutPath,
-                           Defaults.LocalDataLocations().First(),
+                           root,
                            Properties.Settings.Default.DatabaseAddress,
                            Properties.Settings.Default.MongoDBUser,
                            MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -597,7 +618,7 @@ namespace ssi
 
                             logTextBox.Text += handler.CMLTrainModel(trainer.Path,
                             trainerOutPath,
-                            Defaults.LocalDataLocations().First() +  "\\" + database,
+                            root +  "\\" + database,
                             Properties.Settings.Default.DatabaseAddress,
                             Properties.Settings.Default.MongoDBUser,
                             MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -668,7 +689,7 @@ namespace ssi
                     {
 
                         logTextBox.Text += handler.CMLPredictAnnos(mode == Mode.COMPLETE ? tempTrainerPath : trainer.Path,
-                        Defaults.LocalDataLocations().First(),
+                        root,
                         Properties.Settings.Default.DatabaseAddress,
                         Properties.Settings.Default.MongoDBUser,
                         MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -704,7 +725,7 @@ namespace ssi
                 {                    
                     logTextBox.Text += handler.CMLEvaluateModel(evalOutPath, 
                         trainer.Path,
-                        Defaults.LocalDataLocations().First(),
+                        root,
                         Properties.Settings.Default.DatabaseAddress,
                         Properties.Settings.Default.MongoDBUser,
                         MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -1292,26 +1313,32 @@ namespace ssi
                 });
             }
 
-            string root = Defaults.LocalDataLocations().First() + '\\' + DatabaseHandler.DatabaseName;
-            if (Directory.Exists(root))
+           
+            foreach(var location in Defaults.LocalDataLocations())
             {
-                string[] paths = Directory.GetFiles(root, "*." + Defaults.CML.SessionSetExtension);
-
-                if (paths.Length > 0)
+                string root = location + '\\' + DatabaseHandler.DatabaseName;
+                if (Directory.Exists(root))
                 {
-                    foreach (string path in paths)
-                    {
-                        sets.Add(new SessionSet()
-                        {
-                            Set = SessionSet.Type.FILE,
-                            Path = path,
-                            Name = Path.GetFileNameWithoutExtension(path)
-                        });
-                    }
-                }
 
-                SelectSessionSetComboBox.ItemsSource = sets;
+                    string[] paths = Directory.GetFiles(root, "*." + Defaults.CML.SessionSetExtension);
+
+                    if (paths.Length > 0)
+                    {
+                        foreach (string path in paths)
+                        {
+                            sets.Add(new SessionSet()
+                            {
+                                Set = SessionSet.Type.FILE,
+                                Path = path,
+                                Name = Path.GetFileNameWithoutExtension(path)
+                            });
+                        }
+                    }
+
+                }
             }
+            SelectSessionSetComboBox.ItemsSource = sets;
+          
         }
 
         private void SelectSessionsFromFile(SessionSet set)

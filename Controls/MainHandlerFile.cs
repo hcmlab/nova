@@ -80,6 +80,7 @@ namespace ssi
                 showShadowBox("Loading '" + filenames[0].ToString() + "'");
                 LoadDicomFile(filenames);
                 hideShadowBox();
+                polygonUtilities.updateImageSize();
             }
 
 
