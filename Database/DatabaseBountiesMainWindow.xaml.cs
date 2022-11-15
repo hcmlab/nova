@@ -289,8 +289,9 @@ private void AcceptButton_Click(object sender, RoutedEventArgs e)
 
             foreach (StreamItem stream in selectedBounty.streams)
             {
+
                 string existingPath = Defaults.FileExistsinPath(stream.Name, DatabaseHandler.DatabaseName, DatabaseHandler.SessionName);
-                string anyPath = existingPath + "\\" + DatabaseHandler.DatabaseName + "\\" + DatabaseHandler.SessionName + "\\" + stream.Name;
+                string anyPath = existingPath + "\\" + bountyDB + "\\" + bountySession + "\\" + stream.Name;
 
                // string localfile = localPath + stream.Name;
 

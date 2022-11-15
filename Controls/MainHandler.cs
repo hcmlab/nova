@@ -22,7 +22,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.3.8";
+        public static string BuildVersion = "1.2.3.9";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -377,6 +377,17 @@ namespace ssi
             {
 
                 DownloadFile("https://github.com/hcmlab/nova/raw/master/" + hardwareAcceleratorLibrary, hardwareAcceleratorLibraryPath);
+
+            }
+
+
+            string dicomLib = "Dicom.Native64.dll";
+            string dicomLibPath = AppDomain.CurrentDomain.BaseDirectory + dicomLib;
+
+            if (!(File.Exists(dicomLibPath)))
+            {
+
+                DownloadFile("https://github.com/hcmlab/nova/raw/master/bin/" + dicomLib, dicomLibPath);
 
             }
 
