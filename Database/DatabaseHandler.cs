@@ -4184,6 +4184,7 @@ namespace ssi
                 if (annotation.TryGetElement("bountyIsPaid", out value))
                 {
                     isPaid = annotation["bountyIsPaid"].AsBoolean;
+                   
                 }
 
                 DatabaseSession session = sessions.Find(s => s.Id == sessionid);
@@ -4451,7 +4452,7 @@ namespace ssi
                    
 
 
-                    signal = Signal.LoadStreamFile(localPath + file.Name, temp.DimLabels);
+                    signal = Signal.LoadStreamFile(localPath, temp.DimLabels);
                     signals.Add(signal);
                 }
             }

@@ -22,15 +22,15 @@
         <Style x:Key="WinAll" TargetType="{x:Type Window}">
             <!--<Setter Property="FontFamily"
         Value="Calibri" />-->
-            <Setter Property="FontSize"
-        Value="11" />
+            <!--<Setter Property="FontSize"
+        Value="11" />-->
         </Style>
 
         <Style x:Key="ControlAll" TargetType="{x:Type UserControl}">
                 <!--<Setter Property="FontFamily"
         Value="Calibri" />-->
-            <Setter Property="FontSize"
-        Value="11" />
+            <!--<Setter Property="FontSize"
+        Value="11" />-->
         </Style>
 
         <SolidColorBrush x:Key="ComboBox.Static.Background" Color="Transparent"/>
