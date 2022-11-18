@@ -189,7 +189,7 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="Server">
+            <TabItem Header="Backend Server">
 
                 <Grid>
                     <Grid.RowDefinitions>

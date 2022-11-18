@@ -1,8 +1,8 @@
-﻿using ExCSS;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
@@ -28,13 +29,19 @@ namespace ssi
     {
         private MainHandler handler;
         private Mode mode;
+        private Status status = 0;
         private List<SelectedDatabaseAndSessions> selectedDatabaseAndSessions = new List<SelectedDatabaseAndSessions>();
         private List<string> databases = new List<string>();
         string lockedScheme = null;
 
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
-        
+
+        private Thread logThread = null;
+        private Thread statusThread = null;
+
+        private static IList sessions = null;
+        private static string sessionList = "";
 
         public class Trainer
         {
@@ -92,11 +99,47 @@ namespace ssi
             COMPLETE
         }
 
+        public enum Status
+        {
+            WAITING = 0,
+            RUNNING = 1,
+            FINISHED = 2,
+            ERROR = 3
+        }
+
+        private class statusObject
+        {
+            private int key;
+            private string text;
+            private SolidColorBrush color;
+            public statusObject(int key, string text, SolidColorBrush color)
+            {
+                this.key = key;
+                this.text = text;
+                this.color = color;
+            }
+
+            public string getText()
+            {
+                return text;
+            }
+
+            public SolidColorBrush getColor()
+            {
+                return color;
+            }
+        }
+
+        private statusObject[] states = new statusObject[4];
+
+        private static bool polygonCaseOn = true;
+
         private bool handleSelectionChanged = false;
 
         public DatabaseCMLTrainAndPredictWindow(MainHandler handler, Mode mode)
         {   
             InitializeComponent();
+            createStatusObjects();
 
             this.handler = handler;
             this.mode = mode;
@@ -109,15 +152,6 @@ namespace ssi
                 TrainerNameTextBox.IsEnabled = false;
       
             }
-
-            //if (MainHandler.ENABLE_PYTHON)
-            //{
-            //    MainHandler.killExplanationBackend();
-            //    MainHandler.pythonProcessID = MainHandler.startExplanationBackend(true);
-               
-            //}
-
-
             else
             {
                 ModeTabControl.SelectedIndex = (int)mode;
@@ -126,11 +160,220 @@ namespace ssi
                 TrainerNameTextBox.IsEnabled = true;
             }
 
+            Thread logThread = new Thread(new ThreadStart(tryToGetLog));
+            Thread statusThread = new Thread(new ThreadStart(tryToGetStatus));
+            logThread.Start();
+            statusThread.Start();
+            changeFrontendInPolygonCase();
+
             Loaded += Window_Loaded;
            
             HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.";
             HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";
         }
+
+        private void createStatusObjects()
+        {
+            string[] stateStrings = { "Connected to Server!", "Process running...", "Process finished!", "An error occurred!" };
+            SolidColorBrush[] stateColors = { new SolidColorBrush(Colors.LightGray), new SolidColorBrush(Colors.Orange),
+                                              new SolidColorBrush(Colors.Green), new SolidColorBrush(Colors.Red) };
+
+            for (int i = 0; i < states.Length; i++)
+            {
+                states[i] = new statusObject(i, stateStrings[i], stateColors[i]);
+            }
+        }
+
+        private void tryToGetLog()
+        {
+            Trainer trainer = null;
+            this.Dispatcher.Invoke(() =>
+            {
+                trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+            });
+
+            if (trainer.Backend.ToUpper() != "PYTHON")
+                return;
+
+            Dictionary<string, string> response = null;
+            while (polygonCaseOn)
+            {
+                MultipartFormDataContent content = getContent();
+                // else case is handled in status-thread (see tryToGetStatus method)
+                if (content != null)
+                {
+                    try
+                    {
+                        response = handler.getLogFromServer(content);
+
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            logTextBox.Text = response["message"];
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        handleError(ex);
+                    }
+                }
+
+                Thread.Sleep(4000);
+            }
+        }
+
+        private void tryToGetStatus()
+        {
+            Dictionary<string, string> response = null;
+            while (polygonCaseOn)
+            {
+                MultipartFormDataContent content = getContent();
+                if (content != null)
+                {
+                    try
+                    {
+                        response = handler.getStatusFromServer(content);
+                        this.status = (Status)Int16.Parse(response["status"]);
+
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            statusLabel.Content = states[(int)this.status].getText();
+                            statusLabel.Background = states[(int)this.status].getColor();
+                        });
+
+                        if (this.status != Status.RUNNING)
+                        {
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                this.ApplyButton.IsEnabled = true;
+                                this.Cancel_Button.IsEnabled = false;
+                            });
+                        }
+                        else
+                        {
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                this.ApplyButton.IsEnabled = false;
+                                this.Cancel_Button.IsEnabled = true;
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        handleError(ex);
+                    }
+                }
+                else
+                {
+                    this.status = Status.ERROR;
+
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        statusLabel.Content = states[(int)this.status].getText();
+                        statusLabel.Background = states[(int)this.status].getColor();
+                        ApplyButton.IsEnabled = false;
+                        logTextBox.Text = "Please select database, schema, stream, session, annotator and the trainer script!";
+                    });
+                }
+
+                Thread.Sleep(4000);
+            }
+        }
+
+        private void handleError(Exception ex)
+        {
+            this.status = Status.ERROR;
+
+            this.Dispatcher.Invoke(() =>
+            {
+                statusLabel.Content = states[(int)this.status].getText();
+                statusLabel.Background = states[(int)this.status].getColor();
+                ApplyButton.IsEnabled = false;
+                logTextBox.Text = "No connection to server!";
+            });
+        }
+
+        private MultipartFormDataContent getContent()
+        {
+            DatabaseScheme scheme = null;
+            DatabaseStream stream = null;
+            DatabaseAnnotator annotator = null;
+            Trainer trainer = null;
+
+
+            this.Dispatcher.Invoke(() =>
+            {
+                scheme = (DatabaseScheme)SchemesBox.SelectedItem;
+                stream = (DatabaseStream)StreamsBox.SelectedItem;
+                annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
+                trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+                setSessionList();
+            });
+
+            string database = DatabaseHandler.DatabaseName;
+            if (database == null || scheme == null || stream == null || trainer == null || annotator == null || sessionList == "")
+                return null;
+
+            return new MultipartFormDataContent
+            {
+                { new StringContent(database), "database" },
+                { new StringContent(scheme.Name), "scheme" },
+                { new StringContent(stream.Name), "streamName" },   
+                { new StringContent(annotator.Name), "annotator" },
+                { new StringContent(sessionList), "sessions" },
+                { new StringContent(trainer.Name), "trainerScriptName" },
+                { new StringContent(this.mode.ToString()), "mode" }
+            };
+        }
+
+        private void setSessionList()
+        {
+            sessions = SessionsBox.SelectedItems;
+            sessionList = "";
+            foreach (DatabaseSession session in sessions)
+            {
+                if (sessionList == "")
+                {
+                    sessionList += session.Name;
+                }
+                else
+                {
+                    sessionList += ";" + session.Name;
+                }
+            }
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (this.mode == Mode.COMPLETE && this.status == Status.RUNNING)
+            {
+                var result = MessageBox.Show("There is still a training going on at the moment. If you close this window, it will be canceled. Do you want that?", "Warning", MessageBoxButton.YesNo);
+                if (result != MessageBoxResult.Yes)
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    handler.cancleCurrentAction(getContent());
+                }
+            }
+        }
+
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            polygonCaseOn = false;
+        }
+
+        private void Cancel_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("Do you really want to cancel the current action?", "Warning", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                handler.cancleCurrentAction(getContent());
+                this.Cancel_Button.IsEnabled = false;
+            }
+        }
+
 
         #region Window
 
@@ -423,22 +666,24 @@ namespace ssi
                 double cmlbegintime = (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
                 MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
 
+                if (!polygonCaseOn)
+                {
+                    string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
+                                    ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme.Name + ";root=" + Properties.Settings.Default.DatabaseDirectory + ";cooperative=" + (mode == Mode.COMPLETE)  + ";cmlbegintime=" + cmlbegintime};
 
-                string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
-                                    ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme.Name + ";root=" + Defaults.LocalDataLocations().First() + ";cooperative=" + (mode == Mode.COMPLETE)  + ";cmlbegintime=" + cmlbegintime};
-
-                string trainertemplatedbinfo = Path.GetDirectoryName(trainer.Path) + "\\nova_db_info";
-                System.IO.File.WriteAllLines(trainertemplatedbinfo, dbinfo);
+                    string trainertemplatedbinfo = Path.GetDirectoryName(trainer.Path) + "\\nova_db_info";
+                    System.IO.File.WriteAllLines(trainertemplatedbinfo, dbinfo);
+                }
             }
 
             return infofile;
         }
 
-        
+
 
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
-            Trainer trainer = (Trainer) TrainerPathComboBox.SelectedItem;
+            Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
             bool force = mode == Mode.COMPLETE || ForceCheckBox.IsChecked.Value;
 
             if (!File.Exists(trainer.Path))
@@ -446,25 +691,11 @@ namespace ssi
                 MessageTools.Warning("file does not exist '" + trainer.Path + "'");
                 return;
             }
-            
+
             string database = DatabaseHandler.DatabaseName;
 
-            DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;                        
-
-            string sessionList = "";
-            var sessions = SessionsBox.SelectedItems;
-            foreach (DatabaseSession session in sessions)
-            {
-                if (sessionList == "")
-                {
-                    sessionList += session.Name;
-                }
-                else
-                {
-                    sessionList += ";" + session.Name;
-                }
-            }
-
+            DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
+            setSessionList();
             DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
 
             string rolesList = "";
@@ -480,16 +711,14 @@ namespace ssi
                     rolesList += ";" + role.Name;
                 }
             }
-            
+
             DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
 
             string trainerLeftContext = LeftContextTextBox.Text;
             string trainerRightContext = RightContextTextBox.Text;
-            string trainerBalance = ((ComboBoxItem) BalanceComboBox.SelectedItem).Content.ToString();
+            string trainerBalance = ((ComboBoxItem)BalanceComboBox.SelectedItem).Content.ToString();
 
             logTextBox.Text = "";
-
-
             string root = "";
             foreach (var location in Defaults.LocalDataLocations())
             {
@@ -504,121 +733,132 @@ namespace ssi
                 }
             }
 
-            if (mode == Mode.TRAIN 
-                || mode == Mode.COMPLETE)
+            if (trainer.Backend.ToUpper() == "PYTHON")
             {
-                string streamName = "";
-                string[] streamParts = stream.Name.Split('.');
-                if (streamParts.Length <= 1)
+                handlePolygonBackend(trainer, scheme, stream, annotator, database, trainerLeftContext, trainerRightContext, trainerBalance, rolesList);
+            }
+            else
+            {
+                if (mode == Mode.TRAIN || mode == Mode.COMPLETE)
                 {
-                    streamName = stream.Name;
-                }
-                else
-                {
-                    streamName = streamParts[1];
-                    for (int i = 2; i < streamParts.Length; i++)
-                    {
-                        streamName += "." + streamParts[i];
-                    }
-                }
-               
+                    String streamName = getStreamName(stream);
+                    String trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
+                    String trainerOutPath = getTrainerOutPath(trainer, trainerDir);
 
-                string trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
-                                Defaults.CML.ModelsFolderName + "\\" +
-                                Defaults.CML.ModelsTrainerFolderName + "\\" +
-                                scheme.Type.ToString().ToLower() + "\\" +
-                                scheme.Name + "\\" +
-                                stream.Type + "{" +
-                                streamName + "}\\" +
-                                trainer.Name + "\\";
-
-                try
-                {
-                    Directory.CreateDirectory(trainerDir);
-                }
-                catch
-                {
-                    MessageBox.Show("Could not create folder " + trainerDir + " Make sure NOVA has writing access to the directory");
-                    return;
-                }
-                
-                string trainerName = TrainerNameTextBox.Text == "" ? trainer.Name : TrainerNameTextBox.Text;
-                string trainerOutPath = mode == Mode.COMPLETE ? tempTrainerPath : trainerDir + trainerName;
-
-                if (force || !File.Exists(trainerOutPath + ".trainer"))
-                {
                     try
                     {
+                        Directory.CreateDirectory(trainerDir);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Could not create folder " + trainerDir + " Make sure NOVA has writing access to the directory");
+                        return;
+                    }
 
-
-                        string infofile = createMetaFiles(database, annotator, rolesList, stream, sessionList, scheme, trainer);
-
-                     
-                        //if (AnnotationSelectionBox.Items.Count > 0)
-                        if (trainer.Backend.ToUpper() == "SSI")
+                    if (force || !File.Exists(trainerOutPath + ".trainer"))
+                    {
+                        try
                         {
+                            string infofile = createMetaFiles(database, annotator, rolesList, stream, sessionList, scheme, trainer);
 
-                      
+                            if (trainer.Backend.ToUpper() == "SSI")
+                            {
 
-                           logTextBox.Text += handler.CMLTrainModel(trainer.Path,
-                           trainerOutPath,
-                           root,
-                           Properties.Settings.Default.DatabaseAddress,
-                           Properties.Settings.Default.MongoDBUser,
-                           MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
-                           database,
-                           sessionList,
-                           scheme.Name,
-                           rolesList,
-                           annotator.Name,
-                           stream.Name + "." + stream.FileExt,
-                           trainerLeftContext,
-                           trainerRightContext,
-                           trainerBalance,
-                           mode == Mode.COMPLETE,
-                           (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
-                           MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition),
-                           infofile);
+
+
+                                logTextBox.Text += handler.CMLTrainModel(trainer.Path,
+                                trainerOutPath,
+                                root,
+                                Properties.Settings.Default.DatabaseAddress,
+                                Properties.Settings.Default.MongoDBUser,
+                                MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
+                                database,
+                                sessionList,
+                                scheme.Name,
+                                rolesList,
+                                annotator.Name,
+                                stream.Name + "." + stream.FileExt,
+                                trainerLeftContext,
+                                trainerRightContext,
+                                trainerBalance,
+                                mode == Mode.COMPLETE,
+                                (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                                MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition),
+                                infofile);
+                            }
+                            //oldstyle cml call.
+                            else
+                            {
+
+                                logTextBox.Text += handler.CMLTrainModel(trainer.Path,
+                                trainerOutPath,
+                                root + "\\" + database,
+                                Properties.Settings.Default.DatabaseAddress,
+                                Properties.Settings.Default.MongoDBUser,
+                                MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
+                                database,
+                                sessionList,
+                                scheme.Name,
+                                rolesList,
+                                annotator.Name,
+                                stream.Name + "." + stream.FileExt,
+                                trainerLeftContext,
+                                trainerRightContext,
+                                trainerBalance,
+                                mode == Mode.COMPLETE,
+                                (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+                                MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
+
+                            }
+
+                            var dir = new DirectoryInfo(Path.GetDirectoryName(infofile));
+                            foreach (var file in dir.EnumerateFiles(Path.GetFileName(infofile) + "*"))
+                            {
+                                file.Delete();
+                            }
                         }
 
-
-                        else if (trainer.Backend.ToUpper() == "PYTHON")
+                        catch (Exception ex)
                         {
-                            logTextBox.Text += "Using Python Backend...\n";
-                            logTextBox.Text += "Trying to show window...\n";
-                           // logTextBox.Text += MainHandler.showExplanationBackend(true) + "\n";
-                            logTextBox.Text += "Training...\n";
-
-                           handler.PythonBackEndTraining(trainer.Path, trainer.Script,
-                           trainerOutPath,
-                           root,
-                           Properties.Settings.Default.DatabaseAddress,
-                           Properties.Settings.Default.MongoDBUser,
-                           MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
-                           database,
-                           sessionList,
-                           scheme,
-                           rolesList,
-                           annotator.Name,
-                           stream,
-                           trainerLeftContext,
-                           trainerRightContext,
-                           trainerBalance,
-                           mode == Mode.COMPLETE,
-                           (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
-                           MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition),
-                           infofile);
-                            
-
+                            logTextBox.Text += ex;
                         }
+                    }
+                    else
+                    {
+                        logTextBox.Text += "The model " + trainerOutPath + " already exists\nUse Force checkbox to overwrite the existing model.";
+                    }
+                }
 
-                        //oldstyle cml call.
-                        else
+                if (mode == Mode.PREDICT
+                || mode == Mode.COMPLETE)
+                {
+                    if (true || force)
+                    {
+                        double confidence = -1.0;
+                        if (ConfidenceCheckBox.IsChecked == true && ConfidenceTextBox.IsEnabled)
+                        {
+                            double.TryParse(ConfidenceTextBox.Text, out confidence);
+                            Properties.Settings.Default.CMLDefaultConf = confidence;
+                        }
+                        double minGap = 0.0;
+                        if (FillGapCheckBox.IsChecked == true && FillGapTextBox.IsEnabled)
+                        {
+                            double.TryParse(FillGapTextBox.Text, out minGap);
+                            Properties.Settings.Default.CMLDefaultGap = minGap;
+                        }
+                        double minDur = 0.0;
+                        if (RemoveLabelCheckBox.IsChecked == true && RemoveLabelTextBox.IsEnabled)
+                        {
+                            double.TryParse(RemoveLabelTextBox.Text, out minDur);
+                            Properties.Settings.Default.CMLDefaultMinDur = minDur;
+                        }
+                        Properties.Settings.Default.Save();
+
+                        try
                         {
 
-                            logTextBox.Text += handler.CMLTrainModel(trainer.Path,
-                            trainerOutPath,
-                            root +  "\\" + database,
+                            logTextBox.Text += handler.CMLPredictAnnos(mode == Mode.COMPLETE ? tempTrainerPath : trainer.Path,
+                            root,
                             Properties.Settings.Default.DatabaseAddress,
                             Properties.Settings.Default.MongoDBUser,
                             MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
@@ -630,83 +870,48 @@ namespace ssi
                             stream.Name + "." + stream.FileExt,
                             trainerLeftContext,
                             trainerRightContext,
-                            trainerBalance,
+                            confidence,
+                            minGap,
+                            minDur,
                             mode == Mode.COMPLETE,
                             (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
-                            MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
-
+                             MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
                         }
 
-
-
-
-
-                        var dir = new DirectoryInfo(Path.GetDirectoryName(infofile));
-                        foreach (var file in dir.EnumerateFiles(Path.GetFileName(infofile) + "*"))
+                        catch (Exception ex)
                         {
-                            file.Delete();
+                            logTextBox.Text += ex;
                         }
                     }
 
-                    catch(Exception ex)
-                    {
-                        logTextBox.Text += ex;
-                    }
-                    
                 }
-                else
-                {
-                    logTextBox.Text += "The model " + trainerOutPath + " already exists\nUse Force checkbox to overwrite the existing model.";
-                }                
-            }
 
-            if (mode == Mode.PREDICT                
-                || mode == Mode.COMPLETE)
-            {
-                if (true || force)
+                if (mode == Mode.EVALUATE)
                 {
-                    double confidence = -1.0;
-                    if (ConfidenceCheckBox.IsChecked == true && ConfidenceTextBox.IsEnabled)
-                    {
-                        double.TryParse(ConfidenceTextBox.Text, out confidence);
-                        Properties.Settings.Default.CMLDefaultConf = confidence;
-                    }
-                    double minGap = 0.0;
-                    if (FillGapCheckBox.IsChecked == true && FillGapTextBox.IsEnabled)
-                    {
-                        double.TryParse(FillGapTextBox.Text, out minGap);
-                        Properties.Settings.Default.CMLDefaultGap = minGap;
-                    }
-                    double minDur = 0.0;
-                    if (RemoveLabelCheckBox.IsChecked == true && RemoveLabelTextBox.IsEnabled)
-                    {
-                        double.TryParse(RemoveLabelTextBox.Text, out minDur);
-                        Properties.Settings.Default.CMLDefaultMinDur = minDur;
-                    }                                                          
-                    Properties.Settings.Default.Save();
-
+                    string evalOutPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
                     try
-                    {
 
-                        logTextBox.Text += handler.CMLPredictAnnos(mode == Mode.COMPLETE ? tempTrainerPath : trainer.Path,
-                        root,
-                        Properties.Settings.Default.DatabaseAddress,
-                        Properties.Settings.Default.MongoDBUser,
-                        MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
-                        database,
-                        sessionList,
-                        scheme.Name,
-                        rolesList,
-                        annotator.Name,
-                        stream.Name + "." + stream.FileExt,
-                        trainerLeftContext,
-                        trainerRightContext,
-                        confidence,
-                        minGap,
-                        minDur,                        
-                        mode == Mode.COMPLETE,
-                        (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
-                         MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition));
+                    {
+                        logTextBox.Text += handler.CMLEvaluateModel(evalOutPath,
+                            trainer.Path,
+                            root,
+                            Properties.Settings.Default.DatabaseAddress,
+                            Properties.Settings.Default.MongoDBUser,
+                            MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
+                            database,
+                            sessionList,
+                            scheme.Name,
+                            rolesList,
+                            annotator.Name,
+                            stream.Name + "." + stream.FileExt,
+                            LosoCheckBox.IsChecked.Value);
+
+                        if (File.Exists(evalOutPath))
+                        {
+                            ConfmatWindow confmat = new ConfmatWindow(evalOutPath);
+                            confmat.ShowDialog();
+                            File.Delete(evalOutPath);
+                        }
                     }
 
                     catch (Exception ex)
@@ -714,113 +919,197 @@ namespace ssi
                         logTextBox.Text += ex;
                     }
                 }
-                
-            }
 
-             if (mode == Mode.EVALUATE)
+                if (mode == Mode.COMPLETE)
+                {
+                    handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
+
+                    var dir = new DirectoryInfo(Path.GetDirectoryName(tempTrainerPath));
+
+                    string streamName = "";
+                    string[] streamParts = stream.Name.Split('.');
+                    if (streamParts.Length <= 1)
+                    {
+                        streamName = stream.Name;
+                    }
+                    else
+                    {
+                        streamName = streamParts[1];
+                        for (int i = 2; i < streamParts.Length; i++)
+                        {
+                            streamName += "." + streamParts[i];
+                        }
+                    }
+
+                    try
+                    {
+                        var tempdir = new DirectoryInfo(Path.GetDirectoryName(Properties.Settings.Default.CMLTempTrainerPath));
+                        foreach (var file in tempdir.EnumerateFiles(Path.GetFileName(Properties.Settings.Default.CMLTempTrainerPath) + "latestcmlmodel*"))
+                        {
+                            file.Delete();
+                        }
+                    }
+                    catch { }
+
+                    Properties.Settings.Default.CMLTempTrainerPath = Properties.Settings.Default.CMLDirectory + "\\" + Defaults.CML.ModelsFolderName + "\\" + Defaults.CML.ModelsTrainerFolderName + "\\" + AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower() + "\\" + AnnoTier.Selected.AnnoList.Scheme.Name + "\\" + stream.Type + "{" + streamName + "}\\" + trainer.Name + "\\";
+                    Properties.Settings.Default.Save();
+
+                    if (!Directory.Exists(Properties.Settings.Default.CMLDirectory)) 
+                        Directory.CreateDirectory(Properties.Settings.Default.CMLTempTrainerPath);
+
+                    foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*"))
+                    {
+                        string filename = file.Name;
+                        string[] split = file.Name.Split('.');
+                        if (split.Length == 2 && split[1] == "trainer")
+                        {
+                            Properties.Settings.Default.CMLTempTrainerName = split[0];
+                            Properties.Settings.Default.Save();
+
+                            split[0] = "latestcmlmodel";
+                            filename = string.Join(".", split);
+                        }
+
+                        if (File.Exists(Properties.Settings.Default.CMLTempTrainerPath + filename))
+                        {
+                            File.Delete(Properties.Settings.Default.CMLTempTrainerPath + filename);
+                        }
+                        file.MoveTo(Properties.Settings.Default.CMLTempTrainerPath + filename);
+
+                        //file.Delete();
+                    }
+                    Close();
+                }
+            }
+        }
+
+        private String getTrainerOutPath(Trainer trainer, String trainerDir)
+        {
+            string trainerName = TrainerNameTextBox.Text == "" ? trainer.Name : TrainerNameTextBox.Text;
+            return mode == Mode.COMPLETE ? tempTrainerPath : trainerDir + trainerName;
+        }
+
+        private String getTrainerDir(Trainer trainer, String streamName, DatabaseScheme scheme, DatabaseStream stream)
+        {
+            return Properties.Settings.Default.CMLDirectory + "\\" +
+                                       Defaults.CML.ModelsFolderName + "\\" +
+                                       Defaults.CML.ModelsTrainerFolderName + "\\" +
+                                       scheme.Type.ToString().ToLower() + "\\" +
+                                       scheme.Name + "\\" +
+                                       stream.Type + "{" +
+                                       streamName + "}\\" +
+                                       trainer.Name + "\\";
+        }
+
+        private String getStreamName(DatabaseStream stream)
+        {
+            string streamName = "";
+            string[] streamParts = stream.Name.Split('.');
+            if (streamParts.Length <= 1)
             {
-                string evalOutPath = Properties.Settings.Default.CMLDirectory + "\\" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
-                try
-
-                {                    
-                    logTextBox.Text += handler.CMLEvaluateModel(evalOutPath, 
-                        trainer.Path,
-                        root,
-                        Properties.Settings.Default.DatabaseAddress,
-                        Properties.Settings.Default.MongoDBUser,
-                        MainHandler.Decode(Properties.Settings.Default.MongoDBPass),
-                        database,
-                        sessionList,
-                        scheme.Name,
-                        rolesList,
-                        annotator.Name,
-                        stream.Name + "." + stream.FileExt,
-                        LosoCheckBox.IsChecked.Value);
-
-                    if (File.Exists(evalOutPath))
-                    {
-                        ConfmatWindow confmat = new ConfmatWindow(evalOutPath);
-                        confmat.ShowDialog();
-                        File.Delete(evalOutPath);
-                    }
-                }
-
-                catch (Exception ex)
-                {
-                    logTextBox.Text += ex;
-                }
-
-               
-
+                streamName = stream.Name;
             }
-
-            if (mode == Mode.COMPLETE)
+            else
             {
-                handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
-
-                var dir = new DirectoryInfo(Path.GetDirectoryName(tempTrainerPath));
-
-                string streamName = "";
-                string[] streamParts = stream.Name.Split('.');
-                if (streamParts.Length <= 1)
+                streamName = streamParts[1];
+                for (int i = 2; i < streamParts.Length; i++)
                 {
-                    streamName = stream.Name;
+                    streamName += "." + streamParts[i];
                 }
-                else
-                {
-                    streamName = streamParts[1];
-                    for (int i = 2; i < streamParts.Length; i++)
-                    {
-                        streamName += "." + streamParts[i];
-                    }
-                }
-
-                try
-                {
-                    var tempdir = new DirectoryInfo(Path.GetDirectoryName(Properties.Settings.Default.CMLTempTrainerPath));
-                    foreach (var file in tempdir.EnumerateFiles(Path.GetFileName(Properties.Settings.Default.CMLTempTrainerPath) + "latestcmlmodel*"))
-                    {
-                        file.Delete();
-                    }
-                }
-                catch { }
-              
-
-                Properties.Settings.Default.CMLTempTrainerPath = Properties.Settings.Default.CMLDirectory + "\\" + Defaults.CML.ModelsFolderName + "\\" +  Defaults.CML.ModelsTrainerFolderName + "\\" + AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower() + "\\" + AnnoTier.Selected.AnnoList.Scheme.Name + "\\" + stream.Type + "{" + streamName + "}\\" + trainer.Name + "\\";
-                
-
-
-                Properties.Settings.Default.Save();
-
-
-
-                if (!Directory.Exists(Properties.Settings.Default.CMLDirectory)) Directory.CreateDirectory(Properties.Settings.Default.CMLTempTrainerPath);
-
-                foreach (var file in dir.EnumerateFiles(Path.GetFileName(tempTrainerPath) + "*"))
-                {
-                    string filename = file.Name;
-                    string[] split = file.Name.Split('.');
-                    if (split.Length == 2 &&  split[1] == "trainer")
-                    {
-                        Properties.Settings.Default.CMLTempTrainerName = split[0];
-                        Properties.Settings.Default.Save();
-
-                        split[0] = "latestcmlmodel";
-                        filename = string.Join(".", split);
-                    }
-
-                    if (File.Exists(Properties.Settings.Default.CMLTempTrainerPath + filename))
-                    {
-                        File.Delete(Properties.Settings.Default.CMLTempTrainerPath + filename);
-                    }
-                    file.MoveTo(Properties.Settings.Default.CMLTempTrainerPath + filename);
-                    
-                    //file.Delete();
-                }
-
-                Close();
             }
-           
+            return streamName;
+        }
+
+        private void handlePolygonBackend(Trainer trainer, DatabaseScheme scheme, DatabaseStream stream, DatabaseAnnotator annotator, string database, string trainerLeftContext, string trainerRightContext, string trainerBalance, string rolesList)
+        {
+            this.ApplyButton.IsEnabled = false;
+
+            string streamName = getStreamName(stream);
+            string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
+            string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
+
+            string endTimeStr = "";
+            if (this.mode == Mode.COMPLETE)
+            {
+                double playPosition = MainHandler.Time.CurrentPlayPosition;
+                double selectPosition = MainHandler.Time.CurrentSelectPosition;
+                double endTime = ((scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON || scheme.Type == AnnoScheme.TYPE.POLYGON) ? playPosition : selectPosition);
+                endTime = Math.Round(endTime, 2);
+                endTimeStr = endTime + "s";
+            }
+            else
+            {
+                endTimeStr = "null";
+            }
+
+            var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
+            MultipartFormDataContent content = new MultipartFormDataContent
+            {
+                { new StringContent(trainer.Path), "templatePath" },
+                { new StringContent(trainerOutPath), "trainerPath" },
+                { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
+                { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
+                { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
+                { new StringContent(database), "database" },
+                { new StringContent(sessionList), "sessions" },
+                { new StringContent(scheme.Name), "scheme" },
+                { new StringContent(rolesList), "roles" },
+                { new StringContent(annotator.Name), "annotator" },
+                { new StringContent(stream.Name), "streamName" },
+                { new StringContent(stream.Type), "streamType" },
+                { new StringContent(trainerLeftContext), "leftContext" },
+                { new StringContent(trainerRightContext), "rightContext" },
+                { new StringContent(trainerBalance), "balance" },
+                { new StringContent(this.mode.ToString()), "mode" },
+                { new StringContent("0ms"), "startTime" },
+                { new StringContent(endTimeStr), "cmlBeginTime" },
+                { new StringContent(scheme.Type.ToString()), "schemeType" },
+                { new StringContent(trainerScriptPath), "trainerScript" },
+                { new StringContent(trainer.Name), "trainerScriptName" }
+            };
+
+            if (this.mode == Mode.COMPLETE)
+            {
+                _ = handler.PythonBackEndComplete(content);
+            }
+            else if (this.mode == Mode.TRAIN)
+            {
+                _ = handler.PythonBackEndTraining(content);
+            }
+            else if (this.mode != Mode.PREDICT)
+            {
+                _ = handler.PythonBackEndPredict(content);
+            }
+        }
+
+        private void changeFrontendInPolygonCase()
+        {
+            Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+
+            if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
+            {
+                polygonCaseOn = true;
+                logThread = new Thread(new ThreadStart(tryToGetLog));
+                statusThread = new Thread(new ThreadStart(tryToGetStatus));
+                logThread.Start();
+                statusThread.Start();
+                this.statusLabel.Visibility = Visibility.Visible;
+                this.Cancel_Button.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                if (logThread != null && logThread.IsAlive)
+                    logThread.Abort();
+                if (statusThread != null && statusThread.IsAlive)
+                    statusThread.Abort();
+
+                this.ApplyButton.IsEnabled = true;
+                polygonCaseOn = false;
+                this.statusLabel.Visibility = Visibility.Collapsed;
+                this.Cancel_Button.Visibility = Visibility.Collapsed;
+                this.logTextBox.Text = "";
+            }
         }
 
         #endregion
@@ -1604,6 +1893,8 @@ namespace ssi
 
         private void GeneralBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            changeFrontendInPolygonCase();
+
             if (handleSelectionChanged)
             {
                 handleSelectionChanged = false;

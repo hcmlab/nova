@@ -15,7 +15,7 @@ namespace ssi
 {
     public partial class MainHandler
     {
- 
+
         private static readonly HttpClient client = new HttpClient();
         private void databaseCMLExtractFeatures_Click(object sender, RoutedEventArgs e)
         {
@@ -396,7 +396,8 @@ namespace ssi
             string[] sessionssplit = sessions.Split(';');
             string[] rolessplit = roles.Split(';');
             //load exemplary data stream
-            Signal signal = Signal.LoadStreamFile(dataPath + "\\" + database + "\\" + sessionssplit[0] + "\\" + rolessplit[0] + "." + stream.Name + ".stream");
+            string path = dataPath + "\\" + database + "\\" + sessionssplit[0] + "\\" + rolessplit[0] + "." + stream.Name + ".stream";
+            Signal signal = Signal.LoadStreamFile(path);
             signal.type = Signal.Type.FLOAT;
             swheader.WriteLine("\t\t<item byte=\"" + signal.bytes + "\" dim=\"" + signal.dim + "\" sr=\"" + signal.rate + "\" type=\"" + signal.type + "\" />");
             swheader.WriteLine("\t</streams>");
@@ -434,43 +435,12 @@ namespace ssi
             return 1;
         }
 
-        public async Task<Dictionary<string, string>> PythonBackEndTraining(string templatePath, string trainerScript, string trainerPath, string dataPath, string server, string username, string password, string database, string sessions, DatabaseScheme scheme, string roles, string annotator, DatabaseStream stream, string leftContext, string rightContext, string balance, bool complete, double cmlbegintime, string multisessionpath = null)
+        public async Task<Dictionary<string, string>> PythonBackEndTraining(MultipartFormDataContent content)
         {
-           var trainerScriptPath =  Directory.GetParent(templatePath) + "\\" +  trainerScript;
-          
-
-
             try
             {
-
-                var content = new MultipartFormDataContent
-                {
-                    { new StringContent(templatePath), "templatePath" },
-                    { new StringContent(trainerPath), "trainerPath" },
-                    { new StringContent(dataPath), "dataPath" },
-                    { new StringContent(server), "server" },
-                    { new StringContent(username), "username" },
-                    { new StringContent(password), "password" },
-                    { new StringContent(database), "database" },
-                    { new StringContent(sessions), "sessions" },
-                    { new StringContent(scheme.Name), "scheme" },
-                    { new StringContent(roles), "roles" },
-                    { new StringContent(annotator), "annotator" },
-                    { new StringContent(stream.Name), "stream" },
-                    { new StringContent(leftContext), "leftContext" },
-                    { new StringContent(rightContext), "rightContext" },
-                    { new StringContent(balance), "balance" },
-                    { new StringContent(complete.ToString()), "complete" },
-                    { new StringContent(cmlbegintime.ToString()), "cmlbegintime" },
-                    { new StringContent(multisessionpath), "multisessionpath" },
-                    { new StringContent(trainerScriptPath), "trainerScript" }
-
-
-
-                };
-
-
-                string url = "http://localhost:5000/train";   
+                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/train";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -481,18 +451,104 @@ namespace ssi
                     return null;
                 }
 
-                CreateTrainerFile(trainerPath, dataPath, trainerScriptPath, database, sessions, roles, scheme, stream, rightContext, leftContext, balance);
-
                 return explanationDic;
-
             }
-            catch (Exception e)
+            catch (Exception)
             {
-               
                 return null;
             }
+        }
 
-          
+        public async Task<Dictionary<string, string>> PythonBackEndPredict(MultipartFormDataContent content)
+        {
+            try
+            {
+                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/predict";
+                var response = await client.PostAsync(url, content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                if (explanationDic["success"] == "failed")
+                {
+                    return null;
+                }
+
+                return explanationDic;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<Dictionary<string, string>> PythonBackEndComplete(MultipartFormDataContent content)
+        {
+            try
+            {
+                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/complete";
+                var response = await client.PostAsync(url, content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                if (explanationDic["success"] == "failed")
+                {
+                    return null;
+                }
+
+                return explanationDic;
+            }
+            catch (Exception)
+            {
+
+                return null;
+            }
+        }
+
+        public Dictionary<string, string> getLogFromServer(MultipartFormDataContent content)
+        {
+
+            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+            string url = "http://" + tokens[0] + ":" + tokens[1] + "/log";
+
+            var response = client.PostAsync(url, content).Result;
+            var responseContent = response.Content;
+            string responseString = responseContent.ReadAsStringAsync().Result;
+            var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+            return explanationDic;
+        }
+
+        public Dictionary<string, string> getStatusFromServer(MultipartFormDataContent content)
+        {
+            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+            string url = "http://" + tokens[0] + ":" + tokens[1] + "/job_status";
+
+            var response = client.PostAsync(url, content).Result;
+            var responseContent = response.Content;
+            string responseString = responseContent.ReadAsStringAsync().Result;
+            var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+            return explanationDic;
+        }
+
+        public void cancleCurrentAction(MultipartFormDataContent content)
+        {
+            try
+            {
+                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/cancel";
+                var response = client.PostAsync(url, content).Result;
+
+                var responseContent = response.Content;
+                string responseString = responseContent.ReadAsStringAsync().Result;
+                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
         public string CMLPredictBayesFusion(string roleout,

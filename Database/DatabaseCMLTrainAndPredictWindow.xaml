@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
+        Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing" Closed="Window_Closed"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
 
     <Window.Resources>
 
@@ -338,10 +338,12 @@
 
             <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="6" Margin="5" LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <Button Content="Apply" Name="ApplyButton" Click="Apply_Click" Width="75" Margin="5" Height="30"/>
-                    <CheckBox Name="LosoCheckBox" VerticalAlignment="Center" ToolTip="Apply leave-one-session-out cross-validation">Cross-validation</CheckBox>
-                    <CheckBox Name="ForceCheckBox" Margin="5" VerticalAlignment="Center">Force</CheckBox>
+                    <Button Content="Cancel" x:Name="Cancel_Button" IsEnabled="False" Click="Cancel_Button_Click" Width="75" Height="30"/>
+                    <Button Content="Apply" x:Name="ApplyButton" IsEnabled="False"  Click="Apply_Click" Width="75" Margin="5" Height="30"/>
+                    <CheckBox x:Name="LosoCheckBox" VerticalAlignment="Center" ToolTip="Apply leave-one-session-out cross-validation" Content="Cross-validation"/>
+                    <CheckBox x:Name="ForceCheckBox" Margin="5" VerticalAlignment="Center" Content="Force"/>
                 </StackPanel>
+                <Label Name="statusLabel" HorizontalContentAlignment="Center" Background="Red"  Content="No connection to server!" Width="160" Height="30"/>
             </DockPanel>
         </Grid>
 
@@ -355,11 +357,10 @@
                           Margin="0">
         </GridSplitter>
 
-        <DockPanel Grid.Row="1" Grid.Column="2" LastChildFill="True" Margin="0,0,5,5">
+        <DockPanel Grid.Row="2" Grid.Column="2" LastChildFill="True" Margin="0,0,5,5">
             <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log</Label>
-            <TextBox Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" TextWrapping="Wrap"/>
+            <TextBox IsReadOnly="True" Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" TextWrapping="Wrap"/>
         </DockPanel>
-
     </Grid>
 
 </Window>
