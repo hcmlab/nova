@@ -36,13 +36,24 @@ namespace ssi
                 DBPort.Text = tokens[1];
             }
 
+            tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+            if (tokens.Length == 2)
+            {
+                NS_Host.Text = tokens[0];
+                NS_Port.Text = tokens[1];
+            }
+
 
             string[] history =  Properties.Settings.Default.serverhistory.Split(';');
 
             DBHost.DropItems = history;
             DBHost.DropdownClosed += split;
 
-        
+            history = Properties.Settings.Default.NovaServerHistory.Split(';');
+
+            NS_Host.DropItems = history;
+            NS_Host.DropdownClosed += NS_split;
+
 
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
             DBPassword.Password = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
@@ -85,8 +96,7 @@ namespace ssi
 
         }
 
-
-        private  void split(object sender, RoutedEventArgs e)
+        private void split(object sender, RoutedEventArgs e)
         {
             string[] tokens = DBHost.Text.Split(':');
             if (tokens.Length == 2)
@@ -96,9 +106,24 @@ namespace ssi
             }
         }
 
+        private void NS_split(object sender, RoutedEventArgs e)
+        {
+            string[] tokens = NS_Host.Text.Split(':');
+            if (tokens.Length == 2)
+            {
+                NS_Host.Text = tokens[0];
+                NS_Port.Text = tokens[1];
+            }
+        }
+
         public double Uncertainty()
         {
             return double.Parse(Certainty.Text);
+        }
+
+        public string NS_Address()
+        {
+            return NS_Host.Text + ":" + NS_Port.Text;
         }
 
         public string AnnotatorName()
@@ -223,58 +248,54 @@ namespace ssi
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-
-           
-
             if(DBHost.Text != "" && DBHost.Text != "")
             {
 
-                if(Properties.Settings.Default.serverhistory == "") Properties.Settings.Default.serverhistory = DBHost.Text + ":" + DBPort.Text;
+                if(Properties.Settings.Default.serverhistory == "")
+                {
+                    Properties.Settings.Default.serverhistory = DBHost.Text + ":" + DBPort.Text;
+                }
                 else if(!Properties.Settings.Default.serverhistory.Contains(DBHost.Text + ":" + DBPort.Text))
                 {
                     Properties.Settings.Default.serverhistory = Properties.Settings.Default.serverhistory + ";" + DBHost.Text + ":" + DBPort.Text;
                 }
 
-                   
-          
+                if (Properties.Settings.Default.DatabaseDirectory != DownloadDirectory.Text)                
+                {
+                    if (Directory.Exists(DownloadDirectory.Text.Split(';')[0]))
+                    {
+                        Directory.CreateDirectory(DownloadDirectory.Text.Split(';')[0]);
+                        Properties.Settings.Default.DatabaseDirectory = DownloadDirectory.Text;
+                        Properties.Settings.Default.Save();
+                    }
+                    else
+                    {
+                        MessageTools.Warning("Directory does not exist '" + DownloadDirectory.Text + "'");
+                        return;
+                    }
+                }
+
+
+                if (Properties.Settings.Default.CMLDirectory != CMLDirectory.Text)
+                {
+                    if (Directory.Exists(CMLDirectory.Text))
+                    {
+                        Directory.CreateDirectory(CMLDirectory.Text);
+                        Properties.Settings.Default.CMLDirectory = CMLDirectory.Text;
+                        Properties.Settings.Default.Save();
+                    }
+                    else
+                    {
+                        MessageTools.Warning("Directory does not exist '" + CMLDirectory.Text + "'");
+                        return;
+                    }
+                }
+
+                DialogResult = true;
             
-            if (Properties.Settings.Default.DatabaseDirectory != DownloadDirectory.Text)                
-            {
-                if (Directory.Exists(DownloadDirectory.Text.Split(';')[0]))
-                {
-                    Directory.CreateDirectory(DownloadDirectory.Text.Split(';')[0]);
-                    Properties.Settings.Default.DatabaseDirectory = DownloadDirectory.Text;
-                    Properties.Settings.Default.Save();
-                }
-                else
-                {
-                    MessageTools.Warning("Directory does not exist '" + DownloadDirectory.Text + "'");
-                    return;
-                }
-            }
-
-
-            if (Properties.Settings.Default.CMLDirectory != CMLDirectory.Text)
-            {
-                if (Directory.Exists(CMLDirectory.Text))
-                {
-                    Directory.CreateDirectory(CMLDirectory.Text);
-                    Properties.Settings.Default.CMLDirectory = CMLDirectory.Text;
-                    Properties.Settings.Default.Save();
-                }
-                else
-                {
-                    MessageTools.Warning("Directory does not exist '" + CMLDirectory.Text + "'");
-                    return;
-                }
-            }
-
-            DialogResult = true;
-            
-            Close();
+                Close();
 
             }
-
             else
             {
                 MessageBox.Show("Host and IP can't be empty!");
@@ -406,18 +427,48 @@ namespace ssi
             DBPassword.SelectAll();
         }
 
-        private void DB_IP_TextChanged(object sender, RoutedEventArgs e)
-        {
-            
-        }
-
         private void clear_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.serverhistory = "";
 
             DBHost.DropItems = null;
-
         }
+
+        private void NS_clear_Click(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.NovaServerHistory = "";
+
+            NS_Host.DropItems = null;
+        }
+
+        private void NS_Port_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Regex regexObj = new Regex(@"[^\d]");
+            this.NS_Port.Text = regexObj.Replace(this.NS_Port.Text, "");
+        }
+
+        private void NS_Host_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (NS_Host.Text == "")
+                NS_Host.IsDropdownOpened = true;
+        }
+
+        private void NS_Port_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            NS_Port.SelectAll();
+        }
+
+        private void NS_Host_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            if (NS_Host.Text == "")
+                NS_Host.IsDropdownOpened = true;
+        }
+
+        private void NS_Port_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            NS_Port.SelectAll();
+        }
+
 
         private void DBPort_TextChanged(object sender, TextChangedEventArgs e)
         {

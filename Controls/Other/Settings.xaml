@@ -189,6 +189,39 @@
 
                 </Grid>
             </TabItem>
+            <TabItem Header="Server">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="23*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Row="0" Grid.Column="0"  Content="Nova server:" Grid.ColumnSpan="2"/>
+                    <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="0" Grid.Row="0">Host:</Label>
+                        <local:DropdownTextBox Grid.Column="1" Grid.Row="0" x:Name="NS_Host" Margin="5,3,5,2" GotKeyboardFocus="NS_Host_GotFocus" GotMouseCapture="NS_Host_GotMouseCapture"/>
+                        <Button Grid.Column="2" Grid.Row="0" Height="20px" Click="NS_clear_Click" Width="30px">Clear</Button>
+                        <Label Grid.Column="0" Grid.Row="1">Port:</Label>
+                        <TextBox Grid.Column="1" Width="50" HorizontalAlignment="Left" Grid.Row="1" Name="NS_Port" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" TextChanged="NS_Port_TextChanged"  GotKeyboardFocus="NS_Port_GotFocus" GotMouseCapture="NS_Port_GotMouseCapture" />
+                    </Grid>
+                </Grid>
+            </TabItem>
         </TabControl>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">

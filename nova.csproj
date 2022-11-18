@@ -593,6 +593,7 @@
     <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Interfaces\IDrawUnit.cs" />
     <Compile Include="Interfaces\IPointList.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Tools\Lightning.cs" />
     <Compile Include="Tools\LightningTipps.xaml.cs">
       <DependentUpon>LightningTipps.xaml</DependentUpon>
