@@ -1871,7 +1871,7 @@ namespace ssi
             else if (scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
             {
                 BsonArray labels = new BsonArray();
-                int index = 0;
+                int index = 1;
                 foreach (AnnoScheme.Label label in scheme.Labels)
                 {
                     labels.Add(new BsonDocument() {
@@ -2459,7 +2459,7 @@ namespace ssi
                         if (schemeType == AnnoScheme.TYPE.DISCRETE_POLYGON)
                         {
                             BsonArray labels = schemeDoc["labels"].AsBsonArray;
-                            int index = 0;
+                            int index = 1;
                             for (int j = 0; j < labels.Count; j++)
                             {
                                 if (label.Label == labels[j]["name"].ToString())
