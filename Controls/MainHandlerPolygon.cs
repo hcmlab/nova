@@ -358,9 +358,12 @@ namespace ssi
         #region MOUSE
         void OnPolygonMedia_RightMouseDown(IMedia media, double x, double y)
         {
-            if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+            if (!polygonInformations.IsCreateModeOn)
             {
-                polygonHandlerPerformer.handleRightMouseDown(media, x, y);
+                if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
+                {
+                    polygonHandlerPerformer.handleRightMouseDown(media, x, y);
+                }
             }
         }
 
