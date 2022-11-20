@@ -272,6 +272,7 @@
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -296,8 +297,11 @@
                     <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Output name</Label>
                     <TextBox Name="TrainerNameTextBox" IsEnabled="True" Grid.Row="3" Grid.Column="1" Height="20">0</TextBox>
 
-                    <Label Name="CMLEndpointLabel" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Endpoint CML</Label>
-                    <TextBox Name="CMLEndpointTextBox" IsEnabled="True" Grid.Row="4" Grid.Column="1" Height="20">0</TextBox>
+                    <Label Name="CMLBeginFrameLabel" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Begin-Frame CML</Label>
+                    <TextBox Name="CMLBeginFrameTextBox" TextChanged="CMLBeginFrameLabelTextBox_TextChanged" IsEnabled="True" Grid.Row="4" Grid.Column="1" Height="20">-1</TextBox>
+
+                    <Label Name="CMLEndFrameLabel" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">End-Frame CML</Label>
+                    <TextBox Name="CMLEndFrameTextBox" TextChanged="CMLBeginFrameLabelTextBox_TextChanged" IsEnabled="True" Grid.Row="5" Grid.Column="1" Height="20">-1</TextBox>
 
                     <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="4" Grid.Column="2" VerticalAlignment="Center"></Label>
 

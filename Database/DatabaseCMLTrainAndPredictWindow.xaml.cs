@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -147,19 +148,24 @@ namespace ssi
             if (mode == Mode.COMPLETE)
             {
                 ModeTabControl.Visibility = System.Windows.Visibility.Collapsed;
-                CMLEndpointLabel.Visibility = System.Windows.Visibility.Visible;
-                CMLEndpointTextBox.Visibility = System.Windows.Visibility.Visible;
+                CMLBeginFrameLabel.Visibility = System.Windows.Visibility.Visible;
+                CMLBeginFrameTextBox.Visibility = System.Windows.Visibility.Visible;
+                CMLEndFrameLabel.Visibility = System.Windows.Visibility.Visible;
+                CMLEndFrameTextBox.Visibility = System.Windows.Visibility.Visible;
                 TrainerNameTextBox.IsEnabled = false;
-      
             }
             else
             {
                 ModeTabControl.SelectedIndex = (int)mode;
-                CMLEndpointLabel.Visibility = System.Windows.Visibility.Collapsed;
-                CMLEndpointTextBox.Visibility = System.Windows.Visibility.Collapsed;
+                CMLBeginFrameLabel.Visibility = System.Windows.Visibility.Collapsed;
+                CMLBeginFrameTextBox.Visibility = System.Windows.Visibility.Collapsed;
+                CMLEndFrameLabel.Visibility = System.Windows.Visibility.Collapsed;
+                CMLEndFrameTextBox.Visibility = System.Windows.Visibility.Collapsed;
                 TrainerNameTextBox.IsEnabled = true;
             }
 
+            this.CMLEndFrameTextBox.Text = handler.control.annoListControl.annoDataGrid.Items.Count.ToString();
+            this.CMLBeginFrameTextBox.Text = handler.control.annoListControl.annoDataGrid.SelectedIndex.ToString();
             Thread logThread = new Thread(new ThreadStart(tryToGetLog));
             Thread statusThread = new Thread(new ThreadStart(tryToGetStatus));
             logThread.Start();
@@ -167,7 +173,7 @@ namespace ssi
             changeFrontendInPolygonCase();
 
             Loaded += Window_Loaded;
-           
+
             HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.";
             HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";
         }
@@ -1027,20 +1033,23 @@ namespace ssi
             string streamName = getStreamName(stream);
             string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
             string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
+            double sampleRate = (1000 / stream.SampleRate / 1000);
+            int cmlBeginFrame = int.Parse(this.CMLBeginFrameTextBox.Text);
+            int cmlEndFrame = int.Parse(this.CMLEndFrameTextBox.Text);
 
-            string endTimeStr = "";
-            if (this.mode == Mode.COMPLETE)
+            if(cmlBeginFrame >= cmlEndFrame)
             {
-                double playPosition = MainHandler.Time.CurrentPlayPosition;
-                double selectPosition = MainHandler.Time.CurrentSelectPosition;
-                double endTime = ((scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON || scheme.Type == AnnoScheme.TYPE.POLYGON) ? playPosition : selectPosition);
-                endTime = Math.Round(endTime, 2);
-                endTimeStr = endTime + "s";
+                MessageBox.Show("End-Frame must be greater than Begin-Frame!", "Error", MessageBoxButton.OK);
+                return;
             }
-            else
+            if (cmlBeginFrame > handler.control.annoListControl.annoDataGrid.Items.Count || cmlEndFrame > handler.control.annoListControl.annoDataGrid.Items.Count)
             {
-                endTimeStr = "null";
+                MessageBox.Show("Begin-Frame or End-Frame are greater than the amount of frames of the current file!", "Error", MessageBoxButton.OK);
+                return;
             }
+
+            String cmlBeginTime = (sampleRate * cmlBeginFrame).ToString();
+            String cmlEndTime = (sampleRate * cmlEndFrame).ToString();
 
             var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
             MultipartFormDataContent content = new MultipartFormDataContent
@@ -1062,8 +1071,10 @@ namespace ssi
                 { new StringContent(trainerRightContext), "rightContext" },
                 { new StringContent(trainerBalance), "balance" },
                 { new StringContent(this.mode.ToString()), "mode" },
-                { new StringContent("0ms"), "startTime" },
-                { new StringContent(endTimeStr), "cmlBeginTime" },
+                { new StringContent("0s"), "startTime" },
+                { new StringContent(cmlBeginTime), "cmlBeginTime" },
+                { new StringContent(cmlEndTime), "cmlEndTime" },
+                { new StringContent(sampleRate.ToString()), "sampleRate" },
                 { new StringContent(scheme.Type.ToString()), "schemeType" },
                 { new StringContent(trainerScriptPath), "trainerScript" },
                 { new StringContent(trainer.Name), "trainerScriptName" }
@@ -1095,6 +1106,10 @@ namespace ssi
                 logThread.Start();
                 statusThread.Start();
                 this.statusLabel.Visibility = Visibility.Visible;
+                this.CMLBeginFrameLabel.Visibility = Visibility.Visible;
+                this.CMLBeginFrameTextBox.Visibility = Visibility.Visible;
+                this.CMLEndFrameLabel.Visibility = Visibility.Visible;
+                this.CMLEndFrameTextBox.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;
             }
             else
@@ -1107,6 +1122,10 @@ namespace ssi
                 this.ApplyButton.IsEnabled = true;
                 polygonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
+                this.CMLBeginFrameLabel.Visibility = Visibility.Collapsed;
+                this.CMLBeginFrameTextBox.Visibility = Visibility.Collapsed;
+                this.CMLEndFrameLabel.Visibility = Visibility.Collapsed;
+                this.CMLEndFrameTextBox.Visibility = Visibility.Collapsed;
                 this.Cancel_Button.Visibility = Visibility.Collapsed;
                 this.logTextBox.Text = "";
             }
@@ -1833,16 +1852,6 @@ namespace ssi
                 ForceCheckBox.IsEnabled = true;
                 TrainerPathComboBox.IsEnabled = true;
             }
-
-            DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
-
-            if (scheme != null)
-            {
-                double cmlbegintime = (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
-                                                                                    MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
-
-                CMLEndpointTextBox.Text = Math.Round(cmlbegintime, 2).ToString();
-            }
         }
 
         #endregion
@@ -2168,6 +2177,18 @@ namespace ssi
                     MessageBox.Show("Can't read file format.");
                 }
             }
+        }
+
+        private void CMLBeginFrameLabelTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Regex regexObj = new Regex(@"[^\d]");
+            this.CMLBeginFrameTextBox.Text = regexObj.Replace(this.CMLBeginFrameTextBox.Text, "");
+        }
+
+        private void CMLEndFrameLabelBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Regex regexObj = new Regex(@"[^\d]");
+            this.CMLEndFrameTextBox.Text = regexObj.Replace(this.CMLEndFrameTextBox.Text, "");
         }
     }
 

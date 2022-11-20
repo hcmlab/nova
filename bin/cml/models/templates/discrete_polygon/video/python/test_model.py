@@ -8,6 +8,7 @@ import cv2
 import time
 import torch
 import random
+import datetime
 import evaluator
 import numpy as np
 
@@ -24,14 +25,14 @@ from torch.utils.data import DataLoader
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def train(data_list, labels, logger, steps=400, plot_path=None):
+def train(data_list, labels, logger, steps=800, plot_path=None):
     if plot_path is None:
         plot_path = Path.cwd()
 
     data_list = random.sample(data_list, len(data_list))
-    dataset_train = PolygonDataset(data_list[0:int(len(data_list) * 0.8)], train=False)
-    dataset_val = PolygonDataset(data_list[int(len(data_list) * 0.8):], train=False)
-    batch_size = 1
+    dataset_train = PolygonDataset(data_list[0:int(len(data_list) * 0.8)], train=True)
+    dataset_val = PolygonDataset(data_list[int(len(data_list) * 0.8):], train=True)
+    batch_size = 4
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=0, drop_last=True)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=True, num_workers=0, drop_last=True)
 
@@ -88,9 +89,8 @@ def train(data_list, labels, logger, steps=400, plot_path=None):
 
             plot("test_case", "Test case with polygons", validation_data, loss_data, steps, val_range, plot_path)
 
-            time_dif = time.time() - start_time
-            logger.info("Duration since the training started: " + str(time_dif // 60) +
-                        " min and " + str(round(time_dif % 60)) + " sec (for " + str(step + 1) + " steps)")
+            time_dif = round(time.time() - start_time)
+            logger.info("Duration since the training started: " + str(datetime.timedelta(seconds=round(time_dif))))
 
     return model
 
@@ -149,20 +149,27 @@ def plot(plot_name, network_information, validation_data, loss_data, steps_targe
     # plt.close('all')
 
 
-def predict(model, data, logger):
+def predict(model, data, logger, shape):
     model = model.to(device)
     model.eval()
     probability_results = None
 
-    dataset = PolygonDataset(data, train=False)
-    batch_size = 1
+    dataset = PolygonDataset(data, train=True)
+    batch_size = 8
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=0, drop_last=False)
     logger.info("Prediction started...")
 
     counter = 0
     for images, _ in dataloader:
         predictions = model(images.to(device)).to("cpu").detach().numpy()
-        probability_results = predictions if probability_results is None else np.concatenate((probability_results, predictions), axis=0)
+        resized_predictions = np.zeros(shape=(predictions.shape[0], predictions.shape[1], shape[0], shape[1]))
+        for frame_id, prediction in enumerate(predictions):
+            for layer_id, layer in enumerate(prediction):
+                resized_predictions[frame_id][layer_id] = cv2.resize(predictions[frame_id][layer_id],
+                                                                     dsize=(shape[1], shape[0]),
+                                                                     interpolation=cv2.INTER_NEAREST)
+        probability_results = resized_predictions if probability_results is None else np.concatenate(
+            (probability_results, resized_predictions), axis=0)
 
         counter += 1
         if counter % 25 == 0:
