@@ -164,12 +164,32 @@ namespace ssi
                 TrainerNameTextBox.IsEnabled = true;
             }
 
-            this.CMLEndFrameTextBox.Text = handler.control.annoListControl.annoDataGrid.Items.Count.ToString();
+            int endframe = -1;
+
+            if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+            {
+                double endtime = AnnoTier.Selected.AnnoList.ElementAt(AnnoTier.Selected.AnnoList.Count - 1).Stop;
+                double frame = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate) / 1000.0;
+                endframe = (int)(endtime / frame);
+
+            }
+
+            else endframe = handler.control.annoListControl.annoDataGrid.Items.Count;
+
+
+
+            this.CMLEndFrameTextBox.Text =endframe.ToString();
             this.CMLBeginFrameTextBox.Text = handler.control.annoListControl.annoDataGrid.SelectedIndex.ToString();
+
+            Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+
+            if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
+            {
             Thread logThread = new Thread(new ThreadStart(tryToGetLog));
             Thread statusThread = new Thread(new ThreadStart(tryToGetStatus));
             logThread.Start();
             statusThread.Start();
+            }
             changeFrontendInPolygonCase();
 
             Loaded += Window_Loaded;
@@ -229,6 +249,19 @@ namespace ssi
 
         private void tryToGetStatus()
         {
+            //Trainer trainer = null;
+            //this.Dispatcher.Invoke(() =>
+            //{
+            //    trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+            //});
+
+            //if (trainer.Backend.ToUpper() != "PYTHON")
+            //{
+              
+            //    return;
+
+            //}
+
             Dictionary<string, string> response = null;
             while (polygonCaseOn)
             {
@@ -281,8 +314,17 @@ namespace ssi
                     });
                 }
 
-                Thread.Sleep(4000);
+                Thread.Sleep(2000);
             }
+
+            this.Dispatcher.Invoke(() =>
+            {
+                this.ApplyButton.IsEnabled = true;
+                logTextBox.Text = "";
+            });
+
+         
+            
         }
 
         private void handleError(Exception ex)
@@ -1114,11 +1156,6 @@ namespace ssi
             }
             else
             {
-                if (logThread != null && logThread.IsAlive)
-                    logThread.Abort();
-                if (statusThread != null && statusThread.IsAlive)
-                    statusThread.Abort();
-
                 this.ApplyButton.IsEnabled = true;
                 polygonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
