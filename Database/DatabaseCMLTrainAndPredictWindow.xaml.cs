@@ -166,15 +166,21 @@ namespace ssi
 
             int endframe = -1;
 
-            if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+            if (AnnoTier.Selected != null)
             {
-                double endtime = AnnoTier.Selected.AnnoList.ElementAt(AnnoTier.Selected.AnnoList.Count - 1).Stop;
-                double frame = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate) / 1000.0;
-                endframe = (int)(endtime / frame);
+                if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+                {
+                    double endtime = AnnoTier.Selected.AnnoList.ElementAt(AnnoTier.Selected.AnnoList.Count - 1).Stop;
+                    double frame = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate) / 1000.0;
+                    endframe = (int)(endtime / frame);
 
+                }
+
+                else endframe = handler.control.annoListControl.annoDataGrid.Items.Count;
             }
+           
 
-            else endframe = handler.control.annoListControl.annoDataGrid.Items.Count;
+            
 
 
 
