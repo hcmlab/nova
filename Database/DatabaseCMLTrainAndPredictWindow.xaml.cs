@@ -145,24 +145,28 @@ namespace ssi
             this.handler = handler;
             this.mode = mode;
 
+
+     
+
             if (mode == Mode.COMPLETE)
             {
                 ModeTabControl.Visibility = System.Windows.Visibility.Collapsed;
-                CMLBeginFrameLabel.Visibility = System.Windows.Visibility.Visible;
-                CMLBeginFrameTextBox.Visibility = System.Windows.Visibility.Visible;
-                CMLEndFrameLabel.Visibility = System.Windows.Visibility.Visible;
-                CMLEndFrameTextBox.Visibility = System.Windows.Visibility.Visible;
+                //CMLBeginFrameLabel.Visibility = System.Windows.Visibility.Visible;
+                //CMLBeginFrameTextBox.Visibility = System.Windows.Visibility.Visible;
+                //CMLEndFrameLabel.Visibility = System.Windows.Visibility.Visible;
+                //CMLEndFrameTextBox.Visibility = System.Windows.Visibility.Visible;
                 TrainerNameTextBox.IsEnabled = false;
             }
             else
             {
                 ModeTabControl.SelectedIndex = (int)mode;
-                CMLBeginFrameLabel.Visibility = System.Windows.Visibility.Collapsed;
-                CMLBeginFrameTextBox.Visibility = System.Windows.Visibility.Collapsed;
-                CMLEndFrameLabel.Visibility = System.Windows.Visibility.Collapsed;
-                CMLEndFrameTextBox.Visibility = System.Windows.Visibility.Collapsed;
+                //CMLBeginFrameLabel.Visibility = System.Windows.Visibility.Collapsed;
+                //CMLBeginFrameTextBox.Visibility = System.Windows.Visibility.Collapsed;
+                //CMLEndFrameLabel.Visibility = System.Windows.Visibility.Collapsed;
+                //CMLEndFrameTextBox.Visibility = System.Windows.Visibility.Collapsed;
                 TrainerNameTextBox.IsEnabled = true;
             }
+       
 
             int endframe = -1;
 
@@ -202,12 +206,12 @@ namespace ssi
 
             if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
             {
-            Thread logThread = new Thread(new ThreadStart(tryToGetLog));
-            Thread statusThread = new Thread(new ThreadStart(tryToGetStatus));
-            logThread.Start();
-            statusThread.Start();
+                Thread logThread = new Thread(new ThreadStart(tryToGetLog));
+                Thread statusThread = new Thread(new ThreadStart(tryToGetStatus));
+                logThread.Start();
+                statusThread.Start();
             }
-            changeFrontendInPolygonCase();
+            changeFrontendInPythonBackEndCase();
 
             Loaded += Window_Loaded;
 
@@ -260,7 +264,7 @@ namespace ssi
                     }
                 }
 
-                Thread.Sleep(4000);
+                Thread.Sleep(2000);
             }
         }
 
@@ -1153,35 +1157,69 @@ namespace ssi
             }
         }
 
-        private void changeFrontendInPolygonCase()
+        private void changeFrontendInPythonBackEndCase()
         {
             Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+            logThread = new Thread(new ThreadStart(tryToGetLog));
+            statusThread = new Thread(new ThreadStart(tryToGetStatus));
+
+            logThread.Start();
+            statusThread.Start();
 
             if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
             {
                 polygonCaseOn = true;
-                logThread = new Thread(new ThreadStart(tryToGetLog));
-                statusThread = new Thread(new ThreadStart(tryToGetStatus));
-                logThread.Start();
-                statusThread.Start();
+              
+               
                 this.statusLabel.Visibility = Visibility.Visible;
-                this.CMLBeginFrameLabel.Visibility = Visibility.Visible;
-                this.CMLBeginFrameTextBox.Visibility = Visibility.Visible;
-                this.CMLEndFrameLabel.Visibility = Visibility.Visible;
-                this.CMLEndFrameTextBox.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;
+
+                if (mode == Mode.COMPLETE)
+                {
+                    this.CMLBeginFrameLabel.Visibility = Visibility.Visible;
+                    this.CMLBeginFrameTextBox.Visibility = Visibility.Visible;
+                    this.CMLEndFrameLabel.Visibility = Visibility.Visible;
+                    this.CMLEndFrameTextBox.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    this.CMLBeginFrameLabel.Visibility = Visibility.Collapsed;
+                    this.CMLBeginFrameTextBox.Visibility = Visibility.Collapsed;
+                    this.CMLEndFrameLabel.Visibility = Visibility.Collapsed;
+                    this.CMLEndFrameTextBox.Visibility = Visibility.Collapsed;
+                }
+                
+               
             }
             else
             {
+
+            
                 this.ApplyButton.IsEnabled = true;
                 polygonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
-                this.CMLBeginFrameLabel.Visibility = Visibility.Collapsed;
-                this.CMLBeginFrameTextBox.Visibility = Visibility.Collapsed;
-                this.CMLEndFrameLabel.Visibility = Visibility.Collapsed;
-                this.CMLEndFrameTextBox.Visibility = Visibility.Collapsed;
                 this.Cancel_Button.Visibility = Visibility.Collapsed;
                 this.logTextBox.Text = "";
+                this.CMLEndFrameLabel.Visibility = Visibility.Collapsed;
+                this.CMLEndFrameTextBox.Visibility = Visibility.Collapsed;
+
+                if (mode == Mode.COMPLETE)
+                {
+                    this.CMLBeginFrameLabel.Visibility = Visibility.Visible;
+                    this.CMLBeginFrameTextBox.Visibility = Visibility.Visible;
+                    this.CMLEndFrameLabel.Visibility = Visibility.Collapsed;
+                    this.CMLEndFrameTextBox.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    this.CMLBeginFrameLabel.Visibility = Visibility.Collapsed;
+                    this.CMLBeginFrameTextBox.Visibility = Visibility.Collapsed;
+                    this.CMLEndFrameLabel.Visibility = Visibility.Collapsed;
+                    this.CMLEndFrameTextBox.Visibility = Visibility.Collapsed;
+                }
+
+
+
             }
         }
 
@@ -1956,7 +1994,7 @@ namespace ssi
 
         private void GeneralBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            changeFrontendInPolygonCase();
+            changeFrontendInPythonBackEndCase();
 
             if (handleSelectionChanged)
             {
