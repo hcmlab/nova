@@ -176,8 +176,8 @@ namespace ssi
 
                 }
 
-                else endframe = handler.control.annoListControl.annoDataGrid.Items.Count;
-            }
+                else endframe = AnnoTier.Selected.AnnoList.Count;
+            
            
 
             
@@ -185,7 +185,18 @@ namespace ssi
 
 
             this.CMLEndFrameTextBox.Text =endframe.ToString();
-            this.CMLBeginFrameTextBox.Text = handler.control.annoListControl.annoDataGrid.SelectedIndex.ToString();
+           
+            
+            double cmlbegintime = (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
+            MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
+
+            double framef = (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE) ? (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate) / 1000.0 : (1000.0 / AnnoTier.Selected.AnnoList.Scheme.SampleRate) / 1000.0;
+            int beginframe = (int)(cmlbegintime / framef);
+            this.CMLBeginFrameTextBox.Text = beginframe.ToString();
+
+            }
+
+            //handler.control.annoListControl.annoDataGrid.SelectedIndex.ToString();
 
             Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
 
