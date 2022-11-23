@@ -804,7 +804,7 @@ namespace ssi
 
             if (trainer.Backend.ToUpper() == "PYTHON")
             {
-                handlePolygonBackend(trainer, scheme, stream, annotator, database, trainerLeftContext, trainerRightContext, trainerBalance, rolesList);
+                handlePythonBackend(trainer, scheme, stream, annotator, database, trainerLeftContext, trainerRightContext, trainerBalance, rolesList);
             }
             else
             {
@@ -1089,7 +1089,7 @@ namespace ssi
             return streamName;
         }
 
-        private void handlePolygonBackend(Trainer trainer, DatabaseScheme scheme, DatabaseStream stream, DatabaseAnnotator annotator, string database, string trainerLeftContext, string trainerRightContext, string trainerBalance, string rolesList)
+        private void handlePythonBackend(Trainer trainer, DatabaseScheme scheme, DatabaseStream stream, DatabaseAnnotator annotator, string database, string trainerLeftContext, string trainerRightContext, string trainerBalance, string rolesList)
         {
             this.ApplyButton.IsEnabled = false;
 
