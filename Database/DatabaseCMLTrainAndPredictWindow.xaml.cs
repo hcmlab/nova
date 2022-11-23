@@ -239,6 +239,11 @@ namespace ssi
                 trainer = (Trainer)TrainerPathComboBox.SelectedItem;
             });
 
+            if(trainer == null)
+            {
+                return;
+            }
+
             if (trainer.Backend.ToUpper() != "PYTHON")
                 return;
 
@@ -1096,30 +1101,57 @@ namespace ssi
             string streamName = getStreamName(stream);
             string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
             string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
-            double sampleRate = (1000 / stream.SampleRate / 1000);
-            int cmlBeginFrame = int.Parse(this.CMLBeginFrameTextBox.Text);
-            int cmlEndFrame = int.Parse(this.CMLEndFrameTextBox.Text);
+            double sampleRate = (1000 / stream.SampleRate);
 
-            if(cmlBeginFrame >= cmlEndFrame)
+            string relativeTrainerOutPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+
+            String cmlBeginTime = "0";
+            String cmlEndTime = "0";
+
+            if (this.mode == Mode.COMPLETE)
             {
-                MessageBox.Show("End-Frame must be greater than Begin-Frame!", "Error", MessageBoxButton.OK);
-                return;
-            }
-            if (cmlBeginFrame > handler.control.annoListControl.annoDataGrid.Items.Count || cmlEndFrame > handler.control.annoListControl.annoDataGrid.Items.Count)
-            {
-                MessageBox.Show("Begin-Frame or End-Frame are greater than the amount of frames of the current file!", "Error", MessageBoxButton.OK);
-                return;
+
+                int cmlBeginFrame = int.Parse(this.CMLBeginFrameTextBox.Text);
+                int cmlEndFrame = int.Parse(this.CMLEndFrameTextBox.Text);
+
+
+                if (cmlBeginFrame >= cmlEndFrame)
+                {
+                    MessageBox.Show("End-Frame must be greater than Begin-Frame!", "Error", MessageBoxButton.OK);
+                    return;
+                }
+                if (cmlBeginFrame > handler.control.annoListControl.annoDataGrid.Items.Count || cmlEndFrame > handler.control.annoListControl.annoDataGrid.Items.Count)
+                {
+                    MessageBox.Show("Begin-Frame or End-Frame are greater than the amount of frames of the current file!", "Error", MessageBoxButton.OK);
+                    return;
+                }
+
+                cmlBeginTime = (sampleRate * cmlBeginFrame).ToString();
+                cmlEndTime = (sampleRate * cmlEndFrame).ToString();
+
+
             }
 
-            String cmlBeginTime = (sampleRate * cmlBeginFrame).ToString();
-            String cmlEndTime = (sampleRate * cmlEndFrame).ToString();
+            else
+            {
+                cmlBeginTime = "-1";
+                cmlEndTime = "-1";
+            }
+
 
             var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
+            string relativetrainerScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+
+            string relativetemplatePath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
+
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent(trainer.Path), "templatePath" },
-                { new StringContent(trainerOutPath), "trainerPath" },
-                { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" },
+
+
+                //Int -> MS Float -> S (oder ms,s als string)
+                { new StringContent(relativetemplatePath), "templatePath" },
+                { new StringContent(relativeTrainerOutPath), "trainerPath" },
+                { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
                 { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
@@ -1134,18 +1166,20 @@ namespace ssi
                 { new StringContent(trainerRightContext), "rightContext" },
                 { new StringContent(trainerBalance), "balance" },
                 { new StringContent(this.mode.ToString()), "mode" },
-                { new StringContent("0s"), "startTime" },
+                { new StringContent("0"), "startTime" }, //IN MILLISECONDS
                 { new StringContent(cmlBeginTime), "cmlBeginTime" },
                 { new StringContent(cmlEndTime), "cmlEndTime" },
                 { new StringContent(sampleRate.ToString()), "sampleRate" },
                 { new StringContent(scheme.Type.ToString()), "schemeType" },
-                { new StringContent(trainerScriptPath), "trainerScript" },
+                { new StringContent(relativetrainerScriptPath), "trainerScript" },
                 { new StringContent(trainer.Name), "trainerScriptName" }
             };
 
             if (this.mode == Mode.COMPLETE)
             {
                 _ = handler.PythonBackEndComplete(content);
+              //  _ = handler.PythonBackEndTraining(content);
+              //  _ = handler.PythonBackEndPredict(content);
             }
             else if (this.mode == Mode.TRAIN)
             {
