@@ -54,6 +54,8 @@ namespace ssi
             public string Backend { get; set; }
             public string Script { get; set; }
 
+            public string Weight { get; set; }
+
             public override string ToString()
             {
                 return Name;
@@ -1101,9 +1103,26 @@ namespace ssi
             string streamName = getStreamName(stream);
             string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
             string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
-            double sampleRate = (1000 / stream.SampleRate);
+            double frameSize = 0;
 
-            string relativeTrainerOutPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+            if(scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON
+                || scheme.Type == AnnoScheme.TYPE.POINT || scheme.Type == AnnoScheme.TYPE.POLYGON)
+            {
+                frameSize =  1000.0 / scheme.SampleRate;
+
+            }
+            else if (scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            {
+                frameSize = 1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate;
+                // make UI element to adjust
+            }
+
+            else if (scheme.Type == AnnoScheme.TYPE.FREE)
+            {
+                frameSize = 10000.0; // 10 Sekunden make UI element to adjust TODO
+            }
+
+                string relativeTrainerOutPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
 
             String cmlBeginTime = "0";
             String cmlEndTime = "0";
@@ -1126,8 +1145,8 @@ namespace ssi
                     return;
                 }
 
-                cmlBeginTime = (sampleRate * cmlBeginFrame).ToString();
-                cmlEndTime = (sampleRate * cmlEndFrame).ToString();
+                cmlBeginTime = (frameSize * cmlBeginFrame).ToString();
+                cmlEndTime = (frameSize * cmlEndFrame).ToString();
 
 
             }
@@ -1143,6 +1162,12 @@ namespace ssi
             string relativetrainerScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
 
             string relativetemplatePath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
+
+
+            if(mode == Mode.PREDICT)
+            {
+                trainer.Name = trainer.Name.Split(' ')[0];
+            }
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
@@ -1166,13 +1191,14 @@ namespace ssi
                 { new StringContent(trainerRightContext), "rightContext" },
                 { new StringContent(trainerBalance), "balance" },
                 { new StringContent(this.mode.ToString()), "mode" },
-                { new StringContent("0"), "startTime" }, //IN MILLISECONDS
+                { new StringContent("0ms"), "startTime" }, //IN MILLISECONDS
                 { new StringContent(cmlBeginTime), "cmlBeginTime" },
                 { new StringContent(cmlEndTime), "cmlEndTime" },
-                { new StringContent(sampleRate.ToString()), "sampleRate" },
+                { new StringContent(frameSize.ToString() + "ms"), "frameSize" }, //inms
                 { new StringContent(scheme.Type.ToString()), "schemeType" },
                 { new StringContent(relativetrainerScriptPath), "trainerScript" },
-                { new StringContent(trainer.Name), "trainerScriptName" }
+                { new StringContent(trainer.Name), "trainerScriptName" },
+                { new StringContent(trainer.Weight), "weightsPath" }
             };
 
             if (this.mode == Mode.COMPLETE)
@@ -1185,7 +1211,7 @@ namespace ssi
             {
                 _ = handler.PythonBackEndTraining(content);
             }
-            else if (this.mode != Mode.PREDICT)
+            else if (this.mode == Mode.PREDICT)
             {
                 _ = handler.PythonBackEndPredict(content);
             }
@@ -1631,6 +1657,12 @@ namespace ssi
                     if (script != null)
                     {
                         trainer.Script = script.Value;
+                    }
+
+                    var weights = node.Attributes["path"];
+                    if (weights != null)
+                    {
+                        trainer.Weight = weights.Value;
                     }
                 }
             }

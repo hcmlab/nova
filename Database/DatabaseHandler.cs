@@ -3774,7 +3774,7 @@ namespace ssi
                             {
                                 String label = "";
                                 Color labelColor = Colors.Black;
-                                String conf = "100";
+                                String conf = "1";
                                 if (polygon.TryGetElement("confidence", out value))
                                     conf = value.Value.ToString();
 
