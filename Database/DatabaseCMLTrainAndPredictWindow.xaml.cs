@@ -1157,6 +1157,14 @@ namespace ssi
                 cmlEndTime = "-1";
             }
 
+            bool test = true;
+
+
+            //TODO REMOVE
+            if (test){
+                cmlEndTime = "300s";
+            }
+
 
             var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
             string relativetrainerScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
