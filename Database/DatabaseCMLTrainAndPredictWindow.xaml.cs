@@ -218,7 +218,7 @@ namespace ssi
             Loaded += Window_Loaded;
 
             HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.";
-            HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";
+            HelpPredictLabel.Content = "Framesize in s or ms (only Schemes without fixed rate)\n\nPredict until time in s or ms (Leave eof for the whole session)\n\nApply thresholds to fill up gaps between segments of the same class\nand remove small segments (in seconds).\n\r\nSet confidence to a fixed value.";
         }
 
         private void createStatusObjects()
@@ -277,18 +277,23 @@ namespace ssi
 
         private void tryToGetStatus()
         {
-            //Trainer trainer = null;
-            //this.Dispatcher.Invoke(() =>
-            //{
-            //    trainer = (Trainer)TrainerPathComboBox.SelectedItem;
-            //});
+            Trainer trainer = null;
+            this.Dispatcher.Invoke(() =>
+            {
+                trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+            });
 
-            //if (trainer.Backend.ToUpper() != "PYTHON")
-            //{
-              
-            //    return;
+            if(trainer == null)
+            {
+                return;
+            }
 
-            //}
+            if (trainer.Backend.ToUpper() != "PYTHON")
+            {
+
+                return;
+
+            }
 
             Dictionary<string, string> response = null;
             while (polygonCaseOn)
@@ -1105,24 +1110,41 @@ namespace ssi
             string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
             double frameSize = 0;
 
-            if(scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON
+         
+
+
+            if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON
                 || scheme.Type == AnnoScheme.TYPE.POINT || scheme.Type == AnnoScheme.TYPE.POLYGON)
             {
-                frameSize =  1000.0 / scheme.SampleRate;
+                frameSize = 1000.0 / scheme.SampleRate;
 
             }
-            else if (scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            //else if (scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            //{
+            //    frameSize = double.Parse(FrameSizeTextBox.Text);
+            //    // make UI element to adjust
+            //}
+
+            else if (scheme.Type == AnnoScheme.TYPE.FREE || scheme.Type == AnnoScheme.TYPE.DISCRETE)
             {
-                frameSize = 1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate;
-                // make UI element to adjust
+                string frameSizestring = FrameSizeTextBox.Text;
+                if (frameSizestring.EndsWith("ms")) {
+                    frameSizestring = frameSizestring.Remove(frameSizestring.Length - 2);
+                    frameSize = double.Parse(frameSizestring);
+                }
+
+                else if (frameSizestring.EndsWith("s")) {
+                    frameSizestring = frameSizestring.Remove(frameSizestring.Length - 1);
+                    frameSize = double.Parse(frameSizestring) * 1000;
+                }
+                else {
+                    MessageBox.Show("Please use Seconds or Milliseconds for the Framesize");
+                    return;
+                     }
+
             }
 
-            else if (scheme.Type == AnnoScheme.TYPE.FREE)
-            {
-                frameSize = 10000.0; // 10 Sekunden make UI element to adjust TODO
-            }
-
-                string relativeTrainerOutPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+            string relativeTrainerOutPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
 
             String cmlBeginTime = "0";
             String cmlEndTime = "0";
@@ -1157,13 +1179,35 @@ namespace ssi
                 cmlEndTime = "-1";
             }
 
-            bool test = true;
 
 
-            //TODO REMOVE
-            if (test){
-                cmlEndTime = "300s";
+            if((this.mode == Mode.PREDICT) && EndLengthTextBox.Text != "eof")
+            {
+                string frameSizestring = EndLengthTextBox.Text;
+                if (frameSizestring.EndsWith("ms"))
+                {
+                    cmlEndTime = EndLengthTextBox.Text;
+                }
+
+                else if (frameSizestring.EndsWith("s"))
+                {
+                    cmlEndTime = EndLengthTextBox.Text;
+                }
+                else
+                {
+                    MessageBox.Show("Please use Seconds or  Milliseconds for the Preview End time");
+                    return;
+                }
+
+
+        
             }
+
+            ////TODO REMOVE
+            //bool test = true;
+            //if (test){
+            //    cmlEndTime = "300s";
+            //}
 
 
             var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
@@ -1234,6 +1278,10 @@ namespace ssi
             logThread.Start();
             statusThread.Start();
 
+
+
+
+
             if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
             {
                 polygonCaseOn = true;
@@ -1255,6 +1303,38 @@ namespace ssi
                     this.CMLBeginFrameTextBox.Visibility = Visibility.Collapsed;
                     this.CMLEndFrameLabel.Visibility = Visibility.Collapsed;
                     this.CMLEndFrameTextBox.Visibility = Visibility.Collapsed;
+                    DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
+
+                    if ((mode == Mode.PREDICT))
+                    {
+                        this.FrameSizeLabel.Visibility = Visibility.Visible;
+                        this.FrameSizeTextBox.Visibility = Visibility.Visible;
+                        this.EndLength.Visibility = Visibility.Visible;
+                        this.EndLengthTextBox.Visibility = Visibility.Visible;
+                        EndLengthTextBox.IsEnabled = true;
+
+                        if (scheme.Type == AnnoScheme.TYPE.FREE || scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                        {
+                            FrameSizeTextBox.Text = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate).ToString() + "ms";
+                            FrameSizeTextBox.IsEnabled = true;
+                        }
+
+                        else
+                        {
+                            FrameSizeTextBox.Text = (1000.0 / scheme.SampleRate).ToString() + "ms";
+                            FrameSizeTextBox.IsEnabled = false;
+                        }
+                    }
+                    else
+                    {
+                        FrameSizeLabel.Visibility = Visibility.Collapsed;
+                        FrameSizeTextBox.Visibility = Visibility.Collapsed;
+                        this.EndLength.Visibility = Visibility.Collapsed;
+                        this.EndLengthTextBox.Visibility = Visibility.Collapsed;
+                    }
+
+
+
                 }
                 
                
@@ -1262,7 +1342,8 @@ namespace ssi
             else
             {
 
-            
+                EndLengthTextBox.Text = "eof";
+                EndLengthTextBox.IsEnabled = false;
                 this.ApplyButton.IsEnabled = true;
                 polygonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
@@ -2018,6 +2099,10 @@ namespace ssi
                 ForceCheckBox.IsEnabled = true;
                 TrainerPathComboBox.IsEnabled = true;
             }
+
+         
+
+
         }
 
         #endregion
@@ -2355,6 +2440,16 @@ namespace ssi
         {
             Regex regexObj = new Regex(@"[^\d]");
             this.CMLEndFrameTextBox.Text = regexObj.Replace(this.CMLEndFrameTextBox.Text, "");
+        }
+
+        private void FrameSizeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void LeftContextTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 

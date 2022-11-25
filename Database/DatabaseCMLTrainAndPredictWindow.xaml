@@ -268,6 +268,7 @@
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
@@ -288,20 +289,22 @@
                         <ComboBoxItem>over</ComboBoxItem>
                     </ComboBox>
 
-                    <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
-                    <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" Height="20">0</TextBox>
 
-                    <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Right context</Label>
-                    <TextBox Name="RightContextTextBox" Grid.Row="2" Grid.Column="1" Height="20">0</TextBox>
 
-                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Output name</Label>
-                    <TextBox Name="TrainerNameTextBox" IsEnabled="True" Grid.Row="3" Grid.Column="1" Height="20">0</TextBox>
+                    <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
+                    <TextBox Name="LeftContextTextBox" Grid.Row="2" Grid.Column="1" Height="20" TextChanged="LeftContextTextBox_TextChanged">0</TextBox>
 
-                    <Label Name="CMLBeginFrameLabel" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Begin-Frame CML</Label>
-                    <TextBox Name="CMLBeginFrameTextBox" TextChanged="CMLBeginFrameLabelTextBox_TextChanged" IsEnabled="True" Grid.Row="4" Grid.Column="1" Height="20">-1</TextBox>
+                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Right context</Label>
+                    <TextBox Name="RightContextTextBox" Grid.Row="3" Grid.Column="1" Height="20">0</TextBox>
 
-                    <Label Name="CMLEndFrameLabel" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">End-Frame CML</Label>
-                    <TextBox Name="CMLEndFrameTextBox" TextChanged="CMLBeginFrameLabelTextBox_TextChanged" IsEnabled="True" Grid.Row="5" Grid.Column="1" Height="20">-1</TextBox>
+                    <Label Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Output name</Label>
+                    <TextBox Name="TrainerNameTextBox" IsEnabled="True" Grid.Row="4" Grid.Column="1" Height="20">0</TextBox>
+
+                    <Label Name="CMLBeginFrameLabel" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Begin-Frame CML</Label>
+                    <TextBox Name="CMLBeginFrameTextBox" TextChanged="CMLBeginFrameLabelTextBox_TextChanged" IsEnabled="True" Grid.Row="5" Grid.Column="1" Height="20">-1</TextBox>
+
+                    <Label Name="CMLEndFrameLabel" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">End-Frame CML</Label>
+                    <TextBox Name="CMLEndFrameTextBox" TextChanged="CMLBeginFrameLabelTextBox_TextChanged" IsEnabled="True" Grid.Row="6" Grid.Column="1" Height="20">-1</TextBox>
 
                     <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="4" Grid.Column="2" VerticalAlignment="Center"></Label>
 
@@ -317,6 +320,8 @@
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -325,14 +330,20 @@
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
-                    <CheckBox Name="FillGapCheckBox" Grid.Row="0" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="FillGapCheckBox_Checked" Unchecked="FillGapCheckBox_Unchecked">Fill gaps (s)</CheckBox>
-                    <TextBox Name="FillGapTextBox" Grid.Row="0" Grid.Column="1"  Height="20">0.5</TextBox>
+                    <Label Name="FrameSizeLabel" Grid.Row="0"  Visibility="Collapsed" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Framesize</Label>
+                    <TextBox Name="FrameSizeTextBox" Visibility="Collapsed" TextChanged="FrameSizeTextBox_TextChanged" IsEnabled="True" Grid.Row="0" Grid.Column="1" Height="20">40ms</TextBox>
 
-                    <CheckBox Name="RemoveLabelCheckBox" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="RemoveLabelCheckBox_Checked" Unchecked="RemoveLabelCheckBox_Unchecked">Remove (s)</CheckBox>
-                    <TextBox Name="RemoveLabelTextBox" Grid.Row="1" Grid.Column="1"  Height="20">0.15</TextBox>
+                    <Label Name="EndLength" Grid.Row="1"   Visibility="Collapsed" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Predict until</Label>
+                    <TextBox Name="EndLengthTextBox"  Visibility="Collapsed" TextChanged="FrameSizeTextBox_TextChanged" IsEnabled="True" Grid.Row="1" Grid.Column="1" ToolTip="Leave on eof (End of File) for full predictions, enter time in seconds or milliseconds to predict until a certain time" Height="20">eof</TextBox>
 
-                    <CheckBox Name="ConfidenceCheckBox" Grid.Row="2" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="ConfidenceCheckBox_Checked" Unchecked="ConfidenceCheckBox_Unchecked">Confidence</CheckBox>
-                    <TextBox Name="ConfidenceTextBox" Grid.Row="2" Grid.Column="1"  Height="20">-1.0</TextBox>
+                    <CheckBox Name="FillGapCheckBox" Grid.Row="2" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="FillGapCheckBox_Checked" Unchecked="FillGapCheckBox_Unchecked">Fill gaps (s)</CheckBox>
+                    <TextBox Name="FillGapTextBox" Grid.Row="2" Grid.Column="1"  Height="20">0.5</TextBox>
+
+                    <CheckBox Name="RemoveLabelCheckBox" Grid.Row="3" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="RemoveLabelCheckBox_Checked" Unchecked="RemoveLabelCheckBox_Unchecked">Remove (s)</CheckBox>
+                    <TextBox Name="RemoveLabelTextBox" Grid.Row="3" Grid.Column="1"  Height="20">0.15</TextBox>
+
+                    <CheckBox Name="ConfidenceCheckBox" Grid.Row="4" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left" Checked="ConfidenceCheckBox_Checked" Unchecked="ConfidenceCheckBox_Unchecked">Confidence</CheckBox>
+                    <TextBox Name="ConfidenceTextBox" Grid.Row="4" Grid.Column="1"  Height="20">-1.0</TextBox>
 
                     <Label Name="HelpPredictLabel" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
 
