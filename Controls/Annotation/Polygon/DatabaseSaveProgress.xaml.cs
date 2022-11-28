@@ -35,7 +35,7 @@ namespace ssi.Controls.Annotation.Polygon
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
 		{
-            const long MAX_DOCUMENT_SIZE = 16777216;
+            const long MAX_DOCUMENT_SIZE = 16000000; // with buffer
             (sender as BackgroundWorker).ReportProgress(1);
             List<AnnoList> fittedParts = DatabaseHandler.splitDataInFittingParts(annoList, schemeDoc, MAX_DOCUMENT_SIZE);
             (sender as BackgroundWorker).ReportProgress(8);

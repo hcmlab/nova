@@ -2700,10 +2700,11 @@ namespace ssi
                 }
 
                 // delete and replace backup annotation data
-
                 if (annoList.Source.Database.DataBackupOID != AnnoSource.DatabaseSource.ZERO)
                 {
                     var filterAnnotationDataBackupDoc = builder.Eq("_id", annoList.Source.Database.DataBackupOID);
+                    // if the anno is very large, we have splitted parts -> delete all of them
+                    deleteTailIfNecessary(annoList, annotationData, builder);
                     annotationData.DeleteOne(filterAnnotationDataBackupDoc);
                 }
                 annoList.Source.Database.DataBackupOID = annoList.Source.Database.DataOID;
@@ -2815,6 +2816,29 @@ namespace ssi
             return true;
         }
 
+        private static void deleteTailIfNecessary(AnnoList annoList, IMongoCollection<BsonDocument> annotationData, FilterDefinitionBuilder<BsonDocument> builder)
+        {
+            var condition = builder.Eq("_id", annoList.Source.Database.DataBackupOID);
+            var fields = Builders<BsonDocument>.Projection.Include("nextEntry");
+            var id = annotationData.Find(condition).Project<BsonDocument>(fields).ToList();
+            if (id.Count > 0 && id[0].Contains("nextEntry"))
+            {
+                ObjectId nextEntryID = id[0].GetValue("nextEntry").AsObjectId;
+                bool nextEntryAvailable = true;
+                while(nextEntryAvailable)
+                {
+                    condition = builder.Eq("_id", nextEntryID);
+                    id = annotationData.Find(condition).Project<BsonDocument>(fields).ToList();
+                    if (id.Count > 0 && id[0].Contains("nextEntry"))
+                        nextEntryID = id[0].GetValue("nextEntry").AsObjectId;
+                    else
+                        nextEntryAvailable = false;
+
+                    annotationData.DeleteOne(condition);
+                }
+            }
+        }
+
         public static List<AnnoList> splitDataInFittingParts(AnnoList annoList, BsonDocument schemeDoc, long max_size)
         {
             AnnoList first = getHalfAnnoList(annoList, 0, annoList.Count / 2);
@@ -2825,8 +2849,6 @@ namespace ssi
             BsonDocument newAnnotationDataDoc = new BsonDocument();
             newAnnotationDataDoc.Add(new BsonElement("_id", testID));
             newAnnotationDataDoc.Add("labels", data);
-            // TODO MARCO warum previous?
-            newAnnotationDataDoc.Add("previousEntry", testID);
 
             List<AnnoList> resultList = new List<AnnoList>();
             if (newAnnotationDataDoc.ToBson().Length >= max_size)
@@ -2842,7 +2864,6 @@ namespace ssi
             newAnnotationDataDoc = new BsonDocument();
             newAnnotationDataDoc.Add(new BsonElement("_id", testID));
             newAnnotationDataDoc.Add("labels", data);
-            newAnnotationDataDoc.Add("previousEntry", testID);
 
             if (newAnnotationDataDoc.ToBson().Length >= max_size)
             {
