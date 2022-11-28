@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def train(data_list, labels, logger, steps=800, plot_path=None):
+def train(data_list, labels, logger, steps=100, plot_path=None):
     if plot_path is None:
         plot_path = Path.cwd()
 
@@ -181,7 +181,9 @@ def predict(model, data, logger, shape):
 
 
 def save(model, path):
-    model.save_weights(str(path) + ".pth")
+    path = str(path) + ".pth"
+    model.save_weights(path)
+    return path
 
 
 def load(path, num_classes):

@@ -133,7 +133,7 @@ namespace ssi
 
         private statusObject[] states = new statusObject[4];
 
-        private static bool polygonCaseOn = true;
+        private static bool pythonCaseOn = true;
 
         private bool handleSelectionChanged = false;
 
@@ -148,49 +148,58 @@ namespace ssi
             if (mode == Mode.COMPLETE)
             {
                 ModeTabControl.Visibility = System.Windows.Visibility.Collapsed;
-                CMLBeginFrameLabel.Visibility = System.Windows.Visibility.Visible;
-                CMLBeginFrameTextBox.Visibility = System.Windows.Visibility.Visible;
-                CMLEndFrameLabel.Visibility = System.Windows.Visibility.Visible;
-                CMLEndFrameTextBox.Visibility = System.Windows.Visibility.Visible;
                 TrainerNameTextBox.IsEnabled = false;
             }
             else
             {
                 ModeTabControl.SelectedIndex = (int)mode;
-                CMLBeginFrameLabel.Visibility = System.Windows.Visibility.Collapsed;
-                CMLBeginFrameTextBox.Visibility = System.Windows.Visibility.Collapsed;
-                CMLEndFrameLabel.Visibility = System.Windows.Visibility.Collapsed;
-                CMLEndFrameTextBox.Visibility = System.Windows.Visibility.Collapsed;
                 TrainerNameTextBox.IsEnabled = true;
             }
 
-            int endframe = -1;
+            int endtime = -1;
 
-            if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+            if(AnnoTier.Selected != null)
             {
-                double endtime = AnnoTier.Selected.AnnoList.ElementAt(AnnoTier.Selected.AnnoList.Count - 1).Stop;
-                double frame = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate) / 1000.0;
-                endframe = (int)(endtime / frame);
+                if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+                {
+                    double endtimeInSec = (int)AnnoTier.Selected.AnnoList.ElementAt(AnnoTier.Selected.AnnoList.Count - 1).Stop;
+                    endtime = (int)(Math.Round(value: endtimeInSec, digits: 2) * 1000);
+                }
+                else
+                {
+                    double endtimeInSec = ((AnnoListItem)handler.control.annoListControl.annoDataGrid.Items[handler.control.annoListControl.annoDataGrid.Items.Count - 1]).Stop;
+                    endtime = (int)(Math.Round(value: endtimeInSec, digits: 2) * 1000);
+                }
 
+                int startTime = -1;
+
+                if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+                {
+                    double startTimeInSec = MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
+                    startTime = (int)(Math.Round(value: startTimeInSec, digits: 2) * 1000);
+                }
+                else
+                {
+                    double startTimeInSec = MainHandler.Time.CurrentPlayPosition;
+                    startTime = (int)(Math.Round(value: startTimeInSec, digits: 2) * 1000);
+                }
+
+                this.CMLEndTimeTextBox.Text = endtime.ToString();
+                this.CMLBeginTimeTextBox.Text = startTime.ToString();
             }
-
-            else endframe = handler.control.annoListControl.annoDataGrid.Items.Count;
-
-
-
-            this.CMLEndFrameTextBox.Text =endframe.ToString();
-            this.CMLBeginFrameTextBox.Text = handler.control.annoListControl.annoDataGrid.SelectedIndex.ToString();
+            
 
             Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
 
             if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
             {
-            Thread logThread = new Thread(new ThreadStart(tryToGetLog));
-            Thread statusThread = new Thread(new ThreadStart(tryToGetStatus));
-            logThread.Start();
-            statusThread.Start();
+                Thread logThread = new Thread(new ThreadStart(tryToGetLog));
+                Thread statusThread = new Thread(new ThreadStart(tryToGetStatus));
+                logThread.Start();
+                statusThread.Start();
             }
-            changeFrontendInPolygonCase();
+
+            changeFrontendInPythonBackEndCase();
 
             Loaded += Window_Loaded;
 
@@ -212,17 +221,8 @@ namespace ssi
 
         private void tryToGetLog()
         {
-            Trainer trainer = null;
-            this.Dispatcher.Invoke(() =>
-            {
-                trainer = (Trainer)TrainerPathComboBox.SelectedItem;
-            });
-
-            if (trainer.Backend.ToUpper() != "PYTHON")
-                return;
-
             Dictionary<string, string> response = null;
-            while (polygonCaseOn)
+            while (pythonCaseOn)
             {
                 MultipartFormDataContent content = getContent();
                 // else case is handled in status-thread (see tryToGetStatus method)
@@ -249,21 +249,8 @@ namespace ssi
 
         private void tryToGetStatus()
         {
-            //Trainer trainer = null;
-            //this.Dispatcher.Invoke(() =>
-            //{
-            //    trainer = (Trainer)TrainerPathComboBox.SelectedItem;
-            //});
-
-            //if (trainer.Backend.ToUpper() != "PYTHON")
-            //{
-              
-            //    return;
-
-            //}
-
             Dictionary<string, string> response = null;
-            while (polygonCaseOn)
+            while (pythonCaseOn)
             {
                 MultipartFormDataContent content = getContent();
                 if (content != null)
@@ -409,7 +396,7 @@ namespace ssi
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            polygonCaseOn = false;
+            pythonCaseOn = false;
         }
 
         private void Cancel_Button_Click(object sender, RoutedEventArgs e)
@@ -714,7 +701,7 @@ namespace ssi
                 double cmlbegintime = (scheme.Type == AnnoScheme.TYPE.CONTINUOUS) ? MainHandler.Time.CurrentPlayPosition :
                 MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
 
-                if (!polygonCaseOn)
+                if (!pythonCaseOn)
                 {
                     string[] dbinfo = {"ip="+Properties.Settings.Default.DatabaseAddress.Split(':')[0] +";port="+ Properties.Settings.Default.DatabaseAddress.Split(':')[1]+ ";user=" + Properties.Settings.Default.MongoDBUser +
                                     ";pw="+ MainHandler.Decode(Properties.Settings.Default.MongoDBPass) + ";scheme=" +  scheme.Name + ";root=" + Properties.Settings.Default.DatabaseDirectory + ";cooperative=" + (mode == Mode.COMPLETE)  + ";cmlbegintime=" + cmlbegintime};
@@ -783,7 +770,7 @@ namespace ssi
 
             if (trainer.Backend.ToUpper() == "PYTHON")
             {
-                handlePolygonBackend(trainer, scheme, stream, annotator, database, trainerLeftContext, trainerRightContext, trainerBalance, rolesList);
+                handlePythonBackend(trainer, scheme, stream, annotator, database, trainerLeftContext, trainerRightContext, trainerBalance, rolesList);
             }
             else
             {
@@ -811,9 +798,6 @@ namespace ssi
 
                             if (trainer.Backend.ToUpper() == "SSI")
                             {
-
-
-
                                 logTextBox.Text += handler.CMLTrainModel(trainer.Path,
                                 trainerOutPath,
                                 root,
@@ -1068,7 +1052,7 @@ namespace ssi
             return streamName;
         }
 
-        private void handlePolygonBackend(Trainer trainer, DatabaseScheme scheme, DatabaseStream stream, DatabaseAnnotator annotator, string database, string trainerLeftContext, string trainerRightContext, string trainerBalance, string rolesList)
+        private void handlePythonBackend(Trainer trainer, DatabaseScheme scheme, DatabaseStream stream, DatabaseAnnotator annotator, string database, string trainerLeftContext, string trainerRightContext, string trainerBalance, string rolesList)
         {
             this.ApplyButton.IsEnabled = false;
 
@@ -1076,22 +1060,14 @@ namespace ssi
             string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
             string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
             double sampleRate = (1000 / stream.SampleRate / 1000);
-            int cmlBeginFrame = int.Parse(this.CMLBeginFrameTextBox.Text);
-            int cmlEndFrame = int.Parse(this.CMLEndFrameTextBox.Text);
+            int cmlBeginTime = int.Parse(this.CMLBeginTimeTextBox.Text);
+            int cmlEndTime = int.Parse(this.CMLEndTimeTextBox.Text);
 
-            if(cmlBeginFrame >= cmlEndFrame)
+            if(cmlBeginTime >= cmlEndTime)
             {
-                MessageBox.Show("End-Frame must be greater than Begin-Frame!", "Error", MessageBoxButton.OK);
+                MessageBox.Show("End-Time must be greater than Begin-Time!", "Error", MessageBoxButton.OK);
                 return;
             }
-            if (cmlBeginFrame > handler.control.annoListControl.annoDataGrid.Items.Count || cmlEndFrame > handler.control.annoListControl.annoDataGrid.Items.Count)
-            {
-                MessageBox.Show("Begin-Frame or End-Frame are greater than the amount of frames of the current file!", "Error", MessageBoxButton.OK);
-                return;
-            }
-
-            String cmlBeginTime = (sampleRate * cmlBeginFrame).ToString();
-            String cmlEndTime = (sampleRate * cmlEndFrame).ToString();
 
             var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
             MultipartFormDataContent content = new MultipartFormDataContent
@@ -1113,9 +1089,9 @@ namespace ssi
                 { new StringContent(trainerRightContext), "rightContext" },
                 { new StringContent(trainerBalance), "balance" },
                 { new StringContent(this.mode.ToString()), "mode" },
-                { new StringContent("0s"), "startTime" },
-                { new StringContent(cmlBeginTime), "cmlBeginTime" },
-                { new StringContent(cmlEndTime), "cmlEndTime" },
+                { new StringContent("0"), "startTime" },
+                { new StringContent(this.CMLBeginTimeTextBox.Text), "cmlBeginTime" },
+                { new StringContent(this.CMLEndTimeTextBox.Text), "cmlEndTime" },
                 { new StringContent(sampleRate.ToString()), "sampleRate" },
                 { new StringContent(scheme.Type.ToString()), "schemeType" },
                 { new StringContent(trainerScriptPath), "trainerScript" },
@@ -1130,42 +1106,59 @@ namespace ssi
             {
                 _ = handler.PythonBackEndTraining(content);
             }
-            else if (this.mode != Mode.PREDICT)
+            else if (this.mode == Mode.PREDICT)
             {
                 _ = handler.PythonBackEndPredict(content);
             }
         }
 
-        private void changeFrontendInPolygonCase()
+        private void changeFrontendInPythonBackEndCase()
         {
             Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
 
             if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
             {
-                polygonCaseOn = true;
+                pythonCaseOn = true;
                 logThread = new Thread(new ThreadStart(tryToGetLog));
                 statusThread = new Thread(new ThreadStart(tryToGetStatus));
                 logThread.Start();
                 statusThread.Start();
                 this.statusLabel.Visibility = Visibility.Visible;
-                this.CMLBeginFrameLabel.Visibility = Visibility.Visible;
-                this.CMLBeginFrameTextBox.Visibility = Visibility.Visible;
-                this.CMLEndFrameLabel.Visibility = Visibility.Visible;
-                this.CMLEndFrameTextBox.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;
+
+                if (mode == Mode.COMPLETE)
+                {
+                    ModeTabControl.Visibility = System.Windows.Visibility.Collapsed;
+                    CMLBeginTimeLabel.Visibility = System.Windows.Visibility.Visible;
+                    CMLBeginTimeTextBox.Visibility = System.Windows.Visibility.Visible;
+                    CMLEndTimeLabel.Visibility = System.Windows.Visibility.Visible;
+                    CMLEndTimeTextBox.Visibility = System.Windows.Visibility.Visible;
+                    TrainerNameTextBox.IsEnabled = false;
+                }
+                else
+                {
+                    ModeTabControl.SelectedIndex = (int)mode;
+                    CMLBeginTimeLabel.Visibility = System.Windows.Visibility.Collapsed;
+                    CMLBeginTimeTextBox.Visibility = System.Windows.Visibility.Collapsed;
+                    CMLEndTimeLabel.Visibility = System.Windows.Visibility.Collapsed;
+                    CMLEndTimeTextBox.Visibility = System.Windows.Visibility.Collapsed;
+                    TrainerNameTextBox.IsEnabled = true;
+                }
             }
             else
             {
                 this.ApplyButton.IsEnabled = true;
-                polygonCaseOn = false;
+                pythonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
-                this.CMLBeginFrameLabel.Visibility = Visibility.Collapsed;
-                this.CMLBeginFrameTextBox.Visibility = Visibility.Collapsed;
-                this.CMLEndFrameLabel.Visibility = Visibility.Collapsed;
-                this.CMLEndFrameTextBox.Visibility = Visibility.Collapsed;
+                this.CMLBeginTimeLabel.Visibility = Visibility.Collapsed;
+                this.CMLBeginTimeTextBox.Visibility = Visibility.Collapsed;
+                this.CMLEndTimeLabel.Visibility = Visibility.Collapsed;
+                this.CMLEndTimeTextBox.Visibility = Visibility.Collapsed;
                 this.Cancel_Button.Visibility = Visibility.Collapsed;
                 this.logTextBox.Text = "";
             }
+
+
         }
 
         #endregion
@@ -1939,7 +1932,7 @@ namespace ssi
 
         private void GeneralBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            changeFrontendInPolygonCase();
+            changeFrontendInPythonBackEndCase();
 
             if (handleSelectionChanged)
             {
@@ -2216,16 +2209,16 @@ namespace ssi
             }
         }
 
-        private void CMLBeginFrameLabelTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void CMLBeginTimeLabelTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             Regex regexObj = new Regex(@"[^\d]");
-            this.CMLBeginFrameTextBox.Text = regexObj.Replace(this.CMLBeginFrameTextBox.Text, "");
+            this.CMLBeginTimeTextBox.Text = regexObj.Replace(this.CMLBeginTimeTextBox.Text, "");
         }
 
-        private void CMLEndFrameLabelBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void CMLEndTimeTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             Regex regexObj = new Regex(@"[^\d]");
-            this.CMLEndFrameTextBox.Text = regexObj.Replace(this.CMLEndFrameTextBox.Text, "");
+            this.CMLEndTimeTextBox.Text = regexObj.Replace(this.CMLEndTimeTextBox.Text, "");
         }
     }
 
