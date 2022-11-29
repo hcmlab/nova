@@ -154,7 +154,7 @@ namespace ssi
 
                     if (user.Password != "")
                     {
-                        if(user.ln_wallet_id != null || user.ln_wallet_id != "")
+                        if(user.ln_wallet_id != null && user.ln_wallet_id != "")
                         {
                             MessageBoxResult mb = MessageBox.Show("User has a Lightning Wallet, Changing Password will make it unaccessable if user didn't save admin key!","Attention",MessageBoxButton.OKCancel);
                             if(mb == MessageBoxResult.OK)
@@ -173,9 +173,12 @@ namespace ssi
                     if (user.ln_wallet_id == null || user.ln_wallet_id == "")
                     {
                         user.ln_wallet_id = "";
+                        user.ln_wallet_id_locked = "";
                         user.ln_user_id = "";
                         user.ln_invoice_key = "";
+                        user.ln_invoice_key_locked = "";
                         user.ln_admin_key = "";
+                        user.ln_admin_key_locked = "";
                         user.ln_addressname = "";
                         user.ln_addresspin = "";
                     }
