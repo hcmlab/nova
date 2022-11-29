@@ -480,3 +480,5 @@ bin/OxyPlot.Wpf.xml
 bin/OxyPlot.xml
 bin/OxyPlot.Xps.dll
 bin/OxyPlot.Xps.xml
+bin/cml/models/templates/discrete_polygon/video/python/nova_db_info
+bin/cml/models/templates/discrete_polygon/video/python/nova_sessions

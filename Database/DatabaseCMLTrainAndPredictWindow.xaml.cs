@@ -33,6 +33,7 @@ namespace ssi
         private Status status = 0;
         private List<SelectedDatabaseAndSessions> selectedDatabaseAndSessions = new List<SelectedDatabaseAndSessions>();
         private List<string> databases = new List<string>();
+        static MultipartFormDataContent CMLpredictionContent;
         string lockedScheme = null;
 
         GridViewColumnHeader _lastHeaderClicked = null;
@@ -43,6 +44,7 @@ namespace ssi
 
         private static IList sessions = null;
         private static string sessionList = "";
+        static bool CML_TrainingDone = false;
 
         public class Trainer
         {
@@ -53,6 +55,7 @@ namespace ssi
             public string Balance { get; set; }
             public string Backend { get; set; }
             public string Script { get; set; }
+            public string Weight { get; set; }
 
             public override string ToString()
             {
@@ -107,6 +110,7 @@ namespace ssi
             FINISHED = 2,
             ERROR = 3
         }
+
 
         private class statusObject
         {
@@ -184,8 +188,8 @@ namespace ssi
                     startTime = (int)(Math.Round(value: startTimeInSec, digits: 2) * 1000);
                 }
 
-                this.CMLEndTimeTextBox.Text = endtime.ToString();
-                this.CMLBeginTimeTextBox.Text = startTime.ToString();
+                this.CMLEndTimeTextBox.Text = endtime.ToString() + "ms";
+                this.CMLBeginTimeTextBox.Text = startTime.ToString() + "ms";
             }
             
 
@@ -204,7 +208,7 @@ namespace ssi
             Loaded += Window_Loaded;
 
             HelpTrainLabel.Content = "To balance the number of samples per class samples can be removed ('under') or duplicated ('over').\r\n\r\nDuring training the current feature frame can be extended by adding left and / or right frames.\r\n\r\nThe default output name may be altered.";
-            HelpPredictLabel.Content = "Apply thresholds to fill up gaps between segments of the same class\r\nand remove small segments (in seconds).\r\n\r\nSet confidence to a fixed value.";
+            HelpPredictLabel.Content = "Framesize in s or ms (only Schemes without fixed rate)\n\nPredict until time in s or ms (Leave eof for the whole session)\n\nApply thresholds to fill up gaps between segments of the same class\nand remove small segments (in seconds).\n\r\nSet confidence to a fixed value.";
         }
 
         private void createStatusObjects()
@@ -268,11 +272,20 @@ namespace ssi
 
                         if (this.status != Status.RUNNING)
                         {
-                            this.Dispatcher.Invoke(() =>
+                            if (mode == Mode.COMPLETE && this.status == Status.FINISHED && !CML_TrainingDone)
                             {
-                                this.ApplyButton.IsEnabled = true;
-                                this.Cancel_Button.IsEnabled = false;
-                            });
+                                _ = handler.PythonBackEndPredict(CMLpredictionContent);
+                                CML_TrainingDone = true;
+                                Thread.Sleep(8000);
+                            }
+                            else
+                            {
+                                this.Dispatcher.Invoke(() =>
+                                {
+                                    this.ApplyButton.IsEnabled = true;
+                                    this.Cancel_Button.IsEnabled = false;
+                                });
+                            }
                         }
                         else
                         {
@@ -618,11 +631,6 @@ namespace ssi
                         //combinations[sessionlistpart.Key] = database + ":" + annotator.Name + ":" + rolesList + ":" + stream.Name + "." + stream.FileExt + ":" + sessionlistpart.Value;
                         Console.WriteLine(item.Database.TrimEnd(';') + ":" + item.Annotator.TrimEnd(';') + ":" + item.Roles.TrimEnd(';') + ":" + item.Stream.TrimEnd(';') + ":" + sessionlistpart.Value);
                     }
-
-
-
-
-                   
                 }
 
 
@@ -1059,22 +1067,89 @@ namespace ssi
             string streamName = getStreamName(stream);
             string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
             string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
-            double sampleRate = (1000 / stream.SampleRate / 1000);
-            int cmlBeginTime = int.Parse(this.CMLBeginTimeTextBox.Text);
-            int cmlEndTime = int.Parse(this.CMLEndTimeTextBox.Text);
+            double frameSize = 0;
 
-            if(cmlBeginTime >= cmlEndTime)
+            if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON
+                || scheme.Type == AnnoScheme.TYPE.POINT || scheme.Type == AnnoScheme.TYPE.POLYGON)
             {
-                MessageBox.Show("End-Time must be greater than Begin-Time!", "Error", MessageBoxButton.OK);
-                return;
+                frameSize = 1000.0 / scheme.SampleRate;
+            }
+            else if (scheme.Type == AnnoScheme.TYPE.FREE || scheme.Type == AnnoScheme.TYPE.DISCRETE)
+            {
+                string frameSizestring = FrameSizeTextBox.Text;
+                if (frameSizestring.EndsWith("ms"))
+                {
+                    frameSizestring = frameSizestring.Remove(frameSizestring.Length - 2);
+                    frameSize = double.Parse(frameSizestring);
+                }
+                else if (frameSizestring.EndsWith("s"))
+                {
+                    frameSizestring = frameSizestring.Remove(frameSizestring.Length - 1);
+                    frameSize = double.Parse(frameSizestring) * 1000;
+                }
+                else
+                {
+                    MessageBox.Show("Please use Seconds or Milliseconds for the Framesize");
+                    return;
+                }
             }
 
+            int endTime = 0;
+            int startTime = 0;
             var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
+            string relativeTrainerScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+            string relativetemplatePath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
+            string relativeTrainerOutPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+
+            if (this.mode == Mode.PREDICT)
+            {
+                if (EndLengthTextBox.Text != "eof")
+                {
+                    string endTimeString = EndLengthTextBox.Text;
+                    if (endTimeString.EndsWith("ms"))
+                    {
+                        endTimeString = endTimeString.Remove(endTimeString.Length - 2);
+                        endTime = int.Parse(endTimeString);
+                    }
+
+                    else if (endTimeString.EndsWith("s"))
+                    {
+                        endTimeString = endTimeString.Remove(endTimeString.Length - 1);
+                        endTime = int.Parse(endTimeString) * 1000;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please use Seconds or  Milliseconds for the Preview End time");
+                        return;
+                    }
+                }
+            }
+            else if(this.mode == Mode.TRAIN || this.mode == Mode.COMPLETE)
+            {
+                String timeString = CMLBeginTimeTextBox.Text;
+                if (timeString.EndsWith("ms"))
+                {
+                    timeString = timeString.Remove(timeString.Length - 2);
+                    endTime = int.Parse(timeString);
+                }
+                else if (timeString.EndsWith("s"))
+                {
+                    timeString = timeString.Remove(timeString.Length - 1);
+                    endTime = int.Parse(timeString) * 1000;
+                }
+                else
+                {
+                    MessageBox.Show("Please use Seconds or  Milliseconds for the Preview End time");
+                    return;
+                }
+            }
+
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent(trainer.Path), "templatePath" },
-                { new StringContent(trainerOutPath), "trainerPath" },
-                { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" },
+                { new StringContent("true"), "flattenSamples"},
+                { new StringContent(relativetemplatePath), "templatePath" },
+                { new StringContent(relativeTrainerOutPath), "trainerPath" },
+                { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
                 { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
@@ -1088,26 +1163,77 @@ namespace ssi
                 { new StringContent(trainerLeftContext), "leftContext" },
                 { new StringContent(trainerRightContext), "rightContext" },
                 { new StringContent(trainerBalance), "balance" },
-                { new StringContent(this.mode.ToString()), "mode" },
-                { new StringContent("0"), "startTime" },
-                { new StringContent(this.CMLBeginTimeTextBox.Text), "cmlBeginTime" },
-                { new StringContent(this.CMLEndTimeTextBox.Text), "cmlEndTime" },
-                { new StringContent(sampleRate.ToString()), "sampleRate" },
+                { new StringContent(mode.ToString()), "mode" },
+                { new StringContent(startTime.ToString()), "startTime" },
+                { new StringContent(endTime.ToString()), "endTime" },
+                { new StringContent(frameSize.ToString()), "frameSize" },
                 { new StringContent(scheme.Type.ToString()), "schemeType" },
-                { new StringContent(trainerScriptPath), "trainerScript" },
+                { new StringContent(relativeTrainerScriptPath), "trainerScript" },
                 { new StringContent(trainer.Name), "trainerScriptName" }
             };
 
+            if (mode == Mode.COMPLETE)
+            {
+                startTime = endTime;
+
+                string timeString = CMLEndTimeTextBox.Text;
+                if (timeString.EndsWith("ms"))
+                {
+                    timeString = timeString.Remove(timeString.Length - 2);
+                    endTime = int.Parse(timeString);
+                }
+                else if (timeString.EndsWith("s"))
+                {
+                    timeString = timeString.Remove(timeString.Length - 1);
+                    endTime = int.Parse(timeString) * 1000;
+                }
+                else
+                {
+                    MessageBox.Show("Please use Seconds or  Milliseconds for the Preview End time");
+                    return;
+                }
+
+                CMLpredictionContent = new MultipartFormDataContent
+                {
+                    { new StringContent("true"), "flattenSamples"},
+                    { new StringContent(relativetemplatePath), "templatePath" },
+                    { new StringContent(relativeTrainerOutPath), "trainerPath" },
+                    { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
+                    { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
+                    { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
+                    { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
+                    { new StringContent(database), "database" },
+                    { new StringContent(sessionList), "sessions" },
+                    { new StringContent(scheme.Name), "scheme" },
+                    { new StringContent(rolesList), "roles" },
+                    { new StringContent(annotator.Name), "annotator" },
+                    { new StringContent(stream.Name), "streamName" },
+                    { new StringContent(stream.Type), "streamType" },
+                    { new StringContent(trainerLeftContext), "leftContext" },
+                    { new StringContent(trainerRightContext), "rightContext" },
+                    { new StringContent(trainerBalance), "balance" },
+                    { new StringContent(this.mode.ToString()), "mode" },
+                    { new StringContent(startTime.ToString()), "startTime" },
+                    { new StringContent(endTime.ToString()), "endTime" },
+                    { new StringContent(frameSize.ToString()), "frameSize" },
+                    { new StringContent(scheme.Type.ToString()), "schemeType" },
+                    { new StringContent(relativeTrainerScriptPath), "trainerScript" },
+                    { new StringContent(trainer.Name), "trainerScriptName" }
+                };
+            }
+
             if (this.mode == Mode.COMPLETE)
             {
-                _ = handler.PythonBackEndComplete(content);
+                CML_TrainingDone = false;
+                _ = handler.PythonBackEndTraining(content);                
             }
-            else if (this.mode == Mode.TRAIN)
+            if (this.mode == Mode.TRAIN)
             {
                 _ = handler.PythonBackEndTraining(content);
             }
             else if (this.mode == Mode.PREDICT)
             {
+                content.Add(new StringContent(trainer.Weight), "weightsPath");
                 _ = handler.PythonBackEndPredict(content);
             }
         }
@@ -1135,6 +1261,27 @@ namespace ssi
                     CMLEndTimeTextBox.Visibility = System.Windows.Visibility.Visible;
                     TrainerNameTextBox.IsEnabled = false;
                 }
+                else if(mode == Mode.PREDICT)
+                {
+                    this.FrameSizeLabel.Visibility = Visibility.Visible;
+                    this.FrameSizeTextBox.Visibility = Visibility.Visible;
+                    this.EndLength.Visibility = Visibility.Visible;
+                    this.EndLengthTextBox.Visibility = Visibility.Visible;
+                    EndLengthTextBox.IsEnabled = true;
+                    DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
+
+                    if (scheme.Type == AnnoScheme.TYPE.FREE || scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                    {
+                        FrameSizeTextBox.Text = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate).ToString() + "ms";
+                        FrameSizeTextBox.IsEnabled = true;
+                    }
+
+                    else
+                    {
+                        FrameSizeTextBox.Text = (1000.0 / scheme.SampleRate).ToString() + "ms";
+                        FrameSizeTextBox.IsEnabled = false;
+                    }
+                }
                 else
                 {
                     ModeTabControl.SelectedIndex = (int)mode;
@@ -1147,6 +1294,9 @@ namespace ssi
             }
             else
             {
+                EndLengthTextBox.Text = "eof";
+                EndLengthTextBox.IsEnabled = false;
+
                 this.ApplyButton.IsEnabled = true;
                 pythonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
@@ -1535,6 +1685,12 @@ namespace ssi
                     if (script != null)
                     {
                         trainer.Script = script.Value;
+                    }
+
+                    var weights = node.Attributes["path"];
+                    if (weights != null)
+                    {
+                        trainer.Weight = weights.Value;
                     }
                 }
             }
@@ -2207,18 +2363,6 @@ namespace ssi
                     MessageBox.Show("Can't read file format.");
                 }
             }
-        }
-
-        private void CMLBeginTimeLabelTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            Regex regexObj = new Regex(@"[^\d]");
-            this.CMLBeginTimeTextBox.Text = regexObj.Replace(this.CMLBeginTimeTextBox.Text, "");
-        }
-
-        private void CMLEndTimeTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            Regex regexObj = new Regex(@"[^\d]");
-            this.CMLEndTimeTextBox.Text = regexObj.Replace(this.CMLEndTimeTextBox.Text, "");
         }
     }
 

@@ -23,9 +23,10 @@ from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEPENDENCIES = [Path(__file__).name, "deeplabv3.py", "dataset.py", "evaluator.py"]
 
 
-def train(data_list, labels, logger, steps=100, plot_path=None):
+def train(data_list, labels, logger, steps=10, plot_path=None):
     if plot_path is None:
         plot_path = Path.cwd()
 

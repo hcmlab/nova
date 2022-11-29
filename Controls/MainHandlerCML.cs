@@ -324,7 +324,6 @@ namespace ssi
 
             try
             {
-
                 var content = new MultipartFormDataContent
                 {
                     { new StringContent(templatePath), "templatePath" },
