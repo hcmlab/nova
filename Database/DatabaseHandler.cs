@@ -1179,7 +1179,6 @@ namespace ssi
 
         public static bool ChangeUserCustomData(DatabaseUser user)
         {
-            double test = user.Rating;
             if (!IsConnected)
             {
                 return false;
