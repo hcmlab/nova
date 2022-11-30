@@ -1097,9 +1097,9 @@ namespace ssi
             int endTime = 0;
             int startTime = 0;
             var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
-            string relativeTrainerScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
-            string relativetemplatePath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
-            string relativeTrainerOutPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+            string relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+            string relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
+            string relativeWeightPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
             bool flattenSamples = false;
 
             if (this.mode == Mode.PREDICT)
@@ -1152,8 +1152,8 @@ namespace ssi
             MultipartFormDataContent content = new MultipartFormDataContent
             {
                 { new StringContent(flattenSamples.ToString()), "flattenSamples"},
-                { new StringContent(relativetemplatePath), "templatePath" },
-                { new StringContent(relativeTrainerOutPath), "trainerPath" },
+                { new StringContent(relativeTrainerPath), "templatePath" },
+                { new StringContent(relativeWeightPath), "weightsPath" },
                 { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
                 { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
@@ -1173,7 +1173,7 @@ namespace ssi
                 { new StringContent(endTime.ToString()), "endTime" },
                 { new StringContent(frameSize.ToString()), "frameSize" },
                 { new StringContent(scheme.Type.ToString()), "schemeType" },
-                { new StringContent(relativeTrainerScriptPath), "trainerScript" },
+                { new StringContent(relativeScriptPath), "trainerScript" },
                 { new StringContent(trainer.Name), "trainerScriptName" }
             };
 
@@ -1198,11 +1198,17 @@ namespace ssi
                     return;
                 }
 
+                // TODO pfade updaten
+                relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+                relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
+                relativeWeightPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+
+
                 CMLpredictionContent = new MultipartFormDataContent
                 {
-                    { new StringContent("true"), "flattenSamples"},
-                    { new StringContent(relativetemplatePath), "templatePath" },
-                    { new StringContent(relativeTrainerOutPath), "trainerPath" },
+                    { new StringContent(flattenSamples.ToString()), "flattenSamples"},
+                    { new StringContent(relativeTrainerPath), "templatePath" },
+                    { new StringContent(relativeWeightPath), "weightsPath" },
                     { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
                     { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                     { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
@@ -1222,7 +1228,7 @@ namespace ssi
                     { new StringContent(endTime.ToString()), "endTime" },
                     { new StringContent(frameSize.ToString()), "frameSize" },
                     { new StringContent(scheme.Type.ToString()), "schemeType" },
-                    { new StringContent(relativeTrainerScriptPath), "trainerScript" },
+                    { new StringContent(relativeScriptPath), "trainerScript" },
                     { new StringContent(trainer.Name), "trainerScriptName" }
                 };
             }
@@ -1274,17 +1280,19 @@ namespace ssi
                     this.EndLengthTextBox.Visibility = Visibility.Visible;
                     EndLengthTextBox.IsEnabled = true;
                     DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
-
-                    if (scheme.Type == AnnoScheme.TYPE.FREE || scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                    if(scheme != null)
                     {
-                        FrameSizeTextBox.Text = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate).ToString() + "ms";
-                        FrameSizeTextBox.IsEnabled = true;
-                    }
+                        if (scheme.Type == AnnoScheme.TYPE.FREE || scheme.Type == AnnoScheme.TYPE.DISCRETE)
+                        {
+                            FrameSizeTextBox.Text = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate).ToString() + "ms";
+                            FrameSizeTextBox.IsEnabled = true;
+                        }
 
-                    else
-                    {
-                        FrameSizeTextBox.Text = (1000.0 / scheme.SampleRate).ToString() + "ms";
-                        FrameSizeTextBox.IsEnabled = false;
+                        else
+                        {
+                            FrameSizeTextBox.Text = (1000.0 / scheme.SampleRate).ToString() + "ms";
+                            FrameSizeTextBox.IsEnabled = false;
+                        }
                     }
                 }
                 else
