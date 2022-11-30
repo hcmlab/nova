@@ -1100,6 +1100,7 @@ namespace ssi
             string relativeTrainerScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
             string relativetemplatePath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
             string relativeTrainerOutPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+            bool flattenSamples = false;
 
             if (this.mode == Mode.PREDICT)
             {
@@ -1123,6 +1124,8 @@ namespace ssi
                         return;
                     }
                 }
+                
+                trainer.Name = trainer.Name.Split(' ')[0]; 
             }
             else if(this.mode == Mode.TRAIN || this.mode == Mode.COMPLETE)
             {
@@ -1142,11 +1145,13 @@ namespace ssi
                     MessageBox.Show("Please use Seconds or  Milliseconds for the Preview End time");
                     return;
                 }
+            
             }
+
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent("true"), "flattenSamples"},
+                { new StringContent(flattenSamples.ToString()), "flattenSamples"},
                 { new StringContent(relativetemplatePath), "templatePath" },
                 { new StringContent(relativeTrainerOutPath), "trainerPath" },
                 { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
