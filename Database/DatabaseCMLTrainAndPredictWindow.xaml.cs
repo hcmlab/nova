@@ -1031,6 +1031,7 @@ namespace ssi
 
         private String getTrainerDir(Trainer trainer, String streamName, DatabaseScheme scheme, DatabaseStream stream)
         {
+            string trainername = trainer.Name.Split(' ')[0];
             return Properties.Settings.Default.CMLDirectory + "\\" +
                                        Defaults.CML.ModelsFolderName + "\\" +
                                        Defaults.CML.ModelsTrainerFolderName + "\\" +
@@ -1038,7 +1039,7 @@ namespace ssi
                                        scheme.Name + "\\" +
                                        stream.Type + "{" +
                                        streamName + "}\\" +
-                                       trainer.Name + "\\";
+                                       trainername + "\\";
         }
 
         private String getStreamName(DatabaseStream stream)
