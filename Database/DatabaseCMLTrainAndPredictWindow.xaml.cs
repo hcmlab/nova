@@ -368,7 +368,7 @@ namespace ssi
                 { new StringContent(stream.Name), "streamName" },   
                 { new StringContent(annotator.Name), "annotator" },
                 { new StringContent(sessionList), "sessions" },
-                { new StringContent(trainer.Name), "trainerScriptName" },
+                { new StringContent(trainer.Name), "trainerName" },
                 { new StringContent(this.mode.ToString()), "mode" }
             };
         }
@@ -1067,7 +1067,10 @@ namespace ssi
             string streamName = getStreamName(stream);
             string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
             string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
+          
             double frameSize = 0;
+
+
 
             if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON
                 || scheme.Type == AnnoScheme.TYPE.POINT || scheme.Type == AnnoScheme.TYPE.POLYGON)
@@ -1096,10 +1099,16 @@ namespace ssi
 
             int endTime = 0;
             int startTime = 0;
-            var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
-            string relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+            //var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
+            //string relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
             string relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
-            string relativeWeightPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+
+            FileInfo file_info = new FileInfo(trainerOutPath);
+            string traineroutfolder = file_info.DirectoryName;
+            string trainer_name = file_info.Name;
+
+
+            string relativeTrainerOutputDirectory = traineroutfolder.Replace(Properties.Settings.Default.CMLDirectory, "");
             bool flattenSamples = false;
 
             if (this.mode == Mode.PREDICT)
@@ -1127,7 +1136,7 @@ namespace ssi
                 
                 trainer.Name = trainer.Name.Split(' ')[0]; 
             }
-            else if(this.mode == Mode.TRAIN || this.mode == Mode.COMPLETE)
+            else if(this.mode == Mode.COMPLETE)
             {
                 String timeString = CMLBeginTimeTextBox.Text;
                 if (timeString.EndsWith("ms"))
@@ -1152,9 +1161,8 @@ namespace ssi
             MultipartFormDataContent content = new MultipartFormDataContent
             {
                 { new StringContent(flattenSamples.ToString()), "flattenSamples"},
-                { new StringContent(relativeTrainerPath), "templatePath" },
-                { new StringContent(relativeWeightPath), "weightsPath" },
-                { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
+                { new StringContent(relativeTrainerPath), "trainerFilePath" },
+                { new StringContent(relativeTrainerOutputDirectory), "trainerOutputDirectory" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
@@ -1172,9 +1180,8 @@ namespace ssi
                 { new StringContent(startTime.ToString()), "startTime" },
                 { new StringContent(endTime.ToString()), "endTime" },
                 { new StringContent(frameSize.ToString()), "frameSize" },
-                { new StringContent(scheme.Type.ToString()), "schemeType" },
-                { new StringContent(relativeScriptPath), "trainerScript" },
-                { new StringContent(trainer.Name), "trainerScriptName" }
+                { new StringContent(scheme.Type.ToString()), "schemeType" },          
+                { new StringContent(trainer_name), "trainerName" }
             };
 
             if (mode == Mode.COMPLETE)
@@ -1199,16 +1206,15 @@ namespace ssi
                 }
 
                 // TODO pfade updaten
-                relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
-                relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
-                relativeWeightPath = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
+                relativeTrainerPath = relativeTrainerOutputDirectory + trainer.Name;
+                //relativeTrainerOutputDirectory = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
 
 
                 CMLpredictionContent = new MultipartFormDataContent
                 {
                     { new StringContent(flattenSamples.ToString()), "flattenSamples"},
-                    { new StringContent(relativeTrainerPath), "templatePath" },
-                    { new StringContent(relativeWeightPath), "weightsPath" },
+                    { new StringContent(relativeTrainerPath), "trainerPath" },
+                    { new StringContent(relativeTrainerOutputDirectory), "trainerOutputDirectory" },
                     { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
                     { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                     { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
@@ -1228,8 +1234,7 @@ namespace ssi
                     { new StringContent(endTime.ToString()), "endTime" },
                     { new StringContent(frameSize.ToString()), "frameSize" },
                     { new StringContent(scheme.Type.ToString()), "schemeType" },
-                    { new StringContent(relativeScriptPath), "trainerScript" },
-                    { new StringContent(trainer.Name), "trainerScriptName" }
+                    { new StringContent(trainer_name), "trainerName" }
                 };
             }
 
