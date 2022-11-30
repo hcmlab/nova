@@ -1103,6 +1103,7 @@ namespace ssi
             //string relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
             string relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
 
+            //TODO traineroutpath on predict
             FileInfo file_info = new FileInfo(trainerOutPath);
             string traineroutfolder = file_info.DirectoryName;
             string trainer_name = file_info.Name;
