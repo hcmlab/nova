@@ -574,8 +574,9 @@ namespace ssi
             }
             else
             {
-                this.Status_Label.Foreground = Brushes.Red;
-                this.Status_Label.Content = "Interpolation not done...";
+                this.Status_Label.Foreground = Brushes.Black;
+                this.Status_Label.Background = Brushes.LightGray;
+                this.Status_Label.Content = "Ready for interpolation.";
             }
         }
     }
