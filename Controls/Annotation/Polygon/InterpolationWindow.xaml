@@ -20,8 +20,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="40"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition/>
             <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -107,8 +107,8 @@
         <StackPanel Grid.Row="3" Grid.Column="3" Margin="0,5,5,5" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="Interpolate_2D" Click="Interpolate_2D_Click" Height="25" Width="95" Margin="5" Content="Interpolate 2D"/>
             <Button x:Name="Interpolate_3D" Click="Interpolate_3D_Click" Height="25" Width="95" Margin="5" Content="Interpolate 3D"/>
-            <Button x:Name="Next" Click="Next_Click" Height="25" Width="75" Margin="5,8" Content="Next"/>
-            <Button x:Name="Cancel" Click="Close_Click" Height="25" Width="75" Content="Close"/>
+            <Button x:Name="Next" Click="Next_Click" Height="25" Width="75" Margin="5" Content="Next"/>
+            <Button x:Name="Cancel" Click="Close_Click" Height="25" Margin="5" Width="75" Content="Close"/>
         </StackPanel>
         <Label x:Name="Status_Label" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Grid.Row="3" Background="LightGray" Foreground="Black" Margin="10,15,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" FontWeight="Bold" Content="Ready for interpolation." Height="25" Width="150" Grid.ColumnSpan="2"/>
 
