@@ -354,6 +354,7 @@ namespace ssi
                 stream = (DatabaseStream)StreamsBox.SelectedItem;
                 annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
                 trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+                trainer.Name = trainer.Name.Split(' ')[0];
                 setSessionList();
             });
 
@@ -368,8 +369,7 @@ namespace ssi
                 { new StringContent(stream.Name), "streamName" },   
                 { new StringContent(annotator.Name), "annotator" },
                 { new StringContent(sessionList), "sessions" },
-                { new StringContent(trainer.Name), "trainerName" },
-                { new StringContent(this.mode.ToString()), "mode" }
+                { new StringContent(Properties.Settings.Default.MongoDBUser), "username" }
             };
         }
 
@@ -1105,6 +1105,7 @@ namespace ssi
             string relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
 
             //TODO traineroutpath on predict
+            
             FileInfo file_info = new FileInfo(trainerOutPath);
             string traineroutfolder = file_info.DirectoryName;
             string trainer_name = file_info.Name;
