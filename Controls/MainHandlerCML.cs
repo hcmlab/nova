@@ -475,8 +475,9 @@ namespace ssi
 
                 return explanationDic;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                MessageBox.Show(e.Message);
                 return null;
             }
         }

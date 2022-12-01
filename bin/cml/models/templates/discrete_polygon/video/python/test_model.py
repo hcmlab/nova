@@ -23,12 +23,15 @@ from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-DEPENDENCIES = [Path(__file__).name, "deeplabv3.py", "dataset.py", "evaluator.py"]
+DEPENDENCIES = ["deeplabv3.py", "dataset.py", "evaluator.py"]
 
 
-def train(data_list, labels, logger, steps=10, plot_path=None):
+def train(data_list, logger, steps=10, plot_path=None):
     if plot_path is None:
         plot_path = Path.cwd()
+
+    labels = data_list[1]
+    data_list = data_list[0]
 
     data_list = random.sample(data_list, len(data_list))
     dataset_train = PolygonDataset(data_list[0:int(len(data_list) * 0.8)], train=True)
@@ -94,6 +97,15 @@ def train(data_list, labels, logger, steps=10, plot_path=None):
             logger.info("Duration since the training started: " + str(datetime.timedelta(seconds=round(time_dif))))
 
     return model
+
+
+def preprocess(ds_iter, logger, request_form=None):
+    data_list = list(ds_iter)
+    labels = ds_iter.label_info[list(ds_iter.label_info)[0]].labels
+    if len(data_list) < 1:
+        logger.error("The number of available training data is too low!")
+
+    return data_list, labels
 
 
 def execute_evaluation(model, dataloader, labels_count):

@@ -44,7 +44,7 @@ namespace ssi
 
         private static IList sessions = null;
         private static string sessionList = "";
-        static bool CML_TrainingDone = false;
+        static bool CML_TrainingStarted = false;
 
         public class Trainer
         {
@@ -272,11 +272,10 @@ namespace ssi
 
                         if (this.status != Status.RUNNING)
                         {
-                            if (mode == Mode.COMPLETE && this.status == Status.FINISHED && !CML_TrainingDone)
+                            if (mode == Mode.COMPLETE && this.status == Status.FINISHED && CML_TrainingStarted)
                             {
                                 _ = handler.PythonBackEndPredict(CMLpredictionContent);
-                                CML_TrainingDone = true;
-                                Thread.Sleep(8000);
+                                CML_TrainingStarted = false;
                             }
                             else
                             {
@@ -1208,17 +1207,13 @@ namespace ssi
                     return;
                 }
 
-                // TODO pfade updaten
-                relativeTrainerPath = relativeTrainerOutputDirectory + trainer.Name;
-                //relativeTrainerOutputDirectory = trainerOutPath.Replace(Properties.Settings.Default.CMLDirectory, "");
-
+                relativeTrainerPath = relativeTrainerOutputDirectory + "\\" + trainer.Name + "." + Defaults.CML.TrainerFileExtension;
 
                 CMLpredictionContent = new MultipartFormDataContent
                 {
                     { new StringContent(flattenSamples.ToString()), "flattenSamples"},
-                    { new StringContent(relativeTrainerPath), "trainerPath" },
+                    { new StringContent(relativeTrainerPath), "trainerFilePath" },
                     { new StringContent(relativeTrainerOutputDirectory), "trainerOutputDirectory" },
-                    { new StringContent(Properties.Settings.Default.DatabaseDirectory), "dataPath" }, //optional, not used
                     { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                     { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
                     { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
@@ -1232,7 +1227,7 @@ namespace ssi
                     { new StringContent(trainerLeftContext), "leftContext" },
                     { new StringContent(trainerRightContext), "rightContext" },
                     { new StringContent(trainerBalance), "balance" },
-                    { new StringContent(this.mode.ToString()), "mode" },
+                    { new StringContent(mode.ToString()), "mode" },
                     { new StringContent(startTime.ToString()), "startTime" },
                     { new StringContent(endTime.ToString()), "endTime" },
                     { new StringContent(frameSize.ToString()), "frameSize" },
@@ -1243,8 +1238,8 @@ namespace ssi
 
             if (this.mode == Mode.COMPLETE)
             {
-                CML_TrainingDone = false;
-                _ = handler.PythonBackEndTraining(content);                
+                _ = handler.PythonBackEndTraining(content);
+                CML_TrainingStarted = true;
             }
             if (this.mode == Mode.TRAIN)
             {
