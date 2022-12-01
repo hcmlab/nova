@@ -15,7 +15,7 @@ The Cooperative Machine Learning capabilities allow to train and evaluate machin
 ![alt tag](http://hcm-lab.de/projects/ssi/wp-content/uploads/2018/02/novacml.png)
 
 
-The latest binaries can always be found [here](https://github.com/tobiasbaur/nova/releases).  
+The latest binaries can always be found [here](https://github.com/hcmlab/nova/releases).  
 
 ## FAQ:
 
