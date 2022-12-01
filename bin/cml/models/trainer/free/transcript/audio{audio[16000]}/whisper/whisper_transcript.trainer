@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<trainer ssi-v="5">
+    <info trained="true" seed="1234"/>
+	<meta balance="under" backend="Python"/>	
+    <model create="PythonModel" stream="0" path="whisper" script="whisper_transcript.py" /> 
+</trainer>

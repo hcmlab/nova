@@ -16,15 +16,14 @@ import logging
 
 
 
-def train (X, Y):
+def train (X, Y, logger=None, request_form=None):
     print('Training not supported')
     return None
     
-def save (model, path):
+def save (model, path, logger=None, request_form=None):
    print('Save not imported')
 
-
-def preprocess(data_iterator): 
+def preprocess(data_iterator, logger=None, request_form=None):
 
     # Get all audio tracks
     audio_tracks = list(filter(lambda x: 'audio' in x, data_iterator.data_info.keys()))
@@ -45,7 +44,7 @@ def preprocess(data_iterator):
 
     return torch_ds
 
-def predict(model, X, logger=None):
+def predict(model, X, logger=None, request_form=None):
 
     transcript_dict = {}
 
@@ -85,7 +84,6 @@ def predict(model, X, logger=None):
     # print the recognized text
     return transcript_dict
 
-
-def load (path):
+def load (path, logger=None, request_form=None):
     model = whisper.load_model("large")
     return model
