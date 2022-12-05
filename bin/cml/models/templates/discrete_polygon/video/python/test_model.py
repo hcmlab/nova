@@ -199,11 +199,10 @@ def save(model, path):
     return path
 
 
-def load(path, num_classes):
-    model = DeepLabV3Plus(num_classes).to(device)
+def load(path):
+    model = DeepLabV3Plus().to(device)
     model.load_weights(path)
     return model
-
 
 def print_images(img1, img2):
     if type(img1).__module__ != np.__name__:

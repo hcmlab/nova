@@ -427,11 +427,17 @@ namespace ssi
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             switchMode();
-
+          
             GetDatabases(DatabaseHandler.DatabaseName);
-
+           
             if (mode == Mode.COMPLETE)
             {
+                if(RolesBox.ItemsSource == null || AnnotatorsBox.ItemsSource == null || SessionsBox.ItemsSource == null)
+                {
+                    handleSelectionChanged = true;
+                    return;
+                }
+
 
                 AnnoList annoList = AnnoTierStatic.Selected.AnnoList;
 
@@ -1207,7 +1213,7 @@ namespace ssi
                     return;
                 }
 
-                relativeTrainerPath = relativeTrainerOutputDirectory + "\\" + trainer.Name + "." + Defaults.CML.TrainerFileExtension;
+                relativeTrainerPath = relativeTrainerOutputDirectory + "\\" + TrainerNameTextBox.Text + "." + Defaults.CML.TrainerFileExtension;
 
                 CMLpredictionContent = new MultipartFormDataContent
                 {
