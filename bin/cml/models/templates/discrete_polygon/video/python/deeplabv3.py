@@ -17,7 +17,7 @@ val_transform = transforms.Compose([transforms.ToTensor(),
 
 
 class DeepLabV3Plus(torch.nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes=4):
         super().__init__()
         self.backbone = torchvision.models.resnet50(pretrained=True)
 
@@ -48,6 +48,9 @@ class DeepLabV3Plus(torch.nn.Module):
                                                 padding=1)
         self.to(device)
 
+    def setOutputClasses(self, num_output):
+        self.deconv3.out_channels = num_output
+    
     def forward(self, x):
 
         xc1 = self.backbone.conv1(x)

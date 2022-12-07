@@ -460,26 +460,33 @@ namespace ssi
 
         public async Task<Dictionary<string, string>> PythonBackEndPredict(MultipartFormDataContent content)
         {
-            try
-            {
-                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/predict";
-                var response = await client.PostAsync(url, content);
-                var responseString = await response.Content.ReadAsStringAsync();
-                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+            bool done = false;
+            HttpResponseMessage response;
+            string responseString;
+            Dictionary<string, string> explanationDic = null;
 
-                if (explanationDic["success"] == "failed")
+            do
+            {
+                try
                 {
-                    return null;
+                    string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                    string url = "http://" + tokens[0] + ":" + tokens[1] + "/predict";
+                    response = await client.PostAsync(url, content);
+                    responseString = await response.Content.ReadAsStringAsync();
+                    explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+                    done = true;
                 }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+            } while (!done);
 
-                return explanationDic;
-            }
-            catch (Exception e)
+            if (explanationDic != null && explanationDic["success"] == "failed")
             {
-                MessageBox.Show(e.Message);
                 return null;
             }
+            return explanationDic;
         }
 
         public async Task<Dictionary<string, string>> PythonBackEndComplete(MultipartFormDataContent content)

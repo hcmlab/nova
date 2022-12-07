@@ -321,9 +321,6 @@ namespace ssi
                 this.ApplyButton.IsEnabled = true;
                 logTextBox.Text = "";
             });
-
-         
-            
         }
 
         private void handleError(Exception ex)
