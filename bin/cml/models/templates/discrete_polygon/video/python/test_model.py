@@ -26,7 +26,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 DEPENDENCIES = ["deeplabv3.py", "dataset.py", "evaluator.py"]
 
 
-def train(data_list, logger, steps=10, plot_path=None):
+def train(data_list, logger, steps=600, plot_path=None):
     if plot_path is None:
         plot_path = Path.cwd()
 
@@ -101,7 +101,7 @@ def train(data_list, logger, steps=10, plot_path=None):
 
 def preprocess(ds_iter, logger, request_form=None):
     data_list = list(ds_iter)
-    labels = ds_iter.label_info[list(ds_iter.label_info)[0]].labels
+    labels = ds_iter.annos[ds_iter.roles[0] + "." + ds_iter.schemes[0]].labels
     if len(data_list) < 1:
         logger.error("The number of available training data is too low!")
 
@@ -162,7 +162,7 @@ def plot(plot_name, network_information, validation_data, loss_data, steps_targe
     # plt.close('all')
 
 
-def predict(model, data, logger, shape):
+def predict(model, data, shape, logger):
     model = model.to(device)
     model.eval()
     probability_results = None
@@ -199,10 +199,12 @@ def save(model, path):
     return path
 
 
-def load(path):
+def load(path, logger=None):
+    path = str(path) + ".pth"
     model = DeepLabV3Plus().to(device)
     model.load_weights(path)
     return model
+
 
 def print_images(img1, img2):
     if type(img1).__module__ != np.__name__:
