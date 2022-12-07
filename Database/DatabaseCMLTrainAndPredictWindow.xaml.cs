@@ -1115,6 +1115,8 @@ namespace ssi
             string traineroutfolder = file_info.DirectoryName;
             string trainer_name = file_info.Name;
 
+            bool deleteFiles = false;
+
 
             string relativeTrainerOutputDirectory = traineroutfolder.Replace(Properties.Settings.Default.CMLDirectory, "");
             bool flattenSamples = false;
@@ -1189,7 +1191,8 @@ namespace ssi
                 { new StringContent(endTime.ToString()), "endTime" },
                 { new StringContent(frameSize.ToString()), "frameSize" },
                 { new StringContent(scheme.Type.ToString()), "schemeType" },          
-                { new StringContent(trainer_name), "trainerName" }
+                { new StringContent(trainer_name), "trainerName" },
+                { new StringContent(deleteFiles.ToString()), "deleteFiles" }
             };
 
             if (mode == Mode.COMPLETE)
@@ -1214,7 +1217,7 @@ namespace ssi
                 }
 
                 relativeTrainerPath = relativeTrainerOutputDirectory + "\\" + TrainerNameTextBox.Text + "." + Defaults.CML.TrainerFileExtension;
-
+                deleteFiles = true;
                 CMLpredictionContent = new MultipartFormDataContent
                 {
                     { new StringContent(flattenSamples.ToString()), "flattenSamples"},
@@ -1238,7 +1241,8 @@ namespace ssi
                     { new StringContent(endTime.ToString()), "endTime" },
                     { new StringContent(frameSize.ToString()), "frameSize" },
                     { new StringContent(scheme.Type.ToString()), "schemeType" },
-                    { new StringContent(trainer_name), "trainerName" }
+                    { new StringContent(trainer_name), "trainerName" },
+                    { new StringContent(deleteFiles.ToString()), "deleteFiles" }
                 };
             }
 
