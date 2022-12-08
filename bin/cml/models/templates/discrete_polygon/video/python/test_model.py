@@ -26,7 +26,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 DEPENDENCIES = ["deeplabv3.py", "dataset.py", "evaluator.py"]
 
 
-def train(data_list, logger, steps=600, plot_path=None):
+def train(data_list, logger, steps=10, plot_path=None):
     if plot_path is None:
         plot_path = Path.cwd()
 
@@ -199,9 +199,9 @@ def save(model, path):
     return path
 
 
-def load(path, logger=None):
+def load(path, classes, logger=None):
     path = str(path) + ".pth"
-    model = DeepLabV3Plus().to(device)
+    model = DeepLabV3Plus(len(classes)).to(device)
     model.load_weights(path)
     return model
 

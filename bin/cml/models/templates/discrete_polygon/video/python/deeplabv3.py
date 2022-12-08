@@ -48,9 +48,6 @@ class DeepLabV3Plus(torch.nn.Module):
                                                 padding=1)
         self.to(device)
 
-    def setOutputClasses(self, num_output):
-        self.deconv3.out_channels = num_output
-    
     def forward(self, x):
 
         xc1 = self.backbone.conv1(x)
