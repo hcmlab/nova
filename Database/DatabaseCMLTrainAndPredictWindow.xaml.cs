@@ -162,11 +162,11 @@ namespace ssi
 
             int endtime = -1;
 
-            if(AnnoTier.Selected != null)
+            if(AnnoTier.Selected != null )
             {
                 if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
-                    double endtimeInSec = (int)AnnoTier.Selected.AnnoList.ElementAt(AnnoTier.Selected.AnnoList.Count - 1).Stop;
+                    double endtimeInSec = AnnoTier.Selected.AnnoList.Count == 0 ? 0 : (int)AnnoTier.Selected.AnnoList.ElementAt(AnnoTier.Selected.AnnoList.Count - 1).Stop;
                     endtime = (int)(Math.Round(value: endtimeInSec, digits: 2) * 1000);
                 }
                 else
@@ -274,11 +274,11 @@ namespace ssi
                         {
                             if (mode == Mode.COMPLETE && this.status == Status.FINISHED && CML_TrainingStarted)
                             {
-                                _ = handler.PythonBackEndPredict(CMLpredictionContent);
+                                _ = handler.PythonBackEndPredictComplete(CMLpredictionContent);
                                 CML_TrainingStarted = false;
                                 CML_PredictionStarted = true;
                             }
-                            else if(mode == Mode.COMPLETE && this.status == Status.FINISHED && !CML_TrainingStarted && CML_PredictionStarted)
+                            else if(mode == Mode.COMPLETE && this.status == Status.FINISHED && CML_PredictionStarted)
                             {
                                 CML_PredictionStarted = false;
                                 // Load window in the background
@@ -415,6 +415,8 @@ namespace ssi
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            CML_TrainingStarted = false;
+            CML_PredictionStarted = false;
             pythonCaseOn = false;
         }
 
@@ -1264,7 +1266,6 @@ namespace ssi
             }
             else if (this.mode == Mode.PREDICT)
             {
-                content.Add(new StringContent(trainer.Weight), "weightsPath");
                 _ = handler.PythonBackEndPredict(content);
             }
         }

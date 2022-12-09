@@ -460,6 +460,31 @@ namespace ssi
 
         public async Task<Dictionary<string, string>> PythonBackEndPredict(MultipartFormDataContent content)
         {
+            try
+            {
+                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/predict";
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                if (explanationDic["success"] == "failed")
+                {
+                    return null;
+                }
+
+                return explanationDic;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+
+        public async Task<Dictionary<string, string>> PythonBackEndPredictComplete(MultipartFormDataContent content)
+        {
             bool done = false;
             HttpResponseMessage response;
             string responseString;
@@ -493,18 +518,23 @@ namespace ssi
         {
             try
             {
-                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/complete";
-                var response = await client.PostAsync(url, content);
-                var responseString = await response.Content.ReadAsStringAsync();
-                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
-
-                if (explanationDic["success"] == "failed")
+                HttpClientHandler httpClientHandler = new HttpClientHandler();
+                using (var client = new HttpClient(httpClientHandler, false))
                 {
-                    return null;
-                }
 
-                return explanationDic;
+                    string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                    string url = "http://" + tokens[0] + ":" + tokens[1] + "/complete";
+                    var response = await client.PostAsync(url, content);
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                    if (explanationDic["success"] == "failed")
+                    {
+                        return null;
+                    }
+
+                    return explanationDic;
+                }
             }
             catch (Exception)
             {
