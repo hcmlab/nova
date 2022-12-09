@@ -26,12 +26,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 DEPENDENCIES = ["deeplabv3.py", "dataset.py", "evaluator.py"]
 
 
-def train(data_list, logger, steps=10, plot_path=None):
+def train(data_list, logger, steps=300, plot_path=None):
     if plot_path is None:
         plot_path = Path.cwd()
 
-    labels = data_list[1]
-    data_list = data_list[0]
+    data_list, labels = data_list
 
     data_list = random.sample(data_list, len(data_list))
     dataset_train = PolygonDataset(data_list[0:int(len(data_list) * 0.8)], train=True)
@@ -40,8 +39,6 @@ def train(data_list, logger, steps=10, plot_path=None):
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=0, drop_last=True)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=True, num_workers=0, drop_last=True)
 
-    # model = UNet(len(labels) + 1).to(device)
-    # model = ResNet_18_ASPP(len(labels) + 1).to(device)
     model = DeepLabV3Plus(len(labels) + 1).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = torch.nn.CrossEntropyLoss(ignore_index=255)
@@ -200,8 +197,8 @@ def save(model, path):
 
 
 def load(path, classes, logger=None):
-    path = str(path) + ".pth"
-    model = DeepLabV3Plus(len(classes)).to(device)
+    path = str(path)
+    model = DeepLabV3Plus(len(classes) + 1).to(device)
     model.load_weights(path)
     return model
 

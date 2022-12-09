@@ -45,7 +45,7 @@ namespace ssi
         private static IList sessions = null;
         private static string sessionList = "";
         static bool CML_TrainingStarted = false;
-
+        static bool CML_PredictionStarted = false;
         public class Trainer
         {
             public string Path { get; set; }
@@ -276,6 +276,16 @@ namespace ssi
                             {
                                 _ = handler.PythonBackEndPredict(CMLpredictionContent);
                                 CML_TrainingStarted = false;
+                                CML_PredictionStarted = true;
+                            }
+                            else if(mode == Mode.COMPLETE && this.status == Status.FINISHED && !CML_TrainingStarted && CML_PredictionStarted)
+                            {
+                                CML_PredictionStarted = false;
+                                // Load window in the background
+                                this.Dispatcher.Invoke(() =>
+                                {
+                                    handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
+                                });
                             }
                             else
                             {
@@ -1297,7 +1307,6 @@ namespace ssi
                             FrameSizeTextBox.Text = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate).ToString() + "ms";
                             FrameSizeTextBox.IsEnabled = true;
                         }
-
                         else
                         {
                             FrameSizeTextBox.Text = (1000.0 / scheme.SampleRate).ToString() + "ms";

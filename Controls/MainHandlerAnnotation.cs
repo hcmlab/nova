@@ -118,7 +118,6 @@ namespace ssi
             control.annoLiveModeCheckBox.Visibility = Visibility.Hidden;
             control.annoLiveModeCheckBoxLabel.Visibility = Visibility.Hidden;
             this.control.annostatusbar.Visibility = Visibility.Hidden;
-
         }
 
         private void updateAnnoInfo(AnnoTier annoTier)
