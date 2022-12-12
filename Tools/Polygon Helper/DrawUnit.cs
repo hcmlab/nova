@@ -55,16 +55,20 @@ namespace ssi.Types.Polygon
             else
                 return;
 
+            Tuple<int, int> size = video.GetImageSize();
             overlay.Lock();
             overlay.Clear();
 
-            drawLabels(polygonList, overlay, selectionRectPoints);
+            drawLabels(polygonList, overlay, size, selectionRectPoints);
 
             overlay.Unlock();
         }
 
-        private void drawLabels(PolygonList polygonList, WriteableBitmap overlay, List<int> selectionRectPoints = null)
+        private void drawLabels(PolygonList polygonList, WriteableBitmap overlay, Tuple<int, int> size, List<int> selectionRectPoints = null)
         {
+            int pixelCount = size.Item1 * size.Item2;
+
+            int standard_thickness = (int)Math.Ceiling((double)pixelCount / 1000000);
             int thickness = 1;
             Color lastColor = new Color();
 
@@ -88,29 +92,31 @@ namespace ssi.Types.Polygon
                     }
                 }
 
-                if (!polygonInformations.IsCreateModeOn)
+                if (currentPolygonLabelEqualSelectedOne && !polygonInformations.IsCreateModeOn)
                 {
-                    if (currentPolygonLabelEqualSelectedOne && polygonInformations.SelectedPolygon != null)
+                    List<int> allPoints = new List<int>();
+
+                    lastColor.R = polygonLabel.Color.R;
+                    lastColor.G = polygonLabel.Color.G;
+                    lastColor.B = polygonLabel.Color.B;
+                    lastColor.A = polygonLabel.Color.A;
+
+                    foreach (PolygonPoint pp in polygonLabel.Polygon)
                     {
-                        List<int> allPoints = new List<int>();
-
-                        lastColor.R = polygonLabel.Color.R;
-                        lastColor.G = polygonLabel.Color.G;
-                        lastColor.B = polygonLabel.Color.B;
-                        lastColor.A = polygonLabel.Color.A;
-
-                        foreach (PolygonPoint pp in polygonLabel.Polygon)
-                        {
-                            allPoints.Add((int)pp.X);
-                            allPoints.Add((int)pp.Y);
-                        }
-
-                        allPoints.Add((int)polygonLabel.Polygon.First().X);
-                        allPoints.Add((int)polygonLabel.Polygon.First().Y);
-                        Color contentColor = polygonLabel.Color;
-                        contentColor.A = 126;
-                        overlay.FillPolygon(allPoints.ToArray(), contentColor);
+                        allPoints.Add((int)pp.X);
+                        allPoints.Add((int)pp.Y);
                     }
+
+                    allPoints.Add((int)polygonLabel.Polygon.First().X);
+                    allPoints.Add((int)polygonLabel.Polygon.First().Y);
+                    Color contentColor = polygonLabel.Color;
+
+                    if (polygonInformations.SelectedPolygon != null)
+                        contentColor.A = 160;
+                    else
+                        contentColor.A = 120;
+
+                    overlay.FillPolygon(allPoints.ToArray(), contentColor);
                 }
             }
 
@@ -118,20 +124,19 @@ namespace ssi.Types.Polygon
             {
                 if (polygonLabel.Polygon.Count > 0)
                 {
-                    bool currentPolygonLabelEqualSelectedOne = false;
+                    bool currentPolygonLabelEqualSelectedOnes = false;
                     for (int i = 0; i < control.polygonListControl.polygonDataGrid.SelectedItems.Count; i++)
                     {
                         if (polygonLabel.Equals(control.polygonListControl.polygonDataGrid.SelectedItems[i]))
                         {
-                            currentPolygonLabelEqualSelectedOne = true;
+                            currentPolygonLabelEqualSelectedOnes = true;
                             break;
                         }
                     }
-
-                    if (currentPolygonLabelEqualSelectedOne)
-                        thickness = 3;
+                    if (currentPolygonLabelEqualSelectedOnes)
+                        thickness = standard_thickness * 3;
                     else
-                        thickness = 1;
+                        thickness = standard_thickness;
 
                     Color color = polygonLabel.Color;
                     Color secondColor = Color.FromRgb(255, 255, 255);
@@ -139,7 +144,7 @@ namespace ssi.Types.Polygon
                     if (color.R + color.G + color.B > 600)
                         secondColor = Color.FromRgb(0, 0, 0);
 
-                    drawPolygon(overlay, polygonLabel, thickness, currentPolygonLabelEqualSelectedOne, color, secondColor);
+                    drawPolygon(overlay, polygonLabel, thickness, currentPolygonLabelEqualSelectedOnes, color, secondColor);
                 }
             }
 

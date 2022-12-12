@@ -458,7 +458,10 @@ namespace ssi
                 {
                     if (polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed && polygonUtilities.controlPressed())
                     {
-                        polygonEditor.addNewPointToDonePolygon(x, y);
+                        if (polygonInformations.SelectedPoint != null)
+                            polygonEditor.removePointFromDonePolygon(x, y);
+                        else
+                            polygonEditor.addNewPointToDonePolygon(x, y);
                         return;
                     }
 
@@ -569,7 +572,10 @@ namespace ssi
                         if (Mouse.LeftButton == MouseButtonState.Pressed)
                             control.Cursor = Cursors.SizeAll;
                         else
-                            control.Cursor = Cursors.Hand;
+                        {
+                            if (!polygonUtilities.controlPressed())
+                                control.Cursor = Cursors.Hand;
+                        }
                     }
                     else
                     {
@@ -624,7 +630,7 @@ namespace ssi
                 return;
             }
 
-            if (polygonUtilities.controlPressed() && mousePositionInformation.mouseIsOnLine() && !Keyboard.IsKeyDown(Key.Z))
+            if (polygonUtilities.controlPressed() && !Keyboard.IsKeyDown(Key.Z) && (mousePositionInformation.mouseIsOnLine() || polygonInformations.SelectedPoint != null))
             {
                 polygonInformations.IsAboveSelectedPolygonLineAndCtrlPressed = true;
                 control.Cursor = Cursors.Cross;

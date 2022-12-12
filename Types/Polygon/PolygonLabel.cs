@@ -1,5 +1,6 @@
 ﻿using ssi.Interfaces;
 using ssi.Types.Polygon;
+using System;
 using System.Collections.Generic;
 using System.Windows.Media;
 
@@ -25,10 +26,15 @@ namespace ssi
             
             this.label = label;
             this.color = color;
-            this.Confidence = conf;
+            this.Confidence = getConfRounded(conf);
 
             id = sID;
             sID++;
+        }
+
+        private string getConfRounded(string conf)
+        {
+            return "" + Math.Round(Convert.ToDecimal(conf), 2);
         }
 
         public PolygonLabel(List<PolygonPoint> polygon, string label, Color color, string conf, LabelInformations infos)
@@ -40,7 +46,7 @@ namespace ssi
 
             this.label = label;
             this.color = color;
-            this.Confidence = conf;
+            this.Confidence = getConfRounded(conf);
             this.informations = infos;
 
             id = sID;
@@ -62,7 +68,7 @@ namespace ssi
 
             this.label = label;
             this.color = color;
-            this.Confidence = conf;
+            this.Confidence = getConfRounded(conf);
 
             id = ID;
         }
@@ -141,7 +147,7 @@ namespace ssi
         public int ID => id;
 
         internal LabelInformations Informations { get => informations; set => informations = value; }
-        public string Confidence { get => confidence; set => confidence = value; }
+        public string Confidence { get => confidence; set => confidence = getConfRounded(value); }
 
         public override bool Equals(object obj)
         {

@@ -459,6 +459,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Polygon\AddCopiedLabelsCommand.cs" />
+    <Compile Include="Commands\Polygon\RemovePointCommand.cs" />
     <Compile Include="Commands\Polygon\RemoveLabelsCommand.cs" />
     <Compile Include="Commands\Polygon\AddExtraPointCommand.cs" />
     <Compile Include="Commands\Polygon\AddPointCommand.cs" />

@@ -41,6 +41,7 @@ namespace ssi
 
         private Thread logThread = null;
         private Thread statusThread = null;
+        private Thread predictAndReloadThread = null;
 
         private static IList sessions = null;
         private static string sessionList = "";
@@ -197,10 +198,12 @@ namespace ssi
 
             if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
             {
-                Thread logThread = new Thread(new ThreadStart(tryToGetLog));
-                Thread statusThread = new Thread(new ThreadStart(tryToGetStatus));
+                logThread = new Thread(new ThreadStart(tryToGetLog));
+                statusThread = new Thread(new ThreadStart(tryToGetStatus));
+                predictAndReloadThread = new Thread(new ThreadStart(predictAndReloadInCompleteCase));
                 logThread.Start();
                 statusThread.Start();
+                predictAndReloadThread.Start();
             }
 
             changeFrontendInPythonBackEndCase();
@@ -247,7 +250,7 @@ namespace ssi
                     }
                 }
 
-                Thread.Sleep(4000);
+                Thread.Sleep(1500);
             }
         }
 
@@ -264,30 +267,26 @@ namespace ssi
                         response = handler.getStatusFromServer(content);
                         this.status = (Status)Int16.Parse(response["status"]);
 
-                        this.Dispatcher.Invoke(() =>
+                        if (!(mode == Mode.COMPLETE && CML_PredictionStarted))
                         {
-                            statusLabel.Content = states[(int)this.status].getText();
-                            statusLabel.Background = states[(int)this.status].getColor();
-                        });
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                statusLabel.Content = states[(int)this.status].getText();
+                                statusLabel.Background = states[(int)this.status].getColor();
+                            });
+                        }
 
-                        if (this.status != Status.RUNNING)
+                        if (this.status == Status.RUNNING)
                         {
-                            if (mode == Mode.COMPLETE && this.status == Status.FINISHED && CML_TrainingStarted)
+                            this.Dispatcher.Invoke(() =>
                             {
-                                _ = handler.PythonBackEndPredictComplete(CMLpredictionContent);
-                                CML_TrainingStarted = false;
-                                CML_PredictionStarted = true;
-                            }
-                            else if(mode == Mode.COMPLETE && this.status == Status.FINISHED && CML_PredictionStarted)
-                            {
-                                CML_PredictionStarted = false;
-                                // Load window in the background
-                                this.Dispatcher.Invoke(() =>
-                                {
-                                    handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
-                                });
-                            }
-                            else
+                                this.ApplyButton.IsEnabled = false;
+                                this.Cancel_Button.IsEnabled = true;
+                            });
+                        }
+                        else
+                        {
+                            if(!(mode == Mode.COMPLETE && CML_PredictionStarted))
                             {
                                 this.Dispatcher.Invoke(() =>
                                 {
@@ -295,14 +294,6 @@ namespace ssi
                                     this.Cancel_Button.IsEnabled = false;
                                 });
                             }
-                        }
-                        else
-                        {
-                            this.Dispatcher.Invoke(() =>
-                            {
-                                this.ApplyButton.IsEnabled = false;
-                                this.Cancel_Button.IsEnabled = true;
-                            });
                         }
                     }
                     catch (Exception ex)
@@ -322,8 +313,7 @@ namespace ssi
                         logTextBox.Text = "Please select database, schema, stream, session, annotator and the trainer script!";
                     });
                 }
-
-                Thread.Sleep(2000);
+                Thread.Sleep(1500);
             }
 
             this.Dispatcher.Invoke(() =>
@@ -331,6 +321,39 @@ namespace ssi
                 this.ApplyButton.IsEnabled = true;
                 logTextBox.Text = "";
             });
+        }
+
+        private void predictAndReloadInCompleteCase()
+        {
+            while (pythonCaseOn)
+            {
+                if (this.status != Status.RUNNING)
+                {
+                    if (mode == Mode.COMPLETE && this.status == Status.FINISHED && CML_TrainingStarted)
+                    {
+                        this.status = Status.RUNNING;
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            statusLabel.Content = states[(int)this.status].getText();
+                            statusLabel.Background = states[(int)this.status].getColor();
+                        });
+
+                        _ = handler.PythonBackEndPredictComplete(CMLpredictionContent);
+                        CML_TrainingStarted = false;
+                        CML_PredictionStarted = true;
+                    }
+                    else if (mode == Mode.COMPLETE && this.status == Status.FINISHED && CML_PredictionStarted)
+                    {
+                        CML_PredictionStarted = false;
+                        // Load window in the background
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            handler.ReloadAnnoTierFromDatabase(AnnoTierStatic.Selected, false);
+                        });
+                    }
+                }
+                Thread.Sleep(500);
+            }
         }
 
         private void handleError(Exception ex)
@@ -427,6 +450,8 @@ namespace ssi
             {
                 handler.cancleCurrentAction(getContent());
                 this.Cancel_Button.IsEnabled = false;
+                CML_TrainingStarted = false;
+                CML_PredictionStarted = false;
             }
         }
 
@@ -1279,8 +1304,11 @@ namespace ssi
                 pythonCaseOn = true;
                 logThread = new Thread(new ThreadStart(tryToGetLog));
                 statusThread = new Thread(new ThreadStart(tryToGetStatus));
+                predictAndReloadThread = new Thread(new ThreadStart(predictAndReloadInCompleteCase));
                 logThread.Start();
                 statusThread.Start();
+                predictAndReloadThread.Start();
+
                 this.statusLabel.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;
 

@@ -39,6 +39,15 @@ namespace ssi.Tools.Polygon_Helper
             drawUnit.polygonOverlayUpdate(((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem));
         }
 
+        public void removePointFromDonePolygon(double x, double y)
+        {
+            PolygonLabel polygonLabel = polygonInformations.OverLinePolygon;
+            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+            item.UndoRedoStack.Do(new RemovePointCommand(polygonInformations.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel));
+            drawUnit.polygonOverlayUpdate(((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem));
+        }
+
+
         public void editPolygon(double x, double y)
         {
             uIElementsController.enableOrDisableControls(false);
