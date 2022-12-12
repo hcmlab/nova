@@ -68,7 +68,7 @@ namespace ssi.Types.Polygon
         {
             int pixelCount = size.Item1 * size.Item2;
 
-            int standard_thickness = (int)Math.Ceiling((double)pixelCount / 1000000);
+            int standard_thickness = (int)Math.Ceiling((double)pixelCount / 1000000) + 1;
             int thickness = 1;
             Color lastColor = new Color();
 
@@ -134,7 +134,7 @@ namespace ssi.Types.Polygon
                         }
                     }
                     if (currentPolygonLabelEqualSelectedOnes)
-                        thickness = standard_thickness * 3;
+                        thickness = standard_thickness * 2;
                     else
                         thickness = standard_thickness;
 

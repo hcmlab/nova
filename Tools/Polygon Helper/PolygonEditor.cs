@@ -42,9 +42,12 @@ namespace ssi.Tools.Polygon_Helper
         public void removePointFromDonePolygon(double x, double y)
         {
             PolygonLabel polygonLabel = polygonInformations.OverLinePolygon;
-            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
-            item.UndoRedoStack.Do(new RemovePointCommand(polygonInformations.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel));
-            drawUnit.polygonOverlayUpdate(((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem));
+            if(polygonLabel.Polygon.Count > 3)
+            {
+                AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem;
+                item.UndoRedoStack.Do(new RemovePointCommand(polygonInformations.LastPolygonPoint.PointID, new PolygonPoint(x, y), polygonLabel));
+                drawUnit.polygonOverlayUpdate(((AnnoListItem)control.annoListControl.annoDataGrid.SelectedItem));
+            }
         }
 
 

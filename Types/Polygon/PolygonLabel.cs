@@ -92,7 +92,16 @@ namespace ssi
             {
                 if (this.polygon[i].PointID == id)
                 {
-                    this.removeAt(i + 1);
+                    if (i + 1 == this.polygon.Count)
+                    {
+                        this.removeAt(0);
+                        return;
+                    }
+                    else
+                    {
+                        this.removeAt(i + 1);
+                        return;
+                    }
                 }
             }
         }
