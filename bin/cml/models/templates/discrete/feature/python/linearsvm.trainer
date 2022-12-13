@@ -8,5 +8,5 @@
     <!--<normalize>
         <item method="Scale" stream="0"/>
     </normalize>-->
-    <model create="PythonModel" stream="0" script="linearsvm.py" /> 
+    <model create="PythonModel" stream="0" script="linearsvm.py" optstr="{C:STRING:0.1}"/> 
 </trainer>

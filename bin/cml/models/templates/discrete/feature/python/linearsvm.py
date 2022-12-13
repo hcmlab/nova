@@ -4,48 +4,53 @@ import numpy as np
 from pathlib import Path
 
 if not hasattr(sys, 'argv'):
-    sys.argv = ['']
+    sys.argv  = ['']
+
 
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 import pickle
 
-DEPENDENCIES = ['test.txt']
+DEPENDENCIES = []
+OPTIONS = {'C': '0.1'}
 MODEL_SUFFIX = '.model'
 
+def set_options(options):
+    """Overwrite/Append Options. No Return value"""
+    for key, value in options.items():
+        OPTIONS[key] = value
 
-def train(data, logger=None):
-    X, Y = data
-    linear_svc = LinearSVC(C=0.1, dual=False)
+
+def train (data, logger=None):
+    X,Y = data
+    linear_svc = LinearSVC(C=float(OPTIONS['C']))
     model = CalibratedClassifierCV(linear_svc, method='sigmoid', cv=3)
     print('train_x shape: {} | train_x[0] shape: {}'.format(X.shape, X[0].shape))
     print('train_y shape: {} | train_y[0] shape: {}'.format(Y.shape, Y[0].shape))
     model.fit(X, Y)
     return model
 
-
-def save(model, path, logger=None):
+def save (model, path, logger=None):
     if not Path(path.parent).is_dir():
         path.parent.mkdir(parents=True, exist_ok=True)
         # out_path = str(path) + ".pth"
     out_path = str(path) + MODEL_SUFFIX
     with open(out_path, 'wb') as f:
         pickle.dump(model, f)
-        print('Model stored at: {}'.format(path))
+        #print('Model stored at: {}'.format(path))
     return out_path
 
 
-def predict(model, data, logger=None):
+def predict (model, data, logger=None):
     Y = model.predict(data[0])
     return Y
 
 
-def load(path, classes, logger=None):
-    file = open(path, 'rb')
+def load (path, classes, logger=None):
+    file = open(path,'rb')
     model = pickle.load(file)
-    # model = pickle.load(path, "rb" )
+    #model = pickle.load(path, "rb" )
     return model
-
 
 def preprocess(ds_iter, request_form=[], logger=None):
     data_list = list(ds_iter)
