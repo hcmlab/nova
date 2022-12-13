@@ -14,14 +14,14 @@ import whisper
 import numpy as np
 import logging
 
+DEPENDENCIES = []
+OPTIONS = {'model': 'large'}
 
+def setOptions(opts):
+    for key, value in opts.items():
+        OPTIONS[key] = value
+        print(key, value)
 
-def train (X, Y, logger=None, request_form=None):
-    print('Training not supported')
-    return None
-    
-def save (model, path, logger=None, request_form=None):
-   print('Save not imported')
 
 def preprocess(data_iterator, logger=None, request_form=None):
 
@@ -43,6 +43,12 @@ def preprocess(data_iterator, logger=None, request_form=None):
         )
 
     return torch_ds
+
+
+def train (X, Y, logger=None, request_form=None):
+    print('Training not supported')
+    return None
+
 
 def predict(model, X, logger=None, request_form=None):
 
@@ -84,6 +90,10 @@ def predict(model, X, logger=None, request_form=None):
     # print the recognized text
     return transcript_dict
 
-def load (path, logger=None, request_form=None):
-    model = whisper.load_model("large")
+
+def save (model, path, logger=None, request_form=None):
+   print('Save not supported')
+
+def load(path, classes=None, logger=None, request_form=None):
+    model = whisper.load_model(OPTIONS['model'])
     return model
