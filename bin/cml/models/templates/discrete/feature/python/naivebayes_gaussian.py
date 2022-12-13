@@ -1,17 +1,26 @@
+import os
 import sys
+import numpy as np
+from pathlib import Path
+
 if not hasattr(sys, 'argv'):
     sys.argv  = ['']
 
 
 from sklearn.naive_bayes import GaussianNB
 import pickle
+DEPENDENCIES = []
+OPTIONS = {}
+MODEL_SUFFIX = '.model'
 
-def train (X, Y):
+
+def train (data, logger=None):
+    X,Y = data
     model = GaussianNB()
     print('train_x shape: {} | train_x[0] shape: {}'.format(X.shape, X[0].shape))
     model.fit(X, Y) 
     return model
-
+    
 def save (model, path, logger=None):
     if not Path(path.parent).is_dir():
         path.parent.mkdir(parents=True, exist_ok=True)
