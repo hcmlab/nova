@@ -27,7 +27,6 @@ def train (data, logger=None):
 def save (model, path, logger=None):
     if not Path(path.parent).is_dir():
         path.parent.mkdir(parents=True, exist_ok=True)
-        # out_path = str(path) + ".pth"
     out_path = str(path) + MODEL_SUFFIX
     with open(out_path, 'wb') as f:
         pickle.dump(model, f)
