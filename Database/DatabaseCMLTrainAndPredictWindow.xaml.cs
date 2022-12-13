@@ -2488,6 +2488,11 @@ namespace ssi
 
         public string AttributesResult()
         {
+            if(SpecificModelattributesresult == null)
+            {
+                return "";
+            }
+
             string resultOptstring = "";
             foreach (var element in SpecificModelattributesresult)
             {
@@ -2519,11 +2524,11 @@ namespace ssi
 
         private void AddTrainerSpecificOptionsUIElements(string optstr)
         {
-
+            ModelSpecificAttributes = null;
             ModelSpecificAttributes = ParseAttributes(optstr);
             inputGrid.Children.Clear();
 
-            if (ModelSpecificAttributes.Count > 0)
+            if (ModelSpecificAttributes != null && ModelSpecificAttributes.Count > 0)
             {
 
                 Dictionary<string, Input> input = new Dictionary<string, Input>();
