@@ -31,8 +31,9 @@
         <Label Content="File server:" Grid.Column="0" Grid.Row="2"></Label>
         <TextBox Name="ServerField" Text="" Grid.Column="1" Grid.Row="2" Margin="5"></TextBox>
         <StackPanel Grid.Row="3" Grid.Column="1" VerticalAlignment="Top" >
-            <RadioButton Name="UrlFormatGeneral"  IsChecked="True" ToolTip="Enter the Url leading directly to a network share, including the corpus folder (sessions can be subfolders) (e.g. Dropbox public link, SFTP Server)" Margin="5">General Link to Database Folder</RadioButton>
-            <RadioButton Name="UrlFormatNextCloud" Margin="5" ToolTip="Enter the Url for a shared Nextcloud Parent Folder (contains corpora as subdirectories)">Nextcloud Parent Folder</RadioButton>
+            <RadioButton Name="UrlFormatNextCloud" IsChecked="True"  Margin="5" ToolTip="Enter the Url for a shared Nextcloud Parent Folder (contains corpora as subdirectories)">Nextcloud Parent Folder</RadioButton>
+            <RadioButton Name="UrlFormatGeneral"  ToolTip="Enter the Url leading directly to a network share, including the corpus folder (sessions can be subfolders) (e.g. Dropbox public link, SFTP Server)" Margin="5">General Link to Database Folder</RadioButton>
+           
         </StackPanel>
       
 

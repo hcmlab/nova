@@ -1,6 +1,9 @@
-﻿using MongoDB.Bson;
+﻿using MathNet.Numerics.Distributions;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using Octokit;
+using SharpDX;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +11,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +23,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
+using static ssi.AnnoTierAttributesWindow;
 using Path = System.IO.Path;
 
 namespace ssi
@@ -34,6 +39,7 @@ namespace ssi
         private List<SelectedDatabaseAndSessions> selectedDatabaseAndSessions = new List<SelectedDatabaseAndSessions>();
         private List<string> databases = new List<string>();
         static MultipartFormDataContent CMLpredictionContent;
+        List<AnnoScheme.Attribute> ModelSpecificAttributes;
         string lockedScheme = null;
 
         GridViewColumnHeader _lastHeaderClicked = null;
@@ -43,6 +49,7 @@ namespace ssi
         private Thread statusThread = null;
         private Thread predictAndReloadThread = null;
 
+        Dictionary<string, UIElement> SpecificModelattributesresult;
         private static IList sessions = null;
         private static string sessionList = "";
         static bool CML_TrainingStarted = false;
@@ -58,11 +65,29 @@ namespace ssi
             public string Script { get; set; }
             public string Weight { get; set; }
 
+            public string OptStr { get; set; }
+
             public override string ToString()
             {
                 return Name;
             }
-        }        
+        }
+
+        public class Input
+        {
+            public Input()
+            {
+                Label = "";
+                DefaultValue = "";
+                Attributes = new List<string>();
+                AttributeType = AnnoScheme.AttributeTypes.STRING;
+            }
+            public string Label { get; set; }
+            public List<string> Attributes { get; set; }
+            public string DefaultValue { get; set; }
+            public AnnoScheme.AttributeTypes AttributeType { get; set; }
+        }
+
 
         public class SessionSet
         {
@@ -1201,6 +1226,7 @@ namespace ssi
             
             }
 
+            string ModelSpecificOptString = AttributesResult();
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
@@ -1226,7 +1252,8 @@ namespace ssi
                 { new StringContent(frameSize.ToString()), "frameSize" },
                 { new StringContent(scheme.Type.ToString()), "schemeType" },          
                 { new StringContent(trainer_name), "trainerName" },
-                { new StringContent(deleteFiles.ToString()), "deleteFiles" }
+                { new StringContent(deleteFiles.ToString()), "deleteFiles" },
+                { new StringContent(ModelSpecificOptString), "OptStr" }
             };
 
             if (mode == Mode.COMPLETE)
@@ -1252,6 +1279,8 @@ namespace ssi
 
                 relativeTrainerPath = relativeTrainerOutputDirectory + "\\" + TrainerNameTextBox.Text + "." + Defaults.CML.TrainerFileExtension;
                 deleteFiles = true;
+
+                
                 CMLpredictionContent = new MultipartFormDataContent
                 {
                     { new StringContent(flattenSamples.ToString()), "flattenSamples"},
@@ -1276,7 +1305,8 @@ namespace ssi
                     { new StringContent(frameSize.ToString()), "frameSize" },
                     { new StringContent(scheme.Type.ToString()), "schemeType" },
                     { new StringContent(trainer_name), "trainerName" },
-                    { new StringContent(deleteFiles.ToString()), "deleteFiles" }
+                    { new StringContent(deleteFiles.ToString()), "deleteFiles" },
+                    { new StringContent(ModelSpecificOptString), "OptStr" }
                 };
             }
 
@@ -1308,9 +1338,11 @@ namespace ssi
                 logThread.Start();
                 statusThread.Start();
                 predictAndReloadThread.Start();
+                AddTrainerSpecificOptionsUIElements(trainer.OptStr);
 
                 this.statusLabel.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;
+                this.ModelSpecificOptions.Visibility = Visibility.Visible;
 
                 if (mode == Mode.COMPLETE)
                 {
@@ -1366,6 +1398,7 @@ namespace ssi
                 this.CMLEndTimeLabel.Visibility = Visibility.Collapsed;
                 this.CMLEndTimeTextBox.Visibility = Visibility.Collapsed;
                 this.Cancel_Button.Visibility = Visibility.Collapsed;
+                this.ModelSpecificOptions.Visibility = Visibility.Collapsed;
                 this.logTextBox.Text = "";
             }
 
@@ -1752,6 +1785,12 @@ namespace ssi
                     if (weights != null)
                     {
                         trainer.Weight = weights.Value;
+                    }
+
+                    var optstr = node.Attributes["optstr"];
+                    if (optstr != null)
+                    {
+                        trainer.OptStr = optstr.Value;
                     }
                 }
             }
@@ -2388,6 +2427,184 @@ namespace ssi
 
 
         }
+
+        private List<AnnoScheme.Attribute> ParseAttributes(string optstr)
+        {
+
+            List <AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
+            if (optstr == null) 
+            {
+                return null;
+            }
+            else
+            {
+            
+                string[] split = optstr.Split(';');
+                foreach (string s in split)
+                {
+                    string option;
+                    option = s.Replace("{", "");
+                    option = option.Replace ("}", "");
+                    string[] attributes = option.Split(':');
+
+                    AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.STRING;
+                    List<string> content = new List<string>();
+                    string name = attributes[0];
+                   
+
+                    if (attributes[1].Contains("BOOL"))
+                    {
+                        type = AnnoScheme.AttributeTypes.BOOLEAN;
+                        content.Add(attributes[2]);
+                    }
+                       
+                    else if (attributes[1].Contains("STRING"))
+                    {
+                        type = AnnoScheme.AttributeTypes.STRING;
+                        content.Add(attributes[2]);
+                    }
+                        
+                    else if (attributes[1].Contains("LIST"))
+                    {
+                        type = AnnoScheme.AttributeTypes.LIST;
+                        string[] elements = attributes[2].Split(',');
+                        foreach(string e in elements)
+                        {
+                            content.Add(e);
+                        }
+
+                    }
+
+                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type);
+                    values.Add(attribute);
+                }
+
+              
+  
+            }
+
+            return values;
+        }
+
+        public string AttributesResult()
+        {
+            string resultOptstring = "";
+            foreach (var element in SpecificModelattributesresult)
+            {
+                //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
+                {
+                    if (element.Value.GetType().Name == "CheckBox")
+                    {
+                        resultOptstring = resultOptstring + element.Key + "=" + ((CheckBox)element.Value).IsChecked + ";";
+                    }
+                    else if (element.Value.GetType().Name == "ComboBox")
+                    {
+                        resultOptstring = resultOptstring + element.Key + "=" + ((ComboBox)element.Value).SelectedItem + ";";
+                    }
+                    else if (element.Value.GetType().Name == "TextBox")
+                    {
+                        resultOptstring = resultOptstring + element.Key + "=" + ((TextBox)element.Value).Text + ";";
+                    }
+                    //var test = element.Value.ToString() ;
+                }
+
+
+            }
+
+            resultOptstring = resultOptstring.Remove(resultOptstring.Length - 1, 1);
+            return resultOptstring;
+        }
+
+
+
+        private void AddTrainerSpecificOptionsUIElements(string optstr)
+        {
+
+            ModelSpecificAttributes = ParseAttributes(optstr);
+            inputGrid.Children.Clear();
+
+            if (ModelSpecificAttributes.Count > 0)
+            {
+
+                Dictionary<string, Input> input = new Dictionary<string, Input>();
+
+                foreach (var attribute in ModelSpecificAttributes)
+                {
+             
+                    input[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType };
+                }
+                SpecificModelattributesresult = new Dictionary<string, UIElement>();
+                TextBox firstTextBox = null;
+                foreach (KeyValuePair<string, Input> element in input)
+                {
+                    System.Windows.Controls.Label label = new System.Windows.Controls.Label() { Content = element.Value.Label };
+
+                    Thickness tk = label.Margin; tk.Left = 5; tk.Right = 0; tk.Bottom = 0; label.Margin = tk;
+
+                    inputGrid.Children.Add(label);
+
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Auto);
+                    inputGrid.RowDefinitions.Add(rowDefinition);
+
+                    Grid.SetColumn(label, 0);
+                    Grid.SetRow(label, inputGrid.RowDefinitions.Count - 1);
+
+
+                    if (element.Value.AttributeType == AnnoScheme.AttributeTypes.STRING)
+                    {
+                        TextBox textBox = new TextBox() { Text = element.Value.DefaultValue };
+                        //textBox.GotFocus += TextBox_GotFocus;
+                        if (firstTextBox == null)
+                        {
+                            firstTextBox = textBox;
+                        }
+                        Thickness margin = textBox.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; textBox.Margin = margin;
+                        SpecificModelattributesresult.Add(element.Key, textBox);
+                        inputGrid.Children.Add(textBox);
+                        if (firstTextBox != null)
+                        {
+                            firstTextBox.Focus();
+                        }
+
+                        Grid.SetColumn(textBox, 1);
+                        Grid.SetRow(textBox, inputGrid.RowDefinitions.Count - 1);
+                    }
+                    else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.BOOLEAN)
+                    {
+                        CheckBox cb = new CheckBox()
+                        {
+                            IsChecked = (element.Value.DefaultValue.ToLower() == "false") ? false : true
+                        };
+
+                        Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; cb.Margin = margin;
+                        SpecificModelattributesresult.Add(element.Key, cb);
+                        inputGrid.Children.Add(cb);
+
+
+                        Grid.SetColumn(cb, 1);
+                        Grid.SetRow(cb, inputGrid.RowDefinitions.Count - 1);
+                    }
+                    else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
+                    {
+                        ComboBox cb = new ComboBox()
+                        {
+                            ItemsSource = element.Value.Attributes
+                        };
+                        cb.SelectedItem = element.Value.DefaultValue;
+                        Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; cb.Margin = margin;
+                        SpecificModelattributesresult.Add(element.Key, cb);
+                        inputGrid.Children.Add(cb);
+
+                        Grid.SetColumn(cb, 1);
+                        Grid.SetRow(cb, inputGrid.RowDefinitions.Count - 1);
+                    }
+                }
+            }
+
+            else this.ModelSpecificOptions.Visibility = Visibility.Collapsed;
+        }
+
 
 
         private void AnnotationSelectionBox_Drop(object sender, DragEventArgs e)

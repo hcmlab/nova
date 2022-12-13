@@ -56,6 +56,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            
         </Grid.RowDefinitions>
 
         <TabControl Name="ModeTabControl" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" SelectionChanged="ModeTabControl_SelectionChanged">
@@ -191,7 +192,7 @@
 
             </Grid>
 
-
+           
 
 
 
@@ -351,7 +352,9 @@
 
             </GroupBox>
 
-            <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="6" Margin="5" LastChildFill="False">
+          
+
+            <DockPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="6" Margin="5" LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <Button Content="Cancel" x:Name="Cancel_Button" IsEnabled="False" Click="Cancel_Button_Click" Width="75" Height="30"/>
                     <Button Content="Apply" x:Name="ApplyButton" IsEnabled="False"  Click="Apply_Click" Width="75" Margin="5" Height="30"/>
@@ -372,10 +375,29 @@
                           Margin="0">
         </GridSplitter>
 
-        <DockPanel Grid.Row="2" Grid.Column="2" LastChildFill="True" Margin="0,0,5,5">
+        <Grid Grid.Row="2" Grid.Column="2" >
+            <Grid.RowDefinitions>
+             <RowDefinition Height="*"></RowDefinition>
+             <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+      
+        <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,5,5">
             <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log</Label>
-            <TextBox IsReadOnly="True" Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"  TextWrapping="Wrap"/>
+            <TextBox  IsReadOnly="True" Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"  TextWrapping="Wrap"/>
+           
         </DockPanel>
+            <GroupBox Name="ModelSpecificOptions" Margin="0,5,5,0" Header="Model Specific Options" Grid.Row="1">
+                <Grid Name="inputGrid" >
+
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                </Grid> 
+            </GroupBox>
+        </Grid>
+        
     </Grid>
 
 </Window>
