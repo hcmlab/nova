@@ -3,10 +3,10 @@
     <info trained="false" seed="1234"/>
 	<meta balance="under" backend="Python"/>	
 	<register>
-		<item name="python38"/>		
+		<item name="python39"/>		
 	</register>	
     <!--<normalize>
         <item method="Scale" stream="0"/>
     </normalize>-->
-    <model create="Model" stream="0" script="gaussiannb.py" /> 
+    <model create="PythonModel" script="naivebayes_gaussian.py" /> 
 </trainer>

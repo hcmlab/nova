@@ -15,12 +15,6 @@ DEPENDENCIES = []
 OPTIONS = {'C': '0.1'}
 MODEL_SUFFIX = '.model'
 
-def set_options(options):
-    """Overwrite/Append Options. No Return value"""
-    for key, value in options.items():
-        OPTIONS[key] = value
-
-
 def train (data, logger=None):
     X,Y = data
     linear_svc = LinearSVC(C=float(OPTIONS['C']))

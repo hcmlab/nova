@@ -17,11 +17,6 @@ import logging
 DEPENDENCIES = []
 OPTIONS = {'model': 'large'}
 
-def setOptions(opts):
-    for key, value in opts.items():
-        OPTIONS[key] = value
-        print(key, value)
-
 
 def preprocess(data_iterator, logger=None, request_form=None):
 
