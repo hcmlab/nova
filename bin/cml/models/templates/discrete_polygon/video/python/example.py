@@ -26,7 +26,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 DEPENDENCIES = ["deeplabv3.py", "dataset.py", "evaluator.py"]
 
 
-def train(data_list, logger, steps=300, plot_path=None):
+def train(data_list, logger, steps=400, plot_path=None):
     if plot_path is None:
         plot_path = Path.cwd()
 
@@ -88,8 +88,6 @@ def train(data_list, logger, steps=300, plot_path=None):
             logger_msg = "The best IoU so far: " + str(round(max(validation_data), 3))
             logger.info(logger_msg)
 
-            plot("test_case", "Test case with polygons", validation_data, loss_data, steps, val_range, plot_path)
-
             time_dif = round(time.time() - start_time)
             logger.info("Duration since the training started: " + str(datetime.timedelta(seconds=round(time_dif))))
 
@@ -120,43 +118,6 @@ def execute_evaluation(model, dataloader, labels_count):
             all_results = evaluator.get_intersection_and_union(predictions, segmentations, all_results, labels_count)
 
     return evaluator.calculate_intersection_over_union(all_results)
-
-
-def plot(plot_name, network_information, validation_data, loss_data, steps_target, val_range, plot_path):
-    ...
-    # x = [(i + 1) * val_range for i in range(len(validation_data))]
-    #
-    # fig_index = len(plt.get_fignums()) + 1
-    # fig = plt.figure(fig_index, figsize=(8, 4))
-    # fig.suptitle(network_information)
-    #
-    # ax1 = fig.add_subplot(111)
-    # ax1.set_title('Mean IoU')
-    # ax1.set(xlabel='Steps')
-    # ax1.set_xlim(0, steps_target + val_range)
-    # ax1.set_ylim(0, 101)
-    # ax1.plot(x, validation_data, 'y', label='validation')
-    # ax1.legend(loc='upper left')
-    #
-    # fig.savefig(Path(plot_path, plot_name + "_acc.png"))
-    #
-    # x = [(i + 1) * val_range for i in range(len(loss_data))]
-    #
-    # fig_index = len(plt.get_fignums()) + 1
-    # fig = plt.figure(fig_index, figsize=(8, 4))
-    # fig.suptitle(network_information)
-    #
-    # ax1 = fig.add_subplot(111)
-    # ax1.set_title('Loss')
-    # ax1.set(xlabel='Steps')
-    # ax1.set_xlim(0, steps_target + val_range)
-    # max_loss = max(loss_data)
-    # ax1.set_ylim(0, 1.5 * max_loss)
-    # ax1.plot(x, loss_data, 'r', label='train')
-    # ax1.legend(loc='upper right')
-    #
-    # fig.savefig(Path(plot_path, plot_name + "_loss.png"))
-    # plt.close('all')
 
 
 def predict(model, data, shape, logger):

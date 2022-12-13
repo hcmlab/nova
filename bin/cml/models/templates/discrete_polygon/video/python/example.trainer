@@ -6,5 +6,5 @@
 		<item name="python39"/>		
 	</register>	
 	
-    <model create="PythonModel" stream="0" script="test_model.py"/> 
+    <model create="PythonModel" stream="0" script="example.py"/> 
 </trainer>
