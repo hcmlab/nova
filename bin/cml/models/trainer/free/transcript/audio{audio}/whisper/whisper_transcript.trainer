@@ -2,5 +2,5 @@
 <trainer ssi-v="5">
     <info trained="true" seed="1234"/>
 	<meta balance="under" backend="Python"/>	
-    <model create="PythonModel" stream="0" path="whisper" script="whisper_transcript.py" /> 
+    <model create="PythonModel" stream="0" path="whisper" script="whisper_transcript.py" optstr="{model:LIST:large,tiny,base,small,medium,tiny.en,base.en,small.en,medium.en};{test:BOOL:true};{AnotherOption:STRING:13}" /> 
 </trainer>
