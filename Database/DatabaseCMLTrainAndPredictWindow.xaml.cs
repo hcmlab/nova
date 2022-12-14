@@ -135,6 +135,7 @@ namespace ssi
             RUNNING = 1,
             FINISHED = 2,
             ERROR = 3
+
         }
 
 
@@ -192,7 +193,7 @@ namespace ssi
             {
                 if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
-                    double endtimeInSec = AnnoTier.Selected.AnnoList.Count == 0 ? 0 : (int)AnnoTier.Selected.AnnoList.ElementAt(AnnoTier.Selected.AnnoList.Count - 1).Stop;
+                    double endtimeInSec = MainHandler.Time.TotalDuration;
                     endtime = (int)(Math.Round(value: endtimeInSec, digits: 2) * 1000);
                 }
                 else
@@ -378,6 +379,7 @@ namespace ssi
                     }
                 }
                 Thread.Sleep(500);
+            
             }
         }
 
