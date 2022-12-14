@@ -12,13 +12,18 @@ from sklearn.calibration import CalibratedClassifierCV
 import pickle
 
 DEPENDENCIES = []
-OPTIONS = {'C': '0.1'}
+OPTIONS = {'C': '0.1','number_folds':'3', 'dual':'True', 'class_weight':'None', 'method':'sigmoid'}
 MODEL_SUFFIX = '.model'
 
 def train (data, logger=None):
     X,Y = data
-    linear_svc = LinearSVC(C=float(OPTIONS['C']))
-    model = CalibratedClassifierCV(linear_svc, method='sigmoid', cv=3)
+
+    #Manage Options
+    if OPTIONS['class_weight'] == 'None':
+        OPTIONS['class_weight'] = None
+
+    linear_svc = LinearSVC(C=float(OPTIONS['C']), dual=bool(OPTIONS['dual']), class_weight=(OPTIONS['class_weight']))
+    model = CalibratedClassifierCV(linear_svc, method=OPTIONS['method'], cv=int(OPTIONS['number_folds']))
     print('train_x shape: {} | train_x[0] shape: {}'.format(X.shape, X[0].shape))
     print('train_y shape: {} | train_y[0] shape: {}'.format(Y.shape, Y[0].shape))
     model.fit(X, Y)
@@ -27,6 +32,7 @@ def train (data, logger=None):
 def save (model, path, logger=None):
     if not Path(path.parent).is_dir():
         path.parent.mkdir(parents=True, exist_ok=True)
+        # out_path = str(path) + ".pth"
     out_path = str(path) + MODEL_SUFFIX
     with open(out_path, 'wb') as f:
         pickle.dump(model, f)

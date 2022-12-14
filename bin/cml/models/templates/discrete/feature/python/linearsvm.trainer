@@ -8,5 +8,5 @@
     <!--<normalize>
         <item method="Scale" stream="0"/>
     </normalize>-->
-    <model create="PythonModel" stream="0" script="linearsvm.py" optstr="{C:STRING:0.1}"/> 
+    <model create="PythonModel" stream="0" script="linearsvm.py" optstr="{C:STRING:0.1};{number_folds:STRING:3};{dual:BOOL:True};{class_weight:LIST:None,balanced};{method:LIST:sigmoid,isotonic}"/> 
 </trainer>
