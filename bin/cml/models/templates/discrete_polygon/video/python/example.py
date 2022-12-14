@@ -13,8 +13,6 @@ import evaluator
 import numpy as np
 
 from PIL import Image
-from u_net import UNet
-from resnet_aspp import ResNet_18_ASPP
 from deeplabv3 import DeepLabV3Plus
 from pathlib import Path
 from torchvision import transforms
