@@ -41,7 +41,8 @@ def save (model, path, logger=None):
 
 
 def predict (model, data, logger=None):
-    Y = model.predict(data[0])
+    X,Y = data
+    Y = model.predict_proba(X) 
     return Y
 
 
@@ -60,9 +61,12 @@ def preprocess(ds_iter, request_form=[], logger=None):
     x = []
     y = []
     for r in request_form["roles"].split(';'):
-        x_tmp = [v[r + '.' + request_form["streamName"].split(" ")[0]] for v in data_list]
-        y_tmp = [v[r + '.' + request_form["scheme"].split(";")[0]] for v in data_list]
+        x_tmp = [val[r + '.' + request_form["streamName"].split(" ")[0]] for val in data_list]
+        y_tmp = [val[r + '.' + request_form["scheme"].split(";")[0]] for val in data_list]
         x.extend(x_tmp)
         y.extend(y_tmp)
 
     return np.ma.concatenate(x, axis=0), np.array(y)
+
+def postprocess(ds_iter, request_form=[], logger=None):
+    pass
