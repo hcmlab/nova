@@ -194,7 +194,8 @@ namespace ssi
                 if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
                     double endtimeInSec = MainHandler.Time.TotalDuration;
-                    endtime = (int)(Math.Round(value: endtimeInSec, digits: 2) * 1000);
+                    double resample = endtimeInSec * Properties.Settings.Default.DefaultDiscreteSampleRate;
+                    endtimeInSec = (int)((Math.Round(resample)) / Properties.Settings.Default.DefaultDiscreteSampleRate * 1000);
                 }
                 else
                 {
@@ -207,7 +208,8 @@ namespace ssi
                 if (AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || AnnoTier.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.FREE)
                 {
                     double startTimeInSec = MainHandler.Time.TimeFromPixel(MainHandler.Time.CurrentSelectPosition);
-                    startTime = (int)(Math.Round(value: startTimeInSec, digits: 2) * 1000);
+                    double resample =  startTimeInSec * Properties.Settings.Default.DefaultDiscreteSampleRate;
+                    startTime = (int) ((Math.Round(resample)) / Properties.Settings.Default.DefaultDiscreteSampleRate * 1000);
                 }
                 else
                 {
