@@ -195,7 +195,7 @@ namespace ssi
                 {
                     double endtimeInSec = MainHandler.Time.TotalDuration;
                     double resample = endtimeInSec * Properties.Settings.Default.DefaultDiscreteSampleRate;
-                    endtimeInSec = (int)((Math.Round(resample)) / Properties.Settings.Default.DefaultDiscreteSampleRate * 1000);
+                    endtime = (int)((Math.Round(resample)) / Properties.Settings.Default.DefaultDiscreteSampleRate * 1000);
                 }
                 else
                 {
