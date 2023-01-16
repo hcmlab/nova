@@ -1,9 +1,0 @@
-<trainer ssi-v="5">
-    <info trained="true" />
-	<meta rightContext="0" leftContext="0" balance="none" backend="Python" />	
-	<register>
-		<item name="python39" />		
-	</register>	
-	
-    <model create="PythonModel" stream="0" script="test_model.py" path="ohyw2vrp.pth" /> 
-</trainer>
