@@ -88,13 +88,16 @@ namespace ssi.Types.Polygon
 
         public void handlePaste()
         {
-            AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
+            if(control.annoListControl.annoDataGrid.SelectedItems.Count > 0 && this.copyLabels.Length > 0)
+            {
+                AnnoListItem item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];
 
-            PolygonLabel[] labelsToSelect = item.UndoRedoStack.Do(new AddCopiedLabelsCommand(this.copyLabels, item));
+                PolygonLabel[] labelsToSelect = item.UndoRedoStack.Do(new AddCopiedLabelsCommand(this.copyLabels, item));
 
-            undoRedoHandler.selectLabels(labelsToSelect);
-            undoRedoHandler.updateOverlayAndLabelCount(item);
-            this.ContextMenuOpen = false;
+                undoRedoHandler.selectLabels(labelsToSelect);
+                undoRedoHandler.updateOverlayAndLabelCount(item);
+                this.ContextMenuOpen = false;
+            }
         }
 
         public void handleCut()

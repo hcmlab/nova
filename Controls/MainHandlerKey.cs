@@ -320,8 +320,15 @@ namespace ssi
 
                             else if (e.KeyboardDevice.IsKeyDown(Key.X))
                             {
-                                CutSegment(sender, e);
-                                e.Handled = true;
+                                if (dataGridChecker.isSchemeTypePolygon())
+                                {
+                                    this.polygonHandlerPerformer.handleCut();
+                                }
+                                else 
+                                {
+                                    CutSegment(sender, e);
+                                    e.Handled = true;
+                                }
                             }
 
                             else if (e.KeyboardDevice.IsKeyDown(Key.Z))
