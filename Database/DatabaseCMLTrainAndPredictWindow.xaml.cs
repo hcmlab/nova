@@ -1369,7 +1369,9 @@ namespace ssi
                     {
                         if (scheme.Type == AnnoScheme.TYPE.FREE || scheme.Type == AnnoScheme.TYPE.DISCRETE)
                         {
-                            FrameSizeTextBox.Text = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate).ToString() + "ms";
+                            double sr = ((DatabaseStream)StreamsBox.SelectedItem).SampleRate;
+                            FrameSizeTextBox.Text = (1000.0 / sr).ToString() + "ms";
+                            //FrameSizeTextBox.Text = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate).ToString() + "ms";
                             FrameSizeTextBox.IsEnabled = true;
                         }
                         else
@@ -2200,6 +2202,9 @@ namespace ssi
                 Update(mode);
                 handleSelectionChanged = true;
                 GetStreams();
+                double sr = ((DatabaseStream)StreamsBox.SelectedItem).SampleRate;
+                FrameSizeTextBox.Text = (1000.0 / sr).ToString() + "ms";
+
             }
         }
 
