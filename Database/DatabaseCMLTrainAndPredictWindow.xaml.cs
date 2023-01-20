@@ -394,6 +394,7 @@ namespace ssi
                 statusLabel.Content = states[(int)this.status].getText();
                 statusLabel.Background = states[(int)this.status].getColor();
                 ApplyButton.IsEnabled = false;
+                Cancel_Button.IsEnabled = false;
                 logTextBox.Text = "No connection to server!";
             });
         }
@@ -1342,7 +1343,8 @@ namespace ssi
                 logThread.Start();
                 statusThread.Start();
                 predictAndReloadThread.Start();
-                AddTrainerSpecificOptionsUIElements(trainer.OptStr);
+                if (trainer.OptStr != "")
+                    AddTrainerSpecificOptionsUIElements(trainer.OptStr);
 
                 this.statusLabel.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;

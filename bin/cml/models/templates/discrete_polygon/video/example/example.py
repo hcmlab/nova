@@ -24,21 +24,19 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 DEPENDENCIES = ["deeplabv3.py", "dataset.py", "evaluator.py"]
 
 
-def train(data_list, logger, steps=400, plot_path=None):
-    if plot_path is None:
-        plot_path = Path.cwd()
+def train(data_list, logger, steps=900):
+    data_list, labels, _ = data_list
 
-    data_list, labels = data_list
-
+    data_list = data_list[0]
     data_list = random.sample(data_list, len(data_list))
-    dataset_train = PolygonDataset(data_list[0:int(len(data_list) * 0.8)], train=True)
-    dataset_val = PolygonDataset(data_list[int(len(data_list) * 0.8):], train=True)
-    batch_size = 4
+    dataset_train = PolygonDataset(data_list[0:int(len(data_list) * 0.9)], train=True)
+    dataset_val = PolygonDataset(data_list[int(len(data_list) * 0.9):])
+    batch_size = 8
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=0, drop_last=True)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=True, num_workers=0, drop_last=True)
 
     model = DeepLabV3Plus(len(labels) + 1).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00025)
     criterion = torch.nn.CrossEntropyLoss(ignore_index=255)
 
     validation_data = []
@@ -77,13 +75,13 @@ def train(data_list, logger, steps=400, plot_path=None):
         if (step + 1) % val_range == 0:
             loss_data.append(loss_sum / (step * batch_size))
             logger_msg = "Loss after " + str(step + 1) + " steps (batch size = " + str(batch_size) + "): " \
-                         + str(round(loss_data[-1], 3))
+                         + str(round(loss_data[-1], 5))
             logger.info(logger_msg)
             # Validation; labels_count = len(labels) + 1, because we didn't consider the background until now
             validation_data.append(execute_evaluation(model, val_dataloader, len(labels) + 1))
-            logger_msg = "IoU after " + str(step + 1) + " steps: " + str(round(validation_data[-1], 3))
+            logger_msg = "IoU after " + str(step + 1) + " steps: " + str(round(validation_data[-1], 5))
             logger.info(logger_msg)
-            logger_msg = "The best IoU so far: " + str(round(max(validation_data), 3))
+            logger_msg = "The best IoU so far: " + str(round(max(validation_data), 5))
             logger.info(logger_msg)
 
             time_dif = round(time.time() - start_time)
@@ -94,11 +92,27 @@ def train(data_list, logger, steps=400, plot_path=None):
 
 def preprocess(ds_iter, logger, request_form=None):
     data_list = list(ds_iter)
+    last_id = 0
+    for id, data_point in enumerate(data_list):
+        if len(data_point[ds_iter.roles[0] + "." + ds_iter.schemes[0]]['polygons']) > 0:
+            last_id = id
+
+    if last_id == 0:
+        labeled_data_list = []
+        unlabeled_data_list = data_list
+    else:
+        labeled_data_list = data_list[:last_id + 1]
+        unlabeled_data_list = data_list[last_id + 1:]
+
     labels = ds_iter.annos[ds_iter.roles[0] + "." + ds_iter.schemes[0]].labels
     if len(data_list) < 1:
         logger.error("The number of available training data is too low!")
 
-    return data_list, labels
+    start_frame = data_list[0][ds_iter.roles[0] + "." + ds_iter.schemes[0]]['name']
+    logger.info("Amount of labeled data: " + str(len(labeled_data_list)))
+    logger.info("Amount of unlabeled data: " + str(len(unlabeled_data_list)))
+    logger.info("Start-frame for training/prediction: " + str(start_frame))
+    return [labeled_data_list, unlabeled_data_list], labels, start_frame
 
 
 def execute_evaluation(model, dataloader, labels_count):
@@ -118,12 +132,12 @@ def execute_evaluation(model, dataloader, labels_count):
     return evaluator.calculate_intersection_over_union(all_results)
 
 
-def predict(model, data, shape, logger):
+def predict(model, data, shape, labels, logger):
     model = model.to(device)
     model.eval()
-    probability_results = None
+    probability_results = np.zeros(shape=(len(data), len(labels) + 1, shape[0], shape[1]), dtype=np.float64)
 
-    dataset = PolygonDataset(data, train=True)
+    dataset = PolygonDataset(data)
     batch_size = 8
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=0, drop_last=False)
     logger.info("Prediction started...")
@@ -137,8 +151,8 @@ def predict(model, data, shape, logger):
                 resized_predictions[frame_id][layer_id] = cv2.resize(predictions[frame_id][layer_id],
                                                                      dsize=(shape[1], shape[0]),
                                                                      interpolation=cv2.INTER_NEAREST)
-        probability_results = resized_predictions if probability_results is None else np.concatenate(
-            (probability_results, resized_predictions), axis=0)
+
+        probability_results[counter*batch_size:counter*batch_size+batch_size, :, :, :] = resized_predictions
 
         counter += 1
         if counter % 25 == 0:

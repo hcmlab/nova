@@ -1,16 +1,16 @@
 import cv2
 import numpy as np
+import random
 
 
 from PIL import Image
 from skimage.draw import polygon
 from torchvision import transforms
 from torch.utils.data import Dataset
-from matplotlib import pyplot as plt
 
 
 class PolygonDataset(Dataset):
-    def __init__(self, list_dataset, train=True):
+    def __init__(self, list_dataset, train=False):
         self.list_dataset = list_dataset
         self.num_images = len(self.list_dataset)
         self.train = train
@@ -23,18 +23,41 @@ class PolygonDataset(Dataset):
         image = np.uint8(data[list(data)[1]])[0]
         label = np.uint8(polygon_to_mask(image.shape, data[list(data)[0]]))
 
-        if self.train:
-            image, label = resize_img_mask(image, label)
+        image, label = resize(image, label)
 
         image = transforms.ToTensor()(Image.fromarray(image))
-        # TODO MARCO schauen ob man es loescht oder behaelt
-        image = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))(image)
         label = Image.fromarray(label).convert('L')
         label = transforms.ToTensor()(label)
         label = (label * 255).long()
         label.squeeze_(dim=0)
 
+        if self.train:
+            image, label = execute_augmentation(image, label)
+
         return [image, label]
+
+
+def execute_augmentation(image, label):
+    if random.uniform(0, 1) > 0.80:
+        image = transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))(image)
+
+    if random.uniform(0, 1) > 0.9:
+        image = transforms.RandomHorizontalFlip(p=1)(image)
+        label = transforms.RandomHorizontalFlip(p=1)(label)
+
+    if random.uniform(0, 1) > 0.9:
+        image = transforms.RandomVerticalFlip(p=1)(image)
+        label = transforms.RandomVerticalFlip(p=1)(label)
+
+    if random.uniform(0, 1) > 0.9:
+        image = transforms.Grayscale(num_output_channels=3)(image)
+
+    if random.uniform(0, 1) > 0.9:
+        image = transforms.ColorJitter(brightness=.5, hue=.3)(image)
+
+    image = transforms.RandomInvert(p=0.10)(image)
+
+    return image, label
 
 
 def polygon_to_mask(size, polygons):
@@ -64,7 +87,7 @@ def fill_mask(mask, polygon_points, color):
     return mask
 
 
-def resize_img_mask(input_image, input_mask):
+def resize(input_image, input_mask):
     output_image = cv2.resize(input_image, dsize=(512, 256), interpolation=cv2.INTER_NEAREST)
     output_mask = cv2.resize(input_mask, dsize=(512, 256), interpolation=cv2.INTER_NEAREST)
 
