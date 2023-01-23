@@ -1254,7 +1254,7 @@ namespace ssi
                 { new StringContent(mode.ToString()), "mode" },
                 { new StringContent(startTime.ToString()), "startTime" },
                 { new StringContent(endTime.ToString()), "endTime" },
-                { new StringContent(frameSize.ToString()), "frameSize" },
+                { new StringContent(frameSize.ToString() + "ms"), "frameSize" },
                 { new StringContent(scheme.Type.ToString()), "schemeType" },          
                 { new StringContent(trainer_name), "trainerName" },
                 { new StringContent(deleteFiles.ToString()), "deleteFiles" },
@@ -1307,7 +1307,7 @@ namespace ssi
                     { new StringContent(mode.ToString()), "mode" },
                     { new StringContent(startTime.ToString()), "startTime" },
                     { new StringContent(endTime.ToString()), "endTime" },
-                    { new StringContent(frameSize.ToString()), "frameSize" },
+                    { new StringContent(frameSize.ToString() + "ms"), "frameSize" },
                     { new StringContent(scheme.Type.ToString()), "schemeType" },
                     { new StringContent(trainer_name), "trainerName" },
                     { new StringContent(deleteFiles.ToString()), "deleteFiles" },
@@ -1555,6 +1555,10 @@ namespace ssi
                 {
                     StreamsBox.SelectedIndex = 0;
                 }
+
+                double sr = ((DatabaseStream)StreamsBox.SelectedItem).SampleRate;
+                FrameSizeTextBox.Text = (1000.0 / sr).ToString() + "ms";
+
                 StreamsBox.ScrollIntoView(StreamsBox.SelectedItem);
             }
         }
