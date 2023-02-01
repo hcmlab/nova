@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.Distributions;
+using Microsoft.Toolkit.HighPerformance;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -2484,6 +2485,16 @@ namespace ssi
                     else if (attributes[1].Contains("STRING"))
                     {
                         type = AnnoScheme.AttributeTypes.STRING;
+                        if(attributes[2] == "$(roles)")
+                        {
+                            attributes[2] = "";
+                            foreach (var role in DatabaseHandler.Roles)
+                            {
+                                attributes[2] += role.Name + ",";
+                            }
+                            attributes[2] = attributes[2].Remove(attributes[2].Length - 1);
+                            
+                        }
                         content.Add(attributes[2]);
                     }
                         
