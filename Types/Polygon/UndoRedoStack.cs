@@ -65,7 +65,7 @@ namespace ssi.Types
 
         public void updateMenuItems(AnnoListItem item = null)
         {
-            if(control.annoListControl.annoDataGrid.SelectedItems.Count > 0)
+            if(control != null && control.annoListControl.annoDataGrid.SelectedItems.Count > 0)
             {
                 if(item == null)
                     item = (AnnoListItem)control.annoListControl.annoDataGrid.SelectedItems[0];

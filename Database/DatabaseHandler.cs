@@ -15,6 +15,7 @@ using System.Threading;
 using System.Web.UI.DataVisualization.Charting;
 using System.Windows;
 using System.Windows.Media;
+using static System.Runtime.InteropServices.Marshal;
 
 namespace ssi
 {
@@ -1871,7 +1872,7 @@ namespace ssi
             else if (scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
             {
                 BsonArray labels = new BsonArray();
-                int index = 0;
+                int index = 1;
                 foreach (AnnoScheme.Label label in scheme.Labels)
                 {
                     labels.Add(new BsonDocument() {
@@ -2459,7 +2460,7 @@ namespace ssi
                         if (schemeType == AnnoScheme.TYPE.DISCRETE_POLYGON)
                         {
                             BsonArray labels = schemeDoc["labels"].AsBsonArray;
-                            int index = 0;
+                            int index = 1;
                             for (int j = 0; j < labels.Count; j++)
                             {
                                 if (label.Label == labels[j]["name"].ToString())
@@ -2699,10 +2700,11 @@ namespace ssi
                 }
 
                 // delete and replace backup annotation data
-
                 if (annoList.Source.Database.DataBackupOID != AnnoSource.DatabaseSource.ZERO)
                 {
                     var filterAnnotationDataBackupDoc = builder.Eq("_id", annoList.Source.Database.DataBackupOID);
+                    // if the anno is very large, we have splitted parts -> delete all of them
+                    deleteTailIfNecessary(annoList, annotationData, builder);
                     annotationData.DeleteOne(filterAnnotationDataBackupDoc);
                 }
                 annoList.Source.Database.DataBackupOID = annoList.Source.Database.DataOID;
@@ -2715,7 +2717,7 @@ namespace ssi
                 newAnnotationDataDoc.Add(new BsonElement("_id", annoList.Source.Database.DataOID));
                 newAnnotationDataDoc.Add("labels", data);
 
-                const long MAX_DOCUMENT_SIZE = 16777216;
+                const long MAX_DOCUMENT_SIZE = 16000000; // with buffer
                 int current_lenght = newAnnotationDataDoc.ToBson().Length + 1;
 
                 if (current_lenght >= MAX_DOCUMENT_SIZE)
@@ -2814,32 +2816,41 @@ namespace ssi
             return true;
         }
 
+        private static void deleteTailIfNecessary(AnnoList annoList, IMongoCollection<BsonDocument> annotationData, FilterDefinitionBuilder<BsonDocument> builder)
+        {
+            var condition = builder.Eq("_id", annoList.Source.Database.DataBackupOID);
+            var fields = Builders<BsonDocument>.Projection.Include("nextEntry");
+            var id = annotationData.Find(condition).Project<BsonDocument>(fields).ToList();
+            if (id.Count > 0 && id[0].Contains("nextEntry"))
+            {
+                ObjectId nextEntryID = id[0].GetValue("nextEntry").AsObjectId;
+                bool nextEntryAvailable = true;
+                while(nextEntryAvailable)
+                {
+                    condition = builder.Eq("_id", nextEntryID);
+                    id = annotationData.Find(condition).Project<BsonDocument>(fields).ToList();
+                    if (id.Count > 0 && id[0].Contains("nextEntry"))
+                        nextEntryID = id[0].GetValue("nextEntry").AsObjectId;
+                    else
+                        nextEntryAvailable = false;
+
+                    annotationData.DeleteOne(condition);
+                }
+            }
+        }
+
         public static List<AnnoList> splitDataInFittingParts(AnnoList annoList, BsonDocument schemeDoc, long max_size)
         {
-            List<AnnoList> resultList = new List<AnnoList>();
-            AnnoList first = new AnnoList();
-            first.Scheme = annoList.Scheme;
-            first.Meta = annoList.Meta;
-            for (int i = 0; i < annoList.Count / 2; i++)
-            {
-                first.Add(annoList[i]);
-            }
-
-            AnnoList second = new AnnoList();
-            second.Scheme = annoList.Scheme;
-            second.Meta = annoList.Meta;
-            for (int i = annoList.Count / 2; i < annoList.Count; i++)
-            {
-                second.Add(annoList[i]);
-            }
+            AnnoList first = getHalfAnnoList(annoList, 0, annoList.Count / 2);
+            AnnoList second = getHalfAnnoList(annoList, annoList.Count / 2, annoList.Count);
 
             ObjectId testID = ObjectId.GenerateNewId();
             BsonArray data = AnnoListToBsonArray(first, schemeDoc);
             BsonDocument newAnnotationDataDoc = new BsonDocument();
             newAnnotationDataDoc.Add(new BsonElement("_id", testID));
             newAnnotationDataDoc.Add("labels", data);
-            newAnnotationDataDoc.Add("previousEntry", testID);
 
+            List<AnnoList> resultList = new List<AnnoList>();
             if (newAnnotationDataDoc.ToBson().Length >= max_size)
             {
                 resultList.AddRange(splitDataInFittingParts(first, schemeDoc, max_size));
@@ -2853,7 +2864,6 @@ namespace ssi
             newAnnotationDataDoc = new BsonDocument();
             newAnnotationDataDoc.Add(new BsonElement("_id", testID));
             newAnnotationDataDoc.Add("labels", data);
-            newAnnotationDataDoc.Add("previousEntry", testID);
 
             if (newAnnotationDataDoc.ToBson().Length >= max_size)
             {
@@ -2865,6 +2875,20 @@ namespace ssi
             }
 
             return resultList;
+        }
+
+        private static AnnoList getHalfAnnoList(AnnoList completeList, int counter, int end)
+        {
+            AnnoList annoList = new AnnoList();
+            annoList.Scheme = completeList.Scheme;
+            annoList.Meta = completeList.Meta;
+
+            for (; counter < end; counter++)
+            {
+                annoList.Add(completeList[counter]);
+            }
+
+            return annoList;
         }
 
         public static ObjectId GetAnnotationId(string role, string scheme, string annotator, string session)

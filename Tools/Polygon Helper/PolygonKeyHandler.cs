@@ -32,7 +32,11 @@ namespace ssi.Tools.Polygon_Helper
 
                 while (label.Polygon.Count > 0)
                 {
-                    label = item.UndoRedoStack.Undo()[0];
+                    PolygonLabel[] tmp = item.UndoRedoStack.Undo();
+                    if (label != null)
+                        label = tmp[0];
+                    else
+                        return;
                 }
 
                 item.PolygonList.removeExplicitPolygon(label);

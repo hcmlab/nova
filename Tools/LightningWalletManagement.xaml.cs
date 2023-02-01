@@ -283,17 +283,21 @@ namespace ssi
                     var lnurl = await lightning.getLNURLw(MainHandler.myWallet, value);
                     //string lnurlwstring = "lightning:" + lnurl["lnurl"];
 
-                    //Bitmap bmp = await lightning.GetQRImage(lnurlwstring);
-                    Bitmap bmp = await lightning.GetLNURLQRImage(lnurl["id"]);
-                    //bmp.SetResolution(200, 200);
-                    QR2.Visibility = Visibility.Visible;
-                    QR2.Source = ConvertBitmap(bmp);
-                    DepositAdress.Text = "";
-                    QR.Visibility = Visibility.Collapsed;
-                    System.Windows.Clipboard.SetText(lnurl["lnurl"]);
-                    Withdrawaddress.Visibility = Visibility.Visible;
-                    Withdrawaddress.Text = lnurl["lnurl"];
-                    statuswithdraw.Content = "Copied LNURL to clipboard";
+                    if (lnurl.Count > 7)
+                    {
+                        //Bitmap bmp = await lightning.GetQRImage(lnurlwstring);
+                        Bitmap bmp = await lightning.GetLNURLQRImage(lnurl["id"]);
+                        //bmp.SetResolution(200, 200);
+                        QR2.Visibility = Visibility.Visible;
+                        QR2.Source = ConvertBitmap(bmp);
+                        DepositAdress.Text = "";
+                        QR.Visibility = Visibility.Collapsed;
+                        System.Windows.Clipboard.SetText(lnurl["lnurl"]);
+                        Withdrawaddress.Visibility = Visibility.Visible;
+                        Withdrawaddress.Text = lnurl["lnurl"];
+                        statuswithdraw.Content = "Copied LNURL to clipboard";
+                    }
+                   
                 }
                 else 
                 {

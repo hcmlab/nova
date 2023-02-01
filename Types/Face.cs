@@ -420,7 +420,12 @@ namespace ssi
                     {
                         double X = signal.data[i] * width;
                         double Y = height - signal.data[i + 1] * height;
-                        writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+                        try
+                        {
+                            if((int)(X) > 0 && (int)(Y) > 0) writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+                        }
+                        catch { }
+                      
                     }
                 }
             }

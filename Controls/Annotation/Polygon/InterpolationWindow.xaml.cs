@@ -52,8 +52,8 @@ namespace ssi
             int counter = 0;
             foreach (AnnoListItem item in this.list)
             {
-                SourceFrames.Items.Add(new ComboboxItem(item.Label + " | Labels in frame: " + item.LabelCount, counter));
-                TargetFrames.Items.Add(new ComboboxItem(item.Label + " | Labels in frame: " + item.LabelCount, counter));
+                SourceFrames.Items.Add(new ComboboxItem(item.Label + " | Amount of labels: " + item.LabelCount, counter));
+                TargetFrames.Items.Add(new ComboboxItem(item.Label + " | Amount of labels: " + item.LabelCount, counter));
                 counter++;
             }
             SourceFrames.SelectedIndex = sourceFrameIndex;
@@ -165,8 +165,20 @@ namespace ssi
 
                 if (sourcePointsAnglesTuple.Count != targetPointsAnglesTuple.Count)
                 {
-                    MessageBox.Show("Not able to interpolate with the selected values!", "Confirm", MessageBoxButton.OK, MessageBoxImage.Information);
+                    while(sourcePointsAnglesTuple.Count != targetPointsAnglesTuple.Count)
+                    {
+                        if(sourcePointsAnglesTuple.Count > targetPointsAnglesTuple.Count)
+                        {
+                            sourcePointsAnglesTuple.RemoveAt(sourcePointsAnglesTuple.Count - 1);
+                        }
+                        else
+                        {
+                            targetPointsAnglesTuple.RemoveAt(targetPointsAnglesTuple.Count - 1);
+                        }
+                    }
                 }
+
+
 
                 for (int i = 0; i < sourcePointsAnglesTuple.Count; i++)
                 {
@@ -571,11 +583,18 @@ namespace ssi
                         this.Status_Label.Foreground = Brushes.Green;
                         this.Status_Label.Content = "Interpolation done!";
                     }
+                    else
+                    {
+                        this.Status_Label.Foreground = Brushes.Black;
+                        this.Status_Label.Background = Brushes.LightGray;
+                        this.Status_Label.Content = "Ready for interpolation.";
+                    }
             }
             else
             {
-                this.Status_Label.Foreground = Brushes.Red;
-                this.Status_Label.Content = "Interpolation not done...";
+                this.Status_Label.Foreground = Brushes.Black;
+                this.Status_Label.Background = Brushes.LightGray;
+                this.Status_Label.Content = "Ready for interpolation.";
             }
         }
     }

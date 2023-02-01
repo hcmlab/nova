@@ -20,8 +20,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="40"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition/>
             <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -31,8 +31,8 @@
             <ColumnDefinition Width="127*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Label Name="SourceLabel" Grid.Row="0" Foreground="DarkBlue" Grid.Column="1" Margin="20.667,8,141,8" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" FontWeight="Bold">Source</Label>
-        <Label Name="TargetLabel" Grid.Row="0" Foreground="DarkBlue" Grid.Column="3" Margin="148,8" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" FontWeight="Bold">Target</Label>
+        <Label Name="SourceLabel" Grid.Row="0" Foreground="DarkBlue" Grid.Column="1" Margin="20.667,8,141,8" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" HorizontalContentAlignment="Center" Width="100" FontWeight="Bold">Source</Label>
+        <Label Name="TargetLabel" Foreground="DarkBlue" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" HorizontalContentAlignment="Center" FontWeight="Bold" Width="100">Target</Label>
 
         <ComboBox Name="SourceFrames" SelectionChanged="sourceFrameChanged" Grid.Column="0" Grid.Row="1" Margin="5" Grid.ColumnSpan="2" ItemsSource="{Binding}">
             <ComboBox.ItemsPanel>
@@ -105,12 +105,12 @@
 
 
         <StackPanel Grid.Row="3" Grid.Column="3" Margin="0,5,5,5" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="Interpolate_2D" Click="Interpolate_2D_Click" Height="25" Width="95" Margin="5" Content="Interpolate 2D"/>
-            <Button x:Name="Interpolate_3D" Click="Interpolate_3D_Click" Height="25" Width="95" Margin="5" Content="Interpolate 3D"/>
-            <Button x:Name="Next" Click="Next_Click" Height="25" Width="75" Margin="5,8" Content="Next"/>
-            <Button x:Name="Cancel" Click="Close_Click" Height="25" Width="75" Content="Close"/>
+            <Button x:Name="Interpolate_2D" Click="Interpolate_2D_Click" Height="25" Width="95" Margin="4" Content="Interpolate 2D"/>
+            <Button x:Name="Interpolate_3D" Click="Interpolate_3D_Click" Height="25" Width="95" Margin="4" Content="Interpolate 3D"/>
+            <Button x:Name="Next" Click="Next_Click" Height="25" Width="75" Margin="4" Content="Next"/>
+            <Button x:Name="Cancel" Click="Close_Click" Height="25" Margin="4" Width="75" Content="Close"/>
         </StackPanel>
-        <Label x:Name="Status_Label" Grid.Row="3" Foreground="Red" Margin="0,25,231,0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Bold" Content="Interpolation not done..." Height="25" Width="150" Grid.ColumnSpan="2"/>
+        <Label x:Name="Status_Label" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Grid.Row="3" Background="LightGray" Foreground="Black" Margin="10,15,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" FontWeight="Bold" Content="Ready for interpolation." Height="25" Width="150" Grid.ColumnSpan="2"/>
 
     </Grid>
 </Window>

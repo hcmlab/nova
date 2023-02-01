@@ -179,5 +179,11 @@
     <Setting Name="SRTwordlevel" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="NovaServerHistory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost:27017</Value>
+    </Setting>
+    <Setting Name="NovaServerAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost:27017</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

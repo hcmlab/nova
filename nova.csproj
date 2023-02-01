@@ -459,6 +459,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Polygon\AddCopiedLabelsCommand.cs" />
+    <Compile Include="Commands\Polygon\RemovePointCommand.cs" />
     <Compile Include="Commands\Polygon\RemoveLabelsCommand.cs" />
     <Compile Include="Commands\Polygon\AddExtraPointCommand.cs" />
     <Compile Include="Commands\Polygon\AddPointCommand.cs" />
@@ -593,6 +594,7 @@
     <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Interfaces\IDrawUnit.cs" />
     <Compile Include="Interfaces\IPointList.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Tools\Lightning.cs" />
     <Compile Include="Tools\LightningTipps.xaml.cs">
       <DependentUpon>LightningTipps.xaml</DependentUpon>

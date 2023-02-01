@@ -345,19 +345,19 @@ namespace ssi
 
                             if (media.NaturalDuration.HasTimeSpan)
                             {
-                                duration = media.NaturalDuration.TimeSpan.TotalSeconds;
+                                duration = media.NaturalDuration.TimeSpan.Seconds;
                                 media = null;
-                              
                             }
                         }
 
                         duration = Math.Round(duration, 2);
                         ((DatabaseSession)session).Duration = duration;
                         DatabaseHandler.UpdateSession(((DatabaseSession)session).Name, ((DatabaseSession)session));
-
-
                     }
-                    catch { Console.WriteLine("Could not read " + filepath); }
+                    catch 
+                    { 
+                        Console.WriteLine("Could not read " + filepath); 
+                    }
                    
                 }
 

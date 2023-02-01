@@ -12,6 +12,7 @@ namespace ssi.Types.Polygon
         {
             EDIT,
             CREATION,
+            REMOVE_POINT,
             EXTRA_POINT,
             REMOVE,
             COPY

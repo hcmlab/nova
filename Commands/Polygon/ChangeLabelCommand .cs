@@ -32,7 +32,7 @@ namespace ssi.Types.Polygon
             }
 
             polygonToChange.Informations = new LabelInformations(this.type);
-            polygonToChange.Confidence = "100";
+            polygonToChange.Confidence = "1.0";
             return new PolygonLabel[] { polygonToChange };
         }
 

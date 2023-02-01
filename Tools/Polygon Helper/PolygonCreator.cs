@@ -51,7 +51,7 @@ namespace ssi.Tools.Polygon_Helper
 
             String name = scheme.DefaultLabel;
             Color color = scheme.DefaultColor;
-            String conf = "100";
+            String conf = "1.0";
             if (AnnoTierStatic.Selected.AnnoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON)
             {
                 name = handler.CurrentLabelName;

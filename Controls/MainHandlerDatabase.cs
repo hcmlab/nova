@@ -575,10 +575,12 @@ namespace ssi
                 tier.AnnoList.HasChanged = false;          
             }
 
-            else if (annoList != null && annoList.Count > 0 && annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
+            else if (annoList != null && annoList.Count > 0 && (annoList.Scheme.Type == AnnoScheme.TYPE.CONTINUOUS || 
+                     annoList.Scheme.Type == AnnoScheme.TYPE.POLYGON || annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON ||
+                     annoList.Scheme.Type == AnnoScheme.TYPE.POINT))
             {
                 maxdur = annoList[annoList.Count - 1].Stop;
-
+                polygonUtilities.ControlInStacksSet = false;
                 setAnnoList(annoList);
                 tier.AnnoList.Clear();
                 tier.AnnoList = annoList;

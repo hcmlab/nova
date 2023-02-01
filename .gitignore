@@ -357,6 +357,7 @@ PythonScripts/LimeExplain.py
 PythonScripts\polygon_network_example\resources\dataset
 bin/exception.txt
 bin/requirements.txt
+bin/cml/models/trainer/discrete_polygon
 bin/cml/models/templates/discrete/video/keras/nova_sessions
 bin/cml/models/templates/discrete/video/keras/nova_db_info
 bin/cml/models/templates/discrete/video/keras/database/__init__.py
@@ -479,3 +480,7 @@ bin/OxyPlot.Wpf.xml
 bin/OxyPlot.xml
 bin/OxyPlot.Xps.dll
 bin/OxyPlot.Xps.xml
+bin/cml/models/templates/discrete_polygon/video/python/nova_db_info
+bin/cml/models/templates/discrete_polygon/video/python/nova_sessions
+*.pth
+bin/data/*

@@ -22,7 +22,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.3.9";
+        public static string BuildVersion = "1.2.4.0";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -744,6 +744,7 @@ namespace ssi
 
                 Properties.Settings.Default.UncertaintyLevel = s.Uncertainty();
                 Properties.Settings.Default.Annotator = s.AnnotatorName();
+                Properties.Settings.Default.NovaServerAddress = s.NS_Address();
                 Properties.Settings.Default.DatabaseAddress = s.DatabaseAddress();
                 Properties.Settings.Default.MongoDBUser = s.MongoUser() != "" ? s.MongoUser() : "invalid username";
                 Properties.Settings.Default.MongoDBPass = MainHandler.Encode(s.MongoPass());
