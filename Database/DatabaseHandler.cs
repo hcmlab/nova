@@ -3,6 +3,7 @@ using CsvHelper.Configuration;
 using DnsClient;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Octokit;
 using ssi.Controls.Annotation.Polygon;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Web.UI.DataVisualization.Charting;
@@ -322,15 +324,17 @@ namespace ssi
             return databases.Any(s => name.Equals(s));
         }
 
-        public static List<string> GetDatabases(DatabaseAuthentication level = DatabaseAuthentication.READWRITE)
+        public static List<string> GetDatabases(string username = "", DatabaseAuthentication level = DatabaseAuthentication.READWRITE)
         {
             List<string> items = new List<string>();
+
+            if (username == "") username = Properties.Settings.Default.MongoDBUser; 
 
             if (IsConnected)
             {
 
 
-                if (CheckAuthentication(Properties.Settings.Default.MongoDBUser, "admin") >= 3)
+                if (CheckAuthentication(username, "admin") >= 3)
                 {
                     var databases = client.ListDatabasesAsync().Result.ToListAsync().Result;
                     foreach (var c in databases)
@@ -347,7 +351,7 @@ namespace ssi
                 else
                 {
 
-                    string user = Properties.Settings.Default.MongoDBUser;
+                    string user = username;
                     try
                     {
                         var adminDB = client.GetDatabase("admin");
@@ -886,6 +890,9 @@ namespace ssi
 
         public static bool DeleteDB(string name)
         {
+            string temp = databaseName;
+            ChangeDatabase(name);
+
             if (!IsConnected)
             {
                 return false;
@@ -902,6 +909,14 @@ namespace ssi
                 return false;
             }
 
+            List<DatabaseAnnotator> annotators = GetAnnotators();
+            foreach(DatabaseAnnotator annotator in annotators)
+            {
+
+                DatabaseHandler.DeleteAnnotator(annotator.Name, name);
+            }
+           
+
             if (name == databaseName)
             {
                 databaseName = null;
@@ -909,7 +924,7 @@ namespace ssi
             }
 
             Client.DropDatabase(name);
-
+            ChangeDatabase(temp);
             return true;
         }
 
@@ -1493,6 +1508,43 @@ namespace ssi
             RevokeUserRole(user, "read", databaseName);
             RevokeUserRole(user, "readWrite", databaseName);
             RevokeUserRole(user, "dbAdmin", databaseName);
+
+            return true;
+        }
+
+
+        public static bool DeleteAnnotator(string name, string databasename)
+        {
+            if (!IsConnected && !IsDatabase)
+            {
+                return false;
+            }
+
+            if (!UserExists(name))
+            {
+                return false;
+            }
+
+            try
+            {
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("name", name);
+            var result = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filter).Single();
+            string user = result["name"].AsString;
+           
+                var del = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).DeleteOne(filter);
+            }
+            catch
+            {
+                Console.Write("Database does not exist, remove access");
+            }
+           
+
+            //annotators = GetAnnotators();
+
+            RevokeUserRole(name, "read", databasename);
+            RevokeUserRole(name, "readWrite", databasename);
+            RevokeUserRole(name, "dbAdmin", databasename);
 
             return true;
         }
@@ -4658,6 +4710,8 @@ namespace ssi
         {
             return Name;
         }
+
+        //public bool hasMatchingAnnotations { get; set; }
     }
 
     public class DatabaseUser
