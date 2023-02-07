@@ -196,5 +196,21 @@ namespace ssi
         {
             //DatabaseHandler.UpdateDatabaseLocalLists();
         }
+
+        private void Fix_Click(object sender, RoutedEventArgs e)
+        {
+            string user = (string)UsersBox.SelectedItem;
+            List<string> databases = DatabaseHandler.GetDatabases(user);
+
+            foreach(string database in databases)
+            {
+                if (!DatabaseHandler.DatabaseExists(database))
+                {
+                    DatabaseHandler.DeleteAnnotator(user, database);
+
+                }
+            }
+
+        }
     }
 }
