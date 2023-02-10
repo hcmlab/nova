@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.Distributions;
+using Microsoft.Toolkit.HighPerformance;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -1371,8 +1372,12 @@ namespace ssi
                     {
                         if (scheme.Type == AnnoScheme.TYPE.FREE || scheme.Type == AnnoScheme.TYPE.DISCRETE)
                         {
-                            double sr = ((DatabaseStream)StreamsBox.SelectedItem).SampleRate;
-                            FrameSizeTextBox.Text = (1000.0 / sr).ToString() + "ms";
+                            if((DatabaseStream)StreamsBox.SelectedItem != null)
+                            {
+                                double sr = ((DatabaseStream)StreamsBox.SelectedItem).SampleRate;
+                                FrameSizeTextBox.Text = (1000.0 / sr).ToString() + "ms";
+                            }
+                            
                             //FrameSizeTextBox.Text = (1000.0 / Properties.Settings.Default.DefaultDiscreteSampleRate).ToString() + "ms";
                             FrameSizeTextBox.IsEnabled = true;
                         }
@@ -2208,8 +2213,12 @@ namespace ssi
                 Update(mode);
                 handleSelectionChanged = true;
                 GetStreams();
-                double sr = ((DatabaseStream)StreamsBox.SelectedItem).SampleRate;
-                FrameSizeTextBox.Text = (1000.0 / sr).ToString() + "ms";
+                if((DatabaseStream)StreamsBox.SelectedItem != null)
+                {
+                    double sr = ((DatabaseStream)StreamsBox.SelectedItem).SampleRate;
+                    FrameSizeTextBox.Text = (1000.0 / sr).ToString() + "ms";
+                }
+               
 
             }
         }
@@ -2476,6 +2485,16 @@ namespace ssi
                     else if (attributes[1].Contains("STRING"))
                     {
                         type = AnnoScheme.AttributeTypes.STRING;
+                        if(attributes[2] == "$(roles)")
+                        {
+                            attributes[2] = "";
+                            foreach (var role in DatabaseHandler.Roles)
+                            {
+                                attributes[2] += role.Name + ",";
+                            }
+                            attributes[2] = attributes[2].Remove(attributes[2].Length - 1);
+                            
+                        }
                         content.Add(attributes[2]);
                     }
                         

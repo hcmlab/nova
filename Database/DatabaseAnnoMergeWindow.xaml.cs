@@ -391,13 +391,23 @@ namespace ssi
 
             for (int i = 0; i < minSize; i++)
             {
+                int numberoftrackstemp = numberoftracks;
 
                 foreach (AnnoList a in al)
                 {
-                    array[i] = array[i] + a[i].Score;
+                    if (!double.IsNaN(a[i].Score))
+                    {
+                        array[i] = array[i] + a[i].Score;
+                    }
+                    else
+                    {
+                        numberoftrackstemp--;
+                    }
                 }
 
-                newList[i].Score = array[i] / numberoftracks;
+                if (numberoftrackstemp > 0)
+                    newList[i].Score = array[i] / numberoftrackstemp;
+                else newList[i].Score = double.NaN;
             }
 
             newList.Scheme.SampleRate = 1 / (newList[0].Stop - newList[0].Start);
@@ -804,7 +814,7 @@ namespace ssi
         {
             DatabasesBox.Items.Clear();
 
-            List<string> databases = DatabaseHandler.GetDatabases(DatabaseAuthentication.READWRITE);
+            List<string> databases = DatabaseHandler.GetDatabases("", DatabaseAuthentication.READWRITE);
 
             foreach (string db in databases)
             {

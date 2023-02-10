@@ -462,7 +462,7 @@ namespace ssi
         {
             DatabasesBox.Items.Clear();
 
-            List<string> databases = DatabaseHandler.GetDatabases(DatabaseAuthentication.READWRITE);
+            List<string> databases = DatabaseHandler.GetDatabases("", DatabaseAuthentication.READWRITE);
 
             foreach (string db in databases)
             {
