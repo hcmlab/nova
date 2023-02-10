@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<trainer ssi-v="5">
+    <info trained="false" seed="1234"/>
+	<meta balance="under" backend="Python"/>	
+	<register>
+		<item name="python38"/>		
+	</register>
+    <!--<normalize>
+        <item method="Scale" stream="0"/>
+    </normalize>-->
+    <model create="PythonModel" stream="0" script="linearsvr.py" optstr="{C:STRING:0.1};{number_folds:STRING:3};{dual:BOOL:True};{method:LIST:sigmoid,isotonic}"/>
+</trainer>
