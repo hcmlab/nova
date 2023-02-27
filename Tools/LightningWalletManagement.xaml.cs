@@ -381,7 +381,7 @@ namespace ssi
 
             string rnd = RandomString(8);
             string lnaddressname = "user-" + rnd;
-            string pin = await lightning.TestLNaddress(lnaddressname, invoice_key);
+            string pin = await lightning.AddOrChangeLnAddress(lnaddressname, invoice_key, "https://novaannotation.com/");
 
             user.ln_addressname = lnaddressname;
             user.ln_addresspin = pin;
@@ -491,7 +491,7 @@ namespace ssi
                 DatabaseUser user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
 
                 string lnaddressname = walletaddress.Text;
-                string pin = await lightning.TestLNaddress(lnaddressname, MainHandler.myWallet.invoice_key, MainHandler.myWallet.lnaddresspin, MainHandler.myWallet.lnaddressname);
+                string pin = await lightning.AddOrChangeLnAddress(lnaddressname, MainHandler.myWallet.invoice_key, MainHandler.myWallet.lnaddresspin, MainHandler.myWallet.lnaddressname);
                 if (pin.Contains("Error"))
                 {
                     MessageBox.Show(pin);

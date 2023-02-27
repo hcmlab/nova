@@ -105,6 +105,7 @@ namespace ssi
         public class Lightning
         {
             public static string LNEndPoint = "https://ln.novaannotation.com";
+            public static string LNAddressUrl = "https://novaannotation.com/";
             public static string LNBitsEndPoint = "https://lnbits.novaannotation.com";
             public static string LnAddressHost = "@novaannotation.com";
 

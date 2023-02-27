@@ -206,7 +206,7 @@ namespace ssi
         }
 
        
-        public async Task<string> TestLNaddress(string name, string key, string pin=" ", string prevname=" ")
+        public async Task<string> AddOrChangeLnAddress(string name, string key, string pin=" ", string prevname=" ")
         {
             var content = new MultipartFormDataContent
             {
@@ -215,11 +215,11 @@ namespace ssi
            string url = "";
            if(pin == " ")
             {
-                url = "https://novaannotation.com/" + "create?name=" + name + "&key=" + key;
+                url = Defaults.Lightning.LNAddressUrl + "create?name=" + name + "&key=" + key;
             }
            else
             {
-                url = "https://novaannotation.com/" + "create?name=" + name + "&key=" + key + "&currentname=" + prevname + "&pin=" + pin;
+                url = Defaults.Lightning.LNAddressUrl + "create?name=" + name + "&key=" + key + "&currentname=" + prevname + "&pin=" + pin;
             }
             var client = new HttpClient();
             var response = await client.PostAsync(url, content);
@@ -233,10 +233,6 @@ namespace ssi
                 return retpin;
                 }
             else return "Error: " + responseString;
-
-            //var responseDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
-            //dynamic responseDic = JObject.Parse(responseString);
-
 
         }
 
