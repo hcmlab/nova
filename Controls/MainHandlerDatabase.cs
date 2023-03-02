@@ -554,7 +554,7 @@ namespace ssi
             AnnoList annoList = DatabaseHandler.LoadAnnoList(annotation, loadBackup);
             double maxdur = 0;
 
-            if (annoList != null && annoList.Count > 0 && annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoList.Scheme.Type == AnnoScheme.TYPE.FREE)
+            if (annoList != null && (annoList.Count > 0 && annoList.Scheme.Type == AnnoScheme.TYPE.DISCRETE || annoList.Scheme.Type == AnnoScheme.TYPE.FREE))
             {
                 maxdur = annoList[annoList.Count - 1].Stop;
 
