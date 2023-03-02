@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using Dicom;
 using DnsClient;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -4298,7 +4299,12 @@ namespace ssi
                     try { date = annotation["date"].ToUniversalTime(); }
                     catch(Exception e)
                     {
-                        date = DateTime.Today;
+                        try { date =  DateTime.Parse(annotation["date"].AsString).ToUniversalTime(); }
+                        catch (Exception ex)
+                        {
+                            date = DateTime.Today;
+                        }
+                      
                     }
                   
                     
