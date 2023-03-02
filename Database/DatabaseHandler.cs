@@ -4295,7 +4295,13 @@ namespace ssi
                 DateTime date = DateTime.Today;
                 if (annotation.Contains("date"))
                 {
-                    date = annotation["date"].ToUniversalTime();
+                    try { date = annotation["date"].ToUniversalTime(); }
+                    catch(Exception e)
+                    {
+                        date = DateTime.Today;
+                    }
+                  
+                    
                 }
 
                 bool isOwner = Properties.Settings.Default.MongoDBUser == annotatorName || DatabaseHandler.CheckAuthentication() >= DatabaseAuthentication.DBADMIN;
