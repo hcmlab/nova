@@ -466,7 +466,7 @@ namespace ssi
         {
             statuswithdraw.Foreground = Brushes.Black;
             statuswithdraw.Content = "Copied LNaddress to clipboard";
-            System.Windows.Clipboard.SetText(MainHandler.myWallet.lnaddressname + Defaults.Lightning.LnAddressHost);  
+            System.Windows.Clipboard.SetText(MainHandler.myWallet.lnaddressname + "@" + Defaults.Lightning.LnAddressDomain);  
         }
 
         private void balance_MouseDoubleClick(object sender, MouseButtonEventArgs e)

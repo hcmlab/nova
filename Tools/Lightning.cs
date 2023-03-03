@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Media.Imaging;
 using Svg;
+using System.Windows.Input;
+using System.Xml.Linq;
+using System.Net.Http.Headers;
 
 namespace ssi
 {
@@ -206,33 +209,39 @@ namespace ssi
         }
 
        
-        public async Task<string> AddOrChangeLnAddress(string name, string key, string pin=" ", string prevname=" ")
+        public async Task<string> AddOrChangeLnAddress(string name, string key, string pin=" ", string currentname = " ")
         {
+   
             var content = new MultipartFormDataContent
             {
-               
+                { new StringContent(name), "name" },
+                { new StringContent(Defaults.Lightning.LnAddressDomain), "domain" },
+                { new StringContent("lnbits"), "kind" },
+                { new StringContent(Defaults.Lightning.LNBitsEndPoint), "host" },
+                { new StringContent(key), "key" },
+                { new StringContent(pin), "pin" },
+                { new StringContent(currentname), "currentname" }
             };
-           string url = "";
-           if(pin == " ")
-            {
-                url = Defaults.Lightning.LNAddressUrl + "create?name=" + name + "&key=" + key;
-            }
-           else
-            {
-                url = Defaults.Lightning.LNAddressUrl + "create?name=" + name + "&key=" + key + "&currentname=" + prevname + "&pin=" + pin;
-            }
+          
+            //content.Headers.Add("X-Pin", pin);
+            string url = "";
+            string responseString = "Failed";
             var client = new HttpClient();
+            url = Defaults.Lightning.LNAddressUrl + "api/easy/";
             var response = await client.PostAsync(url, content);
+            responseString = await response.Content.ReadAsStringAsync();
 
-            var responseString = await response.Content.ReadAsStringAsync();
-            if(responseString.Contains("Success"))
+            try
+            {
+                var responseDic = JObject.Parse(responseString);
+
+                if ((bool)responseDic["ok"])
                 {
-                string[] array =  responseString.Split('&');
-                string[] array2 = array[1].Split('=');
-                string retpin = array2[1];
-                return retpin;
+                    return responseDic["pin"].ToString();
                 }
-            else return "Error: " + responseString;
+                else return "Error";
+            }
+            catch { return "Error"; }
 
         }
 

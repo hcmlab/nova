@@ -107,7 +107,7 @@ namespace ssi
             public static string LNEndPoint = "https://ln.novaannotation.com";
             public static string LNAddressUrl = "https://novaannotation.com/";
             public static string LNBitsEndPoint = "https://lnbits.novaannotation.com";
-            public static string LnAddressHost = "@novaannotation.com";
+            public static string LnAddressDomain = "novaannotation.com";
 
             //  MainHandler.Decode("aHR0cDovL2hjYWkuYml0Y29pbmZpeGVzdGhpcy5vcmc6NTAwMA==");
             public static string LNTippingInvoiceID = "7cdd5e6ca21b47889d9ae42740bb9031";
