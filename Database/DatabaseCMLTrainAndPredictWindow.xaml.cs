@@ -1172,10 +1172,10 @@ namespace ssi
             int startTime = 0;
             //var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
             //string relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
-            string relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
-
+            string relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "").Remove(0, 1) ;
+   
             //TODO traineroutpath on predict
-            
+
             FileInfo file_info = new FileInfo(trainerOutPath);
             string traineroutfolder = file_info.DirectoryName;
             string trainer_name = file_info.Name;
@@ -1183,7 +1183,7 @@ namespace ssi
             bool deleteFiles = false;
 
 
-            string relativeTrainerOutputDirectory = traineroutfolder.Replace(Properties.Settings.Default.CMLDirectory, "");
+            string relativeTrainerOutputDirectory = traineroutfolder.Replace(Properties.Settings.Default.CMLDirectory, "").Remove(0, 1);
             bool flattenSamples = false;
 
             if (this.mode == Mode.PREDICT)
