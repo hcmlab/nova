@@ -636,7 +636,7 @@ namespace ssi
             }
             catch
             {
-                MessageBox.Show("Error wrting file!");
+                MessageBox.Show("Error writing file!");
             }
 
           

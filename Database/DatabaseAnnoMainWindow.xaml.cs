@@ -391,6 +391,7 @@ namespace ssi
                         DeleteAnnotation.Visibility = Visibility.Visible;
                         //CopyAnnotation.Visibility = Visibility.Visible;                       
                     }
+                    else { DeleteAnnotation.Visibility = Visibility.Hidden; }
                 }
 
                 foreach (var item in AnnotationsBox.SelectedItems)
