@@ -22,6 +22,9 @@ using System.Windows.Threading;
 using System.Xml;
 using System.Security.Cryptography;
 using System.Text;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace ssi
 {
@@ -862,6 +865,32 @@ namespace ssi
             {
                 return base64EncodedData;
             }
+        }
+        //eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiTk9WQSIsImlhdCI6MTY3OTU3MzQxMX0.UtIwN82JX7YaMhb4l5yHOgSqejL7Y2Il7X3qufZswwQ
+        public static async Task<dynamic> RegisterUser(string user, string password, string fullname, string email, string regkey)
+        {
+            //'email' is optional, but might be used in the future
+
+            if (regkey == "") regkey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiTk9WQSIsImRhdGFiYXNlcyI6InB1YmxpYyIsImlhdCI6MTY3OTU4MDQxNn0.llDaZHTRxmK3zQR3qqgTD4tznFiUg_q4wFzltZmaSA8";
+            string url = "https://auth.novaannotation.com/register";
+
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.TryAddWithoutValidation("authorization", "Bearer " + regkey);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Content = new StringContent("{\"user\":\"" + user + "\",\"password\":\"" + password + "\",\"fullname\":\"" + fullname + "\",\"email\":\"" +
+            email + "\"}", Encoding.UTF8, "application/json");
+
+            var response = await client.SendAsync(request);
+            var responseString = await response.Content.ReadAsStringAsync();
+            dynamic responseDic = JObject.Parse(responseString);
+
+           
+
+             return responseDic;
+            //if (responseDic["Success"] == "Success") return "Registered " + responseDic["User"] + " on Database(s) " + responseDic["Databases"] ;
+            //else if (responseDic["Success"] == "AlreadyExists") return "User already exists";
+            //else return "Error: " + responseDic["Success"];
         }
 
     }

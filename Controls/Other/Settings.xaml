@@ -155,8 +155,14 @@
                         <TextBox Grid.Column="4" Name="DBPort" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" TextChanged="DBPort_TextChanged"  GotKeyboardFocus="DBPort_GotFocus" GotMouseCapture="DBPort_GotMouseCapture" />
                     </Grid>
                     <Label Grid.Row="2" Content="Database user:" Grid.ColumnSpan="2" Grid.Column="0"/>
-
-                    <Button Grid.Row="2" Name="LoginWithLightning" Visibility="Hidden" Background="Gold" Content="Login with Lightning" Click="Button_Click" Grid.ColumnSpan="1" Grid.Column="1" Margin="185,0,5,23" Grid.RowSpan="2">
+                    <Button Grid.Row="2" Name="RegisterButton" Visibility="Hidden" Background="WhiteSmoke" Content="Register" Click="Register_Click" Grid.ColumnSpan="1" Grid.Column="1" Margin="95,0,145,23" Grid.RowSpan="2">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button Grid.Row="2" Name="LoginWithLightning" Visibility="Hidden" Background="Gold" Content="Login with Lightning" Click="Button_Click" Grid.ColumnSpan="1" Grid.Column="1" Margin="195,0,5,23" Grid.RowSpan="2">
                         <Button.Resources>
                             <Style TargetType="Border">
                                 <Setter Property="CornerRadius" Value="8"/>

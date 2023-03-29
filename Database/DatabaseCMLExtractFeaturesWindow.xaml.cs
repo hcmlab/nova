@@ -147,15 +147,6 @@ namespace ssi
 
                             }
 
-
-                            if (foundpath)
-                            {
-
-                            }
-                         
-
-
-
                             string toPath = Path.GetDirectoryName(fromPath) + "\\" 
                             + role.Name + "." + featureName + ".stream";
 
