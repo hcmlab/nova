@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ssi.Controls.Other;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -70,12 +71,14 @@ namespace ssi
             if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
             {
                 LoginWithLightning.Visibility = Visibility.Hidden;
+                RegisterButton.Visibility = Visibility.Hidden;
                 Properties.Settings.Default.LoggedInWithLightning = false;
                 Properties.Settings.Default.Save();
             }
             else
             {
                 LoginWithLightning.Visibility = Visibility.Visible;
+                RegisterButton.Visibility = Visibility.Visible;
             }
             if (Properties.Settings.Default.LoggedInWithLightning)
             {
@@ -543,13 +546,54 @@ namespace ssi
             if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
             {
                 LoginWithLightning.Visibility = Visibility.Hidden;
+                RegisterButton.Visibility = Visibility.Hidden;
                 Properties.Settings.Default.LoggedInWithLightning = false;
                 Properties.Settings.Default.Save();
+
+             
             }
             else
             {
                 LoginWithLightning.Visibility = Visibility.Visible;
+                RegisterButton.Visibility = Visibility.Visible;
             }
+        }
+
+        private async void Register_Click(object sender, RoutedEventArgs e)
+        {
+            Register regwindow = new Register();
+           var dialogresult = regwindow.ShowDialog();
+            {
+                if(dialogresult == true)
+                {
+                    string username = regwindow.User();
+                    string password = regwindow.Password();
+                    string fullname = regwindow.Fullname();
+                    string email = regwindow.Email();
+                    string regkey = regwindow.RegisterKey();
+
+                    dynamic result = await MainHandler.RegisterUser(username, password, fullname, email, regkey);
+                    if (result["Success"] == "Forbidden" || result["Success"] == "NotAuthorized")
+                    {
+                        MessageBox.Show("Invalid Regkey, please try again. If you don't have a regkey, leave field empty to gain access to the public demo database");
+                    }
+
+                    else  if (result["Success"] == "AlreadyExists")
+                    {
+                        MessageBox.Show("User already exits");
+                    }
+
+                    if (result["Success"] == "Success")
+                    {
+                        MessageBox.Show("Successully registered "+ result["User"] + " at database(s) " + result["Databases"]);
+                        DBUser.Text = username;
+                        DBPassword.Password = password;
+                    }
+                }
+            }
+            //TODO Register with Username/PW
+            // 
+            // MessageBox.Show(result);
         }
     }
 }
