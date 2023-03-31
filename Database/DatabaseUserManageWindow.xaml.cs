@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Octokit;
 
 namespace ssi
 {
@@ -26,7 +27,19 @@ namespace ssi
         public DatabaseUserManageWindow(string name = null, string fullname = null,  string email = null, int expertise = 0, double xp = 0, double rating = 0, double ratingContractor = 0)
         {
             InitializeComponent();
-           
+            if ((Properties.Settings.Default.DatabaseAddress.Split(':'))[0] != Defaults.checkdb)
+            {
+                Key.Visibility = Visibility.Hidden;
+                AccesKeyField.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                AccesKeyField.Visibility = Visibility.Visible;
+                Key.Visibility = Visibility.Visible;
+            }
+               
+
+
             if (name != null)
             {                
                 NameField.Text = name;
@@ -90,8 +103,33 @@ namespace ssi
             return Expertisefield.SelectedIndex;
         }
 
-        private void OkClick(object sender, RoutedEventArgs e)
+        private async void OkClick(object sender, RoutedEventArgs e)
         {
+
+            if(AccesKeyField.Text != "")
+            {
+                string username = Properties.Settings.Default.MongoDBUser;
+                string password = MainHandler.Decode(Properties.Settings.Default.MongoDBPass);
+                string regkey = AccesKeyField.Text;
+
+                dynamic result = await MainHandler.RegisterUser(username, password, "", "", regkey);
+                if (result["Success"] == "Forbidden" || result["Success"] == "NotAuthorized")
+                {
+                    MessageBox.Show("Invalid Regkey, please try again. If you don't have a regkey, leave field empty to gain access to the public demo database");
+                }
+
+                else if (result["Success"] == "AlreadyExists")
+                {
+                    MessageBox.Show("User already exits");
+                }
+
+                if (result["Success"] == "Success")
+                {
+                    MessageBox.Show("Updated access for " + result["User"] + " at database(s) " + result["Databases"]);
+ 
+                }
+            }
+
             if((MainHandler.Encode(CurrentPasswordField.Password) == Properties.Settings.Default.MongoDBPass && PasswordField.Password != "") || PasswordField.Password == "")
             {
                 DialogResult = true;

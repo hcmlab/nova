@@ -40,7 +40,7 @@ namespace ssi
 
         private void OkClick(object sender, RoutedEventArgs e)
         {
-            session.Name = NameField.Text == "" ? Defaults.Strings.Unkown : NameField.Text;
+            session.Name = NameField.Text == "" ? Defaults.Strings.Unknown : NameField.Text;
             session.Language = LanguageField.Text;
             session.Location = LocationField.Text;
             session.Date = DatePicker.SelectedDate.Value;

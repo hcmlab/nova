@@ -90,7 +90,7 @@ namespace ssi
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
+            scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unknown : nameTextBox.Text;
 
             if (double.TryParse(srTextBox.Text, out double value))
             {

@@ -68,7 +68,7 @@ namespace ssi
             EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
             Showexport.IsChecked = Properties.Settings.Default.ShowExportDatabase;
             enableworldlevel.IsChecked = Properties.Settings.Default.SRTwordlevel;
-            if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
+            if (DBHost.Text != Defaults.checkdb)
             {
                 LoginWithLightning.Visibility = Visibility.Hidden;
                 RegisterButton.Visibility = Visibility.Hidden;

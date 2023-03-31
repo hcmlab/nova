@@ -52,7 +52,7 @@ namespace ssi
 
         public class Strings
         {
-            public static string Unkown = "Unkown";         
+            public static string Unknown = "Unknown";         
         }
 
 
@@ -64,10 +64,6 @@ namespace ssi
             {
                 localLocations.Add(s);
             }
-            //localLocations.Add(Properties.Settings.Default.DatabaseDirectory);
-            //localLocations.Add("W:\\nova\\data"); //TODO
-            //localLocations.Add("K:\\nova\\data"); //TODO
-
             return localLocations;
         }
 
@@ -120,6 +116,7 @@ namespace ssi
         public static int SelectionBorderWidth = 7;
 
         public static double DefaultSampleRate = 25.0;
+        public static string checkdb = MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz");
 
         public static Color DefaultColors(int index)
         {

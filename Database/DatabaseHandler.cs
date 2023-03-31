@@ -363,7 +363,7 @@ namespace ssi
                         for (int i = 0; i < roles.Count; i++)
                         {
 
-                            if (roles[i]["db"].ToString() != "admin" && roles[i]["db"].ToString() != "local" && roles[i]["db"].ToString() != "config" && !items.Contains(roles[i]["db"].ToString()))
+                            if (roles[i]["db"].ToString() != "admin" && roles[i]["db"].ToString() != "local" && roles[i]["db"].ToString() != "config" && !items.Contains(roles[i]["db"].ToString())  && CheckAuthentication(roles[i]["db"].ToString()) >= (int)level)
                             {
                                 items.Add(roles[i]["db"].ToString());
                             }

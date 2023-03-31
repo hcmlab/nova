@@ -37,7 +37,7 @@ namespace ssi
         {
             DialogResult = true;
 
-            scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
+            scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unknown : nameTextBox.Text;
             double value;
             if (double.TryParse(srTextBox.Text, out value))
             {

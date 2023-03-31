@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using static Dicom.Network.DicomServiceOptions;
-
 namespace ssi
 {
     /// <summary>
@@ -16,6 +14,12 @@ namespace ssi
         public DatabaseAdminManageDBWindow()
         {
             InitializeComponent();
+
+            if ((Properties.Settings.Default.DatabaseAddress.Split(':'))[0] != Defaults.checkdb)
+            {
+                GenerateKey.Visibility = Visibility.Hidden;
+            }
+            else GenerateKey.Visibility = Visibility.Visible;
 
             GetDatabases(DatabaseHandler.DatabaseName);
             Refresh();
@@ -601,6 +605,13 @@ namespace ssi
 
 
             }
+
+        }
+
+        private void GenerateKey_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseAdminGenerateKeyWindow window = new DatabaseAdminGenerateKeyWindow();
+            window.ShowDialog();
 
         }
     }
