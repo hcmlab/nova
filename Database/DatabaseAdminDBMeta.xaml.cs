@@ -37,7 +37,7 @@ namespace ssi
 
         private void OkClick(object sender, RoutedEventArgs e)
         {
-            db.Name = NameField.Text == "" ? Defaults.Strings.Unkown : NameField.Text;
+            db.Name = NameField.Text == "" ? Defaults.Strings.Unknown : NameField.Text;
             db.Description = DescriptionField.Text;
             db.Server = ServerField.Text;
             db.ServerAuth = AuthentificationBox.IsChecked.Value;

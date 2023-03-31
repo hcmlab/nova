@@ -46,6 +46,7 @@
                 <Button Style="{StaticResource MyButton}" Name="AddAnnotator" Content="ADD" Click="AddAnnotator_Click"/>
                 <Button Style="{StaticResource MyButton}" Name="DeleteAnnotator" Content="REM" Click="DeleteAnnotator_Click"/>
                 <Button Style="{StaticResource MyButton}" Name="EditAnnotator" Content="EDIT" Click="EditAnnotator_Click"  />
+                <Button Style="{StaticResource MyButton}" Name="GenerateKey" Content="KEY" Click="GenerateKey_Click"  />
             </StackPanel >
             <ListBox x:Name="AnnotatorsBox" DockPanel.Dock="Top" Margin="5,0,5,0" SelectionMode="Single" Focusable="True" ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
         </DockPanel>

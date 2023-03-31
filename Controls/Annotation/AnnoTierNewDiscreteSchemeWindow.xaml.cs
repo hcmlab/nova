@@ -62,7 +62,7 @@ namespace ssi
             List<string> usedLabels = new List<string>();
 
             scheme.MinOrBackColor = backroundColorPicket.SelectedColor.Value;
-            scheme.Name = schemeNameTextField.Text == "" ? Defaults.Strings.Unkown : schemeNameTextField.Text;
+            scheme.Name = schemeNameTextField.Text == "" ? Defaults.Strings.Unknown : schemeNameTextField.Text;
             scheme.Labels.Clear();
 
             foreach (Label a in LabelsListBox.Items)

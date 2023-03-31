@@ -38,7 +38,7 @@ namespace ssi
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            scheme.DefaultLabel = dlTextBox.Text == "" ? Defaults.Strings.Unkown : dlTextBox.Text;
+            scheme.DefaultLabel = dlTextBox.Text == "" ? Defaults.Strings.Unknown : dlTextBox.Text;
 
             Byte R = dlColor.SelectedColor.GetValueOrDefault().R;
             Byte G = dlColor.SelectedColor.GetValueOrDefault().G;

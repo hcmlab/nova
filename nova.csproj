@@ -552,6 +552,9 @@
     <Compile Include="Controls\Signal\SignalTrackSettingsWindow.xaml.cs">
       <DependentUpon>SignalTrackSettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseAdminGenerateKeyWindow.xaml.cs">
+      <DependentUpon>DatabaseAdminGenerateKeyWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseAdminManageAnnotationsWindow.xaml.cs">
       <DependentUpon>DatabaseAdminManageAnnotationsWindow.xaml</DependentUpon>
     </Compile>
@@ -882,6 +885,10 @@
     <Page Include="Controls\Signal\SignalTrackSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseAdminGenerateKeyWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Database\DatabaseAdminManageAnnotationsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

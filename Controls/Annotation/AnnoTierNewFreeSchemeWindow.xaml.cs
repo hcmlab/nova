@@ -24,7 +24,7 @@ namespace ssi
 
             scheme.MinOrBackColor = backgroundColorPicker.SelectedColor.Value;
             scheme.MaxOrForeColor = labelColorPicker.SelectedColor.Value;
-            scheme.Name = schemeNameTextBox.Text == "" ? Defaults.Strings.Unkown : schemeNameTextBox.Text;
+            scheme.Name = schemeNameTextBox.Text == "" ? Defaults.Strings.Unknown : schemeNameTextBox.Text;
 
             Close();
         }

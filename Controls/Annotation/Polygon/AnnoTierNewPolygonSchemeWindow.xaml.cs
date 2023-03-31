@@ -44,8 +44,8 @@ namespace ssi
         {
             DialogResult = true;
 
-            scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unkown : nameTextBox.Text;
-            scheme.DefaultLabel = dlTextBox.Text == "" ? Defaults.Strings.Unkown : dlTextBox.Text;
+            scheme.Name = nameTextBox.Text == "" ? Defaults.Strings.Unknown : nameTextBox.Text;
+            scheme.DefaultLabel = dlTextBox.Text == "" ? Defaults.Strings.Unknown : dlTextBox.Text;
             Byte R = dlColor.SelectedColor.GetValueOrDefault().R;
             Byte G = dlColor.SelectedColor.GetValueOrDefault().G;
             Byte B = dlColor.SelectedColor.GetValueOrDefault().B;
