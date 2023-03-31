@@ -41,7 +41,10 @@ namespace ssi
 
         private async  void OkClick(object sender, RoutedEventArgs e)
         {
-          
+            //make this dynamically, maybe
+            string validFor = "24h";
+
+            ValidforLabel.Content = validFor;
 
            // session.Date = DatePicker.SelectedDate.Value;
 
@@ -51,7 +54,7 @@ namespace ssi
                 databases += db + ",";
             }
             databases = databases.Remove(databases.Length - 1);
-            dynamic requestform = await MainHandler.GenerateToken(databases, "24h");
+            dynamic requestform = await MainHandler.GenerateToken(databases, validFor);
 
             KeyLabel.Content = requestform["accessToken"];
             System.Windows.Clipboard.SetText(KeyLabel.Content.ToString());

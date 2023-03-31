@@ -115,7 +115,7 @@ namespace ssi
                 dynamic result = await MainHandler.RegisterUser(username, password, "", "", regkey);
                 if (result["Success"] == "Forbidden" || result["Success"] == "NotAuthorized")
                 {
-                    MessageBox.Show("Invalid Regkey, please try again. If you don't have a regkey, leave field empty to gain access to the public demo database");
+                    MessageBox.Show("Invalid or Expired Regkey.");
                 }
 
                 else if (result["Success"] == "AlreadyExists")
