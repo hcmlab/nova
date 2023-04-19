@@ -140,7 +140,7 @@
             </Grid.RowDefinitions>
 
             <Button Name="editButton" Grid.Column="0" Grid.Row="0" Height="25" Margin="7,5,5,5">Relabel</Button>
-            <TextBox Name="editTextBox" Grid.Column="1" Grid.Row="0" Margin="5,5,7,5"/>
+            <TextBox Name="editTextBox" GotFocus="editTextBox_GotFocus" LostFocus="editTextBox_LostFocus" Grid.Column="1" Grid.Row="0" Margin="5,5,7,5"/>
             <ComboBox Name="editComboBox" Grid.Column="1" Grid.Row="0" Margin="5" Visibility="Collapsed">
                 <ComboBox.Resources>
                     <Style TargetType="{x:Type Border}">

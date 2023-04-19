@@ -24,6 +24,7 @@ namespace ssi
         public Point leftThumb, rightThumb = new Point(0, 0);
         float leftTrigger, rightTrigger;
         public int deadband = 2500;
+        public static bool TextboxSelected = false;
 
         public void connectController()
         {
@@ -555,75 +556,79 @@ namespace ssi
                         break;
                     /*No Modifier keys are pressed*/
                     case 0:
-                        if (e.KeyboardDevice.IsKeyDown(Key.E))
+                        if (!TextboxSelected)
                         {
-                            SelectSegmentEnd();
-                            e.Handled = true;
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.L))
-                        {
-                            ToggleLiveMode();
-                            e.Handled = true;
-                        }                        
-                        else if (e.KeyboardDevice.IsKeyDown(Key.M))
-                        {
-                            ToggleMouseMode();
-                            e.Handled = true;
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.Q))
-                        {
-                            SelectSegmentStart();
-                            e.Handled = true;
-                        }
+
+                            if (e.KeyboardDevice.IsKeyDown(Key.E))
+                            {
+                                SelectSegmentEnd();
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.L))
+                            {
+                                ToggleLiveMode();
+                                e.Handled = true;
+                            }                        
+                            else if (e.KeyboardDevice.IsKeyDown(Key.M))
+                            {
+                                ToggleMouseMode();
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Q))
+                            {
+                                SelectSegmentStart();
+                                e.Handled = true;
+                            }
                         
-                        else if ((e.KeyboardDevice.IsKeyDown(Key.W)))
-                        {
-                            CreateOrSelectAnnotation();
-                        }
-                        else if ((e.KeyboardDevice.IsKeyDown(Key.D)))
-                        {
-                            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                            else if ((e.KeyboardDevice.IsKeyDown(Key.W)))
                             {
-                                UnselectLabel();
                                 CreateOrSelectAnnotation();
-                                e.Handled = true;
                             }
-                        }
-
-                        else if ((e.KeyboardDevice.IsKeyDown(Key.U)))
-                        {
-                            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                            else if ((e.KeyboardDevice.IsKeyDown(Key.D)))
                             {
-                                UnselectLabel();
-                                e.Handled = true;
+                                if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                                {
+                                    UnselectLabel();
+                                    CreateOrSelectAnnotation();
+                                    e.Handled = true;
+                                }
+                            }
+
+                            else if ((e.KeyboardDevice.IsKeyDown(Key.U)))
+                            {
+                                if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                                {
+                                    UnselectLabel();
+                                    e.Handled = true;
                                 
+                                }
                             }
-                        }
-                        else if ((e.KeyboardDevice.IsKeyDown(Key.J)))
-                        {
-                            if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                            else if ((e.KeyboardDevice.IsKeyDown(Key.J)))
                             {
-                                double selectedtime = MainHandler.timeline.CurrentPlayPosition;
-                                AnnoTierSegment t = AnnoTier.Selected.GetSegmentAtLocation(selectedtime);
-                                MainHandler.timeline.CurrentPlayPosition = selectedtime;
+                                if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsDiscreteOrFree)
+                                {
+                                    double selectedtime = MainHandler.timeline.CurrentPlayPosition;
+                                    AnnoTierSegment t = AnnoTier.Selected.GetSegmentAtLocation(selectedtime);
+                                    MainHandler.timeline.CurrentPlayPosition = selectedtime;
                                
-                                AnnoTierStatic.SelectLabel(t);
+                                    AnnoTierStatic.SelectLabel(t);
 
+                                    e.Handled = true;
+                                }
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Back))
+                            {
+                                RemoveSegment(sender, e);
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.Delete))
+                            {
+                                RemoveSegment(sender, e);
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.F5))
+                            {
+                                ReloadAnnotations();
                                 e.Handled = true;
                             }
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.Back))
-                        {
-                            RemoveSegment(sender, e);
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.Delete))
-                        {
-                            RemoveSegment(sender, e);
-                        }
-                        else if (e.KeyboardDevice.IsKeyDown(Key.F5))
-                        {
-                            ReloadAnnotations();
-                            e.Handled = true;
                         }
                         break;
                     default:

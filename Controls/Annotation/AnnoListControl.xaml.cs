@@ -372,6 +372,15 @@ namespace ssi
             itemhasFocus = false;
         }
 
+        private void editTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            MainHandler.TextboxSelected = true;
+        }
+
+        private void editTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            MainHandler.TextboxSelected = false;
+        }
     }
 
 
