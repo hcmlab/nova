@@ -4917,5 +4917,18 @@ namespace ssi
         ROOT = 4,
     }
 
+    public class SelectedDatabaseAndSessions
+    {
+        public string Database { get; set; }
+        public string Sessions { get; set; }
+
+        public string Roles { get; set; }
+
+        public string Annotator { get; set; }
+        public string Stream { get; set; }
+
+
+    }
+
     #endregion DATABASE TYPES
 }

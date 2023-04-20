@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Xml;
 using Tamir.SharpSsh.jsch;
+using static ssi.DatabaseCMLExtractFeaturesWindow;
 
 namespace ssi
 {
@@ -28,20 +29,64 @@ namespace ssi
 
         private bool handleSelectionChanged = false;
 
+
+        public class ChainCategories
+        {
+            HashSet<string> chaincategories = new HashSet<string>();
+            public HashSet<string> GetCategories()
+            {
+                return chaincategories;
+            }
+            public void AddCategory(String category)
+            {
+                chaincategories.Add(category);
+            }
+
+        }
+
+        public class Transformer
+        {
+            public string Name { get; set; }
+            public string Type { get; set; }
+            public string Script { get; set; }
+            public string Syspath { get; set; }
+            public string OptStr { get; set; }
+            public bool Multi_role_input { get; set; }
+        }
+
         public class Chain
         {
+
+            private List<Transformer> transformers = new List<Transformer>();
             public string Path { get; set; }
             public string Name { get; set; }
             public string FrameStep { get; set; }
             public string LeftContext { get; set; }
             public string RightContext { get; set; }
+            public string Backend { get; set; }
+            public string Description { get; set; }
+            public string Category { get; set; }
+
+
+            public  List<Transformer> GetTransformers()
+            {
+                return transformers;
+            }
+            public void AddTransformer(Transformer transformer)
+            {
+                transformers.Add(transformer);
+            }
+
+
             public override string ToString()
             {
                 return Name;
             }
         }
+ 
 
-        public enum Mode
+
+public enum Mode
         {
             EXTRACT,
             MERGE,            

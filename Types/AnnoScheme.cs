@@ -44,12 +44,16 @@ namespace ssi
             public string Name { get; set; }
             public List<string> Values { get; set; }
             public AttributeTypes AttributeType { get; set; }
+            public List<string> ExtraValues { get; set; }
+            public AttributeTypes ExtraAttributeType { get; set; }
 
-            public Attribute(string name, List<string> values, AttributeTypes type)
+            public Attribute(string name, List<string> values, AttributeTypes type, List<string> xvalues = null, AttributeTypes xtype = AttributeTypes.BOOLEAN)
             {
                 Name = name;
                 Values = values;
                 AttributeType = type;
+                ExtraValues = xvalues;
+                ExtraAttributeType = xtype;
             }
         }
 

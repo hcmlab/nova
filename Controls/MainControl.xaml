@@ -88,6 +88,7 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="LEARNING" Name="databaseCMLMenu">
+                <MenuItem Header="Nova Server playground (just for tests)" Visibility="Hidden" Name="databaseNovaServerMenu"/>
                 <MenuItem Header="Merge Annotations" Name="databaseCMLMergeAnnotationsMenu" />
                 <MenuItem Header="Annotation Statistics" Name="databaseAnnotationStatisticsMenu" />
                 <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>

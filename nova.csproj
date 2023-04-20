@@ -576,6 +576,9 @@
     <Compile Include="Database\DatabaseBountiesMainWindow.xaml.cs">
       <DependentUpon>DatabaseBountiesMainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\DatabaseNovaServerWindow.xaml.cs">
+      <DependentUpon>DatabaseNovaServerWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DatabaseUserManageWindow.xaml.cs">
       <DependentUpon>DatabaseUserManageWindow.xaml</DependentUpon>
     </Compile>
@@ -917,6 +920,10 @@
     <Page Include="Database\DatabaseBountiesMainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Database\DatabaseNovaServerWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Database\DatabaseUserManageWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
