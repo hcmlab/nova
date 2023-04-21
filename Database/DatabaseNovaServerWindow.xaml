@@ -256,23 +256,7 @@
                     <Label Name="ChainDescLabel" Grid.Row="5" Grid.Column="1">Description:</Label>
                     <Label Name="ChainDescription" Grid.Row="6" Grid.Column="1"></Label>
 
-                    <Label  Visibility="Collapsed" Name="TrainerLabel" Grid.Row="2" Grid.Column="0" Margin="0,5,0,5">Trainer</Label>
-
-                    <ComboBox  Visibility="Collapsed" Name="TrainerPathComboBox" Grid.Row="2" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="GeneralBox_SelectionChanged" HorizontalContentAlignment="Stretch">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="25"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Name}" />
-                                    <TextBlock Text="{Binding Backend}" Foreground="DarkGray" HorizontalAlignment="Right"  />
-                                </Grid>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-
+        
                     <Label Visibility="Collapsed" Name="TrainerPathLabel" Grid.Row="0" Grid.Column="2" Margin="0,5,0,5"></Label>
 
                 </Grid>
@@ -308,7 +292,7 @@
                 <TextBox Name="RightContextTextBox" Grid.Row="3" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Name="HelpLabel" Grid.Row="1" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
 
-                <Label  Grid.Column="0" Grid.Row="4"  VerticalAlignment="Center" HorizontalAlignment="Right">Name:</Label>
+                <Label  Grid.Column="0" Grid.Row="4"  VerticalAlignment="Center" HorizontalAlignment="Right">Optional Suffix:</Label>
                 <TextBox  Grid.Column="1"  Grid.Row="4" Name="FeatureNameTextBox" Height="20" ></TextBox>
            
             </Grid>
