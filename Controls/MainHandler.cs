@@ -22,7 +22,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.4.5";
+        public static string BuildVersion = "1.2.4.6";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -240,6 +240,12 @@ namespace ssi
             control.databaseManageAnnotationsMenu.Click += databaseManageAnnotations_Click;
             control.databaseCMLMergeAnnotationsMenu.Click += databaseCMLMergeAnnotations_Click;
             control.databaseAnnotationStatisticsMenu.Click += DatabaseAnnotationStatisticsMenu_Click;
+
+        #if DEBUG
+            control.databaseNovaServerMenu.Visibility = Visibility.Visible;
+            control.databaseNovaServerMenu.Click += DatabaseNovaServerMenu_Click;         //debug-mode only snippet go here.
+        #endif
+
 
             control.showSettingsMenu.Click += showSettings_Click;
 
@@ -462,6 +468,12 @@ namespace ssi
             // allow drag and drop
 
             control.Drop += controlDrop;
+        }
+
+        private void DatabaseNovaServerMenu_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseNovaServerWindow window = new DatabaseNovaServerWindow(this);
+            window.ShowDialog();
         }
 
         private void MediaSettingsButton_Click(object sender, RoutedEventArgs e)

@@ -88,9 +88,13 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="LEARNING" Name="databaseCMLMenu">
+             
                 <MenuItem Header="Merge Annotations" Name="databaseCMLMergeAnnotationsMenu" />
                 <MenuItem Header="Annotation Statistics" Name="databaseAnnotationStatisticsMenu" />
-                <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
+                <MenuItem Header="Extract Features">
+                    <MenuItem Header="Local Extraction" Name="databaseCMLExtractFeaturesMenu"/>
+                    <MenuItem Header="Nova-Server Extraction (beta)" Name="databaseNovaServerMenu"/>
+                </MenuItem>
                 <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
                 <MenuItem Header="Train and Predict" Name="databaseCMLTrainAndPredictMenu"/>
                 <MenuItem Header="Fusion" Name="fusionmenu">

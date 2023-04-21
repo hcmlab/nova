@@ -345,7 +345,8 @@ namespace ssi
 
                             if (media.NaturalDuration.HasTimeSpan)
                             {
-                                duration = media.NaturalDuration.TimeSpan.Seconds;
+                                duration = media.NaturalDuration.TimeSpan.TotalMilliseconds;
+                                duration = duration / 1000.0;
                                 media = null;
                             }
                         }

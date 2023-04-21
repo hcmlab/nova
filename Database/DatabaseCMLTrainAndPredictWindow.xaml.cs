@@ -25,6 +25,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
 using static ssi.AnnoTierAttributesWindow;
+using static ssi.DatabaseCMLExtractFeaturesWindow;
 using Path = System.IO.Path;
 
 namespace ssi
@@ -225,7 +226,7 @@ namespace ssi
 
             Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
 
-            if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
+            if (trainer != null && (trainer.Backend.ToUpper() == "PYTHON" || trainer.Backend.ToUpper() == "NOVA-SERVER"))
             {
                 logThread = new Thread(new ThreadStart(tryToGetLog));
                 statusThread = new Thread(new ThreadStart(tryToGetStatus));
@@ -846,7 +847,7 @@ namespace ssi
                 }
             }
 
-            if (trainer.Backend.ToUpper() == "PYTHON")
+            if (trainer.Backend.ToUpper() == "PYTHON" || trainer.Backend.ToUpper() == "NOVA-SERVER")
             {
                 handlePythonBackend(trainer, scheme, stream, annotator, database, trainerLeftContext, trainerRightContext, trainerBalance, rolesList);
             }
@@ -1335,7 +1336,7 @@ namespace ssi
         {
             Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
 
-            if (trainer != null && trainer.Backend.ToUpper() == "PYTHON")
+            if (trainer != null && (trainer.Backend.ToUpper() == "PYTHON" || trainer.Backend.ToUpper() == "NOVA-SERVER"))
             {
                 pythonCaseOn = true;
                 logThread = new Thread(new ThreadStart(tryToGetLog));
@@ -2683,16 +2684,4 @@ namespace ssi
         }
     }
 
-    public class SelectedDatabaseAndSessions
-    {
-        public string Database { get; set; }
-        public string Sessions { get; set; }
-
-        public string Roles { get; set; }
-
-        public string Annotator { get; set; }
-        public string Stream { get; set; }
-
-
-    }
 }
