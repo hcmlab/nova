@@ -523,7 +523,7 @@ namespace ssi
             string database = DatabaseHandler.DatabaseName;
 
            // DatabaseStream stream = (DatabaseStream)StreamsBox.SelectedItem;
-            setSessionList();
+            //setSessionList();
            // DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
 
             string rolesList = "";
@@ -538,9 +538,24 @@ namespace ssi
                 {
                     rolesList += ";" + role.Name;
                 }
+
             }
 
-            DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
+            string sessionList = "";
+                var sessions = SessionsBox.SelectedItems;
+                foreach (DatabaseSession session in sessions)
+                {
+                    if (sessionList == "")
+                    {
+                        sessionList += session.Name;
+                    }
+                    else
+                    {
+                        sessionList += ";" + session.Name;
+                    }
+                }
+
+                DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
 
             string trainerLeftContext = LeftContextTextBox.Text;
             string trainerRightContext = RightContextTextBox.Text;
@@ -550,12 +565,12 @@ namespace ssi
 
             if (chain.Backend.ToUpper() == "NOVA-SERVER" || chain.Backend.ToUpper() == "PYTHON") 
             {
-              handlePythonBackend(chain, annotator, database, trainerLeftContext, trainerRightContext, rolesList);
+              handlePythonBackend(chain, annotator, database, trainerLeftContext, trainerRightContext, rolesList, sessionList);
             }
         }
 
  
-        private void handlePythonBackend(Chain chain, DatabaseAnnotator annotator, string database, string trainerLeftContext, string trainerRightContext, string rolesList)
+        private void handlePythonBackend(Chain chain, DatabaseAnnotator annotator, string database, string chainLeftContext, string chainRightContext, string rolesList, string sessionsList)
         {
            // this.ApplyButton.IsEnabled = false;
 
@@ -636,19 +651,19 @@ namespace ssi
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent("False"), "flattenSamples" },
+                { new StringContent("false"), "flattenSamples" },
                 { new StringContent(relativeChainPath), "chainFilePath" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
                 { new StringContent(database), "database" },
-                { new StringContent(sessionList), "sessions" },
+                { new StringContent(sessionsList), "sessions" },
                 { new StringContent(schemes), "scheme" },
                 { new StringContent(rolesList), "roles" },
                 { new StringContent(annotator.Name), "annotator" },
                 { new StringContent(streams), "streamName" },
-                { new StringContent(trainerLeftContext), "leftContext" },
-                { new StringContent(trainerRightContext), "rightContext" },
+                { new StringContent(chainLeftContext), "leftContext" },
+                { new StringContent(chainRightContext), "rightContext" },
                 { new StringContent(frameSize.ToString() + "ms"), "frameSize" },
                 { new StringContent(filenameSuffix), "fileNameSuffix" },
                 { new StringContent(ModelSpecificOptString), "optStr" }
@@ -1824,6 +1839,7 @@ namespace ssi
         {
             List<string> result = new List<string>();
             string[] typesplitted = Type.Split(',');
+            
 
             if (Tag == "$(role)")
             {
@@ -1837,8 +1853,14 @@ namespace ssi
      
                 foreach (var stream in DatabaseHandler.Streams)
                 {
+                    string[] streamtype = stream.Type.Split(';');
+                    for(int i = 0; i < streamtype.Length; i++)
+                    {
+                        streamtype[i] = streamtype[i].ToUpper();
+                    }
+                    if (streamtype.Any(typesplitted.Contains) || Type == "")
 
-                    if (typesplitted.Contains(stream.Type.ToUpper()) || Type == "")
+                      //  if (typesplitted.Contains(streamtype.find .ToUpper()) || Type == "")
                         result.Add(stream.Name);
                 }
             }
