@@ -572,13 +572,13 @@ namespace ssi
  
         private void handlePythonBackend(Chain chain, DatabaseAnnotator annotator, string database, string chainLeftContext, string chainRightContext, string rolesList, string sessionsList)
         {
-           // this.ApplyButton.IsEnabled = false;
+            // this.ApplyButton.IsEnabled = false;
 
-           // string streamName = getStreamName(stream);
-           // string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
-           // string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
+            // string streamName = getStreamName(stream);
+            // string trainerDir = getTrainerDir(trainer, streamName, scheme, stream);
+            // string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
 
-            double frameSize = 0;
+            string frameSize = FrameSizeTextBox.Text;
 
 
 
@@ -664,7 +664,7 @@ namespace ssi
                 { new StringContent(streams), "streamName" },
                 { new StringContent(chainLeftContext), "leftContext" },
                 { new StringContent(chainRightContext), "rightContext" },
-                { new StringContent(frameSize.ToString() + "ms"), "frameSize" },
+                { new StringContent(frameSize), "frameSize" },
                 { new StringContent(filenameSuffix), "fileNameSuffix" },
                 { new StringContent(ModelSpecificOptString), "optStr" }
             };
