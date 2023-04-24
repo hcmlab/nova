@@ -246,7 +246,7 @@ namespace ssi
                // predictAndReloadThread = new Thread(new ThreadStart(predictAndReloadInCompleteCase));
                 logThread.Start();
                 statusThread.Start();
-                predictAndReloadThread.Start();
+                //predictAndReloadThread.Start();
             }
 
             changeFrontendInPythonBackEndCase();
@@ -1221,7 +1221,7 @@ namespace ssi
                     }
                 }
 
-                if (chainCategories.GetCategories().Count == 1)
+                if (chainCategories.GetCategories().Count > 0)
                 {
                     ChainCategoryBox.ItemsSource = chainCategories.GetCategories();
                     ChainCategoryBox.SelectedIndex = 0;
