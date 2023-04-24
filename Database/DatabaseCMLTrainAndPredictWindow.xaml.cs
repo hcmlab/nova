@@ -256,12 +256,73 @@ namespace ssi
             }
         }
 
+
+        private string getIdHash()
+        {
+            DatabaseScheme scheme = null;
+            DatabaseStream stream = null;
+            DatabaseAnnotator annotator = null;
+            Trainer trainer = null;
+
+
+            this.Dispatcher.Invoke(() =>
+            {
+                scheme = (DatabaseScheme)SchemesBox.SelectedItem;
+                stream = (DatabaseStream)StreamsBox.SelectedItem;
+                annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
+                trainer = (Trainer)TrainerPathComboBox.SelectedItem;
+                trainer.Name = trainer.Name.Split(' ')[0];
+                setSessionList();
+            });
+
+            string database = DatabaseHandler.DatabaseName;
+            string ModelSpecificOptString = AttributesResult();
+
+
+            int result = GetDeterministicHashCode("database" + database + "scheme" + scheme.Name + "streamName" + stream.Name + "annotator" + annotator.Name + "sessions" + sessionList + "username" + Properties.Settings.Default.MongoDBUser + "trainer" + trainer.Name + "opts" + ModelSpecificOptString);
+
+            var jobIDhash = (Math.Abs(result)).ToString();
+            int MaxLength = 8;
+            if (jobIDhash.Length > MaxLength)
+                jobIDhash = jobIDhash.ToString().Substring(0, MaxLength);
+
+            return jobIDhash;
+        }
+
+
+        static int GetDeterministicHashCode(string str)
+        {
+            unchecked
+            {
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                for (int i = 0; i < str.Length; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                    if (i == str.Length - 1)
+                        break;
+                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                }
+
+                return hash1 + (hash2 * 1566083941);
+            }
+        }
+
+
         private void tryToGetLog()
         {
             Dictionary<string, string> response = null;
             while (pythonCaseOn)
             {
-                MultipartFormDataContent content = getContent();
+
+                var jobIDhash = getIdHash();
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(jobIDhash), "jobID"  }
+                };
+                
                 // else case is handled in status-thread (see tryToGetStatus method)
                 if (content != null)
                 {
@@ -289,7 +350,12 @@ namespace ssi
             Dictionary<string, string> response = null;
             while (pythonCaseOn)
             {
-                MultipartFormDataContent content = getContent();
+                var jobIDhash = getIdHash();
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(jobIDhash), "jobID"  }
+                };
                 if (content != null)
                 {
                     try
@@ -462,7 +528,13 @@ namespace ssi
                 }
                 else
                 {
-                    handler.cancleCurrentAction(getContent());
+                    var jobIDhash = getIdHash();
+
+                    var content = new MultipartFormDataContent
+                {
+                    { new StringContent(jobIDhash), "jobID"  }
+                };
+                    handler.cancleCurrentAction(content);
                 }
             }
         }
@@ -479,8 +551,17 @@ namespace ssi
         {
             var result = MessageBox.Show("Do you really want to cancel the current action?", "Warning", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
+
             {
-                handler.cancleCurrentAction(getContent());
+
+
+                var jobIDhash = getIdHash();
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(jobIDhash), "jobID"  }
+                };
+                handler.cancleCurrentAction(content);
                 this.Cancel_Button.IsEnabled = false;
                 CML_TrainingStarted = false;
                 CML_PredictionStarted = false;

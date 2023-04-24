@@ -15,6 +15,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,6 +29,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
+using System.Xml.Linq;
 using static ssi.AnnoScheme;
 using static ssi.AnnoTierAttributesWindow;
 using static ssi.DatabaseCMLExtractFeaturesWindow;
@@ -265,12 +268,72 @@ namespace ssi
             }
         }
 
+
+        static int GetDeterministicHashCode(string str)
+        {
+            unchecked
+            {
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                for (int i = 0; i < str.Length; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                    if (i == str.Length - 1)
+                        break;
+                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                }
+
+                return hash1 + (hash2 * 1566083941);
+            }
+        }
+
+        private string getIdHash()
+        {
+            DatabaseAnnotator annotator = null;
+            Chain chain = null;
+            string ModelSpecificOptString = "";
+
+
+            this.Dispatcher.Invoke(() =>
+            {
+    
+                annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
+                chain = (Chain)ChainsBox.SelectedItem;
+                chain.Name = chain.Name.Split(' ')[0];
+                setSessionList();
+                ModelSpecificOptString = AttributesResult();
+
+            });
+
+            string database = DatabaseHandler.DatabaseName;
+            
+
+            int result = GetDeterministicHashCode("database" + database + "annotator" + annotator.Name + "sessions" + sessionList + "username" + Properties.Settings.Default.MongoDBUser + "chain" + chain.Name + "opts" + ModelSpecificOptString);
+
+            var jobIDhash = (Math.Abs(result)).ToString();
+            int MaxLength = 8;
+            if (jobIDhash.Length > MaxLength)
+                jobIDhash = jobIDhash.ToString().Substring(0, MaxLength);
+
+            return jobIDhash;
+        }
+
+
+
         private void tryToGetLog()
         {
             Dictionary<string, string> response = null;
             while (pythonCaseOn)
             {
-                MultipartFormDataContent content = getContent();
+                // MultipartFormDataContent content = getContent();
+
+                var jobIDhash = getIdHash();
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(jobIDhash), "jobID"  }
+                };
                 // else case is handled in status-thread (see tryToGetStatus method)
                 if (content != null)
                 {
@@ -298,7 +361,12 @@ namespace ssi
             Dictionary<string, string> response = null;
             while (pythonCaseOn)
             {
-                MultipartFormDataContent content = getContent();
+                var jobIDhash = getIdHash();
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(jobIDhash), "jobID"  }
+                };
                 if (content != null)
                 {
                     try
@@ -378,36 +446,6 @@ namespace ssi
             });
         }
 
-        private MultipartFormDataContent getContent()
-        {
-            DatabaseScheme scheme = null;
-            DatabaseStream stream = null;
-            DatabaseAnnotator annotator = null;
-            Trainer trainer = null;
-
-
-            this.Dispatcher.Invoke(() =>
-            {
-                //scheme = (DatabaseScheme)SchemesBox.SelectedItem;
-                annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
-                setSessionList();
-            });
-
-            string database = DatabaseHandler.DatabaseName;
-            if (database == null  || sessionList == "")
-                return null;
-
-            return new MultipartFormDataContent
-            {
-                { new StringContent(database), "database" },
-                { new StringContent("extractor"), "scheme" },
-                { new StringContent("any"), "streamName" },
-                { new StringContent(Properties.Settings.Default.MongoDBUser), "annotator" },
-                { new StringContent(sessionList), "sessions" },
-                { new StringContent(Properties.Settings.Default.MongoDBUser), "username" }
-            };
-        }
-
         private void setSessionList()
         {
             sessions = SessionsBox.SelectedItems;
@@ -443,7 +481,14 @@ namespace ssi
             var result = MessageBox.Show("Do you really want to cancel the current action?", "Warning", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
             {
-                handler.cancleCurrentAction(getContent());
+                var jobIDhash = getIdHash();
+
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(jobIDhash), "jobID"  }
+                };
+ 
+                handler.cancleCurrentAction(content);
                 this.Cancel_Button.IsEnabled = false;
                 CML_TrainingStarted = false;
                 CML_PredictionStarted = false;
@@ -626,7 +671,7 @@ namespace ssi
             bool flattenSamples = false;
 
 
-
+            setSessionList();
             string ModelSpecificOptString = AttributesResult();
 
             string streams = "";
@@ -645,13 +690,16 @@ namespace ssi
             if(schemes.Length>1) schemes = schemes.Remove(schemes.Length - 1);
 
 
+       
             
 
             string filenameSuffix = "";
 
+            var jobIDhash = getIdHash();
+
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent("false"), "flattenSamples" },
+                { new StringContent(flattenSamples.ToString()), "flattenSamples" },
                 { new StringContent(relativeChainPath), "chainFilePath" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
@@ -666,30 +714,9 @@ namespace ssi
                 { new StringContent(chainRightContext), "rightContext" },
                 { new StringContent(frameSize), "frameSize" },
                 { new StringContent(filenameSuffix), "fileNameSuffix" },
-                { new StringContent(ModelSpecificOptString), "optStr" }
+                { new StringContent(ModelSpecificOptString), "optStr" },
+                { new StringContent(jobIDhash), "jobID"  }
             };
-
-
-//    'chainFilePath': 'chains\\test\\uc4\\uc4a.chain',
-//    'server': '137.250.171.233:37317',
-//    'username': 'schildom',
-//    'password': 'asdasdasd.asdasdasdasd',
-//    'database': 'therapai',
-//    'sessions': '88Y8_S03',
-//    'scheme': 'bahjsdasd;voiceactivity',
-//    'roles': 'patient;therapeut;session',
-//    'annotator': 'baurtobi',
-//    'streamName': 'audio',
-//    'leftContext': '0',
-//    'rightContext': '0',
-//    'frameSize': '10ms',
-//    'optStr': 'audio_stream=session.audio;vad_anno_1=therapeut.voiceactivity;vad_anno_2=patient.voiceactivity;voice_label_id=0'
-//}
-
-
-
-
-
 
             if (this.mode == Mode.EXTRACT)
             {
