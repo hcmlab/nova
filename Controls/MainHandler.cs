@@ -241,10 +241,8 @@ namespace ssi
             control.databaseCMLMergeAnnotationsMenu.Click += databaseCMLMergeAnnotations_Click;
             control.databaseAnnotationStatisticsMenu.Click += DatabaseAnnotationStatisticsMenu_Click;
 
-        #if DEBUG
             control.databaseNovaServerMenu.Visibility = Visibility.Visible;
             control.databaseNovaServerMenu.Click += DatabaseNovaServerMenu_Click;         //debug-mode only snippet go here.
-        #endif
 
 
             control.showSettingsMenu.Click += showSettings_Click;
