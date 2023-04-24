@@ -1906,6 +1906,9 @@ namespace ssi
 
         public string AttributesResult()
         {
+
+            AllUsedSchemes.Clear();
+            AllUsedStreams.Clear();
             if (SpecificModelattributesresult == null)
             {
                 return "";
