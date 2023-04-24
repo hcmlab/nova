@@ -589,6 +589,28 @@ namespace ssi
             return true;
         }
 
+        public static bool AnnotationExists(ObjectId annotationId)
+        {
+            if (!IsConnected)
+            {
+                return false;
+            }
+
+            var builder = Builders<BsonDocument>.Filter;
+
+            var annotations = database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotations);
+
+            var filterAnnotation = builder.Eq("_id", annotationId);
+            List<BsonDocument> annotationDocs = annotations.Find(filterAnnotation).ToList();
+
+            if (annotationDocs.Count == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public static bool AnnotationExists(string annotator, string session, string role, string scheme)
         {
             if (!IsConnected)
@@ -4364,6 +4386,10 @@ namespace ssi
 
             foreach (DatabaseAnnotation annotation in collections)
             {
+                if (!AnnotationExists(annotation.Id)) {
+                    continue;
+                }
+
                 AnnoList annoList = LoadAnnoList(annotation, false);
                 if (annoList != null)
                 {

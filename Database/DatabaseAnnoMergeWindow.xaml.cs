@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Web.UI.DataVisualization.Charting;
 using System.IO;
+using Octokit;
 
 namespace ssi
 {
@@ -270,11 +271,11 @@ namespace ssi
             GetAnnotations();
         }
 
-        private void copyAnnotation(List<AnnoList> al)
+        private bool copyAnnotation(List<AnnoList> al)
         {
+            bool isSaved = false;
             if (al.Count > 0)
             {
-                bool isSaved = false;
                 string originalScheme = al[0].Scheme.Name;
                 string originalFullname = al[0].Meta.AnnotatorFullName;
 
@@ -300,14 +301,13 @@ namespace ssi
                 }
 
                 Ok.IsEnabled = true;
-                if (isSaved)
-                    MessageBox.Show("Annotation: " + originalScheme + " from Annotator: " + originalFullname + " has been copied to Annotator: " + newList.Meta.AnnotatorFullName);
-
-                GetAnnotations();
+              
+           
             }
+            return isSaved;
         }
 
-        private void rootMeanSquare(List<AnnoList> al)
+        private bool rootMeanSquare(List<AnnoList> al)
         {
             bool isSaved = false;
             int numberoftracks = al.Count;
@@ -355,12 +355,12 @@ namespace ssi
             {
                 isSaved = newList.Save(null, false, true);
             }
-            if (isSaved) MessageBox.Show("The annotations have been merged");
-            Ok.IsEnabled = true;
-            GetAnnotations();
+
+            return isSaved;
+     
         }
 
-        private void calculateMean(List<AnnoList> al)
+        private bool calculateMean(List<AnnoList> al)
         {
             bool isSaved = false;
             int numberoftracks = al.Count;
@@ -418,9 +418,9 @@ namespace ssi
                 isSaved = newList.Save(null, false, true);
             }
 
-            if (isSaved) MessageBox.Show("The annotations have been merged");
-            Ok.IsEnabled = true;
-            GetAnnotations();
+            return isSaved;
+
+          
         }
 
         private void handleButtons(bool discrete)
@@ -446,7 +446,7 @@ namespace ssi
   
 
      
-        private void MergeDiscreteLists(List<AnnoList> al, string restclass = "Rest")
+        private bool MergeDiscreteLists(List<AnnoList> al, string restclass = "Rest")
         {
             AnnoList cont = new AnnoList();
             cont.Scheme = al[0].Scheme;
@@ -514,11 +514,7 @@ namespace ssi
                 isSaved = newList.Save(null, false, true);
             }
 
-            if (isSaved) MessageBox.Show("Annotations have been merged");
-
-            Ok.IsEnabled = true;
-
-            GetAnnotations();
+            return isSaved;
         }
 
      
@@ -526,18 +522,47 @@ namespace ssi
         private void CalculateMedian_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
+            var sessions = SessionsResultsBox.SelectedItems;
 
-            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+            bool isSaved = false;
+            bool anyisSaved = false;
+            foreach (var session in sessions)
+            {
+                List<DatabaseAnnotation> annos = new List<DatabaseAnnotation>();
+                foreach (var anno in  AnnotationResultBox.SelectedItems)
+                {
+                    DatabaseAnnotation newAnno = (DatabaseAnnotation)anno;
+                    newAnno.Session = ((DatabaseSession)session).Name;
+                    annos.Add(newAnno);    
+                }
 
-            if (WeightExpertise.IsChecked == true) //some option
-            {
-                List<AnnoList> multial = multiplyAnnoListsbyExpertise(al);
-                calculateMean(multial);
+                List<AnnoList> al = DatabaseHandler.LoadSession(annos);
+
+                if(al.Count > 0)
+                {
+                    if (WeightExpertise.IsChecked == true) //some option
+                    {
+                        List<AnnoList> multial = multiplyAnnoListsbyExpertise(al);
+                        anyisSaved = calculateMean(multial);
+                       
+                    }
+                    else
+                    {
+                        anyisSaved = calculateMean(al);
+                       
+                       
+                    }
+
+                    if (anyisSaved) isSaved = true;
+
+                }
+
+              
+
             }
-            else
-            {
-                calculateMean(al);
-            }
+            if (isSaved) MessageBox.Show("The annotations have been merged");
+            Ok.IsEnabled = true;
+            GetAnnotations();
         }
 
         private void RolesBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -564,18 +589,47 @@ namespace ssi
         private void RMS_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
+            var sessions = SessionsResultsBox.SelectedItems;
 
-            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
+            bool isSaved = false;
+            bool anyisSaved = false;
+            foreach (var session in sessions)
+            {
+                List<DatabaseAnnotation> annos = new List<DatabaseAnnotation>();
+                foreach (var anno in AnnotationResultBox.SelectedItems)
+                {
+                    DatabaseAnnotation newAnno = (DatabaseAnnotation)anno;
+                    newAnno.Session = ((DatabaseSession)session).Name;
+                    annos.Add(newAnno);
+                }
 
-            if (WeightExpertise.IsChecked == true) //some option
-            {
-                List<AnnoList> multial = multiplyAnnoListsbyExpertise(al);
-                rootMeanSquare(multial);
+                List<AnnoList> al = DatabaseHandler.LoadSession(annos);
+
+                if (al.Count > 0)
+                {
+                    if (WeightExpertise.IsChecked == true) //some option
+                    {
+                        List<AnnoList> multial = multiplyAnnoListsbyExpertise(al);
+                        anyisSaved = rootMeanSquare(multial);
+
+                    }
+                    else
+                    {
+                        anyisSaved = rootMeanSquare(al);
+
+
+                    }
+
+                    if (anyisSaved) isSaved = true;
+
+                }
+
+
+
             }
-            else
-            {
-                rootMeanSquare(al);
-            }
+            if (isSaved) MessageBox.Show("The annotations have been merged");
+            Ok.IsEnabled = true;
+            GetAnnotations();
         }
 
         private async Task CalculateKappaWrapper(List<AnnoList> annolists)
@@ -795,18 +849,45 @@ namespace ssi
             if (AnnotationResultBox.SelectedItems.Count > 1)
             {
                 string restclass = "Rest";
-                List<AnnoList> annolists = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-                List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(annolists, restclass);
+                var sessions = SessionsResultsBox.SelectedItems;
 
-                if (WeightExpertise.IsChecked == true) //some option
+                bool isSaved = false;
+                bool anyisSaved = false;
+                foreach (var session in sessions)
                 {
-                    List<AnnoList> multial = multiplyAnnoListsbyExpertise(convertedlists);
-                    MergeDiscreteLists(multial, restclass);
+                    List<DatabaseAnnotation> annos = new List<DatabaseAnnotation>();
+                    foreach (var anno in AnnotationResultBox.SelectedItems)
+                    {
+                        DatabaseAnnotation newAnno = (DatabaseAnnotation)anno;
+                        newAnno.Session = ((DatabaseSession)session).Name;
+                        annos.Add(newAnno);
+                    }
+
+                    List<AnnoList> annolists = DatabaseHandler.LoadSession(annos);
+                    List<AnnoList> convertedlists = Statistics.convertAnnoListsToMatrix(annolists, restclass);
+
+                    if (convertedlists.Count > 0)
+                    {
+                        if (WeightExpertise.IsChecked == true) //some option
+                        {
+                            List<AnnoList> multial = multiplyAnnoListsbyExpertise(convertedlists);
+                            MergeDiscreteLists(multial, restclass);
+                        }
+                        else
+                        {
+                            MergeDiscreteLists(convertedlists, restclass);
+                        }
+
+                        if (anyisSaved) isSaved = true;
+
+                    }
+
+
+
                 }
-                else
-                {
-                    MergeDiscreteLists(convertedlists, restclass);
-                }
+                if (isSaved) MessageBox.Show("Annotations have been merged");
+                Ok.IsEnabled = true;
+                GetAnnotations();
             }
         }
 
@@ -875,8 +956,35 @@ namespace ssi
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
             Ok.IsEnabled = false;
-            List<AnnoList> al = DatabaseHandler.LoadSession(AnnotationResultBox.SelectedItems);
-            copyAnnotation(al);
+            var sessions = SessionsResultsBox.SelectedItems;
+
+            bool isSaved = false;
+            bool anyisSaved = false;
+            foreach (var session in sessions)
+            {
+                List<DatabaseAnnotation> annos = new List<DatabaseAnnotation>();
+                foreach (var anno in AnnotationResultBox.SelectedItems)
+                {
+                    DatabaseAnnotation newAnno = (DatabaseAnnotation)anno;
+                    newAnno.Session = ((DatabaseSession)session).Name;
+                    annos.Add(newAnno);
+                }
+
+                List<AnnoList> al = DatabaseHandler.LoadSession(annos);
+
+                if (al.Count > 0)
+                {
+                    anyisSaved = copyAnnotation(al);
+                    if (anyisSaved) isSaved = true;
+
+                }
+
+
+
+            }
+            if (isSaved) MessageBox.Show("Annotation has been copied");
+            Ok.IsEnabled = true;
+            GetAnnotations();
         }
 
         private void calculateStatistics()
