@@ -1852,13 +1852,14 @@ namespace ssi
 
             string trainerDir = null;
 
+            string[] streamtypes = stream.Type.Split(';'); 
             if (isTemplate)
             {
                 trainerDir = Properties.Settings.Default.CMLDirectory + "\\" +
                     Defaults.CML.ModelsFolderName + "\\" +
                     Defaults.CML.ModelsTemplatesFolderName + "\\" +
                     scheme.Type.ToString().ToLower() + "\\" +
-                    stream.Type;
+                    streamtypes[0];
             }
             else
             {
@@ -1867,7 +1868,7 @@ namespace ssi
                     Defaults.CML.ModelsTrainerFolderName + "\\" +
                     scheme.Type.ToString().ToLower() + "\\" +
                     scheme.Name + "\\" +
-                    stream.Type + "{" +
+                    streamtypes[0] + "{" +
                     streamName + "}\\";
             }
 
