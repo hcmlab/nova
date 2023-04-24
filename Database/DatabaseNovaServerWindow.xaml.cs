@@ -624,7 +624,7 @@ namespace ssi
             // string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
 
             string frameSize = FrameSizeTextBox.Text;
-
+            string suffix = FeatureNameTextBox.Text;
 
 
             //if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON
@@ -686,12 +686,34 @@ namespace ssi
             {
                 schemes += v + ";";
             }
-
             if(schemes.Length>1) schemes = schemes.Remove(schemes.Length - 1);
 
 
-       
-            
+            string roles = "";
+            foreach (var v in AllUsedRoles)
+            {
+                roles += v + ";";
+            }
+            if (roles.Length > 1) roles = roles.Remove(roles.Length - 1);
+
+            bool multi_role_input = true;
+
+
+            //If one part of the chain doesnt allow multi user input, dont use it.
+            foreach (Transformer t in chain.GetTransformers()){
+                if (t.Multi_role_input == false)
+                {
+                    multi_role_input = false;
+                    break;
+                }
+            }
+            if (!multi_role_input)
+            {
+                roles = rolesList;
+            }
+
+
+
 
             string filenameSuffix = "";
 
@@ -707,7 +729,7 @@ namespace ssi
                 { new StringContent(database), "database" },
                 { new StringContent(sessionsList), "sessions" },
                 { new StringContent(schemes), "scheme" },
-                { new StringContent(rolesList), "roles" },
+                { new StringContent(roles), "roles" },
                 { new StringContent(annotator.Name), "annotator" },
                 { new StringContent(streams), "streamName" },
                 { new StringContent(chainLeftContext), "leftContext" },
@@ -715,6 +737,7 @@ namespace ssi
                 { new StringContent(frameSize), "frameSize" },
                 { new StringContent(filenameSuffix), "fileNameSuffix" },
                 { new StringContent(ModelSpecificOptString), "optStr" },
+                { new StringContent(suffix), "suffix"  },
                 { new StringContent(jobIDhash), "jobID"  }
             };
 
@@ -743,7 +766,7 @@ namespace ssi
                 foreach(Transformer t in chain.GetTransformers())
                 {
                     if (t.OptStr != "")
-                        AddTrainerSpecificOptionsUIElements(t.OptStr, ClearUI);
+                        AddTrainerSpecificOptionsUIElements(t.OptStr, t.Multi_role_input, ClearUI);
                         ClearUI = false;
                 }
               
@@ -1154,6 +1177,7 @@ namespace ssi
                         {
                             t.Multi_role_input = bool.Parse(itemnode.Attributes["multi_role_input"].Value);
                         }
+                        else t.Multi_role_input = true;
 
                         t.Type = "filter";
                         chain.AddTransformer(t);
@@ -1190,6 +1214,7 @@ namespace ssi
                         {
                             t.Multi_role_input = bool.Parse(itemnode.Attributes["multi_role_input"].Value);
                         }
+                        else t.Multi_role_input = true;
 
                         t.Type = "feature";
                         chain.AddTransformer(t);
@@ -1751,7 +1776,7 @@ namespace ssi
 
         }
 
-        private List<AnnoScheme.Attribute> ParseAttributes(string optstr)
+        private List<AnnoScheme.Attribute> ParseAttributes(string optstr, bool multiroleinput)
         {
 
             List<AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
@@ -1807,11 +1832,24 @@ namespace ssi
                                 content = checkTagList(attributes[2], attributes[3]);
                             }
                             else content = checkTagList(attributes[2], "");
-                       
-                            foreach(var item in (RolesBox.SelectedItems))
+
+
+                            if (multiroleinput)
                             {
-                                xcontent.Add(item.ToString());
+                                foreach (var item in (DatabaseHandler.Roles))
+                                {
+                                    xcontent.Add(item.ToString());
+                                }
+                                RolesBox.Visibility = Visibility.Collapsed;
+                                RolesLabel.Visibility = Visibility.Collapsed;
                             }
+                            else
+                            {
+                                RolesBox.Visibility = Visibility.Visible;
+                                RolesLabel.Visibility= Visibility.Visible;
+                            }
+
+                          
 
                             if (attributes[2].StartsWith("$(stream_name")){
                                 origin = "stream";
@@ -1909,6 +1947,8 @@ namespace ssi
 
             AllUsedSchemes.Clear();
             AllUsedStreams.Clear();
+            AllUsedRoles.Clear();
+
             if (SpecificModelattributesresult == null)
             {
                 return "";
@@ -1939,9 +1979,10 @@ namespace ssi
                                 else if (element.Key.Split('.')[1] == "stream" && !AllUsedStreams.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
                                 {
                                     AllUsedStreams.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
-                            }
+                                 }
                             
                         }
+
 
 
                         if (element.Value.Count == 1)
@@ -1951,6 +1992,10 @@ namespace ssi
                         else if (element.Value.Count == 2)
                         {
                              resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
+                            if (!AllUsedRoles.Contains(((ComboBox)element.Value.ElementAt(1)).SelectedItem)){
+                                AllUsedRoles.Add(((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString());
+                            }
+                            
                         }
 
 
@@ -1972,18 +2017,15 @@ namespace ssi
 
 
 
-        private void AddTrainerSpecificOptionsUIElements(string optstr, bool Clear=false)
+        private void AddTrainerSpecificOptionsUIElements(string optstr, bool multiroleInput, bool Clear=false)
         {
-            AllUsedSchemes.Clear();
-            AllUsedStreams.Clear();
-
             if (Clear) {
                 ModelSpecificAttributes = null;
                 ModelSpecificAttributes = new List<AnnoScheme.Attribute>();
                 inputGrid.Children.Clear();
             }
           
-            ModelSpecificAttributes.AddRange(ParseAttributes(optstr));
+            ModelSpecificAttributes.AddRange(ParseAttributes(optstr, multiroleInput));
            
 
             if (ModelSpecificAttributes != null && ModelSpecificAttributes.Count > 0)
@@ -2079,7 +2121,7 @@ namespace ssi
                         Grid.SetColumn(cb, 1);
                         Grid.SetRow(cb, inputGrid.RowDefinitions.Count - 1);
 
-                        if (element.Value.ExtraAttributes != null)
+                        if (element.Value.ExtraAttributes != null && element.Value.ExtraAttributes.Count > 0)
                         {
                             ComboBox cb2 = new ComboBox()
                             {
@@ -2109,7 +2151,7 @@ namespace ssi
                                 cb
                      
                             };
-                            SpecificModelattributesresult.Add(element.Key, list);
+                            SpecificModelattributesresult.Add(element.Key + "." + element.Value.Origin, list);
                         }
 
                            
