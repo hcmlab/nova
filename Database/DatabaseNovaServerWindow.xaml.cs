@@ -1,4 +1,4 @@
-﻿using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Distributions;
 using Microsoft.Toolkit.HighPerformance;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -1076,9 +1076,6 @@ namespace ssi
         private bool parseChainFile(ref Chain chain)
         {
             XmlDocument doc = new XmlDocument();
-            if(chainCategories.GetCategories().Count == 0)
-            chainCategories.AddCategory("ALL");
-
             try
             {
       
@@ -1221,11 +1218,7 @@ namespace ssi
                     }
                 }
 
-                if (chainCategories.GetCategories().Count > 0)
-                {
-                    ChainCategoryBox.ItemsSource = chainCategories.GetCategories();
-                    ChainCategoryBox.SelectedIndex = 0;
-                }
+               
                    
             }
             catch (Exception e)
@@ -1251,6 +1244,19 @@ namespace ssi
                 if (Directory.Exists(chainDir))
                 {
                     string[] chainFiles = Directory.GetFiles(chainDir, "*." + Defaults.CML.ChainFileExtension, SearchOption.AllDirectories);
+
+                  
+                    if (chainCategories.GetCategories().Count == 0)
+                    {
+                        chainCategories.AddCategory("ALL");
+                        if (ChainCategoryBox.ItemsSource == null)
+                        {
+                            ChainCategoryBox.ItemsSource = chainCategories.GetCategories();
+                            ChainCategoryBox.SelectedIndex = 0;
+                        }
+                    }
+
+
                     foreach (string chainFile in chainFiles)
                     {
                         Chain chain = new Chain() { Path = chainFile };
