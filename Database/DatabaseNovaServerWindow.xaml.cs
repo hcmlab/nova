@@ -1221,7 +1221,7 @@ namespace ssi
                     }
                 }
 
-                if (chainCategories.GetCategories().Count > 0)
+                if (chainCategories.GetCategories().Count == 1)
                 {
                     ChainCategoryBox.ItemsSource = chainCategories.GetCategories();
                     ChainCategoryBox.SelectedIndex = 0;
