@@ -2611,27 +2611,31 @@ namespace ssi
             }
 
             string resultOptstring = "";
-            foreach (var element in SpecificModelattributesresult)
+
+
+            this.Dispatcher.Invoke(() =>
             {
-                //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
+                foreach (var element in SpecificModelattributesresult)
                 {
-                    if (element.Value.GetType().Name == "CheckBox")
+                    //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
                     {
-                        resultOptstring = resultOptstring + element.Key + "=" + ((CheckBox)element.Value).IsChecked + ";";
+                        if (element.Value.GetType().Name == "CheckBox")
+                        {
+                            resultOptstring = resultOptstring + element.Key + "=" + ((CheckBox)element.Value).IsChecked + ";";
+                        }
+                        else if (element.Value.GetType().Name == "ComboBox")
+                        {
+                            resultOptstring = resultOptstring + element.Key + "=" + ((ComboBox)element.Value).SelectedItem + ";";
+                        }
+                        else if (element.Value.GetType().Name == "TextBox")
+                        {
+                            resultOptstring = resultOptstring + element.Key + "=" + ((TextBox)element.Value).Text + ";";
+                        }
+                        //var test = element.Value.ToString() ;
                     }
-                    else if (element.Value.GetType().Name == "ComboBox")
-                    {
-                        resultOptstring = resultOptstring + element.Key + "=" + ((ComboBox)element.Value).SelectedItem + ";";
-                    }
-                    else if (element.Value.GetType().Name == "TextBox")
-                    {
-                        resultOptstring = resultOptstring + element.Key + "=" + ((TextBox)element.Value).Text + ";";
-                    }
-                    //var test = element.Value.ToString() ;
                 }
-
-
-            }
+            });
+       
 
             resultOptstring = resultOptstring.Remove(resultOptstring.Length - 1, 1);
             return resultOptstring;
