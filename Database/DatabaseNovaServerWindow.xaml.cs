@@ -191,6 +191,7 @@ namespace ssi
             createStatusObjects();
 
             GetChains("All");
+            GetAnnotators();
 
             this.handler = handler;
             this.mode = Mode.EXTRACT;
@@ -1446,7 +1447,8 @@ namespace ssi
 
             GetRoles();
             GetSchemes();
-            GetAnnotators();
+           
+
             GetStreams();
             GetSessions();
             //GetTrainers();
