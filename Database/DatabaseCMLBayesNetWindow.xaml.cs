@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Xml.Linq;
 
 namespace ssi
 {
@@ -903,7 +904,14 @@ namespace ssi
                     ObjectId roleID = new ObjectId();
                     DatabaseHandler.GetObjectID(ref roleID, DatabaseDefinitionCollections.Roles, roleName);
 
-                    string annotatorName = DatabaseHandler.Annotators.Find(a => a.FullName == item.Annotator).Name;
+                    string annotatorName = "";
+                    DatabaseAnnotator annotator = DatabaseHandler.Annotators.Find(a => a.FullName == item.Annotator);
+                    if(annotator != null)
+                    {
+                        annotatorName = DatabaseHandler.Annotators.Find(a => a.FullName == item.Annotator).Name;
+                    }
+
+
                     ObjectId annotatorID = new ObjectId();
                     DatabaseHandler.GetObjectID(ref annotatorID, DatabaseDefinitionCollections.Annotators, annotatorName);
 
@@ -936,7 +944,13 @@ namespace ssi
                     ObjectId roleID = new ObjectId();
                     DatabaseHandler.GetObjectID(ref roleID, DatabaseDefinitionCollections.Roles, roleName);
 
-                    string annotatorName = DatabaseHandler.Annotators.Find(a => a.FullName == item.Annotator).Name;
+                    string annotatorName = "";
+                    var test = DatabaseHandler.Annotators;
+                    DatabaseAnnotator annotator = DatabaseHandler.Annotators.Find(a => a.FullName == item.Annotator);
+                    if (annotator != null)
+                    {
+                        annotatorName = DatabaseHandler.Annotators.Find(a => a.FullName == item.Annotator).Name;
+                    }
                     ObjectId annotatorID = new ObjectId();
                     DatabaseHandler.GetObjectID(ref annotatorID, DatabaseDefinitionCollections.Annotators, annotatorName);
 
