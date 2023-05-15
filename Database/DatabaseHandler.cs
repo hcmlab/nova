@@ -4111,8 +4111,12 @@ namespace ssi
 
                 // load scheme and data
                 BsonArray annotationData = getData(dataID, annotationsData);
-                if (annotationData.Count > 0)
+
+                if(scheme["type"] == "DISCRETE" || scheme["type"] == "FREE" || annotationData.Count > 0)
+                {
                     loadAnnoListSchemeAndData(ref annoList, scheme, annotationData);
+                }
+          
 
                 // update source
 
@@ -4187,8 +4191,11 @@ namespace ssi
                 // load scheme and data
 
                 BsonArray annotationData = getData(dataID, annotationsData);
-                if (annotationData.Count > 0)
+                if (scheme["type"] == "DISCRETE" || scheme["type"] == "FREE" || annotationData.Count > 0)
+                {
                     loadAnnoListSchemeAndData(ref annoList, scheme, annotationData);
+                }
+
 
                 // update source
 

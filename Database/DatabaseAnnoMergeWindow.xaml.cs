@@ -973,11 +973,11 @@ namespace ssi
                 List<AnnoList> al = DatabaseHandler.LoadSession(annos);
 
                 if (al.Count > 0)
-                {
+               {
                     anyisSaved = copyAnnotation(al);
                     if (anyisSaved) isSaved = true;
 
-                }
+               }
 
 
 
