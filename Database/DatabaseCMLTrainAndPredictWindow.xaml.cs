@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1236,7 +1237,7 @@ namespace ssi
                 if (frameSizestring.EndsWith("ms"))
                 {
                     frameSizestring = frameSizestring.Remove(frameSizestring.Length - 2);
-                    frameSize = double.Parse(frameSizestring);
+                    frameSize = (int)double.Parse(frameSizestring);
                 }
                 else if (frameSizestring.EndsWith("s"))
                 {
@@ -1341,7 +1342,7 @@ namespace ssi
                 { new StringContent(scheme.Type.ToString()), "schemeType" },          
                 { new StringContent(trainer_name), "trainerName" },
                 { new StringContent(deleteFiles.ToString()), "deleteFiles" },
-                { new StringContent(ModelSpecificOptString), "OptStr" }
+                { new StringContent(ModelSpecificOptString), "optStr" }
             };
 
             if (mode == Mode.COMPLETE)
@@ -1394,7 +1395,7 @@ namespace ssi
                     { new StringContent(scheme.Type.ToString()), "schemeType" },
                     { new StringContent(trainer_name), "trainerName" },
                     { new StringContent(deleteFiles.ToString()), "deleteFiles" },
-                    { new StringContent(ModelSpecificOptString), "OptStr" }
+                    { new StringContent(ModelSpecificOptString), "optStr" }
                 };
             }
 
@@ -1428,6 +1429,12 @@ namespace ssi
                 predictAndReloadThread.Start();
                 if (trainer.OptStr != "")
                     AddTrainerSpecificOptionsUIElements(trainer.OptStr);
+                else
+                {
+                    ModelSpecificAttributes = null;
+                    ModelSpecificAttributes = new List<AnnoScheme.Attribute>();
+                    inputGrid.Children.Clear();
+                }
 
                 this.statusLabel.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;
@@ -2645,6 +2652,7 @@ namespace ssi
 
         private void AddTrainerSpecificOptionsUIElements(string optstr)
         {
+
             ModelSpecificAttributes = null;
             ModelSpecificAttributes = ParseAttributes(optstr);
             inputGrid.Children.Clear();
