@@ -183,6 +183,23 @@ namespace ssi
                 var annotatdb = DatabaseHandler.Database.GetCollection<BsonDocument>(DatabaseDefinitionCollections.Annotators).Find(filterc).ToList();
                 string annotatorname = "Deleted User";
                 string annotatornamefull = annotatorname;
+
+                bool isFinished = false;
+
+
+                DateTime date = DateTime.Now;
+                BsonElement value;
+
+                if (anno.TryGetElement("isFinished", out value))
+                {
+                   isFinished = anno["isFinished"].AsBoolean;
+                }
+
+                if (anno.TryGetElement("date", out value))
+                {
+                    date = anno["date"].ToUniversalTime();
+                }
+
                 if (annotatdb.Count > 0)
                 {
                     annotatorname = annotatdb[0].GetValue(1).ToString();
@@ -192,11 +209,11 @@ namespace ssi
 
                 if (result.ElementCount > 0 && result2.ElementCount > 0 && anno["scheme_id"].AsObjectId == schemeid && anno["role_id"].AsObjectId == roleid)
                 {
-                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = sessionname });
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = sessionname, IsFinished = isFinished, Date = date });
                 }
                 else if (result.ElementCount > 0 && result2.ElementCount == 0 && anno["scheme_id"].AsObjectId == schemeid)
                 {
-                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = sessionname });
+                    items.Add(new DatabaseAnnotation() { Role = rolename, Scheme = annoschemename, AnnotatorFullName = annotatornamefull, Annotator = annotatorname, Id = anno["_id"].AsObjectId, Session = sessionname, IsFinished = isFinished, Date = date  });
                 }
                 }
             }

@@ -70,19 +70,32 @@
             <ListView Name="AnnotationResultBox" SelectionChanged="AnnotationResultBox_SelectionChanged" SelectionMode="Extended"  DockPanel.Dock="Top">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
-
-                        <GridViewColumn Width="Auto" Header="Role">
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="Role" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
+             
                         <GridViewColumn Width="Auto" Header="Annotator">
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="AnnotatorFullName" />
                             </GridViewColumn.DisplayMemberBinding>
                         </GridViewColumn>
-
+                        <GridViewColumn Width="Auto" Header="Finished">
+                            <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox Name="IsFinishedCheckbox" IsEnabled="False" IsChecked="{Binding IsFinished}" />
+                            </StackPanel>
+                            </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Date">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="Date" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Role">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <Binding Path="Role" />
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto" Header="Scheme" DisplayMemberBinding="{Binding Scheme}" />
                         <!--<GridViewColumn Width="Auto" Header="Annotator" DisplayMemberBinding="{Binding Meta}" />-->
                     </GridView>
                 </ListView.View>
