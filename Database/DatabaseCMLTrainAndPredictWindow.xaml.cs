@@ -1316,6 +1316,7 @@ namespace ssi
             }
 
             string ModelSpecificOptString = AttributesResult();
+            var jobIDhash = getIdHash();
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
@@ -1342,7 +1343,9 @@ namespace ssi
                 { new StringContent(scheme.Type.ToString()), "schemeType" },          
                 { new StringContent(trainer_name), "trainerName" },
                 { new StringContent(deleteFiles.ToString()), "deleteFiles" },
-                { new StringContent(ModelSpecificOptString), "optStr" }
+                { new StringContent(ModelSpecificOptString), "optStr" },
+                { new StringContent(jobIDhash), "jobID"  }
+
             };
 
             if (mode == Mode.COMPLETE)
@@ -1368,8 +1371,9 @@ namespace ssi
 
                 relativeTrainerPath = relativeTrainerOutputDirectory + "\\" + TrainerNameTextBox.Text + "." + Defaults.CML.TrainerFileExtension;
                 deleteFiles = true;
+                jobIDhash = getIdHash();
 
-                
+
                 CMLpredictionContent = new MultipartFormDataContent
                 {
                     { new StringContent(flattenSamples.ToString()), "flattenSamples"},
@@ -1395,7 +1399,9 @@ namespace ssi
                     { new StringContent(scheme.Type.ToString()), "schemeType" },
                     { new StringContent(trainer_name), "trainerName" },
                     { new StringContent(deleteFiles.ToString()), "deleteFiles" },
-                    { new StringContent(ModelSpecificOptString), "optStr" }
+                    { new StringContent(ModelSpecificOptString), "optStr" },
+                    { new StringContent(jobIDhash), "jobID"  }
+
                 };
             }
 
