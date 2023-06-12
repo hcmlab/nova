@@ -1234,7 +1234,7 @@ namespace ssi
         private List<Chain> getChains()
         {
             List<Chain> chains = new List<Chain>();
-            string[] types = {"test"};
+            string[] types = {"nova-server"};
 
 
             foreach (string type in types)
