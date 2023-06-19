@@ -236,13 +236,13 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
                     <Label Name="TrainerLabel" Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Trainer</Label>
 
-                    <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="GeneralBox_SelectionChanged" HorizontalContentAlignment="Stretch">
+                    <ComboBox Name="TrainerPathComboBox" MinWidth="250" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="GeneralBox_SelectionChanged" HorizontalContentAlignment="Stretch">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>

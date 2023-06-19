@@ -1836,7 +1836,8 @@ namespace ssi
                 }
                 TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database;
 
-                TrainerPathLabel.Content = trainer.Path;                
+                TrainerPathLabel.Content = trainer.Path;
+                TrainerPathLabel.ToolTip = trainer.Path;
             }
         }
 
