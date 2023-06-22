@@ -397,12 +397,13 @@ namespace ssi
                                 updatedb = true;
                             });
                         }
-                        else
+                        else if (this.status == Status.FINISHED)
                         {
                             if (!(CML_PredictionStarted))
                             {
                                 this.Dispatcher.Invoke(() =>
                                 {
+                                   
                                     this.ApplyButton.IsEnabled = true;
                                     this.Cancel_Button.IsEnabled = false;
                                 });
@@ -436,8 +437,8 @@ namespace ssi
 
             this.Dispatcher.Invoke(() =>
             {
-                this.ApplyButton.IsEnabled = true;
-                logTextBox.Text = "";
+               // this.ApplyButton.IsEnabled = true;
+               // logTextBox.Text = "";
             });
         }
 
@@ -796,7 +797,7 @@ namespace ssi
             {
            
 
-                this.ApplyButton.IsEnabled = true;
+                //this.ApplyButton.IsEnabled = true;
                 pythonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
 
@@ -1514,7 +1515,7 @@ namespace ssi
                 enable = true;
             }
 
-            ApplyButton.IsEnabled = enable;
+           // ApplyButton.IsEnabled = enable;
             ExtractPanel.IsEnabled = enable;
             ForceCheckBox.IsEnabled = enable;
             multidatabaseadd.IsEnabled = enable;
@@ -1574,6 +1575,7 @@ namespace ssi
                 string name = DatabasesBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(name);
                 LoadSessionSets();
+                GetAnnotators();
             }
 
             Update(mode);
@@ -1872,6 +1874,7 @@ namespace ssi
                                 RolesLabel.Visibility= Visibility.Visible;
                             }
 
+                            if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
                           
 
                             if (attributes[2].StartsWith("$(stream_name")){
@@ -1974,18 +1977,17 @@ namespace ssi
                     if (typesplitted.Contains(scheme.Type.ToString()) || Type == "")
                         foreach(DatabaseSession session in SessionsBox.SelectedItems)
                         {
-                                if (DatabaseHandler.AnnotationExists(((DatabaseAnnotator)(AnnotatorsBox.SelectedItem)).Name, session.Name, ((DatabaseRole)DatabaseHandler.Roles[0]).Name, scheme.Name))
+                                if (AnnotatorsBox.SelectedItem != null && DatabaseHandler.AnnotationExists(((DatabaseAnnotator)(AnnotatorsBox.SelectedItem)).Name, session.Name, ((DatabaseRole)DatabaseHandler.Roles[0]).Name, scheme.Name))
                                 {
                                     result.Add(scheme.Name);
-                                    break;
+                                  
+                                break;
                                 }
                            
                         }
-                      
-                        
-                        
                 }
             }
+          
             return result;
         }
 
@@ -2159,7 +2161,9 @@ namespace ssi
                         ComboBox cb = new ComboBox()
                         {
                             ItemsSource = element.Value.Attributes
+                           
                         };
+                        if (element.Value.Attributes[0] == "") cb.IsEnabled = false;
                         cb.SelectedItem = element.Value.DefaultValue;
                         Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; cb.Margin = margin;
                        
@@ -2175,6 +2179,7 @@ namespace ssi
                                 ItemsSource = element.Value.ExtraAttributes
                             };
                             cb2.SelectedIndex = 0;
+                            if (element.Value.Attributes[0] == "") cb2.IsEnabled = false;
 
                             Thickness margin2 = cb2.Margin; margin2.Top = 5; margin2.Right = 5; margin2.Bottom = 5; cb2.Margin = margin2;
                             inputGrid.Children.Add(cb2);
