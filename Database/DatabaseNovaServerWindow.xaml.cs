@@ -2,6 +2,7 @@ using MathNet.Numerics.Distributions;
 using Microsoft.Toolkit.HighPerformance;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using NAudio.CoreAudioApi;
 using Newtonsoft.Json;
 using Octokit;
 using Org.Mentalis.Security.Certificates;
@@ -14,6 +15,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Printing;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -66,6 +68,7 @@ namespace ssi
         private static string sessionList = "";
         static bool CML_TrainingStarted = false;
         static bool CML_PredictionStarted = false;
+        bool ShowAnnotatorBox = false;
 
         ChainCategories chainCategories = new ChainCategories();
         public class Trainer
@@ -360,6 +363,7 @@ namespace ssi
         private void tryToGetStatus()
         {
             Dictionary<string, string> response = null;
+            bool updatedb = false;
             while (pythonCaseOn)
             {
                 var jobIDhash = getIdHash();
@@ -390,6 +394,7 @@ namespace ssi
                             {
                                 this.ApplyButton.IsEnabled = false;
                                 this.Cancel_Button.IsEnabled = true;
+                                updatedb = true;
                             });
                         }
                         else
@@ -401,6 +406,11 @@ namespace ssi
                                     this.ApplyButton.IsEnabled = true;
                                     this.Cancel_Button.IsEnabled = false;
                                 });
+
+                                if(this.status == Status.FINISHED && updatedb) {
+                                    DatabaseHandler.UpdateDatabaseLocalLists();
+                                    updatedb = false;
+                                }
                             }
                         }
                     }
@@ -601,7 +611,8 @@ namespace ssi
                     }
                 }
 
-                DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
+            DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
+        
 
             string trainerLeftContext = LeftContextTextBox.Text;
             string trainerRightContext = RightContextTextBox.Text;
@@ -980,10 +991,7 @@ namespace ssi
 
         public void GetSessions()
         {
-            //if (SchemesBox.SelectedItem == null || RolesBox.SelectedItem == null || AnnotatorsBox.SelectedItem == null)
-            //{
-            //    return;
-            //}
+       
 
             //if (mode == Mode.TRAIN || mode == Mode.EVALUATE)
             //{
@@ -1012,6 +1020,7 @@ namespace ssi
             //else
             {
                 SessionsBox.ItemsSource = DatabaseHandler.Sessions;
+                SessionsBox.SelectedIndex = 0;  
             }
         }
 
@@ -1464,6 +1473,11 @@ namespace ssi
                // Properties.Settings.Default.CMLD = ((Chain)ChainsBox.SelectedItem).Name;
             }
 
+            if(AnnotatorsBox.SelectedItem != null)
+            {
+                Properties.Settings.Default.CMLDefaultAnnotator = ((DatabaseAnnotator)AnnotatorsBox.SelectedItem).Name;
+            }
+         
 
             if (RolesBox.SelectedItem != null)
             {
@@ -1547,6 +1561,7 @@ namespace ssi
                     FrameSizeTextBox.Text = (1000.0 / sr).ToString() + "ms";
                 }
 
+                
 
             }
         }
@@ -1786,7 +1801,7 @@ namespace ssi
 
         private List<AnnoScheme.Attribute> ParseAttributes(string optstr, bool multiroleinput)
         {
-
+            ShowAnnotatorBox = false;
             List<AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
             if (optstr == null)
             {
@@ -1865,6 +1880,7 @@ namespace ssi
                             else if (attributes[2].StartsWith("$(annotation_name") || attributes[2].StartsWith("$(anno_name"))
                             {
                                 origin = "anno";
+                                ShowAnnotatorBox = true;
                             }
 
                         }
@@ -1888,6 +1904,18 @@ namespace ssi
 
 
 
+
+            }
+
+            if (ShowAnnotatorBox)
+            {
+                AnnotatorsBox.Visibility = Visibility.Visible;
+                AnnotatorsLabel.Visibility = Visibility.Visible;
+            }
+            else 
+            {
+                AnnotatorsBox.Visibility = Visibility.Hidden;
+                AnnotatorsLabel.Visibility = Visibility.Hidden;
             }
 
             return values;
@@ -1944,7 +1972,18 @@ namespace ssi
                 foreach (var scheme in DatabaseHandler.Schemes)
                 {
                     if (typesplitted.Contains(scheme.Type.ToString()) || Type == "")
-                        result.Add(scheme.Name);
+                        foreach(DatabaseSession session in SessionsBox.SelectedItems)
+                        {
+                                if (DatabaseHandler.AnnotationExists(((DatabaseAnnotator)(AnnotatorsBox.SelectedItem)).Name, session.Name, ((DatabaseRole)DatabaseHandler.Roles[0]).Name, scheme.Name))
+                                {
+                                    result.Add(scheme.Name);
+                                    break;
+                                }
+                           
+                        }
+                      
+                        
+                        
                 }
             }
             return result;

@@ -74,7 +74,7 @@ namespace ssi
 
         public MediaKit(string filepath, MediaType type)
         {
-            LoadedBehavior = WPFMediaKit.DirectShow.MediaPlayers.MediaState.Stop;
+            LoadedBehavior = WPFMediaKit.DirectShow.MediaPlayers.MediaState.Manual;
             UnloadedBehavior = WPFMediaKit.DirectShow.MediaPlayers.MediaState.Close;
                          
             BeginInit();
