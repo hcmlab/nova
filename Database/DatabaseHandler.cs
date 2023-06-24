@@ -18,6 +18,7 @@ using System.Threading;
 using System.Web.UI.DataVisualization.Charting;
 using System.Windows;
 using System.Windows.Media;
+using Tamir.SharpSsh.jsch;
 using static System.Runtime.InteropServices.Marshal;
 
 namespace ssi
@@ -2047,7 +2048,14 @@ namespace ssi
 
                     if (document.Contains("sr"))
                     {
-                        scheme.SampleRate = document["sr"].AsDouble;
+                        try
+                        {
+                            scheme.SampleRate = document["sr"].AsDouble;
+                        }
+                        catch (System.InvalidCastException e)
+                        {
+                            scheme.SampleRate = document["sr"].ToDouble();
+                        }
                     }
                 }
                 else
@@ -2339,7 +2347,14 @@ namespace ssi
                     session.Duration = 0.0;
                     if (document.TryGetElement("duration", out value))
                     {
-                        session.Duration = document["duration"].AsDouble;
+                        try
+                        {
+                            session.Duration = document["duration"].AsDouble;
+                        }
+                        catch (System.InvalidCastException e)
+                        {
+                            session.Duration = document["duration"].ToDouble();
+                        }
                     }
 
                     session.Date = new DateTime();

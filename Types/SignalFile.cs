@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Shapes;
 using System.Xml;
 using NAudio.Wave;
+using Path = System.IO.Path;
 
 namespace ssi
 {
@@ -86,7 +89,7 @@ namespace ssi
                         && number > 0)
                     {
                         char[] delims = { ' ', '\t', ';', ',' };
-                        string[] tokens = lines[0].Split(delims);
+                        string[] tokens = lines[0].Split(delims, StringSplitOptions.RemoveEmptyEntries);
                         dim = (uint)tokens.Length;
 
                         if (dim > 0)
@@ -132,7 +135,7 @@ namespace ssi
                 signal.filePath = filepath;
                 string[] tmp = filepath.Split('\\');
                 signal.fileName = tmp[tmp.Length - 1];
-                signal.name =  Path.GetFileNameWithoutExtension(signal.fileName);
+                signal.name = Path.GetFileNameWithoutExtension(signal.fileName);
 
                 doc.Load(filepath);
 
@@ -315,7 +318,16 @@ namespace ssi
                         for (UInt32 i = 0; i < signal.number; i++)
                         {
                             line = fs.ReadLine();
-                            row = line.Split(delims);
+                            if (Regex.IsMatch(line, @"^[a-zA-Z]+$"))
+                            {
+                                continue;
+                            }
+                            if (line[0].Equals("\"") || ((short)line[0]) == 34)
+                            {
+                                line = line.Substring(1, line.Length - 2);
+                            }
+                            row = line.Split(delims, StringSplitOptions.RemoveEmptyEntries);
+
                             for (UInt32 j = 0; j < signal.dim; j++)
                             {
                                 signal.data[i * signal.dim + j] = float.Parse(row[j]);
