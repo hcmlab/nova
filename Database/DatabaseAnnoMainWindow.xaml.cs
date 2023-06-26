@@ -102,6 +102,7 @@ namespace ssi
                 DatabaseSession session = (DatabaseSession)SessionsBox.SelectedItem;
                 if (DatabaseHandler.ChangeSession(session.Name))
                 {
+
                    // DialogResult = true;
                 }
             }

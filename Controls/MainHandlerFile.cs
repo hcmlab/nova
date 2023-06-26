@@ -33,6 +33,7 @@ using FFMediaToolkit.Graphics;
 using System.Windows.Forms.VisualStyles;
 using NAudio.CoreAudioApi;
 using Tamir.SharpSsh.jsch;
+using WPFMediaKit.DirectShow.Controls;
 
 namespace ssi
 {
@@ -83,6 +84,7 @@ namespace ssi
                 polygonUtilities.updateImageSize();
             }
 
+          
 
         }
 
@@ -435,6 +437,9 @@ namespace ssi
                     MediaKit media = new MediaKit(filename, type);
                     addEvents(null, media);
                     addMedia(media);
+                    media.Play();
+                    media.Pause();
+
                     return media;
                 }
                 else if (MediaBackend == MEDIABACKEND.MEDIA)
@@ -442,7 +447,13 @@ namespace ssi
                     Media media = new Media(filename, type);
                     addEvents(media);
                     addMedia(media);
+                    media.Play();
+                    media.Pause();
+                    media.Position = TimeSpan.Zero;
+      
                     return media;
+
+
                 }
             }
             catch

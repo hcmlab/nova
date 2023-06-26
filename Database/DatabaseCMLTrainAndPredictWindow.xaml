@@ -236,22 +236,22 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
                     <Label Name="TrainerLabel" Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Trainer</Label>
 
-                    <ComboBox Name="TrainerPathComboBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="GeneralBox_SelectionChanged" HorizontalContentAlignment="Stretch">
+                    <ComboBox Name="TrainerPathComboBox" MinWidth="350"  Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="GeneralBox_SelectionChanged" HorizontalContentAlignment="Stretch">
                         <ComboBox.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate >
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="25"/>
+                                        <ColumnDefinition MinWidth="270"/>
+                                        <ColumnDefinition Width="80"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Name}" />
-                                    <TextBlock Text="{Binding Backend}" Foreground="DarkGray" HorizontalAlignment="Right"  />
+                                    <TextBlock Text="{Binding Name}"  />
+                                    <TextBlock Text="{Binding Backend}"  Foreground="DarkGray" HorizontalAlignment="Right" Width="80" />
                                 </Grid>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>

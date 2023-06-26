@@ -1323,9 +1323,9 @@ namespace ssi
                 { new StringContent(flattenSamples.ToString()), "flattenSamples"},
                 { new StringContent(relativeTrainerPath), "trainerFilePath" },
                 { new StringContent(relativeTrainerOutputDirectory), "trainerOutputDirectory" },
-                { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
-                { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
-                { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress), "dbServer" },
+                { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
+                { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
                 { new StringContent(database), "database" },
                 { new StringContent(sessionList), "sessions" },
                 { new StringContent(scheme.Name), "scheme" },
@@ -1379,9 +1379,9 @@ namespace ssi
                     { new StringContent(flattenSamples.ToString()), "flattenSamples"},
                     { new StringContent(relativeTrainerPath), "trainerFilePath" },
                     { new StringContent(relativeTrainerOutputDirectory), "trainerOutputDirectory" },
-                    { new StringContent(Properties.Settings.Default.DatabaseAddress), "server" },
-                    { new StringContent(Properties.Settings.Default.MongoDBUser), "username" },
-                    { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "password" },
+                    { new StringContent(Properties.Settings.Default.DatabaseAddress), "dbServer" },
+                    { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
+                    { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
                     { new StringContent(database), "database" },
                     { new StringContent(sessionList), "sessions" },
                     { new StringContent(scheme.Name), "scheme" },
@@ -1836,7 +1836,8 @@ namespace ssi
                 }
                 TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database;
 
-                TrainerPathLabel.Content = trainer.Path;                
+                TrainerPathLabel.Content = trainer.Path;
+                TrainerPathLabel.ToolTip = trainer.Path;
             }
         }
 

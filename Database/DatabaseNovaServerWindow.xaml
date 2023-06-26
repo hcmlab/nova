@@ -105,7 +105,7 @@
                 <ListBox Visibility="Collapsed" Name="SchemesBox" DisplayMemberPath="Name" SelectionChanged="GeneralBox_SelectionChanged" Grid.Row="1" SelectionMode="Single" Margin="0,0,5,0"></ListBox>
                 <Label Name="RolesLabel"  Grid.Row="2">Roles</Label>
                 <ListBox Name="RolesBox" DisplayMemberPath="Name" SelectionChanged="GeneralBox_SelectionChanged" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
-                <Label Grid.ColumnSpan="2" Grid.Row="4">Annotators</Label>
+                <Label Name="AnnotatorsLabel" Grid.ColumnSpan="2" Grid.Row="4">Annotators</Label>
                 <ListBox Name="AnnotatorsBox" DisplayMemberPath="FullName" SelectionChanged="GeneralBox_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>
 
