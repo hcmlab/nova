@@ -44,6 +44,13 @@ namespace ssi
                 NS_Port.Text = tokens[1];
             }
 
+            tokens = Properties.Settings.Default.NovaAssistantAddress.Split(':');
+            if (tokens.Length == 2)
+            {
+                Assistant_Host.Text = tokens[0];
+                Assistant_Port.Text = tokens[1];
+            }
+
 
             string[] history =  Properties.Settings.Default.serverhistory.Split(';');
 
@@ -54,6 +61,11 @@ namespace ssi
 
             NS_Host.DropItems = history;
             NS_Host.DropdownClosed += NS_split;
+
+            history = Properties.Settings.Default.NovaAssistantHistory.Split(';');
+
+            Assistant_Host.DropItems = history;
+            Assistant_Host.DropdownClosed += Assistant_Host_DropdownClosed; ;
 
 
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
@@ -99,6 +111,16 @@ namespace ssi
 
         }
 
+        private void Assistant_Host_DropdownClosed(object sender, RoutedEventArgs e)
+        {
+            string[] tokens = Assistant_Host.Text.Split(':');
+            if (tokens.Length == 2)
+            {
+                Assistant_Host.Text = tokens[0];
+                Assistant_Port.Text = tokens[1];
+            }
+        }
+
         private void split(object sender, RoutedEventArgs e)
         {
             string[] tokens = DBHost.Text.Split(':');
@@ -128,6 +150,12 @@ namespace ssi
         {
             return NS_Host.Text + ":" + NS_Port.Text;
         }
+
+        public string Assistant_Address()
+        {
+            return Assistant_Host.Text + ":" + Assistant_Port.Text;
+        }
+
 
         public string AnnotatorName()
         {
@@ -456,10 +484,21 @@ namespace ssi
                 NS_Host.IsDropdownOpened = true;
         }
 
+        private void Assistant_Host_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (Assistant_Host.Text == "")
+                Assistant_Host.IsDropdownOpened = true;
+        }
         private void NS_Port_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             NS_Port.SelectAll();
         }
+
+        private void Assistant_Port_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            Assistant_Port.SelectAll();
+        }
+
 
         private void NS_Host_GotMouseCapture(object sender, MouseEventArgs e)
         {
@@ -470,6 +509,17 @@ namespace ssi
         private void NS_Port_GotMouseCapture(object sender, MouseEventArgs e)
         {
             NS_Port.SelectAll();
+        }
+
+        private void Assistant_Host_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            if (Assistant_Host.Text == "")
+                Assistant_Host.IsDropdownOpened = true;
+        }
+
+        private void Assistant_Port_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            Assistant_Port.SelectAll();
         }
 
 
@@ -594,6 +644,18 @@ namespace ssi
             //TODO Register with Username/PW
             // 
             // MessageBox.Show(result);
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.NovaAssistantHistory = "";
+            Assistant_Host.DropItems = null;
+        }
+
+        private void Assistant_Port_TextChanged(object sender, TextChangedEventArgs e)
+        {
+          
+
         }
     }
 }

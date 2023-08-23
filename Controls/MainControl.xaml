@@ -116,6 +116,9 @@
                 </MenuItem>
             </MenuItem>
 
+            <MenuItem Header="ASSISTANT" Name="AssistantMenu">
+            </MenuItem>
+
             <MenuItem Header="?">
                 <MenuItem Header="Buy us a coffee ☕"  Name="supportMenu" />
                 <MenuItem Header="About"  Name="aboutMenu" />

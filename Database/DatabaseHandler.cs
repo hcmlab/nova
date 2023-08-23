@@ -1755,7 +1755,15 @@ namespace ssi
 
                         foreach (var element in array)
                         {
-                            stream.DimLabels.Add(element["id"].AsInt32, element["name"].AsString);
+                            try
+                            {
+                                stream.DimLabels.Add(element["id"].AsInt32, element["name"].AsString);
+                            }
+
+                            catch
+                            {
+                                stream.DimLabels.Add(Int32.Parse(element["id"].AsString), element["name"].AsString);
+                            }
                         }
 
                     }

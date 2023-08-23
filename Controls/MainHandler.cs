@@ -1,4 +1,5 @@
 ﻿using Octokit;
+using ssi.Controls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -255,6 +256,8 @@ namespace ssi
             control.aboutMenu.Click += aboutMenu_Click;
             control.supportMenu.Click += support_Click;
 
+            control.AssistantMenu.Click += AssistantMenu_Click;
+
 
             //PYTHON
             //if(ENABLE_PYTHON) startExplainableThread();
@@ -468,6 +471,13 @@ namespace ssi
             control.Drop += controlDrop;
         }
 
+        private void AssistantMenu_Click(object sender, RoutedEventArgs e)
+        {
+            LLAMA llama2 = new LLAMA();
+            llama2.ShowDialog();
+   
+        }
+
         private void DatabaseNovaServerMenu_Click(object sender, RoutedEventArgs e)
         {
             DatabaseNovaServerWindow window = new DatabaseNovaServerWindow(this);
@@ -639,7 +649,10 @@ namespace ssi
             {
                 viewonlyMode(false);
             }
-            updateControl();
+
+            LLAMA.dict_users = new Dictionary<string, dynamic>();
+
+        updateControl();
             control.timeLineControl.rangeSlider.Update();
             control.timeLineControl.rangeSlider.slider.RangeStartSelected = 0;
             control.timeLineControl.rangeSlider.slider.RangeStopSelected = 100000;
@@ -755,6 +768,7 @@ namespace ssi
                 Properties.Settings.Default.UncertaintyLevel = s.Uncertainty();
                 Properties.Settings.Default.Annotator = s.AnnotatorName();
                 Properties.Settings.Default.NovaServerAddress = s.NS_Address();
+                Properties.Settings.Default.NovaAssistantAddress = s.Assistant_Address();
                 Properties.Settings.Default.DatabaseAddress = s.DatabaseAddress();
                 Properties.Settings.Default.MongoDBUser = s.MongoUser() != "" ? s.MongoUser() : "invalid username";
                 Properties.Settings.Default.MongoDBPass = MainHandler.Encode(s.MongoPass());

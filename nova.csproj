@@ -497,6 +497,9 @@
     <Compile Include="Controls\Annotation\Polygon\DatabaseSaveProgress.xaml.cs">
       <DependentUpon>DatabaseSaveProgress.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\LLAMA.xaml.cs">
+      <DependentUpon>LLAMA.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\MainHandlerAnnotation.cs" />
     <Compile Include="Controls\MainHandlerCML.cs" />
     <Compile Include="Controls\MainHandlerDatabase.cs" />
@@ -608,6 +611,7 @@
     <Compile Include="Tools\LightningTipps.xaml.cs">
       <DependentUpon>LightningTipps.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Tools\NovaServerNostr.cs" />
     <Compile Include="Tools\PluginCaller.cs" />
     <Compile Include="Tools\Polygon Helper\DataGridChecker.cs" />
     <Compile Include="Tools\Polygon Helper\DrawUnit.cs" />
@@ -744,6 +748,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Annotation\Polygon\DatabaseSaveProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\LLAMA.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1057,6 +1065,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>

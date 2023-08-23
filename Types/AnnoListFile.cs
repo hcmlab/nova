@@ -1175,7 +1175,9 @@ namespace ssi
 
 
 
-                //XmlNode header = doc.SelectSingleNode("//HEADER");
+                //XmlNode
+                //
+                //= doc.SelectSingleNode("//HEADER");
                 //List<KeyValuePair<string, string>> header_list = new List<KeyValuePair<string, string>>();
                 //foreach (XmlNode node in header.ChildNodes)
                 //{
