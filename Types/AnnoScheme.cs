@@ -47,13 +47,19 @@ namespace ssi
             public List<string> ExtraValues { get; set; }
             public AttributeTypes ExtraAttributeType { get; set; }
 
-            public Attribute(string name, List<string> values, AttributeTypes type, List<string> xvalues = null, AttributeTypes xtype = AttributeTypes.BOOLEAN, string origin = null)
+            public List<string> ExtraValues2 { get; set; }
+            public AttributeTypes ExtraAttributeType2 { get; set; }
+
+
+            public Attribute(string name, List<string> values, AttributeTypes type, List<string> xvalues = null, AttributeTypes xtype = AttributeTypes.BOOLEAN, List<string> xvalues2 = null, AttributeTypes xtype2 = AttributeTypes.BOOLEAN, string origin = null)
             {
                 Name = name;
                 Values = values;
                 AttributeType = type;
                 ExtraValues = xvalues;
                 ExtraAttributeType = xtype;
+                ExtraValues2 = xvalues2;
+                ExtraAttributeType2 = xtype2;
                 Origin = origin;
             }
             public string Origin { get; set; }

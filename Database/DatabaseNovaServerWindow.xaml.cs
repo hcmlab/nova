@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using NAudio.CoreAudioApi;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Octokit;
 using Org.Mentalis.Security.Certificates;
 using SharpDX;
@@ -27,6 +28,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
@@ -55,6 +57,8 @@ namespace ssi
         List<string> AllUsedRoles = new List<string>();
         List<string> AllUsedStreams = new List<string>();
         List<string> AllUsedSchemes = new List<string>();
+
+        JArray data = new JArray();
 
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
@@ -100,14 +104,18 @@ namespace ssi
                 AttributeType = AnnoScheme.AttributeTypes.STRING;
                 ExtraAttributes = new List<string>();
                 ExtraAttributeType = AnnoScheme.AttributeTypes.LIST;
+                ExtraAttributes2 = new List<string>();
+                ExtraAttributeType2 = AnnoScheme.AttributeTypes.LIST;
                 Origin = "";
             }
             public string Label { get; set; }
             public List<string> Attributes { get; set; }
             public List<string> ExtraAttributes { get; set; }
+            public List<string> ExtraAttributes2 { get; set; }
             public string DefaultValue { get; set; }
             public AnnoScheme.AttributeTypes AttributeType { get; set; }
             public AnnoScheme.AttributeTypes ExtraAttributeType { get; set; }
+            public AnnoScheme.AttributeTypes ExtraAttributeType2 { get; set; }
             public string Origin { get; set; }
         }
 
@@ -437,8 +445,8 @@ namespace ssi
 
             this.Dispatcher.Invoke(() =>
             {
-               // this.ApplyButton.IsEnabled = true;
-               // logTextBox.Text = "";
+                this.ApplyButton.IsEnabled = true;
+                logTextBox.Text = "";
             });
         }
 
@@ -584,19 +592,19 @@ namespace ssi
            // DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
 
             string rolesList = "";
-            var roles = RolesBox.SelectedItems;
-            foreach (DatabaseRole role in roles)
-            {
-                if (rolesList == "")
-                {
-                    rolesList += role.Name;
-                }
-                else
-                {
-                    rolesList += ";" + role.Name;
-                }
+            //var roles = RolesBox.SelectedItems;
+            //foreach (DatabaseRole role in roles)
+            //{
+            //    if (rolesList == "")
+            //    {
+            //        rolesList += role.Name;
+            //    }
+            //    else
+            //    {
+            //        rolesList += ";" + role.Name;
+            //    }
 
-            }
+            //}
 
             string sessionList = "";
                 var sessions = SessionsBox.SelectedItems;
@@ -661,6 +669,7 @@ namespace ssi
             //    else
             //    {
             //        MessageBox.Show("Please use Seconds or Milliseconds for the Framesize");
+            //        return;
             //        return;
             //    }
             //}
@@ -732,6 +741,11 @@ namespace ssi
 
             var jobIDhash = getIdHash();
 
+            string json = data.ToString();
+
+
+
+
             MultipartFormDataContent content = new MultipartFormDataContent
             {
                 { new StringContent(flattenSamples.ToString()), "flattenSamples" },
@@ -741,17 +755,14 @@ namespace ssi
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
                 { new StringContent(database), "database" },
                 { new StringContent(sessionsList), "sessions" },
-                { new StringContent(schemes), "scheme" },
-                { new StringContent(roles), "roles" },
-                { new StringContent(annotator.Name), "annotator" },
-                { new StringContent(streams), "streamName" },
                 { new StringContent(chainLeftContext), "leftContext" },
                 { new StringContent(chainRightContext), "rightContext" },
                 { new StringContent(frameSize), "frameSize" },
                 { new StringContent(filenameSuffix), "fileNameSuffix" },
                 { new StringContent(ModelSpecificOptString), "optStr" },
                 { new StringContent(suffix), "suffix"  },
-                { new StringContent(jobIDhash), "jobID"  }
+                { new StringContent(jobIDhash), "jobID"  },
+                { new StringContent(json), "data"  }
             };
 
             if (this.mode == Mode.EXTRACT)
@@ -797,7 +808,7 @@ namespace ssi
             {
            
 
-                //this.ApplyButton.IsEnabled = true;
+                this.ApplyButton.IsEnabled = true;
                 pythonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
 
@@ -881,23 +892,19 @@ namespace ssi
             if (RolesBox.Items.Count > 0)
             {
 
-                    string[] items = Properties.Settings.Default.CMLDefaultRole.Split(';');
-                    foreach (string item in items)
+                string[] items = Properties.Settings.Default.CMLDefaultRole.Split(';');
+                foreach (string item in items)
+                {
+                    DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == item);
+                    if (role != null)
                     {
-                        DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == item);
-                        if (role != null)
-                        {
-                            RolesBox.SelectedItems.Add(role);
-                        }
+                        RolesBox.SelectedItems.Add(role);
                     }
-                    if (RolesBox.SelectedItem == null)
-                    {
-                        RolesBox.SelectAll();
-                    }
-                
-
-
-
+                }
+                if (RolesBox.SelectedItem == null)
+                {
+                    RolesBox.SelectAll();
+                }
 
                 RolesBox.ScrollIntoView(RolesBox.SelectedItem);
             }
@@ -1361,21 +1368,21 @@ namespace ssi
 
             DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
             DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
-            foreach (DatabaseRole role in RolesBox.SelectedItems)
-            {
-                List<DatabaseAnnotation> annotations = DatabaseHandler.GetAnnotations(scheme, role, annotator);
-                foreach (DatabaseAnnotation annotation in annotations)
-                {
-                    if (annotation.IsFinished)
-                    {
-                        DatabaseSession session = sessions.Find(s => s.Name == annotation.Session);
-                        if (session != null)
-                        {
-                            SessionsBox.SelectedItems.Add(session);
-                        }
-                    }
-                }
-            }
+            //foreach (DatabaseRole role in RolesBox.SelectedItems)
+            //{
+            //    List<DatabaseAnnotation> annotations = DatabaseHandler.GetAnnotations(scheme, role, annotator);
+            //    foreach (DatabaseAnnotation annotation in annotations)
+            //    {
+            //        if (annotation.IsFinished)
+            //        {
+            //            DatabaseSession session = sessions.Find(s => s.Name == annotation.Session);
+            //            if (session != null)
+            //            {
+            //                SessionsBox.SelectedItems.Add(session);
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         private void SelectMissingSessions()
@@ -1390,18 +1397,18 @@ namespace ssi
 
             DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
             DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
-            foreach (DatabaseRole role in RolesBox.SelectedItems)
-            {
-                List<DatabaseAnnotation> annotations = DatabaseHandler.GetAnnotations(scheme, role, annotator);
-                foreach (DatabaseAnnotation annotation in annotations)
-                {
-                    DatabaseSession session = sessions.Find(s => s.Name == annotation.Session);
-                    if (session != null)
-                    {
-                        SessionsBox.SelectedItems.Remove(session);
-                    }
-                }
-            }
+            //foreach (DatabaseRole role in RolesBox.SelectedItems)
+            //{
+            //    List<DatabaseAnnotation> annotations = DatabaseHandler.GetAnnotations(scheme, role, annotator);
+            //    foreach (DatabaseAnnotation annotation in annotations)
+            //    {
+            //        DatabaseSession session = sessions.Find(s => s.Name == annotation.Session);
+            //        if (session != null)
+            //        {
+            //            SessionsBox.SelectedItems.Remove(session);
+            //        }
+            //    }
+            //}
         }
 
         private void ApplySessionSet()
@@ -1478,7 +1485,7 @@ namespace ssi
             {
                 Properties.Settings.Default.CMLDefaultAnnotator = ((DatabaseAnnotator)AnnotatorsBox.SelectedItem).Name;
             }
-         
+
 
             if (RolesBox.SelectedItem != null)
             {
@@ -1718,11 +1725,11 @@ namespace ssi
                 sessions += session + ";";
             }
 
-            string roles = "";
-            foreach (var role in RolesBox.SelectedItems)
-            {
-                roles += role + ";";
-            }
+            //string roles = "";
+            //foreach (var role in RolesBox.SelectedItems)
+            //{
+            //    roles += role + ";";
+            //}
 
 
             if (selectedDatabaseAndSessions.Count == 0)
@@ -1739,7 +1746,7 @@ namespace ssi
 
 
 
-            SelectedDatabaseAndSessions stp = new SelectedDatabaseAndSessions() { Database = DatabasesBox.SelectedItem.ToString(), Sessions = sessions, Roles = roles, Annotator = AnnotatorsBox.SelectedItem.ToString(), Stream = stream };
+            SelectedDatabaseAndSessions stp = new SelectedDatabaseAndSessions() { Database = DatabasesBox.SelectedItem.ToString(), Sessions = sessions, Annotator = AnnotatorsBox.SelectedItem.ToString(), Stream = stream };
 
 
             //For now we allow to add data multiple times. This comes with the advantage that we also allow sessions from different annotators.
@@ -1825,7 +1832,9 @@ namespace ssi
                     List<string> content = new List<string>();
 
                     AnnoScheme.AttributeTypes xtype = AnnoScheme.AttributeTypes.LIST;
+                    AnnoScheme.AttributeTypes xtype2 = AnnoScheme.AttributeTypes.LIST;
                     List<string> xcontent = new List<string>();
+                    List<string> xcontent2 = new List<string>();
 
                     string name = attributes[0];
 
@@ -1865,13 +1874,14 @@ namespace ssi
                                 {
                                     xcontent.Add(item.ToString());
                                 }
+
                                 RolesBox.Visibility = Visibility.Collapsed;
                                 RolesLabel.Visibility = Visibility.Collapsed;
                             }
                             else
                             {
                                 RolesBox.Visibility = Visibility.Visible;
-                                RolesLabel.Visibility= Visibility.Visible;
+                                RolesLabel.Visibility = Visibility.Visible;
                             }
 
                             if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
@@ -1884,6 +1894,10 @@ namespace ssi
                             {
                                 origin = "anno";
                                 ShowAnnotatorBox = true;
+                                foreach (var item in (DatabaseHandler.Annotators))
+                                {
+                                    xcontent2.Add(item.ToString());
+                                }
                             }
 
                         }
@@ -1901,7 +1915,7 @@ namespace ssi
 
                     }
 
-                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, origin);
+                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, xcontent2, xtype2, origin);
                     values.Add(attribute);
                 }
 
@@ -1952,6 +1966,13 @@ namespace ssi
                     result.Add(role.Name);
                 }
             }
+            else if (Tag == "$(annotator)")
+            {
+                foreach (var annotator in DatabaseHandler.Annotators)
+                {
+                    result.Add(annotator.Name);
+                }
+            }
             else if (Tag.StartsWith("$(stream_name"))
             {
      
@@ -1971,20 +1992,24 @@ namespace ssi
             else if (Tag.StartsWith("$(annotation_name") || Tag.StartsWith("$(anno_name"))
             {
                
-
                 foreach (var scheme in DatabaseHandler.Schemes)
                 {
+
+
                     if (typesplitted.Contains(scheme.Type.ToString()) || Type == "")
-                        foreach(DatabaseSession session in SessionsBox.SelectedItems)
-                        {
-                                if (AnnotatorsBox.SelectedItem != null && DatabaseHandler.AnnotationExists(((DatabaseAnnotator)(AnnotatorsBox.SelectedItem)).Name, session.Name, ((DatabaseRole)DatabaseHandler.Roles[0]).Name, scheme.Name))
-                                {
-                                    result.Add(scheme.Name);
-                                  
-                                break;
-                                }
-                           
-                        }
+                    { 
+                        result.Add(scheme.Name);
+                        //    foreach(DatabaseSession session in SessionsBox.SelectedItems)
+                        //    {
+                        //            //if (DatabaseHandler.AnnotationExists(((DatabaseAnnotator)(AnnotatorsBox.SelectedItem)).Name, session.Name, ((DatabaseRole)DatabaseHandler.Roles[0]).Name, scheme.Name))
+                        //            //{
+
+
+
+                        //            //break;
+                        //            //}
+
+                    }
                 }
             }
           
@@ -1997,6 +2022,7 @@ namespace ssi
             AllUsedSchemes.Clear();
             AllUsedStreams.Clear();
             AllUsedRoles.Clear();
+            data.Clear();
 
             if (SpecificModelattributesresult == null)
             {
@@ -2020,15 +2046,90 @@ namespace ssi
 
                         if (element.Key.Split('.')[1] != "")
                         {
-                       
-                                if (element.Key.Split('.')[1] == "anno" && !AllUsedSchemes.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
+
+                            if (element.Key.Split('.')[1] == "anno")
+                            {
+                                string role = "";
+                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
                                 {
-                                    AllUsedSchemes.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
+
+                                    role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
+                                    JObject ob = new JObject
+                                    {
+                                        { "src", "db:anno" },
+                                        { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                        { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
+                                        { "role", role }
+                                    };
+                                    data.Add(ob);
                                 }
-                                else if (element.Key.Split('.')[1] == "stream" && !AllUsedStreams.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
+                                else if  (RolesBox.SelectedItem != null){
+                                    foreach (var rol in RolesBox.SelectedItems)
+                                        {
+                                        role = RolesBox.SelectedItem.ToString();
+                                        JObject ob = new JObject
+                                        {
+                                            { "src", "db:anno" },
+                                            { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                            { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
+                                            { "role", role }
+                                        };
+                                        data.Add(ob);
+                                    }
+                                    
+                                }
+                              
+                               
+
+                            }
+
+                            else if (element.Key.Split('.')[1] == "stream")
+                            {
+                                string role = "";
+
+                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
                                 {
-                                    AllUsedStreams.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
-                                 }
+                                    role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
+                                    JObject ob = new JObject
+                                {
+                                    { "src", "db:stream" },
+                                    { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                    { "role",role}
+                                };
+                                    data.Add(ob);
+                                }
+                                else if (RolesBox.SelectedItem != null)
+                                {
+                                    role = RolesBox.SelectedItem.ToString();
+                                    foreach (var rol in RolesBox.SelectedItems)
+                                    {
+                                        role = RolesBox.SelectedItem.ToString();
+                                        JObject ob = new JObject
+                                             {
+                                                    { "src", "db:stream" },
+                                                    { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                                    { "role",role}
+                                                };
+                                        data.Add(ob);
+                                    }
+
+
+                                }
+                            }
+
+
+
+                            //if (element.Key.Split('.')[1] == "anno" && !AllUsedSchemes.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
+                            //    {
+                            //        AllUsedSchemes.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
+                             
+
+
+                            //}
+                            //    else if (element.Key.Split('.')[1] == "stream" && !AllUsedStreams.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
+                            //    {
+                            //        AllUsedStreams.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
+                            //     }
                             
                         }
 
@@ -2041,10 +2142,19 @@ namespace ssi
                         else if (element.Value.Count == 2)
                         {
                              resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
-                            if (!AllUsedRoles.Contains(((ComboBox)element.Value.ElementAt(1)).SelectedItem)){
-                                AllUsedRoles.Add(((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString());
-                            }
+                           // if (!AllUsedRoles.Contains(((ComboBox)element.Value.ElementAt(1)).SelectedItem)){
+                            //    AllUsedRoles.Add(((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString());
+                            //}
                             
+                        }
+                        else if (element.Value.Count == 3)
+                        {
+                            resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(2)) + ";";
+                            //if (!AllUsedRoles.Contains(((ComboBox)element.Value.ElementAt(2)).SelectedItem))
+                            //{
+                            //    AllUsedRoles.Add(((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString());
+                            //}
+
                         }
 
 
@@ -2085,7 +2195,7 @@ namespace ssi
                 foreach (var attribute in ModelSpecificAttributes)
                 {
                     if (attribute.Values.Count == 0) attribute.Values.Add("");
-                    input[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType, ExtraAttributes = attribute.ExtraValues, ExtraAttributeType = attribute.ExtraAttributeType, Origin = attribute.Origin };
+                    input[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType, ExtraAttributes = attribute.ExtraValues, ExtraAttributeType = attribute.ExtraAttributeType, ExtraAttributes2 = attribute.ExtraValues2, ExtraAttributeType2 = attribute.ExtraAttributeType2, Origin = attribute.Origin };
                     
 
 
@@ -2155,9 +2265,6 @@ namespace ssi
                     else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
                     {
 
-
-                     
-
                         ComboBox cb = new ComboBox()
                         {
                             ItemsSource = element.Value.Attributes
@@ -2165,27 +2272,79 @@ namespace ssi
                         };
                         if (element.Value.Attributes[0] == "") cb.IsEnabled = false;
                         cb.SelectedItem = element.Value.DefaultValue;
-                        Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; cb.Margin = margin;
+                        Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; 
+                        cb.Margin = margin;
                        
                         inputGrid.Children.Add(cb);
 
                         Grid.SetColumn(cb, 1);
                         Grid.SetRow(cb, inputGrid.RowDefinitions.Count - 1);
 
-                        if (element.Value.ExtraAttributes != null && element.Value.ExtraAttributes.Count > 0)
+                        if (element.Value.ExtraAttributes2 != null && element.Value.ExtraAttributes2.Count > 0)
                         {
                             ComboBox cb2 = new ComboBox()
                             {
                                 ItemsSource = element.Value.ExtraAttributes
                             };
                             cb2.SelectedIndex = 0;
-                            if (element.Value.Attributes[0] == "") cb2.IsEnabled = false;
+                            if (element.Value.ExtraAttributes.Count == 0)
+                            {
+                                cb2.IsEnabled = false;
+                            }
+                            else
+                            {
+                                cb2.IsEnabled = true;
+                            }
+                           
+
+                            ComboBox cb3 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes2
+                            };
+                            cb3.SelectedIndex = 0;
+
+
+                            cb2.Margin = margin;
+                            cb3.Margin = margin;
+                            inputGrid.Children.Add(cb2);
+                            inputGrid.Children.Add(cb3);
+
+                            Grid.SetColumn(cb2, 2);
+                            Grid.SetRow(cb2, inputGrid.RowDefinitions.Count - 1);
+
+                            Grid.SetColumn(cb3, 3);
+                            Grid.SetRow(cb3, inputGrid.RowDefinitions.Count - 1);
+
+
+                            List<UIElement> list = new List<UIElement>
+                            {
+                                cb,
+                                cb2,
+                                cb3
+
+                            };
+                            SpecificModelattributesresult.Add(element.Key + "." + element.Value.Origin, list);
+
+
+                        }
+
+                        else if (element.Value.ExtraAttributes != null && element.Value.ExtraAttributes.Count > 0)
+                        {
+                            ComboBox cb2 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes
+                            };
+                            cb2.SelectedIndex = 0;
+                            if (element.Value.ExtraAttributes.Count == 0) cb2.IsEnabled = false;
+                            else cb2.IsEnabled = true;
+
 
                             Thickness margin2 = cb2.Margin; margin2.Top = 5; margin2.Right = 5; margin2.Bottom = 5; cb2.Margin = margin2;
                             inputGrid.Children.Add(cb2);
 
                             Grid.SetColumn(cb2, 2);
                             Grid.SetRow(cb2, inputGrid.RowDefinitions.Count - 1);
+
 
                             List<UIElement> list = new List<UIElement>
                             {
@@ -2196,6 +2355,7 @@ namespace ssi
 
 
                         }
+                      
                         else
                         {
                             List<UIElement> list = new List<UIElement>
