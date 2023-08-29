@@ -61,7 +61,7 @@ namespace ssi.Controls
         {
             InitializeComponent();
             ReplyBox.Document = new FlowDocument(paragraph);
-            user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+     
             InputBox.Focus();
         }
         public static Dictionary<string, dynamic> dict_users = new Dictionary<string, dynamic>();
@@ -108,8 +108,13 @@ namespace ssi.Controls
         public async void CallLlama()
         {
             string message = InputBox.Text;
-            var user =  DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
-            var from = user.Fullname;
+            string from = "Nova User";
+            if (DatabaseHandler.IsConnected == true)
+            {
+                var user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                from = user.Fullname;
+            }
+
             var text = message;
             paragraph.Inlines.Add(new Bold(new Run(from + ": "))
             {
