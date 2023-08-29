@@ -257,6 +257,10 @@ namespace ssi
             control.supportMenu.Click += support_Click;
 
             control.AssistantMenu.Click += AssistantMenu_Click;
+            if(Properties.Settings.Default.NovaAssistantAddress == "")
+            {
+                control.AssistantMenu.Visibility = Visibility.Collapsed;
+            }
 
 
             //PYTHON
@@ -789,6 +793,14 @@ namespace ssi
                 Properties.Settings.Default.SRTwordlevel = s.EnableSRTWordlevel();
 
                 Properties.Settings.Default.Save();
+                if (Properties.Settings.Default.NovaAssistantAddress == "")
+                {
+                    control.AssistantMenu.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    control.AssistantMenu.Visibility = Visibility.Visible;
+                }
 
 
                 foreach (AnnoTier tier in AnnoTiers)

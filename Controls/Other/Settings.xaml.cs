@@ -62,10 +62,11 @@ namespace ssi
             NS_Host.DropItems = history;
             NS_Host.DropdownClosed += NS_split;
 
-            history = Properties.Settings.Default.NovaAssistantHistory.Split(';');
+            //history = Properties.Settings.Default.NovaAssistantHistory.Split(';');
 
-            Assistant_Host.DropItems = history;
-            Assistant_Host.DropdownClosed += Assistant_Host_DropdownClosed; ;
+            //Assistant_Host.DropItems = history;
+            //Assistant_Host.
+            //Assistant_Host.DropdownClosed += Assistant_Host_DropdownClosed; ;
 
 
             DBUser.Text = Properties.Settings.Default.MongoDBUser;
@@ -153,6 +154,7 @@ namespace ssi
 
         public string Assistant_Address()
         {
+            if (Assistant_Host.Text == "") return "";
             return Assistant_Host.Text + ":" + Assistant_Port.Text;
         }
 
@@ -486,8 +488,8 @@ namespace ssi
 
         private void Assistant_Host_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            if (Assistant_Host.Text == "")
-                Assistant_Host.IsDropdownOpened = true;
+           //if (Assistant_Host.Text == "")
+              //  Assistant_Host.IsDropdownOpened = true;
         }
         private void NS_Port_GotFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
@@ -513,8 +515,8 @@ namespace ssi
 
         private void Assistant_Host_GotMouseCapture(object sender, MouseEventArgs e)
         {
-            if (Assistant_Host.Text == "")
-                Assistant_Host.IsDropdownOpened = true;
+           // if (Assistant_Host.Text == "")
+           //     Assistant_Host.IsDropdownOpened = false;
         }
 
         private void Assistant_Port_GotMouseCapture(object sender, MouseEventArgs e)
@@ -649,7 +651,7 @@ namespace ssi
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.NovaAssistantHistory = "";
-            Assistant_Host.DropItems = null;
+            //Assistant_Host.DropItems = null;
         }
 
         private void Assistant_Port_TextChanged(object sender, TextChangedEventArgs e)
