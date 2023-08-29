@@ -757,7 +757,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("localhost:1337")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string NovaAssistantAddress {
             get {
                 return ((string)(this["NovaAssistantAddress"]));

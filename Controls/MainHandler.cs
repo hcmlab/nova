@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.5.9";
+        public static string BuildVersion = "1.2.6.0";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -257,6 +257,10 @@ namespace ssi
             control.supportMenu.Click += support_Click;
 
             control.AssistantMenu.Click += AssistantMenu_Click;
+            if(Properties.Settings.Default.NovaAssistantAddress == "")
+            {
+                control.AssistantMenu.Visibility = Visibility.Collapsed;
+            }
 
 
             //PYTHON
@@ -789,6 +793,14 @@ namespace ssi
                 Properties.Settings.Default.SRTwordlevel = s.EnableSRTWordlevel();
 
                 Properties.Settings.Default.Save();
+                if (Properties.Settings.Default.NovaAssistantAddress == "")
+                {
+                    control.AssistantMenu.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    control.AssistantMenu.Visibility = Visibility.Visible;
+                }
 
 
                 foreach (AnnoTier tier in AnnoTiers)

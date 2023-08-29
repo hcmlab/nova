@@ -241,7 +241,7 @@
                             <RowDefinition></RowDefinition>
                         </Grid.RowDefinitions>
                         <Label Grid.Column="0" Grid.Row="0">Host:</Label>
-                        <local:DropdownTextBox Grid.Column="1" Grid.Row="0" x:Name="Assistant_Host" Margin="5,3,5,2" GotKeyboardFocus="Assistant_Host_GotFocus" GotMouseCapture="Assistant_Host_GotMouseCapture"/>
+                        <TextBox Grid.Column="1" Grid.Row="0" x:Name="Assistant_Host" Margin="5,3,5,2" GotKeyboardFocus="Assistant_Host_GotFocus" GotMouseCapture="Assistant_Host_GotMouseCapture"/>
                         <Button Grid.Column="2" Grid.Row="0" Height="20px" Click="Button_Click_1" Width="30px">Clear</Button>
                         <Label Grid.Column="0" Grid.Row="1">Port:</Label>
                         <TextBox Grid.Column="1" Width="50" HorizontalAlignment="Left" Grid.Row="1" Name="Assistant_Port" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" TextChanged="Assistant_Port_TextChanged"  GotKeyboardFocus="Assistant_Port_GotFocus" GotMouseCapture="Assistant_Port_GotMouseCapture" />
