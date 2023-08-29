@@ -185,5 +185,11 @@
     <Setting Name="NovaServerAddress" Type="System.String" Scope="User">
       <Value Profile="(Default)">localhost:27017</Value>
     </Setting>
+    <Setting Name="NovaAssistantAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="NovaAssistantHistory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost:1337</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

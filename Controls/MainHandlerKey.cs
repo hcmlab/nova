@@ -8,7 +8,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using SharpDX.XInput;
 using System.Threading;
-
+using ssi.Controls;
 
 namespace ssi
 {
@@ -271,6 +271,12 @@ namespace ssi
                             if (e.KeyboardDevice.IsKeyDown(Key.B))
                             {
                                 reloadBackupSelectedAnno();
+                                e.Handled = true;
+                            }
+                            else if (e.KeyboardDevice.IsKeyDown(Key.A))
+                            {
+                                LLAMA lLAMA = new LLAMA();
+                                lLAMA.ShowDialog();
                                 e.Handled = true;
                             }
                             else if (e.KeyboardDevice.IsKeyDown(Key.C))
