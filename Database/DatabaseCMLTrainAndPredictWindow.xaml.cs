@@ -17,6 +17,7 @@ using System.Runtime.ConstrainedExecution;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -25,6 +26,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
+using System.Xml.Linq;
 using static ssi.AnnoTierAttributesWindow;
 using static ssi.DatabaseCMLExtractFeaturesWindow;
 using Path = System.IO.Path;
@@ -2393,7 +2395,7 @@ namespace ssi
                     }
 
                     string header = headerClicked.Column.Header as string;
-                    ICollectionView dataView = CollectionViewSource.GetDefaultView(((ListView)sender).ItemsSource);
+                    ICollectionView dataView = CollectionViewSource.GetDefaultView(((System.Windows.Controls.ListView)sender).ItemsSource);
 
                     dataView.SortDescriptions.Clear();
                     SortDescription sd = new SortDescription(header, direction);
@@ -2578,43 +2580,129 @@ namespace ssi
                         type = AnnoScheme.AttributeTypes.BOOLEAN;
                         content.Add(attributes[2]);
                     }
-                       
+
+
                     else if (attributes[1].Contains("STRING"))
                     {
                         type = AnnoScheme.AttributeTypes.STRING;
-                        if(attributes[2] == "$(roles)")
+                        if (attributes[2].StartsWith("$("))
                         {
-                            attributes[2] = "";
-                            foreach (var role in DatabaseHandler.Roles)
-                            {
-                                attributes[2] += role.Name + ",";
-                            }
-                            attributes[2] = attributes[2].Remove(attributes[2].Length - 1);
-                            
+                            attributes[2] = checkTag(attributes[2]);
                         }
                         content.Add(attributes[2]);
                     }
-                        
                     else if (attributes[1].Contains("LIST"))
                     {
                         type = AnnoScheme.AttributeTypes.LIST;
-                        string[] elements = attributes[2].Split(',');
-                        foreach(string e in elements)
+
+                        if (attributes[2].StartsWith("$("))
                         {
-                            content.Add(e);
+                            if (attributes.Length > 3)
+                            {
+                                attributes[3] = attributes[3].Replace(")", "");
+                                content = checkTagList(attributes[2], attributes[3]);
+                            }
+                            else content = checkTagList(attributes[2], "");
+
+                            if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
+
+                        }
+                        else
+                        {
+                            string[] elements = attributes[2].Split(',');
+                            foreach (string e in elements)
+                            {
+                                content.Add(e);
+                            }
                         }
 
-                    }
 
-                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type);
-                    values.Add(attribute);
+                    }
+                   
+        
+                AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type);
+                values.Add(attribute);
                 }
 
-              
-  
             }
 
             return values;
+        }
+
+
+        public string checkTag(string Tag)
+        {
+            string result = "";
+            if (Tag == "$(role)")
+            {
+                foreach (var role in DatabaseHandler.Roles)
+                {
+                    result += role.Name + ",";
+                }
+                result = result.Remove(result.Length - 1);
+            }
+            return result;
+        }
+
+        public List<string> checkTagList(string Tag, string Type)
+        {
+            List<string> result = new List<string>();
+            string[] typesplitted = Type.Split(',');
+
+
+            if (Tag == "$(role)")
+            {
+                foreach (var role in DatabaseHandler.Roles)
+                {
+                    result.Add(role.Name);
+                }
+            }
+
+            else if (Tag == "$(annotator)")
+            {
+                foreach (var annotator in DatabaseHandler.Annotators)
+                {
+                    result.Add(annotator.Name);
+                }
+            }
+            else if (Tag.StartsWith("$(stream_name"))
+            {
+
+                foreach (var stream in DatabaseHandler.Streams)
+                {
+                    string[] streamtype = stream.Type.Split(';');
+                    for (int i = 0; i < streamtype.Length; i++)
+                    {
+                        streamtype[i] = streamtype[i].ToUpper();
+                    }
+                    if (streamtype.Any(typesplitted.Contains) || Type == "")
+
+                        //  if (typesplitted.Contains(streamtype.find .ToUpper()) || Type == "")
+                        result.Add(stream.Name);
+                }
+            }
+            else if (Tag.StartsWith("$(annotation_name") || Tag.StartsWith("$(anno_name"))
+            {
+                foreach (var scheme in DatabaseHandler.Schemes)
+                {
+                    if (typesplitted.Contains(scheme.Type.ToString()) || Type == "")
+                    {
+                        result.Add(scheme.Name);
+                    }
+                        //foreach (DatabaseSession session in SessionsBox.SelectedItems)
+                        //{
+                        //    if (AnnotatorsBox.SelectedItem != null && DatabaseHandler.AnnotationExists(((DatabaseAnnotator)(AnnotatorsBox.SelectedItem)).Name, session.Name, ((DatabaseRole)DatabaseHandler.Roles[0]).Name, scheme.Name))
+                        //    {
+                        //        result.Add(scheme.Name);
+
+                        //        break;
+                        //    }
+
+                        //}
+                }
+            }
+
+            return result;
         }
 
         public string AttributesResult()
@@ -2635,7 +2723,7 @@ namespace ssi
                     {
                         if (element.Value.GetType().Name == "CheckBox")
                         {
-                            resultOptstring = resultOptstring + element.Key + "=" + ((CheckBox)element.Value).IsChecked + ";";
+                            resultOptstring = resultOptstring + element.Key + "=" + ((System.Windows.Controls.CheckBox)element.Value).IsChecked + ";";
                         }
                         else if (element.Value.GetType().Name == "ComboBox")
                         {
@@ -2643,7 +2731,7 @@ namespace ssi
                         }
                         else if (element.Value.GetType().Name == "TextBox")
                         {
-                            resultOptstring = resultOptstring + element.Key + "=" + ((TextBox)element.Value).Text + ";";
+                            resultOptstring = resultOptstring + element.Key + "=" + ((System.Windows.Controls.TextBox)element.Value).Text + ";";
                         }
                         //var test = element.Value.ToString() ;
                     }
@@ -2675,7 +2763,7 @@ namespace ssi
                     input[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType };
                 }
                 SpecificModelattributesresult = new Dictionary<string, UIElement>();
-                TextBox firstTextBox = null;
+                System.Windows.Controls.TextBox firstTextBox = null;
                 foreach (KeyValuePair<string, Input> element in input)
                 {
                     System.Windows.Controls.Label label = new System.Windows.Controls.Label() { Content = element.Value.Label };
@@ -2694,7 +2782,7 @@ namespace ssi
 
                     if (element.Value.AttributeType == AnnoScheme.AttributeTypes.STRING)
                     {
-                        TextBox textBox = new TextBox() { Text = element.Value.DefaultValue };
+                        System.Windows.Controls.TextBox textBox = new System.Windows.Controls.TextBox() { Text = element.Value.DefaultValue };
                         //textBox.GotFocus += TextBox_GotFocus;
                         if (firstTextBox == null)
                         {
@@ -2713,7 +2801,7 @@ namespace ssi
                     }
                     else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.BOOLEAN)
                     {
-                        CheckBox cb = new CheckBox()
+                        System.Windows.Controls.CheckBox cb = new System.Windows.Controls.CheckBox()
                         {
                             IsChecked = (element.Value.DefaultValue.ToLower() == "false") ? false : true
                         };
