@@ -1952,6 +1952,14 @@ namespace ssi
                     result.Add(role.Name);
                 }
             }
+
+            else if (Tag == "$(annotator)")
+            {
+                foreach (var annotator in DatabaseHandler.Annotators)
+                {
+                    result.Add(annotator.Name);
+                }
+            }
             else if (Tag.StartsWith("$(stream_name"))
             {
      
