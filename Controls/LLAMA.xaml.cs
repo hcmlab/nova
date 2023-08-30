@@ -287,11 +287,11 @@ namespace ssi.Controls
                 e.Handled = true;
                 CallLlama();
             }
-            else if (e.Key == System.Windows.Input.Key.Escape)
+            else if (e.Key == System.Windows.Input.Key.Escape || e.Key == Key.A && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 e.Handled = true;
-                this.DialogResult = false;
-                this.Close();
+                //this.DialogResult = false;
+                this.Hide();
             }
 
         }
@@ -306,5 +306,15 @@ namespace ssi.Controls
             Scrollviewer.ScrollToEnd();
 
         }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            //if (!AppGeneral.IsClosing)
+            {
+                this.Hide();
+                e.Cancel = true;
+            }
+        }
+    
     }
 }
