@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.6.0";
+        public static string BuildVersion = "1.2.6.2";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -85,7 +85,7 @@ namespace ssi
 
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         public AnnoTierSegment temp_segment;
-
+        static LLAMA llama2 = new LLAMA();
         public class DownloadStatus
         {
             public string File;
@@ -477,9 +477,7 @@ namespace ssi
 
         private void AssistantMenu_Click(object sender, RoutedEventArgs e)
         {
-            LLAMA llama2 = new LLAMA();
-            llama2.ShowDialog();
-   
+                 MainHandler.llama2.Show();
         }
 
         private void DatabaseNovaServerMenu_Click(object sender, RoutedEventArgs e)

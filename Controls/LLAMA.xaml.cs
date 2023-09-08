@@ -61,7 +61,7 @@ namespace ssi.Controls
         {
             InitializeComponent();
             ReplyBox.Document = new FlowDocument(paragraph);
-            user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+     
             InputBox.Focus();
         }
         public static Dictionary<string, dynamic> dict_users = new Dictionary<string, dynamic>();
@@ -108,8 +108,13 @@ namespace ssi.Controls
         public async void CallLlama()
         {
             string message = InputBox.Text;
-            var user =  DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
-            var from = user.Fullname;
+            string from = "Nova User";
+            if (DatabaseHandler.IsConnected == true)
+            {
+                var user = DatabaseHandler.GetUserInfo(Properties.Settings.Default.MongoDBUser);
+                from = user.Fullname;
+            }
+
             var text = message;
             paragraph.Inlines.Add(new Bold(new Run(from + ": "))
             {
@@ -282,11 +287,11 @@ namespace ssi.Controls
                 e.Handled = true;
                 CallLlama();
             }
-            else if (e.Key == System.Windows.Input.Key.Escape)
+            else if (e.Key == System.Windows.Input.Key.Escape || e.Key == Key.A && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 e.Handled = true;
-                this.DialogResult = false;
-                this.Close();
+                //this.DialogResult = false;
+                this.Hide();
             }
 
         }
@@ -301,5 +306,15 @@ namespace ssi.Controls
             Scrollviewer.ScrollToEnd();
 
         }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            //if (!AppGeneral.IsClosing)
+            {
+                this.Hide();
+                e.Cancel = true;
+            }
+        }
+    
     }
 }

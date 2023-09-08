@@ -279,6 +279,19 @@ namespace ssi
                 }
             }
 
+            if (storesession.IsChecked == true)
+            {
+                headline += "session" + seperator;
+
+                for (int i = 0; i < tempsteps; i++)
+                {
+                    headline += "session_" + (i + 1) + seperator;
+                }
+            }
+
+
+       
+
             for (int a = 0; a < annoLists.Count; a++)
             {
                 double localdur = 0;
@@ -437,7 +450,18 @@ namespace ssi
                                 }
                             }
 
-                            headline = headline.Remove(headline.Length - 1);
+                            if (storesession.IsChecked == true)
+                            {
+                                headline += sessionname.ToUpper() + seperator;
+                                for (int j = 0; j < tempsteps; j++)
+                                {
+                                    headline += sessionname.ToUpper() + seperator;
+                                }
+                            }
+
+                            
+
+                       headline = headline.Remove(headline.Length - 1);
 
                             string[] splitline = headline.Split(seperator);
 
@@ -575,6 +599,8 @@ namespace ssi
                         headline += annoLists[a].Meta.Role + "_" + annoLists[a].Scheme.Name + "_" + (i+1) + seperator;
                     }
                 }
+
+              
                 double localdur = 0;
 
                 if (annoLists[a].Count > 0)
@@ -583,6 +609,16 @@ namespace ssi
                 }
 
                 maxdur = Math.Max(maxdur, localdur);
+            }
+
+            if (storesession.IsChecked == true)
+            {
+                headline += "session" + seperator;
+
+                for (int i = 0; i < tempsteps; i++)
+                {
+                    headline += "session_" + (i + 1) + seperator;
+                }
             }
 
             try
@@ -597,6 +633,9 @@ namespace ssi
                         string[] split = headline.Split(seperator);
                         SheetRows = split.Length;
                     }
+
+                  
+
 
 
                     headline = "";
@@ -636,6 +675,13 @@ namespace ssi
                     {
                         if (a.Count < minSize) minSize = a.Count;
                     }
+
+                    AnnoList session = new AnnoList();
+                    for (int i = 0; i < minSize; i++)
+                    {
+                        session.Add(new AnnoListItem(0, 1, sessionname));
+                    }
+                    newlists.Add(session);
 
                     string discretelabel = "";
 
@@ -712,6 +758,7 @@ namespace ssi
                             }
                         }
 
+                     
                         headline = headline.Remove(headline.Length - 1);
 
                         string[] splitline = headline.Split(seperator);

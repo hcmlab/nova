@@ -203,6 +203,9 @@
                     <Label Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"  Width="130" ToolTip="Only applies for continous annotations">Store role in column</Label>
                     <CheckBox Name="writerolecheckbox" Grid.Row="4" Grid.Column="1"  HorizontalAlignment="Right" Height="20" IsChecked="True"></CheckBox>
 
+                    <Label Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"  Width="130" ToolTip="Only applies for continous annotations">Store session in column</Label>
+                    <CheckBox Name="storesession" Grid.Row="5" Grid.Column="1"  HorizontalAlignment="Right" Height="20" IsChecked="True"></CheckBox>
+
 
                     <Label Name="HelpTrainLabel" Grid.Row="0" Grid.RowSpan="6" Grid.Column="2" VerticalAlignment="Center"></Label>
 
