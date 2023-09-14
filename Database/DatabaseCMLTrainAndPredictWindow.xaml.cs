@@ -2,7 +2,9 @@
 using Microsoft.Toolkit.HighPerformance;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using NAudio.CoreAudioApi;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Octokit;
 using SharpDX;
 using System;
@@ -22,6 +24,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
@@ -53,6 +56,7 @@ namespace ssi
         private Thread logThread = null;
         private Thread statusThread = null;
         private Thread predictAndReloadThread = null;
+        JArray data = new JArray();
 
         Dictionary<string, UIElement> SpecificModelattributesresult;
         private static IList sessions = null;
@@ -1320,16 +1324,39 @@ namespace ssi
             string ModelSpecificOptString = AttributesResult();
             var jobIDhash = getIdHash();
 
+
+            //TEST CODE
+
+            JObject ob = new JObject
+                                    {
+                                        { "src", "db:anno" },
+                                        { "scheme", "transcript" },
+                                        { "annotator", "whisperx"},
+                                        { "role", "testrole" }
+                                    };
+
+          
+            data.Add(ob);
+
+            string json = data.ToString(Newtonsoft.Json.Formatting.None);
+           
+   
+            string sessionsstr = "[\"04_Oesterreich_test\"]";
+
+            //TEST END
+
+
             MultipartFormDataContent content = new MultipartFormDataContent
             {
                 { new StringContent(flattenSamples.ToString()), "flattenSamples"},
                 { new StringContent(relativeTrainerPath), "trainerFilePath" },
                 { new StringContent(relativeTrainerOutputDirectory), "trainerOutputDirectory" },
-                { new StringContent(Properties.Settings.Default.DatabaseAddress), "dbServer" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
-                { new StringContent(database), "database" },
-                { new StringContent(sessionList), "sessions" },
+                { new StringContent(database), "dataset" },
+                { new StringContent(sessionsstr), "sessions" },
                 { new StringContent(scheme.Name), "scheme" },
                 { new StringContent(rolesList), "roles" },
                 { new StringContent(annotator.Name), "annotator" },
@@ -1346,7 +1373,8 @@ namespace ssi
                 { new StringContent(trainer_name), "trainerName" },
                 { new StringContent(deleteFiles.ToString()), "deleteFiles" },
                 { new StringContent(ModelSpecificOptString), "optStr" },
-                { new StringContent(jobIDhash), "jobID"  }
+                { new StringContent(jobIDhash), "jobID"  },
+                { new StringContent(json), "data"  }
 
             };
 
@@ -2727,6 +2755,8 @@ namespace ssi
                         }
                         else if (element.Value.GetType().Name == "ComboBox")
                         {
+
+
                             resultOptstring = resultOptstring + element.Key + "=" + ((ComboBox)element.Value).SelectedItem + ";";
                         }
                         else if (element.Value.GetType().Name == "TextBox")
