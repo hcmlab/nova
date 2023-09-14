@@ -676,12 +676,17 @@ namespace ssi
                         if (a.Count < minSize) minSize = a.Count;
                     }
 
-                    AnnoList session = new AnnoList();
-                    for (int i = 0; i < minSize; i++)
+                    if (storesession.IsChecked == true)
                     {
-                        session.Add(new AnnoListItem(0, 1, sessionname));
+                        AnnoList session = new AnnoList();
+                        for (int i = 0; i < minSize; i++)
+                        {
+                            session.Add(new AnnoListItem(0, 1, sessionname));
+                        }
+                        newlists.Add(session);
                     }
-                    newlists.Add(session);
+
+                 
 
                     string discretelabel = "";
 
