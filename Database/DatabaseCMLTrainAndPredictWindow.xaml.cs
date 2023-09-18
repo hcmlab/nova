@@ -888,7 +888,7 @@ namespace ssi
             Trainer trainer = (Trainer)TrainerPathComboBox.SelectedItem;
             bool force = mode == Mode.COMPLETE || ForceCheckBox.IsChecked.Value;
 
-            if (!File.Exists(trainer.Path))
+            if (trainer.Backend == "SSI" && !File.Exists(trainer.Path))
             {
                 MessageTools.Warning("file does not exist '" + trainer.Path + "'");
                 return;
@@ -1261,8 +1261,17 @@ namespace ssi
             int startTime = 0;
             //var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
             //string relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
-            string relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "").Remove(0, 1) ;
-   
+            string relativeTrainerPath = "";
+            if (trainer.Path.StartsWith("\\"))
+            {
+                relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "").Remove(0, 1);
+            }
+            else
+            {
+                relativeTrainerPath = trainer.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
+
+            }
+
             //TODO traineroutpath on predict
 
             FileInfo file_info = new FileInfo(trainerOutPath);
@@ -1326,22 +1335,27 @@ namespace ssi
 
 
             //TEST CODE
-
+            data.Clear();
             JObject ob = new JObject
                                     {
                                         { "src", "db:anno" },
-                                        { "scheme", "transcript" },
-                                        { "annotator", "whisperx"},
-                                        { "role", "testrole" }
+                                        { "scheme", SchemesBox.SelectedItem.ToString() },
+                                        { "annotator", AnnotatorsBox.SelectedItem.ToString() },
+                                        { "role", RolesBox.SelectedItem.ToString() }
                                     };
 
-          
             data.Add(ob);
 
             string json = data.ToString(Newtonsoft.Json.Formatting.None);
-           
-   
-            string sessionsstr = "[\"04_Oesterreich_test\"]";
+
+
+            string sessionsstr = "[";
+            foreach (DatabaseSession session in SessionsBox.SelectedItems)
+            {
+                sessionsstr = sessionsstr + "\"" + session.Name + "\",";
+            }
+            sessionsstr = sessionsstr.Remove(sessionsstr.Length - 1, 1) + "]";
+
 
             //TEST END
 
@@ -1430,7 +1444,8 @@ namespace ssi
                     { new StringContent(trainer_name), "trainerName" },
                     { new StringContent(deleteFiles.ToString()), "deleteFiles" },
                     { new StringContent(ModelSpecificOptString), "optStr" },
-                    { new StringContent(jobIDhash), "jobID"  }
+                    { new StringContent(jobIDhash), "jobID"  },
+                    { new StringContent(json), "data"  }
 
                 };
             }
@@ -1875,6 +1890,65 @@ namespace ssi
 
         #region Trainer
 
+        private bool parseTrainerFileServer(ref Trainer trainer, JToken TrainerEntry, bool isTemplate)
+        {
+
+            JObject trainerobject = JObject.Parse(TrainerEntry.ToString());
+
+
+
+
+            try
+            {
+                string[] tokens = trainer.Path.Split('\\');
+
+                trainer.Name = isTemplate ? Path.GetFileNameWithoutExtension(trainer.Path) : tokens[tokens.Length - 2] + " > " + Path.GetFileNameWithoutExtension(trainer.Path);
+                trainer.LeftContext = "0";
+                trainer.RightContext = "0";
+                trainer.Balance = "none";
+                trainer.Backend = "NOVA-SERVER";
+
+                var leftContext = trainerobject["meta_left_ctx"];
+                if (leftContext != null)
+                {
+                    trainer.LeftContext = trainerobject["meta_left_ctx"].ToString();
+                }
+                var rightContext = trainerobject["meta_right_ctx"];
+                if (rightContext != null)
+                {
+                    trainer.RightContext = trainerobject["meta_right_ctx"].ToString();
+                }
+
+                var optstr = trainerobject["model_option_string"];
+                if (optstr != null)
+                {
+                    trainer.OptStr = trainerobject["model_option_string"].ToString();
+                }
+
+                var script = trainerobject["model_script_path"];
+                if (script != null)
+                {
+                    trainer.Script = trainerobject["model_script_path"].ToString();
+                }
+
+                var balance = trainerobject["balance"];
+                if (balance != null)
+                {
+                    trainer.Balance = trainerobject["balance"].ToString();
+                }
+   
+
+            }
+            catch (Exception e)
+            {
+                MessageTools.Error(e.ToString());
+                return false;
+            }
+
+            return true;
+        }
+
+
         private bool parseTrainerFile(ref Trainer trainer, bool isTemplate)
         {
             XmlDocument doc = new XmlDocument();
@@ -1996,6 +2070,26 @@ namespace ssi
                     streamtypes[0] + "{" +
                     streamName + "}\\";
             }
+
+
+            //SERVER REQUEST
+
+            var server_trainers = handler.get_info_from_server();
+            JObject trainersServer = JObject.FromObject(server_trainers["trainer_ok"]);
+
+        
+            foreach (var trainerEntry in trainersServer)
+            {
+                Trainer trainer = new Trainer() { Path = trainerEntry.Key };
+                if (parseTrainerFileServer(ref trainer, trainerEntry.Value, isTemplate))
+                {
+                    trainers.Add(trainer);
+                }
+            }
+
+
+
+
 
             if (Directory.Exists(trainerDir))
             {

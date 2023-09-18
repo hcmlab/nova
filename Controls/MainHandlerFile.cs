@@ -232,7 +232,15 @@ namespace ssi
                 case SSI_FILE_TYPE.AUDIO:
 
                     Signal signala = loadAudioSignalFile(filepath, foreground, background);
-                    signala.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                    if (signala == null)
+                    {
+                        MessageBox.Show("Can't open Audio file " + filepath);
+                    }
+                    else
+                    {
+                        signala.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                    }
+                  
 
 
                     loaded = true;

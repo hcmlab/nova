@@ -1,4 +1,6 @@
 ﻿using System;
+using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -157,6 +159,12 @@ namespace ssi
 
         private void AddDB_Click(object sender, RoutedEventArgs e)
         {
+            if (DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, DatabaseBox.SelectedItem.ToString()) < 4)
+            {
+                MessageBox.Show("Only Server Admins can use this feature");
+                return;
+            }
+
             DatabaseDBMeta meta = new DatabaseDBMeta();
 
             DatabaseAdminDBMeta dialog = new DatabaseAdminDBMeta(ref meta);
@@ -174,8 +182,15 @@ namespace ssi
 
         private void EditDB_Click(object sender, RoutedEventArgs e)
         {
+           
             if (DatabaseBox.SelectedItem != null)
             {
+                if (DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, DatabaseBox.SelectedItem.ToString()) < 4)
+                {
+                    MessageBox.Show("Only Server Admins can use this feature");
+                    return;
+                }
+
                 string name = (string)DatabaseBox.SelectedItem;
 
                 DatabaseDBMeta meta = new DatabaseDBMeta { Name = name };
@@ -196,8 +211,16 @@ namespace ssi
 
         private void DeleteDB_Click(object sender, RoutedEventArgs e)
         {
+
             if (DatabaseBox.SelectedItem != null)
             {
+
+                if (DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, DatabaseBox.SelectedItem.ToString()) < 4)
+                {
+                    MessageBox.Show("Only Server Admins can use this feature");
+                    return;
+                }
+
                 string db = (string)DatabaseBox.SelectedItem;
                 MessageBoxResult result = MessageBox.Show("Delete database '" + db + "'?", "Question", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)

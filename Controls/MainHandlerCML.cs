@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -592,6 +593,22 @@ namespace ssi
             var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
 
             return explanationDic;
+        }
+
+
+
+        public JObject get_info_from_server()
+        {
+            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+            string url = "http://" + tokens[0] + ":" + tokens[1] + "/cml_info";
+
+            var response = client.GetAsync(url).Result;
+            var responseContent = response.Content;
+            string responseString = responseContent.ReadAsStringAsync().Result;
+            var result = JObject.Parse(responseString);
+
+
+            return result;
         }
 
         public void cancleCurrentAction(MultipartFormDataContent content)
