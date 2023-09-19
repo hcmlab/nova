@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using Octokit;
 using Org.Mentalis.Security.Certificates;
 using SharpDX;
+using Svg;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -201,11 +203,13 @@ namespace ssi
             InitializeComponent();
             createStatusObjects();
 
-            GetChains("All");
-            GetAnnotators();
 
             this.handler = handler;
             this.mode = Mode.EXTRACT;
+
+            GetChains("All");
+            GetAnnotators();
+
 
 
             ModeTabControl.SelectedIndex = (int)mode;
@@ -579,11 +583,11 @@ namespace ssi
             Chain chain = (Chain)ChainsBox.SelectedItem;
             bool force =  ForceCheckBox.IsChecked.Value;
 
-            if (!File.Exists(chain.Path))
-            {
-                MessageTools.Warning("file does not exist '" + chain.Path + "'");
-                return;
-            }
+            //if (!File.Exists(chain.Path))
+            //{
+            //    MessageTools.Warning("file does not exist '" + chain.Path + "'");
+            //    return;
+            //}
 
             string database = DatabaseHandler.DatabaseName;
 
@@ -1091,153 +1095,170 @@ namespace ssi
             }
         }
 
-        private bool parseChainFile(ref Chain chain)
+        private bool parseChainFile(ref Chain chain, JToken ChainEntry)
         {
-            XmlDocument doc = new XmlDocument();
             try
             {
-      
-                doc.Load(chain.Path);
-       
 
-
+                JObject chainobject = JObject.Parse(ChainEntry.ToString());
                 chain.Name = Path.GetFileNameWithoutExtension(chain.Path);
+                chain.LeftContext = "0";
+                chain.RightContext = "0";
+                chain.FrameStep = "0";
+                chain.Category = "0";
+                chain.Description = "";
+                chain.Backend = "NOVA-SERVER";
 
-                foreach (XmlNode node in doc.SelectNodes("//meta"))
+                var leftContext = chainobject["meta_left_ctx"];
+                if (leftContext != null)
                 {
-                    chain.FrameStep = node.Attributes["frameStep"].Value;
-                    var leftContext = node.Attributes["leftContext"];
-                    if (leftContext != null)
-                    {
-                        chain.LeftContext = leftContext.Value;
-                    }
-                    else
-                    {
-                        chain.LeftContext = "0";
-                    }
-                    var rightContext = node.Attributes["rightContext"];
-                    if (rightContext != null)
-                    {
-                        chain.RightContext = rightContext.Value;
-                    }
-                    else
-                    {
-                        chain.RightContext = "0";
-                    }
-
-                    var Backend = node.Attributes["backend"];
-                    if (Backend != null)
-                    {
-                        chain.Backend = Backend.Value;
-                    }
-                    else
-                    {
-                        chain.Backend = "SSI";
-                    }
-
-                    var Description = node.Attributes["description"];
-                    if (Description != null)
-                    {
-                        chain.Description = Description.Value;
-                    }
-                    else
-                    {
-                        chain.Description = "";
-                    }
-
-                    var Category = node.Attributes["category"];
-                    if (Category != null)
-                    {
-                        chain.Category = Category.Value;
-                        chainCategories.AddCategory(chain.Category);
-                       
-                    }
-                    else
-                    {
-                        chain.Category = "";
-                    }
-
-
-
-                }
-                foreach (XmlNode node in doc.SelectNodes("//filter"))
-                {
-                    foreach (XmlNode itemnode in node.SelectNodes("//item"))
-                    {
-                        Transformer t = new Transformer();
-                        var Name = itemnode.Attributes["create"];
-
-                        if (Name != null)
-                        {
-                            t.Name = Name.Value;
-                        }
-                        else continue;
-                        var Script = itemnode.Attributes["script"];
-                        if (Script != null)
-                        {
-                            t.Script = Script.Value;
-                        }
-                        var Syspath = itemnode.Attributes["syspath"];
-                        if (Syspath != null)
-                        {
-                            t.Syspath = Syspath.Value;
-                        }
-                        var OptStr = itemnode.Attributes["optsstr"];
-                        if (OptStr != null)
-                        {
-                            t.OptStr = OptStr.Value;
-                        }
-                        var Multi_role_input = itemnode.Attributes["multi_role_input"];
-                        if (Multi_role_input != null)
-                        {
-                            t.Multi_role_input = bool.Parse(itemnode.Attributes["multi_role_input"].Value);
-                        }
-                        else t.Multi_role_input = true;
-
-                        t.Type = "filter";
-                        chain.AddTransformer(t);
-                    }
-                }
-                foreach (XmlNode node in doc.SelectNodes("//feature"))
-                {
-                    foreach (XmlNode itemnode in node.SelectNodes("//item"))
-                    {
-                        Transformer t = new Transformer();
-                        var Name = itemnode.Attributes["create"];
-                        if (Name != null)
-                        {
-                            t.Name = Name.Value;
-                        }
-                        else continue;
-                        var Script = itemnode.Attributes["script"];
-                        if (Script != null)
-                        {
-                            t.Script = Script.Value;
-                        }
-                        var Syspath = itemnode.Attributes["syspath"];
-                        if (Syspath != null)
-                        {
-                            t.Syspath = Syspath.Value;
-                        }
-                        var OptStr = itemnode.Attributes["optsstr"];
-                        if (OptStr != null)
-                        {
-                            t.OptStr = OptStr.Value;
-                        }
-                        var Multi_role_input = itemnode.Attributes["multi_role_input"];
-                        if (Multi_role_input != null)
-                        {
-                            t.Multi_role_input = bool.Parse(itemnode.Attributes["multi_role_input"].Value);
-                        }
-                        else t.Multi_role_input = true;
-
-                        t.Type = "feature";
-                        chain.AddTransformer(t);
-                    }
+                    chain.LeftContext = chainobject["meta_left_ctx"].ToString();
                 }
 
-               
-                   
+                var rightContext = chainobject["meta_right_ctx"];
+                if (rightContext != null)
+                {
+                    chain.RightContext = chainobject["meta_right_ctx"].ToString();
+                }
+
+                var frameStep = chainobject["meta_frame_step"];
+                if (frameStep != null)
+                {
+                    chain.FrameStep = chainobject["meta_frame_step"].ToString();
+                }
+
+                var category = chainobject["meta_category"];
+                if (category != null)
+                {
+                    chain.Category = chainobject["meta_category"].ToString();
+                    chainCategories.AddCategory(chain.Category);
+                }
+                var description = chainobject["meta_description"];
+                if (description != null)
+                {
+                    chain.Description = chainobject["meta_description"].ToString();
+                }
+
+                var elements = chainobject["links"];
+
+                JArray arr = JArray.Parse(elements.ToString());
+
+
+                foreach (var element in arr)
+                    {
+                    Transformer t = new Transformer();
+                    t.Name = element["create"].ToString();
+
+                    var Script = element["script"];
+                    if (Script != null)
+                    {
+                        t.Script = element["script"].ToString();
+                    }
+                    var Syspath = element["syspath"];
+                    if (Syspath != null)
+                    {
+                        t.Syspath = element["syspath"].ToString();
+                    }
+                    var OptStr = element["optsstr"];
+                    if (OptStr != null)
+                    {
+                        t.OptStr = element["optsstr"].ToString();
+                    }
+                    var Multi_role_input = element["multi_role_input"];
+                    if (Multi_role_input != null)
+                    {
+                        t.Multi_role_input = bool.Parse(element["multi_role_input"].ToString());
+                    }
+                    else t.Multi_role_input = true;
+
+                    t.Type = "filter";
+                    chain.AddTransformer(t);
+
+                    }
+
+
+
+                //}
+                //foreach (XmlNode node in doc.SelectNodes("//filter"))
+                //{
+                //    foreach (XmlNode itemnode in node.SelectNodes("//item"))
+                //    {
+                //        Transformer t = new Transformer();
+                //        var Name = itemnode.Attributes["create"];
+
+                //        if (Name != null)
+                //        {
+                //            t.Name = Name.Value;
+                //        }
+                //        else continue;
+
+
+                //        var Script = itemnode.Attributes["script"];
+                //        if (Script != null)
+                //        {
+                //            t.Script = Script.Value;
+                //        }
+                //        var Syspath = itemnode.Attributes["syspath"];
+                //        if (Syspath != null)
+                //        {
+                //            t.Syspath = Syspath.Value;
+                //        }
+                //        var OptStr = itemnode.Attributes["optsstr"];
+                //        if (OptStr != null)
+                //        {
+                //            t.OptStr = OptStr.Value;
+                //        }
+                //        var Multi_role_input = itemnode.Attributes["multi_role_input"];
+                //        if (Multi_role_input != null)
+                //        {
+                //            t.Multi_role_input = bool.Parse(itemnode.Attributes["multi_role_input"].Value);
+                //        }
+                //        else t.Multi_role_input = true;
+
+                //        t.Type = "filter";
+                //        chain.AddTransformer(t);
+                //    }
+                //}
+                //foreach (XmlNode node in doc.SelectNodes("//feature"))
+                //{
+                //    foreach (XmlNode itemnode in node.SelectNodes("//item"))
+                //    {
+                //        Transformer t = new Transformer();
+                //        var Name = itemnode.Attributes["create"];
+                //        if (Name != null)
+                //        {
+                //            t.Name = Name.Value;
+                //        }
+                //        else continue;
+                //        var Script = itemnode.Attributes["script"];
+                //        if (Script != null)
+                //        {
+                //            t.Script = Script.Value;
+                //        }
+                //        var Syspath = itemnode.Attributes["syspath"];
+                //        if (Syspath != null)
+                //        {
+                //            t.Syspath = Syspath.Value;
+                //        }
+                //        var OptStr = itemnode.Attributes["optsstr"];
+                //        if (OptStr != null)
+                //        {
+                //            t.OptStr = OptStr.Value;
+                //        }
+                //        var Multi_role_input = itemnode.Attributes["multi_role_input"];
+                //        if (Multi_role_input != null)
+                //        {
+                //            t.Multi_role_input = bool.Parse(itemnode.Attributes["multi_role_input"].Value);
+                //        }
+                //        else t.Multi_role_input = true;
+
+                //        t.Type = "feature";
+                //        chain.AddTransformer(t);
+                //    }
+                //}
+
+
+
             }
             catch (Exception e)
             {
@@ -1251,40 +1272,75 @@ namespace ssi
         private List<Chain> getChains()
         {
             List<Chain> chains = new List<Chain>();
-            string[] types = {"nova-server"};
 
 
-            foreach (string type in types)
+            try
             {
-                string chainDir = Properties.Settings.Default.CMLDirectory +
-                        "\\" + Defaults.CML.ChainFolderName +
-                        "\\" + type;
-                if (Directory.Exists(chainDir))
+
+                var server_chains = handler.get_info_from_server();
+                JObject chainsServer = JObject.FromObject(server_chains["chains_ok"]);
+                if (chainCategories.GetCategories().Count == 0)
                 {
-                    string[] chainFiles = Directory.GetFiles(chainDir, "*." + Defaults.CML.ChainFileExtension, SearchOption.AllDirectories);
-
-                  
-                    if (chainCategories.GetCategories().Count == 0)
+                    chainCategories.AddCategory("ALL");
+                    if (ChainCategoryBox.ItemsSource == null)
                     {
-                        chainCategories.AddCategory("ALL");
-                        if (ChainCategoryBox.ItemsSource == null)
-                        {
-                            ChainCategoryBox.ItemsSource = chainCategories.GetCategories();
-                            ChainCategoryBox.SelectedIndex = 0;
-                        }
-                    }
-
-
-                    foreach (string chainFile in chainFiles)
-                    {
-                        Chain chain = new Chain() { Path = chainFile };
-                        if (parseChainFile(ref chain))
-                        {
-                            chains.Add(chain);
-                        }
+                        ChainCategoryBox.ItemsSource = chainCategories.GetCategories();
+                        ChainCategoryBox.SelectedIndex = 0;
                     }
                 }
+
+                        foreach (var chainsEntry in chainsServer)
+                        {
+                       
+                            Chain chain = new Chain() { Path = chainsEntry.Key };
+                            if (parseChainFile(ref chain, chainsEntry.Value))
+                            {
+                                chains.Add(chain);
+                            }
+
+                            
+                         }
+                
             }
+            catch
+                {
+                    Console.WriteLine("No Connection to a Nova Server instance");
+                }
+
+       
+
+
+            //foreach (string type in types)
+            //{
+            //    string chainDir = Properties.Settings.Default.CMLDirectory +
+            //            "\\" + Defaults.CML.ChainFolderName +
+            //            "\\" + type;
+            //    if (Directory.Exists(chainDir))
+            //    {
+            //        string[] chainFiles = Directory.GetFiles(chainDir, "*." + Defaults.CML.ChainFileExtension, SearchOption.AllDirectories);
+
+                  
+            //        if (chainCategories.GetCategories().Count == 0)
+            //        {
+            //            chainCategories.AddCategory("ALL");
+            //            if (ChainCategoryBox.ItemsSource == null)
+            //            {
+            //                ChainCategoryBox.ItemsSource = chainCategories.GetCategories();
+            //                ChainCategoryBox.SelectedIndex = 0;
+            //            }
+            //        }
+
+
+            //        foreach (string chainFile in chainFiles)
+            //        {
+            //            Chain chain = new Chain() { Path = chainFile };
+            //            if (parseChainFile(ref chain))
+            //            {
+            //                chains.Add(chain);
+            //            }
+            //        }
+            //    }
+            //}
 
             return chains;
         }

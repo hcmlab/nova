@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.6.2";
+        public static string BuildVersion = "1.2.6.3";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -234,7 +234,9 @@ namespace ssi
             control.databaseCMLFusionMenuPredict.Click += databaseCMLFusionPredict_Click;
             control.databaseCMLExtractFeaturesMenu.Click += databaseCMLExtractFeatures_Click;
             control.databaseCMLMergeFeaturesMenu.Click += databaseCMLMergeFeatures_Click;
-            control.databaseCMLTrainAndPredictMenu.Click += databaseCMLTrainAndPredict_Click;
+            control.databaseCMLTrainAndPredictMenuTrain.Click += databaseCMLTrainAndPredictTrain_Click;
+            control.databaseCMLTrainAndPredictMenuPredict.Click += databaseCMLTrainAndPredictPredict_Click;
+            control.databaseCMLTrainAndPredictMenuEval.Click += databaseCMLTrainAndPredictEval_Click;
             control.databaseManageUsersMenu.Click += databaseManageUsers_Click;
             control.databaseManageDBsMenu.Click += databaseManageDBs_Click;
             control.databaseManageSessionsMenu.Click += databaseManageSessions_Click;

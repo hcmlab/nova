@@ -1386,7 +1386,7 @@ namespace ssi
                 { new StringContent(scheme.Type.ToString()), "schemeType" },          
                 { new StringContent(trainer_name), "trainerName" },
                 { new StringContent(deleteFiles.ToString()), "deleteFiles" },
-                { new StringContent(ModelSpecificOptString), "optStr" },
+                { new StringContent(ModelSpecificOptString), "optStr" },  
                 { new StringContent(jobIDhash), "jobID"  },
                 { new StringContent(json), "data"  }
 
@@ -1895,9 +1895,6 @@ namespace ssi
 
             JObject trainerobject = JObject.Parse(TrainerEntry.ToString());
 
-
-
-
             try
             {
                 string[] tokens = trainer.Path.Split('\\');
@@ -2074,18 +2071,34 @@ namespace ssi
 
             //SERVER REQUEST
 
-            var server_trainers = handler.get_info_from_server();
-            JObject trainersServer = JObject.FromObject(server_trainers["trainer_ok"]);
-
-        
-            foreach (var trainerEntry in trainersServer)
+            try
             {
-                Trainer trainer = new Trainer() { Path = trainerEntry.Key };
-                if (parseTrainerFileServer(ref trainer, trainerEntry.Value, isTemplate))
+
+                var server_trainers = handler.get_info_from_server();
+                JObject trainersServer = JObject.FromObject(server_trainers["trainer_ok"]);
+
+
+                foreach (var trainerEntry in trainersServer)
                 {
-                    trainers.Add(trainer);
+                    if (trainerEntry.Key.Contains(scheme.Name))
+                    {
+                        Trainer trainer = new Trainer() { Path = trainerEntry.Key };
+                        if (parseTrainerFileServer(ref trainer, trainerEntry.Value, isTemplate))
+                        {
+                            trainers.Add(trainer);
+                        }
+                    }
+
+
                 }
             }
+
+            catch
+            {
+                Console.WriteLine("No Connection to a Nova Server instance");
+            }
+
+            
 
 
 

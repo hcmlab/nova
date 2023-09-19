@@ -32,11 +32,21 @@ namespace ssi
             dialog.ShowDialog();
         }
 
-        private void databaseCMLTrainAndPredict_Click(object sender, RoutedEventArgs e)
+        private void databaseCMLTrainAndPredictTrain_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.TRAIN);
             showDialogClearWorkspace(dialog);
-        }        
+        }
+        private void databaseCMLTrainAndPredictPredict_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.PREDICT);
+            showDialogClearWorkspace(dialog);
+        }
+        private void databaseCMLTrainAndPredictEval_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.EVALUATE);
+            showDialogClearWorkspace(dialog);
+        }
 
         private void databaseCMLCompleteStep()
         {                    
