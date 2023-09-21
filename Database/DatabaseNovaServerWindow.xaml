@@ -312,7 +312,7 @@
                     
                 </Grid.ColumnDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Feature chain</Label>
+                <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left">Processor</Label>
              
                 <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
                 <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
@@ -322,9 +322,6 @@
                 <TextBox Name="RightContextTextBox" Grid.Row="3" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Name="HelpLabel" Grid.Row="1" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
 
-                <Label  Grid.Column="0" Grid.Row="4"  VerticalAlignment="Center" HorizontalAlignment="Right">Optional Suffix:</Label>
-                <TextBox  Grid.Column="1"  Grid.Row="4" Name="FeatureNameTextBox" Height="20" ></TextBox>
-           
             </Grid>
           
 

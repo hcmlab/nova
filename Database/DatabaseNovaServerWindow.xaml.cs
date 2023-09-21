@@ -228,7 +228,7 @@ namespace ssi
             LeftContextTextBox.IsEnabled = true;
             FrameSizeTextBox.IsEnabled = true;
             RightContextTextBox.IsEnabled = true;
-            FeatureNameTextBox.IsEnabled = true;
+            //FeatureNameTextBox.IsEnabled = true;
             
 
             int endtime = -1;
@@ -670,7 +670,7 @@ namespace ssi
             // string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
 
             string frameSize = FrameSizeTextBox.Text;
-            string suffix = FeatureNameTextBox.Text;
+            //string suffix = FeatureNameTextBox.Text;
 
 
             //if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON
@@ -1698,7 +1698,7 @@ namespace ssi
                 { new StringContent(frameSize), "frameSize" },
                 { new StringContent(filenameSuffix), "fileNameSuffix" },
                 { new StringContent(ModelSpecificOptString), "optStr" },
-                { new StringContent(suffix), "suffix"  },
+                { new StringContent(""), "suffix"  },
                 { new StringContent(jobIDhash), "jobID"  },
                 { new StringContent(json), "data"  }
             };
