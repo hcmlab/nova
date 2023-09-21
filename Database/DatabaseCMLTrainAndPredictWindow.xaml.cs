@@ -1336,8 +1336,18 @@ namespace ssi
 
             //TEST CODE
             data.Clear();
-            JObject ob = new JObject
+            string type = "input";
+            string id = "in_1";
+            if (mode == Mode.PREDICT)
+            {
+                type = "output";
+                id = "out_1";
+            }
+
+                JObject ob = new JObject
                                     {
+                                        { "type", type },
+                                        { "id", id },
                                         { "src", "db:anno" },
                                         { "scheme", SchemesBox.SelectedItem.ToString() },
                                         { "annotator", AnnotatorsBox.SelectedItem.ToString() },

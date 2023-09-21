@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing" Closed="Window_Closed"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
+        Title="NOVA SERVER" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing" Closed="Window_Closed"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
 
     <Window.Resources>
 
@@ -60,7 +60,7 @@
         </Grid.RowDefinitions>
 
         <TabControl Name="ModeTabControl" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" SelectionChanged="ModeTabControl_SelectionChanged">
-            <TabItem Header="Extract" />
+            <TabItem Header="Process" />
             <!--<TabItem Header="Evaluate" />
             <TabItem Header="Predict" />-->
         </TabControl>
@@ -78,10 +78,10 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="141*"></ColumnDefinition>
-                <ColumnDefinition Width="140*"/>
-                <ColumnDefinition Width="281*"></ColumnDefinition>
+                <ColumnDefinition Width="200*"></ColumnDefinition>
+                <ColumnDefinition Width="200*"/>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
+ 
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="Database"/>
@@ -90,7 +90,7 @@
             </DockPanel>
 
             <Label Grid.Row="0" Grid.Column="1" Visibility="Collapsed" Content="Annotation"/>
-            <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" >
+            <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1" >
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"></RowDefinition>
@@ -105,12 +105,12 @@
                 <ListBox Visibility="Collapsed" Name="SchemesBox" DisplayMemberPath="Name" SelectionChanged="GeneralBox_SelectionChanged" Grid.Row="1" SelectionMode="Single" Margin="0,0,5,0"></ListBox>
                 <Label Name="RolesLabel"  Grid.Row="2">Roles</Label>
                 <ListBox Name="RolesBox" DisplayMemberPath="Name" SelectionChanged="GeneralBox_SelectionChanged" Grid.Row="3" SelectionMode="Extended" Margin="0,0,5,0"></ListBox>
-                <Label Name="AnnotatorsLabel" Grid.ColumnSpan="2" Grid.Row="4">Annotators</Label>
-                <ListBox Name="AnnotatorsBox" DisplayMemberPath="FullName" SelectionChanged="GeneralBox_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
+                <Label Name="AnnotatorsLabel" Visibility="Collapsed" Grid.ColumnSpan="1" Grid.Row="4">Annotators</Label>
+                <ListBox Name="AnnotatorsBox" Visibility="Collapsed" DisplayMemberPath="FullName" SelectionChanged="GeneralBox_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>
 
             <Label Content="Sessions" Grid.Row="0" Grid.Column="4" ToolTip="Sessions that are not marked as finished appear in red" />
-            <DockPanel Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="4" Margin="0,0,5,0" LastChildFill="True">
+            <DockPanel Grid.Row="1" Grid.ColumnSpan="1" Grid.Column="4" Margin="0,0,5,0" LastChildFill="True">
 
                 <DockPanel Name="SelectSessionSetComboBoxPanel"  DockPanel.Dock="Bottom" LastChildFill="True">
                     <Label DockPanel.Dock="Left">Select</Label>
@@ -227,7 +227,7 @@
 
 
 
-            <GroupBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,5,5,0" Header="Chain">
+            <GroupBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Processor">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -247,14 +247,14 @@
                     </Grid.ColumnDefinitions>
 
 
-                    <Label Name="ChainCategoryLabel" Grid.Row="0" Grid.Column="1">Category:</Label>
-                    <ComboBox Name="ChainCategoryBox" Grid.Row="1" Grid.Column="1" Height="20" SelectionChanged="ChainCategoryBox_SelectionChanged" ></ComboBox>
-                    <Label Name="ChainsBoxLabel" Grid.Row="2" Grid.Column="1">Chain:</Label>
+                    <Label Name="ProcessorCategoryLabel" Grid.Row="0" Grid.Column="1">Category:</Label>
+                    <ComboBox Name="ProcessorCategoryBox" Grid.Row="1" Grid.Column="1" Height="20" SelectionChanged="ProcessorCategoryBox_SelectionChanged" ></ComboBox>
+                    <Label Name="ProcessorsBoxLabel" Grid.Row="2" Grid.Column="1">Processor:</Label>
 
-                    <ComboBox Name="ChainsBox" Grid.Row="3" Grid.Column="1" Height="20" SelectionChanged="GeneralBox_SelectionChanged" ></ComboBox>
-                    <Label Name="ChainPathLabel" Grid.Row="4" Grid.Column="1"></Label>
-                    <Label Name="ChainDescLabel" Grid.Row="5" Grid.Column="1">Description:</Label>
-                    <Label Name="ChainDescription" Grid.Row="6" Grid.Column="1"></Label>
+                    <ComboBox Name="ProcessorsBox" Grid.Row="3" Grid.Column="1" Height="20" SelectionChanged="GeneralBox_SelectionChanged" ></ComboBox>
+                    <Label Name="ProcessorPathLabel" Grid.Row="4" Grid.Column="1"></Label>
+                    <Label Name="ProcessorDescLabel" Grid.Row="5" Grid.Column="1">Description:</Label>
+                    <Label Name="ProcessorDescription" Grid.Row="6" Grid.Column="1"></Label>
 
         
                     <Label Visibility="Collapsed" Name="TrainerPathLabel" Grid.Row="0" Grid.Column="2" Margin="0,5,0,5"></Label>
@@ -262,7 +262,37 @@
                 </Grid>
 
             </GroupBox>
-            
+            <GroupBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Input">
+                <Grid Name="inputGrid" >
+
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+
+                    </Grid.ColumnDefinitions>
+                </Grid>
+
+            </GroupBox>
+            <GroupBox Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Output">
+
+                <Grid Name="outputGrid" >
+
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+
+                    </Grid.ColumnDefinitions>
+                </Grid>
+
+            </GroupBox>
+
+
             <Grid Name="ExtractPanel" Grid.Row="2" Grid.ColumnSpan="3" Margin="0,5,5,0" >
 
                 <Grid.RowDefinitions>
@@ -303,7 +333,6 @@
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <Button Content="Cancel" x:Name="Cancel_Button" IsEnabled="False" Click="Cancel_Button_Click" Width="75" Height="30"/>
                     <Button Content="Apply" x:Name="ApplyButton" IsEnabled="False"  Click="Apply_Click" Width="75" Margin="5" Height="30"/>
-                    <CheckBox x:Name="LosoCheckBox" VerticalAlignment="Center" ToolTip="Apply leave-one-session-out cross-validation" Content="Cross-validation"/>
                     <CheckBox x:Name="ForceCheckBox" Margin="5" VerticalAlignment="Center" Content="Force"/>
                 </StackPanel>
                 <Label Name="statusLabel" HorizontalContentAlignment="Center" Background="Red"  Content="No connection to server!" Width="160" Height="30"/>
@@ -328,11 +357,18 @@
 
             <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,5,5">
                 <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log</Label>
-                <TextBox  IsReadOnly="True" Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"  TextWrapping="Wrap"/>
+                <ScrollViewer x:Name="Scrollviewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <TextBox  IsReadOnly="True" Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"  TextWrapping="Wrap"  SizeChanged="logTextBox_SizeChanged"/>
 
+                    <!--<RichTextBox Margin="10,10,10,10"  SizeChanged="ReplyBox_SizeChanged"  x:Name="ReplyBox" Height="Auto" Width="Auto" Grid.Row="0">
+                        --><!--TextWrapping="Wrap"--><!--
+                    </RichTextBox>-->
+                </ScrollViewer>
+                
+              
             </DockPanel>
-            <GroupBox Name="ModelSpecificOptions" Margin="0,5,5,0" Header="Chain Specific Options" Grid.Row="1">
-                <Grid Name="inputGrid" >
+            <GroupBox Name="ModelSpecificOptions" Margin="0,5,5,0" Header="Processor Specific Options" Grid.Row="1">
+                <Grid Name="optionsGrid" >
 
 
                     <Grid.ColumnDefinitions>

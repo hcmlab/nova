@@ -474,7 +474,7 @@ namespace ssi
             try
             {
                 string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/extract";
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/process";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -498,7 +498,7 @@ namespace ssi
             try
             {
                 string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/predict";
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/process";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();

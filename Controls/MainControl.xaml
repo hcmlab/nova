@@ -91,22 +91,25 @@
              
                 <MenuItem Header="Merge Annotations" Name="databaseCMLMergeAnnotationsMenu" />
                 <MenuItem Header="Annotation Statistics" Name="databaseAnnotationStatisticsMenu" />
-                <MenuItem Header="Extract Features">
-                    <MenuItem Header="Local Extraction" Name="databaseCMLExtractFeaturesMenu"/>
-                    <MenuItem Header="Nova-Server Extraction (beta)" Name="databaseNovaServerMenu"/>
-                </MenuItem>
-                <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
-                <MenuItem Header="Machine Learning" Name="databaseCMLTrainAndPredictMenu">
+                <MenuItem Header="Local ML Tools">
+                    <MenuItem Header="Extract Features" Name="databaseCMLExtractFeaturesMenu"/>
+                    <MenuItem Header="Merge Features" Name="databaseCMLMergeFeaturesMenu"/>
                     <MenuItem Header="Train" Name="databaseCMLTrainAndPredictMenuTrain"/>
                     <MenuItem Header="Evaluation" Name="databaseCMLTrainAndPredictMenuEval"/>
                     <MenuItem Header="Predict" Name="databaseCMLTrainAndPredictMenuPredict"/>
-                </MenuItem>
-                <MenuItem Header="Fusion" Name="fusionmenu">
-                    <MenuItem Header="Bayesian Networks" Name="bnmenu">
-                        <MenuItem Header="Train" Name="databaseCMLFusionMenu"/>
-                        <MenuItem Header="Predict" Name="databaseCMLFusionMenuPredict"/>
+                    <MenuItem Header="Fusion" Name="fusionmenu">
+                        <MenuItem Header="Bayesian Networks" Name="bnmenu">
+                            <MenuItem Header="Train" Name="databaseCMLFusionMenu"/>
+                            <MenuItem Header="Predict" Name="databaseCMLFusionMenuPredict"/>
+                        </MenuItem>
                     </MenuItem>
                 </MenuItem>
+               
+                <!--<MenuItem Header="Local Machine Learning" Name="databaseCMLTrainAndPredictMenu">
+                   
+                </MenuItem>-->
+              
+                <MenuItem Header="Nova-Server AI" Name="databaseNovaServerMenu"/>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
 
