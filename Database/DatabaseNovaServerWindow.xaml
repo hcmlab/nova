@@ -263,10 +263,9 @@
 
             </GroupBox>
             <GroupBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Input">
-                <Grid Name="inputGrid" >
-
-
-                    <Grid.ColumnDefinitions>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid Name="inputGrid" >
+                        <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -274,14 +273,16 @@
 
                     </Grid.ColumnDefinitions>
                 </Grid>
+                </ScrollViewer>
 
             </GroupBox>
             <GroupBox Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Output">
 
-                <Grid Name="outputGrid" >
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid Name="outputGrid" >
 
 
-                    <Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -289,6 +290,7 @@
 
                     </Grid.ColumnDefinitions>
                 </Grid>
+                </ScrollViewer>
 
             </GroupBox>
 

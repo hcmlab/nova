@@ -651,6 +651,8 @@ namespace ssi
             string trainerLeftContext = LeftContextTextBox.Text;
             string trainerRightContext = RightContextTextBox.Text;
 
+            
+
             logTextBox.Text = "";
    
 
@@ -3157,9 +3159,11 @@ namespace ssi
                 return;
             }
 
+            bool first = true;
             foreach (var element in Inputsresult)
             {
 
+            
 
 
                 //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
@@ -3186,6 +3190,14 @@ namespace ssi
                                         { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                         { "role", role }
                                     };
+                                    if (first)
+                                    {
+                                        Properties.Settings.Default.CMLDefaultAnnotator = ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString();
+                                        Properties.Settings.Default.CMLDefaultRole = role;
+                                        Properties.Settings.Default.Save();
+                                        first = false;
+                                    }
+                                    
                                     data.Add(ob);
                                 }
                                 else if (RolesBox.SelectedItem != null)
@@ -3201,6 +3213,13 @@ namespace ssi
                                             { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                             { "role", role }
                                         };
+                                        if (first)
+                                        {
+                                            Properties.Settings.Default.CMLDefaultAnnotator = ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString();
+                                            Properties.Settings.Default.CMLDefaultRole = role;
+                                            Properties.Settings.Default.Save();
+                                            first = false;
+                                        }
                                         data.Add(ob);
                                     }
 
@@ -3225,6 +3244,12 @@ namespace ssi
                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                     { "role",role}
                                 };
+                                    if (first)
+                                    {
+                                        Properties.Settings.Default.CMLDefaultRole = role;
+                                        Properties.Settings.Default.Save();
+                                        first = false;
+                                    }
                                     data.Add(ob);
                                 }
                                 else if (RolesBox.SelectedItem != null)
@@ -3241,6 +3266,12 @@ namespace ssi
                                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                                     { "role",role}
                                                 };
+                                        if (first)
+                                        {
+                                            Properties.Settings.Default.CMLDefaultRole = role;
+                                            Properties.Settings.Default.Save();
+                                            first = false;
+                                        }
                                         data.Add(ob);
                                     }
 
@@ -3252,6 +3283,7 @@ namespace ssi
                     }
                 }
             }
+            bool firstoutput = true;
             foreach (var element in Outputsresult)
             {
 
@@ -3281,6 +3313,13 @@ namespace ssi
                                         { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                         { "role", role }
                                     };
+                                    if (firstoutput)
+                                    {
+                                        Properties.Settings.Default.CMLDefaultAnnotatorPrediction = ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString();
+                                        Properties.Settings.Default.CMLDefaultRole = role;
+                                        Properties.Settings.Default.Save();
+                                        firstoutput = false;
+                                    }
                                     data.Add(ob);
                                 }
                                 else if (RolesBox.SelectedItem != null)
@@ -3296,6 +3335,13 @@ namespace ssi
                                             { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                             { "role", role }
                                         };
+                                        if (firstoutput)
+                                        {
+                                            Properties.Settings.Default.CMLDefaultAnnotatorPrediction = ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString();
+                                            Properties.Settings.Default.CMLDefaultRole = role;
+                                            Properties.Settings.Default.Save();
+                                            firstoutput = false;
+                                        }
                                         data.Add(ob);
                                     }
 
@@ -3342,6 +3388,12 @@ namespace ssi
                                     { "name", name },
                                     { "role",role}
                                 };
+                                    if (firstoutput)
+                                    {
+                                        Properties.Settings.Default.CMLDefaultRole = role;
+                                        Properties.Settings.Default.Save();
+                                        firstoutput = false;
+                                    }
                                     data.Add(ob);
                                 }
                                 else if (RolesBox.SelectedItem != null)
@@ -3358,6 +3410,12 @@ namespace ssi
                                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                                     { "role",role}
                                                 };
+                                        if (firstoutput)
+                                        {
+                                            Properties.Settings.Default.CMLDefaultRole = role;
+                                            Properties.Settings.Default.Save();
+                                            firstoutput = false;
+                                        }
                                         data.Add(ob);
                                     }
 
@@ -3654,7 +3712,11 @@ namespace ssi
                             {
                                 ItemsSource = element.Value.ExtraAttributes2
                             };
-                            cb3.SelectedIndex = 0;
+                            cb3.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotatorPrediction;
+                            if (cb3.SelectedItem == null)
+                            {
+                                cb3.SelectedIndex = 0;
+                            }
 
 
                             cb2.Margin = margin;
@@ -3840,7 +3902,11 @@ namespace ssi
                             {
                                 ItemsSource = element.Value.ExtraAttributes2
                             };
-                            cb3.SelectedIndex = 0;
+                            cb3.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotator;
+                            if(cb3.SelectedItem == null)
+                            {
+                                cb3.SelectedIndex = 0;  
+                            }
 
 
                             cb2.Margin = margin;
