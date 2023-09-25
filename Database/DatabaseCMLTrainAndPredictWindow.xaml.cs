@@ -2081,32 +2081,32 @@ namespace ssi
 
             //SERVER REQUEST
 
-            try
-            {
+            //try
+            //{
 
-                var server_trainers = handler.get_info_from_server();
-                JObject trainersServer = JObject.FromObject(server_trainers["trainer_ok"]);
-
-
-                foreach (var trainerEntry in trainersServer)
-                {
-                    if (trainerEntry.Key.Contains(scheme.Name))
-                    {
-                        Trainer trainer = new Trainer() { Path = trainerEntry.Key };
-                        if (parseTrainerFileServer(ref trainer, trainerEntry.Value, isTemplate))
-                        {
-                            trainers.Add(trainer);
-                        }
-                    }
+            //    var server_trainers = handler.get_info_from_server();
+            //    JObject trainersServer = JObject.FromObject(server_trainers["trainer_ok"]);
 
 
-                }
-            }
+            //    foreach (var trainerEntry in trainersServer)
+            //    {
+            //        if (trainerEntry.Key.Contains(scheme.Name))
+            //        {
+            //            Trainer trainer = new Trainer() { Path = trainerEntry.Key };
+            //            if (parseTrainerFileServer(ref trainer, trainerEntry.Value, isTemplate))
+            //            {
+            //                trainers.Add(trainer);
+            //            }
+            //        }
 
-            catch
-            {
-                Console.WriteLine("No Connection to a Nova Server instance");
-            }
+
+            //    }
+            //}
+
+            //catch
+            //{
+            //    Console.WriteLine("No Connection to a Nova Server instance");
+            //}
 
             
 
