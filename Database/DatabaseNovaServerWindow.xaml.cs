@@ -25,6 +25,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -40,7 +41,10 @@ using System.Xml.Linq;
 using static ssi.AnnoScheme;
 using static ssi.AnnoTierAttributesWindow;
 using static ssi.DatabaseCMLExtractFeaturesWindow;
+using CheckBox = System.Windows.Controls.CheckBox;
+using ListView = System.Windows.Controls.ListView;
 using Path = System.IO.Path;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace ssi
 {
@@ -773,905 +777,11 @@ namespace ssi
             }
 
 
-
+            bool force = ForceCheckBox.IsChecked.Value;
 
             string filenameSuffix = "";
 
             var jobIDhash = getIdHash();
-
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             string json = data.ToString(Newtonsoft.Json.Formatting.None);
 
 
@@ -1702,7 +812,8 @@ namespace ssi
                 { new StringContent(ModelSpecificOptString), "optStr" },
                 { new StringContent(""), "suffix"  },
                 { new StringContent(jobIDhash), "jobID"  },
-                { new StringContent(json), "data"  }
+                { new StringContent(json), "data"  },
+                 { new StringContent(force.ToString()), "force"  }
             };
 
             if (this.mode == Mode.EXTRACT)
@@ -1727,6 +838,9 @@ namespace ssi
                 statusThread.Start();
                 //predictAndReloadThread.Start();
                 bool ClearUI = true;
+                AddInputUIElements(processor.Inputs, processor.GetTransformers()[0].Multi_role_input);
+                AddOutputUIElements(processor.Outputs, processor.GetTransformers()[0].Multi_role_input);
+
                 foreach (Transformer t in processor.GetTransformers())
                 {
                     if (t.OptStr != "")
@@ -1737,8 +851,7 @@ namespace ssi
 
              
 
-                AddInputUIElements(processor.Inputs, processor.GetTransformers()[0].Multi_role_input);
-                AddOutputUIElements(processor.Outputs, processor.GetTransformers()[0].Multi_role_input);
+          
 
 
 
@@ -2837,7 +1950,13 @@ namespace ssi
                         List<string> result = new List<string>();
                         if(input.DefaultName != null)
                         {
-                            result.Add(input.DefaultName);
+                            var scheme = DatabaseHandler.Schemes.Find(x => x.Name == input.DefaultName);
+                            if (scheme != null){
+                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()))
+
+                                    result.Add(input.DefaultName);
+                            }
+                            
                         }
                        
 
@@ -2902,7 +2021,6 @@ namespace ssi
                         origin = "stream";
 
                     }
-
 
 
                     if (multiroleinput)
@@ -3001,22 +2119,32 @@ namespace ssi
                             }
                             else content = checkTagList(attributes[2], "");
 
-
-                            if (multiroleinput)
+                            if(!attributes[2].StartsWith("$(io_input_id") && !attributes[2].StartsWith("$(io_output_id"))
                             {
-                                foreach (var item in (DatabaseHandler.Roles))
+                                if (multiroleinput)
                                 {
-                                    xcontent.Add(item.ToString());
-                                }
+                                    foreach (var item in (DatabaseHandler.Roles))
+                                    {
+                                        xcontent.Add(item.ToString());
+                                    }
 
+                                    RolesBox.Visibility = Visibility.Collapsed;
+                                    RolesLabel.Visibility = Visibility.Collapsed;
+                                }
+                                else
+                                {
+                                    RolesBox.Visibility = Visibility.Visible;
+                                    RolesLabel.Visibility = Visibility.Visible;
+                                }
+                            }
+
+                            else
+                            {
                                 RolesBox.Visibility = Visibility.Collapsed;
                                 RolesLabel.Visibility = Visibility.Collapsed;
                             }
-                            else
-                            {
-                                RolesBox.Visibility = Visibility.Visible;
-                                RolesLabel.Visibility = Visibility.Visible;
-                            }
+
+                           
 
                             if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
                           
@@ -3032,6 +2160,18 @@ namespace ssi
                                 {
                                     xcontent2.Add(item.ToString());
                                 }
+                            }
+
+                            else if (attributes[2].StartsWith("$(io_input_id"))
+                            {
+                                origin = "input";
+          
+                            }
+
+                            else if (attributes[2].StartsWith("$(io_output_id"))
+                            {
+                                origin = "output";
+     
                             }
 
                         }
@@ -3146,7 +2286,25 @@ namespace ssi
                     }
                 }
             }
-          
+
+            else if (Tag.StartsWith("$(io_input_id"))
+            {
+
+                foreach (var item in (Inputs))
+                {
+                    result.Add(item.Name);
+                }
+            }
+
+            else if (Tag.StartsWith("$(io_output_id"))
+            {
+     
+                foreach (var item in (Outputs))
+                {
+                    result.Add(item.Name);
+                }
+            }
+
             return result;
         }
 
@@ -3462,95 +2620,95 @@ namespace ssi
                     else if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
                     {
 
-                        if (element.Key.Split('.')[1] != "")
-                        {
+                        //if (element.Key.Split('.')[1] != "")
+                        //{
 
-                            if (element.Key.Split('.')[1] == "anno")
-                            {
-                                string role = "";
-                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
-                                {
+                        //    if (element.Key.Split('.')[1] == "anno")
+                        //    {
+                        //        string role = "";
+                        //        if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
+                        //        {
 
-                                    role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
-                                    JObject ob = new JObject
-                                    {
-                                        { "src", "db:anno" },
-                                        { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                                        { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
-                                        { "role", role }
-                                    };
-                                    data.Add(ob);
-                                }
-                                else if (RolesBox.SelectedItem != null)
-                                {
-                                    foreach (var rol in RolesBox.SelectedItems)
-                                    {
-                                        role = RolesBox.SelectedItem.ToString();
-                                        JObject ob = new JObject
-                                        {
-                                            { "src", "db:anno" },
-                                            { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                                            { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
-                                            { "role", role }
-                                        };
-                                        data.Add(ob);
-                                    }
+                        //            role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
+                        //            JObject ob = new JObject
+                        //            {
+                        //                { "src", "db:anno" },
+                        //                { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                        //                { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
+                        //                { "role", role }
+                        //            };
+                        //            data.Add(ob);
+                        //        }
+                        //        else if (RolesBox.SelectedItem != null)
+                        //        {
+                        //            foreach (var rol in RolesBox.SelectedItems)
+                        //            {
+                        //                role = RolesBox.SelectedItem.ToString();
+                        //                JObject ob = new JObject
+                        //                {
+                        //                    { "src", "db:anno" },
+                        //                    { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                        //                    { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
+                        //                    { "role", role }
+                        //                };
+                        //                data.Add(ob);
+                        //            }
 
-                                }
-
-
-
-                            }
-
-                            else if (element.Key.Split('.')[1] == "stream")
-                            {
-                                string role = "";
-
-                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
-                                {
-                                    role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
-                                    JObject ob = new JObject
-                                {
-                                    { "src", "db:stream" },
-                                    { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                                    { "role",role}
-                                };
-                                    data.Add(ob);
-                                }
-                                else if (RolesBox.SelectedItem != null)
-                                {
-                                    role = RolesBox.SelectedItem.ToString();
-                                    foreach (var rol in RolesBox.SelectedItems)
-                                    {
-                                        role = RolesBox.SelectedItem.ToString();
-                                        JObject ob = new JObject
-                                             {
-                                                    { "src", "db:stream" },
-                                                    { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                                                    { "role",role}
-                                                };
-                                        data.Add(ob);
-                                    }
-
-
-                                }
-                            }
+                        //        }
 
 
 
-                            //if (element.Key.Split('.')[1] == "anno" && !AllUsedSchemes.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
-                            //    {
-                            //        AllUsedSchemes.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
+                        //    }
+
+                        //    else if (element.Key.Split('.')[1] == "stream")
+                        //    {
+                        //        string role = "";
+
+                        //        if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
+                        //        {
+                        //            role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
+                        //            JObject ob = new JObject
+                        //        {
+                        //            { "src", "db:stream" },
+                        //            { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                        //            { "role",role}
+                        //        };
+                        //            data.Add(ob);
+                        //        }
+                        //        else if (RolesBox.SelectedItem != null)
+                        //        {
+                        //            role = RolesBox.SelectedItem.ToString();
+                        //            foreach (var rol in RolesBox.SelectedItems)
+                        //            {
+                        //                role = RolesBox.SelectedItem.ToString();
+                        //                JObject ob = new JObject
+                        //                     {
+                        //                            { "src", "db:stream" },
+                        //                            { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                        //                            { "role",role}
+                        //                        };
+                        //                data.Add(ob);
+                        //            }
+
+
+                        //        }
+                        //    }
 
 
 
-                            //}
-                            //    else if (element.Key.Split('.')[1] == "stream" && !AllUsedStreams.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
-                            //    {
-                            //        AllUsedStreams.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
-                            //     }
+                        //    //if (element.Key.Split('.')[1] == "anno" && !AllUsedSchemes.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
+                        //    //    {
+                        //    //        AllUsedSchemes.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
 
-                        }
+
+
+                        //    //}
+                        //    //    else if (element.Key.Split('.')[1] == "stream" && !AllUsedStreams.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
+                        //    //    {
+                        //    //        AllUsedStreams.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
+                        //    //     }
+
+                        //}
 
 
 
@@ -3568,7 +2726,7 @@ namespace ssi
                         }
                         else if (element.Value.Count == 3)
                         {
-                            resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(2)) + ";";
+                            resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(2)).SelectedItem + ";";
                             //if (!AllUsedRoles.Contains(((ComboBox)element.Value.ElementAt(2)).SelectedItem))
                             //{
                             //    AllUsedRoles.Add(((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString());
@@ -3697,7 +2855,17 @@ namespace ssi
                             {
                                 ItemsSource = element.Value.ExtraAttributes
                             };
-                            cb2.SelectedIndex = 0;
+
+                             string[] split = element.Key.ToString().Split('_');
+                             if(split.Length > 1)
+                                {
+                                    cb2.SelectedItem = split[0];
+                                }
+                            if (cb2.SelectedItem == null)
+                            {
+                                cb2.SelectedIndex = 0;
+                            }
+      
                             if (element.Value.ExtraAttributes.Count == 0)
                             {
                                 cb2.IsEnabled = false;
@@ -3712,6 +2880,9 @@ namespace ssi
                             {
                                 ItemsSource = element.Value.ExtraAttributes2
                             };
+
+
+
                             cb3.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotatorPrediction;
                             if (cb3.SelectedItem == null)
                             {
@@ -3749,7 +2920,15 @@ namespace ssi
                             {
                                 ItemsSource = element.Value.ExtraAttributes
                             };
-                            cb2.SelectedIndex = 0;
+                            string[] split = element.Key.ToString().Split('_');
+                            if (split.Length > 1)
+                            {
+                                cb2.SelectedItem = split[0];
+                            }
+                            if (cb2.SelectedItem == null)
+                            {
+                                cb2.SelectedIndex = 0;
+                            }
                             if (element.Value.ExtraAttributes.Count == 0) cb2.IsEnabled = false;
                             else cb2.IsEnabled = true;
 
@@ -3887,7 +3066,15 @@ namespace ssi
                             {
                                 ItemsSource = element.Value.ExtraAttributes
                             };
-                            cb2.SelectedIndex = 0;
+                            string[] split = element.Key.ToString().Split('_');
+                            if (split.Length > 1)
+                            {
+                                cb2.SelectedItem = split[0];
+                            }
+                            if (cb2.SelectedItem == null)
+                            {
+                                cb2.SelectedIndex = 0;
+                            }
                             if (element.Value.ExtraAttributes.Count == 0)
                             {
                                 cb2.IsEnabled = false;
@@ -3939,7 +3126,17 @@ namespace ssi
                             {
                                 ItemsSource = element.Value.ExtraAttributes
                             };
-                            cb2.SelectedIndex = 0;
+                            string[] split = element.Key.ToString().Split('_');
+                            if (split.Length > 1)
+                            {
+                                cb2.SelectedItem = split[0];
+                            }
+                            if (cb2.SelectedItem == null)
+                            {
+                                cb2.SelectedIndex = 0;
+                            }
+
+
                             if (element.Value.ExtraAttributes.Count == 0) cb2.IsEnabled = false;
                             else cb2.IsEnabled = true;
 
