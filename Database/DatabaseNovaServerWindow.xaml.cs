@@ -2273,15 +2273,7 @@ namespace ssi
                     if (typesplitted.Contains(scheme.Type.ToString()) || Type == "")
                     { 
                         result.Add(scheme.Name);
-                        //    foreach(DatabaseSession session in SessionsBox.SelectedItems)
-                        //    {
-                        //            //if (DatabaseHandler.AnnotationExists(((DatabaseAnnotator)(AnnotatorsBox.SelectedItem)).Name, session.Name, ((DatabaseRole)DatabaseHandler.Roles[0]).Name, scheme.Name))
-                        //            //{
-
-
-
-                        //            //break;
-                        //            //}
+                      
 
                     }
                 }
@@ -2620,98 +2612,6 @@ namespace ssi
                     else if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
                     {
 
-                        //if (element.Key.Split('.')[1] != "")
-                        //{
-
-                        //    if (element.Key.Split('.')[1] == "anno")
-                        //    {
-                        //        string role = "";
-                        //        if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
-                        //        {
-
-                        //            role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
-                        //            JObject ob = new JObject
-                        //            {
-                        //                { "src", "db:anno" },
-                        //                { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                        //                { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
-                        //                { "role", role }
-                        //            };
-                        //            data.Add(ob);
-                        //        }
-                        //        else if (RolesBox.SelectedItem != null)
-                        //        {
-                        //            foreach (var rol in RolesBox.SelectedItems)
-                        //            {
-                        //                role = RolesBox.SelectedItem.ToString();
-                        //                JObject ob = new JObject
-                        //                {
-                        //                    { "src", "db:anno" },
-                        //                    { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                        //                    { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
-                        //                    { "role", role }
-                        //                };
-                        //                data.Add(ob);
-                        //            }
-
-                        //        }
-
-
-
-                        //    }
-
-                        //    else if (element.Key.Split('.')[1] == "stream")
-                        //    {
-                        //        string role = "";
-
-                        //        if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
-                        //        {
-                        //            role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
-                        //            JObject ob = new JObject
-                        //        {
-                        //            { "src", "db:stream" },
-                        //            { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                        //            { "role",role}
-                        //        };
-                        //            data.Add(ob);
-                        //        }
-                        //        else if (RolesBox.SelectedItem != null)
-                        //        {
-                        //            role = RolesBox.SelectedItem.ToString();
-                        //            foreach (var rol in RolesBox.SelectedItems)
-                        //            {
-                        //                role = RolesBox.SelectedItem.ToString();
-                        //                JObject ob = new JObject
-                        //                     {
-                        //                            { "src", "db:stream" },
-                        //                            { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                        //                            { "role",role}
-                        //                        };
-                        //                data.Add(ob);
-                        //            }
-
-
-                        //        }
-                        //    }
-
-
-
-                        //    //if (element.Key.Split('.')[1] == "anno" && !AllUsedSchemes.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
-                        //    //    {
-                        //    //        AllUsedSchemes.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
-
-
-
-                        //    //}
-                        //    //    else if (element.Key.Split('.')[1] == "stream" && !AllUsedStreams.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
-                        //    //    {
-                        //    //        AllUsedStreams.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
-                        //    //     }
-
-                        //}
-
-
-
                         if (element.Value.Count == 1)
                         {
                             resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
@@ -2719,21 +2619,14 @@ namespace ssi
                         else if (element.Value.Count == 2)
                         {
                             resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
-                            // if (!AllUsedRoles.Contains(((ComboBox)element.Value.ElementAt(1)).SelectedItem)){
-                            //    AllUsedRoles.Add(((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString());
-                            //}
 
                         }
                         else if (element.Value.Count == 3)
                         {
                             resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(2)).SelectedItem + ";";
-                            //if (!AllUsedRoles.Contains(((ComboBox)element.Value.ElementAt(2)).SelectedItem))
-                            //{
-                            //    AllUsedRoles.Add(((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString());
-                            //}
+
 
                         }
-
 
 
                     }
