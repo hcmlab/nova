@@ -287,8 +287,9 @@
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
 
-                    </Grid.ColumnDefinitions>
+                        </Grid.ColumnDefinitions>
                 </Grid>
                 </ScrollViewer>
 

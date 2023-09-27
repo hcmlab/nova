@@ -2338,7 +2338,8 @@ namespace ssi
                                         { "src", "db:anno" },
                                         { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                         { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
-                                        { "role", role }
+                                        { "role", role },
+                                        { "active", "True" }
                                     };
                                     if (first)
                                     {
@@ -2361,7 +2362,8 @@ namespace ssi
                                             { "src", "db:anno" },
                                             { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                             { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
-                                            { "role", role }
+                                            { "role", role },
+                                            { "active", "True" }
                                         };
                                         if (first)
                                         {
@@ -2392,7 +2394,8 @@ namespace ssi
                                     { "type", "input" },
                                     { "src", "db:stream" },
                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                                    { "role",role}
+                                    { "role",role},
+                                    { "active", "True" }
                                 };
                                     if (first)
                                     {
@@ -2414,7 +2417,8 @@ namespace ssi
                                                     { "type", "input" },
                                                     { "src", "db:stream" },
                                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                                                    { "role",role}
+                                                    { "role",role},
+                                                    { "active", "True" }
                                                 };
                                         if (first)
                                         {
@@ -2461,7 +2465,8 @@ namespace ssi
                                         { "src", "db:anno" },
                                         { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                         { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
-                                        { "role", role }
+                                        { "role", role },
+                                        { "active", ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString() }
                                     };
                                     if (firstoutput)
                                     {
@@ -2483,7 +2488,8 @@ namespace ssi
                                             { "src", "db:anno" },
                                             { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                             { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
-                                            { "role", role }
+                                            { "role", role },
+                                             { "active", ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString() }
                                         };
                                         if (firstoutput)
                                         {
@@ -2536,7 +2542,8 @@ namespace ssi
                                     { "type", "output" },
                                     { "src", "db:stream" },
                                     { "name", name },
-                                    { "role",role}
+                                    { "role",role},
+                                    { "active", ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString() }
                                 };
                                     if (firstoutput)
                                     {
@@ -2558,7 +2565,8 @@ namespace ssi
                                                     { "type", "output" },
                                                     { "src", "db:stream" },
                                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
-                                                    { "role",role}
+                                                    { "role",role},
+                                                    { "active", ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString() }
                                                 };
                                         if (firstoutput)
                                         {
@@ -2742,6 +2750,18 @@ namespace ssi
                         Grid.SetColumn(cb, 1);
                         Grid.SetRow(cb, outputGrid.RowDefinitions.Count - 1);
 
+
+                        CheckBox cbox = new CheckBox()
+                        {
+                            IsChecked = true
+                        };
+                        cbox.Margin = margin;
+                        outputGrid.Children.Add(cbox);
+                        Grid.SetColumn(cbox, 4);
+                        Grid.SetRow(cbox, outputGrid.RowDefinitions.Count - 1);
+
+
+
                         if (element.Value.ExtraAttributes2 != null && element.Value.ExtraAttributes2.Count > 0)
                         {
                             ComboBox cb2 = new ComboBox()
@@ -2794,12 +2814,14 @@ namespace ssi
                             Grid.SetColumn(cb3, 3);
                             Grid.SetRow(cb3, outputGrid.RowDefinitions.Count - 1);
 
+                  
 
                             List<UIElement> list = new List<UIElement>
                             {
                                 cb,
                                 cb2,
-                                cb3
+                                cb3,
+                                cbox
 
                             };
                             Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
@@ -2833,10 +2855,13 @@ namespace ssi
                             Grid.SetRow(cb2, outputGrid.RowDefinitions.Count - 1);
 
 
+
+
                             List<UIElement> list = new List<UIElement>
                             {
                                 cb,
-                                cb2
+                                cb2,
+                                cbox
                             };
                             Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
 
@@ -2845,9 +2870,11 @@ namespace ssi
 
                         else
                         {
+
                             List<UIElement> list = new List<UIElement>
                             {
-                                cb
+                                cb,
+                                cbox
 
                             };
                             Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
