@@ -841,6 +841,16 @@ namespace ssi
                 AddInputUIElements(processor.Inputs, processor.GetTransformers()[0].Multi_role_input);
                 AddOutputUIElements(processor.Outputs, processor.GetTransformers()[0].Multi_role_input);
 
+                if (processor.isIterable){
+                    ExtractPanel.Visibility = Visibility.Visible;
+
+                }
+                else
+                {
+                    ExtractPanel.Visibility = Visibility.Hidden;
+                }
+
+
                 foreach (Transformer t in processor.GetTransformers())
                 {
                     if (t.OptStr != "")
@@ -1110,6 +1120,8 @@ namespace ssi
             public string Description { get; set; }
             public string Category { get; set; }
 
+            public bool isIterable { get; set; }
+
             public bool isTrained { get; set; }
             public List<ServerInputOutput> Inputs { get; set; }
             public List<ServerInputOutput> Outputs { get; set; }
@@ -1233,6 +1245,13 @@ namespace ssi
                     processor.Description = chainobject["meta_description"].ToString();
                 }
 
+               processor.isIterable = true;
+               var isiterable = chainobject["meta_is_iterable"];
+                if (isiterable != null)
+                {
+                    processor.isIterable = ((bool)chainobject["meta_is_iterable"]);
+                }
+
                 //var elements = chainobject["links"];
 
                 //JArray arr = JArray.Parse(elements.ToString());
@@ -1240,7 +1259,7 @@ namespace ssi
 
                 //foreach (var element in arr)
                 //{
-                    Transformer t = new Transformer();
+                Transformer t = new Transformer();
                     t.Name = chainobject["model_create"].ToString();
 
                     var Script = chainobject["model_script_path"];
