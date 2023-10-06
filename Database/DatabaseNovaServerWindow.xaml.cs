@@ -2472,6 +2472,14 @@ namespace ssi
 
                             if (element.Key.Split('.')[1] == "anno")
                             {
+
+                                string isactive = "true";
+
+                                if (element.Value.Count > 2)
+                                {
+                                    isactive = ((CheckBox)element.Value.ElementAt(2)).IsChecked.ToString();
+                                }
+
                                 string role = "";
                                 if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
                                 {
@@ -2485,7 +2493,7 @@ namespace ssi
                                         { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                         { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                         { "role", role },
-                                        { "active", ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString() }
+                                        { "active", isactive }
                                     };
                                     if (firstoutput)
                                     {
@@ -2500,6 +2508,7 @@ namespace ssi
                                 {
                                     foreach (var rol in RolesBox.SelectedItems)
                                     {
+
                                         role = RolesBox.SelectedItem.ToString();
                                         JObject ob = new JObject
                                             { {"id", element.Key.Split('.')[0] },
@@ -2508,7 +2517,7 @@ namespace ssi
                                             { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                             { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                             { "role", role },
-                                             { "active", ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString() }
+                                             { "active", isactive }
                                         };
                                         if (firstoutput)
                                         {
@@ -2529,6 +2538,18 @@ namespace ssi
                             else if (element.Key.Split('.')[1] == "stream")
                             {
                                 string role = "";
+
+                                string subtype = "";
+                                Processor processor = (Processor)ProcessorsBox.SelectedItem;
+                                ServerInputOutput output = processor.Outputs.Find(x => x.ID == element.Key.Split('.')[0]);
+                                if (output.SubType != null)
+                                {
+                                    subtype = output.SubType.ToString();
+                                }
+                                if (output.SubSubType != null)
+                                {
+                                    subtype = subtype + ":" + output.SubSubType.ToString();
+                                }
 
                                 if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
                                 {
@@ -2554,15 +2575,23 @@ namespace ssi
 
                                     }
 
+                                    string isactive = "true";
+
+                                    if (element.Value.Count > 2)
+                                    {
+                                        isactive = ((CheckBox)element.Value.ElementAt(2)).IsChecked.ToString();
+                                    }
+
 
                                     JObject ob = new JObject
                                 {
                                     {"id", element.Key.Split('.')[0] },
                                     { "type", "output" },
+                                    { "kind", subtype },
                                     { "src", "db:stream" },
                                     { "name", name },
                                     { "role",role},
-                                    { "active", ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString() }
+                                    { "active", isactive }
                                 };
                                     if (firstoutput)
                                     {
@@ -2574,6 +2603,13 @@ namespace ssi
                                 }
                                 else if (RolesBox.SelectedItem != null)
                                 {
+                                    string isactive = "true";
+
+                                    if (element.Value.Count > 2)
+                                    {
+                                        isactive = ((CheckBox)element.Value.ElementAt(2)).IsChecked.ToString();
+                                    }
+
                                     role = RolesBox.SelectedItem.ToString();
                                     foreach (var rol in RolesBox.SelectedItems)
                                     {
@@ -2582,10 +2618,11 @@ namespace ssi
                                              {
                                                     {"id", element.Key.Split('.')[0] },
                                                     { "type", "output" },
+                                                    { "kind", subtype },
                                                     { "src", "db:stream" },
                                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                                     { "role",role},
-                                                    { "active", ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString() }
+                                                    { "active", isactive }
                                                 };
                                         if (firstoutput)
                                         {
