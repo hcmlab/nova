@@ -1237,6 +1237,7 @@ namespace ssi
                 if (category != null)
                 {
                     processor.Category = chainobject["meta_category"].ToString();
+
                     chainCategories.AddCategory(processor.Category);
                 }
                 var description = chainobject["meta_description"];
@@ -2477,7 +2478,7 @@ namespace ssi
 
                                 if (element.Value.Count > 2)
                                 {
-                                    isactive = ((CheckBox)element.Value.ElementAt(2)).IsChecked.ToString();
+                                    isactive = ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString();
                                 }
 
                                 string role = "";
