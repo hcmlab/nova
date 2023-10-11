@@ -854,8 +854,12 @@ namespace ssi
                 foreach (Transformer t in processor.GetTransformers())
                 {
                     if (t.OptStr != "")
+                    {
+                        ClearUI = true;
+                    }
                     AddTrainerSpecificOptionsUIElements(t.OptStr, t.Multi_role_input, ClearUI);
                     ClearUI = false;
+
                 }
 
 
@@ -2084,9 +2088,9 @@ namespace ssi
         {
             ShowAnnotatorBox = false;
             List<AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
-            if (optstr == null)
+            if (optstr == null || optstr == "")
             {
-                return null;
+                return values;
             }
             else
             {
@@ -3161,8 +3165,11 @@ namespace ssi
                 ModelSpecificAttributes = new List<AnnoScheme.Attribute>();
                 optionsGrid.Children.Clear();
             }
-          
+           
             ModelSpecificAttributes.AddRange(ParseAttributes(optstr, multiroleInput));
+            
+          
+          
            
 
             if (ModelSpecificAttributes != null && ModelSpecificAttributes.Count > 0)
