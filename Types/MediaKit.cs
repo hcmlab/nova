@@ -64,12 +64,12 @@ namespace ssi
 
         public void SetVolume(double volume)
         {
-            Volume = volume;
+            this.Volume = volume;
         }
 
         public double GetVolume()
         {
-            return Volume;
+            return this.Volume;
         }
 
         public MediaKit(string filepath, MediaType type)
@@ -83,7 +83,7 @@ namespace ssi
 
             // if ScrubbingEnabled is true move correctly shows selected frame, but cursor won't work any more...
             //  this.ScrubbingEnabled = true;
-            Volume = 1.0;
+            //Volume = 1.0;
             Pause();
 
             this.filepath = filepath;

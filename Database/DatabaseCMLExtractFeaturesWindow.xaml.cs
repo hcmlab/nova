@@ -191,20 +191,23 @@ public enum Mode
 
 
                             }
-
-                            string toPath = Path.GetDirectoryName(fromPath) + "\\" 
-                            + role.Name + "." + featureName + ".stream";
-
-                            if (force || !File.Exists(toPath))
+                            if (fromPath != "")
                             {
-                                nFiles++;
-                                fileListIn.WriteLine(fromPath);
-                                fileListOut.WriteLine(toPath);
+                                string toPath = Path.GetDirectoryName(fromPath) + "\\"
+                           + role.Name + "." + featureName + ".stream";
+
+                                if (force || !File.Exists(toPath))
+                                {
+                                    nFiles++;
+                                    fileListIn.WriteLine(fromPath);
+                                    fileListOut.WriteLine(toPath);
+                                }
+                                else
+                                {
+                                    logTextBox.Text += "skip " + fromPath + "\n";
+                                }
                             }
-                            else
-                            {
-                                logTextBox.Text += "skip " + fromPath + "\n";
-                            }
+                           
                         }
                     }
                 }

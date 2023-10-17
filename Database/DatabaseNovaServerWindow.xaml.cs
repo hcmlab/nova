@@ -4,9 +4,11 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using NAudio.CoreAudioApi;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Octokit;
 using Org.Mentalis.Security.Certificates;
 using SharpDX;
+using Svg;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,12 +24,16 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
@@ -35,7 +41,10 @@ using System.Xml.Linq;
 using static ssi.AnnoScheme;
 using static ssi.AnnoTierAttributesWindow;
 using static ssi.DatabaseCMLExtractFeaturesWindow;
+using CheckBox = System.Windows.Controls.CheckBox;
+using ListView = System.Windows.Controls.ListView;
 using Path = System.IO.Path;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace ssi
 {
@@ -51,10 +60,14 @@ namespace ssi
         private List<string> databases = new List<string>();
         static MultipartFormDataContent CMLpredictionContent;
         List<AnnoScheme.Attribute> ModelSpecificAttributes = new List<AnnoScheme.Attribute>();
+        List<AnnoScheme.Attribute> Inputs = new List<AnnoScheme.Attribute>();
+        List<AnnoScheme.Attribute> Outputs = new List<AnnoScheme.Attribute>();
         string lockedScheme = null;
         List<string> AllUsedRoles = new List<string>();
         List<string> AllUsedStreams = new List<string>();
         List<string> AllUsedSchemes = new List<string>();
+
+        JArray data = new JArray();
 
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
@@ -64,31 +77,40 @@ namespace ssi
         private Thread predictAndReloadThread = null;
 
         Dictionary<string, List<UIElement>> SpecificModelattributesresult;
+        Dictionary<string, List<UIElement>> Inputsresult;
+        Dictionary<string, List<UIElement>> Outputsresult;
         private static IList sessions = null;
         private static string sessionList = "";
         static bool CML_TrainingStarted = false;
         static bool CML_PredictionStarted = false;
         bool ShowAnnotatorBox = false;
 
-        ChainCategories chainCategories = new ChainCategories();
-        public class Trainer
+        ProcessorCategories chainCategories = new ProcessorCategories();
+        public class ProcessorCategories
         {
-            public string Path { get; set; }
-            public string Name { get; set; }
-            public string LeftContext { get; set; }
-            public string RightContext { get; set; }
-            public string Balance { get; set; }
-            public string Backend { get; set; }
-            public string Script { get; set; }
-            public string Weight { get; set; }
-
-            public string OptStr { get; set; }
-
-            public override string ToString()
+            HashSet<string> chaincategories = new HashSet<string>();
+            public HashSet<string> GetCategories()
             {
-                return Name;
+                return chaincategories;
             }
+            public void AddCategory(String category)
+            {
+                chaincategories.Add(category);
+            }
+
         }
+
+        public class ServerInputOutput
+        {
+            public string ID { get; set; }
+            public string IO { get; set; }
+            public string Type { get; set; }
+            public string SubType { get; set; }
+            public string SubSubType { get; set; }
+
+            public string DefaultName { get; set; }
+        }
+
 
         public class Input
         {
@@ -100,14 +122,18 @@ namespace ssi
                 AttributeType = AnnoScheme.AttributeTypes.STRING;
                 ExtraAttributes = new List<string>();
                 ExtraAttributeType = AnnoScheme.AttributeTypes.LIST;
+                ExtraAttributes2 = new List<string>();
+                ExtraAttributeType2 = AnnoScheme.AttributeTypes.LIST;
                 Origin = "";
             }
             public string Label { get; set; }
             public List<string> Attributes { get; set; }
             public List<string> ExtraAttributes { get; set; }
+            public List<string> ExtraAttributes2 { get; set; }
             public string DefaultValue { get; set; }
             public AnnoScheme.AttributeTypes AttributeType { get; set; }
             public AnnoScheme.AttributeTypes ExtraAttributeType { get; set; }
+            public AnnoScheme.AttributeTypes ExtraAttributeType2 { get; set; }
             public string Origin { get; set; }
         }
 
@@ -193,18 +219,20 @@ namespace ssi
             InitializeComponent();
             createStatusObjects();
 
-            GetChains("All");
-            GetAnnotators();
 
             this.handler = handler;
             this.mode = Mode.EXTRACT;
+
+            GetProcessors("All");
+            GetAnnotators();
+
 
 
             ModeTabControl.SelectedIndex = (int)mode;
             LeftContextTextBox.IsEnabled = true;
             FrameSizeTextBox.IsEnabled = true;
             RightContextTextBox.IsEnabled = true;
-            FeatureNameTextBox.IsEnabled = true;
+            //FeatureNameTextBox.IsEnabled = true;
             
 
             int endtime = -1;
@@ -241,7 +269,7 @@ namespace ssi
             }
 
 
-           Chain trainer = (Chain)ChainsBox.SelectedItem;
+           Processor trainer = (Processor)ProcessorsBox.SelectedItem;
 
             if (trainer != null && (trainer.Backend.ToUpper() == "PYTHON" || trainer.Backend.ToUpper() == "NOVA-SERVER"))
             {
@@ -295,7 +323,7 @@ namespace ssi
         private string getIdHash()
         {
             DatabaseAnnotator annotator = null;
-            Chain chain = null;
+            Processor chain = null;
             string ModelSpecificOptString = "";
 
 
@@ -303,7 +331,7 @@ namespace ssi
             {
     
                 annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
-                chain = (Chain)ChainsBox.SelectedItem;
+                chain = (Processor)ProcessorsBox.SelectedItem;
                 chain.Name = chain.Name.Split(' ')[0];
                 setSessionList();
                 ModelSpecificOptString = AttributesResult();
@@ -397,7 +425,17 @@ namespace ssi
                                 updatedb = true;
                             });
                         }
-                        else if (this.status == Status.FINISHED)
+
+                        else if (this.status == Status.ERROR)
+                            {
+                                this.Dispatcher.Invoke(() =>
+                                {
+                                    this.ApplyButton.IsEnabled = true;
+                                    this.Cancel_Button.IsEnabled = false;
+                                    updatedb = true;
+                                });
+                            }
+                            else if (this.status == Status.FINISHED)
                         {
                             if (!(CML_PredictionStarted))
                             {
@@ -437,8 +475,8 @@ namespace ssi
 
             this.Dispatcher.Invoke(() =>
             {
-               // this.ApplyButton.IsEnabled = true;
-               // logTextBox.Text = "";
+                this.ApplyButton.IsEnabled = true;
+                logTextBox.Text = "";
             });
         }
 
@@ -452,7 +490,7 @@ namespace ssi
             {
                 statusLabel.Content = states[(int)this.status].getText();
                 statusLabel.Background = states[(int)this.status].getColor();
-                ApplyButton.IsEnabled = false;
+                ApplyButton.IsEnabled = true;
                 Cancel_Button.IsEnabled = false;
                 logTextBox.Text = "No connection to server!";
             });
@@ -541,13 +579,12 @@ namespace ssi
      
                 case Mode.EXTRACT:
 
-                    Title = "Extract";
-                    ApplyButton.Content = "Extract";
-                    //TrainerLabel.Content = "Chain";
+                    Title = "NOVA SERVER";
+                    ApplyButton.Content = "Send";
+                    //TrainerLabel.Content = "Processor";
 
                     ExtractPanel.Visibility = System.Windows.Visibility.Visible;
                     ForceCheckBox.Visibility = System.Windows.Visibility.Visible;
-                    LosoCheckBox.Visibility = System.Windows.Visibility.Collapsed;
 
                     //AnnotationSelectionBox.Visibility = System.Windows.Visibility.Visible;
                     //removePair.Visibility = System.Windows.Visibility.Visible;
@@ -568,14 +605,14 @@ namespace ssi
 
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
-            Chain chain = (Chain)ChainsBox.SelectedItem;
+            Processor chain = (Processor)ProcessorsBox.SelectedItem;
             bool force =  ForceCheckBox.IsChecked.Value;
 
-            if (!File.Exists(chain.Path))
-            {
-                MessageTools.Warning("file does not exist '" + chain.Path + "'");
-                return;
-            }
+            //if (!File.Exists(chain.Path))
+            //{
+            //    MessageTools.Warning("file does not exist '" + chain.Path + "'");
+            //    return;
+            //}
 
             string database = DatabaseHandler.DatabaseName;
 
@@ -584,19 +621,19 @@ namespace ssi
            // DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
 
             string rolesList = "";
-            var roles = RolesBox.SelectedItems;
-            foreach (DatabaseRole role in roles)
-            {
-                if (rolesList == "")
-                {
-                    rolesList += role.Name;
-                }
-                else
-                {
-                    rolesList += ";" + role.Name;
-                }
+            //var roles = RolesBox.SelectedItems;
+            //foreach (DatabaseRole role in roles)
+            //{
+            //    if (rolesList == "")
+            //    {
+            //        rolesList += role.Name;
+            //    }
+            //    else
+            //    {
+            //        rolesList += ";" + role.Name;
+            //    }
 
-            }
+            //}
 
             string sessionList = "";
                 var sessions = SessionsBox.SelectedItems;
@@ -618,6 +655,8 @@ namespace ssi
             string trainerLeftContext = LeftContextTextBox.Text;
             string trainerRightContext = RightContextTextBox.Text;
 
+            
+
             logTextBox.Text = "";
    
 
@@ -628,7 +667,7 @@ namespace ssi
         }
 
  
-        private void handlePythonBackend(Chain chain, DatabaseAnnotator annotator, string database, string chainLeftContext, string chainRightContext, string rolesList, string sessionsList)
+        private void handlePythonBackend(Processor chain, DatabaseAnnotator annotator, string database, string chainLeftContext, string chainRightContext, string rolesList, string sessionsList)
         {
             // this.ApplyButton.IsEnabled = false;
 
@@ -637,7 +676,7 @@ namespace ssi
             // string trainerOutPath = getTrainerOutPath(trainer, trainerDir);
 
             string frameSize = FrameSizeTextBox.Text;
-            string suffix = FeatureNameTextBox.Text;
+            //string suffix = FeatureNameTextBox.Text;
 
 
             //if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS || scheme.Type == AnnoScheme.TYPE.DISCRETE_POLYGON
@@ -662,6 +701,7 @@ namespace ssi
             //    {
             //        MessageBox.Show("Please use Seconds or Milliseconds for the Framesize");
             //        return;
+            //        return;
             //    }
             //}
 
@@ -669,7 +709,15 @@ namespace ssi
             int startTime = 0;
             //var trainerScriptPath = Directory.GetParent(trainer.Path) + "\\" + trainer.Script;
             //string relativeScriptPath = trainerScriptPath.Replace(Properties.Settings.Default.CMLDirectory, "");
-            string relativeChainPath = chain.Path.Replace(Properties.Settings.Default.CMLDirectory, "").Remove(0, 1);
+            string relativeProcessorPath = "";
+            if (chain.Path.StartsWith("//")){
+                relativeProcessorPath = chain.Path.Replace(Properties.Settings.Default.CMLDirectory, "").Remove(0, 1);
+            }
+            else
+            {
+                relativeProcessorPath = chain.Path.Replace(Properties.Settings.Default.CMLDirectory, "");
+            }
+          
 
             //TODO traineroutpath on predict
 
@@ -685,6 +733,9 @@ namespace ssi
 
 
             setSessionList();
+
+            InputOutResults();
+
             string ModelSpecificOptString = AttributesResult();
 
             string streams = "";
@@ -726,32 +777,43 @@ namespace ssi
             }
 
 
-
+            bool force = ForceCheckBox.IsChecked.Value;
 
             string filenameSuffix = "";
 
             var jobIDhash = getIdHash();
+            string json = data.ToString(Newtonsoft.Json.Formatting.None);
+
+
+            string sessionsstr = "[";
+            foreach (DatabaseSession session in SessionsBox.SelectedItems)
+            {
+                sessionsstr = sessionsstr + "\"" + session.Name + "\",";
+            }
+            sessionsstr = sessionsstr.Remove(sessionsstr.Length - 1, 1) + "]";
+
+
+
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
                 { new StringContent(flattenSamples.ToString()), "flattenSamples" },
-                { new StringContent(relativeChainPath), "chainFilePath" },
-                { new StringContent(Properties.Settings.Default.DatabaseAddress), "dbServer" },
+                { new StringContent(relativeProcessorPath), "trainerFilePath" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
-                { new StringContent(database), "database" },
-                { new StringContent(sessionsList), "sessions" },
-                { new StringContent(schemes), "scheme" },
-                { new StringContent(roles), "roles" },
-                { new StringContent(annotator.Name), "annotator" },
-                { new StringContent(streams), "streamName" },
+                { new StringContent(database), "dataset" },
+                { new StringContent(sessionsstr), "sessions" },
                 { new StringContent(chainLeftContext), "leftContext" },
                 { new StringContent(chainRightContext), "rightContext" },
                 { new StringContent(frameSize), "frameSize" },
                 { new StringContent(filenameSuffix), "fileNameSuffix" },
                 { new StringContent(ModelSpecificOptString), "optStr" },
-                { new StringContent(suffix), "suffix"  },
-                { new StringContent(jobIDhash), "jobID"  }
+                { new StringContent(""), "suffix"  },
+                { new StringContent(jobIDhash), "jobID"  },
+                { new StringContent(json), "data"  },
+                 { new StringContent(force.ToString()), "force"  }
             };
 
             if (this.mode == Mode.EXTRACT)
@@ -764,9 +826,9 @@ namespace ssi
 
         private void changeFrontendInPythonBackEndCase()
         {
-            Chain chain = (Chain)ChainsBox.SelectedItem;
+            Processor processor = (Processor)ProcessorsBox.SelectedItem;
 
-            if (chain != null && (chain.Backend.ToUpper() == "PYTHON" || chain.Backend.ToUpper() == "NOVA-SERVER"))
+            if (processor != null && (processor.Backend.ToUpper() == "PYTHON" || processor.Backend.ToUpper() == "NOVA-SERVER"))
             {
                 pythonCaseOn = true;
                 logThread = new Thread(new ThreadStart(tryToGetLog));
@@ -776,13 +838,37 @@ namespace ssi
                 statusThread.Start();
                 //predictAndReloadThread.Start();
                 bool ClearUI = true;
-                foreach(Transformer t in chain.GetTransformers())
+                AddInputUIElements(processor.Inputs, processor.GetTransformers()[0].Multi_role_input);
+                AddOutputUIElements(processor.Outputs, processor.GetTransformers()[0].Multi_role_input);
+
+                if (processor.isIterable){
+                    ExtractPanel.Visibility = Visibility.Visible;
+
+                }
+                else
+                {
+                    ExtractPanel.Visibility = Visibility.Hidden;
+                }
+
+
+                foreach (Transformer t in processor.GetTransformers())
                 {
                     if (t.OptStr != "")
-                        AddTrainerSpecificOptionsUIElements(t.OptStr, t.Multi_role_input, ClearUI);
-                        ClearUI = false;
+                    {
+                        ClearUI = true;
+                    }
+                    AddTrainerSpecificOptionsUIElements(t.OptStr, t.Multi_role_input, ClearUI);
+                    ClearUI = false;
+
                 }
-              
+
+
+             
+
+          
+
+
+
 
                 this.statusLabel.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;
@@ -797,7 +883,7 @@ namespace ssi
             {
            
 
-                //this.ApplyButton.IsEnabled = true;
+                this.ApplyButton.IsEnabled = true;
                 pythonCaseOn = false;
                 this.statusLabel.Visibility = Visibility.Collapsed;
 
@@ -881,23 +967,19 @@ namespace ssi
             if (RolesBox.Items.Count > 0)
             {
 
-                    string[] items = Properties.Settings.Default.CMLDefaultRole.Split(';');
-                    foreach (string item in items)
+                string[] items = Properties.Settings.Default.CMLDefaultRole.Split(';');
+                foreach (string item in items)
+                {
+                    DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == item);
+                    if (role != null)
                     {
-                        DatabaseRole role = ((List<DatabaseRole>)RolesBox.ItemsSource).Find(r => r.Name == item);
-                        if (role != null)
-                        {
-                            RolesBox.SelectedItems.Add(role);
-                        }
+                        RolesBox.SelectedItems.Add(role);
                     }
-                    if (RolesBox.SelectedItem == null)
-                    {
-                        RolesBox.SelectAll();
-                    }
-                
-
-
-
+                }
+                if (RolesBox.SelectedItem == null)
+                {
+                    RolesBox.SelectAll();
+                }
 
                 RolesBox.ScrollIntoView(RolesBox.SelectedItem);
             }
@@ -1027,33 +1109,69 @@ namespace ssi
 
         #endregion
 
-        #region Chain 
+        #region Processor 
 
-        public void GetChains(string Category)
+        public class Processor
         {
-            ChainsBox.Items.Clear();
 
-                List<Chain> chains = getChains();
-                foreach (Chain chain in chains)
+            private List<Transformer> transformers = new List<Transformer>();
+            public string Path { get; set; }
+            public string Name { get; set; }
+            public string FrameStep { get; set; }
+            public string LeftContext { get; set; }
+            public string RightContext { get; set; }
+            public string Backend { get; set; }
+            public string Description { get; set; }
+            public string Category { get; set; }
+
+            public bool isIterable { get; set; }
+
+            public bool isTrained { get; set; }
+            public List<ServerInputOutput> Inputs { get; set; }
+            public List<ServerInputOutput> Outputs { get; set; }
+
+
+            public List<Transformer> GetTransformers()
+            {
+                return transformers;
+            }
+            public void AddTransformer(Transformer transformer)
+            {
+                transformers.Add(transformer);
+            }
+
+
+            public override string ToString()
+            {
+                return Name;
+            }
+        }
+
+        public void GetProcessors(string Category)
+        {
+            ProcessorsBox.Items.Clear();
+
+                List<Processor> chains = getProcessors();
+                foreach (Processor chain in chains)
                 {
                         
                     if(Category == "ALL")
                     {
-                       ChainsBox.Items.Add(chain);
+                       ProcessorsBox.Items.Add(chain);
                     }
                     else if (Category == chain.Category)
                     {
-                        ChainsBox.Items.Add(chain);
+                        ProcessorsBox.Items.Add(chain);
                     }
                    
                 }
             
 
-            if (ChainsBox.Items.Count > 0)
+            if (ProcessorsBox.Items.Count > 0)
             {
-                Chain chain = null;
+                Processor chain = null;
 
-                foreach (Chain c in ChainsBox.Items)
+                foreach (Processor c in ProcessorsBox.Items)
                 {
                     if (c.Name == Properties.Settings.Default.CMLDefaultChain)
                     {
@@ -1064,173 +1182,148 @@ namespace ssi
 
                 if (chain != null)
                 {
-                    ChainsBox.SelectedItem = chain;
+                    ProcessorsBox.SelectedItem = chain;
                 }
-                if (ChainsBox.SelectedItem == null)
+                if (ProcessorsBox.SelectedItem == null)
                 {
-                    ChainsBox.SelectedIndex = 0;
+                    ProcessorsBox.SelectedIndex = 0;
                 }
             }
 
-            if (ChainsBox.SelectedItem != null)
+            if (ProcessorsBox.SelectedItem != null)
             {
-                Chain chain = (Chain)ChainsBox.SelectedItem;
-                ChainPathLabel.Content = chain.Path;
-                ChainDescription.Content = chain.Description;
-                LeftContextTextBox.Text = chain.LeftContext;
-                FrameSizeTextBox.Text = chain.FrameStep;
-                RightContextTextBox.Text = chain.RightContext;
+                Processor processor = (Processor)ProcessorsBox.SelectedItem;
+                ProcessorPathLabel.Content = processor.Path;
+                ProcessorDescription.Content = processor.Description;
+                LeftContextTextBox.Text = processor.LeftContext;
+                FrameSizeTextBox.Text = processor.FrameStep;
+                RightContextTextBox.Text = processor.RightContext;
 
             }
         }
 
-        private bool parseChainFile(ref Chain chain)
+        private bool parseProcessorFile(ref Processor processor, JToken ProcessorEntry)
         {
-            XmlDocument doc = new XmlDocument();
             try
             {
-      
-                doc.Load(chain.Path);
-       
 
+                JObject chainobject = JObject.Parse(ProcessorEntry.ToString());
+                processor.Name = Path.GetFileNameWithoutExtension(processor.Path);
+                processor.LeftContext = "0";
+                processor.RightContext = "0";
+                processor.FrameStep = "0";
+                processor.Category = "0";
+                processor.Description = "";
+                processor.Backend = "NOVA-SERVER";
+                processor.isTrained = ((bool)chainobject["info_trained"]);
+                if (!processor.isTrained)
+                    { return false; }
 
-                chain.Name = Path.GetFileNameWithoutExtension(chain.Path);
-
-                foreach (XmlNode node in doc.SelectNodes("//meta"))
+                var leftContext = chainobject["meta_left_ctx"];
+                if (leftContext != null)
                 {
-                    chain.FrameStep = node.Attributes["frameStep"].Value;
-                    var leftContext = node.Attributes["leftContext"];
-                    if (leftContext != null)
-                    {
-                        chain.LeftContext = leftContext.Value;
-                    }
-                    else
-                    {
-                        chain.LeftContext = "0";
-                    }
-                    var rightContext = node.Attributes["rightContext"];
-                    if (rightContext != null)
-                    {
-                        chain.RightContext = rightContext.Value;
-                    }
-                    else
-                    {
-                        chain.RightContext = "0";
-                    }
-
-                    var Backend = node.Attributes["backend"];
-                    if (Backend != null)
-                    {
-                        chain.Backend = Backend.Value;
-                    }
-                    else
-                    {
-                        chain.Backend = "SSI";
-                    }
-
-                    var Description = node.Attributes["description"];
-                    if (Description != null)
-                    {
-                        chain.Description = Description.Value;
-                    }
-                    else
-                    {
-                        chain.Description = "";
-                    }
-
-                    var Category = node.Attributes["category"];
-                    if (Category != null)
-                    {
-                        chain.Category = Category.Value;
-                        chainCategories.AddCategory(chain.Category);
-                       
-                    }
-                    else
-                    {
-                        chain.Category = "";
-                    }
-
-
-
-                }
-                foreach (XmlNode node in doc.SelectNodes("//filter"))
-                {
-                    foreach (XmlNode itemnode in node.SelectNodes("//item"))
-                    {
-                        Transformer t = new Transformer();
-                        var Name = itemnode.Attributes["create"];
-
-                        if (Name != null)
-                        {
-                            t.Name = Name.Value;
-                        }
-                        else continue;
-                        var Script = itemnode.Attributes["script"];
-                        if (Script != null)
-                        {
-                            t.Script = Script.Value;
-                        }
-                        var Syspath = itemnode.Attributes["syspath"];
-                        if (Syspath != null)
-                        {
-                            t.Syspath = Syspath.Value;
-                        }
-                        var OptStr = itemnode.Attributes["optsstr"];
-                        if (OptStr != null)
-                        {
-                            t.OptStr = OptStr.Value;
-                        }
-                        var Multi_role_input = itemnode.Attributes["multi_role_input"];
-                        if (Multi_role_input != null)
-                        {
-                            t.Multi_role_input = bool.Parse(itemnode.Attributes["multi_role_input"].Value);
-                        }
-                        else t.Multi_role_input = true;
-
-                        t.Type = "filter";
-                        chain.AddTransformer(t);
-                    }
-                }
-                foreach (XmlNode node in doc.SelectNodes("//feature"))
-                {
-                    foreach (XmlNode itemnode in node.SelectNodes("//item"))
-                    {
-                        Transformer t = new Transformer();
-                        var Name = itemnode.Attributes["create"];
-                        if (Name != null)
-                        {
-                            t.Name = Name.Value;
-                        }
-                        else continue;
-                        var Script = itemnode.Attributes["script"];
-                        if (Script != null)
-                        {
-                            t.Script = Script.Value;
-                        }
-                        var Syspath = itemnode.Attributes["syspath"];
-                        if (Syspath != null)
-                        {
-                            t.Syspath = Syspath.Value;
-                        }
-                        var OptStr = itemnode.Attributes["optsstr"];
-                        if (OptStr != null)
-                        {
-                            t.OptStr = OptStr.Value;
-                        }
-                        var Multi_role_input = itemnode.Attributes["multi_role_input"];
-                        if (Multi_role_input != null)
-                        {
-                            t.Multi_role_input = bool.Parse(itemnode.Attributes["multi_role_input"].Value);
-                        }
-                        else t.Multi_role_input = true;
-
-                        t.Type = "feature";
-                        chain.AddTransformer(t);
-                    }
+                    processor.LeftContext = chainobject["meta_left_ctx"].ToString();
                 }
 
-               
-                   
+                var rightContext = chainobject["meta_right_ctx"];
+                if (rightContext != null)
+                {
+                    processor.RightContext = chainobject["meta_right_ctx"].ToString();
+                }
+
+                var frameStep = chainobject["meta_frame_step"];
+                if (frameStep != null)
+                {
+                    processor.FrameStep = chainobject["meta_frame_step"].ToString();
+                }
+
+                var category = chainobject["meta_category"];
+                if (category != null)
+                {
+                    processor.Category = chainobject["meta_category"].ToString();
+
+                    chainCategories.AddCategory(processor.Category);
+                }
+                var description = chainobject["meta_description"];
+                if (description != null)
+                {
+                    processor.Description = chainobject["meta_description"].ToString();
+                }
+
+               processor.isIterable = true;
+               var isiterable = chainobject["meta_is_iterable"];
+                if (isiterable != null)
+                {
+                    processor.isIterable = ((bool)chainobject["meta_is_iterable"]);
+                }
+
+                //var elements = chainobject["links"];
+
+                //JArray arr = JArray.Parse(elements.ToString());
+
+
+                //foreach (var element in arr)
+                //{
+                Transformer t = new Transformer();
+                    t.Name = chainobject["model_create"].ToString();
+
+                    var Script = chainobject["model_script_path"];
+                    if (Script != null)
+                    {
+                        t.Script = chainobject["model_script_path"].ToString();
+                    }
+                    var Syspath = chainobject["syspath"];
+                    var OptStr = chainobject["model_option_string"];
+                    if (OptStr != null)
+                    {
+                        t.OptStr = chainobject["model_option_string"].ToString();
+                    }
+                    var Multi_role_input = chainobject["model_multi_role_input"];
+                    if (Multi_role_input != null)
+                    {
+                        t.Multi_role_input = bool.Parse(chainobject["model_multi_role_input"].ToString());
+                    }
+                    else t.Multi_role_input = true;
+
+                    t.Type = "filter";
+                    processor.AddTransformer(t);
+
+                processor.Inputs = new List<ServerInputOutput>();
+                processor.Outputs = new List<ServerInputOutput>();
+
+                var meta_io = chainobject["meta_io"];
+                if(meta_io != null && meta_io.ToString() != "[]") {
+
+                    JArray io = JArray.Parse(meta_io.ToString());
+                    foreach(var element in io)
+                    {
+                        ServerInputOutput inputoutput = new ServerInputOutput();
+                        inputoutput.ID = element["id"].ToString();
+                        inputoutput.IO = element["type"].ToString();
+                        var defaultname = element["default_value"];
+                        if (defaultname != null)
+                        {
+                            inputoutput.DefaultName = defaultname.ToString();
+                        }
+                        string[] split = element["data"].ToString().Split(':');
+                        inputoutput.Type = split[0];
+                        if (split.Length > 1)
+                            inputoutput.SubType = split[1];
+                        if (split.Length > 2)
+                            inputoutput.SubSubType = split[2];
+
+                        if (inputoutput.IO == "input")
+                        {
+                            processor.Inputs.Add(inputoutput);
+                        }
+                        else processor.Outputs.Add(inputoutput);    
+                    }
+                 
+                }
+
+
+
+
             }
             catch (Exception e)
             {
@@ -1241,43 +1334,78 @@ namespace ssi
             return true;
         }
 
-        private List<Chain> getChains()
+        private List<Processor> getProcessors()
         {
-            List<Chain> chains = new List<Chain>();
-            string[] types = {"nova-server"};
+            List<Processor> chains = new List<Processor>();
 
 
-            foreach (string type in types)
+            try
             {
-                string chainDir = Properties.Settings.Default.CMLDirectory +
-                        "\\" + Defaults.CML.ChainFolderName +
-                        "\\" + type;
-                if (Directory.Exists(chainDir))
+
+                var server_chains = handler.get_info_from_server();
+                JObject chainsServer = JObject.FromObject(server_chains["trainer_ok"]);
+                if (chainCategories.GetCategories().Count == 0)
                 {
-                    string[] chainFiles = Directory.GetFiles(chainDir, "*." + Defaults.CML.ChainFileExtension, SearchOption.AllDirectories);
-
-                  
-                    if (chainCategories.GetCategories().Count == 0)
+                    chainCategories.AddCategory("ALL");
+                    if (ProcessorCategoryBox.ItemsSource == null)
                     {
-                        chainCategories.AddCategory("ALL");
-                        if (ChainCategoryBox.ItemsSource == null)
-                        {
-                            ChainCategoryBox.ItemsSource = chainCategories.GetCategories();
-                            ChainCategoryBox.SelectedIndex = 0;
-                        }
-                    }
-
-
-                    foreach (string chainFile in chainFiles)
-                    {
-                        Chain chain = new Chain() { Path = chainFile };
-                        if (parseChainFile(ref chain))
-                        {
-                            chains.Add(chain);
-                        }
+                        ProcessorCategoryBox.ItemsSource = chainCategories.GetCategories();
+                        ProcessorCategoryBox.SelectedIndex = 0;
                     }
                 }
+
+                        foreach (var chainsEntry in chainsServer)
+                        {
+                       
+                            Processor chain = new Processor() { Path = chainsEntry.Key };
+                            if (parseProcessorFile(ref chain, chainsEntry.Value))
+                            {
+                                chains.Add(chain);
+                            }
+
+                            
+                         }
+                
             }
+            catch
+                {
+                    Console.WriteLine("No Connection to a Nova Server instance");
+                }
+
+       
+
+
+            //foreach (string type in types)
+            //{
+            //    string chainDir = Properties.Settings.Default.CMLDirectory +
+            //            "\\" + Defaults.CML.ProcessorFolderName +
+            //            "\\" + type;
+            //    if (Directory.Exists(chainDir))
+            //    {
+            //        string[] chainFiles = Directory.GetFiles(chainDir, "*." + Defaults.CML.ProcessorFileExtension, SearchOption.AllDirectories);
+
+                  
+            //        if (chainCategories.GetCategories().Count == 0)
+            //        {
+            //            chainCategories.AddCategory("ALL");
+            //            if (ProcessorCategoryBox.ItemsSource == null)
+            //            {
+            //                ProcessorCategoryBox.ItemsSource = chainCategories.GetCategories();
+            //                ProcessorCategoryBox.SelectedIndex = 0;
+            //            }
+            //        }
+
+
+            //        foreach (string chainFile in chainFiles)
+            //        {
+            //            Processor chain = new Processor() { Path = chainFile };
+            //            if (parseProcessorFile(ref chain))
+            //            {
+            //                chains.Add(chain);
+            //            }
+            //        }
+            //    }
+            //}
 
             return chains;
         }
@@ -1361,21 +1489,21 @@ namespace ssi
 
             DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
             DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
-            foreach (DatabaseRole role in RolesBox.SelectedItems)
-            {
-                List<DatabaseAnnotation> annotations = DatabaseHandler.GetAnnotations(scheme, role, annotator);
-                foreach (DatabaseAnnotation annotation in annotations)
-                {
-                    if (annotation.IsFinished)
-                    {
-                        DatabaseSession session = sessions.Find(s => s.Name == annotation.Session);
-                        if (session != null)
-                        {
-                            SessionsBox.SelectedItems.Add(session);
-                        }
-                    }
-                }
-            }
+            //foreach (DatabaseRole role in RolesBox.SelectedItems)
+            //{
+            //    List<DatabaseAnnotation> annotations = DatabaseHandler.GetAnnotations(scheme, role, annotator);
+            //    foreach (DatabaseAnnotation annotation in annotations)
+            //    {
+            //        if (annotation.IsFinished)
+            //        {
+            //            DatabaseSession session = sessions.Find(s => s.Name == annotation.Session);
+            //            if (session != null)
+            //            {
+            //                SessionsBox.SelectedItems.Add(session);
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         private void SelectMissingSessions()
@@ -1390,18 +1518,18 @@ namespace ssi
 
             DatabaseScheme scheme = (DatabaseScheme)SchemesBox.SelectedItem;
             DatabaseAnnotator annotator = (DatabaseAnnotator)AnnotatorsBox.SelectedItem;
-            foreach (DatabaseRole role in RolesBox.SelectedItems)
-            {
-                List<DatabaseAnnotation> annotations = DatabaseHandler.GetAnnotations(scheme, role, annotator);
-                foreach (DatabaseAnnotation annotation in annotations)
-                {
-                    DatabaseSession session = sessions.Find(s => s.Name == annotation.Session);
-                    if (session != null)
-                    {
-                        SessionsBox.SelectedItems.Remove(session);
-                    }
-                }
-            }
+            //foreach (DatabaseRole role in RolesBox.SelectedItems)
+            //{
+            //    List<DatabaseAnnotation> annotations = DatabaseHandler.GetAnnotations(scheme, role, annotator);
+            //    foreach (DatabaseAnnotation annotation in annotations)
+            //    {
+            //        DatabaseSession session = sessions.Find(s => s.Name == annotation.Session);
+            //        if (session != null)
+            //        {
+            //            SessionsBox.SelectedItems.Remove(session);
+            //        }
+            //    }
+            //}
         }
 
         private void ApplySessionSet()
@@ -1462,23 +1590,23 @@ namespace ssi
             GetStreams();
             GetSessions();
             //GetTrainers();
-            //GetChains();
+            //GetProcessors();
             ApplySessionSet();
             UpdateGUI();
         }
 
         private void SaveDefaults(Mode oldmode)
         {
-            if (ChainsBox.SelectedItem != null)
+            if (ProcessorsBox.SelectedItem != null)
             {
-               // Properties.Settings.Default.CMLD = ((Chain)ChainsBox.SelectedItem).Name;
+               // Properties.Settings.Default.CMLD = ((Processor)ProcessorsBox.SelectedItem).Name;
             }
 
             if(AnnotatorsBox.SelectedItem != null)
             {
                 Properties.Settings.Default.CMLDefaultAnnotator = ((DatabaseAnnotator)AnnotatorsBox.SelectedItem).Name;
             }
-         
+
 
             if (RolesBox.SelectedItem != null)
             {
@@ -1506,7 +1634,7 @@ namespace ssi
         {
             bool enable = false;
 
-            if (ChainsBox.Items.Count > 0
+            if (ProcessorsBox.Items.Count > 0
                 && DatabasesBox.SelectedItem != null
                 && SessionsBox.SelectedItem != null
                )
@@ -1520,7 +1648,7 @@ namespace ssi
             ForceCheckBox.IsEnabled = enable;
             multidatabaseadd.IsEnabled = enable;
 
-            //if (ChainsBox.Items.Count > 0)
+            //if (ProcessorsBox.Items.Count > 0)
             //{
             //    ApplyButton.IsEnabled = true;
             //    ExtractPanel.IsEnabled = true;
@@ -1528,11 +1656,11 @@ namespace ssi
             //    //TrainerPathComboBox.IsEnabled = true;
             //}
 
-            if (ChainsBox.SelectedItem != null)
+            if (ProcessorsBox.SelectedItem != null)
             {
-                Chain chain = (Chain)ChainsBox.SelectedItem;
-                ChainPathLabel.Content = chain.Path;
-                ChainDescription.Content = chain.Description;
+                Processor chain = (Processor)ProcessorsBox.SelectedItem;
+                ProcessorPathLabel.Content = chain.Path;
+                ProcessorDescription.Content = chain.Description;
                 LeftContextTextBox.Text = chain.LeftContext;
                 FrameSizeTextBox.Text = chain.FrameStep;
                 RightContextTextBox.Text = chain.RightContext;
@@ -1718,11 +1846,11 @@ namespace ssi
                 sessions += session + ";";
             }
 
-            string roles = "";
-            foreach (var role in RolesBox.SelectedItems)
-            {
-                roles += role + ";";
-            }
+            //string roles = "";
+            //foreach (var role in RolesBox.SelectedItems)
+            //{
+            //    roles += role + ";";
+            //}
 
 
             if (selectedDatabaseAndSessions.Count == 0)
@@ -1739,7 +1867,7 @@ namespace ssi
 
 
 
-            SelectedDatabaseAndSessions stp = new SelectedDatabaseAndSessions() { Database = DatabasesBox.SelectedItem.ToString(), Sessions = sessions, Roles = roles, Annotator = AnnotatorsBox.SelectedItem.ToString(), Stream = stream };
+            SelectedDatabaseAndSessions stp = new SelectedDatabaseAndSessions() { Database = DatabasesBox.SelectedItem.ToString(), Sessions = sessions, Annotator = AnnotatorsBox.SelectedItem.ToString(), Stream = stream };
 
 
             //For now we allow to add data multiple times. This comes with the advantage that we also allow sessions from different annotators.
@@ -1801,13 +1929,168 @@ namespace ssi
 
         }
 
+
+
+        private List<AnnoScheme.Attribute> ParseInputs(List<ServerInputOutput> Inputs, bool multiroleinput)
+        {
+            ShowAnnotatorBox = false;
+            List<AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
+            if (Inputs == null)
+            {
+                return null;
+            }
+            else
+            {
+                foreach (ServerInputOutput input in Inputs)
+                {
+                    string option;
+                    string origin = null;
+
+                    AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.STRING;
+                    List<string> content = new List<string>();
+
+                    AnnoScheme.AttributeTypes xtype = AnnoScheme.AttributeTypes.LIST;
+                    AnnoScheme.AttributeTypes xtype2 = AnnoScheme.AttributeTypes.LIST;
+                    List<string> xcontent = new List<string>();
+                    List<string> xcontent2 = new List<string>();
+
+                    string name = input.ID.ToString();
+                    type = AnnoScheme.AttributeTypes.LIST;
+
+
+                    if (input.Type.ToLower() == "url")
+                    {
+                        type = AnnoScheme.AttributeTypes.STRING;
+                        if (input.DefaultName != null && input.DefaultName != "")
+                        {
+                            content.Add(input.DefaultName);
+                        }
+                        //else content.Add("");
+
+                    }
+
+                        if (input.Type.ToLower() == "annotation")
+                    {
+                        List<string> result = new List<string>();
+                        if(input.DefaultName != null)
+                        {
+                            var scheme = DatabaseHandler.Schemes.Find(x => x.Name == input.DefaultName);
+                            if (scheme != null){
+                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()))
+
+                                    result.Add(input.DefaultName);
+                            }
+                            
+                        }
+                       
+
+                        foreach (var scheme in DatabaseHandler.Schemes)
+                            {
+                                if (input.SubType != null)
+                                {
+                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()) && !result.Contains(scheme.Name))
+                                {
+                                    result.Add(scheme.Name);
+                                }
+
+                            }
+                                else
+                                {
+                                    result.Add(scheme.Name);
+                                }
+                          
+                            }
+                        content = result;
+                        origin = "anno";
+                        ShowAnnotatorBox = true;
+                        foreach (var item in (DatabaseHandler.Annotators))
+                        {
+                          
+                            xcontent2.Add(item.ToString());
+                        }
+                    }
+
+                    else if (input.Type.ToLower() == "stream")
+                    {
+                        List<string> result = new List<string>();
+                        if (input.DefaultName != null && input.DefaultName != "")
+                        {
+                            result.Add(input.DefaultName);
+                        }
+
+
+                        foreach (var scheme in DatabaseHandler.Streams)
+                        {
+                            if (input.SubType != null)
+                            {
+                                if (input.SubType == "SSIStream"){
+                                    input.SubType = "feature";
+                                }
+                                if(input.SubSubType != null)
+                                {
+                                    input.SubType = input.SubSubType;
+                                }
+                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()) && !result.Contains(scheme.Name)){
+                                    result.Add(scheme.Name);
+                                }
+
+                            }
+                            else
+                            {
+                                result.Add(scheme.Name);
+                            }
+                           
+                        }
+                        content = result;
+                        origin = "stream";
+
+                    }
+
+
+                    if (multiroleinput)
+                    {
+                        foreach (var item in (DatabaseHandler.Roles))
+                        {
+                            xcontent.Add(item.ToString());
+                        }
+
+                        RolesBox.Visibility = Visibility.Collapsed;
+                        RolesLabel.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        RolesBox.Visibility = Visibility.Visible;
+                        RolesLabel.Visibility = Visibility.Visible;
+                    }
+
+                    if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
+
+
+
+                       
+
+                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, xcontent2, xtype2, origin);
+                    values.Add(attribute);
+                }
+
+
+
+
+            }
+
+
+            return values;
+        }
+
+
+
         private List<AnnoScheme.Attribute> ParseAttributes(string optstr, bool multiroleinput)
         {
             ShowAnnotatorBox = false;
             List<AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
-            if (optstr == null)
+            if (optstr == null || optstr == "")
             {
-                return null;
+                return values;
             }
             else
             {
@@ -1825,7 +2108,9 @@ namespace ssi
                     List<string> content = new List<string>();
 
                     AnnoScheme.AttributeTypes xtype = AnnoScheme.AttributeTypes.LIST;
+                    AnnoScheme.AttributeTypes xtype2 = AnnoScheme.AttributeTypes.LIST;
                     List<string> xcontent = new List<string>();
+                    List<string> xcontent2 = new List<string>();
 
                     string name = attributes[0];
 
@@ -1858,21 +2143,32 @@ namespace ssi
                             }
                             else content = checkTagList(attributes[2], "");
 
-
-                            if (multiroleinput)
+                            if(!attributes[2].StartsWith("$(io_input_id") && !attributes[2].StartsWith("$(io_output_id"))
                             {
-                                foreach (var item in (DatabaseHandler.Roles))
+                                if (multiroleinput)
                                 {
-                                    xcontent.Add(item.ToString());
+                                    foreach (var item in (DatabaseHandler.Roles))
+                                    {
+                                        xcontent.Add(item.ToString());
+                                    }
+
+                                    RolesBox.Visibility = Visibility.Collapsed;
+                                    RolesLabel.Visibility = Visibility.Collapsed;
                                 }
+                                else
+                                {
+                                    RolesBox.Visibility = Visibility.Visible;
+                                    RolesLabel.Visibility = Visibility.Visible;
+                                }
+                            }
+
+                            else
+                            {
                                 RolesBox.Visibility = Visibility.Collapsed;
                                 RolesLabel.Visibility = Visibility.Collapsed;
                             }
-                            else
-                            {
-                                RolesBox.Visibility = Visibility.Visible;
-                                RolesLabel.Visibility= Visibility.Visible;
-                            }
+
+                           
 
                             if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
                           
@@ -1884,6 +2180,22 @@ namespace ssi
                             {
                                 origin = "anno";
                                 ShowAnnotatorBox = true;
+                                foreach (var item in (DatabaseHandler.Annotators))
+                                {
+                                    xcontent2.Add(item.ToString());
+                                }
+                            }
+
+                            else if (attributes[2].StartsWith("$(io_input_id"))
+                            {
+                                origin = "input";
+          
+                            }
+
+                            else if (attributes[2].StartsWith("$(io_output_id"))
+                            {
+                                origin = "output";
+     
                             }
 
                         }
@@ -1901,7 +2213,7 @@ namespace ssi
 
                     }
 
-                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, origin);
+                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, xcontent2, xtype2, origin);
                     values.Add(attribute);
                 }
 
@@ -1910,16 +2222,16 @@ namespace ssi
 
             }
 
-            if (ShowAnnotatorBox)
-            {
-                AnnotatorsBox.Visibility = Visibility.Visible;
-                AnnotatorsLabel.Visibility = Visibility.Visible;
-            }
-            else 
-            {
+            //if (ShowAnnotatorBox)
+            //{
+            //    AnnotatorsBox.Visibility = Visibility.Visible;
+            //    AnnotatorsLabel.Visibility = Visibility.Visible;
+            //}
+            //else 
+            //{
                 AnnotatorsBox.Visibility = Visibility.Hidden;
                 AnnotatorsLabel.Visibility = Visibility.Hidden;
-            }
+           // }
 
             return values;
         }
@@ -1952,7 +2264,6 @@ namespace ssi
                     result.Add(role.Name);
                 }
             }
-
             else if (Tag == "$(annotator)")
             {
                 foreach (var annotator in DatabaseHandler.Annotators)
@@ -1979,25 +2290,365 @@ namespace ssi
             else if (Tag.StartsWith("$(annotation_name") || Tag.StartsWith("$(anno_name"))
             {
                
-
                 foreach (var scheme in DatabaseHandler.Schemes)
                 {
+
+
                     if (typesplitted.Contains(scheme.Type.ToString()) || Type == "")
-                        foreach(DatabaseSession session in SessionsBox.SelectedItems)
-                        {
-                                if (AnnotatorsBox.SelectedItem != null && DatabaseHandler.AnnotationExists(((DatabaseAnnotator)(AnnotatorsBox.SelectedItem)).Name, session.Name, ((DatabaseRole)DatabaseHandler.Roles[0]).Name, scheme.Name))
-                                {
-                                    result.Add(scheme.Name);
-                                  
-                                break;
-                                }
-                           
-                        }
+                    { 
+                        result.Add(scheme.Name);
+                      
+
+                    }
                 }
             }
-          
+
+            else if (Tag.StartsWith("$(io_input_id"))
+            {
+
+                foreach (var item in (Inputs))
+                {
+                    result.Add(item.Name);
+                }
+            }
+
+            else if (Tag.StartsWith("$(io_output_id"))
+            {
+     
+                foreach (var item in (Outputs))
+                {
+                    result.Add(item.Name);
+                }
+            }
+
             return result;
         }
+
+        public void InputOutResults()
+        {
+            data.Clear();
+
+            if (Inputsresult == null || Outputsresult == null)
+            {
+                return;
+            }
+
+            bool first = true;
+            foreach (var element in Inputsresult)
+            {
+
+            
+
+
+                //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
+                {
+                    if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
+                    {
+
+                        if (element.Key.Split('.')[1] != "")
+                        {
+
+                            if (element.Key.Split('.')[1] == "anno")
+                            {
+                                string role = "";
+                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
+                                {
+
+                                    role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
+                                    JObject ob = new JObject
+                                    {
+                                        {"id", element.Key.Split('.')[0] },
+                                        { "type", "input" },
+                                        { "src", "db:anno" },
+                                        { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                        { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
+                                        { "role", role },
+                                        { "active", "True" }
+                                    };
+                                    if (first)
+                                    {
+                                        Properties.Settings.Default.CMLDefaultAnnotator = ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString();
+                                        Properties.Settings.Default.CMLDefaultRole = role;
+                                        Properties.Settings.Default.Save();
+                                        first = false;
+                                    }
+                                    
+                                    data.Add(ob);
+                                }
+                                else if (RolesBox.SelectedItem != null)
+                                {
+                                    foreach (var rol in RolesBox.SelectedItems)
+                                    {
+                                        role = RolesBox.SelectedItem.ToString();
+                                        JObject ob = new JObject
+                                            { {"id", element.Key.Split('.')[0] },
+                                            { "type", "input" },
+                                            { "src", "db:anno" },
+                                            { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                            { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
+                                            { "role", role },
+                                            { "active", "True" }
+                                        };
+                                        if (first)
+                                        {
+                                            Properties.Settings.Default.CMLDefaultAnnotator = ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString();
+                                            Properties.Settings.Default.CMLDefaultRole = role;
+                                            Properties.Settings.Default.Save();
+                                            first = false;
+                                        }
+                                        data.Add(ob);
+                                    }
+
+                                }
+
+
+
+                            }
+
+                            else if (element.Key.Split('.')[1] == "stream")
+                            {
+                                string role = "";
+
+                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
+                                {
+                                    role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
+                                    JObject ob = new JObject
+                                {
+                                    {"id", element.Key.Split('.')[0] },
+                                    { "type", "input" },
+                                    { "src", "db:stream" },
+                                    { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                    { "role",role},
+                                    { "active", "True" }
+                                };
+                                    if (first)
+                                    {
+                                        Properties.Settings.Default.CMLDefaultRole = role;
+                                        Properties.Settings.Default.Save();
+                                        first = false;
+                                    }
+                                    data.Add(ob);
+                                }
+                                else if (RolesBox.SelectedItem != null)
+                                {
+                                    role = RolesBox.SelectedItem.ToString();
+                                    foreach (var rol in RolesBox.SelectedItems)
+                                    {
+                                        role = RolesBox.SelectedItem.ToString();
+                                        JObject ob = new JObject
+                                             {
+                                                    {"id", element.Key.Split('.')[0] },
+                                                    { "type", "input" },
+                                                    { "src", "db:stream" },
+                                                    { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                                    { "role",role},
+                                                    { "active", "True" }
+                                                };
+                                        if (first)
+                                        {
+                                            Properties.Settings.Default.CMLDefaultRole = role;
+                                            Properties.Settings.Default.Save();
+                                            first = false;
+                                        }
+                                        data.Add(ob);
+                                    }
+
+
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+            bool firstoutput = true;
+            foreach (var element in Outputsresult)
+            {
+
+
+
+                //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
+                {
+                    if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
+                    {
+
+                        if (element.Key.Split('.')[1] != "")
+                        {
+
+                            if (element.Key.Split('.')[1] == "anno")
+                            {
+
+                                string isactive = "true";
+
+                                if (element.Value.Count > 2)
+                                {
+                                    isactive = ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString();
+                                }
+
+                                string role = "";
+                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
+                                {
+
+                                    role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
+                                    JObject ob = new JObject
+                                    {
+                                        {"id", element.Key.Split('.')[0] },
+                                        { "type", "output" },
+                                        { "src", "db:anno" },
+                                        { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                        { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
+                                        { "role", role },
+                                        { "active", isactive }
+                                    };
+                                    if (firstoutput)
+                                    {
+                                        Properties.Settings.Default.CMLDefaultAnnotatorPrediction = ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString();
+                                        Properties.Settings.Default.CMLDefaultRole = role;
+                                        Properties.Settings.Default.Save();
+                                        firstoutput = false;
+                                    }
+                                    data.Add(ob);
+                                }
+                                else if (RolesBox.SelectedItem != null)
+                                {
+                                    foreach (var rol in RolesBox.SelectedItems)
+                                    {
+
+                                        role = RolesBox.SelectedItem.ToString();
+                                        JObject ob = new JObject
+                                            { {"id", element.Key.Split('.')[0] },
+                                            { "type", "output" },
+                                            { "src", "db:anno" },
+                                            { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                            { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
+                                            { "role", role },
+                                             { "active", isactive }
+                                        };
+                                        if (firstoutput)
+                                        {
+                                            Properties.Settings.Default.CMLDefaultAnnotatorPrediction = ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString();
+                                            Properties.Settings.Default.CMLDefaultRole = role;
+                                            Properties.Settings.Default.Save();
+                                            firstoutput = false;
+                                        }
+                                        data.Add(ob);
+                                    }
+
+                                }
+
+
+
+                            }
+
+                            else if (element.Key.Split('.')[1] == "stream")
+                            {
+                                string role = "";
+
+                                string subtype = "";
+                                Processor processor = (Processor)ProcessorsBox.SelectedItem;
+                                ServerInputOutput output = processor.Outputs.Find(x => x.ID == element.Key.Split('.')[0]);
+                                if (output.SubType != null)
+                                {
+                                    subtype = output.SubType.ToString();
+                                }
+                                if (output.SubSubType != null)
+                                {
+                                    subtype = subtype + ":" + output.SubSubType.ToString();
+                                }
+
+                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
+                                {
+                                    role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
+                                    string name = "";
+                                    try
+                                    {
+                                        if (((ComboBox)element.Value.ElementAt(0)).SelectedItem == null)
+                                        {
+                                            name = ((ComboBox)element.Value.ElementAt(0)).Text;
+
+                                        }
+                                        else
+                                        {
+                                            name = ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString();
+
+                                        }
+
+
+                                    }
+                                    catch
+                                    {
+
+                                    }
+
+                                    string isactive = "true";
+
+                                    if (element.Value.Count > 2)
+                                    {
+                                        isactive = ((CheckBox)element.Value.ElementAt(2)).IsChecked.ToString();
+                                    }
+
+
+                                    JObject ob = new JObject
+                                {
+                                    {"id", element.Key.Split('.')[0] },
+                                    { "type", "output" },
+                                    { "kind", subtype },
+                                    { "src", "db:stream" },
+                                    { "name", name },
+                                    { "role",role},
+                                    { "active", isactive }
+                                };
+                                    if (firstoutput)
+                                    {
+                                        Properties.Settings.Default.CMLDefaultRole = role;
+                                        Properties.Settings.Default.Save();
+                                        firstoutput = false;
+                                    }
+                                    data.Add(ob);
+                                }
+                                else if (RolesBox.SelectedItem != null)
+                                {
+                                    string isactive = "true";
+
+                                    if (element.Value.Count > 2)
+                                    {
+                                        isactive = ((CheckBox)element.Value.ElementAt(2)).IsChecked.ToString();
+                                    }
+
+                                    role = RolesBox.SelectedItem.ToString();
+                                    foreach (var rol in RolesBox.SelectedItems)
+                                    {
+                                        role = RolesBox.SelectedItem.ToString();
+                                        JObject ob = new JObject
+                                             {
+                                                    {"id", element.Key.Split('.')[0] },
+                                                    { "type", "output" },
+                                                    { "kind", subtype },
+                                                    { "src", "db:stream" },
+                                                    { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                                                    { "role",role},
+                                                    { "active", isactive }
+                                                };
+                                        if (firstoutput)
+                                        {
+                                            Properties.Settings.Default.CMLDefaultRole = role;
+                                            Properties.Settings.Default.Save();
+                                            firstoutput = false;
+                                        }
+                                        data.Add(ob);
+                                    }
+
+
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+
 
         public string AttributesResult()
         {
@@ -2005,7 +2656,11 @@ namespace ssi
             AllUsedSchemes.Clear();
             AllUsedStreams.Clear();
             AllUsedRoles.Clear();
+         
 
+         
+
+            
             if (SpecificModelattributesresult == null)
             {
                 return "";
@@ -2015,7 +2670,7 @@ namespace ssi
             foreach (var element in SpecificModelattributesresult)
             {
 
-               
+
 
                 //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
                 {
@@ -2026,35 +2681,21 @@ namespace ssi
                     else if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
                     {
 
-                        if (element.Key.Split('.')[1] != "")
-                        {
-                       
-                                if (element.Key.Split('.')[1] == "anno" && !AllUsedSchemes.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
-                                {
-                                    AllUsedSchemes.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
-                                }
-                                else if (element.Key.Split('.')[1] == "stream" && !AllUsedStreams.Contains(((ComboBox)element.Value.ElementAt(0)).SelectedItem))
-                                {
-                                    AllUsedStreams.Add(((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
-                                 }
-                            
-                        }
-
-
-
                         if (element.Value.Count == 1)
                         {
                             resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
                         }
                         else if (element.Value.Count == 2)
                         {
-                             resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
-                            if (!AllUsedRoles.Contains(((ComboBox)element.Value.ElementAt(1)).SelectedItem)){
-                                AllUsedRoles.Add(((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString());
-                            }
-                            
-                        }
+                            resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
 
+                        }
+                        else if (element.Value.Count == 3)
+                        {
+                            resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(2)).SelectedItem + ";";
+
+
+                        }
 
 
                     }
@@ -2071,38 +2712,280 @@ namespace ssi
             resultOptstring = resultOptstring.Remove(resultOptstring.Length - 1, 1);
             return resultOptstring;
         }
+        
 
-
-
-        private void AddTrainerSpecificOptionsUIElements(string optstr, bool multiroleInput, bool Clear=false)
+        private void AddOutputUIElements(List<ServerInputOutput> inputs, bool Clear = false)
         {
-            if (Clear) {
-                ModelSpecificAttributes = null;
-                ModelSpecificAttributes = new List<AnnoScheme.Attribute>();
-                inputGrid.Children.Clear();
-            }
-          
-            ModelSpecificAttributes.AddRange(ParseAttributes(optstr, multiroleInput));
-           
+            if (Clear)
+            {
+                Outputs = null;
+                Outputs = new List<AnnoScheme.Attribute>();
+                outputGrid.Children.Clear();
 
-            if (ModelSpecificAttributes != null && ModelSpecificAttributes.Count > 0)
+                Outputs.AddRange(ParseInputs(inputs, true));
+
+            }
+
+
+            if (Outputs != null && Outputs.Count > 0)
             {
 
                 Dictionary<string, Input> input = new Dictionary<string, Input>();
 
-                foreach (var attribute in ModelSpecificAttributes)
+                foreach (var attribute in Outputs)
                 {
                     if (attribute.Values.Count == 0) attribute.Values.Add("");
-                    input[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType, ExtraAttributes = attribute.ExtraValues, ExtraAttributeType = attribute.ExtraAttributeType, Origin = attribute.Origin };
-                    
+                    input[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType, ExtraAttributes = attribute.ExtraValues, ExtraAttributeType = attribute.ExtraAttributeType, ExtraAttributes2 = attribute.ExtraValues2, ExtraAttributeType2 = attribute.ExtraAttributeType2, Origin = attribute.Origin };
+
 
 
                 }
-                SpecificModelattributesresult = new Dictionary<string, List<UIElement>>();
+                Outputsresult = new Dictionary<string, List<UIElement>>();
                 TextBox firstTextBox = null;
                 foreach (KeyValuePair<string, Input> element in input)
                 {
-                    System.Windows.Controls.Label label = new System.Windows.Controls.Label() { Content = element.Value.Label };
+                    System.Windows.Controls.Label label = new System.Windows.Controls.Label() { Content = element.Value.Label.Replace("_","__") };
+
+                    Thickness tk = label.Margin; tk.Left = 5; tk.Right = 0; tk.Bottom = 0; label.Margin = tk;
+
+                    outputGrid.Children.Add(label);
+
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Auto);
+                    outputGrid.RowDefinitions.Add(rowDefinition);
+
+                    Grid.SetColumn(label, 0);
+                    Grid.SetRow(label, outputGrid.RowDefinitions.Count - 1);
+
+
+                    if (element.Value.AttributeType == AnnoScheme.AttributeTypes.STRING)
+                    {
+                        TextBox textBox = new TextBox() { Text = element.Value.DefaultValue };
+                        //textBox.GotFocus += TextBox_GotFocus;
+                        if (firstTextBox == null)
+                        {
+                            firstTextBox = textBox;
+                        }
+                        Thickness margin = textBox.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; textBox.Margin = margin;
+                        List<UIElement> list = new List<UIElement>
+                            {
+                                textBox,
+
+                            };
+                        Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
+                        outputGrid.Children.Add(textBox);
+                        if (firstTextBox != null)
+                        {
+                            firstTextBox.Focus();
+                        }
+
+                        Grid.SetColumn(textBox, 1);
+                        Grid.SetRow(textBox, outputGrid.RowDefinitions.Count - 1);
+                    }
+                    else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
+                    {
+
+                        ComboBox cb = new ComboBox();
+                        foreach (var item in element.Value.Attributes)
+                        {
+                            cb.Items.Add(item);
+                        }
+
+                        //{
+                        //    ItemsSource = element.Value.Attributes
+
+                        //};
+
+                        if (element.Value.Origin == "stream")
+                        {
+                            cb.IsEditable = true;
+                        }
+
+                        if (element.Value.Attributes[0] == "") cb.IsEnabled = false;
+                        cb.SelectedItem = element.Value.DefaultValue;
+                        Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5;
+                        cb.Margin = margin;
+
+                        outputGrid.Children.Add(cb);
+
+                        Grid.SetColumn(cb, 1);
+                        Grid.SetRow(cb, outputGrid.RowDefinitions.Count - 1);
+
+
+                        CheckBox cbox = new CheckBox()
+                        {
+                            IsChecked = true
+                        };
+                        cbox.Margin = margin;
+                        outputGrid.Children.Add(cbox);
+                        Grid.SetColumn(cbox, 4);
+                        Grid.SetRow(cbox, outputGrid.RowDefinitions.Count - 1);
+
+
+
+                        if (element.Value.ExtraAttributes2 != null && element.Value.ExtraAttributes2.Count > 0)
+                        {
+                            ComboBox cb2 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes
+                            };
+
+                             string[] split = element.Key.ToString().Split('_');
+                             if(split.Length > 1)
+                                {
+                                    cb2.SelectedItem = split[0];
+                                }
+                            if (cb2.SelectedItem == null)
+                            {
+                                cb2.SelectedIndex = 0;
+                            }
+      
+                            if (element.Value.ExtraAttributes.Count == 0)
+                            {
+                                cb2.IsEnabled = false;
+                            }
+                            else
+                            {
+                                cb2.IsEnabled = true;
+                            }
+
+
+                            ComboBox cb3 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes2
+                            };
+
+
+
+                            cb3.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotatorPrediction;
+                            if (cb3.SelectedItem == null)
+                            {
+                                cb3.SelectedIndex = 0;
+                            }
+
+
+                            cb2.Margin = margin;
+                            cb3.Margin = margin;
+                            outputGrid.Children.Add(cb2);
+                            outputGrid.Children.Add(cb3);
+
+                            Grid.SetColumn(cb2, 2);
+                            Grid.SetRow(cb2, outputGrid.RowDefinitions.Count - 1);
+
+                            Grid.SetColumn(cb3, 3);
+                            Grid.SetRow(cb3, outputGrid.RowDefinitions.Count - 1);
+
+                  
+
+                            List<UIElement> list = new List<UIElement>
+                            {
+                                cb,
+                                cb2,
+                                cb3,
+                                cbox
+
+                            };
+                            Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
+
+
+                        }
+
+                        else if (element.Value.ExtraAttributes != null && element.Value.ExtraAttributes.Count > 0)
+                        {
+                            ComboBox cb2 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes
+                            };
+                            string[] split = element.Key.ToString().Split('_');
+                            if (split.Length > 1)
+                            {
+                                cb2.SelectedItem = split[0];
+                            }
+                            if (cb2.SelectedItem == null)
+                            {
+                                cb2.SelectedIndex = 0;
+                            }
+                            if (element.Value.ExtraAttributes.Count == 0) cb2.IsEnabled = false;
+                            else cb2.IsEnabled = true;
+
+
+                            Thickness margin2 = cb2.Margin; margin2.Top = 5; margin2.Right = 5; margin2.Bottom = 5; cb2.Margin = margin2;
+                            outputGrid.Children.Add(cb2);
+
+                            Grid.SetColumn(cb2, 2);
+                            Grid.SetRow(cb2, outputGrid.RowDefinitions.Count - 1);
+
+
+
+
+                            List<UIElement> list = new List<UIElement>
+                            {
+                                cb,
+                                cb2,
+                                cbox
+                            };
+                            Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
+
+
+                        }
+
+                        else
+                        {
+
+                            List<UIElement> list = new List<UIElement>
+                            {
+                                cb,
+                                cbox
+
+                            };
+                            Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
+                        }
+
+
+
+                    }
+                }
+            }
+
+
+        }
+
+        private void Cb_TextInput(object sender, TextCompositionEventArgs e)
+        {
+            ((ComboBox)sender).Items[0] = e.Text;
+        }
+
+        private void AddInputUIElements(List<ServerInputOutput> inputs, bool Clear = false)
+        {
+            if (Clear)
+            {
+                Inputs = null;
+                Inputs = new List<AnnoScheme.Attribute>();
+                inputGrid.Children.Clear();
+
+                Inputs.AddRange(ParseInputs(inputs, true));
+
+            }
+
+
+            if (Inputs != null && Inputs.Count > 0)
+            {
+
+                Dictionary<string, Input> input = new Dictionary<string, Input>();
+
+                foreach (var attribute in Inputs)
+                {
+                    if (attribute.Values.Count == 0) attribute.Values.Add("");
+                    input[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType, ExtraAttributes = attribute.ExtraValues, ExtraAttributeType = attribute.ExtraAttributeType, ExtraAttributes2 = attribute.ExtraValues2, ExtraAttributeType2 = attribute.ExtraAttributeType2, Origin = attribute.Origin };
+
+
+
+                }
+                Inputsresult = new Dictionary<string, List<UIElement>>();
+                TextBox firstTextBox = null;
+                foreach (KeyValuePair<string, Input> element in input)
+                {
+                    System.Windows.Controls.Label label = new System.Windows.Controls.Label() { Content = element.Value.Label.Replace("_", "__") };
 
                     Thickness tk = label.Margin; tk.Left = 5; tk.Right = 0; tk.Bottom = 0; label.Margin = tk;
 
@@ -2130,7 +3013,7 @@ namespace ssi
                                 textBox,
 
                             };
-                        SpecificModelattributesresult.Add(element.Key + "." + element.Value.Origin, list);
+                        Inputsresult.Add(element.Key + "." + element.Value.Origin, list);
                         inputGrid.Children.Add(textBox);
                         if (firstTextBox != null)
                         {
@@ -2139,6 +3022,210 @@ namespace ssi
 
                         Grid.SetColumn(textBox, 1);
                         Grid.SetRow(textBox, inputGrid.RowDefinitions.Count - 1);
+                    }
+                    else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
+                    {
+
+                        ComboBox cb = new ComboBox()
+                        {
+                            ItemsSource = element.Value.Attributes
+
+                        };
+                        if (element.Value.Attributes[0] == "") cb.IsEnabled = false;
+                        cb.SelectedItem = element.Value.DefaultValue;
+                        Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5;
+                        cb.Margin = margin;
+
+                        inputGrid.Children.Add(cb);
+
+                        Grid.SetColumn(cb, 1);
+                        Grid.SetRow(cb, inputGrid.RowDefinitions.Count - 1);
+
+                        if (element.Value.ExtraAttributes2 != null && element.Value.ExtraAttributes2.Count > 0)
+                        {
+                            ComboBox cb2 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes
+                            };
+                            string[] split = element.Key.ToString().Split('_');
+                            if (split.Length > 1)
+                            {
+                                cb2.SelectedItem = split[0];
+                            }
+                            if (cb2.SelectedItem == null)
+                            {
+                                cb2.SelectedIndex = 0;
+                            }
+                            if (element.Value.ExtraAttributes.Count == 0)
+                            {
+                                cb2.IsEnabled = false;
+                            }
+                            else
+                            {
+                                cb2.IsEnabled = true;
+                            }
+
+
+                            ComboBox cb3 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes2
+                            };
+                            cb3.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotator;
+                            if(cb3.SelectedItem == null)
+                            {
+                                cb3.SelectedIndex = 0;  
+                            }
+
+
+                            cb2.Margin = margin;
+                            cb3.Margin = margin;
+                            inputGrid.Children.Add(cb2);
+                            inputGrid.Children.Add(cb3);
+
+                            Grid.SetColumn(cb2, 2);
+                            Grid.SetRow(cb2, inputGrid.RowDefinitions.Count - 1);
+
+                            Grid.SetColumn(cb3, 3);
+                            Grid.SetRow(cb3, inputGrid.RowDefinitions.Count - 1);
+
+
+                            List<UIElement> list = new List<UIElement>
+                            {
+                                cb,
+                                cb2,
+                                cb3
+
+                            };
+                            Inputsresult.Add(element.Key + "." + element.Value.Origin, list);
+
+
+                        }
+
+                        else if (element.Value.ExtraAttributes != null && element.Value.ExtraAttributes.Count > 0)
+                        {
+                            ComboBox cb2 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes
+                            };
+                            string[] split = element.Key.ToString().Split('_');
+                            if (split.Length > 1)
+                            {
+                                cb2.SelectedItem = split[0];
+                            }
+                            if (cb2.SelectedItem == null)
+                            {
+                                cb2.SelectedIndex = 0;
+                            }
+
+
+                            if (element.Value.ExtraAttributes.Count == 0) cb2.IsEnabled = false;
+                            else cb2.IsEnabled = true;
+
+
+                            Thickness margin2 = cb2.Margin; margin2.Top = 5; margin2.Right = 5; margin2.Bottom = 5; cb2.Margin = margin2;
+                            inputGrid.Children.Add(cb2);
+
+                            Grid.SetColumn(cb2, 2);
+                            Grid.SetRow(cb2, inputGrid.RowDefinitions.Count - 1);
+
+
+                            List<UIElement> list = new List<UIElement>
+                            {
+                                cb,
+                                cb2
+                            };
+                            Inputsresult.Add(element.Key + "." + element.Value.Origin, list);
+
+
+                        }
+
+                        else
+                        {
+                            List<UIElement> list = new List<UIElement>
+                            {
+                                cb
+
+                            };
+                            Inputsresult.Add(element.Key + "." + element.Value.Origin, list);
+                        }
+
+
+
+                    }
+                }
+            }
+
+
+        }
+
+        private void AddTrainerSpecificOptionsUIElements(string optstr, bool multiroleInput, bool Clear=false)
+        {
+            if (Clear) {
+                ModelSpecificAttributes = null;
+                ModelSpecificAttributes = new List<AnnoScheme.Attribute>();
+                optionsGrid.Children.Clear();
+            }
+           
+            ModelSpecificAttributes.AddRange(ParseAttributes(optstr, multiroleInput));
+            
+          
+          
+           
+
+            if (ModelSpecificAttributes != null && ModelSpecificAttributes.Count > 0)
+            {
+
+                Dictionary<string, Input> input = new Dictionary<string, Input>();
+
+                foreach (var attribute in ModelSpecificAttributes)
+                {
+                    if (attribute.Values.Count == 0) attribute.Values.Add("");
+                    input[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType, ExtraAttributes = attribute.ExtraValues, ExtraAttributeType = attribute.ExtraAttributeType, ExtraAttributes2 = attribute.ExtraValues2, ExtraAttributeType2 = attribute.ExtraAttributeType2, Origin = attribute.Origin };
+                    
+
+
+                }
+                SpecificModelattributesresult = new Dictionary<string, List<UIElement>>();
+                TextBox firstTextBox = null;
+                foreach (KeyValuePair<string, Input> element in input)
+                {
+                    System.Windows.Controls.Label label = new System.Windows.Controls.Label() { Content = element.Value.Label.Replace("_", "__") };
+
+                    Thickness tk = label.Margin; tk.Left = 5; tk.Right = 0; tk.Bottom = 0; label.Margin = tk;
+
+                    optionsGrid.Children.Add(label);
+
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Auto);
+                    optionsGrid.RowDefinitions.Add(rowDefinition);
+
+                    Grid.SetColumn(label, 0);
+                    Grid.SetRow(label, optionsGrid.RowDefinitions.Count - 1);
+
+
+                    if (element.Value.AttributeType == AnnoScheme.AttributeTypes.STRING)
+                    {
+                        TextBox textBox = new TextBox() { Text = element.Value.DefaultValue };
+                        //textBox.GotFocus += TextBox_GotFocus;
+                        if (firstTextBox == null)
+                        {
+                            firstTextBox = textBox;
+                        }
+                        Thickness margin = textBox.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; textBox.Margin = margin;
+                        List<UIElement> list = new List<UIElement>
+                            {
+                                textBox,
+
+                            };
+                        SpecificModelattributesresult.Add(element.Key + "." + element.Value.Origin, list);
+                        optionsGrid.Children.Add(textBox);
+                        if (firstTextBox != null)
+                        {
+                            firstTextBox.Focus();
+                        }
+
+                        Grid.SetColumn(textBox, 1);
+                        Grid.SetRow(textBox, optionsGrid.RowDefinitions.Count - 1);
                     }
                     else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.BOOLEAN)
                     {
@@ -2154,17 +3241,14 @@ namespace ssi
                            
                             };
                         SpecificModelattributesresult.Add(element.Key + "." + element.Value.Origin, list);
-                        inputGrid.Children.Add(cb);
+                        optionsGrid.Children.Add(cb);
 
 
                         Grid.SetColumn(cb, 1);
-                        Grid.SetRow(cb, inputGrid.RowDefinitions.Count - 1);
+                        Grid.SetRow(cb, optionsGrid.RowDefinitions.Count - 1);
                     }
                     else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
                     {
-
-
-                     
 
                         ComboBox cb = new ComboBox()
                         {
@@ -2173,27 +3257,79 @@ namespace ssi
                         };
                         if (element.Value.Attributes[0] == "") cb.IsEnabled = false;
                         cb.SelectedItem = element.Value.DefaultValue;
-                        Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; cb.Margin = margin;
+                        Thickness margin = cb.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; 
+                        cb.Margin = margin;
                        
-                        inputGrid.Children.Add(cb);
+                        optionsGrid.Children.Add(cb);
 
                         Grid.SetColumn(cb, 1);
-                        Grid.SetRow(cb, inputGrid.RowDefinitions.Count - 1);
+                        Grid.SetRow(cb, optionsGrid.RowDefinitions.Count - 1);
 
-                        if (element.Value.ExtraAttributes != null && element.Value.ExtraAttributes.Count > 0)
+                        if (element.Value.ExtraAttributes2 != null && element.Value.ExtraAttributes2.Count > 0)
                         {
                             ComboBox cb2 = new ComboBox()
                             {
                                 ItemsSource = element.Value.ExtraAttributes
                             };
                             cb2.SelectedIndex = 0;
-                            if (element.Value.Attributes[0] == "") cb2.IsEnabled = false;
+                            if (element.Value.ExtraAttributes.Count == 0)
+                            {
+                                cb2.IsEnabled = false;
+                            }
+                            else
+                            {
+                                cb2.IsEnabled = true;
+                            }
+                           
 
-                            Thickness margin2 = cb2.Margin; margin2.Top = 5; margin2.Right = 5; margin2.Bottom = 5; cb2.Margin = margin2;
-                            inputGrid.Children.Add(cb2);
+                            ComboBox cb3 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes2
+                            };
+                            cb3.SelectedIndex = 0;
+
+
+                            cb2.Margin = margin;
+                            cb3.Margin = margin;
+                            optionsGrid.Children.Add(cb2);
+                            optionsGrid.Children.Add(cb3);
 
                             Grid.SetColumn(cb2, 2);
-                            Grid.SetRow(cb2, inputGrid.RowDefinitions.Count - 1);
+                            Grid.SetRow(cb2, optionsGrid.RowDefinitions.Count - 1);
+
+                            Grid.SetColumn(cb3, 3);
+                            Grid.SetRow(cb3, optionsGrid.RowDefinitions.Count - 1);
+
+
+                            List<UIElement> list = new List<UIElement>
+                            {
+                                cb,
+                                cb2,
+                                cb3
+
+                            };
+                            SpecificModelattributesresult.Add(element.Key + "." + element.Value.Origin, list);
+
+
+                        }
+
+                        else if (element.Value.ExtraAttributes != null && element.Value.ExtraAttributes.Count > 0)
+                        {
+                            ComboBox cb2 = new ComboBox()
+                            {
+                                ItemsSource = element.Value.ExtraAttributes
+                            };
+                            cb2.SelectedIndex = 0;
+                            if (element.Value.ExtraAttributes.Count == 0) cb2.IsEnabled = false;
+                            else cb2.IsEnabled = true;
+
+
+                            Thickness margin2 = cb2.Margin; margin2.Top = 5; margin2.Right = 5; margin2.Bottom = 5; cb2.Margin = margin2;
+                            optionsGrid.Children.Add(cb2);
+
+                            Grid.SetColumn(cb2, 2);
+                            Grid.SetRow(cb2, optionsGrid.RowDefinitions.Count - 1);
+
 
                             List<UIElement> list = new List<UIElement>
                             {
@@ -2204,6 +3340,7 @@ namespace ssi
 
 
                         }
+                      
                         else
                         {
                             List<UIElement> list = new List<UIElement>
@@ -2261,9 +3398,15 @@ namespace ssi
             }
         }
 
-        private void ChainCategoryBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ProcessorCategoryBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            GetChains((String)ChainCategoryBox.SelectedItem);
+            GetProcessors((String)ProcessorCategoryBox.SelectedItem);
+
+        }
+
+        private void logTextBox_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Scrollviewer.ScrollToEnd();
 
         }
     }

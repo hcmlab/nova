@@ -1439,7 +1439,7 @@ namespace ssi
 
                             //index = (int)((double)AnnoList.Count / (double)continuousTierLines.Count * (double)i + 0.5f);
                             index = (int)((double)visiblesamples / (double)continuousTierLines.Count * (double)i + 0.5f   + (time.SelectionStart * AnnoList.Scheme.SampleRate));
-                            if (index > AnnoList.Count) index = AnnoList.Count - 1;
+                            if (index >= AnnoList.Count) index = AnnoList.Count - 1;
 
                             if (AnnoList[index].Start >= time.SelectionStart && AnnoList[index].Stop <= time.SelectionStop)
                             {

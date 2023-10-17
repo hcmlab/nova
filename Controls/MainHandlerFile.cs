@@ -232,7 +232,15 @@ namespace ssi
                 case SSI_FILE_TYPE.AUDIO:
 
                     Signal signala = loadAudioSignalFile(filepath, foreground, background);
-                    signala.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                    if (signala == null)
+                    {
+                        MessageBox.Show("Can't open Audio file " + filepath);
+                    }
+                    else
+                    {
+                        signala.Media = loadMediaFile(filepath, MediaType.AUDIO);
+                    }
+                  
 
 
                     loaded = true;
@@ -590,6 +598,11 @@ namespace ssi
                     else if (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect2")
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT2);
+                        addMedia(media);
+                    }
+                    else if (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "blazeface")
+                    {
+                        IMedia media = new Face(filename, signal, Face.FaceType.BLAZEFACE);
                         addMedia(media);
                     }
                 }

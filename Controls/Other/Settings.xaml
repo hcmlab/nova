@@ -181,7 +181,7 @@
                         <TextBox Name="DownloadDirectory" Margin="5,0,5,5" DockPanel.Dock="Left"/>
                     </DockPanel>
 
-                    <Label Grid.Row="8" Content="CML directory:" Grid.ColumnSpan="2"/>
+                    <Label Grid.Row="8" Content="Local CML directory:" Grid.ColumnSpan="2"/>
                     <DockPanel Grid.Row="9" LastChildFill="True" Grid.ColumnSpan="2">
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                             <Button Name="PickCMLDirectory" Margin="5,0,5,5" Click="PickCMLDirectory_Click">Pick</Button>

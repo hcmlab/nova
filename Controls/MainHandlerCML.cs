@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,11 +32,21 @@ namespace ssi
             dialog.ShowDialog();
         }
 
-        private void databaseCMLTrainAndPredict_Click(object sender, RoutedEventArgs e)
+        private void databaseCMLTrainAndPredictTrain_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.TRAIN);
             showDialogClearWorkspace(dialog);
-        }        
+        }
+        private void databaseCMLTrainAndPredictPredict_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.PREDICT);
+            showDialogClearWorkspace(dialog);
+        }
+        private void databaseCMLTrainAndPredictEval_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseCMLTrainAndPredictWindow dialog = new DatabaseCMLTrainAndPredictWindow(this, DatabaseCMLTrainAndPredictWindow.Mode.EVALUATE);
+            showDialogClearWorkspace(dialog);
+        }
 
         private void databaseCMLCompleteStep()
         {                    
@@ -463,7 +474,7 @@ namespace ssi
             try
             {
                 string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/extract";
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/process";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -487,7 +498,7 @@ namespace ssi
             try
             {
                 string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/predict";
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/process";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -592,6 +603,22 @@ namespace ssi
             var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
 
             return explanationDic;
+        }
+
+
+
+        public JObject get_info_from_server()
+        {
+            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+            string url = "http://" + tokens[0] + ":" + tokens[1] + "/cml_info";
+
+            var response = client.GetAsync(url).Result;
+            var responseContent = response.Content;
+            string responseString = responseContent.ReadAsStringAsync().Result;
+            var result = JObject.Parse(responseString);
+
+
+            return result;
         }
 
         public void cancleCurrentAction(MultipartFormDataContent content)
