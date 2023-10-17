@@ -600,6 +600,11 @@ namespace ssi
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT2);
                         addMedia(media);
                     }
+                    else if (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "blazeface")
+                    {
+                        IMedia media = new Face(filename, signal, Face.FaceType.BLAZEFACE);
+                        addMedia(media);
+                    }
                 }
                 else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton")
                 {

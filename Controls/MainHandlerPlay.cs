@@ -60,6 +60,8 @@ namespace ssi
             updatePositionLabels(Time.CurrentPlayPosition);
             signalCursor.X = Time.PixelFromTime(Time.CurrentPlayPosition + (offset*2.5));
 
+        
+
             if (AnnoTierStatic.Selected != null && AnnoTierStatic.Selected.IsGeometric)
             {
                 control.annoListControl.annoDataGrid.SelectedItems.Clear();
