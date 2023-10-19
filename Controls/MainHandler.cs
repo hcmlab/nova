@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.6.3";
+        public static string BuildVersion = "1.2.6.4";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
