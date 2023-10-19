@@ -44,7 +44,7 @@ namespace ssi
         private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
         private string basePath;
-        public List<float> sample;
+        public int frame;
         public float[] featurestream;
         private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
@@ -137,46 +137,83 @@ namespace ssi
 
         }
 
-        private async Task<Dictionary<string, float>> getExplanationFromBackend()
+        private async Task<Dictionary<string, float>> sendExplanationRequestForm()
         {
+            
+            string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
+
+            string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
+
+            string fileName = SignalTrack.Selected.Signal.Name.Replace(role+".", "");
+
+            //JObject test = new JObject
+            //{
+            //  {"id", "explanation_stream"},
+            //  {"type", "input" },
+            //  {"scheme", AnnoTier.Selected.AnnoList.Scheme.Name},
+            //  {"annotator", "gold"},
+            //  {"src", "db:anno" },
+            //  {"role", role},
+            //  {"active", "True" }
+            //};
+
+            JObject ob = new JObject
+            {
+              {"id", "explanation_stream"},
+              {"type", "input" },
+              {"src", "db:stream" },
+              {"name", fileName},
+              {"role", role},
+              {"active", "True" }
+            };
+            JArray data = new JArray();
+            data.Add(ob);
+            string json = data.ToString(Newtonsoft.Json.Formatting.None);
+
+            MultipartFormDataContent content = new MultipartFormDataContent
+            {
+                { new StringContent(modelPath), "modelPath" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
+                { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
+                { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
+                { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
+                { new StringContent(sessionsstr), "sessions" },
+                //{ new StringContent(JsonConvert.SerializeObject(this.sample).ToString()), "sampleID" },
+                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame" },
+                { new StringContent(this.dim.ToString()), "dim" },
+                { new StringContent(numFeatures.Text), "numFeatures" },
+                { new StringContent(getIdHash()), "jobID" },
+                { new StringContent(json), "data"  }
+            };
+
             try
             {
-
-               
-                var content = new MultipartFormDataContent
-                {
-                    { new StringContent(modelPath), "model_path" },
-                    { new StringContent(JsonConvert.SerializeObject(this.sample).ToString()), "sample" },
-                    { new StringContent(JsonConvert.SerializeObject(this.featurestream).ToString()), "data" },
-                    { new StringContent(this.dim.ToString()), "dim" }
-                };
-
-                numFeaturesV = Int32.Parse(numFeatures.Text);
-
-                string url = "http://localhost:5000/tabular?&numfeatures=" + numFeaturesV;
-
+                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/explain";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
 
-
                 var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
-                
+
+                //var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, float>>(responseString);
+
                 if (explanationDic["success"].ToString() == "failed")
                 {
                     return null;
                 }
 
-
                 var explanations = JsonConvert.DeserializeObject<Dictionary<string, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
 
                 return explanations;
-
             }
             catch (Exception e)
             {
                 return null;
             }
+
+
         }
 
         private async void getExplanation(object sender, RoutedEventArgs e)
@@ -185,11 +222,10 @@ namespace ssi
             SeriesCollection.Clear();
             explanationButton.IsEnabled = false;
 
-            //containerExplainedImages.Children.Clear();
+            Dictionary<string, float> explanationData = await sendExplanationRequestForm();
 
-            Dictionary<string, float> explanationData = await getExplanationFromBackend();
 
-            if(explanationData == null)
+            if (explanationData == null)
             {
                 MainHandler.restartPythonnBackend();
                 this.explanationButton.IsEnabled = true;
@@ -326,6 +362,39 @@ namespace ssi
             }
 
         }
+
+        static int GetDeterministicHashCode(string str)
+        {
+            unchecked
+            {
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                for (int i = 0; i < str.Length; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                    if (i == str.Length - 1)
+                        break;
+                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                }
+
+                return hash1 + (hash2 * 1566083941);
+            }
+        }
+
+        private string getIdHash()
+        {
+
+            int result = GetDeterministicHashCode("database" + DatabaseHandler.DatabaseName + "session" + DatabaseHandler.SessionInfo + "username" + Properties.Settings.Default.MongoDBUser + "explainer" + "lime tabular" + "model" + modelPath);
+
+            var jobIDhash = (Math.Abs(result)).ToString();
+            int MaxLength = 8;
+            if (jobIDhash.Length > MaxLength)
+                jobIDhash = jobIDhash.ToString().Substring(0, MaxLength);
+
+            return jobIDhash;
+        }
+
 
         private class ModelTrainer
         {

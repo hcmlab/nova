@@ -59,28 +59,8 @@ namespace ssi
             try
             {
 
-                byte[] img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
-
-                BitmapImage imageBitmap = new BitmapImage();
-                imageBitmap.BeginInit();
-                imageBitmap.StreamSource = new System.IO.MemoryStream(img);
-                imageBitmap.EndInit();
-                window.explanationImage.Source = imageBitmap;
-
-
-
-
-                //int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
-                //List<float> sample = new List<float>();
-                //for(int d= 0; d< SignalTrackStatic.Selected.Signal.dim; d++ )
-                //{
-                //    sample.Add(SignalTrackStatic.Selected.Signal.data[frame * SignalTrackStatic.Selected.Signal.dim + d]);
-                //}
-
-                //window.featurestream = SignalTrackStatic.Selected.Signal.data;
-                //window.sample = sample;
-
-
+                int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
+                window.frame = frame;
 
                 window.Show();
             }
@@ -116,16 +96,10 @@ namespace ssi
 
                 int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
                 List<float> sample = new List<float>();
-                for (int d = 0; d < SignalTrackStatic.Selected.Signal.dim; d++)
-                {
-                    sample.Add(SignalTrackStatic.Selected.Signal.data[frame * SignalTrackStatic.Selected.Signal.dim + d]);
-                }
 
                 windowFeatureExplanations.featurestream = SignalTrackStatic.Selected.Signal.data;
-                windowFeatureExplanations.sample = sample;
                 windowFeatureExplanations.dim = SignalTrackStatic.Selected.Signal.dim;
-
-
+                windowFeatureExplanations.frame = frame;
 
                 windowFeatureExplanations.Show();
             }
