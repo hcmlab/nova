@@ -71,7 +71,7 @@ namespace ssi
                     if (media.HasAudio())
                     {
                         //media.SetVolume(0.0);
-                        control.mediaVolumeControl.volumeSlider.Value = media.GetVolume();
+                        //control.mediaVolumeControl.volumeSlider.Value = media.GetVolume();
                         //control.mediaVolumeControl.Visibility = Visibility.Visible;
                     }                    
                     control.mediaCloseButton.Visibility = playIsPlaying ? Visibility.Hidden : Visibility.Visible;

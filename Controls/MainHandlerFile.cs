@@ -34,6 +34,9 @@ using System.Windows.Forms.VisualStyles;
 using NAudio.CoreAudioApi;
 using Tamir.SharpSsh.jsch;
 using WPFMediaKit.DirectShow.Controls;
+using Tamir.SharpSsh.java.lang;
+using NDtw;
+using System.Windows.Media.Media3D;
 
 namespace ssi
 {
@@ -337,6 +340,7 @@ namespace ssi
         }
 
 
+
         public byte[] GetData(DicomFile m_File)
         {
             var image = new DicomImage(m_File.Dataset);
@@ -575,42 +579,81 @@ namespace ssi
         
              signal = Signal.LoadStreamFile(filename, dimnames);
          
-            if (signal != null && signal.loaded)
+            if (signal != null && signal.loaded )
             {                
-                if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face")
+ 
+                if(signal.Meta.Count > 0)
                 {
 
-                    if(signal.Meta.ContainsKey("type") && signal.Meta["type"] == "openface")
+                    int width = 500;
+                    int height = 500;
+                    int mwidth = width;
+                    int mheight = height;
+
+                    if (signal.Meta.ContainsKey("ratio"))
+                    {
+                        string[] split = signal.Meta["ratio"].Split(':');
+                        int w = Integer.parseInt(split[0]);
+                        int h = Integer.parseInt(split[1]);
+                        float scale = 1;
+                        if (w > h)
+                        {
+                            scale = (float)((float)h / (float)w);
+                            mwidth = width;
+                            mheight = (int)(height * scale);
+                        }
+
+                        else if (w < h)
+                        {
+                            scale = (float)((float)w /(float)h);
+                            mwidth = (int)(width * scale);
+                            mheight = height;
+                        }
+
+                        else
+                        {
+                            mwidth = width;
+                            mheight = height;
+                        }
+
+                    }
+
+
+                    if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "openface") || signal.Meta["type"] == "openface")
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.OPENFACE);
                         addMedia(media);
                     }
-                    else if (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "openface2")
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "openface2") || signal.Meta["type"].Contains("openface2"))
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.OPENFACE2);
                         addMedia(media);
                     }
-                    else if (signal.Meta.ContainsKey("type") && (signal.Meta["type"] == "kinect1" || signal.Meta["type"] == "kinect"))
+                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && (signal.Meta["type"] == "kinect1" || signal.Meta["type"] == "kinect"))
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT1);
                         addMedia(media);
                     }
-                    else if (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect2")
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect2" || signal.Meta["type"].Contains("kinect2")))
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT2);
                         addMedia(media);
                     }
-                    else if (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "blazeface")
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "blazeface") || (signal.Meta.ContainsKey("type") && signal.Meta["type"].Contains("blazeface")))
                     {
-                        IMedia media = new Face(filename, signal, Face.FaceType.BLAZEFACE);
+                   
+
+                        IMedia media = new Face(filename, signal, Face.FaceType.BLAZEFACE, mwidth, mheight);
+                        addMedia(media);
+                    }
+
+                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton")
+                    {
+                        IMedia media = new Skeleton(filename, signal, mwidth, mheight);
                         addMedia(media);
                     }
                 }
-                else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton")
-                {
-                    IMedia media = new Skeleton(filename, signal);
-                    addMedia(media);
-                }
+               
 
                 //else
                 //{

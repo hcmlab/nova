@@ -143,8 +143,8 @@ namespace ssi
 
 
 
-            this.width = Size;
-            this.height = Size;
+            this.width = width; // Size;
+            this.height = height; // Size;
 
             type = MediaType.FACE;
             facetype = ftype;
@@ -511,17 +511,17 @@ namespace ssi
                         //double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
 
 
-                        double Y = signal.data[i] * width;
-                        double X = signal.data[i + 1] * height;
+                        double Y = signal.data[i] * height;
+                        double X = signal.data[i + 1] * width;
 
-                        double Y2 = signal.data[i] * width;
-                        double X2 = signal.data[i + 3] * height;
+                        double Y2 = signal.data[i] * height;
+                        double X2 = signal.data[i + 3] * width;
 
-                        double Y3 = signal.data[i+2] * width;
-                        double X3 = signal.data[i + 3] * height;
+                        double Y3 = signal.data[i+2] * height;
+                        double X3 = signal.data[i + 3] * width;
 
-                        double Y4 = signal.data[i + 2] * width;
-                        double X4 = signal.data[i + 1] * height;
+                        double Y4 = signal.data[i + 2] * height;
+                        double X4 = signal.data[i + 1] * width;
                         try
                         {
                             if (X < width && Y < height)
@@ -553,7 +553,7 @@ namespace ssi
 
                     try
                     {
-                        if (X < width && Y < height)
+                        if (X < width && Y < height && X>0 && Y > 0)
                         {
                             writeableBmp.SetPixel((int)X, (int)Y , SignalColor);
                           
