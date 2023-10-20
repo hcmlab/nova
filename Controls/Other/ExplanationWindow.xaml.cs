@@ -40,6 +40,9 @@ namespace ssi
         public string hideColorV;
         public string positiveOnlyV;
         public int frame;
+        private string filePath;
+        private string videoname;
+        private string role;
         private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
         private string basePath;
@@ -61,8 +64,7 @@ namespace ssi
             }
             explainingLabel.Visibility = Visibility.Hidden;
 
-            img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
-            MediaBoxStatic.Selected.Media.GetFilepath();
+
             topLabels.Text = "2";
             numFeatures.Text = "15";
             numSamples.Text = "800";
@@ -72,7 +74,8 @@ namespace ssi
             string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
-            string videoname = Path.GetFileNameWithoutExtension(MediaBoxStatic.Selected.Media.GetFilepath()).Split('.')[1];
+            videoname = Path.GetFileNameWithoutExtension(MediaBoxStatic.Selected.Media.GetFilepath()).Split('.')[1];
+            role = Path.GetFileNameWithoutExtension(MediaBoxStatic.Selected.Media.GetFilepath()).Split('.')[0];
             basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "video" + "{" + videoname + "}";
 
             DirectoryInfo di = new DirectoryInfo(basePath);
@@ -117,21 +120,25 @@ namespace ssi
 
         }
 
-        private async Task<Dictionary<string, float>> sendExplanationRequestForm()
+        private async Task<List<Tuple<int, double, BitmapImage>>> sendExplanationRequestForm()
         {
 
             string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
 
-            string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
+            topLablesV = Int32.Parse(topLabels.Text);
+            numSamplesV = Int32.Parse(numSamples.Text);
+            numFeaturesV = Int32.Parse(numFeatures.Text);
 
-            string fileName = SignalTrack.Selected.Signal.Name.Replace(role + ".", "");
+            hideRestV = hideRest.IsChecked.Value.ToString();
+            hideColorV = hideColor.IsChecked.Value.ToString();
+            positiveOnlyV = positiveOnly.IsChecked.Value.ToString();
 
             JObject ob = new JObject
             {
               {"id", "explanation_stream"},
               {"type", "input" },
               {"src", "db:stream" },
-              {"name", fileName},
+              {"name", videoname},
               {"role", role},
               {"active", "True" }
             };
@@ -148,11 +155,16 @@ namespace ssi
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
                 { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
                 { new StringContent(sessionsstr), "sessions" },
-                //{ new StringContent(JsonConvert.SerializeObject(this.sample).ToString()), "sampleID" },
-                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame" },
-                { new StringContent(numFeatures.Text), "numFeatures" },
                 { new StringContent(getIdHash()), "jobID" },
-                { new StringContent(json), "data"  }
+                { new StringContent(json), "data"  },
+                { new StringContent("LIME_IMAGE"), "explainer"},
+                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame" },
+                { new StringContent(numFeaturesV.ToString()), "numFeatures" },
+                { new StringContent(topLablesV.ToString()), "topLabels" },
+                { new StringContent(numSamplesV.ToString()), "numSamples" },
+                { new StringContent(hideRestV.ToString()), "hideRest" },
+                { new StringContent(hideColorV.ToString()), "hideColor" },
+                { new StringContent(positiveOnlyV.ToString()), "positiveOnly" }
             };
 
             try
@@ -172,62 +184,16 @@ namespace ssi
                     return null;
                 }
 
-                var explanations = JsonConvert.DeserializeObject<Dictionary<string, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
-
-                return explanations;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-
-
-        }
-
-        //private async Task<Dictionary<string, Tuple<int, double, string>>> getExplanationFromBackend()
-        private async Task<List<Tuple<int, double, BitmapImage>>> getExplanationFromBackend()
-        {
-            try
-            {
-
-                var base64 = System.Convert.ToBase64String(this.img);
-
-                var content = new MultipartFormDataContent
-                {
-                    { new StringContent(modelPath), "model_path" },
-                    { new StringContent(base64), "image" }
-                };
-
-                topLablesV = Int32.Parse(topLabels.Text);
-                numSamplesV = Int32.Parse(numSamples.Text);
-                numFeaturesV = Int32.Parse(numFeatures.Text);
-
-                hideRestV = hideRest.IsChecked.Value.ToString();
-                hideColorV = hideColor.IsChecked.Value.ToString();
-                positiveOnlyV = positiveOnly.IsChecked.Value.ToString();
-
-                string url = "http://localhost:5000/lime?toplabels=" + topLablesV + "&hidecolor=" + hideColorV + "&numsamples=" + numSamplesV + "&positiveonly=" + positiveOnlyV + "&numfeatures=" + numFeaturesV + "&hiderest=" + hideRestV;
-
-                var response = await client.PostAsync(url, content);
-
-                var responseString = await response.Content.ReadAsStringAsync();
-                var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
-
-                if (explanationDic["success"].Value<string>() == "failed")
-                {
-                    return null;
-                }
-
-                JArray explanations =  JArray.Parse(explanationDic["explanations"].Value<object>().ToString());
+                JArray explanations = JArray.Parse(explanationDic["explanations"].Value<object>().ToString());
 
                 List<Tuple<int, double, BitmapImage>> explanationData = new List<Tuple<int, double, BitmapImage>>();
 
                 foreach (var item in explanations)
                 {
                     var temp = item.ToArray();
-                    int cl = (int) temp[0];
-                    double cl_score = (double) temp[1];
-                    string explanation_img64 = (string) temp[2];
+                    int cl = (int)temp[0];
+                    double cl_score = (double)temp[1];
+                    string explanation_img64 = (string)temp[2];
                     byte[] explanation = System.Convert.FromBase64String(explanation_img64);
 
                     BitmapImage explanation_bitmap = new BitmapImage();
@@ -241,12 +207,13 @@ namespace ssi
                 }
 
                 return explanationData;
-
             }
             catch (Exception e)
             {
                 return null;
             }
+
+
         }
 
         private async void getExplanation(object sender, RoutedEventArgs e)
@@ -260,11 +227,10 @@ namespace ssi
 
             containerExplainedImages.Children.Clear();
 
-            List<Tuple<int, double, BitmapImage>> explanationData = await getExplanationFromBackend();
+            List<Tuple<int, double, BitmapImage>> explanationData = await sendExplanationRequestForm();
 
             if(explanationData == null)
             {
-                MainHandler.restartPythonnBackend();
 
                 this.explainingLabel.Visibility = Visibility.Hidden;
                 blur = new BlurEffect();
@@ -322,26 +288,6 @@ namespace ssi
 
         }
 
-        //private void getExplanationLegacy(object sender, RoutedEventArgs e)
-        //{
-        //    containerImageToBeExplained.Visibility = Visibility.Visible;
-        //    explainingLabel.Visibility = Visibility.Visible;
-        //    BlurEffect blur = new BlurEffect();
-        //    blur.Radius = 20;
-        //    explanationImage.Effect = blur;
-        //    topLablesV = Int32.Parse(topLabels.Text);
-        //    numSamplesV = Int32.Parse(numSamples.Text);
-        //    numFeaturesV = Int32.Parse(numFeatures.Text);
-
-        //    hideRestV = hideRest.IsChecked.Value;
-        //    hideColorV = hideColor.IsChecked.Value;
-        //    positiveOnlyV = positiveOnly.IsChecked.Value;
-        //    getNewExplanation = true;
-        //    explanationButton.IsEnabled = false;
-
-        //    containerExplainedImages.Children.Clear();
-
-        //}
 
         private void modelPanel_Drop(object sender, DragEventArgs e)
         {

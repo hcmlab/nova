@@ -59,7 +59,7 @@ namespace ssi
             try
             {
 
-                int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
+                int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, MediaBoxStatic.Selected.Media.GetSampleRate());
                 window.frame = frame;
 
                 window.Show();
@@ -95,7 +95,6 @@ namespace ssi
             {
 
                 int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
-                List<float> sample = new List<float>();
 
                 windowFeatureExplanations.featurestream = SignalTrackStatic.Selected.Signal.data;
                 windowFeatureExplanations.dim = SignalTrackStatic.Selected.Signal.dim;
@@ -163,13 +162,8 @@ namespace ssi
 
             try
             {
-                byte[] img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
-
-                BitmapImage imageBitmap = new BitmapImage();
-                imageBitmap.BeginInit();
-                imageBitmap.StreamSource = new System.IO.MemoryStream(img);
-                imageBitmap.EndInit();
-                windowfexplain.explanationImage.Source = imageBitmap;
+                int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, MediaBoxStatic.Selected.Media.GetSampleRate());
+                windowfexplain.frame = frame;
 
                 windowfexplain.Show();
             }
@@ -226,91 +220,7 @@ namespace ssi
             }
             return "failed";
         }
-      
-    
-
-        public static int startPythonBackend(bool forcedebug = false)
-        {
-
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            try
-            {
-         
-
-                startInfo.WindowStyle = (Properties.Settings.Default.EnablePythonDebug == true) ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
-                //startInfo.WindowStyle = (forcedebug == true ) ? ProcessWindowStyle.Minimized : startInfo.WindowStyle;
-                //startInfo.RedirectStandardOutput = true;
-                //startInfo.RedirectStandardError = true;
-                //if(!File.Exists(AppDomain.CurrentDomain.BaseDirectory + "ssi\\nova_python.exe")){
-                //    File.Copy(AppDomain.CurrentDomain.BaseDirectory + "ssi\\python.exe", AppDomain.CurrentDomain.BaseDirectory + "ssi\\nova_python.exe");
-                //}
-
-
-                  
-                startInfo.FileName = "\"" + AppDomain.CurrentDomain.BaseDirectory + "ssi\\python.exe" + "\"";
-                startInfo.Arguments = "\"" + AppDomain.CurrentDomain.BaseDirectory + "PythonScripts\\explanation_backend.py" + "\"";
-               
-                process.StartInfo = startInfo;
-
-                process.Start();
-                
-        
-                //string output = process.StandardOutput.ReadToEnd();
-                //Console.WriteLine(output);
-              
-
-                //string output = process.StandardOutput.ReadToEnd();
-                //MessageBox.Show(output);
-                //Console.WriteLine(output);
-                //string err = process.StandardError.ReadToEnd();
-                //Console.WriteLine(err);
-                //process.WaitForExit();
-
-                //ShowWindow(process.MainWindowHandle, 5);
-
-                return process.Id;
-            }
-
-            catch
-            {
-                return -1;
-            }
-           
-       
-        }
-
-        public static void killPythonBackend(bool forcedebug = false )
-        {
-            try
-            {
-                Process[] process = Process.GetProcesses();
-                foreach (Process prs in process)
-                {
-                   
-                    if (prs.Id == MainHandler.pythonProcessID)
-                    {
-                        KillProcessAndChildren(prs.Id);
-                        break;
-                    }
-                }
-
-             
-
-            }
-            catch
-            {
-
-            }
-        }
-
-        public static void restartPythonnBackend()
-        {
-            killPythonBackend();
-            MainHandler.pythonProcessID = startPythonBackend();
-        }
-
-
+     
 
         public static void KillProcessAndChildren(int pid)
         {

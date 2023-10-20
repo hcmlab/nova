@@ -105,8 +105,6 @@ namespace ssi
         private string runCMLTool(string tool, string mode, List<object> parameters, Dictionary<string,object> arguments, string logName)
         {
 
-            if(ENABLE_PYTHON) killPythonBackend();
-
             string result = "";
             string logPath = AppDomain.CurrentDomain.BaseDirectory + logName + ".log";
 
@@ -171,11 +169,6 @@ namespace ssi
             catch (Exception ex)
             {
                 MessageTools.Error(ex.ToString());
-            }
-
-            if (ENABLE_PYTHON)
-            {
-               MainHandler.pythonProcessID = startPythonBackend();
             }
 
             return result;

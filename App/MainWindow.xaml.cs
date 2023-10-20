@@ -158,16 +158,6 @@ namespace ssi
             {
                 if (!e.Cancel)
                 {
-                    if (MainHandler.ENABLE_PYTHON)
-                    {
-                        MainHandler.killPythonBackend();
-
-                        //Process[] p = Process.GetProcessesByName("Python");
-                        //foreach(Process pr in p)
-                        //{
-                        //    pr.Kill();
-                        //}
-                    }
                     Application.Current.Shutdown();
                     Process.GetCurrentProcess().Kill();
 
@@ -177,10 +167,6 @@ namespace ssi
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            if (MainHandler.ENABLE_PYTHON)
-            {
-                MainHandler.killPythonBackend();
-            }
             Application.Current.Shutdown();
             Process.GetCurrentProcess().Kill();
         }

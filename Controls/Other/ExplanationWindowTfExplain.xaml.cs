@@ -29,6 +29,9 @@ namespace ssi.Controls.Other
 
         public bool getNewExplanation;
         public string modelPath;
+        public int frame;
+        private string videoname;
+        private string role;
         public byte[] img;
         private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
@@ -52,12 +55,11 @@ namespace ssi.Controls.Other
             }
             explainingLabel.Visibility = Visibility.Hidden;
 
-            img = Screenshot.GetScreenShot(MediaBoxStatic.Selected.Media.GetView(), 1.0, 80);
-
             string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
-            string videoname = Path.GetFileNameWithoutExtension(MediaBoxStatic.Selected.Media.GetFilepath()).Split('.')[1];
+            videoname = Path.GetFileNameWithoutExtension(MediaBoxStatic.Selected.Media.GetFilepath()).Split('.')[1];
+            role = Path.GetFileNameWithoutExtension(MediaBoxStatic.Selected.Media.GetFilepath()).Split('.')[0];
             basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "video" + "{" + videoname + "}";
 
             DirectoryInfo di = new DirectoryInfo(basePath);
@@ -68,7 +70,6 @@ namespace ssi.Controls.Other
             loadModelAndTrainer(basePath);
             parseTrainerFile(getTrainerFile(basePath, modelPath));
             explainer.SelectedIndex = 0;
-            //postprocessing.SelectedIndex = 0;
             lrpalpha.Text = "1.0";
             lrpbeta.Text = "0.0";
             args = "";
@@ -103,6 +104,65 @@ namespace ssi.Controls.Other
                     }
                 }
             }
+
+        }
+
+        private async Task<Dictionary<string, string>> sendExplanationRequestForm()
+        {
+
+            string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
+
+            JObject ob = new JObject
+            {
+              {"id", "explanation_stream"},
+              {"type", "input" },
+              {"src", "db:stream" },
+              {"name", videoname},
+              {"role", role},
+              {"active", "True" }
+            };
+            JArray data = new JArray();
+            data.Add(ob);
+            string json = data.ToString(Newtonsoft.Json.Formatting.None);
+
+            MultipartFormDataContent content = new MultipartFormDataContent
+            {
+                { new StringContent(modelPath), "modelPath" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
+                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
+                { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
+                { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
+                { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
+                { new StringContent(sessionsstr), "sessions" },
+                { new StringContent(getIdHash()), "jobID" },
+                { new StringContent(json), "data"  },
+                { new StringContent("TF_EXPLAIN"), "explainer"},
+                { new StringContent( explainer.Text.ToUpper()), "tfExplainer"},
+                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame" }
+            };
+
+            try
+            {
+                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/explain";
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+
+                var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+
+                if (explanationDic["success"] == "failed")
+                {
+                    return null;
+                }
+
+                return explanationDic;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+
 
         }
 
@@ -155,12 +215,10 @@ namespace ssi.Controls.Other
 
             containerExplainedImages.Children.Clear();
 
-            var explanationDic = await getExplanationFromBackend();
+            var explanationDic = await sendExplanationRequestForm();
 
             if (explanationDic == null)
             {
-                MainHandler.restartPythonnBackend();
-
                 this.explainingLabel.Visibility = Visibility.Hidden;
                 blur = new BlurEffect();
                 blur.Radius = 0;
@@ -289,6 +347,39 @@ namespace ssi.Controls.Other
         {
             this.explanationButton.Visibility = Visibility.Hidden;
         }
+
+        static int GetDeterministicHashCode(string str)
+        {
+            unchecked
+            {
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                for (int i = 0; i < str.Length; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                    if (i == str.Length - 1)
+                        break;
+                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                }
+
+                return hash1 + (hash2 * 1566083941);
+            }
+        }
+
+        private string getIdHash()
+        {
+
+            int result = GetDeterministicHashCode("database" + DatabaseHandler.DatabaseName + "session" + DatabaseHandler.SessionInfo + "username" + Properties.Settings.Default.MongoDBUser + "explainer" + "lime tabular" + "model" + modelPath);
+
+            var jobIDhash = (Math.Abs(result)).ToString();
+            int MaxLength = 8;
+            if (jobIDhash.Length > MaxLength)
+                jobIDhash = jobIDhash.ToString().Substring(0, MaxLength);
+
+            return jobIDhash;
+        }
+
 
         private class ModelTrainer
         {

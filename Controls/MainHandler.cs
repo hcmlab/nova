@@ -281,7 +281,7 @@ namespace ssi
                     var path = $"{pythonPath};{Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine)}";
                     Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
                 }
-                MainHandler.pythonProcessID = startPythonBackend();
+
             }
 
 

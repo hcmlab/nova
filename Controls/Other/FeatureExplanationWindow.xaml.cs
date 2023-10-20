@@ -179,7 +179,7 @@ namespace ssi
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
                 { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
                 { new StringContent(sessionsstr), "sessions" },
-                //{ new StringContent(JsonConvert.SerializeObject(this.sample).ToString()), "sampleID" },
+                { new StringContent("LIME_TABULAR"), "explainer"},
                 { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame" },
                 { new StringContent(this.dim.ToString()), "dim" },
                 { new StringContent(numFeatures.Text), "numFeatures" },
@@ -227,7 +227,6 @@ namespace ssi
 
             if (explanationData == null)
             {
-                MainHandler.restartPythonnBackend();
                 this.explanationButton.IsEnabled = true;
 
                 return;
