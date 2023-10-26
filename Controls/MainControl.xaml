@@ -120,6 +120,7 @@
                 </MenuItem>
                 <MenuItem Header="FeatureExplainer" Name="FeatureExplainer">
                     <MenuItem Header="Lime" Name="explanationWindowFeature"></MenuItem>
+                    <MenuItem Header="DICE" Name="explanationCounterFactual"></MenuItem>
                 </MenuItem>
             </MenuItem>
 

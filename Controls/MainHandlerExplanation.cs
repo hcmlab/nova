@@ -37,6 +37,7 @@ namespace ssi
         ExplanationWindowInnvestigate windowInnvestigate;
         ExplanationWindowTfExplain windowfexplain;
         FeatureExplanationWindow windowFeatureExplanations;
+        CounterFactualWindow windowCounterFactual;
         private static Action EmptyDelegate = delegate () { };
 
         private void explanationWindow_Click(object sender, RoutedEventArgs e)
@@ -85,8 +86,6 @@ namespace ssi
                 MessageBox.Show("Select annotation track first");
                 return;
             }
-
-            string test = SignalTrackStatic.Selected.Signal.FilePath;
 
             windowFeatureExplanations = new FeatureExplanationWindow(SignalTrackStatic.Selected.Signal.FilePath);
 
@@ -173,8 +172,40 @@ namespace ssi
             }
         }
 
+        private void counterFactualWindow_Click(object sender, RoutedEventArgs e)
+        {
+            if (windowCounterFactual != null)
+            {
+                windowCounterFactual.deactiveExplainationButton();
+            }
+
+            if (AnnoTier.Selected == null)
+            {
+                MessageBox.Show("Select annotation track first");
+                return;
+            }
+
+            windowCounterFactual = new CounterFactualWindow(SignalTrackStatic.Selected.Signal.FilePath);
 
 
+            try
+            {
+
+                int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
+
+                windowCounterFactual.featurestream = SignalTrackStatic.Selected.Signal.data;
+                windowCounterFactual.dim = SignalTrackStatic.Selected.Signal.dim;
+                windowCounterFactual.frame = frame;
+
+                windowCounterFactual.Show();
+            }
+            catch
+            {
+
+            }
+
+
+        }
 
         public void checkPythonInstallation()
         {

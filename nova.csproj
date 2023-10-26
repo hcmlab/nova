@@ -532,6 +532,9 @@
     <Compile Include="Controls\Other\ExplanationWindowTfExplain.xaml.cs">
       <DependentUpon>ExplanationWindowTfExplain.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Other\CounterFactualWindow.xaml.cs">
+      <DependentUpon>CounterFactualWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Other\FeatureExplanationWindow.xaml.cs">
       <DependentUpon>FeatureExplanationWindow.xaml</DependentUpon>
     </Compile>
@@ -778,6 +781,10 @@
     <Page Include="Controls\Other\ExplanationWindowTfExplain.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Other\CounterFactualWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Other\FeatureExplanationWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
