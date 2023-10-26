@@ -2050,7 +2050,7 @@ namespace ssi
                         RolesLabel.Visibility = Visibility.Visible;
                     }
 
-                   // if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
+                    ApplyButton.IsEnabled = true;// else ApplyButton.IsEnabled = false;
 
 
 
@@ -2157,7 +2157,7 @@ namespace ssi
 
                            
 
-                            //if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
+                            ApplyButton.IsEnabled = true; //else ApplyButton.IsEnabled = false;
                           
 
                             if (attributes[2].StartsWith("$(stream_name")){
@@ -2335,15 +2335,17 @@ namespace ssi
 
                         if (element.Key.Split('.')[1] != "")
                         {
+                        //TODO -> IMAGE DYNAMIC DEPENDING ON SELECTION
+                          //  -> SOURCE LOGIC
                             string source = element.Key.Split('.')[1];
                             if (source == "file")
                             {
                                 JObject ob = new JObject
                                         {
                                         { "id", element.Key.Split('.')[0] },
-                                        { "type", "output" },
-                                        { "src", "file:uri" },
-                                        { "path", ((TextBox)element.Value.ElementAt(0)).Text},
+                                        { "type", "input" },
+                                        { "src", "file:image" },
+                                        { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
                                         { "active", "True" }
                                     };
                                 data.Add(ob);
@@ -2353,14 +2355,14 @@ namespace ssi
                                 JObject ob = new JObject
                                         {
                                         { "id", element.Key.Split('.')[0] },
-                                        { "type", "output" },
-                                        { "src", "url:uri" },
-                                        { "path", ((TextBox)element.Value.ElementAt(0)).Text},
+                                        { "type", "input" },
+                                        { "src", "url:image" },
+                                        { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
                                         { "active", "True" }
                                     };
                                 data.Add(ob);
                             }
-                            else if (source == "text")
+                            else if ((source == "text") || (source == "prompt"))
                             {
                                 JObject ob = new JObject
                                         {
@@ -2507,14 +2509,14 @@ namespace ssi
                         if (element.Key.Split('.')[1] != "")
                         {
                             string source = element.Key.Split('.')[1];
-                            if (source == "file")
+                            if (source == "image")
                             {
                                 JObject ob = new JObject
                                     {
                                     { "id", element.Key.Split('.')[0] },
                                     { "type", "output" },
-                                    { "src", "file:uri" },
-                                    { "path", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "src", "file:image" },
+                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
                                     { "active", "True" }
                                 };
                                 data.Add(ob);
@@ -2526,7 +2528,7 @@ namespace ssi
                                     { "id", element.Key.Split('.')[0] },
                                     { "type", "output" },
                                     { "src", "url:uri" },
-                                    { "path", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
                                     { "active", "True" }
                                 };
                                     data.Add(ob);
