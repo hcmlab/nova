@@ -1942,7 +1942,7 @@ namespace ssi
                     type = AnnoScheme.AttributeTypes.LIST;
 
 
-                    if (input.Type.ToLower() == "url" || input.Type.ToLower() == "text" || input.Type.ToLower() == "prompt" || input.Type.ToLower() == "file" || input.Type.ToLower() == "string")
+                    if ((input.SubType != null && input.SubType.ToLower() == "url") || (input.SubType != null && input.SubType.ToLower() == "file") || input.Type.ToLower() == "text" || input.Type.ToLower() == "prompt"  || input.Type.ToLower() == "string")
                     {
                         type = AnnoScheme.AttributeTypes.STRING;
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -2338,33 +2338,12 @@ namespace ssi
                         //TODO -> IMAGE DYNAMIC DEPENDING ON SELECTION
                           //  -> SOURCE LOGIC
                             string source = element.Key.Split('.')[1];
-                            if (source == "file")
-                            {
-                                JObject ob = new JObject
-                                        {
-                                        { "id", element.Key.Split('.')[0] },
-                                        { "type", "input" },
-                                        { "src", "file:image" },
-                                        { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
-                                        { "active", "True" }
-                                    };
-                                data.Add(ob);
-                            }
-                            else if (source == "url")
-                            {
-                                JObject ob = new JObject
-                                        {
-                                        { "id", element.Key.Split('.')[0] },
-                                        { "type", "input" },
-                                        { "src", "url:image" },
-                                        { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
-                                        { "active", "True" }
-                                    };
-                                data.Add(ob);
-                            }
-                            else if ((source == "text") || (source == "prompt"))
-                            {
-                                JObject ob = new JObject
+                            string[] src = source.Split(':');
+
+
+                        if ((source == "text") || (source == "prompt") || (src.Length > 1) && (src[1] == "text" || src[1] == "prompt"))
+                        {
+                            JObject ob = new JObject
                                         {
                                         { "id", element.Key.Split('.')[0] },
                                         { "type", "input" },
@@ -2372,8 +2351,34 @@ namespace ssi
                                         { "prompt", ((TextBox)element.Value.ElementAt(0)).Text},
                                         { "active", "True" }
                                     };
+                            data.Add(ob);
+                        }
+
+                        else if (src.Length == 1 || src[1] == "file")
+                            {
+                                JObject ob = new JObject
+                                        {
+                                        { "id", element.Key.Split('.')[0] },
+                                        { "type", "input" },
+                                        { "src", "file:" + src[0]},
+                                        { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                        { "active", "True" }
+                                    };
                                 data.Add(ob);
                             }
+                        else if (src[1] == "url")
+                        {
+                            JObject ob = new JObject
+                                    {
+                                    { "id", element.Key.Split('.')[0] },
+                                    { "type", "input" },
+                                    { "src", "url:" + src[0] },
+                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "active", "True" }
+                                };
+                            data.Add(ob);
+                        }
+                          
 
                         }
                     }
@@ -2507,32 +2512,50 @@ namespace ssi
                     if (element.Value.ElementAt(0).GetType().Name == "TextBox")
                     {
                         if (element.Key.Split('.')[1] != "")
+
                         {
+                          
                             string source = element.Key.Split('.')[1];
-                            if (source == "image")
+                            string[] src = source.Split(':');
+
+                            if ((source == "text") || (source == "prompt") || (src.Length > 1) && ( src[1] == "text" || src[1] == "prompt"))
                             {
                                 JObject ob = new JObject
                                     {
                                     { "id", element.Key.Split('.')[0] },
                                     { "type", "output" },
-                                    { "src", "file:image" },
+                                    { "src", "user:text" },
                                     { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
                                     { "active", "True" }
                                 };
                                 data.Add(ob);
-                            } 
-                            else if (source == "url")
+                            }
+                            else if (src.Length == 1 || src[1] == "file")
+                            {
+                                JObject ob = new JObject
+                                    {
+                                    { "id", element.Key.Split('.')[0] },
+                                    { "type", "output" },
+                                    { "src", "file:"+ src[0] },
+                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "active", "True" }
+                                };
+                                data.Add(ob);
+                            }
+                         
+                            else if (src[1] == "url")
                                 {
                                     JObject ob = new JObject
                                     {
                                     { "id", element.Key.Split('.')[0] },
                                     { "type", "output" },
-                                    { "src", "url:uri" },
+                                    { "src", "url:" + src[0] },
                                     { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
                                     { "active", "True" }
                                 };
                                     data.Add(ob);
                                 }
+                            
 
                         }
                     }
@@ -2848,6 +2871,7 @@ namespace ssi
                         }
 
                         Grid.SetColumn(textBox, 1);
+                        Grid.SetColumnSpan(textBox, 3);
                         Grid.SetRow(textBox, outputGrid.RowDefinitions.Count - 1);
                     }
                     else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
