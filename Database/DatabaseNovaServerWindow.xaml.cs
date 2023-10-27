@@ -273,15 +273,13 @@ namespace ssi
 
             if (trainer != null && (trainer.Backend.ToUpper() == "PYTHON" || trainer.Backend.ToUpper() == "NOVA-SERVER"))
             {
-                logThread = new Thread(new ThreadStart(tryToGetLog));
-                statusThread = new Thread(new ThreadStart(tryToGetStatus));
-               // predictAndReloadThread = new Thread(new ThreadStart(predictAndReloadInCompleteCase));
+                logThread = new Thread(new ThreadStart(NovaSeverGetLog));
+                statusThread = new Thread(new ThreadStart(NovaServerGetStatus));
                 logThread.Start();
                 statusThread.Start();
-                //predictAndReloadThread.Start();
             }
 
-            changeFrontendInPythonBackEndCase();
+            UpdateFrontEnd();
 
             Loaded += Window_Loaded;
         }
@@ -353,7 +351,7 @@ namespace ssi
 
 
 
-        private void tryToGetLog()
+        private void NovaSeverGetLog()
         {
             Dictionary<string, string> response = null;
             while (pythonCaseOn)
@@ -388,7 +386,7 @@ namespace ssi
             }
         }
 
-        private void tryToGetStatus()
+        private void NovaServerGetStatus()
         {
             Dictionary<string, string> response = null;
             bool updatedb = false;
@@ -824,19 +822,17 @@ namespace ssi
 
         }
 
-        private void changeFrontendInPythonBackEndCase()
+        private void UpdateFrontEnd()
         {
             Processor processor = (Processor)ProcessorsBox.SelectedItem;
 
             if (processor != null && (processor.Backend.ToUpper() == "PYTHON" || processor.Backend.ToUpper() == "NOVA-SERVER"))
             {
                 pythonCaseOn = true;
-                logThread = new Thread(new ThreadStart(tryToGetLog));
-                statusThread = new Thread(new ThreadStart(tryToGetStatus));
-               // predictAndReloadThread = new Thread(new ThreadStart(predictAndReloadInCompleteCase));
+                logThread = new Thread(new ThreadStart(NovaSeverGetLog));
+                statusThread = new Thread(new ThreadStart(NovaServerGetStatus));
                 logThread.Start();
                 statusThread.Start();
-                //predictAndReloadThread.Start();
                 bool ClearUI = true;
                 AddInputUIElements(processor.Inputs, processor.GetTransformers()[0].Multi_role_input);
                 AddOutputUIElements(processor.Outputs, processor.GetTransformers()[0].Multi_role_input);
@@ -862,22 +858,10 @@ namespace ssi
 
                 }
 
-
-             
-
-          
-
-
-
-
                 this.statusLabel.Visibility = Visibility.Visible;
                 this.Cancel_Button.Visibility = Visibility.Visible;
                 this.ModelSpecificOptions.Visibility = Visibility.Visible;
-
-        
-                    ModeTabControl.SelectedIndex = (int)mode;
-      
-                
+                ModeTabControl.SelectedIndex = (int)mode;   
             }
             else
             {
@@ -1675,7 +1659,7 @@ namespace ssi
 
         private void GeneralBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            changeFrontendInPythonBackEndCase();
+            UpdateFrontEnd();
 
             if (handleSelectionChanged)
             {
@@ -1931,7 +1915,7 @@ namespace ssi
 
 
 
-        private List<AnnoScheme.Attribute> ParseInputs(List<ServerInputOutput> Inputs, bool multiroleinput)
+        private List<AnnoScheme.Attribute> ParseInputsOutputs(List<ServerInputOutput> Inputs, bool multiroleinput)
         {
             ShowAnnotatorBox = false;
             List<AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
@@ -1958,7 +1942,7 @@ namespace ssi
                     type = AnnoScheme.AttributeTypes.LIST;
 
 
-                    if (input.Type.ToLower() == "url")
+                    if ((input.SubType != null && input.SubType.ToLower() == "url") || (input.SubType != null && input.SubType.ToLower() == "file") || input.Type.ToLower() == "text" || input.Type.ToLower() == "prompt"  || input.Type.ToLower() == "string")
                     {
                         type = AnnoScheme.AttributeTypes.STRING;
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -1966,10 +1950,11 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
+                        origin = input.Type.ToLower();
 
                     }
 
-                        if (input.Type.ToLower() == "annotation")
+                    if (input.Type.ToLower() == "annotation")
                     {
                         List<string> result = new List<string>();
                         if(input.DefaultName != null)
@@ -2046,6 +2031,8 @@ namespace ssi
 
                     }
 
+                  
+
 
                     if (multiroleinput)
                     {
@@ -2063,7 +2050,7 @@ namespace ssi
                         RolesLabel.Visibility = Visibility.Visible;
                     }
 
-                    if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
+                    ApplyButton.IsEnabled = true;// else ApplyButton.IsEnabled = false;
 
 
 
@@ -2170,7 +2157,7 @@ namespace ssi
 
                            
 
-                            if (content.Count > 0) ApplyButton.IsEnabled = true; else ApplyButton.IsEnabled = false;
+                            ApplyButton.IsEnabled = true; //else ApplyButton.IsEnabled = false;
                           
 
                             if (attributes[2].StartsWith("$(stream_name")){
@@ -2337,13 +2324,67 @@ namespace ssi
             foreach (var element in Inputsresult)
             {
 
-            
+                //{ "id", element.Key.Split('.')[0] },
+                //{ "type", "input" },
+                //{ "src", "user:text" },
+                //{ "prompt", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
+                //{ "active", "True" }
+
+                        if (element.Value.ElementAt(0).GetType().Name == "TextBox")
+                        {
+
+                        if (element.Key.Split('.')[1] != "")
+                        {
+                        //TODO -> IMAGE DYNAMIC DEPENDING ON SELECTION
+                          //  -> SOURCE LOGIC
+                            string source = element.Key.Split('.')[1];
+                            string[] src = source.Split(':');
 
 
-                //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
-                {
-                    if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
-                    {
+                        if ((source == "text") || (source == "prompt") || (src.Length > 1) && (src[1] == "text" || src[1] == "prompt"))
+                        {
+                            JObject ob = new JObject
+                                        {
+                                        { "id", element.Key.Split('.')[0] },
+                                        { "type", "input" },
+                                        { "src", "user:text" },
+                                        { "prompt", ((TextBox)element.Value.ElementAt(0)).Text},
+                                        { "active", "True" }
+                                    };
+                            data.Add(ob);
+                        }
+
+                        else if (src.Length == 1 || src[1] == "file")
+                            {
+                                JObject ob = new JObject
+                                        {
+                                        { "id", element.Key.Split('.')[0] },
+                                        { "type", "input" },
+                                        { "src", "file:" + src[0]},
+                                        { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                        { "active", "True" }
+                                    };
+                                data.Add(ob);
+                            }
+                        else if (src[1] == "url")
+                        {
+                            JObject ob = new JObject
+                                    {
+                                    { "id", element.Key.Split('.')[0] },
+                                    { "type", "input" },
+                                    { "src", "url:" + src[0] },
+                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "active", "True" }
+                                };
+                            data.Add(ob);
+                        }
+                          
+
+                        }
+                    }
+
+                else if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
+                        {
 
                         if (element.Key.Split('.')[1] != "")
                         {
@@ -2459,17 +2500,67 @@ namespace ssi
                         }
 
                     }
-                }
+                
             }
             bool firstoutput = true;
             foreach (var element in Outputsresult)
             {
 
-
-
                 //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
                 {
-                    if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
+
+                    if (element.Value.ElementAt(0).GetType().Name == "TextBox")
+                    {
+                        if (element.Key.Split('.')[1] != "")
+
+                        {
+                          
+                            string source = element.Key.Split('.')[1];
+                            string[] src = source.Split(':');
+
+                            if ((source == "text") || (source == "prompt") || (src.Length > 1) && ( src[1] == "text" || src[1] == "prompt"))
+                            {
+                                JObject ob = new JObject
+                                    {
+                                    { "id", element.Key.Split('.')[0] },
+                                    { "type", "output" },
+                                    { "src", "user:text" },
+                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "active", "True" }
+                                };
+                                data.Add(ob);
+                            }
+                            else if (src.Length == 1 || src[1] == "file")
+                            {
+                                JObject ob = new JObject
+                                    {
+                                    { "id", element.Key.Split('.')[0] },
+                                    { "type", "output" },
+                                    { "src", "file:"+ src[0] },
+                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "active", "True" }
+                                };
+                                data.Add(ob);
+                            }
+                         
+                            else if (src[1] == "url")
+                                {
+                                    JObject ob = new JObject
+                                    {
+                                    { "id", element.Key.Split('.')[0] },
+                                    { "type", "output" },
+                                    { "src", "url:" + src[0] },
+                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "active", "True" }
+                                };
+                                    data.Add(ob);
+                                }
+                            
+
+                        }
+                    }
+
+                    else if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
                     {
 
                         if (element.Key.Split('.')[1] != "")
@@ -2522,7 +2613,7 @@ namespace ssi
                                             { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                             { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                             { "role", role },
-                                             { "active", isactive }
+                                            { "active", isactive }
                                         };
                                         if (firstoutput)
                                         {
@@ -2722,7 +2813,7 @@ namespace ssi
                 Outputs = new List<AnnoScheme.Attribute>();
                 outputGrid.Children.Clear();
 
-                Outputs.AddRange(ParseInputs(inputs, true));
+                Outputs.AddRange(ParseInputsOutputs(inputs, true));
 
             }
 
@@ -2780,6 +2871,7 @@ namespace ssi
                         }
 
                         Grid.SetColumn(textBox, 1);
+                        Grid.SetColumnSpan(textBox, 3);
                         Grid.SetRow(textBox, outputGrid.RowDefinitions.Count - 1);
                     }
                     else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
@@ -2963,7 +3055,7 @@ namespace ssi
                 Inputs = new List<AnnoScheme.Attribute>();
                 inputGrid.Children.Clear();
 
-                Inputs.AddRange(ParseInputs(inputs, true));
+                Inputs.AddRange(ParseInputsOutputs(inputs, true));
 
             }
 
@@ -3021,6 +3113,7 @@ namespace ssi
                         }
 
                         Grid.SetColumn(textBox, 1);
+                        Grid.SetColumnSpan(textBox, 3);
                         Grid.SetRow(textBox, inputGrid.RowDefinitions.Count - 1);
                     }
                     else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
