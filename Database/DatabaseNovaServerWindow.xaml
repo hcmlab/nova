@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi"
-        Title="NOVA SERVER" Height="800" Width="Auto" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing" Closed="Window_Closed"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
+        Title="NOVA SERVER" Height="800" Width="1400" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing" Closed="Window_Closed"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
 
     <Window.Resources>
 
@@ -49,8 +49,7 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="350"></ColumnDefinition>
+            <ColumnDefinition Width="250"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
@@ -59,7 +58,7 @@
 
         </Grid.RowDefinitions>
 
-        <TabControl Name="ModeTabControl" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" SelectionChanged="ModeTabControl_SelectionChanged">
+        <TabControl Name="ModeTabControl" Grid.Row="0" Grid.Column="0"  Grid.ColumnSpan="2" SelectionChanged="ModeTabControl_SelectionChanged">
             <TabItem Header="Process" />
             <!--<TabItem Header="Evaluate" />
             <TabItem Header="Predict" />-->
@@ -76,24 +75,30 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="200*"></ColumnDefinition>
-                <ColumnDefinition Width="200*"/>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
- 
-            </Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180"></ColumnDefinition>
+                <ColumnDefinition Width="180"></ColumnDefinition>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"></ColumnDefinition>
 
-            <Label Grid.Row="0" Grid.Column="0" Content="Database"/>
-            <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
-                <ListBox Name="DatabasesBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DatabasesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
-            </DockPanel>
+
+            </Grid.ColumnDefinitions>
+            <GroupBox Name="ResultsBox" Visibility="Collapsed" Grid.Row="4" Grid.Column="3" Header="Results">
+                <Button BorderBrush="Green" Background="WhiteSmoke" Content="Download Result" x:Name="DlButton" Grid.Row="4" Grid.Column="3" Click="DlButton_Click" Width="100" Margin="5" Height="40"/>
+            </GroupBox>
+
+            <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Database">
+
+                <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
+                    <ListBox Name="DatabasesBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DatabasesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
+                </DockPanel>
+            </GroupBox>
 
             <Label Grid.Row="0" Grid.Column="1" Visibility="Collapsed" Content="Annotation"/>
             <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1" >
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="0"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
@@ -109,44 +114,30 @@
                 <ListBox Name="AnnotatorsBox" Visibility="Collapsed" DisplayMemberPath="FullName" SelectionChanged="GeneralBox_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>
 
-            <Label Content="Sessions" Grid.Row="0" Grid.Column="4" ToolTip="Sessions that are not marked as finished appear in red" />
-            <DockPanel Grid.Row="1" Grid.ColumnSpan="1" Grid.Column="4" Margin="0,0,5,0" LastChildFill="True">
+            <GroupBox Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Sessions">
 
-                <DockPanel Name="SelectSessionSetComboBoxPanel"  DockPanel.Dock="Bottom" LastChildFill="True">
-                    <Label DockPanel.Dock="Left">Select</Label>
-                    <ComboBox Name="SelectSessionSetComboBox" DockPanel.Dock="Right" Margin="0,5,0,0" SelectionChanged="SelectSessionSetComboBox_SelectionChanged"></ComboBox>
-                </DockPanel>
+                <DockPanel Grid.Row="1" Grid.ColumnSpan="1" Grid.Column="4" Margin="0,0,5,0" LastChildFill="True">
 
-                <ListView Name="SessionsBox"  SelectionMode="Extended" ItemContainerStyle="{StaticResource SessionsItemColorStyle}"  SelectionChanged="SessionsBox_SelectionChanged" DockPanel.Dock="Top" GridViewColumnHeader.Click="SortListView">
-                    <ListView.View>
+                    <DockPanel Name="SelectSessionSetComboBoxPanel"  DockPanel.Dock="Bottom" LastChildFill="True">
+                        <Label DockPanel.Dock="Left">Select</Label>
+                        <ComboBox Name="SelectSessionSetComboBox" DockPanel.Dock="Right" Margin="0,5,0,0" SelectionChanged="SelectSessionSetComboBox_SelectionChanged"></ComboBox>
+                    </DockPanel>
+
+                    <ListView Name="SessionsBox" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Hidden"  SelectionMode="Extended"  ItemContainerStyle="{StaticResource SessionsItemColorStyle}"  SelectionChanged="SessionsBox_SelectionChanged" DockPanel.Dock="Top" GridViewColumnHeader.Click="SortListView">
+                        <!--<ListView.View>
                         <GridView>
-                            <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}" />
-                            <GridViewColumn Width="Auto" Header="Language">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Language" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <GridViewColumn Width="Auto" Header="Location">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Location" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </GridViewColumn>
-                            <!--GridViewColumn Width="Auto" Header="Date">
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Date" />
-                                </GridViewColumn.DisplayMemberBinding>
-                            </-->
+                            <GridViewColumn Width="120" Header="Name" DisplayMemberBinding="{Binding Name}" />
                         </GridView>
-                    </ListView.View>
-                </ListView>
-            </DockPanel>
+                    </ListView.View>>-->
+                    </ListView>
+                </DockPanel>
+            </GroupBox>
 
             <Label  Visibility="Collapsed" Name="multidatabaselabel" Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="2" Margin="0,0,28,0" ToolTip="It's only necessary to add a selection if you want to train on muliple databases. Adding the first item might take some time, as other databases are checked for consistancy.">Multi Database Training</Label>
             <Grid Grid.Row="1" Grid.Column="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="12*"/>
-                    <ColumnDefinition Width="14*"/>
-                    <ColumnDefinition Width="63*"/>
+
                 </Grid.ColumnDefinitions>
 
                 <Grid.RowDefinitions>
@@ -183,6 +174,7 @@
                                     <Binding Path="Sessions" />
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
+
 
                         </GridView>
                     </ListView.View>
@@ -252,11 +244,11 @@
                     <Label Name="ProcessorsBoxLabel" Grid.Row="2" Grid.Column="1">Processor:</Label>
 
                     <ComboBox Name="ProcessorsBox" Grid.Row="3" Grid.Column="1" Height="20" SelectionChanged="GeneralBox_SelectionChanged" ></ComboBox>
-                    <Label Name="ProcessorPathLabel" Grid.Row="4" Grid.Column="1"></Label>
+                    <TextBlock TextWrapping="WrapWithOverflow"  Margin="5" Name="ProcessorPathLabel" Grid.Row="4" Grid.Column="1"></TextBlock>
                     <Label Name="ProcessorDescLabel" Grid.Row="5" Grid.Column="1">Description:</Label>
-                    <Label Name="ProcessorDescription" Grid.Row="6" Grid.Column="1"></Label>
+                    <TextBlock TextWrapping="WrapWithOverflow" Margin="5" FontSize="10" Name="ProcessorDescription" Grid.Row="6" Grid.Column="1"></TextBlock>
 
-        
+
                     <Label Visibility="Collapsed" Name="TrainerPathLabel" Grid.Row="0" Grid.Column="2" Margin="0,5,0,5"></Label>
 
                 </Grid>
@@ -264,37 +256,47 @@
             </GroupBox>
             <GroupBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Input">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <Grid Name="inputGrid" >
+                    <Grid Name="inputGrid" MaxWidth="400" >
                         <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
 
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
                 </ScrollViewer>
 
             </GroupBox>
             <GroupBox Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Output">
 
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <Grid Name="outputGrid" >
+                    <Grid Name="outputGrid" MaxWidth="400">
 
 
                         <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
 
                         </Grid.ColumnDefinitions>
-                </Grid>
+
+
+                    </Grid>
+
+
+
+
                 </ScrollViewer>
+
 
             </GroupBox>
 
+
+            <GroupBox Name="ProcessorOpts" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,0" Header="Iterator Options">
+            
 
             <Grid Name="ExtractPanel" Grid.Row="2" Grid.ColumnSpan="3" Margin="0,5,5,0" >
 
@@ -312,11 +314,10 @@
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    
+
                 </Grid.ColumnDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left">Processor</Label>
-             
+
                 <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
                 <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Frame step</Label>
@@ -326,7 +327,8 @@
                 <Label Name="HelpLabel" Grid.Row="1" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
 
             </Grid>
-          
+
+            </GroupBox>
 
 
             <DockPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="6" Margin="5" LastChildFill="False">
@@ -335,11 +337,13 @@
                     <Button Content="Apply" x:Name="ApplyButton" IsEnabled="False"  Click="Apply_Click" Width="75" Margin="5" Height="30"/>
                     <CheckBox x:Name="ForceCheckBox" Margin="5" VerticalAlignment="Center" Content="Force"/>
                 </StackPanel>
-                <Label Name="statusLabel" HorizontalContentAlignment="Center" Background="Red"  Content="No connection to server!" Width="160" Height="30"/>
+                <GroupBox Name="statusBox" Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Nova-Server">
+                    <Label Name="statusLabel" HorizontalContentAlignment="Center" Foreground="red" Content="No connection to server!" Width="160" Height="30"/>
+                </GroupBox>
             </DockPanel>
         </Grid>
 
-        <GridSplitter ResizeDirection="Columns"                         
+        <!--<GridSplitter ResizeDirection="Columns"                         
                           Grid.Row="1" 
                           Grid.Column="1" 
                           Height="Auto"
@@ -347,16 +351,17 @@
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           Margin="0">
-        </GridSplitter>
+        </GridSplitter>-->
 
-        <Grid Grid.Row="2" Grid.Column="2" >
+        <Grid Grid.Row="2" Grid.Column="1" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
-            <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,5,5">
-                <Label DockPanel.Dock="Top" Margin="0,0,0,5">Log</Label>
+            <GroupBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" Margin="0,10,5,0" Header="Log">
+                <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,5,5" Grid.Column="5">
+            
                 <ScrollViewer x:Name="Scrollviewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <TextBox  IsReadOnly="True" Name="logTextBox" DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"  TextWrapping="Wrap"  SizeChanged="logTextBox_SizeChanged"/>
 
@@ -364,16 +369,17 @@
                         --><!--TextWrapping="Wrap"--><!--
                     </RichTextBox>-->
                 </ScrollViewer>
-                
               
             </DockPanel>
+            </GroupBox>
+
             <GroupBox Name="ModelSpecificOptions" Margin="0,5,5,0" Header="Processor Specific Options" Grid.Row="1">
                 <Grid Name="optionsGrid" >
 
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
 
