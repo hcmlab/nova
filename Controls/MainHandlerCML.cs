@@ -3,6 +3,7 @@ using FFMediaToolkit.Graphics;
 using MathNet.Numerics.Distributions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ssi.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -630,10 +631,10 @@ namespace ssi
             }
             else if (response.Content.Headers.ContentType.MediaType == "image/jpeg")
             {
-                string filename = FileTools.SaveFileDialog(inputfilename, ".jpg", "Image (*.jpg)|*.jpg", "");
-                if (filename == null) return;
                 System.Drawing.Image image = byteArrayToImage(responseContent);
-                image.Save(filename);
+                ImageView view = new ImageView(image, inputfilename);
+                view.Show();
+
             }
             else
             {

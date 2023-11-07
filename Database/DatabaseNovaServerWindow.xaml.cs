@@ -3197,6 +3197,7 @@ namespace ssi
                 inputGrid.Children.Clear();
 
                 Inputs.AddRange(ParseInputsOutputs(inputs, true));
+                
 
             }
 
@@ -3216,6 +3217,7 @@ namespace ssi
                 }
                 Inputsresult = new Dictionary<string, List<UIElement>>();
                 TextBox firstTextBox = null;
+                bool usesdb = false;
                 foreach (KeyValuePair<string, Input> element in input)
                 {
                     System.Windows.Controls.Label label = new System.Windows.Controls.Label() { Content = element.Value.Label.Replace("_", "__") };
@@ -3259,7 +3261,7 @@ namespace ssi
                     }
                     else if (element.Value.AttributeType == AnnoScheme.AttributeTypes.LIST)
                     {
-
+                        usesdb = true;
                         ComboBox cb = new ComboBox()
                         {
                             ItemsSource = element.Value.Attributes
@@ -3385,6 +3387,18 @@ namespace ssi
 
 
 
+                    }
+
+                    if (usesdb)
+                    {
+                        SessionsOverview.Visibility = Visibility.Visible;
+                        DatabaseOverview.Visibility = Visibility.Visible;
+                    }
+                    else {SessionsOverview.Visibility = Visibility.Collapsed;
+                            DatabaseOverview.Visibility = Visibility.Collapsed;
+                        SessionsBox.ItemsSource = null;
+                        DatabasesBox.SelectedItem = "dummy_dataset";
+    
                     }
                 }
             }

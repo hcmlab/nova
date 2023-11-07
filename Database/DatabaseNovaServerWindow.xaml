@@ -84,10 +84,10 @@
 
             </Grid.ColumnDefinitions>
             <GroupBox Name="ResultsBox" Visibility="Collapsed" Grid.Row="4" Grid.Column="3" Header="Results">
-                <Button BorderBrush="Green" Background="WhiteSmoke" Content="Download Result" x:Name="DlButton" Grid.Row="4" Grid.Column="3" Click="DlButton_Click" Width="100" Margin="5" Height="40"/>
+                <Button BorderBrush="Green" Background="WhiteSmoke" Content="Get Result" x:Name="DlButton" Grid.Row="4" Grid.Column="3" Click="DlButton_Click" Width="100" Margin="5" Height="40"/>
             </GroupBox>
 
-            <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Database">
+            <GroupBox Name="DatabaseOverview" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Database">
 
                 <DockPanel LastChildFill="True" Grid.Row="1" Grid.Column="0" >
                     <ListBox Name="DatabasesBox" Margin="0,0,5,0" DockPanel.Dock="Top" SelectionMode="Single" SelectionChanged="DatabasesBox_SelectionChanged"  ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"></ListBox>
@@ -114,7 +114,7 @@
                 <ListBox Name="AnnotatorsBox" Visibility="Collapsed" DisplayMemberPath="FullName" SelectionChanged="GeneralBox_SelectionChanged" SelectionMode="Single" Grid.Row="5" Margin="0,0,5,0"/>
             </Grid>
 
-            <GroupBox Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Sessions">
+            <GroupBox Name="SessionsOverview" Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Sessions">
 
                 <DockPanel Grid.Row="1" Grid.ColumnSpan="1" Grid.Column="4" Margin="0,0,5,0" LastChildFill="True">
 
