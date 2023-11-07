@@ -45,8 +45,12 @@ namespace ssi
         //private string featurepath;
 
         public SeriesCollection SeriesCollection { get; set; }
+        public SeriesCollection SeriesCollection2 { get; set; }
+
         public string[] Labels { get; set; }
         public Func<double, string> Formatter { get; set; }
+        public Func<double, string> Formatter2 { get; set; }
+
 
         private static readonly HttpClient client = new HttpClient();
         
@@ -97,6 +101,7 @@ namespace ssi
             parseTrainerFile(getTrainerFile(basePath, modelPath));
 
             SeriesCollection = new SeriesCollection();
+            SeriesCollection2 = new SeriesCollection();
 
         }
 
@@ -137,7 +142,7 @@ namespace ssi
 
         }
 
-        private async Task<Dictionary<int, float>> sendExplanationRequestForm()
+        private async Task<Dictionary<int, float>[]> sendExplanationRequestForm()
         {
             
             string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
@@ -203,15 +208,18 @@ namespace ssi
 
                 var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
 
-                //var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, float>>(responseString);
-
                 if (explanationDic["success"].ToString() == "failed")
                 {
                     return null;
                 }
 
-                var explanations = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
-
+                var counterFactuals = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
+                var localImportance = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["local_importance"]));
+                var globalImportance = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["global_importance"]));
+                Dictionary<int, float>[] explanations = new Dictionary<int, float>[3];
+                explanations[0] = counterFactuals;
+                explanations[1] = localImportance;
+                explanations[2] = globalImportance;
                 return explanations;
             }
             catch (Exception e)
@@ -226,10 +234,13 @@ namespace ssi
         {
 
             SeriesCollection.Clear();
+            SeriesCollection2.Clear();
+
             explanationButton.IsEnabled = false;
 
-            Dictionary<int, float> explanationData = await sendExplanationRequestForm();
+            Dictionary<int, string> dimNameDictionary = SignalTrack.Selected.Signal.DimLabels;
 
+            Dictionary<int, float>[] explanationData = await sendExplanationRequestForm();
 
             if (explanationData == null)
             {
@@ -238,27 +249,93 @@ namespace ssi
                 return;
             }
 
+            Dictionary<int, float> counterFactualData = explanationData[0];
+            Dictionary<int, float> localImportanceData = explanationData[1];
+            Dictionary<int, float> glocalImportanceData = explanationData[2];
 
             //Labels = new string[explanationData.Count];
-            ChartValues<float> importanceScores = new ChartValues<float>();
-            explanationChart.AxisX[0].Labels = new string[explanationData.Count];
+            ChartValues<float> counterFactualScores = new ChartValues<float>();
+            ChartValues<float> localImportanceScores = new ChartValues<float>();
+            ChartValues<float> globalImportanceScores = new ChartValues<float>();
 
+            explanationChart.AxisX[0].Labels = new string[counterFactualData.Count];
+            explanationChart.AxisX[0].FontSize = 9;
+            int labelLength = 16;
             int i = 0;
 
-            foreach(var entry in explanationData)
+            foreach(var entry in counterFactualData)
             {
-                importanceScores.Add(entry.Value);
-                explanationChart.AxisX[0].Labels[i] = entry.Key.ToString();
+                counterFactualScores.Add(entry.Value);
+
+                if (dimNameDictionary.Count == 0)
+                {
+                    explanationChart.AxisX[0].Labels[i] = entry.Key.ToString();
+                }
+                else
+                {
+                    string featureName = dimNameDictionary[entry.Key];
+                    if(featureName.Length > labelLength)
+                    {
+                        featureName = featureName.Substring(0, labelLength) + "...";
+                    }
+                    explanationChart.AxisX[0].Labels[i] = featureName;
+                }
+
                 i++;
             }
 
             SeriesCollection.Add(new ColumnSeries
             {
                 Title = "",
-                Values = importanceScores
+                Values = counterFactualScores
             });
 
             Formatter = value => value.ToString("N");
+
+
+            localImportanceChart.AxisX[0].Labels = new string[localImportanceData.Count];
+            localImportanceChart.AxisX[0].FontSize = 9;
+
+            i = 0;
+
+            foreach (var entry in localImportanceData)
+            {
+                localImportanceScores.Add(entry.Value);
+                if(dimNameDictionary.Count == 0)
+                {
+                    localImportanceChart.AxisX[0].Labels[i] = entry.Key.ToString();
+                }
+                else
+                {
+                    string featureName = dimNameDictionary[entry.Key];
+                    if (featureName.Length > labelLength)
+                    {
+                        featureName = featureName.Substring(0, labelLength) + "...";
+                    }
+                    localImportanceChart.AxisX[0].Labels[i] = featureName;
+                }
+                
+                i++;
+            }
+
+            foreach (var entry in glocalImportanceData)
+            {
+                globalImportanceScores.Add(entry.Value);
+            }
+
+            SeriesCollection2.Add(new ColumnSeries
+            {
+                Title = "local",
+                Values = localImportanceScores
+            });
+
+            SeriesCollection2.Add(new ColumnSeries
+            {
+                Title = "global",
+                Values = globalImportanceScores
+            });
+
+            Formatter2 = value => value.ToString("N");
 
             DataContext = this;
 

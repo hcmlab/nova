@@ -11,8 +11,8 @@
         Closing="Window_Closing" Style="{StaticResource WinAll}">
     <Grid Name="container">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="75*"></ColumnDefinition>
-            <ColumnDefinition Width="25*"></ColumnDefinition>
+            <ColumnDefinition Width="80*"></ColumnDefinition>
+            <ColumnDefinition Width="20*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="100*"></RowDefinition>
@@ -28,19 +28,45 @@
                 
             </TabItem>
         </TabControl>-->
-        <Grid Name="explanationAnalysis" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="10">
-            <lvc:CartesianChart Name="explanationChart" Series="{Binding SeriesCollection}" LegendLocation="Left">
-                <lvc:CartesianChart.AxisX>
-                    <lvc:Axis Name="labelaxis" Title="Feature" LabelsRotation="20">
-                        <lvc:Axis.Separator>
-                            <lvc:Separator  Name="sep" Step="1"></lvc:Separator>
-                        </lvc:Axis.Separator>
-                    </lvc:Axis>
-                </lvc:CartesianChart.AxisX>
-                <lvc:CartesianChart.AxisY>
-                    <lvc:Axis Title="Importance score" LabelFormatter="{Binding Formatter}"></lvc:Axis>
-                </lvc:CartesianChart.AxisY>
-            </lvc:CartesianChart>
+        <Grid Name="explanation" Grid.Row="0" Grid.RowSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50*"></RowDefinition>
+                <RowDefinition Height="50*"></RowDefinition>
+
+            </Grid.RowDefinitions>
+            <Grid Name="explanationAnalysis" Margin="10" Grid.Row="0">
+
+                <lvc:CartesianChart Name="explanationChart" Series="{Binding SeriesCollection}" LegendLocation="Left">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Name="labelaxis" Title="Feature" LabelsRotation="45">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator  Name="sep" Step="1"></lvc:Separator>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Counterfactual" LabelFormatter="{Binding Formatter}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+            </Grid>
+            <Grid Name="explanationAnalysisImportanceScore" Margin="10" Grid.Row="1">
+
+                <lvc:CartesianChart Name="localImportanceChart" Series="{Binding SeriesCollection2}" LegendLocation="Left">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Name="labelaxis2" Title="Feature" LabelsRotation="45">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator  Name="sep2" Step="1"></lvc:Separator>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Importance score" LabelFormatter="{Binding Formatter2}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+            </Grid>
         </Grid>
         <WrapPanel Name="containerExplainedImages" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="5">
             <!--<Image Name="explanationImage" Height="200" Width="200">
