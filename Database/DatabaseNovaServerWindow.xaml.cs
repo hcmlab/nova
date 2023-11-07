@@ -449,10 +449,30 @@ namespace ssi
                             {
                                 this.Dispatcher.Invoke(() =>
                                 {
-                                   
+                        
                                     this.ApplyButton.IsEnabled = true;
                                     this.Cancel_Button.IsEnabled = false;
-                                    ResultsBox.Visibility = Visibility.Visible; //TODO REMOVE AFTER TESTING
+                                    bool showresult = false;
+                                    foreach(var element in Outputsresult)
+                                    {
+                                        string source = element.Key.Split('.')[1];
+                                        string[] src = source.Split(':');
+
+
+                                        if ((source == "file") || (source == "image"))
+                                            showresult = true;
+
+                                        else
+                                        {
+                                            showresult = false;
+                                        }
+
+                                    }
+                                    if (showresult)
+                                    {
+                                        ResultsBox.Visibility = Visibility.Visible; //TODO REMOVE AFTER TESTING
+                                    }
+                                   
                                 });
 
 
@@ -856,6 +876,7 @@ namespace ssi
             {
                 pythonCaseOn = true;
                 logThread = new Thread(new ThreadStart(NovaSeverGetLog));
+                ResultsBox.Visibility = Visibility.Collapsed;
                 statusThread = new Thread(new ThreadStart(NovaServerGetStatus));
                 logThread.Start();
                 statusThread.Start();
