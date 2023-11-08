@@ -33,6 +33,7 @@ namespace ssi
 
         public string modelPath;
         private string mlBackend;
+        private string trainerPath;
         public bool getNewExplanation;
         private List<ModelTrainer> modelsTrainers;
         public Dictionary<int, string> idToClassName;
@@ -91,6 +92,9 @@ namespace ssi
             }
 
             basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "feature" + "{" + featurename + "}";
+
+            //TODO add cml info request
+            // search for applicable trainer file
 
             DirectoryInfo di = new DirectoryInfo(basePath);
 
@@ -158,7 +162,7 @@ namespace ssi
               {"type", "input" },
               {"scheme", AnnoTier.Selected.AnnoList.Scheme.Name},
               {"annotator", AnnoTier.Selected.AnnoList.Meta.Annotator},
-              {"src", "db:anno" },
+              {"src", "db:annotation" },
               {"role", role},
               {"active", "True" }
             };
@@ -180,7 +184,8 @@ namespace ssi
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent(modelPath), "modelPath" },
+                { new StringContent(modelPath), "modelFilePath" },
+                { new StringContent(trainerPath), "trainer_file_path" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
@@ -188,12 +193,12 @@ namespace ssi
                 { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
                 { new StringContent(sessionsstr), "sessions" },
                 { new StringContent("DICE"), "explainer"},
-                {new StringContent(mlBackend), "mlBackend" },
-                {new StringContent(sr.ToString()), "sampleRate" },
-                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame" },
-                { new StringContent(this.dim.ToString()), "dim" },
-                { new StringContent(numCounterfactuals.Text), "numCounterfactuals" },
-                { new StringContent(classCounterfactual.Text), "classCounterfactual" },
+                //{new StringContent(mlBackend), "mlBackend" },
+                //{new StringContent(sr.ToString()), "sampleRate" },
+                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
+                //{ new StringContent(this.dim.ToString()), "dim" },
+                { new StringContent(numCounterfactuals.Text), "num_counterfactuals" },
+                { new StringContent(classCounterfactual.Text), "class_counterfactual" },
                 { new StringContent(getIdHash()), "jobID" },
                 { new StringContent(json), "data"  }
             };
@@ -371,6 +376,7 @@ namespace ssi
             Properties.Settings.Default.Save();
 
             mlBackend = modelsTrainers[cmb.SelectedIndex].backend;
+            trainerPath = modelsTrainers[cmb.SelectedIndex].trainer;
 
             Console.WriteLine("Model: " + modelsTrainers[cmb.SelectedIndex].model);
             Console.WriteLine("Trainer: " + modelsTrainers[cmb.SelectedIndex].trainer);
