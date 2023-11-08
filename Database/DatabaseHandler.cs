@@ -72,7 +72,7 @@ namespace ssi
 
         public static string SessionInfo
         {
-            get { return "Session [" + (IsSession ? sessionName.Replace('_', '-') : "none") + "]"; }
+            get { return "Session [" + (IsSession ? sessionName.Replace("_", "_") : "none") + "]"; }
         }
 
         public static bool Connect()

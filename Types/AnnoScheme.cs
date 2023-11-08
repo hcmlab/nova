@@ -123,6 +123,7 @@ namespace ssi
             [DisplayString(ResourceKey = "String")] STRING,
             [DisplayString(ResourceKey = "List")] LIST,
             [DisplayString(ResourceKey = "Boolean")] BOOLEAN,
+            [DisplayString(ResourceKey = "None")] NONE,
 
 
 

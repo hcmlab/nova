@@ -1,8 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using CSJ2K.j2k.image;
+using FFMediaToolkit.Graphics;
+using MathNet.Numerics.Distributions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ssi.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -11,6 +16,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
+using System.Windows.Media.Imaging;
+using Tamir.SharpSsh.jsch;
+
+
 
 namespace ssi
 {
@@ -570,6 +580,76 @@ namespace ssi
                 return null;
             }
         }
+
+
+        public async void getResultFromServer(MultipartFormDataContent content)
+        {
+           
+
+            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+            string url = "http://" + tokens[0] + ":" + tokens[1] + "/fetch_result";
+
+
+            var response = client.PostAsync(url, content).Result;
+            var inputfilename = response.Content.Headers.ContentDisposition.FileName;
+            var responseContent = await response.Content.ReadAsByteArrayAsync();
+            if (response.Content.Headers.ContentType.MediaType == "video/mp4")
+            {
+                string filename = FileTools.SaveFileDialog(inputfilename, ".mp4", "Video (*.mp4)|*.mp4", "");
+                if (filename == null) return;
+
+                Stream t = new FileStream(filename, FileMode.Create);
+                BinaryWriter b = new BinaryWriter(t);
+                b.Write(responseContent);
+                t.Close();
+                MessageBox.Show("Stored video at " + filename);
+            }
+
+            else if (response.Content.Headers.ContentType.MediaType == "application/x-zip-compressed")
+            {
+                string filename = FileTools.SaveFileDialog(inputfilename, ".zip", "Archive (*.zip)|*.zip", "");
+                if (filename == null) return;
+                File.WriteAllBytes(filename, responseContent);
+            }
+
+            else if (response.Content.Headers.ContentType.MediaType == "text/plain")
+            {
+                string result = System.Text.Encoding.UTF8.GetString(responseContent);
+                MessageBox.Show(result);
+            }
+            else if (response.Content.Headers.ContentType.MediaType == "application/octet-stream")
+            {
+                string result = System.Text.Encoding.UTF8.GetString(responseContent);
+                MessageBox.Show(result);
+            }
+            else if (response.Content.Headers.ContentType.MediaType == "image/jpeg")
+            {
+                System.Drawing.Image image = byteArrayToImage(responseContent);
+                ImageView view = new ImageView(image, inputfilename);
+                view.Show();
+
+            }
+            else
+            {
+                MessageBox.Show("Result not found");
+            }
+           
+
+        }
+
+        public Image byteArrayToImage(byte[] byteArrayIn)
+        {
+            Image returnImage = null;
+            try
+            {
+                MemoryStream ms = new MemoryStream(byteArrayIn, 0, byteArrayIn.Length);
+                ms.Write(byteArrayIn, 0, byteArrayIn.Length);
+                returnImage = Image.FromStream(ms, true);//Exception occurs here
+            }
+            catch { }
+            return returnImage;
+        }
+
 
         public Dictionary<string, string> getLogFromServer(MultipartFormDataContent content)
         {
