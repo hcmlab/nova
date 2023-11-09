@@ -2457,7 +2457,7 @@ namespace ssi
                 else if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
                         {
 
-                    string output = "file"; //db
+                    string output = "db"; //db
 
                         if (element.Key.Split('.')[1] != "")
                         {
