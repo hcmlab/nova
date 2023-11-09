@@ -549,6 +549,7 @@
     <Compile Include="Controls\Other\ExplanationWindowInnvestigate.xaml.cs">
       <DependentUpon>ExplanationWindowInnvestigate.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Other\NovaServerUtility.cs" />
     <Compile Include="Controls\Other\QuestionBoxThreeButtons.xaml.cs">
       <DependentUpon>QuestionBoxThreeButtons.xaml</DependentUpon>
     </Compile>

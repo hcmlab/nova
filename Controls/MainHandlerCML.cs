@@ -679,7 +679,6 @@ namespace ssi
         }
 
 
-
         public JObject get_info_from_server()
         {
             string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');

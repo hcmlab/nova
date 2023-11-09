@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using Octokit;
 using Org.Mentalis.Security.Certificates;
 using SharpDX;
+using ssi.Controls.Other.NovaServerUtility;
 using Svg;
 using System;
 using System.Collections;
@@ -302,26 +303,6 @@ namespace ssi
             }
         }
 
-
-        static int GetDeterministicHashCode(string str)
-        {
-            unchecked
-            {
-                int hash1 = (5381 << 16) + 5381;
-                int hash2 = hash1;
-
-                for (int i = 0; i < str.Length; i += 2)
-                {
-                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
-                    if (i == str.Length - 1)
-                        break;
-                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
-                }
-
-                return hash1 + (hash2 * 1566083941);
-            }
-        }
-
         private string getIdHash()
         {
             DatabaseAnnotator annotator = null;
@@ -343,7 +324,7 @@ namespace ssi
             string database = DatabaseHandler.DatabaseName;
             
 
-            int result = GetDeterministicHashCode("database" + database + "annotator" + annotator.Name + "sessions" + sessionList + "username" + Properties.Settings.Default.MongoDBUser + "chain" + chain.Name + "opts" + ModelSpecificOptString);
+            int result = NovaServerUtility.GetDeterministicHashCode("database" + database + "annotator" + annotator.Name + "sessions" + sessionList + "username" + Properties.Settings.Default.MongoDBUser + "chain" + chain.Name + "opts" + ModelSpecificOptString);
 
             var jobIDhash = (Math.Abs(result)).ToString();
             int MaxLength = 8;

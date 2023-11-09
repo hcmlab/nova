@@ -185,7 +185,7 @@ namespace ssi
                 return;
             }
 
-            windowCounterFactual = new CounterFactualWindow(SignalTrackStatic.Selected.Signal.FilePath);
+            windowCounterFactual = new CounterFactualWindow(SignalTrackStatic.Selected.Signal.FilePath, this);
 
 
             try

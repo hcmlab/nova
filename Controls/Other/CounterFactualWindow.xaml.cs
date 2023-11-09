@@ -22,6 +22,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using LiveCharts;
 using LiveCharts.Wpf;
+using System.Threading;
+using ssi.Controls.Other.NovaServerUtility;
 
 namespace ssi
 {
@@ -43,6 +45,7 @@ namespace ssi
         private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
         public uint dim;
+        private MainHandler handler;
         //private string featurepath;
 
         public SeriesCollection SeriesCollection { get; set; }
@@ -54,15 +57,15 @@ namespace ssi
 
 
         private static readonly HttpClient client = new HttpClient();
-        
 
-        public CounterFactualWindow(string featurePath)
+
+        public CounterFactualWindow(string featurePath, MainHandler handler)
         {
 
             InitializeComponent();
             explanationButton.Click += getExplanation;
             modelPath = Properties.Settings.Default.explainModelPath;
-            if(modelPath != null)
+            if (modelPath != null)
             {
                 modelLoaded.Text = Path.GetFileName(modelPath);
             }
@@ -73,6 +76,7 @@ namespace ssi
 
             getNewExplanation = false;
 
+            this.handler = handler;
 
             string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
@@ -80,8 +84,8 @@ namespace ssi
             string[] featurenames = Path.GetFileNameWithoutExtension(featurePath).Split('.');
             string featurename = "";
 
-            for(int i = 2; i < featurenames.Length; i++ ){
-                if(featurename == "")
+            for (int i = 2; i < featurenames.Length; i++) {
+                if (featurename == "")
                 {
                     featurename = featurenames[i];
                 }
@@ -111,26 +115,30 @@ namespace ssi
 
         private void loadModelAndTrainer(string path)
         {
-            
+
             DirectoryInfo di = new DirectoryInfo(path);
-            if(di.Exists)
+            if (di.Exists)
             {
 
                 foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
                 {
                     if (fi.Extension == ".model")
                     {
-                        modelsTrainers.Add(new ModelTrainer(fi.FullName, null, "SKLEARN"));
+
+                        //TODO LOL
+                        string trainerPath = fi.FullName.Split('.')[0] + ".trainer";
+
+                        modelsTrainers.Add(new ModelTrainer(fi.FullName, trainerPath, "SKLEARN"));
                         modelsBox.Items.Add(fi.Name + " " + fi.Directory.Name);
                     }
-                    if(fi.Extension == ".h5")
+                    if (fi.Extension == ".h5")
                     {
                         modelsTrainers.Add(new ModelTrainer(fi.FullName, null, "TENSORFLOW"));
                         modelsBox.Items.Add(fi.Name + " " + fi.Directory.Name);
                     }
                 }
 
-                foreach( var t in modelsTrainers)
+                foreach (var t in modelsTrainers)
                 {
                     foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
                     {
@@ -146,62 +154,8 @@ namespace ssi
 
         }
 
-        private async Task<Dictionary<int, float>[]> sendExplanationRequestForm()
+        public async void explanationStatus(MultipartFormDataContent content)
         {
-            
-            string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
-
-            string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
-
-            string fileName = SignalTrack.Selected.Signal.Name.Replace(role+".", "");
-            double sr = SignalTrack.Selected.Signal.rate;
-
-            JObject anno = new JObject
-            {
-              {"id", "explanation_anno"},
-              {"type", "input" },
-              {"scheme", AnnoTier.Selected.AnnoList.Scheme.Name},
-              {"annotator", AnnoTier.Selected.AnnoList.Meta.Annotator},
-              {"src", "db:annotation" },
-              {"role", role},
-              {"active", "True" }
-            };
-
-            JObject ob = new JObject
-            {
-              {"id", "explanation_stream"},
-              {"type", "input" },
-              {"src", "db:stream" },
-              {"name", fileName},
-              {"role", role},
-              {"active", "True" }
-            };
-
-            JArray data = new JArray();
-            data.Add(ob);
-            data.Add(anno);
-            string json = data.ToString(Newtonsoft.Json.Formatting.None);
-
-            MultipartFormDataContent content = new MultipartFormDataContent
-            {
-                { new StringContent(modelPath), "modelFilePath" },
-                { new StringContent(trainerPath), "trainer_file_path" },
-                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
-                { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
-                { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
-                { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
-                { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
-                { new StringContent(sessionsstr), "sessions" },
-                { new StringContent("DICE"), "explainer"},
-                //{new StringContent(mlBackend), "mlBackend" },
-                //{new StringContent(sr.ToString()), "sampleRate" },
-                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
-                //{ new StringContent(this.dim.ToString()), "dim" },
-                { new StringContent(numCounterfactuals.Text), "num_counterfactuals" },
-                { new StringContent(classCounterfactual.Text), "class_counterfactual" },
-                { new StringContent(getIdHash()), "jobID" },
-                { new StringContent(json), "data"  }
-            };
 
             try
             {
@@ -211,140 +165,231 @@ namespace ssi
 
                 var responseString = await response.Content.ReadAsStringAsync();
 
-                var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
+                url = "http://" + tokens[0] + ":" + tokens[1] + "/job_status";
 
-                if (explanationDic["success"].ToString() == "failed")
+                bool killme = true;
+
+                while (killme)
                 {
-                    return null;
+
+                    Dictionary<string, string> statusresponse = await NovaServerUtility.getInfoFromServer(getIdHash(), url, client);
+                    var status = statusresponse["status"];
+
+                    if (status == "2")
+                    {
+                        killme = false;
+                    }
+                    Thread.Sleep(1000);
                 }
+
+                url = "http://" + tokens[0] + ":" + tokens[1] + "/fetch_result";
+
+                MultipartFormDataContent contentFetch = new MultipartFormDataContent
+                {
+                    { new StringContent(getIdHash()), "jobID"  }
+                };
+
+                response = client.PostAsync(url, contentFetch).Result;
+                var inputfilename = response.Content.Headers.ContentDisposition.FileName;
+                var responseContent = await response.Content.ReadAsByteArrayAsync();
+
+                string result = System.Text.Encoding.UTF8.GetString(responseContent);
+
+                var explanationDic = (JObject)JsonConvert.DeserializeObject(result);
 
                 var counterFactuals = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
                 var localImportance = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["local_importance"]));
                 var globalImportance = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["global_importance"]));
-                Dictionary<int, float>[] explanations = new Dictionary<int, float>[3];
-                explanations[0] = counterFactuals;
-                explanations[1] = localImportance;
-                explanations[2] = globalImportance;
-                return explanations;
+                Dictionary<int, float>[] explanationData = new Dictionary<int, float>[3];
+                explanationData[0] = counterFactuals;
+                explanationData[1] = localImportance;
+                explanationData[2] = globalImportance;
+
+                this.Dispatcher.Invoke(() =>
+                {
+                    SeriesCollection.Clear();
+                    SeriesCollection2.Clear();
+
+                    explanationButton.IsEnabled = false;
+
+                    Dictionary<int, string> dimNameDictionary = SignalTrack.Selected.Signal.DimLabels;
+
+                    if (explanationData == null)
+                    {
+                        this.explanationButton.IsEnabled = true;
+
+                        return;
+                    }
+
+                    Dictionary<int, float> counterFactualData = explanationData[0];
+                    Dictionary<int, float> localImportanceData = explanationData[1];
+                    Dictionary<int, float> glocalImportanceData = explanationData[2];
+
+                    //Labels = new string[explanationData.Count];
+                    ChartValues<float> counterFactualScores = new ChartValues<float>();
+                    ChartValues<float> localImportanceScores = new ChartValues<float>();
+                    ChartValues<float> globalImportanceScores = new ChartValues<float>();
+
+                    explanationChart.AxisX[0].Labels = new string[counterFactualData.Count];
+                    explanationChart.AxisX[0].FontSize = 9;
+                    int labelLength = 16;
+                    int i = 0;
+
+                    foreach (var entry in counterFactualData)
+                    {
+                        counterFactualScores.Add(entry.Value);
+
+                        if (dimNameDictionary.Count == 0)
+                        {
+                            explanationChart.AxisX[0].Labels[i] = entry.Key.ToString();
+                        }
+                        else
+                        {
+                            string featureName = dimNameDictionary[entry.Key];
+                            if (featureName.Length > labelLength)
+                            {
+                                featureName = featureName.Substring(0, labelLength) + "...";
+                            }
+                            explanationChart.AxisX[0].Labels[i] = featureName;
+                        }
+
+                        i++;
+                    }
+
+                    SeriesCollection.Add(new ColumnSeries
+                    {
+                        Title = "",
+                        Values = counterFactualScores
+                    });
+
+                    Formatter = value => value.ToString("N");
+
+
+                    localImportanceChart.AxisX[0].Labels = new string[localImportanceData.Count];
+                    localImportanceChart.AxisX[0].FontSize = 9;
+
+                    i = 0;
+
+                    foreach (var entry in localImportanceData)
+                    {
+                        localImportanceScores.Add(entry.Value);
+                        if (dimNameDictionary.Count == 0)
+                        {
+                            localImportanceChart.AxisX[0].Labels[i] = entry.Key.ToString();
+                        }
+                        else
+                        {
+                            string featureName = dimNameDictionary[entry.Key];
+                            if (featureName.Length > labelLength)
+                            {
+                                featureName = featureName.Substring(0, labelLength) + "...";
+                            }
+                            localImportanceChart.AxisX[0].Labels[i] = featureName;
+                        }
+
+                        i++;
+                    }
+
+                    foreach (var entry in glocalImportanceData)
+                    {
+                        globalImportanceScores.Add(entry.Value);
+                    }
+
+                    SeriesCollection2.Add(new ColumnSeries
+                    {
+                        Title = "local",
+                        Values = localImportanceScores
+                    });
+
+                    SeriesCollection2.Add(new ColumnSeries
+                    {
+                        Title = "global",
+                        Values = globalImportanceScores
+                    });
+
+                    Formatter2 = value => value.ToString("N");
+
+                    DataContext = this;
+
+                    this.explanationButton.IsEnabled = true;
+                });
+
             }
             catch (Exception e)
             {
-                return null;
+                return;
             }
 
 
         }
 
-        private async void getExplanation(object sender, RoutedEventArgs e)
+        private void getExplanation(object sender, RoutedEventArgs e)
         {
 
-            SeriesCollection.Clear();
-            SeriesCollection2.Clear();
 
-            explanationButton.IsEnabled = false;
+            string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
 
-            Dictionary<int, string> dimNameDictionary = SignalTrack.Selected.Signal.DimLabels;
+            string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
 
-            Dictionary<int, float>[] explanationData = await sendExplanationRequestForm();
+            string fileName = SignalTrack.Selected.Signal.Name.Replace(role + ".", "");
+            double sr = SignalTrack.Selected.Signal.rate;
 
-            if (explanationData == null)
-            {
-                this.explanationButton.IsEnabled = true;
-
-                return;
-            }
-
-            Dictionary<int, float> counterFactualData = explanationData[0];
-            Dictionary<int, float> localImportanceData = explanationData[1];
-            Dictionary<int, float> glocalImportanceData = explanationData[2];
-
-            //Labels = new string[explanationData.Count];
-            ChartValues<float> counterFactualScores = new ChartValues<float>();
-            ChartValues<float> localImportanceScores = new ChartValues<float>();
-            ChartValues<float> globalImportanceScores = new ChartValues<float>();
-
-            explanationChart.AxisX[0].Labels = new string[counterFactualData.Count];
-            explanationChart.AxisX[0].FontSize = 9;
-            int labelLength = 16;
-            int i = 0;
-
-            foreach(var entry in counterFactualData)
-            {
-                counterFactualScores.Add(entry.Value);
-
-                if (dimNameDictionary.Count == 0)
+            JObject anno = new JObject
                 {
-                    explanationChart.AxisX[0].Labels[i] = entry.Key.ToString();
-                }
-                else
+                    {"id", "explanation_anno"},
+                    {"type", "input" },
+                    {"scheme", AnnoTier.Selected.AnnoList.Scheme.Name},
+                    {"annotator", AnnoTier.Selected.AnnoList.Meta.Annotator},
+                    {"src", "db:annotation" },
+                    {"role", role},
+                    {"active", "True" }
+                };
+
+            JObject ob = new JObject
                 {
-                    string featureName = dimNameDictionary[entry.Key];
-                    if(featureName.Length > labelLength)
+                    {"id", "explanation_stream"},
+                    {"type", "input" },
+                    {"src", "db:stream" },
+                    {"name", fileName},
+                    {"role", role},
+                    {"active", "True" }
+                };
+
+            JObject output = new JObject
+                {
+                    {"id", "output"},
+                    {"type", "output"}, 
+                    {"src", "request:text"} 
+                };
+
+            JArray data = new JArray();
+            data.Add(ob);
+            data.Add(anno);
+            data.Add(output);
+            string json = data.ToString(Newtonsoft.Json.Formatting.None);
+
+            MultipartFormDataContent content = new MultipartFormDataContent
                     {
-                        featureName = featureName.Substring(0, labelLength) + "...";
-                    }
-                    explanationChart.AxisX[0].Labels[i] = featureName;
-                }
+                        { new StringContent(modelPath), "modelFilePath" },
+                        { new StringContent(trainerPath), "trainer_file_path" },
+                        { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
+                        { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
+                        { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
+                        { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
+                        { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
+                        { new StringContent(sessionsstr), "sessions" },
+                        { new StringContent("DICE"), "explainer"},
+                        { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
+                        { new StringContent(numCounterfactuals.Text), "num_counterfactuals" },
+                        { new StringContent(classCounterfactual.Text), "class_counterfactual" },
+                        { new StringContent(getIdHash()), "jobID" },
+                        { new StringContent(json), "data" },
+                        { new StringContent((1/sr).ToString()), "frame_size" }
+                    };
 
-                i++;
-            }
+            Thread thread = new Thread(() => explanationStatus(content));
+            thread.Start();
 
-            SeriesCollection.Add(new ColumnSeries
-            {
-                Title = "",
-                Values = counterFactualScores
-            });
-
-            Formatter = value => value.ToString("N");
-
-
-            localImportanceChart.AxisX[0].Labels = new string[localImportanceData.Count];
-            localImportanceChart.AxisX[0].FontSize = 9;
-
-            i = 0;
-
-            foreach (var entry in localImportanceData)
-            {
-                localImportanceScores.Add(entry.Value);
-                if(dimNameDictionary.Count == 0)
-                {
-                    localImportanceChart.AxisX[0].Labels[i] = entry.Key.ToString();
-                }
-                else
-                {
-                    string featureName = dimNameDictionary[entry.Key];
-                    if (featureName.Length > labelLength)
-                    {
-                        featureName = featureName.Substring(0, labelLength) + "...";
-                    }
-                    localImportanceChart.AxisX[0].Labels[i] = featureName;
-                }
-                
-                i++;
-            }
-
-            foreach (var entry in glocalImportanceData)
-            {
-                globalImportanceScores.Add(entry.Value);
-            }
-
-            SeriesCollection2.Add(new ColumnSeries
-            {
-                Title = "local",
-                Values = localImportanceScores
-            });
-
-            SeriesCollection2.Add(new ColumnSeries
-            {
-                Title = "global",
-                Values = globalImportanceScores
-            });
-
-            Formatter2 = value => value.ToString("N");
-
-            DataContext = this;
-
-            this.explanationButton.IsEnabled = true;
             
         }
 
@@ -435,49 +480,10 @@ namespace ssi
             this.explanationButton.Visibility = Visibility.Hidden;
         }
 
-        private int getRatio(int n)
-        {
-
-            int m = 1;
-
-            while (true)
-            {
-                if (Math.Pow((m - 1), 2) < n && n <= Math.Pow(m, 2))
-                {
-                    return m;
-                }
-                m++;
-                if (m > 1000)
-                {
-                    return -1;
-                }
-            }
-
-        }
-
-        static int GetDeterministicHashCode(string str)
-        {
-            unchecked
-            {
-                int hash1 = (5381 << 16) + 5381;
-                int hash2 = hash1;
-
-                for (int i = 0; i < str.Length; i += 2)
-                {
-                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
-                    if (i == str.Length - 1)
-                        break;
-                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
-                }
-
-                return hash1 + (hash2 * 1566083941);
-            }
-        }
-
         private string getIdHash()
         {
 
-            int result = GetDeterministicHashCode("database" + DatabaseHandler.DatabaseName + "session" + DatabaseHandler.SessionInfo + "username" + Properties.Settings.Default.MongoDBUser + "explainer" + "lime tabular" + "model" + modelPath);
+            int result = NovaServerUtility.GetDeterministicHashCode("database" + DatabaseHandler.DatabaseName + "session" + DatabaseHandler.SessionInfo + "username" + Properties.Settings.Default.MongoDBUser + "explainer" + "dice" + "model" + modelPath);
 
             var jobIDhash = (Math.Abs(result)).ToString();
             int MaxLength = 8;
