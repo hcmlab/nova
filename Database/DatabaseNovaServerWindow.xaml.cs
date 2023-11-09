@@ -2684,7 +2684,7 @@ namespace ssi
 
                         if (element.Key.Split('.')[1] != "")
                         {
-                            string target = "file"; //db
+                            string target = "db"; //db
                             if (element.Key.Split('.')[1].StartsWith("annotation"))
                             {
 
