@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media.Imaging;
@@ -644,14 +645,14 @@ namespace ssi
 
         }
 
-        public Image byteArrayToImage(byte[] byteArrayIn)
+        public System.Drawing.Image byteArrayToImage(byte[] byteArrayIn)
         {
-            Image returnImage = null;
+            System.Drawing.Image returnImage = null;
             try
             {
                 MemoryStream ms = new MemoryStream(byteArrayIn, 0, byteArrayIn.Length);
                 ms.Write(byteArrayIn, 0, byteArrayIn.Length);
-                returnImage = Image.FromStream(ms, true);//Exception occurs here
+                returnImage = System.Drawing.Image.FromStream(ms, true);//Exception occurs here
             }
             catch { }
             return returnImage;
@@ -687,12 +688,12 @@ namespace ssi
 
 
 
-        public JObject get_info_from_server()
+        public JObject get_info_from_server(MultipartFormDataContent content)
         {
             string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
             string url = "http://" + tokens[0] + ":" + tokens[1] + "/cml_info";
 
-            var response = client.GetAsync(url).Result;
+            var response = client.PostAsync(url, content).Result;
             var responseContent = response.Content;
             string responseString = responseContent.ReadAsStringAsync().Result;
             var result = JObject.Parse(responseString);
