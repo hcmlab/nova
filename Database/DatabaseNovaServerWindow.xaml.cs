@@ -108,9 +108,9 @@ namespace ssi
         {
             public string ID { get; set; }
             public string IO { get; set; }
-            public string Type { get; set; }
+            public string SuperType { get; set; }
             public string SubType { get; set; }
-            public string SubSubType { get; set; }
+            public string SpecificType { get; set; }
 
             public string DefaultName { get; set; }
         }
@@ -134,11 +134,14 @@ namespace ssi
             public List<string> Attributes { get; set; }
             public List<string> ExtraAttributes { get; set; }
             public List<string> ExtraAttributes2 { get; set; }
+
+            public string Origin { get; set; }
+
             public string DefaultValue { get; set; }
             public AnnoScheme.AttributeTypes AttributeType { get; set; }
             public AnnoScheme.AttributeTypes ExtraAttributeType { get; set; }
             public AnnoScheme.AttributeTypes ExtraAttributeType2 { get; set; }
-            public string Origin { get; set; }
+        
         }
 
 
@@ -857,7 +860,7 @@ namespace ssi
                 { new StringContent(""), "suffix"  },
                 { new StringContent(jobIDhash), "jobID"  },
                 { new StringContent(json), "data"  },
-                 { new StringContent(force.ToString()), "force"  }
+                { new StringContent(force.ToString()), "force"  }
             };
 
             if (this.mode == Mode.EXTRACT)
@@ -1337,11 +1340,11 @@ namespace ssi
                             inputoutput.DefaultName = defaultname.ToString();
                         }
                         string[] split = element["data"].ToString().Split(':');
-                        inputoutput.Type = split[0];
+                        inputoutput.SuperType = split[0];
                         if (split.Length > 1)
                             inputoutput.SubType = split[1];
                         if (split.Length > 2)
-                            inputoutput.SubSubType = split[2];
+                            inputoutput.SpecificType = split[2];
 
                         if (inputoutput.IO == "input")
                         {
@@ -1373,7 +1376,22 @@ namespace ssi
             try
             {
 
-                var server_chains = handler.get_info_from_server();
+                //string sessionsstr = "[";
+                //foreach (DatabaseSession session in SessionsBox.SelectedItems)
+                //{
+                //    sessionsstr = sessionsstr + "\"" + session.Name + "\",";
+                //}
+                //sessionsstr = sessionsstr.Remove(sessionsstr.Length - 1, 1) + "]";
+
+
+                var content = new MultipartFormDataContent
+                {
+                      //{ new StringContent("[stream:video]"), "input_filter"  },
+                      //{ new StringContent("[stream:SSIStream:blazeface]"), "output_filter"  }
+                  
+                };
+
+                var server_chains = handler.get_info_from_server(content);
                 JObject chainsServer = JObject.FromObject(server_chains["trainer_ok"]);
                 if (chainCategories.GetCategories().Count == 0)
                 {
@@ -1989,7 +2007,7 @@ namespace ssi
                     type = AnnoScheme.AttributeTypes.LIST;
 
 
-                    if ((input.SubType != null && input.SubType.ToLower() == "url") || (input.SubType != null && input.SubType.ToLower() == "file") || input.Type.ToLower() == "text" || input.Type.ToLower() == "prompt"  || input.Type.ToLower() == "string")
+                    if ((input.SubType != null && input.SubType.ToLower() == "url") || (input.SubType != null && input.SubType.ToLower() == "file") || input.SuperType.ToLower() == "text" || input.SuperType.ToLower() == "prompt"  || input.SuperType.ToLower() == "string")
                     {
                         type = AnnoScheme.AttributeTypes.STRING;
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -1997,7 +2015,7 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
-                        origin = input.Type.ToLower();
+                        origin = input.SuperType.ToLower();
 
                     }
                     else if (input.SubType != null && input.SubType.ToLower() == "request")
@@ -2008,11 +2026,11 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
-                        origin = input.Type.ToLower();
+                        origin = input.SuperType.ToLower();
 
                     }
 
-                    if (input.Type.ToLower().StartsWith("annotation"))
+                    if (input.SuperType.ToLower().StartsWith("annotation"))
                     {
                         List<string> result = new List<string>();
                         if(input.DefaultName != null)
@@ -2044,7 +2062,7 @@ namespace ssi
                           
                             }
                         content = result;
-                        origin = input.Type.ToLower() + ":" + input.SubType.ToLower();
+                        origin = input.SuperType.ToLower() + ":" + input.SubType.ToLower();
                         ShowAnnotatorBox = true;
                         foreach (var item in (DatabaseHandler.Annotators))
                         {
@@ -2053,7 +2071,7 @@ namespace ssi
                         }
                     }
 
-                    else if (input.Type.ToLower().StartsWith("stream"))
+                    else if (input.SuperType.ToLower().StartsWith("stream"))
                     {
                         List<string> result = new List<string>();
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -2069,9 +2087,9 @@ namespace ssi
                                 if (input.SubType == "SSIStream"){
                                     input.SubType = "feature";
                                 }
-                                if(input.SubSubType != null)
+                                if(input.SpecificType != null)
                                 {
-                                    input.SubType = input.SubSubType;
+                                    input.SubType = input.SpecificType;
                                 }
                                 if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()) && !result.Contains(scheme.Name)){
                                     result.Add(scheme.Name);
@@ -2085,7 +2103,7 @@ namespace ssi
                            
                         }
                         content = result;
-                        origin = input.Type.ToLower();
+                        origin = input.SuperType.ToLower();
 
                     }
 
@@ -2787,9 +2805,9 @@ namespace ssi
                                 {
                                     subtype = output.SubType.ToString();
                                 }
-                                if (output.SubSubType != null)
+                                if (output.SpecificType != null)
                                 {
-                                    subtype = subtype + ":" + output.SubSubType.ToString();
+                                    subtype = subtype + ":" + output.SpecificType.ToString();
                                 }
 
                                 if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
