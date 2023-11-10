@@ -943,9 +943,10 @@ namespace ssi
             {
                 DatabasesBox.Items.Add(db);
             }
-
-            if (select != null)
+        
+            if (select != null && select != "")
             {
+              
                 foreach (string item in DatabasesBox.Items)
                 {
                     if (item == select)
@@ -954,8 +955,11 @@ namespace ssi
                     }
                 }
             }
-        }
+            else {
+                DatabasesBox.SelectedIndex = 0;
 
+                }
+        }
         public void GetSchemes()
         {
             List<DatabaseStream> streams = DatabaseHandler.Streams;
