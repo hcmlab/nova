@@ -224,21 +224,16 @@ namespace ssi
             InitializeComponent();
             createStatusObjects();
 
-
             this.handler = handler;
             this.mode = Mode.EXTRACT;
 
             GetProcessors("All");
             GetAnnotators();
 
-
-
             ModeTabControl.SelectedIndex = (int)mode;
             LeftContextTextBox.IsEnabled = true;
             FrameSizeTextBox.IsEnabled = true;
-            RightContextTextBox.IsEnabled = true;
-            //FeatureNameTextBox.IsEnabled = true;
-            
+            RightContextTextBox.IsEnabled = true;            
 
             int endtime = -1;
 
@@ -270,9 +265,7 @@ namespace ssi
                     startTime = (int)(Math.Round(value: startTimeInSec, digits: 2) * 1000);
                 }
 
-   
             }
-
 
            Processor trainer = (Processor)ProcessorsBox.SelectedItem;
 
@@ -288,7 +281,6 @@ namespace ssi
 
             Loaded += Window_Loaded;
         }
-
 
 
         private void createStatusObjects()
@@ -1135,6 +1127,7 @@ namespace ssi
             public string Backend { get; set; }
             public string Description { get; set; }
             public string Category { get; set; }
+            public string ModelWeightsPath { get; set; }
 
             public bool isIterable { get; set; }
 

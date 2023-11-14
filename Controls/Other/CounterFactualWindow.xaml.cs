@@ -24,6 +24,7 @@ using LiveCharts;
 using LiveCharts.Wpf;
 using System.Threading;
 using ssi.Controls.Other.NovaServerUtility;
+using static ssi.DatabaseNovaServerWindow;
 
 namespace ssi
 {
@@ -37,16 +38,10 @@ namespace ssi
         private string mlBackend;
         private string trainerPath;
         public bool getNewExplanation;
-        private List<ModelTrainer> modelsTrainers;
-        public Dictionary<int, string> idToClassName;
-        private string basePath;
+        public List<Processor> availableTrainers;
         public int frame;
-        public float[] featurestream;
-        private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
-        public uint dim;
         private MainHandler handler;
-        //private string featurepath;
 
         public SeriesCollection SeriesCollection { get; set; }
         public SeriesCollection SeriesCollection2 { get; set; }
@@ -58,17 +53,11 @@ namespace ssi
 
         private static readonly HttpClient client = new HttpClient();
 
-
-        public CounterFactualWindow(string featurePath, MainHandler handler)
+        public CounterFactualWindow(MainHandler handler)
         {
-
             InitializeComponent();
             explanationButton.Click += getExplanation;
-            modelPath = Properties.Settings.Default.explainModelPath;
-            if (modelPath != null)
-            {
-                modelLoaded.Text = Path.GetFileName(modelPath);
-            }
+
             explainingLabel.Visibility = Visibility.Hidden;
 
             numCounterfactuals.Text = "1";
@@ -81,78 +70,78 @@ namespace ssi
             string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
-            string[] featurenames = Path.GetFileNameWithoutExtension(featurePath).Split('.');
-            string featurename = "";
-
-            for (int i = 2; i < featurenames.Length; i++) {
-                if (featurename == "")
-                {
-                    featurename = featurenames[i];
-                }
-                else
-                {
-                    featurename = featurename + "." + featurenames[i];
-                }
-            }
-
-            basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "feature" + "{" + featurename + "}";
-
-            //TODO add cml info request
-            // search for applicable trainer file
-
-            DirectoryInfo di = new DirectoryInfo(basePath);
-
-            modelsTrainers = new List<ModelTrainer>();
-
-            idToClassName = new Dictionary<int, string>();
-            loadModelAndTrainer(basePath);
-            parseTrainerFile(getTrainerFile(basePath, modelPath));
+            string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
+            string streamName = "stream:SSIStream:" + SignalTrack.Selected.Signal.Name.Split('.')[2];
+            string schemeName = "annotation:" + schemeType + ":" + scheme;
+            availableTrainers = new List<Processor>();
+            Thread thread = new Thread(() => getAvailableTrainers(streamName, schemeName));
+            thread.Start();
 
             SeriesCollection = new SeriesCollection();
             SeriesCollection2 = new SeriesCollection();
-
         }
 
-        private void loadModelAndTrainer(string path)
+        private void loadTrainers()
         {
-
-            DirectoryInfo di = new DirectoryInfo(path);
-            if (di.Exists)
+            if(availableTrainers != null)
             {
-
-                foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+                foreach(Processor trainer in availableTrainers)
                 {
-                    if (fi.Extension == ".model")
-                    {
-
-                        //TODO LOL
-                        string trainerPath = fi.FullName.Split('.')[0] + ".trainer";
-
-                        modelsTrainers.Add(new ModelTrainer(fi.FullName, trainerPath, "SKLEARN"));
-                        modelsBox.Items.Add(fi.Name + " " + fi.Directory.Name);
-                    }
-                    if (fi.Extension == ".h5")
-                    {
-                        modelsTrainers.Add(new ModelTrainer(fi.FullName, null, "TENSORFLOW"));
-                        modelsBox.Items.Add(fi.Name + " " + fi.Directory.Name);
-                    }
-                }
-
-                foreach (var t in modelsTrainers)
-                {
-                    foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
-                    {
-                        var subDirModel = Path.GetDirectoryName(t.model).Split(Path.DirectorySeparatorChar).Last();
-                        var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
-                        if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(t.model).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
-                        {
-                            t.trainer = fi.FullName;
-                        }
-                    }
+                    modelsBox.Items.Add(trainer.Name);
                 }
             }
 
         }
+
+        private async void getAvailableTrainers(string inputFilter, string outputFilter)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                _busyIndicator.BusyContent = "Loading trainers...";
+                _busyIndicator.IsBusy = true;
+            });
+
+            JArray inputFilterList = new JArray();
+            inputFilterList.Add(inputFilter);
+
+            string jsonInput = inputFilterList.ToString(Newtonsoft.Json.Formatting.None);
+
+            JArray outputFilterList = new JArray();
+            outputFilterList.Add(outputFilter);
+
+            string jsonOutput = outputFilterList.ToString(Newtonsoft.Json.Formatting.None);
+
+            MultipartFormDataContent trainer_content = new MultipartFormDataContent
+            {
+                { new StringContent(jsonInput), "input_filter"},
+                { new StringContent(jsonOutput), "output_filter"}
+            };
+
+            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+            string url = "http://" + tokens[0] + ":" + tokens[1] + "/cml_info";
+            var response = await client.PostAsync(url, trainer_content);
+            var responseString = await response.Content.ReadAsStringAsync();
+            var result = JObject.Parse(responseString);
+            JObject trainer = JObject.FromObject(result["trainer_ok"]);
+
+            foreach (var t in trainer)
+            {
+                Processor processor = NovaServerUtility.parseTrainerFile(t);
+                if(processor != null)
+                { 
+                    availableTrainers.Add(processor);
+                }
+
+            }
+
+            this.Dispatcher.Invoke(() =>
+            {
+                loadTrainers();
+                _busyIndicator.IsBusy = false;
+            });
+
+        }
+
 
         public async void explanationStatus(MultipartFormDataContent content)
         {
@@ -198,6 +187,7 @@ namespace ssi
                 var explanationDic = (JObject)JsonConvert.DeserializeObject(result);
 
                 var counterFactuals = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
+                var originalStream = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["original_data"]));
                 var localImportance = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["local_importance"]));
                 var globalImportance = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["global_importance"]));
                 Dictionary<int, float>[] explanationData = new Dictionary<int, float>[3];
@@ -312,11 +302,13 @@ namespace ssi
                     DataContext = this;
 
                     this.explanationButton.IsEnabled = true;
+                    _busyIndicator.IsBusy = false;
                 });
 
             }
             catch (Exception e)
             {
+                _busyIndicator.IsBusy = false;
                 return;
             }
 
@@ -326,7 +318,8 @@ namespace ssi
         private void getExplanation(object sender, RoutedEventArgs e)
         {
 
-
+            _busyIndicator.BusyContent = "Generating explanation...";
+            _busyIndicator.IsBusy = true;
             string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
 
             string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
@@ -393,91 +386,24 @@ namespace ssi
             
         }
 
-
-        private void modelPanel_Drop(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                // Note that you can have more than one file.
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                modelPath = files[0];
-                modelLoaded.Text = Path.GetFileName(modelPath);
-                Properties.Settings.Default.explainModelPath = modelPath;
-                Properties.Settings.Default.Save();
-
-                //TODO add logic for retrieving ml backend
-
-                idToClassName.Clear();
-                parseTrainerFile(getTrainerFile(basePath, modelPath));
-            }
-        }
-
         private void modelsBox_selectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cmb = sender as ComboBox;
-            modelPath = modelsTrainers[cmb.SelectedIndex].model;
-            modelLoaded.Text = Path.GetFileName(modelPath);
+            trainerPath = availableTrainers[cmb.SelectedIndex].Path;
+            modelPath = Path.Combine(Path.GetDirectoryName(trainerPath), availableTrainers[cmb.SelectedIndex].ModelWeightsPath);
+            modelLoaded.Text = availableTrainers[cmb.SelectedIndex].ModelWeightsPath;
             Properties.Settings.Default.explainModelPath = modelPath;
             Properties.Settings.Default.Save();
-
-            mlBackend = modelsTrainers[cmb.SelectedIndex].backend;
-            trainerPath = modelsTrainers[cmb.SelectedIndex].trainer;
-
-            Console.WriteLine("Model: " + modelsTrainers[cmb.SelectedIndex].model);
-            Console.WriteLine("Trainer: " + modelsTrainers[cmb.SelectedIndex].trainer);
-            Console.WriteLine("-------");
-
-            idToClassName.Clear();
-            parseTrainerFile(modelsTrainers[cmb.SelectedIndex].trainer);
-        }
-
-        private string getTrainerFile(string path, string modelPath)
-        {
-            DirectoryInfo di = new DirectoryInfo(path);
-
-            string trainerPath = null;
-
-            if(di.Exists)
-            {
-                foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
-                {
-                    var subDirModel = Path.GetDirectoryName(modelPath).Split(Path.DirectorySeparatorChar).Last();
-                    var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
-                    if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(modelPath).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
-                    {
-                        trainerPath = fi.FullName;
-                    }
-                }
-            }
-           
-
-            return trainerPath;
-        }
-
-        private void parseTrainerFile(string path)
-        {
-            if(path != null)
-            {
-                XmlDocument trainer = new XmlDocument();
-                trainer.Load(path);
-                XmlNodeList classes = trainer.GetElementsByTagName("classes")[0].ChildNodes;
-
-                for(int i = 0; i < classes.Count; i++)
-                {
-                    idToClassName.Add(i, classes.Item(i).Attributes["name"].Value);
-                }
-            }
-
-        }
-
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-
+            mlBackend = availableTrainers[cmb.SelectedIndex].Backend;
         }
 
         public void deactiveExplainationButton()
         {
             this.explanationButton.Visibility = Visibility.Hidden;
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
         }
 
         private string getIdHash()
@@ -491,21 +417,6 @@ namespace ssi
                 jobIDhash = jobIDhash.ToString().Substring(0, MaxLength);
 
             return jobIDhash;
-        }
-
-
-        private class ModelTrainer
-        {
-            public string model{ get; set; }
-            public string trainer { get; set; }
-            public string backend { get; set; }
-
-            public ModelTrainer(string model, string trainer, string backend)
-            {
-                this.model = model;
-                this.trainer = trainer;
-                this.backend = backend;
-            }
         }
 
     }

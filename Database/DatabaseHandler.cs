@@ -120,8 +120,9 @@ namespace ssi
                 var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
 
             }
-            catch
+            catch (Exception e)
             {
+                MessageBox.Show(e.Message);
                 client = null;
                 return false;
             }
@@ -159,7 +160,6 @@ namespace ssi
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
 
                     settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
-
                     client = new MongoClient(settings);
 
                 }

@@ -185,7 +185,7 @@ namespace ssi
                 return;
             }
 
-            windowCounterFactual = new CounterFactualWindow(SignalTrackStatic.Selected.Signal.FilePath, this);
+            windowCounterFactual = new CounterFactualWindow(this);
 
 
             try
@@ -193,8 +193,6 @@ namespace ssi
 
                 int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
 
-                windowCounterFactual.featurestream = SignalTrackStatic.Selected.Signal.data;
-                windowCounterFactual.dim = SignalTrackStatic.Selected.Signal.dim;
                 windowCounterFactual.frame = frame;
 
                 windowCounterFactual.Show();
