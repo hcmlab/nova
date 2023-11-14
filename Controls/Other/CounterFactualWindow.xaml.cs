@@ -89,6 +89,7 @@ namespace ssi
                 {
                     modelsBox.Items.Add(trainer.Name);
                 }
+                modelsBox.SelectedIndex = 0;
             }
 
         }
@@ -190,10 +191,11 @@ namespace ssi
                 var originalStream = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["original_data"]));
                 var localImportance = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["local_importance"]));
                 var globalImportance = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["global_importance"]));
-                Dictionary<int, float>[] explanationData = new Dictionary<int, float>[3];
+                Dictionary<int, float>[] explanationData = new Dictionary<int, float>[4];
                 explanationData[0] = counterFactuals;
                 explanationData[1] = localImportance;
                 explanationData[2] = globalImportance;
+                explanationData[3] = originalStream;
 
                 this.Dispatcher.Invoke(() =>
                 {
@@ -213,12 +215,15 @@ namespace ssi
 
                     Dictionary<int, float> counterFactualData = explanationData[0];
                     Dictionary<int, float> localImportanceData = explanationData[1];
-                    Dictionary<int, float> glocalImportanceData = explanationData[2];
+                    Dictionary<int, float> globalImportanceData = explanationData[2];
+                    Dictionary<int, float> originalData = explanationData[3];
 
                     //Labels = new string[explanationData.Count];
                     ChartValues<float> counterFactualScores = new ChartValues<float>();
                     ChartValues<float> localImportanceScores = new ChartValues<float>();
                     ChartValues<float> globalImportanceScores = new ChartValues<float>();
+                    ChartValues<float> originalDataScores = new ChartValues<float>();
+
 
                     explanationChart.AxisX[0].Labels = new string[counterFactualData.Count];
                     explanationChart.AxisX[0].FontSize = 9;
@@ -246,10 +251,21 @@ namespace ssi
                         i++;
                     }
 
+                    foreach (var entry in originalData)
+                    {
+                        originalDataScores.Add(entry.Value);
+                    }
+
                     SeriesCollection.Add(new ColumnSeries
                     {
-                        Title = "",
+                        Title = "Counterfactual",
                         Values = counterFactualScores
+                    });
+
+                    SeriesCollection.Add(new ColumnSeries
+                    {
+                        Title = "Original",
+                        Values = originalDataScores
                     });
 
                     Formatter = value => value.ToString("N");
@@ -280,7 +296,7 @@ namespace ssi
                         i++;
                     }
 
-                    foreach (var entry in glocalImportanceData)
+                    foreach (var entry in globalImportanceData)
                     {
                         globalImportanceScores.Add(entry.Value);
                     }
@@ -308,7 +324,10 @@ namespace ssi
             }
             catch (Exception e)
             {
-                _busyIndicator.IsBusy = false;
+                this.Dispatcher.Invoke(() =>
+                {
+                    _busyIndicator.IsBusy = false;
+                });
                 return;
             }
 
