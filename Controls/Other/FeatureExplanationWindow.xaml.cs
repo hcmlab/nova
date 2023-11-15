@@ -23,6 +23,8 @@ using Newtonsoft.Json.Linq;
 using LiveCharts;
 using LiveCharts.Wpf;
 using ssi.Controls.Other.NovaServerUtility;
+using System.Threading;
+using static ssi.DatabaseNovaServerWindow;
 
 namespace ssi
 {
@@ -33,25 +35,16 @@ namespace ssi
     {
 
         public string modelPath;
-        public byte[] img;
+        private string mlBackend;
+        private string trainerPath;
         public bool getNewExplanation;
-        public BitmapImage explainedImg;
         public int topLablesV;
         public int numSamplesV;
         public int numFeaturesV;
-        public string hideRestV;
-        public string hideColorV;
-        public string positiveOnlyV;
-        private List<ModelTrainer> modelsTrainers;
-        public Dictionary<int, string> idToClassName;
-        private string basePath;
+        public List<Processor> availableTrainers;
         public int frame;
-        public float[] featurestream;
         private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
-        public uint dim;
-        //private string featurepath;
-
         public SeriesCollection SeriesCollection { get; set; }
         public string[] Labels { get; set; }
         public Func<double, string> Formatter { get; set; }
@@ -59,16 +52,12 @@ namespace ssi
         private static readonly HttpClient client = new HttpClient();
         
 
-        public FeatureExplanationWindow(string featurePath)
+        public FeatureExplanationWindow()
         {
 
             InitializeComponent();
             explanationButton.Click += getExplanation;
-            modelPath = Properties.Settings.Default.explainModelPath;
-            if(modelPath != null)
-            {
-                modelLoaded.Text = Path.GetFileName(modelPath);
-            }
+            
             explainingLabel.Visibility = Visibility.Hidden;
 
             numFeatures.Text = "2";
@@ -78,85 +67,198 @@ namespace ssi
             string schemeType = AnnoTier.Selected.AnnoList.Scheme.Type.ToString().ToLower();
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
-            string[] featurenames = Path.GetFileNameWithoutExtension(featurePath).Split('.');
-            string featurename = "";
-
-            for(int i = 2; i < featurenames.Length; i++ ){
-                if(featurename == "")
-                {
-                    featurename = featurenames[i];
-                }
-                else
-                {
-                    featurename = featurename + "." + featurenames[i];
-                }
-            }
-
-            basePath = Properties.Settings.Default.CMLDirectory + "\\models\\trainer\\" + schemeType + "\\" + scheme + "\\" + "feature" + "{" + featurename + "}";
-
-            DirectoryInfo di = new DirectoryInfo(basePath);
-
-            modelsTrainers = new List<ModelTrainer>();
-
-            idToClassName = new Dictionary<int, string>();
-            loadModelAndTrainer(basePath);
-            parseTrainerFile(getTrainerFile(basePath, modelPath));
+            string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
+            string streamName = "stream:SSIStream:" + SignalTrack.Selected.Signal.Name.Split('.')[2];
+            string schemeName = "annotation:" + schemeType + ":" + scheme;
+            availableTrainers = new List<Processor>();
+            Thread thread = new Thread(() => getAvailableTrainers(streamName, schemeName));
+            thread.Start();
 
             SeriesCollection = new SeriesCollection();
 
         }
 
-        private void loadModelAndTrainer(string path)
+        private void loadTrainers()
         {
-            
-            DirectoryInfo di = new DirectoryInfo(path);
-            if(di.Exists)
+            if (availableTrainers != null)
             {
-
-                foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+                foreach (Processor trainer in availableTrainers)
                 {
-                    if (fi.Extension == ".model")
-                    {
-                        modelsTrainers.Add(new ModelTrainer(fi.FullName, null));
-                        modelsBox.Items.Add(fi.Name + " " + fi.Directory.Name);
-                    }
+                    modelsBox.Items.Add(trainer.Name);
                 }
-
-                foreach( var t in modelsTrainers)
-                {
-                    foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
-                    {
-                        var subDirModel = Path.GetDirectoryName(t.model).Split(Path.DirectorySeparatorChar).Last();
-                        var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
-                        if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(t.model).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
-                        {
-                            t.trainer = fi.FullName;
-                        }
-                    }
-                }
+                modelsBox.SelectedIndex = 0;
             }
 
         }
 
-        private async Task<Dictionary<string, float>> sendExplanationRequestForm()
+        private async void getAvailableTrainers(string inputFilter, string outputFilter)
         {
-            
+            this.Dispatcher.Invoke(() =>
+            {
+                _busyIndicator.BusyContent = "Loading trainers...";
+                _busyIndicator.IsBusy = true;
+            });
+
+            JArray inputFilterList = new JArray();
+            inputFilterList.Add(inputFilter);
+
+            string jsonInput = inputFilterList.ToString(Newtonsoft.Json.Formatting.None);
+
+            JArray outputFilterList = new JArray();
+            outputFilterList.Add(outputFilter);
+
+            string jsonOutput = outputFilterList.ToString(Newtonsoft.Json.Formatting.None);
+
+            MultipartFormDataContent trainer_content = new MultipartFormDataContent
+            {
+                { new StringContent(jsonInput), "input_filter"},
+                { new StringContent(jsonOutput), "output_filter"}
+            };
+
+            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+            string url = "http://" + tokens[0] + ":" + tokens[1] + "/cml_info";
+            var response = await client.PostAsync(url, trainer_content);
+            var responseString = await response.Content.ReadAsStringAsync();
+            var result = JObject.Parse(responseString);
+            JObject trainer = JObject.FromObject(result["trainer_ok"]);
+
+            foreach (var t in trainer)
+            {
+                Processor processor = NovaServerUtility.parseTrainerFile(t);
+                if (processor != null)
+                {
+                    availableTrainers.Add(processor);
+                }
+
+            }
+
+            this.Dispatcher.Invoke(() =>
+            {
+                loadTrainers();
+                _busyIndicator.IsBusy = false;
+            });
+
+        }
+
+        public async void explanationStatus(MultipartFormDataContent content)
+        {
+            try
+            {
+                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
+                string url = "http://" + tokens[0] + ":" + tokens[1] + "/explain";
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+
+                url = "http://" + tokens[0] + ":" + tokens[1] + "/job_status";
+
+                bool killme = true;
+
+                while (killme)
+                {
+
+                    Dictionary<string, string> statusresponse = await NovaServerUtility.getInfoFromServer(getIdHash(), url, client);
+                    var status = statusresponse["status"];
+
+                    if (status == "2")
+                    {
+                        killme = false;
+                    }
+                    else if (status == "3")
+                    {
+                        //TODO display message in gui that generating explanation failed
+                        killme = false;
+                        return;
+                    }
+                    Thread.Sleep(1000);
+                }
+
+                url = "http://" + tokens[0] + ":" + tokens[1] + "/fetch_result";
+
+                MultipartFormDataContent contentFetch = new MultipartFormDataContent
+                {
+                    { new StringContent(getIdHash()), "jobID"  }
+                };
+
+                response = client.PostAsync(url, contentFetch).Result;
+                var inputfilename = response.Content.Headers.ContentDisposition.FileName;
+                var responseContent = await response.Content.ReadAsByteArrayAsync();
+
+                string result = System.Text.Encoding.UTF8.GetString(responseContent);
+
+                var explanationDic = (JObject)JsonConvert.DeserializeObject(result);
+
+                Dictionary<string, float> explanationData = JsonConvert.DeserializeObject<Dictionary<string, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
+
+                this.Dispatcher.Invoke(() =>
+                {
+
+                    if (explanationData == null)
+                    {
+                        this.explanationButton.IsEnabled = true;
+
+                        return;
+                    }
+
+
+                    //Labels = new string[explanationData.Count];
+                    ChartValues<float> importanceScores = new ChartValues<float>();
+                    explanationChart.AxisX[0].Labels = new string[explanationData.Count];
+
+                    int i = 0;
+
+                    foreach (var entry in explanationData)
+                    {
+                        importanceScores.Add(entry.Value);
+                        explanationChart.AxisX[0].Labels[i] = entry.Key;
+                        i++;
+                    }
+
+                    SeriesCollection.Add(new ColumnSeries
+                    {
+                        Title = "",
+                        Values = importanceScores
+                    });
+
+                    Formatter = value => value.ToString("N");
+
+                    DataContext = this;
+
+                    this.explanationButton.IsEnabled = true;
+                    _busyIndicator.IsBusy = false;
+                });
+
+            }
+            catch
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    _busyIndicator.IsBusy = false;
+                });
+            }
+        }
+
+        private void getExplanation(object sender, RoutedEventArgs e)
+        {
+
+            _busyIndicator.BusyContent = "Generating explanation...";
+            _busyIndicator.IsBusy = true;
             string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
-
             string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
+            string fileName = SignalTrack.Selected.Signal.Name.Replace(role + ".", "");
+            double sr = SignalTrack.Selected.Signal.rate;
 
-            string fileName = SignalTrack.Selected.Signal.Name.Replace(role+".", "");
 
-            //JObject test = new JObject
-            //{
-            //  {"id", "explanation_stream"},
-            //  {"type", "input" },
-            //  {"scheme", AnnoTier.Selected.AnnoList.Scheme.Name},
-            //  {"annotator", "gold"},
-            //  {"src", "db:anno" },
-            //  {"role", role},
-            //  {"active", "True" }
-            //};
+            JObject anno = new JObject
+                {
+                    {"id", "explanation_anno"},
+                    {"type", "input" },
+                    {"scheme", AnnoTier.Selected.AnnoList.Scheme.Name},
+                    {"annotator", AnnoTier.Selected.AnnoList.Meta.Annotator},
+                    {"src", "db:annotation" },
+                    {"role", role},
+                    {"active", "True" }
+                };
 
             JObject ob = new JObject
             {
@@ -167,13 +269,24 @@ namespace ssi
               {"role", role},
               {"active", "True" }
             };
+
+            JObject output = new JObject
+                {
+                    {"id", "output"},
+                    {"type", "output"},
+                    {"src", "request:text"}
+                };
+
             JArray data = new JArray();
             data.Add(ob);
+            data.Add(anno);
+            data.Add(output);
             string json = data.ToString(Newtonsoft.Json.Formatting.None);
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent(modelPath), "modelPath" },
+                { new StringContent(modelPath), "modelFilePath" },
+                { new StringContent(trainerPath), "trainer_file_path" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
@@ -181,156 +294,28 @@ namespace ssi
                 { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
                 { new StringContent(sessionsstr), "sessions" },
                 { new StringContent("LIME_TABULAR"), "explainer"},
-                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame" },
-                { new StringContent(this.dim.ToString()), "dim" },
+                { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
                 { new StringContent(numFeatures.Text), "numFeatures" },
                 { new StringContent(getIdHash()), "jobID" },
-                { new StringContent(json), "data"  }
+                { new StringContent(json), "data"  },
+                { new StringContent((1/sr).ToString()), "frame_size" }
             };
 
-            try
-            {
-                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/explain";
-                var response = await client.PostAsync(url, content);
-
-                var responseString = await response.Content.ReadAsStringAsync();
-
-                var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
-
-                //var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, float>>(responseString);
-
-                if (explanationDic["success"].ToString() == "failed")
-                {
-                    return null;
-                }
-
-                var explanations = JsonConvert.DeserializeObject<Dictionary<string, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
-
-                return explanations;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-
+            Thread thread = new Thread(() => explanationStatus(content));
+            thread.Start();
 
         }
 
-        private async void getExplanation(object sender, RoutedEventArgs e)
-        {
-
-            SeriesCollection.Clear();
-            explanationButton.IsEnabled = false;
-
-            Dictionary<string, float> explanationData = await sendExplanationRequestForm();
-
-
-            if (explanationData == null)
-            {
-                this.explanationButton.IsEnabled = true;
-
-                return;
-            }
-
-
-            //Labels = new string[explanationData.Count];
-            ChartValues<float> importanceScores = new ChartValues<float>();
-            explanationChart.AxisX[0].Labels = new string[explanationData.Count];
-
-            int i = 0;
-
-            foreach(var entry in explanationData)
-            {
-                importanceScores.Add(entry.Value);
-                explanationChart.AxisX[0].Labels[i] = entry.Key;
-                i++;
-            }
-
-            SeriesCollection.Add(new ColumnSeries
-            {
-                Title = "",
-                Values = importanceScores
-            });
-
-            Formatter = value => value.ToString("N");
-
-            DataContext = this;
-
-            this.explanationButton.IsEnabled = true;
-            
-        }
-
-
-        private void modelPanel_Drop(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                // Note that you can have more than one file.
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                modelPath = files[0];
-                modelLoaded.Text = Path.GetFileName(modelPath);
-                Properties.Settings.Default.explainModelPath = modelPath;
-                Properties.Settings.Default.Save();
-
-                idToClassName.Clear();
-                parseTrainerFile(getTrainerFile(basePath, modelPath));
-            }
-        }
 
         private void modelsBox_selectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cmb = sender as ComboBox;
-            modelPath = modelsTrainers[cmb.SelectedIndex].model;
-            modelLoaded.Text = Path.GetFileName(modelPath);
+            trainerPath = availableTrainers[cmb.SelectedIndex].Path;
+            modelPath = Path.Combine(Path.GetDirectoryName(trainerPath), availableTrainers[cmb.SelectedIndex].ModelWeightsPath);
+            modelLoaded.Text = availableTrainers[cmb.SelectedIndex].ModelWeightsPath;
             Properties.Settings.Default.explainModelPath = modelPath;
             Properties.Settings.Default.Save();
-
-            Console.WriteLine("Model: " + modelsTrainers[cmb.SelectedIndex].model);
-            Console.WriteLine("Trainer: " + modelsTrainers[cmb.SelectedIndex].trainer);
-            Console.WriteLine("-------");
-
-            idToClassName.Clear();
-            parseTrainerFile(modelsTrainers[cmb.SelectedIndex].trainer);
-        }
-
-        private string getTrainerFile(string path, string modelPath)
-        {
-            DirectoryInfo di = new DirectoryInfo(path);
-
-            string trainerPath = null;
-
-            if(di.Exists)
-            {
-                foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
-                {
-                    var subDirModel = Path.GetDirectoryName(modelPath).Split(Path.DirectorySeparatorChar).Last();
-                    var subDirTrainer = Path.GetDirectoryName(fi.FullName).Split(Path.DirectorySeparatorChar).Last();
-                    if (fi.Extension == ".trainer" && string.Join(".", Path.GetFileName(modelPath).Split('.').Take(2)) == fi.Name && subDirModel == subDirTrainer)
-                    {
-                        trainerPath = fi.FullName;
-                    }
-                }
-            }
-           
-
-            return trainerPath;
-        }
-
-        private void parseTrainerFile(string path)
-        {
-            if(path != null)
-            {
-                XmlDocument trainer = new XmlDocument();
-                trainer.Load(path);
-                XmlNodeList classes = trainer.GetElementsByTagName("classes")[0].ChildNodes;
-
-                for(int i = 0; i < classes.Count; i++)
-                {
-                    idToClassName.Add(i, classes.Item(i).Attributes["name"].Value);
-                }
-            }
-
+            mlBackend = availableTrainers[cmb.SelectedIndex].Backend;
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -376,18 +361,6 @@ namespace ssi
             return jobIDhash;
         }
 
-
-        private class ModelTrainer
-        {
-            public string model{ get; set; }
-            public string trainer { get; set; }
-
-            public ModelTrainer(string model, string trainer)
-            {
-                this.model = model;
-                this.trainer = trainer;
-            }
-        }
 
     }
 

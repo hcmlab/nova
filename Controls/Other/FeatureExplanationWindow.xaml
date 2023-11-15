@@ -4,119 +4,98 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:ssi"
         d:DesignHeight="300" d:DesignWidth="300" d:DataContext="{d:DesignInstance local:FeatureExplanationWindow}"
         mc:Ignorable="d"
         Title="LIME Explanation" Height="570" Width="800"
         Closing="Window_Closing" Style="{StaticResource WinAll}">
-    <Grid Name="container">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="75*"></ColumnDefinition>
-            <ColumnDefinition Width="25*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100*"></RowDefinition>
-        </Grid.RowDefinitions>
-        <!--<TabControl>
-            <TabItem Header="Lime">
-                
-            </TabItem>
-            <TabItem Header="Shap">
-                
-            </TabItem>
-            <TabItem Header="Innvestigate">
-                
-            </TabItem>
-        </TabControl>-->
-        <Grid Name="explanationAnalysis" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="10">
-            <lvc:CartesianChart Name="explanationChart" Series="{Binding SeriesCollection}" LegendLocation="Left">
-                <lvc:CartesianChart.AxisX>
-                    <lvc:Axis Name="labelaxis" Title="Feature" LabelsRotation="20">
-                        <lvc:Axis.Separator>
-                            <lvc:Separator  Name="sep" Step="1"></lvc:Separator>
-                        </lvc:Axis.Separator>
-                    </lvc:Axis>
-                </lvc:CartesianChart.AxisX>
-                <lvc:CartesianChart.AxisY>
-                    <lvc:Axis Title="Importance score" LabelFormatter="{Binding Formatter}"></lvc:Axis>
-                </lvc:CartesianChart.AxisY>
-            </lvc:CartesianChart>
-        </Grid>
-        <WrapPanel Name="containerExplainedImages" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="5">
-            <!--<Image Name="explanationImage" Height="200" Width="200">
-            </Image>-->
-        </WrapPanel>
-        <Grid Grid.Column="1" Grid.Row="0" Margin="5 0 5 0">
+    <xctk:BusyIndicator x:Name="_busyIndicator" BusyContent="Generating explanation"  IsBusy="False" >
+        <Grid Name="container">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100*"></ColumnDefinition>
+                <ColumnDefinition Width="75*"></ColumnDefinition>
+                <ColumnDefinition Width="25*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="20*"></RowDefinition>
-                <RowDefinition Height="20*"></RowDefinition>
-                <RowDefinition Height="20*"></RowDefinition>
-                <RowDefinition Height="20*"></RowDefinition>
-                <RowDefinition Height="20*"></RowDefinition>
+                <RowDefinition Height="100*"></RowDefinition>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Column="0" Grid.Row="0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100*"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="75*"></RowDefinition>
-                        <RowDefinition Height="25*"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <StackPanel  Name="modelPanel" Grid.Row="0" Width="120" Height="70" Drop="modelPanel_Drop" AllowDrop="True">
-                        <StackPanel.Background>
-                            <ImageBrush ImageSource="/Resources/dropmodel2.png"></ImageBrush>
-                        </StackPanel.Background>
-                    </StackPanel>
+            <Grid Name="explanationAnalysis" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="10">
+                <lvc:CartesianChart Name="explanationChart" Series="{Binding SeriesCollection}" LegendLocation="Left">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Name="labelaxis" Title="Feature" LabelsRotation="20">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator  Name="sep" Step="1"></lvc:Separator>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Importance score" LabelFormatter="{Binding Formatter}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+            </Grid>
+            <WrapPanel Name="containerExplainedImages" Grid.Column="0" Grid.RowSpan="1" Margin="10" Panel.ZIndex="5">
+                <!--<Image Name="explanationImage" Height="200" Width="200">
+            </Image>-->
+            </WrapPanel>
+            <Grid Grid.Column="1" Grid.Row="0" Margin="5 0 5 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20*"></RowDefinition>
+                    <RowDefinition Height="20*"></RowDefinition>
+                    <RowDefinition Height="20*"></RowDefinition>
+                    <RowDefinition Height="20*"></RowDefinition>
+                    <RowDefinition Height="20*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Column="0" Grid.Row="0">
+
+                </StackPanel>
+                <StackPanel Name="options" Grid.Row="0" Grid.RowSpan="3">
+                    <TextBlock x:Name="availableModels" Text="Available Trainers" HorizontalAlignment="Center" Margin="0 10 0 0"/>
                     <ComboBox Name="modelsBox" Grid.Row="1" Margin="5 10 5 0" SelectionChanged="modelsBox_selectionChanged">
 
                     </ComboBox>
-                </Grid>
-                <!--<ComboBox Name="TrainerPathComboBox" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"></ComboBox>-->
-            </StackPanel>
-            <StackPanel Name="options" Grid.Row="1" Grid.RowSpan="3">
-                <TextBlock x:Name="modelLoaded" Text="No model loaded" HorizontalAlignment="Center" Margin="0 0 0 10"/>
-                
-                <Grid Margin="5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="*"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" HorizontalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto"></ColumnDefinition>
-                            <ColumnDefinition Width="auto"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" HorizontalAlignment="Center">Number of features:</Label>
-                        <Image Grid.Column="1" Source="/Resources/Question_16x.png" Height="16" Width="16" ToolTip="Maximum number of features present in explanation"></Image>
+                    <TextBlock x:Name="modelLoaded" Text="No model loaded" HorizontalAlignment="Center" Margin="0 10 0 10"/>
+
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" HorizontalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"></ColumnDefinition>
+                                <ColumnDefinition Width="auto"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" HorizontalAlignment="Center">Number of features:</Label>
+                            <Image Grid.Column="1" Source="/Resources/Question_16x.png" Height="16" Width="16" ToolTip="Maximum number of features present in explanation"></Image>
+                        </Grid>
+                        <TextBox Grid.Row="1" Name="numFeatures" Width="40" HorizontalAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
                     </Grid>
-                    <TextBox Grid.Row="1" Name="numFeatures" Width="40" HorizontalAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
-                </Grid>
-                <Grid Margin="5">
+                    <Grid Margin="5">
 
-                </Grid>
+                    </Grid>
 
-                <Separator Margin="0 10 5 10"></Separator>
-                
-               
-                
-            </StackPanel>
-            <Button Name="explanationButton" Width="100" Height="35" Grid.Column="0" Grid.Row="4">
-                <TextBlock Text="Explain">
-                    <TextBlock.Style>
-                        <Style>
-                            <Setter Property="TextBlock.FontSize" Value="14"></Setter>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-            </Button>
+                    <Separator Margin="0 10 5 10"></Separator>
+
+
+
+                </StackPanel>
+                <Button Name="explanationButton" Width="100" Height="35" Grid.Column="0" Grid.Row="4">
+                    <TextBlock Text="Explain">
+                        <TextBlock.Style>
+                            <Style>
+                                <Setter Property="TextBlock.FontSize" Value="14"></Setter>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button>
+            </Grid>
+
+            <Label Grid.Column="0" Grid.Row="0" Grid.RowSpan="4" Name="explainingLabel" Panel.ZIndex="100" Foreground="White" FontSize="16" Background="Transparent" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+                Working on explanation
+            </Label>
         </Grid>
-        
-        <Label Grid.Column="0" Grid.Row="0" Grid.RowSpan="4" Name="explainingLabel" Panel.ZIndex="100" Foreground="White" FontSize="16" Background="Transparent" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
-            Working on explanation
-        </Label>
-    </Grid>
+    </xctk:BusyIndicator>
 </Window>

@@ -87,16 +87,13 @@ namespace ssi
                 return;
             }
 
-            windowFeatureExplanations = new FeatureExplanationWindow(SignalTrackStatic.Selected.Signal.FilePath);
+            windowFeatureExplanations = new FeatureExplanationWindow();
 
 
             try
             {
 
                 int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
-
-                windowFeatureExplanations.featurestream = SignalTrackStatic.Selected.Signal.data;
-                windowFeatureExplanations.dim = SignalTrackStatic.Selected.Signal.dim;
                 windowFeatureExplanations.frame = frame;
 
                 windowFeatureExplanations.Show();

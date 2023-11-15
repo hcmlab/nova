@@ -168,6 +168,11 @@ namespace ssi
                     if (status == "2")
                     {
                         killme = false;
+                    } else if (status == "3")
+                    {
+                        //TODO display message in gui that generating explanation failed
+                        killme = false;
+                        return;
                     }
                     Thread.Sleep(1000);
                 }
@@ -340,9 +345,7 @@ namespace ssi
             _busyIndicator.BusyContent = "Generating explanation...";
             _busyIndicator.IsBusy = true;
             string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
-
             string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
-
             string fileName = SignalTrack.Selected.Signal.Name.Replace(role + ".", "");
             double sr = SignalTrack.Selected.Signal.rate;
 
