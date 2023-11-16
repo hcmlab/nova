@@ -116,6 +116,12 @@ namespace ssi.Controls.Other.NovaServerUtility
                     processor.isIterable = ((bool)chainobject["meta_is_iterable"]);
                 }
 
+                var classes = chainobject["classes"];
+                if(classes != null)
+                {   
+                    processor.Classes = classes.ToObject<List<Dictionary<string, string>>>();
+                }
+
                 Transformer t = new Transformer();
                 t.Name = chainobject["model_create"].ToString();
 

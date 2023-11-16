@@ -1128,6 +1128,7 @@ namespace ssi
             public string Description { get; set; }
             public string Category { get; set; }
             public string ModelWeightsPath { get; set; }
+            public List<Dictionary<string, string>> Classes = new List<Dictionary<string, string>>();
 
             public bool isIterable { get; set; }
 

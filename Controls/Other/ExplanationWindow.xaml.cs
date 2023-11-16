@@ -49,7 +49,7 @@ namespace ssi
 
         private string role;
         private string videoname;
-        public Dictionary<int, string> idToClassName;
+        private List<Dictionary<string, string>> classDictionaryList;
         private string basePath;
         private IntPtr lk;
         private static Action EmptyDelegate = delegate () { };
@@ -144,102 +144,6 @@ namespace ssi
 
         }
 
-        //private async Task<List<Tuple<int, double, BitmapImage>>> sendExplanationRequestForm()
-        //{
-
-        //    string sessionsstr = "[\"" + DatabaseHandler.SessionName + "\"]";
-
-        //    topLablesV = Int32.Parse(topLabels.Text);
-        //    numSamplesV = Int32.Parse(numSamples.Text);
-        //    numFeaturesV = Int32.Parse(numFeatures.Text);
-
-        //    hideRestV = hideRest.IsChecked.Value.ToString();
-        //    hideColorV = hideColor.IsChecked.Value.ToString();
-        //    positiveOnlyV = positiveOnly.IsChecked.Value.ToString();
-
-        //    JObject ob = new JObject
-        //    {
-        //      {"id", "explanation_stream"},
-        //      {"type", "input" },
-        //      {"src", "db:stream" },
-        //      {"name", videoname},
-        //      {"role", role},
-        //      {"active", "True" }
-        //    };
-        //    JArray data = new JArray();
-        //    data.Add(ob);
-        //    string json = data.ToString(Newtonsoft.Json.Formatting.None);
-
-        //    MultipartFormDataContent content = new MultipartFormDataContent
-        //    {
-        //        { new StringContent(modelPath), "modelPath" },
-        //        { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
-        //        { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
-        //        { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
-        //        { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
-        //        { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
-        //        { new StringContent(sessionsstr), "sessions" },
-        //        { new StringContent(getIdHash()), "jobID" },
-        //        { new StringContent(json), "data"  },
-        //        { new StringContent("LIME_IMAGE"), "explainer"},
-        //        { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame" },
-        //        { new StringContent(numFeaturesV.ToString()), "numFeatures" },
-        //        { new StringContent(topLablesV.ToString()), "topLabels" },
-        //        { new StringContent(numSamplesV.ToString()), "numSamples" },
-        //        { new StringContent(hideRestV.ToString()), "hideRest" },
-        //        { new StringContent(hideColorV.ToString()), "hideColor" },
-        //        { new StringContent(positiveOnlyV.ToString()), "positiveOnly" }
-        //    };
-
-        //    try
-        //    {
-        //        string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-        //        string url = "http://" + tokens[0] + ":" + tokens[1] + "/explain";
-        //        var response = await client.PostAsync(url, content);
-
-        //        var responseString = await response.Content.ReadAsStringAsync();
-
-        //        var explanationDic = (JObject)JsonConvert.DeserializeObject(responseString);
-
-        //        //var explanationDic = JsonConvert.DeserializeObject<Dictionary<string, float>>(responseString);
-
-        //        if (explanationDic["success"].ToString() == "failed")
-        //        {
-        //            return null;
-        //        }
-
-        //        JArray explanations = JArray.Parse(explanationDic["explanations"].Value<object>().ToString());
-
-        //        List<Tuple<int, double, BitmapImage>> explanationData = new List<Tuple<int, double, BitmapImage>>();
-
-        //        foreach (var item in explanations)
-        //        {
-        //            var temp = item.ToArray();
-        //            int cl = (int)temp[0];
-        //            double cl_score = (double)temp[1];
-        //            string explanation_img64 = (string)temp[2];
-        //            byte[] explanation = System.Convert.FromBase64String(explanation_img64);
-
-        //            BitmapImage explanation_bitmap = new BitmapImage();
-        //            explanation_bitmap.BeginInit();
-        //            explanation_bitmap.StreamSource = new System.IO.MemoryStream(explanation);
-        //            explanation_bitmap.EndInit();
-        //            explanation_bitmap.Freeze();
-
-        //            Tuple<int, double, BitmapImage> tuple = new Tuple<int, double, BitmapImage>(cl, cl_score, explanation_bitmap);
-        //            explanationData.Add(tuple);
-        //        }
-
-        //        return explanationData;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return null;
-        //    }
-
-
-        //}
-
         public async void explanationStatus(MultipartFormDataContent content)
         {
             try
@@ -326,9 +230,9 @@ namespace ssi
                         System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
                         string className = "";
 
-                        if (this.idToClassName.ContainsKey(explanationData[i].Item1))
+                        if (classDictionaryList.Count > 0)
                         {
-                            className = this.idToClassName[explanationData[i].Item1];
+                            className = classDictionaryList[explanationData[i].Item1]["name"];
                         }
                         else
                         {
@@ -360,12 +264,18 @@ namespace ssi
 
                     this.containerImageToBeExplained.Visibility = Visibility.Hidden;
                     this.explanationButton.IsEnabled = true;
+                    _busyIndicator.IsBusy = false;
+
                 });
 
             }
             catch
             {
-
+                this.Dispatcher.Invoke(() =>
+                {
+                    _busyIndicator.IsBusy = false;
+                });
+                return;
             }
         }
 
@@ -457,6 +367,7 @@ namespace ssi
             Properties.Settings.Default.explainModelPath = modelPath;
             Properties.Settings.Default.Save();
             mlBackend = availableTrainers[cmb.SelectedIndex].Backend;
+            classDictionaryList = availableTrainers[cmb.SelectedIndex].Classes;
         }
 
 
