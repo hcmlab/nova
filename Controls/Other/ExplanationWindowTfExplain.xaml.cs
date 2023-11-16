@@ -194,7 +194,7 @@ namespace ssi.Controls.Other
                     System.Windows.Controls.StackPanel wrapper = new System.Windows.Controls.StackPanel();
                     string className = "";
 
-                    if (classDictionaryList.Count > 0)
+                    if (classDictionaryList != null)
                     {
                         className = classDictionaryList[Int32.Parse(explanationDic["prediction"])]["name"];
                     }
@@ -288,7 +288,8 @@ namespace ssi.Controls.Other
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent(modelPath), "modelPath" },
+                { new StringContent(modelPath), "modelFilePath" },
+                { new StringContent(trainerPath), "trainer_file_path" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
