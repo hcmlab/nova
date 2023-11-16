@@ -8,11 +8,15 @@
 
     <Window.Resources>
 
+        <ScaleTransform x:Key="FontStretchCondensed" ScaleX="0.8" />
+        <ScaleTransform x:Key="FontStretchExpanded" ScaleX="1.2" />
+        
         <Style TargetType="Button" x:Key="MyButton" >
-            <Setter Property="Margin" Value="2,0,2,0"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="VerticalAlignment" Value="Top"/>
+            <!--<Setter Property="Margin" Value="2,0,2,0"/>-->
+            <Setter Property="Background" Value="Orange"/>
+            <Setter Property="BorderThickness" Value="5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontStretch" Value="Medium"/>
         </Style>
 
         <!--<Style TargetType="ListBox" x:Key="MyListBox">
@@ -44,6 +48,9 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
+    
+    
+ 
 
     <Grid>
 
@@ -321,7 +328,7 @@
                 <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
                 <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Frame step</Label>
-                <TextBox Name="FrameSizeTextBox" Grid.Row="2" Grid.Column="1" IsEnabled="False"  Height="20" TextChanged="GenericTextChanged"></TextBox>
+                <TextBox  Name="FrameSizeTextBox" Grid.Row="2" Grid.Column="1" IsEnabled="False"  Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Right context</Label>
                 <TextBox Name="RightContextTextBox" Grid.Row="3" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
                 <Label Name="HelpLabel" Grid.Row="1" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
@@ -329,6 +336,7 @@
             </Grid>
 
             </GroupBox>
+            
 
 
             <DockPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="6" Margin="5" LastChildFill="False">
