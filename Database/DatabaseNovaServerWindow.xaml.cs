@@ -401,7 +401,7 @@ namespace ssi
             while (pythonCaseOn)
             {
                 var jobIDhash = getIdHash();
-
+             
                 var content = new MultipartFormDataContent
                 {
                     { new StringContent(jobIDhash), "jobID"  }
@@ -420,7 +420,7 @@ namespace ssi
                                 statusLabel.Content = states[(int)this.status].getText();
                                 statusLabel.Foreground = states[(int)this.status].getColor();
                                 //statusBox.BorderBrush = states[(int)this.status].getColor();
-                                //ResultsBox.Visibility = Visibility.Visible; //TODO REMOVE AFTER TESTING
+                                ResultsBox.Visibility = Visibility.Collapsed; //TODO REMOVE AFTER TESTING
                             });
                         }
 
@@ -462,7 +462,7 @@ namespace ssi
                                         string[] src = source.Split(':');
 
 
-                                        if ((source == "file") || (source == "image"))
+                                        if ((source == "file") || (source == "image") || (source == "text"))
                                             showresult = true;
 
                                         else
@@ -614,6 +614,7 @@ namespace ssi
                 Close();
             }
         }
+
 
         #endregion
 
@@ -1984,7 +1985,7 @@ namespace ssi
 
 
 
-        private List<AnnoScheme.Attribute> ParseInputsOutputs(List<ServerInputOutput> Inputs, bool multiroleinput)
+        private List<AnnoScheme.Attribute> ParseInputs(List<ServerInputOutput> Inputs, bool multiroleinput)
         {
             ShowAnnotatorBox = false;
             List<AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
@@ -2011,7 +2012,7 @@ namespace ssi
                     type = AnnoScheme.AttributeTypes.LIST;
 
 
-                    if ((input.SubType != null && input.SubType.ToLower() == "url") || (input.SubType != null && input.SubType.ToLower() == "file") || input.SuperType.ToLower() == "text" || input.SuperType.ToLower() == "prompt"  || input.SuperType.ToLower() == "string")
+                    if ((input.SubType != null && input.SubType.ToLower() == "url") || (input.SubType != null && input.SubType.ToLower() == "image") || (input.SubType != null && input.SubType.ToLower() == "file") || input.SuperType.ToLower() == "text" || input.SuperType.ToLower() == "prompt"  || input.SuperType.ToLower() == "string")
                     {
                         type = AnnoScheme.AttributeTypes.STRING;
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -2022,17 +2023,7 @@ namespace ssi
                         origin = input.SuperType.ToLower();
 
                     }
-                    else if (input.SubType != null && input.SubType.ToLower() == "request")
-                    {
-                        type = AnnoScheme.AttributeTypes.NONE;
-                        if (input.DefaultName != null && input.DefaultName != "")
-                        {
-                            content.Add(input.DefaultName);
-                        }
-                        //else content.Add("");
-                        origin = input.SuperType.ToLower();
-
-                    }
+           
 
                     if (input.SuperType.ToLower().StartsWith("annotation"))
                     {
@@ -2149,6 +2140,173 @@ namespace ssi
             return values;
         }
 
+        private List<AnnoScheme.Attribute> ParseOutputs(List<ServerInputOutput> Inputs, bool multiroleinput)
+        {
+            ShowAnnotatorBox = false;
+            List<AnnoScheme.Attribute> values = new List<AnnoScheme.Attribute>();
+            if (Inputs == null)
+            {
+                return null;
+            }
+            else
+            {
+                foreach (ServerInputOutput input in Inputs)
+                {
+                    string option;
+                    string origin = null;
+
+                    AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.STRING;
+                    List<string> content = new List<string>();
+
+                    AnnoScheme.AttributeTypes xtype = AnnoScheme.AttributeTypes.LIST;
+                    AnnoScheme.AttributeTypes xtype2 = AnnoScheme.AttributeTypes.LIST;
+                    List<string> xcontent = new List<string>();
+                    List<string> xcontent2 = new List<string>();
+
+                    string name = input.ID.ToString();
+                    type = AnnoScheme.AttributeTypes.LIST;
+
+
+                    if ((input.SubType != null && input.SubType.ToLower() == "file"))
+                    {
+                        type = AnnoScheme.AttributeTypes.STRING;
+                        if (input.DefaultName != null && input.DefaultName != "")
+                        {
+                            content.Add(input.DefaultName);
+                        }
+                        //else content.Add("");
+                        origin = input.SuperType.ToLower();
+
+                    }
+                    if (input.SuperType != null && (input.SuperType.ToLower() == "image" || input.SuperType.ToLower() == "text" ||  input.SuperType.ToLower() == "url"))
+                    {
+                        type = AnnoScheme.AttributeTypes.NONE;
+                        if (input.DefaultName != null && input.DefaultName != "")
+                        {
+                            content.Add(input.DefaultName);
+                        }
+                        //else content.Add("");
+                        origin = input.SuperType.ToLower();
+
+                    }
+
+                    else if (input.SuperType.ToLower().StartsWith("annotation"))
+                    {
+                        List<string> result = new List<string>();
+                        if (input.DefaultName != null)
+                        {
+                            var scheme = DatabaseHandler.Schemes.Find(x => x.Name == input.DefaultName);
+                            if (scheme != null)
+                            {
+                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()))
+
+                                    result.Add(input.DefaultName);
+                            }
+
+                        }
+
+
+                        foreach (var scheme in DatabaseHandler.Schemes)
+                        {
+                            if (input.SubType != null)
+                            {
+                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()) && !result.Contains(scheme.Name))
+                                {
+                                    result.Add(scheme.Name);
+                                }
+
+                            }
+                            else
+                            {
+                                result.Add(scheme.Name);
+                            }
+
+                        }
+                        content = result;
+                        origin = input.SuperType.ToLower() + ":" + input.SubType.ToLower();
+                        ShowAnnotatorBox = true;
+                        foreach (var item in (DatabaseHandler.Annotators))
+                        {
+
+                            xcontent2.Add(item.ToString());
+                        }
+                    }
+
+                    else if (input.SuperType.ToLower().StartsWith("stream"))
+                    {
+                        List<string> result = new List<string>();
+                        if (input.DefaultName != null && input.DefaultName != "")
+                        {
+                            result.Add(input.DefaultName);
+                        }
+
+
+                        foreach (var scheme in DatabaseHandler.Streams)
+                        {
+                            if (input.SubType != null)
+                            {
+                                if (input.SubType == "SSIStream")
+                                {
+                                    input.SubType = "feature";
+                                }
+                                if (input.SpecificType != null)
+                                {
+                                    input.SubType = input.SpecificType;
+                                }
+                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()) && !result.Contains(scheme.Name))
+                                {
+                                    result.Add(scheme.Name);
+                                }
+
+                            }
+                            else
+                            {
+                                result.Add(scheme.Name);
+                            }
+
+                        }
+                        content = result;
+                        origin = input.SuperType.ToLower();
+
+                    }
+
+
+
+
+                    if (multiroleinput)
+                    {
+                        foreach (var item in (DatabaseHandler.Roles))
+                        {
+                            xcontent.Add(item.ToString());
+                        }
+
+                        RolesBox.Visibility = Visibility.Collapsed;
+                        RolesLabel.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        RolesBox.Visibility = Visibility.Visible;
+                        RolesLabel.Visibility = Visibility.Visible;
+                    }
+
+                    ApplyButton.IsEnabled = true;// else ApplyButton.IsEnabled = false;
+
+
+
+
+
+                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, xcontent2, xtype2, origin);
+                    values.Add(attribute);
+                }
+
+
+
+
+            }
+
+
+            return values;
+        }
 
 
         private List<AnnoScheme.Attribute> ParseAttributes(string optstr, bool multiroleinput)
@@ -2643,33 +2801,22 @@ namespace ssi
                             string source = element.Key.Split('.')[1];
                             string[] src = source.Split(':');
 
-                            if ((source == "text") || (source == "prompt") || (src.Length > 1) && ( src[1] == "text" || src[1] == "prompt"))
+                            if ((source == "text") || (source == "prompt") || (source == "image") || (src.Length > 1) && ( src[1] == "text" || (source == "image") || src[1] == "prompt"))
                             {
                                 JObject ob = new JObject
                                     {
                                     { "id", element.Key.Split('.')[0] },
                                     { "type", "output" },
-                                    { "src", "request:text" },
+                                    { "src", "request:"+ source },
                                     { "data", ((TextBox)element.Value.ElementAt(0)).Text},
                                     { "active", "True" }
                                 };
                                 data.Add(ob);
                             }
 
-                            else if (src.Length == 1 || src[1] == "request")
-                            {
-                                JObject ob = new JObject
-                                        {
-                                        { "id", element.Key.Split('.')[0] },
-                                        { "type", "output" },
-                                        { "src", "request:" + src[0]},
-                                        { "data", ((TextBox)element.Value.ElementAt(0)).Text},
-                                        { "active", "True" }
-                                    };
-                                data.Add(ob);
-                            }
+                         
 
-                            else if (src[0] == "file")
+                            else if (src[1] == "file")
                             {
                                 JObject ob = new JObject
                                     {
@@ -2980,7 +3127,7 @@ namespace ssi
                 Outputs = new List<AnnoScheme.Attribute>();
                 outputGrid.Children.Clear();
 
-                Outputs.AddRange(ParseInputsOutputs(inputs, true));
+                Outputs.AddRange(ParseOutputs(inputs, true));
 
             }
 
@@ -3239,7 +3386,7 @@ namespace ssi
                 Inputs = new List<AnnoScheme.Attribute>();
                 inputGrid.Children.Clear();
 
-                Inputs.AddRange(ParseInputsOutputs(inputs, true));
+                Inputs.AddRange(ParseInputs(inputs, true));
                 
 
             }
@@ -3704,7 +3851,6 @@ namespace ssi
         private void DlButton_Click(object sender, RoutedEventArgs e)
         {
             var jobIDhash = getIdHash();
-           // jobIDhash = "img"; //"REMOVE AFTER TEST
             var content = new MultipartFormDataContent
             {
                 { new StringContent(jobIDhash), "jobID"  }
