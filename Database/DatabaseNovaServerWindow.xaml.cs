@@ -15,8 +15,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Printing;
 using System.Runtime.CompilerServices;
@@ -36,6 +39,7 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
@@ -43,6 +47,7 @@ using System.Xml.Linq;
 using static ssi.AnnoScheme;
 using static ssi.AnnoTierAttributesWindow;
 using static ssi.DatabaseCMLExtractFeaturesWindow;
+using static System.Net.Mime.MediaTypeNames;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ListView = System.Windows.Controls.ListView;
 using Path = System.IO.Path;
@@ -179,7 +184,7 @@ namespace ssi
 
         public enum Mode
         {
-            EXTRACT
+            PROCESS
         }
 
         public enum Status
@@ -228,7 +233,7 @@ namespace ssi
 
 
             this.handler = handler;
-            this.mode = Mode.EXTRACT;
+            this.mode = Mode.PROCESS;
 
             GetProcessors("All");
             GetAnnotators();
@@ -339,7 +344,8 @@ namespace ssi
                 chain = (Processor)ProcessorsBox.SelectedItem;
                 chain.Name = chain.Name.Split(' ')[0];
                 setSessionList();
-                ModelSpecificOptString = AttributesResult();
+                ModelSpecificOptString = AttributesResult().ToString()
+                ;
 
             });
 
@@ -380,7 +386,7 @@ namespace ssi
 
                         this.Dispatcher.Invoke(() =>
                         {
-                            logTextBox.Text = response["message"];
+                            logTextBox.Text = response["message"].Replace("ERROR", "").Replace("INFO", "");
                         });
                     }
                     catch (Exception ex)
@@ -625,7 +631,7 @@ namespace ssi
             switch (mode)
             {
      
-                case Mode.EXTRACT:
+                case Mode.PROCESS:
 
                     Title = "NOVA SERVER";
                     ApplyButton.Content = "Send";
@@ -784,7 +790,10 @@ namespace ssi
 
             InputOutResults();
 
-            string ModelSpecificOptString = AttributesResult();
+            JObject options = AttributesResult();
+            string jsonoptions = options.ToString(Newtonsoft.Json.Formatting.None);
+            
+
 
             string streams = "";
             foreach(var v in AllUsedStreams)
@@ -833,38 +842,47 @@ namespace ssi
             string json = data.ToString(Newtonsoft.Json.Formatting.None);
 
 
-            string sessionsstr = "[";
-            foreach (DatabaseSession session in SessionsBox.SelectedItems)
-            {
-                sessionsstr = sessionsstr + "\"" + session.Name + "\",";
-            }
-            sessionsstr = sessionsstr.Remove(sessionsstr.Length - 1, 1) + "]";
 
+          
 
 
 
             MultipartFormDataContent content = new MultipartFormDataContent
             {
-                { new StringContent(flattenSamples.ToString()), "flattenSamples" },
+                { new StringContent(jobIDhash), "jobID"  },
                 { new StringContent(relativeProcessorPath), "trainerFilePath" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
                 { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
                 { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
-                { new StringContent(database), "dataset" },
-                { new StringContent(sessionsstr), "sessions" },
                 { new StringContent(chainLeftContext), "leftContext" },
                 { new StringContent(chainRightContext), "rightContext" },
                 { new StringContent(frameSize), "frameSize" },
-                { new StringContent(filenameSuffix), "fileNameSuffix" },
-                { new StringContent(ModelSpecificOptString), "optStr" },
-                { new StringContent(""), "suffix"  },
-                { new StringContent(jobIDhash), "jobID"  },
                 { new StringContent(json), "data"  },
+                { new StringContent(jsonoptions), "options" },
                 { new StringContent(force.ToString()), "force"  }
             };
 
-            if (this.mode == Mode.EXTRACT)
+
+            if (SessionsOverview.Visibility == Visibility.Visible){
+                string sessionsstr = "[";
+                foreach (DatabaseSession session in SessionsBox.SelectedItems)
+                {
+                    sessionsstr = sessionsstr + "\"" + session.Name + "\",";
+                }
+                sessionsstr = sessionsstr.Remove(sessionsstr.Length - 1, 1) + "]";
+                content.Add(new StringContent(sessionsstr), "sessions");
+
+            }
+           
+            if (DatabaseOverview.Visibility == Visibility.Visible)
+            {
+                content.Add(new StringContent(database), "dataset");
+            }
+                
+
+
+            if (this.mode == Mode.PROCESS)
             {
                 _ = handler.pythonBackEndExtraction(content);
             }
@@ -971,7 +989,7 @@ namespace ssi
             {
                 foreach (DatabaseStream stream in streams)
                 {
-                    bool template = mode == Mode.EXTRACT;
+                    bool template = mode == Mode.PROCESS;
                     //if (getTrainer(stream, scheme, template).Count > 0)
                     //{
 
@@ -1036,7 +1054,7 @@ namespace ssi
                 //foreach (DatabaseScheme scheme in schemes)
                 //{
                 DatabaseScheme scheme = ((DatabaseScheme)SchemesBox.SelectedItem);
-                bool template = mode == Mode.EXTRACT;
+                bool template = mode == Mode.PROCESS;
                 //if (getTrainer(stream, scheme, template).Count > 0)
                 //{
                 //    streamsValid.Add(stream);
@@ -1476,7 +1494,7 @@ namespace ssi
             List<SessionSet> sets = new List<SessionSet>();
 
 
-            if (mode == Mode.EXTRACT)
+            if (mode == Mode.PROCESS)
             {
                 sets.Add(new SessionSet()
                 {
@@ -2012,7 +2030,7 @@ namespace ssi
                     type = AnnoScheme.AttributeTypes.LIST;
 
 
-                    if ((input.SubType != null && input.SubType.ToLower() == "url") || (input.SubType != null && input.SubType.ToLower() == "image") || (input.SubType != null && input.SubType.ToLower() == "file") || input.SuperType.ToLower() == "text" || input.SuperType.ToLower() == "prompt"  || input.SuperType.ToLower() == "string")
+                    if ((input.SubType != null && input.SubType.ToLower() == "url") || input.SuperType.ToLower() == "image" || (input.SubType != null && input.SubType.ToLower() == "file") || input.SuperType.ToLower() == "text" || input.SuperType.ToLower() == "prompt"  || input.SuperType.ToLower() == "string")
                     {
                         type = AnnoScheme.AttributeTypes.STRING;
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -2549,6 +2567,22 @@ namespace ssi
             return result;
         }
 
+  
+
+        public Bitmap DownloadImage(string imageUrl)
+        {
+            WebClient client = new WebClient();
+            Stream stream = client.OpenRead(imageUrl);
+            Bitmap bitmap; bitmap = new Bitmap(stream);
+         
+
+            stream.Flush();
+            stream.Close();
+            client.Dispose();
+
+            return bitmap;
+        }
+
         public void InputOutResults()
         {
             data.Clear();
@@ -2578,8 +2612,62 @@ namespace ssi
                             string source = element.Key.Split('.')[1];
                             string[] src = source.Split(':');
 
+                        if(source  == "image")
+                        {
+                            Bitmap image = null;
+                            if (((TextBox)element.Value.ElementAt(0)).Text.StartsWith("http")){
 
-                        if ((source == "text") || (source == "prompt") || (src.Length > 1) && (src[1] == "text" || src[1] == "prompt"))
+                                //image = DownloadImage(((TextBox)element.Value.ElementAt(0)).Text);
+                                JObject ob = new JObject
+                                        {
+                                        { "id", element.Key.Split('.')[0] },
+                                        { "type", "input" },
+                                        { "src", "url:" + src[0]},
+                                        { "uri",  ((TextBox)element.Value.ElementAt(0)).Text},
+                                        { "active", "True" }
+                                    };
+                                data.Add(ob);
+
+
+                            }
+                            else
+                            {
+                                string relativefilepath = handler.SendFiletoServer(((TextBox)element.Value.ElementAt(0)).Text);
+
+                                //image = new Bitmap(((TextBox)element.Value.ElementAt(0)).Text);
+                                //MemoryStream m = new MemoryStream();
+                                //image.Save(m, System.Drawing.Imaging.ImageFormat.Png);
+                                //byte[] imageBytes = m.ToArray();
+
+
+                                //TODO change to something else than base64
+                                //string byteString = BitConverter.ToString(imageBytes);
+                                //string byteString = Encoding.UTF8.GetString(imageBytes);
+                               //string byteString = Convert.ToBase64String(imageBytes);
+
+
+
+
+
+                                JObject ob = new JObject
+                                        {
+                                        { "id", element.Key.Split('.')[0] },
+                                        { "type", "input" },
+                                        { "src", "file:" + src[0]},
+                                        { "uri",  relativefilepath},
+                                        { "active", "True" }
+                                    };
+                                data.Add(ob);
+                            }
+
+                           
+
+
+
+                        }
+
+
+                        else if ((source == "text") || (source == "prompt") || (src.Length > 1) && (src[1] == "text" || src[1] == "prompt"))
                         {
                             JObject ob = new JObject
                                         {
@@ -3055,20 +3143,21 @@ namespace ssi
 
 
 
-        public string AttributesResult()
+        public JObject AttributesResult()
         {
 
             AllUsedSchemes.Clear();
             AllUsedStreams.Clear();
             AllUsedRoles.Clear();
+
+            JObject ob = new JObject();
          
 
-         
+ 
 
-            
             if (SpecificModelattributesresult == null)
             {
-                return "";
+                return null;
             }
 
             string resultOptstring = "";
@@ -3081,24 +3170,22 @@ namespace ssi
                 {
                     if (element.Value.ElementAt(0).GetType().Name == "CheckBox")
                     {
-                        resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((CheckBox)element.Value.ElementAt(0)).IsChecked + ";";
+                        ob.Add(element.Key.Split('.')[0], ((CheckBox)element.Value.ElementAt(0)).IsChecked);
                     }
                     else if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
                     {
 
                         if (element.Value.Count == 1)
                         {
-                            resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
+                            ob.Add(element.Key.Split('.')[0], ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
                         }
                         else if (element.Value.Count == 2)
                         {
-                            resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + ";";
-
+                            ob.Add(element.Key.Split('.')[0], (((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString() + ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString()));
                         }
                         else if (element.Value.Count == 3)
                         {
-                            resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((ComboBox)element.Value.ElementAt(1)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(0)).SelectedItem + "." + ((ComboBox)element.Value.ElementAt(2)).SelectedItem + ";";
-
+                            ob.Add(element.Key.Split('.')[0], (((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString() + ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() + ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString()));
 
                         }
 
@@ -3106,16 +3193,19 @@ namespace ssi
                     }
                     else if (element.Value.ElementAt(0).GetType().Name == "TextBox")
                     {
-                        resultOptstring = resultOptstring + element.Key.Split('.')[0] + "=" + ((TextBox)element.Value.ElementAt(0)).Text + ";";
+                        ob.Add(element.Key.Split('.')[0], ((TextBox)element.Value.ElementAt(0)).Text);
+
                     }
                     //var test = element.Value.ToString() ;
                 }
 
 
             }
+            //MessageBox.Show(ob.ToString());
 
-            resultOptstring = resultOptstring.Remove(resultOptstring.Length - 1, 1);
-            return resultOptstring;
+            return ob;
+            //resultOptstring = resultOptstring.Remove(resultOptstring.Length - 1, 1);
+            //return resultOptstring;
         }
         
 
@@ -3587,6 +3677,8 @@ namespace ssi
                     else {SessionsOverview.Visibility = Visibility.Collapsed;
                             DatabaseOverview.Visibility = Visibility.Collapsed;
                         SessionsBox.ItemsSource = null;
+                        DatabasesBox.ItemsSource = null;
+                        SessionsBox.SelectedItem = "dummy_session";
                         DatabasesBox.SelectedItem = "dummy_dataset";
     
                     }
@@ -3839,7 +3931,6 @@ namespace ssi
         private void ProcessorCategoryBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             GetProcessors((String)ProcessorCategoryBox.SelectedItem);
-
         }
 
         private void logTextBox_SizeChanged(object sender, SizeChangedEventArgs e)
