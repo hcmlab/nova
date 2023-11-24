@@ -612,8 +612,19 @@ namespace ssi
 
             try
             {
+                string inputfilename = "";
                 var response = client.PostAsync(url, content).Result;
-                var inputfilename = response.Content.Headers.ContentDisposition.FileName;
+                try
+                {
+                    inputfilename = response.Content.Headers.ContentDisposition.FileName;
+                }
+                catch
+                {
+                    var c = await response.Content.ReadAsByteArrayAsync();
+                    string result = System.Text.Encoding.UTF8.GetString(c);
+                    MessageBox.Show(result);
+                    return;
+                }
                 var responseContent = await response.Content.ReadAsByteArrayAsync();
                 if (response.Content.Headers.ContentType.MediaType == "video/mp4")
                 {

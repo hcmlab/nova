@@ -1,3 +1,4 @@
+using ExCSS;
 using FFmpeg.AutoGen;
 using MathNet.Numerics.Distributions;
 using Microsoft.Toolkit.HighPerformance;
@@ -49,6 +50,7 @@ using static ssi.AnnoTierAttributesWindow;
 using static ssi.DatabaseCMLExtractFeaturesWindow;
 using static System.Net.Mime.MediaTypeNames;
 using CheckBox = System.Windows.Controls.CheckBox;
+using Colors = System.Windows.Media.Colors;
 using ListView = System.Windows.Controls.ListView;
 using Path = System.IO.Path;
 using TextBox = System.Windows.Controls.TextBox;
@@ -426,7 +428,7 @@ namespace ssi
                                 statusLabel.Content = states[(int)this.status].getText();
                                 statusLabel.Foreground = states[(int)this.status].getColor();
                                 //statusBox.BorderBrush = states[(int)this.status].getColor();
-                                ResultsBox.Visibility = Visibility.Collapsed; //TODO REMOVE AFTER TESTING
+                                ResultsBox.Visibility = System.Windows.Visibility.Collapsed; //TODO REMOVE AFTER TESTING
                             });
                         }
 
@@ -436,7 +438,7 @@ namespace ssi
                             {
                                 this.ApplyButton.IsEnabled = false;
                                 this.Cancel_Button.IsEnabled = true;
-                                ResultsBox.Visibility = Visibility.Collapsed;
+                                ResultsBox.Visibility = System.Windows.Visibility.Collapsed;
                                 updatedb = true;
                             });
                         }
@@ -447,7 +449,7 @@ namespace ssi
                                 {
                                     this.ApplyButton.IsEnabled = true;
                                     this.Cancel_Button.IsEnabled = false;
-                                    ResultsBox.Visibility = Visibility.Collapsed;
+                                    ResultsBox.Visibility = System.Windows.Visibility.Collapsed;
 
                                     updatedb = true;
                                 });
@@ -479,7 +481,7 @@ namespace ssi
                                     }
                                     if (showresult)
                                     {
-                                        ResultsBox.Visibility = Visibility.Visible; //TODO REMOVE AFTER TESTING
+                                        ResultsBox.Visibility = System.Windows.Visibility.Visible; //TODO REMOVE AFTER TESTING
                                     }
                                    
                                 });
@@ -488,12 +490,12 @@ namespace ssi
 
                                 //if (Outputs.Any(x => x.AttributeType != AttributeTypes.NONE))
                                 //{
-                                //    ResultsBox.Visibility = Visibility.Visible;
+                                //    ResultsBox.Visibility = System.Windows.Visibility.Visible;
                                   
                                 //}
                                 //else
                                 //{
-                                //    ResultsBox.Visibility = Visibility.Collapsed;
+                                //    ResultsBox.Visibility = System.Windows.Visibility.Collapsed;
                                 //}
                                
 
@@ -518,7 +520,7 @@ namespace ssi
                         statusLabel.Content = states[(int)this.status].getText();
                         statusLabel.Foreground = states[(int)this.status].getColor();
                         ApplyButton.IsEnabled = false;
-                        ResultsBox.Visibility = Visibility.Collapsed;
+                        ResultsBox.Visibility = System.Windows.Visibility.Collapsed;
                         logTextBox.Text = "Please select database, schema, stream, session, annotator and the trainer script!";
                     });
                 }
@@ -640,10 +642,10 @@ namespace ssi
                     ProcessorOpts.Visibility = System.Windows.Visibility.Visible;
                     ForceCheckBox.Visibility = System.Windows.Visibility.Visible;
 
-                    //AnnotationSelectionBox.Visibility = System.Windows.Visibility.Visible;
-                    //removePair.Visibility = System.Windows.Visibility.Visible;
-                    //multidatabaseadd.Visibility = System.Windows.Visibility.Visible;
-                    //multidatabaselabel.Visibility = System.Windows.Visibility.Visible;
+                    //AnnotationSelectionBox.Visibility = System.Windows.System.Windows.Visibility.Visible;
+                    //removePair.Visibility = System.Windows.System.Windows.Visibility.Visible;
+                    //multidatabaseadd.Visibility = System.Windows.System.Windows.Visibility.Visible;
+                    //multidatabaselabel.Visibility = System.Windows.System.Windows.Visibility.Visible;
 
 
                     break;
@@ -792,7 +794,8 @@ namespace ssi
 
             JObject options = AttributesResult();
             string jsonoptions = options.ToString(Newtonsoft.Json.Formatting.None);
-            
+
+
 
 
             string streams = "";
@@ -864,7 +867,7 @@ namespace ssi
             };
 
 
-            if (SessionsOverview.Visibility == Visibility.Visible){
+            if (SessionsOverview.Visibility == System.Windows.Visibility.Visible){
                 string sessionsstr = "[";
                 foreach (DatabaseSession session in SessionsBox.SelectedItems)
                 {
@@ -875,7 +878,7 @@ namespace ssi
 
             }
            
-            if (DatabaseOverview.Visibility == Visibility.Visible)
+            if (DatabaseOverview.Visibility == System.Windows.Visibility.Visible)
             {
                 content.Add(new StringContent(database), "dataset");
             }
@@ -898,7 +901,7 @@ namespace ssi
             {
                 pythonCaseOn = true;
                 logThread = new Thread(new ThreadStart(NovaSeverGetLog));
-                ResultsBox.Visibility = Visibility.Collapsed;
+                ResultsBox.Visibility = System.Windows.Visibility.Collapsed;
                 statusThread = new Thread(new ThreadStart(NovaServerGetStatus));
                 logThread.Start();
                 statusThread.Start();
@@ -907,12 +910,12 @@ namespace ssi
                 AddOutputUIElements(processor.Outputs, processor.GetTransformers()[0].Multi_role_input);
 
                 if (processor.isIterable){
-                    ProcessorOpts.Visibility = Visibility.Visible;
+                    ProcessorOpts.Visibility = System.Windows.Visibility.Visible;
 
                 }
                 else
                 {
-                    ProcessorOpts.Visibility = Visibility.Hidden;
+                    ProcessorOpts.Visibility = System.Windows.Visibility.Hidden;
                 }
 
 
@@ -927,9 +930,9 @@ namespace ssi
 
                 }
 
-                this.statusLabel.Visibility = Visibility.Visible;
-                this.Cancel_Button.Visibility = Visibility.Visible;
-                this.ModelSpecificOptions.Visibility = Visibility.Visible;
+                this.statusLabel.Visibility = System.Windows.Visibility.Visible;
+                this.Cancel_Button.Visibility = System.Windows.Visibility.Visible;
+                this.ModelSpecificOptions.Visibility = System.Windows.Visibility.Visible;
                 ModeTabControl.SelectedIndex = (int)mode;   
             }
             else
@@ -938,10 +941,10 @@ namespace ssi
 
                 this.ApplyButton.IsEnabled = true;
                 pythonCaseOn = false;
-                this.statusLabel.Visibility = Visibility.Collapsed;
+                this.statusLabel.Visibility = System.Windows.Visibility.Collapsed;
 
-                this.Cancel_Button.Visibility = Visibility.Collapsed;
-                this.ModelSpecificOptions.Visibility = Visibility.Collapsed;
+                this.Cancel_Button.Visibility = System.Windows.Visibility.Collapsed;
+                this.ModelSpecificOptions.Visibility = System.Windows.Visibility.Collapsed;
                 this.logTextBox.Text = "";
             }
 
@@ -2038,7 +2041,7 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
-                        origin = input.SuperType.ToLower();
+                        origin = input.SuperType;
 
                     }
            
@@ -2075,7 +2078,7 @@ namespace ssi
                           
                             }
                         content = result;
-                        origin = input.SuperType.ToLower() + ":" + input.SubType.ToLower();
+                        origin = input.SuperType;
                         ShowAnnotatorBox = true;
                         foreach (var item in (DatabaseHandler.Annotators))
                         {
@@ -2093,30 +2096,36 @@ namespace ssi
                         }
 
 
-                        foreach (var scheme in DatabaseHandler.Streams)
+                        foreach (var stream in DatabaseHandler.Streams)
                         {
+
+                          
+
                             if (input.SubType != null)
                             {
-                                if (input.SubType == "SSIStream"){
-                                    input.SubType = "feature";
-                                }
-                                if(input.SpecificType != null)
+                                //if (input.SubType == "SSIStream"){
+                                //    input.SubType = "feature";
+                                //}
+                                string temptype = input.SubType;
+                                if (input.SpecificType != null)
                                 {
-                                    input.SubType = input.SpecificType;
+                                    temptype = input.SpecificType;
                                 }
-                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()) && !result.Contains(scheme.Name)){
-                                    result.Add(scheme.Name);
+
+                                if (stream.Type.ToString().ToUpper().Contains(temptype.ToUpper()) && !result.Contains(stream.Name))
+                                {
+                                    result.Add(stream.Name);
                                 }
 
                             }
                             else
                             {
-                                result.Add(scheme.Name);
+                                result.Add(stream.Name);
                             }
                            
                         }
                         content = result;
-                        origin = input.SuperType.ToLower();
+                        origin = input.SuperType;
 
                     }
 
@@ -2130,13 +2139,13 @@ namespace ssi
                             xcontent.Add(item.ToString());
                         }
 
-                        RolesBox.Visibility = Visibility.Collapsed;
-                        RolesLabel.Visibility = Visibility.Collapsed;
+                        RolesBox.Visibility = System.Windows.Visibility.Collapsed;
+                        RolesLabel.Visibility = System.Windows.Visibility.Collapsed;
                     }
                     else
                     {
-                        RolesBox.Visibility = Visibility.Visible;
-                        RolesLabel.Visibility = Visibility.Visible;
+                        RolesBox.Visibility = System.Windows.Visibility.Visible;
+                        RolesLabel.Visibility = System.Windows.Visibility.Visible;
                     }
 
                     ApplyButton.IsEnabled = true;// else ApplyButton.IsEnabled = false;
@@ -2193,7 +2202,7 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
-                        origin = input.SuperType.ToLower();
+                        origin = input.SuperType;
 
                     }
                     if (input.SuperType != null && (input.SuperType.ToLower() == "image" || input.SuperType.ToLower() == "text" ||  input.SuperType.ToLower() == "url"))
@@ -2204,7 +2213,7 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
-                        origin = input.SuperType.ToLower();
+                        origin = input.SuperType;
 
                     }
 
@@ -2241,7 +2250,7 @@ namespace ssi
 
                         }
                         content = result;
-                        origin = input.SuperType.ToLower() + ":" + input.SubType.ToLower();
+                        origin = input.SuperType;
                         ShowAnnotatorBox = true;
                         foreach (var item in (DatabaseHandler.Annotators))
                         {
@@ -2263,15 +2272,18 @@ namespace ssi
                         {
                             if (input.SubType != null)
                             {
-                                if (input.SubType == "SSIStream")
-                                {
-                                    input.SubType = "feature";
-                                }
+                                //if (input.SubType == "SSIStream")
+                                //{
+                                //    input.SubType = "feature";
+                                //}
+                                string temptype = input.SubType;
                                 if (input.SpecificType != null)
                                 {
-                                    input.SubType = input.SpecificType;
+                                    temptype = input.SpecificType;
                                 }
-                                if (scheme.Type.ToString().ToUpper().Contains(input.SubType.ToUpper()) && !result.Contains(scheme.Name))
+
+                               
+                                if (scheme.Type.ToString().ToUpper().Contains(temptype.ToUpper()) && !result.Contains(scheme.Name))
                                 {
                                     result.Add(scheme.Name);
                                 }
@@ -2284,7 +2296,7 @@ namespace ssi
 
                         }
                         content = result;
-                        origin = input.SuperType.ToLower();
+                        origin = input.SuperType;
 
                     }
 
@@ -2298,13 +2310,13 @@ namespace ssi
                             xcontent.Add(item.ToString());
                         }
 
-                        RolesBox.Visibility = Visibility.Collapsed;
-                        RolesLabel.Visibility = Visibility.Collapsed;
+                        RolesBox.Visibility = System.Windows.Visibility.Collapsed;
+                        RolesLabel.Visibility = System.Windows.Visibility.Collapsed;
                     }
                     else
                     {
-                        RolesBox.Visibility = Visibility.Visible;
-                        RolesLabel.Visibility = Visibility.Visible;
+                        RolesBox.Visibility = System.Windows.Visibility.Visible;
+                        RolesLabel.Visibility = System.Windows.Visibility.Visible;
                     }
 
                     ApplyButton.IsEnabled = true;// else ApplyButton.IsEnabled = false;
@@ -2395,20 +2407,20 @@ namespace ssi
                                         xcontent.Add(item.ToString());
                                     }
 
-                                    RolesBox.Visibility = Visibility.Collapsed;
-                                    RolesLabel.Visibility = Visibility.Collapsed;
+                                    RolesBox.Visibility = System.Windows.Visibility.Collapsed;
+                                    RolesLabel.Visibility = System.Windows.Visibility.Collapsed;
                                 }
                                 else
                                 {
-                                    RolesBox.Visibility = Visibility.Visible;
-                                    RolesLabel.Visibility = Visibility.Visible;
+                                    RolesBox.Visibility = System.Windows.Visibility.Visible;
+                                    RolesLabel.Visibility = System.Windows.Visibility.Visible;
                                 }
                             }
 
                             else
                             {
-                                RolesBox.Visibility = Visibility.Collapsed;
-                                RolesLabel.Visibility = Visibility.Collapsed;
+                                RolesBox.Visibility = System.Windows.Visibility.Collapsed;
+                                RolesLabel.Visibility = System.Windows.Visibility.Collapsed;
                             }
 
                            
@@ -2467,13 +2479,13 @@ namespace ssi
 
             //if (ShowAnnotatorBox)
             //{
-            //    AnnotatorsBox.Visibility = Visibility.Visible;
-            //    AnnotatorsLabel.Visibility = Visibility.Visible;
+            //    AnnotatorsBox.Visibility = System.Windows.Visibility.Visible;
+            //    AnnotatorsLabel.Visibility = System.Windows.Visibility.Visible;
             //}
             //else 
             //{
-                AnnotatorsBox.Visibility = Visibility.Hidden;
-                AnnotatorsLabel.Visibility = Visibility.Hidden;
+                AnnotatorsBox.Visibility = System.Windows.Visibility.Hidden;
+                AnnotatorsLabel.Visibility = System.Windows.Visibility.Hidden;
            // }
 
             return values;
@@ -2612,12 +2624,10 @@ namespace ssi
                             string source = element.Key.Split('.')[1];
                             string[] src = source.Split(':');
 
-                        if(source  == "image")
+                        if(source  == "image" || source == "video" || source == "audio")
                         {
-                            Bitmap image = null;
+      
                             if (((TextBox)element.Value.ElementAt(0)).Text.StartsWith("http")){
-
-                                //image = DownloadImage(((TextBox)element.Value.ElementAt(0)).Text);
                                 JObject ob = new JObject
                                         {
                                         { "id", element.Key.Split('.')[0] },
@@ -2632,29 +2642,14 @@ namespace ssi
                             }
                             else
                             {
-                                string relativefilepath = handler.SendFiletoServer(((TextBox)element.Value.ElementAt(0)).Text);
-
-                                //image = new Bitmap(((TextBox)element.Value.ElementAt(0)).Text);
-                                //MemoryStream m = new MemoryStream();
-                                //image.Save(m, System.Drawing.Imaging.ImageFormat.Png);
-                                //byte[] imageBytes = m.ToArray();
-
-
-                                //TODO change to something else than base64
-                                //string byteString = BitConverter.ToString(imageBytes);
-                                //string byteString = Encoding.UTF8.GetString(imageBytes);
-                               //string byteString = Convert.ToBase64String(imageBytes);
-
-
-
-
+                                string relativeserverfilepath = handler.SendFiletoServer(((TextBox)element.Value.ElementAt(0)).Text);
 
                                 JObject ob = new JObject
                                         {
                                         { "id", element.Key.Split('.')[0] },
                                         { "type", "input" },
                                         { "src", "file:" + src[0]},
-                                        { "uri",  relativefilepath},
+                                        { "uri",  relativeserverfilepath},
                                         { "active", "True" }
                                     };
                                 data.Add(ob);
@@ -2820,15 +2815,26 @@ namespace ssi
                             else if (element.Key.Split('.')[1].StartsWith("stream"))
                             {
                                 string role = "";
+                            string subtype = "";
+                            Processor processor = (Processor)ProcessorsBox.SelectedItem;
+                            ServerInputOutput inpu = processor.Inputs.Find(x => x.ID == element.Key.Split('.')[0]);
+                            if (inpu.SubType != null)
+                            {
+                                subtype = inpu.SubType.ToString();
+                            }
+                            if (inpu.SpecificType != null)
+                            {
+                                subtype = subtype + ":" + inpu.SpecificType.ToString();
+                            }
 
-                                if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
+                            if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
                                 {
                                     role = ((ComboBox)element.Value.ElementAt(1)).SelectedItem.ToString();
                                     JObject ob = new JObject
                                 {
                                     {"id", element.Key.Split('.')[0] },
                                     { "type", "input" },
-                                    { "src", "db:" + element.Key.Split('.')[1] },
+                                    { "src", "db:" + element.Key.Split('.')[1] + ":" + subtype},
                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                     { "role",role},
                                     { "active", "True" }
@@ -2851,7 +2857,7 @@ namespace ssi
                                              {
                                                     {"id", element.Key.Split('.')[0] },
                                                     { "type", "input" },
-                                                    { "src", "db:" + element.Key.Split('.')[1] },
+                                                    { "src", "db:" + element.Key.Split('.')[1]  + ":" + subtype },
                                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                                     { "role",role},
                                                     { "active", "True" }
@@ -2945,11 +2951,11 @@ namespace ssi
                             if (element.Key.Split('.')[1].StartsWith("annotation"))
                             {
 
-                                string isactive = "true";
+                                bool isactive = true;
 
                                 if (element.Value.Count > 2)
                                 {
-                                    isactive = ((CheckBox)element.Value.ElementAt(3)).IsChecked.ToString();
+                                    isactive = (bool)((CheckBox)element.Value.ElementAt(3)).IsChecked;
                                 }
 
                                 string role = "";
@@ -3073,11 +3079,11 @@ namespace ssi
 
                                     }
 
-                                    string isactive = "true";
+                                    bool isactive = true;
 
                                     if (element.Value.Count > 2)
                                     {
-                                        isactive = ((CheckBox)element.Value.ElementAt(2)).IsChecked.ToString();
+                                        isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
                                     }
 
 
@@ -3086,7 +3092,7 @@ namespace ssi
                                     {"id", element.Key.Split('.')[0] },
                                     { "type", "output" },
                                     { "kind", subtype },
-                                    { "src", "db:" + element.Key.Split('.')[1]},
+                                    { "src", "db:" + element.Key.Split('.')[1] + ":" + subtype},
                                     { "name", name },
                                     { "role",role},
                                     { "active", isactive }
@@ -3101,11 +3107,11 @@ namespace ssi
                                 }
                                 else if (RolesBox.SelectedItem != null)
                                 {
-                                    string isactive = "true";
+                                    bool isactive = true;
 
                                     if (element.Value.Count > 2)
                                     {
-                                        isactive = ((CheckBox)element.Value.ElementAt(2)).IsChecked.ToString();
+                                        isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
                                     }
 
                                     role = RolesBox.SelectedItem.ToString();
@@ -3177,7 +3183,30 @@ namespace ssi
 
                         if (element.Value.Count == 1)
                         {
-                            ob.Add(element.Key.Split('.')[0], ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString());
+                            var result = ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString();
+                            int number;
+                            float numberf;
+                            if (result == "None")
+                            {
+                                ob.Add(element.Key.Split('.')[0], null);
+                            }
+
+                            else if (int.TryParse(result, out number))
+                            {
+                                ob.Add(element.Key.Split('.')[0], number);
+                            }
+
+                            else if (float.TryParse(result, out numberf))
+                            {
+                                ob.Add(element.Key.Split('.')[0], numberf);
+                            }
+
+                            else
+                            {
+                                ob.Add(element.Key.Split('.')[0], result);
+                            }
+                           
+
                         }
                         else if (element.Value.Count == 2)
                         {
@@ -3193,7 +3222,30 @@ namespace ssi
                     }
                     else if (element.Value.ElementAt(0).GetType().Name == "TextBox")
                     {
-                        ob.Add(element.Key.Split('.')[0], ((TextBox)element.Value.ElementAt(0)).Text);
+
+                        var result = ((TextBox)element.Value.ElementAt(0)).Text;
+                        int number;
+                        float numberf;
+                        if (result == "None")
+                        {
+                            ob.Add(element.Key.Split('.')[0], null);
+                        }
+
+                        else if (int.TryParse(result, out number))
+                        {
+                            ob.Add(element.Key.Split('.')[0], number);
+                        }
+
+                        else if (float.TryParse(result, out numberf))
+                        {
+                            ob.Add(element.Key.Split('.')[0], numberf);
+                        }
+                        else
+                        {
+                            ob.Add(element.Key.Split('.')[0], result);
+                        }
+
+                        
 
                     }
                     //var test = element.Value.ToString() ;
@@ -3671,11 +3723,11 @@ namespace ssi
 
                     if (usesdb)
                     {
-                        SessionsOverview.Visibility = Visibility.Visible;
-                        DatabaseOverview.Visibility = Visibility.Visible;
+                        SessionsOverview.Visibility = System.Windows.Visibility.Visible;
+                        DatabaseOverview.Visibility = System.Windows.Visibility.Visible;
                     }
-                    else {SessionsOverview.Visibility = Visibility.Collapsed;
-                            DatabaseOverview.Visibility = Visibility.Collapsed;
+                    else {SessionsOverview.Visibility = System.Windows.Visibility.Collapsed;
+                            DatabaseOverview.Visibility = System.Windows.Visibility.Collapsed;
                         SessionsBox.ItemsSource = null;
                         DatabasesBox.ItemsSource = null;
                         SessionsBox.SelectedItem = "dummy_session";
@@ -3887,7 +3939,7 @@ namespace ssi
                 }
             }
 
-            else this.ModelSpecificOptions.Visibility = Visibility.Collapsed;
+            else this.ModelSpecificOptions.Visibility = System.Windows.Visibility.Collapsed;
         }
 
 
@@ -3942,9 +3994,11 @@ namespace ssi
         private void DlButton_Click(object sender, RoutedEventArgs e)
         {
             var jobIDhash = getIdHash();
+            bool deletefile = true;
             var content = new MultipartFormDataContent
             {
-                { new StringContent(jobIDhash), "jobID"  }
+                { new StringContent(jobIDhash), "jobID"  },
+                { new StringContent(deletefile.ToString()), "delete_after_download"  }
             };
             handler.getResultFromServer(content);
         }
