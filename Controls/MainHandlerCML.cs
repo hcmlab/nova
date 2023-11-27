@@ -3,6 +3,7 @@ using FFMediaToolkit.Graphics;
 using MathNet.Numerics.Distributions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SharpCompress.Common;
 using ssi.Controls;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,13 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media.Imaging;
@@ -581,70 +584,100 @@ namespace ssi
             }
         }
 
+        public string SendFiletoServer(string filePath)
+        {
+
+            using (WebClient client = new WebClient())
+                {
+                string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/upload";
+                var response = client.UploadFile(url, filePath);
+                string result = System.Text.Encoding.UTF8.GetString(response);
+                return result;
+
+                }
+        }
+
 
         public async void getResultFromServer(MultipartFormDataContent content)
         {
            
+            string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/fetch_result";
 
-            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-            string url = "http://" + tokens[0] + ":" + tokens[1] + "/fetch_result";
-
-
-            var response = client.PostAsync(url, content).Result;
-            var inputfilename = response.Content.Headers.ContentDisposition.FileName;
-            var responseContent = await response.Content.ReadAsByteArrayAsync();
-            if (response.Content.Headers.ContentType.MediaType == "video/mp4")
+            try
             {
-                string filename = FileTools.SaveFileDialog(inputfilename, ".mp4", "Video (*.mp4)|*.mp4", "");
-                if (filename == null) return;
+                string inputfilename = "";
+                var response = client.PostAsync(url, content).Result;
+                try
+                {
+                    inputfilename = response.Content.Headers.ContentDisposition.FileName;
+                }
+                catch
+                {
+                    var c = await response.Content.ReadAsByteArrayAsync();
+                    string result = System.Text.Encoding.UTF8.GetString(c);
+                    MessageBox.Show(result);
+                    return;
+                }
+                var responseContent = await response.Content.ReadAsByteArrayAsync();
+                if (response.Content.Headers.ContentType.MediaType == "video/mp4")
+                {
+                    string filename = FileTools.SaveFileDialog(inputfilename, ".mp4", "Video (*.mp4)|*.mp4", "");
+                    if (filename == null) return;
 
-                Stream t = new FileStream(filename, FileMode.Create);
-                BinaryWriter b = new BinaryWriter(t);
-                b.Write(responseContent);
-                t.Close();
-                MessageBox.Show("Stored video at " + filename);
+                    Stream t = new FileStream(filename, FileMode.Create);
+                    BinaryWriter b = new BinaryWriter(t);
+                    b.Write(responseContent);
+                    t.Close();
+                    MessageBox.Show("Stored video at " + filename);
+                }
+
+                else if (response.Content.Headers.ContentType.MediaType == "application/x-zip-compressed")
+                {
+                    string filename = FileTools.SaveFileDialog(inputfilename, ".zip", "Archive (*.zip)|*.zip", "");
+                    if (filename == null) return;
+                    File.WriteAllBytes(filename, responseContent);
+                }
+
+                else if (response.Content.Headers.ContentType.MediaType == "text/plain")
+                {
+                    string result = System.Text.Encoding.UTF8.GetString(responseContent);
+                    MessageBox.Show(result);
+                }
+                else if (response.Content.Headers.ContentType.MediaType == "application/octet-stream")
+                {
+                    string result = System.Text.Encoding.UTF8.GetString(responseContent);
+                    MessageBox.Show(result);
+                }
+                else if (response.Content.Headers.ContentType.MediaType == "image/jpeg")
+                {
+                    System.Drawing.Image image = byteArrayToImage(responseContent);
+                    ImageView view = new ImageView(image, inputfilename);
+                    view.Show();
+
+                }
+                else
+                {
+                    MessageBox.Show("Result not found");
+                }
             }
 
-            else if (response.Content.Headers.ContentType.MediaType == "application/x-zip-compressed")
+            catch
             {
-                string filename = FileTools.SaveFileDialog(inputfilename, ".zip", "Archive (*.zip)|*.zip", "");
-                if (filename == null) return;
-                File.WriteAllBytes(filename, responseContent);
+                MessageBox.Show("Result not found / Server Error");
             }
-
-            else if (response.Content.Headers.ContentType.MediaType == "text/plain")
-            {
-                string result = System.Text.Encoding.UTF8.GetString(responseContent);
-                MessageBox.Show(result);
-            }
-            else if (response.Content.Headers.ContentType.MediaType == "application/octet-stream")
-            {
-                string result = System.Text.Encoding.UTF8.GetString(responseContent);
-                MessageBox.Show(result);
-            }
-            else if (response.Content.Headers.ContentType.MediaType == "image/jpeg")
-            {
-                System.Drawing.Image image = byteArrayToImage(responseContent);
-                ImageView view = new ImageView(image, inputfilename);
-                view.Show();
-
-            }
-            else
-            {
-                MessageBox.Show("Result not found");
-            }
+           
            
 
         }
 
-        public Image byteArrayToImage(byte[] byteArrayIn)
+        public System.Drawing.Image byteArrayToImage(byte[] byteArrayIn)
         {
-            Image returnImage = null;
+            System.Drawing.Image returnImage = null;
             try
             {
                 MemoryStream ms = new MemoryStream(byteArrayIn, 0, byteArrayIn.Length);
                 ms.Write(byteArrayIn, 0, byteArrayIn.Length);
-                returnImage = Image.FromStream(ms, true);//Exception occurs here
+                returnImage = System.Drawing.Image.FromStream(ms, true);//Exception occurs here
             }
             catch { }
             return returnImage;
@@ -653,9 +686,7 @@ namespace ssi
 
         public Dictionary<string, string> getLogFromServer(MultipartFormDataContent content)
         {
-
-            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-            string url = "http://" + tokens[0] + ":" + tokens[1] + "/log";
+            string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/log";
 
             var response = client.PostAsync(url, content).Result;
             var responseContent = response.Content;
@@ -667,8 +698,8 @@ namespace ssi
 
         public Dictionary<string, string> getStatusFromServer(MultipartFormDataContent content)
         {
-            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-            string url = "http://" + tokens[0] + ":" + tokens[1] + "/job_status";
+  
+            string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/job_status";
 
             var response = client.PostAsync(url, content).Result;
             var responseContent = response.Content;
@@ -679,12 +710,12 @@ namespace ssi
         }
 
 
-        public JObject get_info_from_server()
-        {
-            string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-            string url = "http://" + tokens[0] + ":" + tokens[1] + "/cml_info";
 
-            var response = client.GetAsync(url).Result;
+        public JObject get_info_from_server(MultipartFormDataContent content)
+        {
+            string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/cml_info";
+
+            var response = client.PostAsync(url, content).Result;
             var responseContent = response.Content;
             string responseString = responseContent.ReadAsStringAsync().Result;
             var result = JObject.Parse(responseString);
@@ -697,8 +728,7 @@ namespace ssi
         {
             try
             {
-                string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/cancel";
+                string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/cancel";
                 var response = client.PostAsync(url, content).Result;
 
                 var responseContent = response.Content;
