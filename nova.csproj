@@ -562,6 +562,9 @@
     <Compile Include="Controls\Other\ConfmatWindow.xaml.cs">
       <DependentUpon>ConfmatWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Other\CounterFactualGANWindow.xaml.cs">
+      <DependentUpon>CounterFactualGANWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Other\ExplanationWindowTfExplain.xaml.cs">
       <DependentUpon>ExplanationWindowTfExplain.xaml</DependentUpon>
     </Compile>
@@ -640,6 +643,7 @@
     <Compile Include="Database\DatabaseBountiesCreateWindow.xaml.cs">
       <DependentUpon>DatabaseBountiesCreateWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Database\NovaServerHandler.cs" />
     <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Interfaces\IDrawUnit.cs" />
     <Compile Include="Interfaces\IPointList.cs" />
@@ -815,6 +819,10 @@
     <Page Include="Controls\Other\ConfmatWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Other\CounterFactualGANWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Other\ExplanationWindowTfExplain.xaml">
       <SubType>Designer</SubType>

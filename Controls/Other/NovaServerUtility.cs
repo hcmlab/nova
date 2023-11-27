@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using static ssi.Database.NovaServerHandler;
 using static ssi.DatabaseCMLExtractFeaturesWindow;
 using static ssi.DatabaseNovaServerWindow;
 
@@ -190,5 +191,101 @@ namespace ssi.Controls.Other.NovaServerUtility
 
         }
 
+        public static Explainer parseExplainerFile(KeyValuePair<string, JToken> explainerDictionary)
+        {
+            try
+            {
+                Explainer explainer = new Explainer();
+                JObject chainobject = JObject.Parse(explainerDictionary.Value.ToString());
+                explainer.Name = Path.GetFileName(explainerDictionary.Key);
+                explainer.Path = explainerDictionary.Key;
+                explainer.Category = "0";
+                explainer.Description = "";
+                explainer.isTrained = ((bool)chainobject["info_trained"]);
+                if (!explainer.isTrained)
+                { return null; }
+
+                var category = chainobject["meta_category"];
+                if (category != null)
+                {
+                    explainer.Category = chainobject["meta_category"].ToString();
+                }
+                var description = chainobject["meta_description"];
+                if (description != null)
+                {
+                    explainer.Description = chainobject["meta_description"].ToString();
+                }
+
+                var create = chainobject["model_create"].ToString();
+                if (create != null)
+                {
+                    explainer.ModelCreate = chainobject["model_create"].ToString();
+                }
+
+                var Script = chainobject["model_script_path"];
+                if (Script != null)
+                {
+                    explainer.ModelScriptPath = chainobject["model_script_path"].ToString();
+                }
+                var OptStr = chainobject["model_option_string"];
+                if (OptStr != null)
+                {
+                    explainer.Option= chainobject["model_option_string"].ToString();
+                }
+
+                explainer.mlFrameworks = new List<string>();
+
+                var frameworks = chainobject["meta_io"];
+                if(frameworks != null && frameworks.ToString() != null)
+                {
+                    JArray f = JArray.Parse(frameworks.ToString());
+                    foreach (var element in f)
+                    {
+                        explainer.mlFrameworks.Add(element.ToString());
+                    }
+                }
+
+                explainer.Inputs = new List<ServerInputOutput>();
+
+                var meta_io = chainobject["meta_io"];
+                if (meta_io != null && meta_io.ToString() != "[]")
+                {
+
+                    JArray io = JArray.Parse(meta_io.ToString());
+                    foreach (var element in io)
+                    {
+                        ServerInputOutput inputoutput = new ServerInputOutput();
+                        inputoutput.ID = element["id"].ToString();
+                        inputoutput.IO = element["type"].ToString();
+                        var defaultname = element["default_value"];
+                        if (defaultname != null)
+                        {
+                            inputoutput.DefaultName = defaultname.ToString();
+                        }
+                        string[] split = element["data"].ToString().Split(':');
+                        inputoutput.Type = split[0];
+                        if (split.Length > 1)
+                            inputoutput.SubType = split[1];
+                        if (split.Length > 2)
+                            inputoutput.SubSubType = split[2];
+
+                        if (inputoutput.IO == "input")
+                        {
+                            explainer.Inputs.Add(inputoutput);
+                        }
+                    }
+
+                }
+
+                return explainer;
+            }
+            catch (Exception e)
+            {
+                MessageTools.Error(e.ToString());
+                return null;
+            }
+
+        }
     }
+
 }

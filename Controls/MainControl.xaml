@@ -121,6 +121,7 @@
                 <MenuItem Header="FeatureExplainer" Name="FeatureExplainer">
                     <MenuItem Header="Lime" Name="explanationWindowFeature"></MenuItem>
                     <MenuItem Header="DICE" Name="explanationCounterFactual"></MenuItem>
+                    <MenuItem Header="FeatureFactual" Name="explanationCounterFactualGAN"></MenuItem>
                 </MenuItem>
             </MenuItem>
 

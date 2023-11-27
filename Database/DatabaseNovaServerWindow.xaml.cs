@@ -43,6 +43,7 @@ using System.Xml;
 using System.Xml.Linq;
 using static ssi.AnnoScheme;
 using static ssi.AnnoTierAttributesWindow;
+using static ssi.Database.NovaServerHandler;
 using static ssi.DatabaseCMLExtractFeaturesWindow;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ListView = System.Windows.Controls.ListView;
@@ -104,18 +105,6 @@ namespace ssi
             }
 
         }
-
-        public class ServerInputOutput
-        {
-            public string ID { get; set; }
-            public string IO { get; set; }
-            public string Type { get; set; }
-            public string SubType { get; set; }
-            public string SubSubType { get; set; }
-
-            public string DefaultName { get; set; }
-        }
-
 
         public class Input
         {

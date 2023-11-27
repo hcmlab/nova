@@ -38,6 +38,7 @@ namespace ssi
         ExplanationWindowTfExplain windowfexplain;
         FeatureExplanationWindow windowFeatureExplanations;
         CounterFactualWindow windowCounterFactual;
+        CounterFactualGANWindow windowCounterFactualGAN;
         private static Action EmptyDelegate = delegate () { };
 
         private void explanationWindow_Click(object sender, RoutedEventArgs e)
@@ -193,6 +194,39 @@ namespace ssi
                 windowCounterFactual.frame = frame;
 
                 windowCounterFactual.Show();
+            }
+            catch
+            {
+
+            }
+
+
+        }
+
+        private void counterFactualGANWindow_Click(object sender, RoutedEventArgs e)
+        {
+            if (windowCounterFactualGAN != null)
+            {
+                windowCounterFactualGAN.deactiveExplainationButton();
+            }
+
+            if (AnnoTier.Selected == null)
+            {
+                MessageBox.Show("Select annotation track first");
+                return;
+            }
+
+            windowCounterFactualGAN = new CounterFactualGANWindow(this);
+
+
+            try
+            {
+
+                int frame = FileTools.FormatFramesInteger(Time.CurrentPlayPosition, SignalTrackStatic.Selected.Signal.rate);
+
+                windowCounterFactualGAN.frame = frame;
+
+                windowCounterFactualGAN.Show();
             }
             catch
             {
