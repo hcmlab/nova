@@ -265,7 +265,7 @@ namespace ssi
 
                 var explanationDic = (JObject)JsonConvert.DeserializeObject(result);
 
-                var counterFactuals = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["explanation"]));
+                var counterFactuals = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["counterfactual"]));
                 var originalStream = JsonConvert.DeserializeObject<Dictionary<int, float>>(JsonConvert.SerializeObject(explanationDic["original_data"]));
                 Dictionary<int, float>[] explanationData = new Dictionary<int, float>[2];
                 explanationData[0] = counterFactuals;
@@ -274,7 +274,6 @@ namespace ssi
                 this.Dispatcher.Invoke(() =>
                 {
                     SeriesCollection.Clear();
-                    SeriesCollection2.Clear();
 
                     explanationButton.IsEnabled = false;
 
@@ -422,22 +421,28 @@ namespace ssi
             data.Add(output);
             string json = data.ToString(Newtonsoft.Json.Formatting.None);
 
+            JObject options = new JObject();
+            options.Add("direction", annoClassID == 0 ? "01" : "10");
+            string optionsString = options.ToString(Newtonsoft.Json.Formatting.None);
+
             MultipartFormDataContent content = new MultipartFormDataContent
                     {
                         { new StringContent(modelPath), "modelFilePath" },
                         { new StringContent(trainerPath), "trainer_file_path" },
+                        { new StringContent(currentExplainer.Path), "explainer_file_path" },
                         { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[0]), "dbHost" },
                         { new StringContent(Properties.Settings.Default.DatabaseAddress.Split(':')[1]), "dbPort" },
                         { new StringContent(Properties.Settings.Default.MongoDBUser), "dbUser" },
                         { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
                         { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
                         { new StringContent(sessionsstr), "sessions" },
-                        { new StringContent("CYCLE_GAN"), "explainer"},
+                        { new StringContent("CYCLE_GAN"), "explainer_type"},
                         { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
                         { new StringContent(getIdHash()), "jobID" },
                         { new StringContent(json), "data" },
                         { new StringContent((1/sr).ToString()), "frame_size" },
-                        { new StringContent(annoClassID == 0 ? "01" : "10"), "direction" }
+                        { new StringContent(optionsString), "options"}
+                        
                     };
 
             Thread thread = new Thread(() => explanationStatus(content));
@@ -456,7 +461,7 @@ namespace ssi
             Properties.Settings.Default.Save();
             mlBackend = availableTrainers[cmb.SelectedIndex].Backend;
 
-            string inputFilter = availableTrainers[cmb.SelectedIndex].Inputs[0].Type + ":" + availableTrainers[cmb.SelectedIndex].Inputs[0].SubType + ":" + availableTrainers[cmb.SelectedIndex].Inputs[0].SubSubType;
+            string inputFilter = availableTrainers[cmb.SelectedIndex].Inputs[0].SuperType + ":" + availableTrainers[cmb.SelectedIndex].Inputs[0].SubType + ":" + availableTrainers[cmb.SelectedIndex].Inputs[0].SpecificType;
             string modelBackend = mlBackend;
             string modelID = availableTrainers[cmb.SelectedIndex].Name.Split('.')[0];
 
@@ -468,6 +473,7 @@ namespace ssi
         {
             ComboBox cmb = sender as ComboBox;
             explainerLoaded.Text = availableExplainers[cmb.SelectedIndex].Name;
+            currentExplainer = availableExplainers[cmb.SelectedIndex];
         }
 
         public void deactiveExplainationButton()
@@ -482,7 +488,7 @@ namespace ssi
         private string getIdHash()
         {
 
-            int result = NovaServerUtility.GetDeterministicHashCode("database" + DatabaseHandler.DatabaseName + "session" + DatabaseHandler.SessionInfo + "username" + Properties.Settings.Default.MongoDBUser + "explainer" + "dice" + "model" + modelPath);
+            int result = NovaServerUtility.GetDeterministicHashCode("database" + DatabaseHandler.DatabaseName + "session" + DatabaseHandler.SessionInfo + "username" + Properties.Settings.Default.MongoDBUser + "explainer" + "cycleGAN" + "model" + modelPath);
 
             var jobIDhash = (Math.Abs(result)).ToString();
             int MaxLength = 8;

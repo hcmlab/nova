@@ -14,9 +14,9 @@ namespace ssi.Database
         {
             public string ID { get; set; }
             public string IO { get; set; }
-            public string Type { get; set; }
+            public string SuperType { get; set; }
             public string SubType { get; set; }
-            public string SubSubType { get; set; }
+            public string SpecificType { get; set; }
 
             public string DefaultName { get; set; }
         }

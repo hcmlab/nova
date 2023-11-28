@@ -166,11 +166,11 @@ namespace ssi.Controls.Other.NovaServerUtility
                             inputoutput.DefaultName = defaultname.ToString();
                         }
                         string[] split = element["data"].ToString().Split(':');
-                        inputoutput.Type = split[0];
+                        inputoutput.SuperType = split[0];
                         if (split.Length > 1)
                             inputoutput.SubType = split[1];
                         if (split.Length > 2)
-                            inputoutput.SubSubType = split[2];
+                            inputoutput.SpecificType = split[2];
 
                         if (inputoutput.IO == "input")
                         {
@@ -263,11 +263,11 @@ namespace ssi.Controls.Other.NovaServerUtility
                             inputoutput.DefaultName = defaultname.ToString();
                         }
                         string[] split = element["data"].ToString().Split(':');
-                        inputoutput.Type = split[0];
+                        inputoutput.SuperType = split[0];
                         if (split.Length > 1)
                             inputoutput.SubType = split[1];
                         if (split.Length > 2)
-                            inputoutput.SubSubType = split[2];
+                            inputoutput.SpecificType = split[2];
 
                         if (inputoutput.IO == "input")
                         {

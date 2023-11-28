@@ -8,7 +8,7 @@
         xmlns:local="clr-namespace:ssi"
         d:DesignHeight="300" d:DesignWidth="300" d:DataContext="{d:DesignInstance local:CounterFactualGANWindow}"
         mc:Ignorable="d"
-        Title="LIME Explanation" Height="570" Width="800"
+        Title="FeatureFactual" Height="570" Width="800"
         Closing="Window_Closing" Style="{StaticResource WinAll}">
     <xctk:BusyIndicator x:Name="_busyIndicator" BusyContent="Generating explanation"  IsBusy="False" >
         <Grid Name="container">
