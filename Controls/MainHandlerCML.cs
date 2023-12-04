@@ -596,10 +596,16 @@ namespace ssi
 
             using (WebClient client = new WebClient())
                 {
-                string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/upload";
-                var response = client.UploadFile(url, filePath);
-                string result = System.Text.Encoding.UTF8.GetString(response);
-                return result;
+                try{
+                    string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/upload";
+                    var response = client.UploadFile(url, filePath);
+                    string result = System.Text.Encoding.UTF8.GetString(response);
+                    return result;
+                }
+                catch (Exception e) {
+                    MessageBox.Show(e.Message);
+                    return null; }
+             
 
                 }
         }
