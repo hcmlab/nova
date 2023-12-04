@@ -2730,16 +2730,18 @@ namespace ssi
                         if (element.Key.Split('.')[1] != "")
                         {
 
-                        bool isactive = true;
-
-                        if (element.Value.Count > 2)
-                        {
-                            isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
-                        }
+                       
 
                         if (element.Key.Split('.')[1].StartsWith("annotation"))
                             {
-                                string role = "";
+                            bool isactive = true;
+
+                                if (element.Value.Count > 3)
+                                {
+                                    isactive = (bool)((CheckBox)element.Value.ElementAt(3)).IsChecked;
+                                }
+
+                            string role = "";
                                 if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
                                 {
 
@@ -2796,7 +2798,12 @@ namespace ssi
                                 }
                                 else if (RolesBox.SelectedItem != null)
                                 {
-                                    foreach (var rol in RolesBox.SelectedItems)
+                                    if (element.Value.Count >2)
+                                    {
+                                        isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
+                                    }
+
+                                foreach (var rol in RolesBox.SelectedItems)
                                     {
                                         role = RolesBox.SelectedItem.ToString();
                                         JObject ob = new JObject
@@ -2826,7 +2833,13 @@ namespace ssi
 
                             else if (element.Key.Split('.')[1].StartsWith("stream"))
                             {
-                                string role = "";
+
+                            bool isactive = true;
+                            if (element.Value.Count > 2)
+                            {
+                                isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
+                            }
+                            string role = "";
                             string subtype = "";
                             Processor processor = (Processor)ProcessorsBox.SelectedItem;
                             ServerInputOutput inpu = processor.Inputs.Find(x => x.ID == element.Key.Split('.')[0]);
