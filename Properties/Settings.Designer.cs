@@ -778,5 +778,65 @@ namespace ssi.Properties {
                 this["NovaAssistantHistory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.8")]
+        public string NovaAssistantTemperature {
+            get {
+                return ((string)(this["NovaAssistantTemperature"]));
+            }
+            set {
+                this["NovaAssistantTemperature"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Your name is Nova Assistant. You are an AI assistant.")]
+        public string NovaAssistantSystemPrompt {
+            get {
+                return ((string)(this["NovaAssistantSystemPrompt"]));
+            }
+            set {
+                this["NovaAssistantSystemPrompt"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1024")]
+        public string NovaAssistantMaxtokens {
+            get {
+                return ((string)(this["NovaAssistantMaxtokens"]));
+            }
+            set {
+                this["NovaAssistantMaxtokens"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public string NovaAssistantTopK {
+            get {
+                return ((string)(this["NovaAssistantTopK"]));
+            }
+            set {
+                this["NovaAssistantTopK"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.95")]
+        public string NovaAssistantTopP {
+            get {
+                return ((string)(this["NovaAssistantTopP"]));
+            }
+            set {
+                this["NovaAssistantTopP"] = value;
+            }
+        }
     }
 }
