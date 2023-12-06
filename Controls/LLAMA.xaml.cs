@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.HighPerformance;
+﻿using ExCSS;
+using Microsoft.Toolkit.HighPerformance;
 using Newtonsoft.Json;
 using Octokit;
 using OxyPlot.Reporting;
@@ -16,6 +17,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Routing;
 using System.Web.Security;
@@ -25,12 +27,16 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using static CSJ2K.j2k.codestream.HeaderInfo;
 using static ExCSS.AttributeSelectorFactory;
+using static ssi.DatabaseCMLExtractFeaturesWindow;
+using static ssi.DatabaseNovaServerWindow;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.LinkLabel;
 
@@ -104,6 +110,207 @@ namespace ssi.Controls
         }
 
        
+        public void updateUItest(string user, string text)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                paragraph.Inlines.Add(new Bold(new Run(user + ": "))
+                {
+                    Foreground = System.Windows.Media.Brushes.Green
+                });
+                paragraph.Inlines.Add(text);
+                paragraph.Inlines.Add(new LineBreak());
+                InputBox.Clear();
+
+
+            });
+        }
+
+        public async void callLLAMA2(object pr)
+        {
+            string message = pr.ToString();
+
+            string from = "Nova Assistant";
+
+            try
+            {
+                HttpClient client = new HttpClient();
+
+
+                string datastr = "";
+                string datadescr = "";
+                string systemprompt = Properties.Settings.Default.NovaAssistantSystemPrompt;
+                float temperature = float.Parse(Properties.Settings.Default.NovaAssistantTemperature);
+                int maxtokens = int.Parse(Properties.Settings.Default.NovaAssistantMaxtokens);
+                int topk = int.Parse(Properties.Settings.Default.NovaAssistantTopK);
+                float topP = float.Parse(Properties.Settings.Default.NovaAssistantTopP);
+                bool contextaware = true;
+
+                _ = Dispatcher.BeginInvoke(new Action(() =>
+                {
+
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        contextaware = Contextaware.IsChecked == true;
+                    });
+
+                }), DispatcherPriority.SystemIdle);
+
+                if (contextaware && MainHandler.annoLists.Count > 1)
+                {
+                    datastr = await PrepareData();
+                    datadescr = "The data you are supposed to analyse is provided to you in list form, where each entry contains the identity of the speaker at position 0 and the transcript of a speaker at position 1";
+
+
+                    if (!dict_users.ContainsKey(from))
+                    {
+                        dict_users[from] = new Dictionary<string, dynamic>
+                        {
+                            ["history"] = new List<List<string>>()
+                        };
+                    }
+                }
+
+                string user = Properties.Settings.Default.MongoDBUser;
+
+                if (!dict_users.ContainsKey(user))
+                {
+                    dict_users[user] = new Dictionary<string, dynamic>
+                    {
+                        ["history"] = new List<List<string>>()
+                    };
+                }
+
+                string answer =  "";
+
+                if (message == "/clear")
+                {
+
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                    {
+
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            dict_users[user]["history"] = new List<List<string>>();
+                            answer = "";
+                            paragraph.Inlines.Clear();
+                        });
+
+                    }), DispatcherPriority.SystemIdle);
+
+                 
+
+   
+                }
+                else
+                {
+
+                    var payload = new
+                    {
+                        system_prompt = systemprompt,
+                        data_desc = datadescr,
+                        data = datastr,
+                        message = message,
+                        temperature = temperature,
+                        max_new_tokens = maxtokens,
+                        top_p = topP,
+                        top_k = topk,
+                        history = dict_users[user]["history"]
+                    };
+
+                    //answer = await PostStream(url, payload);
+                    string reply = "";
+                    string url = "http://" + Properties.Settings.Default.NovaAssistantAddress + "/assist";
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    request.Method = "POST";
+                    request.ContentType = "application/json";
+
+                    using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
+                    {
+                        string json = JsonConvert.SerializeObject(payload);
+                        streamWriter.Write(json);
+                    }
+
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    using (Stream stream = response.GetResponseStream())
+                    using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                    {
+                        int index = 0;
+                        answer = "";
+                        while (!reader.EndOfStream)
+                        {
+                            char line = ' ';
+                            int nextchar = reader.Read();
+
+                            if (nextchar != -1)
+                            {
+                                line = (char)nextchar;
+                                _ = Dispatcher.BeginInvoke(new Action(() =>
+                                {
+
+                                    this.Dispatcher.Invoke(() =>
+                                    {
+                                       
+
+
+                                        if (index == 0)
+                                        {
+                                            InputBox.Clear();
+                                            paragraph.Inlines.Add(new Bold(new Run(from + ": "))
+                                            {
+                                                Foreground = System.Windows.Media.Brushes.Red
+                                            });
+                                            answer += line;
+                                            paragraph.Inlines.Add(line.ToString());
+                                            //paragraph.Inlines.Add(new LineBreak());
+
+                                        }
+                                        else
+                                        {
+                                            answer += line;
+                                            if (paragraph.Inlines.Count > 1)
+                                            {
+                                                paragraph.Inlines.Remove(paragraph.Inlines.ElementAt(paragraph.Inlines.Count - 1));
+                                                paragraph.Inlines.Add(answer);
+                                            }
+                                           
+
+                                        }
+
+                                        index++;
+                                    });
+
+
+
+                                }), DispatcherPriority.SystemIdle);
+                            }
+
+                            Thread.Sleep(20);
+                        }
+
+                        _ = Dispatcher.BeginInvoke(new Action(() =>
+                        {
+
+                            this.Dispatcher.Invoke(() =>
+                            {
+
+                                paragraph.Inlines.Add(new LineBreak());
+                                dict_users[user]["history"].Add(new List<string> { message, answer });
+                            });
+
+                         }), DispatcherPriority.SystemIdle);
+                }
+
+
+
+
+            }
+            }
+            catch (Exception e) {
+                System.Windows.MessageBox.Show(e.Message);
+            }
+
+        }
 
         public async void CallLlama()
         {
@@ -116,49 +323,78 @@ namespace ssi.Controls
             }
 
             var text = message;
-            paragraph.Inlines.Add(new Bold(new Run(from + ": "))
-            {
-                Foreground = System.Windows.Media.Brushes.Green
-            });
-            paragraph.Inlines.Add(text);
-            paragraph.Inlines.Add(new LineBreak());
-            InputBox.Clear();
+            updateUItest(from, message);
 
-            string url =  "http://" + Properties.Settings.Default.NovaAssistantAddress + "/assist";
-          
+           
             string response;
-            try
-            {
-                 response = await SendMessage(message, url);
-            }
-            catch {
-                response = "Couldn't connect to Assistent Server."; 
-            }
+            new Thread(callLLAMA2).Start(message);
 
-            //ReplyBox.Text += response + "\n\n\n";
-           //ReplyBox.AppendText(response + "\n");
-   
 
-            if (response != "")
-            {
-                from = "Nova Assistant";
-                text = response;
-                paragraph.Inlines.Add(new Bold(new Run(from + ": "))
-                {
-                    Foreground = System.Windows.Media.Brushes.Red
-                });
-                paragraph.Inlines.Add(text);
-                paragraph.Inlines.Add(new LineBreak());
-            }
 
-          
 
-            this.DataContext = this;
+
+                    this.DataContext = this;
         }
-      
-     
 
-    public async Task<string> SendMessage(string msg, string URL)
+        async Task<string> PostStream(string url, object data)
+        {
+            string reply = "";
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+            using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
+            {
+                string json = JsonConvert.SerializeObject(data);
+                streamWriter.Write(json);
+            }
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream stream = response.GetResponseStream())
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    if (!string.IsNullOrEmpty(line))
+                    {
+                        reply += line;
+                        //Console.Write(line + " ");
+                        //System.Windows.MessageBox.Show(line + " ");
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            if (line != "")
+                            {
+                                string from = "Nova Assistant";
+                                string text = reply;
+                                this.Dispatcher.Invoke(() =>
+                                {
+
+                                    paragraph.Inlines.Add(new Bold(new Run(from + ": "))
+                                    {
+                                        Foreground = System.Windows.Media.Brushes.Red
+                                    });
+                                    paragraph.Inlines.Add(text);
+                                    paragraph.Inlines.Add(new LineBreak());
+
+                                });
+
+                             
+                            }
+                            Console.WriteLine(line + "\n");
+
+                        });
+
+                    }
+                }
+            }
+
+            return reply;
+        }
+
+
+
+        public async Task<string> SendMessage(string msg, string URL)
         {
             HttpClient client = new HttpClient();
 
@@ -193,58 +429,63 @@ namespace ssi.Controls
                 };
             }
 
-            async Task<string> PostStreamAsync(string url, object data)
-            {
-     
-                    string ans = "";
-
-                    var jsonContent = Newtonsoft.Json.JsonConvert.SerializeObject(data);
-                    var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-                    using (var response = await client.PostAsync(url, stringContent))
-                    using (var stream = await response.Content.ReadAsStreamAsync())
-                    using (var reader = new System.IO.StreamReader(stream))
-                    {
-         
-                        while (!reader.EndOfStream)
-                        {
-                            var line = await reader.ReadLineAsync();
-                            if (!string.IsNullOrWhiteSpace(line))
-                            {
-                                Console.WriteLine(line);
-                                this.Dispatcher.Invoke(() =>
-                                {
-                                    //ReplyBox.Text += line;
-                                    //ReplyBox.Selection.Start = ReplyBox.TextLength;
-                                    //ReplyBox.SelectionLength = 0;
-
-                                    //ReplyBox.SelectionColor = color;
-                                    //ReplyBox.AppendText(line);
-                                    //ReplyBox.SelectionColor = ReplyBox.ForeColor;
-                                });
-                             }
-                        }
-                    }
-           
-
-                    return ans;
-                
-            }
 
             async Task<string> PostStream(string url, object data)
             {
                 string reply = "";
-                var json = JsonConvert.SerializeObject(data);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "POST";
+                request.ContentType = "application/json";
 
-                using (HttpResponseMessage response = await client.PostAsync(url, content))
-                using (HttpContent responseContent = response.Content)
+                using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
                 {
-                    string responseBody = await responseContent.ReadAsStringAsync();
-                    reply = responseBody.TrimStart();
+                    string json = JsonConvert.SerializeObject(data);
+                    streamWriter.Write(json);
                 }
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        string line = reader.ReadLine();
+                        if (!string.IsNullOrEmpty(line))
+                        {
+                            reply += line;
+                            //Console.Write(line + " ");
+                            //System.Windows.MessageBox.Show(line + " ");
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                if (line != "")
+                                {
+                                    string from = "Nova Assistant";
+                                    string text = reply;
+                                    paragraph.Inlines.Add(new Bold(new Run(from + ": "))
+                                    {
+                                        Foreground = System.Windows.Media.Brushes.Red
+                                    });
+                                    paragraph.Inlines.Add(text);
+                                    paragraph.Inlines.Add(new LineBreak());
+                                }
+
+                                //paragraph.Inlines.Add(reply);
+                                //paragraph.Inlines.Add(new LineBreak());
+                                //System.Windows.MessageBox.Show(reply);
+                                Console.WriteLine(line +"\n");
+
+                            });
+                            
+                        }
+                    }
+                }
+
                 return reply;
             }
+
+
+
+
 
             string answer;
 
@@ -280,41 +521,41 @@ namespace ssi.Controls
             
         }
 
-        private void InputBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    private void InputBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Return)
         {
-            if (e.Key == System.Windows.Input.Key.Return)
-            {
-                e.Handled = true;
-                CallLlama();
-            }
-            else if (e.Key == System.Windows.Input.Key.Escape || e.Key == Key.A && Keyboard.IsKeyDown(Key.LeftCtrl))
-            {
-                e.Handled = true;
-                //this.DialogResult = false;
-                this.Hide();
-            }
-
+            e.Handled = true;
+            CallLlama();
+        }
+        else if (e.Key == System.Windows.Input.Key.Escape || e.Key == Key.A && Keyboard.IsKeyDown(Key.LeftCtrl))
+        {
+            e.Handled = true;
+            //this.DialogResult = false;
+            this.Hide();
         }
 
-        private void ReplyBox_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+    }
+
+    private void ReplyBox_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+    {
+
+    }
+
+    private void ReplyBox_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        Scrollviewer.ScrollToEnd();
+
+    }
+
+    private void Window_Closing(object sender, CancelEventArgs e)
+    {
+        //if (!AppGeneral.IsClosing)
         {
-
+            this.Hide();
+            e.Cancel = true;
         }
-
-        private void ReplyBox_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            Scrollviewer.ScrollToEnd();
-
-        }
-
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            //if (!AppGeneral.IsClosing)
-            {
-                this.Hide();
-                e.Cancel = true;
-            }
-        }
+    }
     
     }
 }

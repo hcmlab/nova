@@ -191,5 +191,20 @@
     <Setting Name="NovaAssistantHistory" Type="System.String" Scope="User">
       <Value Profile="(Default)">localhost:1337</Value>
     </Setting>
+    <Setting Name="NovaAssistantTemperature" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0.8</Value>
+    </Setting>
+    <Setting Name="NovaAssistantSystemPrompt" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Your name is Nova Assistant. You are an AI assistant.</Value>
+    </Setting>
+    <Setting Name="NovaAssistantMaxtokens" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1024</Value>
+    </Setting>
+    <Setting Name="NovaAssistantTopK" Type="System.String" Scope="User">
+      <Value Profile="(Default)">50</Value>
+    </Setting>
+    <Setting Name="NovaAssistantTopP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0.95</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
