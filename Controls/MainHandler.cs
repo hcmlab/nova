@@ -488,7 +488,7 @@ namespace ssi
         private void DatabaseNovaServerMenu_Click(object sender, RoutedEventArgs e)
         {
             DatabaseNovaServerWindow window = new DatabaseNovaServerWindow(this);
-            window.ShowDialog();
+            window.Show();
         }
 
         private void MediaSettingsButton_Click(object sender, RoutedEventArgs e)
