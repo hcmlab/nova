@@ -26,6 +26,7 @@ using System.Printing;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography;
+using System.Security.Permissions;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -845,8 +846,32 @@ namespace ssi
             string json = data.ToString(Newtonsoft.Json.Formatting.None);
 
 
+            string anno_min_gap = "";
+            if (FillGapCheckBox.IsChecked == true)
+            {
+                anno_min_gap = FillGapTextBox.Text;
+            }
 
-          
+            string anno_min_dur = "";
+            if (RemoveLabelCheckBox.IsChecked == true)
+            {
+                anno_min_dur = RemoveLabelTextBox.Text;
+            }
+
+
+            string start = "0";
+            string end = "0";
+            string stride = "None";
+
+
+            if (ProcessorOpts.Visibility == System.Windows.Visibility.Visible)
+            {
+                start = StartLengthTextBox.Text;
+                end = EndLengthTextBox.Text;
+                stride = StrideTextBox.Text;
+            }
+       
+
 
 
 
@@ -862,9 +887,42 @@ namespace ssi
                 { new StringContent(chainRightContext), "rightContext" },
                 { new StringContent(frameSize), "frameSize" },
                 { new StringContent(json), "data"  },
+        
                 { new StringContent(jsonoptions), "options" },
                 { new StringContent(force.ToString()), "force"  }
             };
+
+
+            if (ProcessorOpts.Visibility == System.Windows.Visibility.Visible)
+            {
+                if (stride.ToLower() != "none")
+                {
+                    content.Add(new StringContent(stride), "stride");
+                }
+                if (start.ToLower() != "0")
+                {
+                    content.Add(new StringContent(start), "start");
+                }
+                if (end.ToLower() != "0")
+                {
+                    content.Add(new StringContent(end), "end");
+                }
+
+            }
+
+                if (PredictOptionsPanel.Visibility == System.Windows.Visibility.Visible)
+            {
+                if (FillGapCheckBox.IsChecked == true)
+                {
+                    content.Add(new StringContent(anno_min_gap), "anno_min_gap");
+
+                }
+
+                if (FillGapCheckBox.IsChecked == true)
+                {
+                    content.Add(new StringContent(anno_min_dur), "anno_min_dur");
+                }
+            }
 
 
             if (SessionsOverview.Visibility == System.Windows.Visibility.Visible){
@@ -908,6 +966,28 @@ namespace ssi
                 bool ClearUI = true;
                 AddInputUIElements(processor.Inputs, processor.GetTransformers()[0].Multi_role_input);
                 AddOutputUIElements(processor.Outputs, processor.GetTransformers()[0].Multi_role_input);
+
+                bool hasdiscreteoutput = false;
+                foreach (var output in processor.Outputs)
+                {
+                    if (output.SuperType.ToLower() == "annotation" && output.SubType.ToLower() == "discrete")
+                    {
+                        hasdiscreteoutput = true;
+                        break;
+                    }
+
+                }
+
+                if (hasdiscreteoutput)
+                {
+                    PredictOptionsPanel.Visibility = System.Windows.Visibility.Visible;
+                }
+                else
+                {
+                    PredictOptionsPanel.Visibility = System.Windows.Visibility.Hidden;
+                }
+
+
 
                 if (processor.isIterable){
                     ProcessorOpts.Visibility = System.Windows.Visibility.Visible;

@@ -90,7 +90,7 @@
 
 
             </Grid.ColumnDefinitions>
-            <GroupBox Name="ResultsBox" Visibility="Collapsed" Grid.Row="4" Grid.Column="3" Header="Results">
+            <GroupBox Name="ResultsBox" Visibility="Hidden" Grid.Row="4" Grid.Column="4" Header="Results">
                 <Button BorderBrush="Green" Background="WhiteSmoke" Content="Get Result" x:Name="DlButton" Grid.Row="4" Grid.Column="3" Click="DlButton_Click" Width="100" Margin="5" Height="40"/>
             </GroupBox>
 
@@ -302,9 +302,8 @@
             </GroupBox>
 
 
-            <GroupBox Name="ProcessorOpts" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,0" Header="Iterator Options">
+            <GroupBox Name="ProcessorOpts" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Iterator Options">
             
-
             <Grid Name="ExtractPanel" Grid.Row="2" Grid.ColumnSpan="3" Margin="0,5,5,0" >
 
                 <Grid.RowDefinitions>
@@ -314,7 +313,8 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
-                </Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -327,16 +327,53 @@
 
                 <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Left context</Label>
                 <TextBox Name="LeftContextTextBox" Grid.Row="1" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
-                <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Frame step</Label>
-                <TextBox  Name="FrameSizeTextBox" Grid.Row="2" Grid.Column="1" IsEnabled="False"  Height="20" TextChanged="GenericTextChanged"></TextBox>
-                <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Right context</Label>
-                <TextBox Name="RightContextTextBox" Grid.Row="3" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
-                <Label Name="HelpLabel" Grid.Row="1" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>
+                <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Framesize</Label>
+                    <TextBox  Name="FrameSizeTextBox" Grid.Row="2" Grid.Column="1" IsEnabled="False"  Height="20" TextChanged="GenericTextChanged"></TextBox>
+                    <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right"> Stride</Label>
+                <TextBox  Name="StrideTextBox" Grid.Row="3" Grid.Column="1" Height="20" TextChanged="GenericTextChanged">None</TextBox>
+                <Label Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Right context</Label>
+                <TextBox Name="RightContextTextBox" Grid.Row="4" Grid.Column="1" IsEnabled="False" Height="20" TextChanged="GenericTextChanged"></TextBox>
+                <Label Name="StartLength" Grid.Row="5"   Visibility="Visible" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Process from</Label>
+                <TextBox Name="StartLengthTextBox"  Visibility="Visible" IsEnabled="True" Grid.Row="5" Grid.Column="1" ToolTip="Start time" Height="20">0</TextBox>
+                    <Label Name="EndLength" Grid.Row="6"   Visibility="Visible" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right">Process until</Label>
+                <TextBox Name="EndLengthTextBox"  Visibility="Visible" IsEnabled="True" Grid.Row="6" Grid.Column="1" ToolTip="Leave on eof (End of File) for full predictions, enter time in seconds or milliseconds to predict until a certain time" Height="20">0</TextBox>
 
             </Grid>
+             
 
             </GroupBox>
-            
+            <GroupBox Name="PredictOptionsPanel" Grid.Row="4"  Grid.Column="3" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Label Post-Process">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                
+
+                    <CheckBox Name="FillGapCheckBox" Grid.Row="0" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Center" IsChecked="True" HorizontalAlignment="Left" >Fill gaps (s)</CheckBox>
+                    <TextBox Name="FillGapTextBox" Grid.Row="0" Grid.Column="1"  Height="20">0.5</TextBox>
+
+                    <CheckBox Name="RemoveLabelCheckBox" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" IsChecked="True" HorizontalAlignment="Left">Remove (s)</CheckBox>
+                    <TextBox Name="RemoveLabelTextBox" Grid.Row="1" Grid.Column="1"  Height="20">0.15</TextBox>
+
+                    <!--<CheckBox Name="ConfidenceCheckBox" Grid.Row="2" Grid.Column="0" Margin="0,0,5,0"  VerticalAlignment="Center" HorizontalAlignment="Left">Confidence</CheckBox>
+                    <TextBox Name="ConfidenceTextBox" Grid.Row="2" Grid.Column="1"  Height="20">1.0</TextBox>-->
+
+                    <!--<Label Name="HelpPredictLabel" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center"></Label>-->
+
+                </Grid>
+
+            </GroupBox>
+
 
 
             <DockPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="6" Margin="5" LastChildFill="False">
