@@ -838,5 +838,19 @@ namespace ssi.Properties {
                 this["NovaAssistantTopP"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("The data you are supposed to analyse is provided to you in semi colon seperated t" +
+            "uple form, where each entry contains the identity of the speaker at position 0 a" +
+            "nd the transcript of a speaker at position 1")]
+        public string NovaAssistantDataDescription {
+            get {
+                return ((string)(this["NovaAssistantDataDescription"]));
+            }
+            set {
+                this["NovaAssistantDataDescription"] = value;
+            }
+        }
     }
 }

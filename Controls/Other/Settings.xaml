@@ -195,7 +195,7 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="Backend Server">
+            <TabItem Header="NOVA Server">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -229,38 +229,53 @@
                         <TextBox Grid.Column="1" Width="50" HorizontalAlignment="Left" Grid.Row="1" Name="NS_Port" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" TextChanged="NS_Port_TextChanged"  GotKeyboardFocus="NS_Port_GotFocus" GotMouseCapture="NS_Port_GotMouseCapture" />
                     </Grid>
 
-                    <Label Grid.Row="2" Grid.Column="0"  Content="Nova assistant:" Grid.ColumnSpan="2"/>
-                    <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition></RowDefinition>
-                            <RowDefinition></RowDefinition>
-                            <RowDefinition></RowDefinition>
-                            <RowDefinition></RowDefinition>
-                            <RowDefinition></RowDefinition>
-                            <RowDefinition></RowDefinition>
-                            <RowDefinition></RowDefinition>
+                   
+                </Grid>
+            </TabItem>
+            <TabItem Header="NOVA Assistant">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                
+            <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
                         </Grid.RowDefinitions>
-                        <Label Grid.Column="0" Grid.Row="0">Host:</Label>
-                        <TextBox Grid.Column="1" Grid.Row="0" x:Name="Assistant_Host" Margin="5,3,5,2" GotKeyboardFocus="Assistant_Host_GotFocus" GotMouseCapture="Assistant_Host_GotMouseCapture"/>
-                        <Button Grid.Column="2" Grid.Row="0" Height="20px" Click="Button_Click_1" Width="30px">Clear</Button>
-                        <Label Grid.Column="0" Grid.Row="1">Port:</Label>
-                        <TextBox Grid.Column="1" Width="50" HorizontalAlignment="Left" Grid.Row="1" Name="Assistant_Port" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" TextChanged="Assistant_Port_TextChanged"  GotKeyboardFocus="Assistant_Port_GotFocus" GotMouseCapture="Assistant_Port_GotMouseCapture" />
-                        <Label Grid.Column="0" Grid.Row="2">System Prompt:</Label>
-                        <TextBox Grid.Column="1" Width="250" HorizontalAlignment="Left" Grid.Row="2" Name="SystemPrompt" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
-                        <Label Grid.Column="0" Grid.Row="3">Temperature:</Label>
-                        <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="3" Name="Temperature" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
-                        <Label Grid.Column="0" Grid.Row="4">MaxTokens:</Label>
-                        <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="4" Name="MaxTokens" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
-                        <Label Grid.Column="0" Grid.Row="5">TopP:</Label>
-                        <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="5" Name="TopP" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
-                        <Label Grid.Column="0" Grid.Row="6">TopK:</Label>
-                        <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="6" Name="TopK" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
-                    </Grid>
+                <Label Grid.Column="0" Grid.Row="0">Host:</Label>
+                <TextBox Grid.Column="1" Grid.Row="0" x:Name="Assistant_Host" Margin="5,3,5,2" GotKeyboardFocus="Assistant_Host_GotFocus" GotMouseCapture="Assistant_Host_GotMouseCapture"/>
+                <Button Grid.Column="2" Grid.Row="0" Height="20px" Click="Button_Click_1" Width="30px">Clear</Button>
+                <Label Grid.Column="0" Grid.Row="1">Port:</Label>
+                <TextBox Grid.Column="1" Width="50" HorizontalAlignment="Left" Grid.Row="1" Name="Assistant_Port" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" TextChanged="Assistant_Port_TextChanged"  GotKeyboardFocus="Assistant_Port_GotFocus" GotMouseCapture="Assistant_Port_GotMouseCapture" />
+                <Label Grid.Column="0" Grid.Row="2">System Prompt:</Label>
+                <TextBox Grid.Column="1" Width="250" HorizontalAlignment="Left" Grid.Row="2" Name="SystemPrompt" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
+                <Label Grid.Column="0" Grid.Row="3">Data Description:</Label>
+                <TextBox Grid.Column="1" Width="250" HorizontalAlignment="Left" Grid.Row="3" Name="DataDescription" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
+                <Label Grid.Column="0" Grid.Row="4">Temperature:</Label>
+                <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="4" Name="Temperature" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
+                <Label Grid.Column="0" Grid.Row="5">MaxTokens:</Label>
+                <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="5" Name="MaxTokens" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
+                <Label Grid.Column="0" Grid.Row="6">TopP:</Label>
+                <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="6" Name="TopP" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
+                <Label Grid.Column="0" Grid.Row="7">TopK:</Label>
+                <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="7" Name="TopK" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
+            </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

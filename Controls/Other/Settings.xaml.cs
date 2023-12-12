@@ -26,9 +26,11 @@ namespace ssi
             PointDistance.Text = Properties.Settings.Default.DefaultPolygonPointDistance.ToString();
             DrawwaveformCheckbox.IsChecked = Properties.Settings.Default.DrawVideoWavform;
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
+            DataDescription.Text = Properties.Settings.Default.NovaAssistantDataDescription.ToString();
+
             //For now only works on test server
-           
-           
+
+
             mbackend.SelectedIndex = (Properties.Settings.Default.MediaBackend == "Software") ? 1 : 0; 
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
             if (tokens.Length == 2)
@@ -173,6 +175,12 @@ namespace ssi
         {
             return Temperature.Text;
         }
+
+        public string Data_Description()
+        {
+            return DataDescription.Text;
+        }
+
 
         public string Assistant_MaxTokens()
         {

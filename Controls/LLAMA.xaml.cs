@@ -87,7 +87,7 @@ namespace ssi.Controls
             List<DataItem> annoListItems = new List<DataItem>();
             foreach (AnnoList list in MainHandler.annoLists)
             {
-                if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
+                if (list.Scheme.Type == AnnoScheme.TYPE.FREE || list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                 {
                    foreach(AnnoListItem ali in list)
                     {
@@ -110,7 +110,7 @@ namespace ssi.Controls
         }
 
        
-        public void updateUItest(string user, string text)
+        public void update(string user, string text)
         {
             this.Dispatcher.Invoke(() =>
             {
@@ -156,10 +156,10 @@ namespace ssi.Controls
 
                 }), DispatcherPriority.SystemIdle);
 
-                if (contextaware && MainHandler.annoLists.Count > 1)
+                if (contextaware && MainHandler.annoLists.Count > 0)
                 {
                     datastr = await PrepareData();
-                    datadescr = "The data you are supposed to analyse is provided to you in list form, where each entry contains the identity of the speaker at position 0 and the transcript of a speaker at position 1";
+                    datadescr = Properties.Settings.Default.NovaAssistantDataDescription;
 
 
                     if (!dict_users.ContainsKey(from))
@@ -323,7 +323,7 @@ namespace ssi.Controls
             }
 
             var text = message;
-            updateUItest(from, message);
+            update(from, message);
 
            
             string response;
@@ -394,132 +394,6 @@ namespace ssi.Controls
 
 
 
-        public async Task<string> SendMessage(string msg, string URL)
-        {
-            HttpClient client = new HttpClient();
-
-
-            string datastr = "";
-            string datadescr = "";
-            string systemprompt = "Your Name is Nova Assistant. Do not create ficional examples. Under no circumstances should you add data to it.";
-
-            if (msg.Contains("data"))
-            {
-                datastr = await PrepareData();
-                datadescr = "The data you are supposed to analyse is provided to you in list form, where each entry contains the identity of the speaker at position 0 and the transcript of a speaker at position 1";
-                systemprompt = "Your name is Nova Assistant. You are a therapeutic assistant, helping me analyse the interaction between a patient and the therapist. If you don't know the answer, please do not share false information. Do not create ficional examples. Under no circumstances should you add data to it. Do not start any analysis unless I specifically ask for it.";
-            }
-            else if (msg.StartsWith("-text-to-image"))
-            {
-                NovaServerNostr server = new NovaServerNostr(msg);
-                
-                return "";
-                    
-            }
-
-
-
-            string user = Properties.Settings.Default.MongoDBUser;
-
-            if (!dict_users.ContainsKey(user))
-            {
-                dict_users[user] = new Dictionary<string, dynamic>
-                {
-                    ["history"] = new List<List<string>>()
-                };
-            }
-
-
-            async Task<string> PostStream(string url, object data)
-            {
-                string reply = "";
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.Method = "POST";
-                request.ContentType = "application/json";
-
-                using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
-                {
-                    string json = JsonConvert.SerializeObject(data);
-                    streamWriter.Write(json);
-                }
-
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                using (Stream stream = response.GetResponseStream())
-                using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
-                {
-                    while (!reader.EndOfStream)
-                    {
-                        string line = reader.ReadLine();
-                        if (!string.IsNullOrEmpty(line))
-                        {
-                            reply += line;
-                            //Console.Write(line + " ");
-                            //System.Windows.MessageBox.Show(line + " ");
-                            this.Dispatcher.Invoke(() =>
-                            {
-                                if (line != "")
-                                {
-                                    string from = "Nova Assistant";
-                                    string text = reply;
-                                    paragraph.Inlines.Add(new Bold(new Run(from + ": "))
-                                    {
-                                        Foreground = System.Windows.Media.Brushes.Red
-                                    });
-                                    paragraph.Inlines.Add(text);
-                                    paragraph.Inlines.Add(new LineBreak());
-                                }
-
-                                //paragraph.Inlines.Add(reply);
-                                //paragraph.Inlines.Add(new LineBreak());
-                                //System.Windows.MessageBox.Show(reply);
-                                Console.WriteLine(line +"\n");
-
-                            });
-                            
-                        }
-                    }
-                }
-
-                return reply;
-            }
-
-
-
-
-
-            string answer;
-
-            if (msg == "-clear")
-            {
-                dict_users[user]["history"] = new List<List<string>>();
-                answer = "";
-                paragraph.Inlines.Clear();
-
-                //FlowDocument ObjFdoc = new FlowDocument();
-                //System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph();
-                //paragraph.Inlines.Add(new Run(""));
-                //ObjFdoc.Blocks.Add(ObjPara1);
-                //ReplyBox.Document = ObjFdoc;
-
-            }
-            else
-            {
-              
-                var payload = new
-                {
-                    system_prompt = systemprompt,
-                    data_desc = datadescr,
-                    data = datastr,
-                    message = msg,
-                    history = dict_users[user]["history"]
-                };
-
-                answer = await PostStream(URL, payload);
-                dict_users[user]["history"].Add(new List<string> { msg, answer });
-            }
-            return answer;
-            
-        }
 
     private void InputBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
