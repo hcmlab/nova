@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.7.6";
+        public static string BuildVersion = "1.2.7.7";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -778,6 +778,7 @@ namespace ssi
                 Properties.Settings.Default.NovaAssistantAddress = s.Assistant_Address();
                 Properties.Settings.Default.NovaAssistantSystemPrompt = s.Assistant_SystemPrompt();
                 Properties.Settings.Default.NovaAssistantTemperature = s.Assistant_Temperature();
+                Properties.Settings.Default.NovaAssistantDataDescription = s.Data_Description();
                 Properties.Settings.Default.NovaAssistantMaxtokens = s.Assistant_MaxTokens();
                 Properties.Settings.Default.NovaAssistantTopK = s.Assistant_TopK();
                 Properties.Settings.Default.NovaAssistantTopP = s.Assistant_TopP();

@@ -1,6 +1,7 @@
 ﻿using ExCSS;
 using Microsoft.Toolkit.HighPerformance;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Octokit;
 using OxyPlot.Reporting;
 using SharpCompress.Common;
@@ -21,6 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Routing;
 using System.Web.Security;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -41,13 +43,16 @@ using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.LinkLabel;
 
 namespace ssi.Controls
-{
+{     
+
     /// <summary>
     /// Interaktionslogik für LLAMA.xaml
     /// </summary>
     public partial class LLAMA : Window
     {
         System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph();
+        private static readonly HttpClient client = new HttpClient();
+
         DatabaseUser user;
       
 
@@ -67,10 +72,46 @@ namespace ssi.Controls
         {
             InitializeComponent();
             ReplyBox.Document = new FlowDocument(paragraph);
-     
+
+            getModels();
+            return;
+
+
             InputBox.Focus();
         }
         public static Dictionary<string, dynamic> dict_users = new Dictionary<string, dynamic>();
+
+        private async void getModels()
+        {
+            List<string> res = new List<string>();
+            string url = "http://" + Properties.Settings.Default.NovaAssistantAddress + "/models";
+            try
+            {
+                var response = client.GetAsync(url).Result;
+                var c = await response.Content.ReadAsByteArrayAsync();
+                string result = System.Text.Encoding.UTF8.GetString(c);
+                JArray models = JArray.Parse(result);
+                string all = "";
+                foreach (var model in models ) {
+                    if (!model["provider"].ToString().StartsWith("text-completion"))
+                        {
+                        res.Add(model["provider"].ToString() + ":" + model["id"].ToString());
+                    }
+                  
+                    //all += model["id"].ToString() + " : " + model["provider"].ToString() + "\n";
+                }
+                //System.Windows.MessageBox.Show(all);
+              
+                ModelBox.ItemsSource = res;
+                ModelBox.SelectedItem = Properties.Settings.Default.NovaAssistantModel;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);         
+            }
+               
+        }
+
 
         private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
@@ -205,17 +246,34 @@ namespace ssi.Controls
                 else
                 {
 
-                    var payload = new
-                    {
-                        system_prompt = systemprompt,
-                        data_desc = datadescr,
-                        data = datastr,
-                        message = message,
-                        temperature = temperature,
-                        max_new_tokens = maxtokens,
-                        top_p = topP,
-                        top_k = topk,
-                        history = dict_users[user]["history"]
+
+                    string model = "";
+                    string provider = "";
+
+     
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            model = ModelBox.SelectedItem.ToString().Split(':')[1];
+                            provider = ModelBox.SelectedItem.ToString().Split(':')[0];
+                        });
+
+       
+
+
+
+                var payload = new
+                {
+                    system_prompt = systemprompt,
+                    data_desc = datadescr,
+                    data = datastr,
+                    model = model,
+                    provider = provider,
+                    message = message,
+                    temperature = temperature,
+                    max_new_tokens = maxtokens,
+                    top_p = topP,
+                    top_k = topk,
+                    history = dict_users[user]["history"]
                     };
 
                     //answer = await PostStream(url, payload);
@@ -437,5 +495,15 @@ namespace ssi.Controls
             window.Topmost = true;
         }
 
+        private void ModelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+           // this.Dispatcher.Invoke(() =>
+           // {
+
+           //// Properties.Settings.Default.NovaAssistantModel = ModelBox.SelectedItem.ToString();
+           /// Properties.Settings.Default.Save();
+           //       });
+
+    }
     }
 }
