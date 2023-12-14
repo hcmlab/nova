@@ -209,5 +209,8 @@
     <Setting Name="NovaAssistantDataDescription" Type="System.String" Scope="User">
       <Value Profile="(Default)">The data you are supposed to analyse is provided to you in semi colon seperated tuple form, where each entry contains the identity of the speaker at position 0 and the transcript of a speaker at position 1</Value>
     </Setting>
+    <Setting Name="NovaAssistantModel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">hcai:llama7b</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

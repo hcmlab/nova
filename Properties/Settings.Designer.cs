@@ -852,5 +852,17 @@ namespace ssi.Properties {
                 this["NovaAssistantDataDescription"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("hcai:llama7b")]
+        public string NovaAssistantModel {
+            get {
+                return ((string)(this["NovaAssistantModel"]));
+            }
+            set {
+                this["NovaAssistantModel"] = value;
+            }
+        }
     }
 }

@@ -257,6 +257,7 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
                         </Grid.RowDefinitions>
                 <Label Grid.Column="0" Grid.Row="0">Host:</Label>
                 <TextBox Grid.Column="1" Grid.Row="0" x:Name="Assistant_Host" Margin="5,3,5,2" GotKeyboardFocus="Assistant_Host_GotFocus" GotMouseCapture="Assistant_Host_GotMouseCapture"/>
