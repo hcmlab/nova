@@ -104,6 +104,10 @@ namespace ssi.Controls
               
                 ModelBox.ItemsSource = res;
                 ModelBox.SelectedItem = Properties.Settings.Default.NovaAssistantModel;
+                if  (ModelBox.SelectedItem.ToString() == "")
+                {
+                    ModelBox.SelectedIndex = 0;
+                }
             }
             catch (Exception ex)
             {
@@ -497,13 +501,13 @@ namespace ssi.Controls
 
         private void ModelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-           // this.Dispatcher.Invoke(() =>
-           // {
+            this.Dispatcher.Invoke(() =>
+            {
 
-           //// Properties.Settings.Default.NovaAssistantModel = ModelBox.SelectedItem.ToString();
-           /// Properties.Settings.Default.Save();
-           //       });
+              Properties.Settings.Default.NovaAssistantModel = ModelBox.SelectedItem.ToString();
+              Properties.Settings.Default.Save();
+            });
 
-    }
+        }
     }
 }
