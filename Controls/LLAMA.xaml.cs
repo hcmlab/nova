@@ -51,7 +51,8 @@ namespace ssi.Controls
     public partial class LLAMA : Window
     {
         System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph();
-        private static readonly HttpClient client = new HttpClient();
+        private static HttpClient client = new HttpClient();
+   
 
         DatabaseUser user;
       
@@ -87,7 +88,15 @@ namespace ssi.Controls
             string url = "http://" + Properties.Settings.Default.NovaAssistantAddress + "/models";
             try
             {
-                var response = client.GetAsync(url).Result;
+                HttpClient client2 = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(2);
+                var response = client2.GetAsync(url).Result;
+                if (response == null)
+                {
+                    System.Windows.MessageBox.Show("Could not connect to Assistant");
+                    this.Close();
+                }
+
                 var c = await response.Content.ReadAsByteArrayAsync();
                 string result = System.Text.Encoding.UTF8.GetString(c);
                 JArray models = JArray.Parse(result);
@@ -97,17 +106,18 @@ namespace ssi.Controls
                         {
                         res.Add(model["provider"].ToString() + ":" + model["id"].ToString());
                     }
-                  
-                    //all += model["id"].ToString() + " : " + model["provider"].ToString() + "\n";
                 }
-                //System.Windows.MessageBox.Show(all);
-              
+
+
+  
                 ModelBox.ItemsSource = res;
                 ModelBox.SelectedItem = Properties.Settings.Default.NovaAssistantModel;
                 if  (ModelBox.SelectedItem.ToString() == "")
                 {
                     ModelBox.SelectedIndex = 0;
                 }
+
+               
             }
             catch (Exception ex)
             {
@@ -148,7 +158,8 @@ namespace ssi.Controls
 
             foreach (DataItem item in annoListItemsSorted)
             {
-                labels += item.ToString() + ";";
+                labels += "(" + item.Role + "," + "\""  +item.Item.Label.Trim() + "\");";
+                //labels += item.ToString() + ";";
             }
 
             return labels;
@@ -191,15 +202,13 @@ namespace ssi.Controls
                 float topP = float.Parse(Properties.Settings.Default.NovaAssistantTopP);
                 bool contextaware = true;
 
-                _ = Dispatcher.BeginInvoke(new Action(() =>
+   
+                this.Dispatcher.Invoke(() =>
                 {
+                    contextaware = Contextaware.IsChecked == true;
+                });
 
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        contextaware = Contextaware.IsChecked == true;
-                    });
-
-                }), DispatcherPriority.SystemIdle);
+       
 
                 if (contextaware && MainHandler.annoLists.Count > 0)
                 {
@@ -231,19 +240,14 @@ namespace ssi.Controls
                 if (message == "/clear")
                 {
 
-                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                    this.Dispatcher.Invoke(() =>
                     {
+                        dict_users[user]["history"] = new List<List<string>>();
+                        answer = "";
+                        paragraph.Inlines.Clear();
+                    });
 
-                        this.Dispatcher.Invoke(() =>
-                        {
-                            dict_users[user]["history"] = new List<List<string>>();
-                            answer = "";
-                            paragraph.Inlines.Clear();
-                        });
-
-                    }), DispatcherPriority.SystemIdle);
-
-                 
+      
 
    
                 }
@@ -257,8 +261,12 @@ namespace ssi.Controls
      
                         this.Dispatcher.Invoke(() =>
                         {
-                            model = ModelBox.SelectedItem.ToString().Split(':')[1];
-                            provider = ModelBox.SelectedItem.ToString().Split(':')[0];
+                            if (ModelBox.SelectedItem.ToString() != "")
+                            {
+                                model = ModelBox.SelectedItem.ToString().Split(':')[1];
+                                provider = ModelBox.SelectedItem.ToString().Split(':')[0];
+                            }
+                           
                         });
 
        
