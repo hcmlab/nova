@@ -87,7 +87,7 @@ namespace ssi
 
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         public AnnoTierSegment temp_segment;
-        static LLAMA llama2 = new LLAMA();
+        //static LLAMA llama2 = new LLAMA();
         public class DownloadStatus
         {
             public string File;
@@ -482,7 +482,8 @@ namespace ssi
 
         private void AssistantMenu_Click(object sender, RoutedEventArgs e)
         {
-                 MainHandler.llama2.Show();
+            LLAMA llama = new LLAMA();
+            llama.Show();
         }
 
         private void DatabaseNovaServerMenu_Click(object sender, RoutedEventArgs e)
