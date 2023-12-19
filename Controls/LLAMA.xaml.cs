@@ -104,7 +104,7 @@ namespace ssi.Controls
                 foreach (var model in models ) {
                     if (!model["provider"].ToString().StartsWith("text-completion"))
                         {
-                        res.Add(model["provider"].ToString() + ":" + model["id"].ToString());
+                        res.Add(model["provider"].ToString() + "/" + model["id"].ToString());
                     }
                 }
 
@@ -263,8 +263,8 @@ namespace ssi.Controls
                         {
                             if (ModelBox.SelectedItem.ToString() != "")
                             {
-                                model = ModelBox.SelectedItem.ToString().Split(':')[1];
-                                provider = ModelBox.SelectedItem.ToString().Split(':')[0];
+                                model = ModelBox.SelectedItem.ToString().Split('/')[1];
+                                provider = ModelBox.SelectedItem.ToString().Split('/')[0];
                             }
                            
                         });
