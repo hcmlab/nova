@@ -471,7 +471,7 @@ namespace ssi
                                         string[] src = source.Split(':');
 
 
-                                        if ((source == "file") || (source == "image") || (source == "text"))
+                                        if ((source == "file") || (source == "image") || (source == "stream:Video") || (source == "text"))
                                             showresult = true;
 
                                         else
@@ -2285,7 +2285,7 @@ namespace ssi
                         origin = input.SuperType;
 
                     }
-                    if (input.SuperType != null && (input.SuperType.ToLower() == "image" || input.SuperType.ToLower() == "text" ||  input.SuperType.ToLower() == "url"))
+                    if (input.SuperType != null && (input.SuperType.ToLower() == "image" || input.SubType.ToLower() == "video" || input.SuperType.ToLower() == "text" ||  input.SuperType.ToLower() == "url"))
                     {
                         type = AnnoScheme.AttributeTypes.NONE;
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -2293,7 +2293,15 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
-                        origin = input.SuperType;
+                        if (input.SubType.ToLower() == "video")
+                        {
+                            origin = input.SuperType + ":" + input.SubType;
+                        }
+                        else
+                        {
+                            origin = input.SuperType;
+                        }
+                    
 
                     }
 
@@ -3009,14 +3017,14 @@ namespace ssi
                             string source = element.Key.Split('.')[1];
                             string[] src = source.Split(':');
 
-                            if ((source == "text") || (source == "prompt") || (source == "image") || (src.Length > 1) && ( src[1] == "text" || (source == "image") || src[1] == "prompt"))
+                            if ((source == "text") || (source == "prompt") || (source == "image") || (source == "stream:Video") || (src.Length > 1) && ( src[1] == "text" || (source == "image") || src[1] == "prompt"))
                             {
                                 JObject ob = new JObject
                                     {
                                     { "id", element.Key.Split('.')[0] },
                                     { "type", "output" },
                                     { "src", "request:"+ source },
-                                    { "data", ((TextBox)element.Value.ElementAt(0)).Text},
+                                    { "data", "" },
                                     { "active", isactive }
                                 };
                                 data.Add(ob);
