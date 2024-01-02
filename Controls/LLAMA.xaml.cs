@@ -1,49 +1,25 @@
 ﻿using ExCSS;
-using Microsoft.Toolkit.HighPerformance;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Octokit;
-using OxyPlot.Reporting;
-using SharpCompress.Common;
-using SharpDX;
-using SharpDX.Multimedia;
-using ssi.Tools;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Routing;
-using System.Web.Security;
 using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Interop;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using static CSJ2K.j2k.codestream.HeaderInfo;
-using static ExCSS.AttributeSelectorFactory;
-using static ssi.DatabaseCMLExtractFeaturesWindow;
-using static ssi.DatabaseNovaServerWindow;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Windows.Forms.LinkLabel;
 
 namespace ssi.Controls
-{     
+{
 
     /// <summary>
     /// Interaktionslogik für LLAMA.xaml
@@ -247,14 +223,9 @@ namespace ssi.Controls
                         paragraph.Inlines.Clear();
                     });
 
-      
-
-   
                 }
                 else
                 {
-
-
                     string model = "";
                     string provider = "";
 
@@ -268,9 +239,6 @@ namespace ssi.Controls
                             }
                            
                         });
-
-       
-
 
 
                 var payload = new
