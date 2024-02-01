@@ -646,12 +646,19 @@ namespace ssi
                         addMedia(media);
                     }
 
-                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "feature;face") || (signal.Meta.ContainsKey("type") && signal.Meta["type"].Contains("feature;face")))
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "feature;face") || (signal.Meta.ContainsKey("type") && signal.Meta["type"].Contains("feature;face;landmarks")))
                     {
 
-                        IMedia media = new Face(filename, signal, Face.FaceType.GENERIC, mwidth, mheight);
+                        IMedia media = new Face(filename, signal, Face.FaceType.LANDMARKS, mwidth, mheight);
                         addMedia(media);
                     }
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "feature;face") || (signal.Meta.ContainsKey("type") && signal.Meta["type"].Contains("feature;face;boundingbox")))
+                    {
+
+                        IMedia media = new Face(filename, signal, Face.FaceType.BOUNDINGBOX, mwidth, mheight);
+                        addMedia(media);
+                    }
+
 
                     else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton")
                     {

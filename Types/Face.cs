@@ -28,6 +28,9 @@ namespace ssi
             OPENFACE,
             OPENFACE2,
             BLAZEFACE,
+            LANDMARKS,
+            BOUNDINGBOX,
+            MESH,
             GENERIC
         }
 
@@ -570,7 +573,7 @@ namespace ssi
               }
             }
 
-            else if (facetype == FaceType.GENERIC)
+            else if (facetype == FaceType.BOUNDINGBOX)
             {
                 if (index < signal.number)
                 {
@@ -580,17 +583,17 @@ namespace ssi
                         //double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
 
 
-                        double X1 = signal.data[i] * height;
-                        double Y1 = signal.data[i + 1] * width;
+                        double Y1 = signal.data[i] * height;
+                        double X1 = signal.data[i + 1] * width;
 
-                        double X2 = signal.data[i] * height;
-                        double Y2 = signal.data[i + 3] * width;
+                        double Y2 = signal.data[i] * height;
+                        double X2 = signal.data[i + 3] * width;
 
-                        double X3 = signal.data[i + 2] * height;
-                        double Y3 = signal.data[i + 3] * width;
+                        double Y3 = signal.data[i + 2] * height;
+                        double X3 = signal.data[i + 3] * width;
 
-                        double X4 = signal.data[i + 2] * height;
-                        double Y4 = signal.data[i + 1] * width;
+                        double Y4 = signal.data[i + 2] * height;
+                        double X4 = signal.data[i + 1] * width;
                         try
                         {
                             if (X1 < width && Y1 < height)
@@ -613,11 +616,18 @@ namespace ssi
 
 
                     }
-                    for (uint j = (index * signal.dim + 4); j < (index * signal.dim + (signal.dim - 1)); j += 2)
+                }
+            }
+            else if (facetype == FaceType.LANDMARKS)
+            {
+                if (index < signal.number)
+                {
+
+                    for (uint j = (index * signal.dim); j < (index * signal.dim + (signal.dim - 1)); j += 2)
                     {
 
-                        double X = signal.data[j] * width;
-                        double Y = signal.data[j + 1] * height;
+                        double Y = signal.data[j] * width;
+                        double X = signal.data[j + 1] * height;
 
 
                         try
@@ -637,6 +647,7 @@ namespace ssi
 
                 }
             }
+
 
 
 
