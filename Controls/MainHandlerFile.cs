@@ -590,9 +590,9 @@ namespace ssi
                     int mwidth = width;
                     int mheight = height;
 
-                    if (signal.Meta.ContainsKey("ratio"))
+                    if (signal.Meta.ContainsKey("size"))
                     {
-                        string[] split = signal.Meta["ratio"].Split(':');
+                        string[] split = signal.Meta["size"].Split(':');
                         int w = Integer.parseInt(split[0]);
                         int h = Integer.parseInt(split[1]);
                         float scale = 1;

@@ -189,8 +189,8 @@ namespace ssi
 
             else
             {
-                minMax();
-                scale();
+                //minMax();
+                //scale();
             }
 
           
@@ -626,8 +626,8 @@ namespace ssi
                     for (uint j = (index * signal.dim); j < (index * signal.dim + (signal.dim - 1)); j += 2)
                     {
 
-                        double Y = signal.data[j] * width;
-                        double X = signal.data[j + 1] * height;
+                        double Y = signal.data[j] * height;
+                        double X = signal.data[j + 1] * width;
 
 
                         try
