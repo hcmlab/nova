@@ -471,7 +471,7 @@ namespace ssi
                                         string[] src = source.Split(':');
 
 
-                                        if ((source == "file") || (source == "image") || (source == "stream:Video") || (source == "text"))
+                                        if ((source == "file") || (source == "image")  || (source == "text"))
                                             showresult = true;
 
                                         else
@@ -2261,7 +2261,7 @@ namespace ssi
                 {
                     string option;
                     string origin = null;
-
+                    bool userchoice = false;
                     AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.STRING;
                     List<string> content = new List<string>();
 
@@ -2285,7 +2285,7 @@ namespace ssi
                         origin = input.SuperType;
 
                     }
-                    if (input.SuperType != null && (input.SuperType.ToLower() == "image" || input.SubType.ToLower() == "video" || input.SuperType.ToLower() == "text" ||  input.SuperType.ToLower() == "url"))
+                    if (input.SuperType != null && (input.SuperType.ToLower() == "image" || input.SuperType.ToLower() == "text" ||  input.SuperType.ToLower() == "url"))
                     {
                         type = AnnoScheme.AttributeTypes.NONE;
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -2293,17 +2293,31 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
-                        if (input.SubType.ToLower() == "video")
-                        {
-                            origin = input.SuperType + ":" + input.SubType;
-                        }
-                        else
+                   
                         {
                             origin = input.SuperType;
                         }
                     
 
                     }
+
+
+                    //if (input.SuperType != null && (input.SubType.ToLower() == "video"))
+                    //{
+                    //    type = AnnoScheme.AttributeTypes.NONE;
+                    //    if (input.DefaultName != null && input.DefaultName != "")
+                    //    {
+                    //        content.Add(input.DefaultName);
+                    //    }
+                    //    //else content.Add("");
+               
+                    //    {
+                    //        origin = input.SuperType + ":" + input.SubType;
+                    //        userchoice = true;
+                    //    }
+            
+
+                    //}
 
                     else if (input.SuperType.ToLower().StartsWith("annotation"))
                     {
@@ -2413,7 +2427,7 @@ namespace ssi
 
 
 
-                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, xcontent2, xtype2, origin);
+                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, xcontent2, xtype2, origin, userchoice);
                     values.Add(attribute);
                 }
 
@@ -3434,9 +3448,35 @@ namespace ssi
                     if (element.Value.AttributeType == AnnoScheme.AttributeTypes.NONE)
                     {
                         TextBox textBox = new TextBox() { Text = element.Value.DefaultValue };
+
+                     
+                        //var userchoice = new string[3];
+                        //userchoice[0] = "Request";
+                        //userchoice[1] = "File";
+                        //userchoice[2] = "Database";
+
+                        //ComboBox cb4 = new ComboBox()
+                        //{
+                        //    ItemsSource = userchoice
+                        //};
+                        //cb4.SelectedIndex = 0;
+                        //cb4.SelectionChanged += Cb4_SelectionChanged;
+                        //Thickness margin = new Thickness();
+                        //margin.Top = 5; margin.Right = 5; margin.Bottom = 5;
+                        //cb4.Margin = margin;
+                        //outputGrid.Children.Add(cb4);
+
+
+
+                        
+
+                        //Grid.SetColumn(cb4, 2);
+                        //Grid.SetRow(cb4, outputGrid.RowDefinitions.Count - 1);
+
                         List<UIElement> list = new List<UIElement>
                             {
                                 textBox,
+                              //  cb4
 
                             };
                         Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
@@ -3544,6 +3584,8 @@ namespace ssi
 
 
 
+
+
                             cb3.SelectedItem = Properties.Settings.Default.CMLDefaultAnnotatorPrediction;
                             if (cb3.SelectedItem == null)
                             {
@@ -3553,8 +3595,10 @@ namespace ssi
 
                             cb2.Margin = margin;
                             cb3.Margin = margin;
+                          
                             outputGrid.Children.Add(cb2);
                             outputGrid.Children.Add(cb3);
+                          
 
                             Grid.SetColumn(cb2, 2);
                             Grid.SetRow(cb2, outputGrid.RowDefinitions.Count - 1);
@@ -3562,14 +3606,18 @@ namespace ssi
                             Grid.SetColumn(cb3, 3);
                             Grid.SetRow(cb3, outputGrid.RowDefinitions.Count - 1);
 
-                  
+                          
+
+
+
 
                             List<UIElement> list = new List<UIElement>
                             {
                                 cb,
                                 cb2,
                                 cb3,
-                                cbox
+                                cbox,
+                             
 
                             };
                             Outputsresult.Add(element.Key + "." + element.Value.Origin, list);
@@ -3636,6 +3684,39 @@ namespace ssi
 
 
         }
+
+        //private void Cb4_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+
+        //    Grid parent = (Grid)(((ComboBox)sender).Parent);
+        //    TextBox test = new TextBox();
+        //    CheckBox test2 = new CheckBox();
+        //    if (((ComboBox)sender).SelectedItem.ToString() == "File")
+        //    {
+        //        parent.Children.Remove(test2);
+        //        parent.Children.Add(test);
+
+        //        outputGrid..
+         
+        //        Grid.SetColumn(test, 1);
+        //        Grid.SetRow(test, outputGrid.RowDefinitions.Count - 1);
+        //    }
+        //    else if (((ComboBox)sender).SelectedItem.ToString() == "Database")
+        //    {
+
+        //        parent.Children.Remove(test);
+        //        parent.Children.Add(test2);
+        //        Grid.SetColumn(test2, 1);
+        //        Grid.SetRow(test2, outputGrid.RowDefinitions.Count - 1);
+        //    }
+        //    else
+        //    {
+               
+        //    }
+            
+
+
+        //}
 
         private void Cb_TextInput(object sender, TextCompositionEventArgs e)
         {
