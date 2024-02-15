@@ -51,6 +51,8 @@ namespace ssi
 
         public string[] Labels { get; set; }
         public Func<double, string> Formatter { get; set; }
+        public Func<double, string> Formatter2 { get; set; }
+
 
 
         private static readonly HttpClient client = new HttpClient();
@@ -86,6 +88,8 @@ namespace ssi
             thread.Start();
 
             SeriesCollection = new SeriesCollection();
+            SeriesCollection2 = new SeriesCollection();
+
         }
 
         private void loadTrainers()
@@ -274,6 +278,7 @@ namespace ssi
                 this.Dispatcher.Invoke(() =>
                 {
                     SeriesCollection.Clear();
+                    SeriesCollection2.Clear();
 
                     explanationButton.IsEnabled = false;
 
@@ -296,6 +301,7 @@ namespace ssi
 
                     explanationChart.AxisX[0].Labels = new string[counterFactualData.Count];
                     explanationChart.AxisX[0].FontSize = 9;
+                    explanationChart.AxisY[0].MaxValue = 1.0;
                     int labelLength = 16;
                     int i = 0;
 
@@ -320,24 +326,62 @@ namespace ssi
                         i++;
                     }
 
+                    i = 0;
+                    featureValueChange.AxisX[0].Labels = new string[counterFactualData.Count];
+                    featureValueChange.AxisX[0].FontSize = 9;
                     foreach (var entry in originalData)
                     {
                         originalDataScores.Add(entry.Value);
+
+                        if (dimNameDictionary.Count == 0)
+                        {
+                            explanationChart.AxisX[0].Labels[i] = entry.Key.ToString();
+                        }
+                        else
+                        {
+                            string featureName = dimNameDictionary[entry.Key];
+                            if (featureName.Length > labelLength)
+                            {
+                                featureName = featureName.Substring(0, labelLength) + "...";
+                            }
+                            featureValueChange.AxisX[0].Labels[i] = featureName;
+                        }
+
+                        i++;
+
                     }
 
                     SeriesCollection.Add(new ColumnSeries
                     {
                         Title = "Counterfactual",
-                        Values = counterFactualScores
+                        Values = counterFactualScores,
+                        Fill = System.Windows.Media.Brushes.LightSteelBlue
                     });
 
                     SeriesCollection.Add(new ColumnSeries
                     {
                         Title = "Original",
-                        Values = originalDataScores
+                        Values = originalDataScores,
+                        Fill = System.Windows.Media.Brushes.DarkSalmon
                     });
 
                     Formatter = value => value.ToString("N");
+
+                    ChartValues<float> featureValueChangeScores = new ChartValues<float>();
+
+                    foreach(var entry in originalData)
+                    {
+                        featureValueChangeScores.Add(counterFactualData[entry.Key] - entry.Value);
+                    }
+
+                    SeriesCollection2.Add(new ColumnSeries
+                    {
+                        Title = "feature value change",
+                        Values = featureValueChangeScores,
+                        Fill = System.Windows.Media.Brushes.DarkSeaGreen
+                    });
+
+                    Formatter2 = value => value.ToString("N");
 
                     DataContext = this;
 

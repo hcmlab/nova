@@ -342,7 +342,7 @@ namespace ssi
                 { new StringContent(sessionsstr), "sessions" },
                 { new StringContent(getIdHash()), "jobID" },
                 { new StringContent(json), "data"  },
-                { new StringContent("LIME_IMAGE"), "explainer"},
+                { new StringContent("LIME_IMAGE"), "explainer_type"},
                 { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
                 { new StringContent(numFeaturesV.ToString()), "numFeatures" },
                 { new StringContent(topLablesV.ToString()), "topLabels" },

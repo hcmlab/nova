@@ -298,7 +298,7 @@ namespace ssi.Controls.Other
                 { new StringContent(sessionsstr), "sessions" },
                 { new StringContent(getIdHash()), "jobID" },
                 { new StringContent(json), "data"  },
-                { new StringContent("TF_EXPLAIN"), "explainer"},
+                { new StringContent("TF_EXPLAIN"), "explainer_type"},
                 { new StringContent( explainer.Text.ToUpper()), "tfExplainer"},
                 { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
                 { new StringContent((1/sr).ToString()), "frame_size" }

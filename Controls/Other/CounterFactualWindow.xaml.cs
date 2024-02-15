@@ -71,7 +71,15 @@ namespace ssi
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
             string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
-            string streamName = "stream:SSIStream:" + SignalTrack.Selected.Signal.Name.Split('.')[2];
+            string streamName = "";
+            if (SignalTrack.Selected.Signal.Name.Split('.').Length < 3)
+            {
+                streamName = "stream:SSIStream:" + SignalTrack.Selected.Signal.Name.Split('.')[1];
+            }
+            else
+            {
+                streamName = "stream:SSIStream:" + SignalTrack.Selected.Signal.Name.Split('.')[2];
+            }
             string schemeName = "annotation:" + schemeType + ":" + scheme;
             availableTrainers = new List<Processor>();
             Thread thread = new Thread(() => getAvailableTrainers(streamName, schemeName));
@@ -232,6 +240,7 @@ namespace ssi
 
                     explanationChart.AxisX[0].Labels = new string[counterFactualData.Count];
                     explanationChart.AxisX[0].FontSize = 9;
+                    explanationChart.AxisY[0].MaxValue = 1.0;
                     int labelLength = 16;
                     int i = 0;
 
@@ -264,13 +273,15 @@ namespace ssi
                     SeriesCollection.Add(new ColumnSeries
                     {
                         Title = "Counterfactual",
-                        Values = counterFactualScores
+                        Values = counterFactualScores,
+                        Fill = System.Windows.Media.Brushes.LightSteelBlue
                     });
 
                     SeriesCollection.Add(new ColumnSeries
                     {
                         Title = "Original",
-                        Values = originalDataScores
+                        Values = originalDataScores,
+                        Fill = System.Windows.Media.Brushes.DarkSalmon
                     });
 
                     Formatter = value => value.ToString("N");
@@ -278,6 +289,7 @@ namespace ssi
 
                     localImportanceChart.AxisX[0].Labels = new string[localImportanceData.Count];
                     localImportanceChart.AxisX[0].FontSize = 9;
+                    localImportanceChart.AxisY[0].MaxValue = 1.0;
 
                     i = 0;
 
@@ -309,13 +321,15 @@ namespace ssi
                     SeriesCollection2.Add(new ColumnSeries
                     {
                         Title = "local",
-                        Values = localImportanceScores
+                        Values = localImportanceScores,
+                        Fill = System.Windows.Media.Brushes.PaleGoldenrod
                     });
 
                     SeriesCollection2.Add(new ColumnSeries
                     {
                         Title = "global",
-                        Values = globalImportanceScores
+                        Values = globalImportanceScores,
+                        Fill = System.Windows.Media.Brushes.DarkSeaGreen
                     });
 
                     Formatter2 = value => value.ToString("N");
@@ -393,7 +407,7 @@ namespace ssi
                         { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
                         { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
                         { new StringContent(sessionsstr), "sessions" },
-                        { new StringContent("DICE"), "explainer"},
+                        { new StringContent("DICE"), "explainer_type"},
                         { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
                         { new StringContent(numCounterfactuals.Text), "num_counterfactuals" },
                         { new StringContent(classCounterfactual.Text), "class_counterfactual" },

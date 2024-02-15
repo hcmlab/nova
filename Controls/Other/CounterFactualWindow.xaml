@@ -13,8 +13,8 @@
     <xctk:BusyIndicator x:Name="_busyIndicator" BusyContent="Generating explanation"  IsBusy="False" >
         <Grid Name="container">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="75*"></ColumnDefinition>
-                <ColumnDefinition Width="25*"></ColumnDefinition>
+                <ColumnDefinition Width="85*"></ColumnDefinition>
+                <ColumnDefinition Width="15*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="100*"></RowDefinition>

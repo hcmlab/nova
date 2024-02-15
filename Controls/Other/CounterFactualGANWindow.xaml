@@ -11,10 +11,10 @@
         Title="FeatureFactual" Height="570" Width="800"
         Closing="Window_Closing" Style="{StaticResource WinAll}">
     <xctk:BusyIndicator x:Name="_busyIndicator" BusyContent="Generating explanation"  IsBusy="False" >
-        <Grid Name="container">
+        <Grid Name="container" >
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="75*"></ColumnDefinition>
-                <ColumnDefinition Width="25*"></ColumnDefinition>
+                <ColumnDefinition Width="85*"></ColumnDefinition>
+                <ColumnDefinition Width="15*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="100*"></RowDefinition>
@@ -36,6 +36,7 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="100*"></RowDefinition>
+                    <RowDefinition Height="100*"></RowDefinition>
 
                 </Grid.RowDefinitions>
                 <Grid Name="explanationAnalysis" Margin="10" Grid.Row="0">
@@ -50,6 +51,21 @@
                         </lvc:CartesianChart.AxisX>
                         <lvc:CartesianChart.AxisY>
                             <lvc:Axis Title="Counterfactual" LabelFormatter="{Binding Formatter}"></lvc:Axis>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </Grid>
+                <Grid Name="featureValueChangeScores" Margin="10" Grid.Row="1">
+
+                    <lvc:CartesianChart Name="featureValueChange" Series="{Binding SeriesCollection2}" LegendLocation="Left">
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Name="labelaxis2" Title="Feature" LabelsRotation="45">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator  Name="sep2" Step="1"></lvc:Separator>
+                                </lvc:Axis.Separator>
+                            </lvc:Axis>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis Title="feature value change" LabelFormatter="{Binding Formatter2}"></lvc:Axis>
                         </lvc:CartesianChart.AxisY>
                     </lvc:CartesianChart>
                 </Grid>

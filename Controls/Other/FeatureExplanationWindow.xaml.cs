@@ -68,7 +68,16 @@ namespace ssi
             string scheme = AnnoTier.Selected.AnnoList.Scheme.Name;
 
             string role = SignalTrack.Selected.Signal.Name.Split('.')[0];
-            string streamName = "stream:SSIStream:" + SignalTrack.Selected.Signal.Name.Split('.')[2];
+            string streamName = "";
+            if (SignalTrack.Selected.Signal.Name.Split('.').Length < 3)
+            {
+                streamName = "stream:SSIStream:" + SignalTrack.Selected.Signal.Name.Split('.')[1];
+            }
+            else
+            {
+                streamName = "stream:SSIStream:" + SignalTrack.Selected.Signal.Name.Split('.')[2];
+            }
+
             string schemeName = "annotation:" + schemeType + ":" + scheme;
             availableTrainers = new List<Processor>();
             Thread thread = new Thread(() => getAvailableTrainers(streamName, schemeName));
@@ -217,7 +226,8 @@ namespace ssi
                     SeriesCollection.Add(new ColumnSeries
                     {
                         Title = "",
-                        Values = importanceScores
+                        Values = importanceScores,
+                        Fill = System.Windows.Media.Brushes.LightSteelBlue
                     });
 
                     Formatter = value => value.ToString("N");
@@ -293,7 +303,7 @@ namespace ssi
                 { new StringContent(MainHandler.Decode(Properties.Settings.Default.MongoDBPass)), "dbPassword" },
                 { new StringContent(DatabaseHandler.DatabaseName), "dataset" },
                 { new StringContent(sessionsstr), "sessions" },
-                { new StringContent("LIME_TABULAR"), "explainer"},
+                { new StringContent("LIME_TABULAR"), "explainer_type"},
                 { new StringContent(JsonConvert.SerializeObject(this.frame)), "frame_id" },
                 { new StringContent(numFeatures.Text), "numFeatures" },
                 { new StringContent(getIdHash()), "jobID" },
