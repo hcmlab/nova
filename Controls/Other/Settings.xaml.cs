@@ -26,9 +26,11 @@ namespace ssi
             PointDistance.Text = Properties.Settings.Default.DefaultPolygonPointDistance.ToString();
             DrawwaveformCheckbox.IsChecked = Properties.Settings.Default.DrawVideoWavform;
             ContinuousHotkeysnum.Text = Properties.Settings.Default.ContinuousHotkeysNumber.ToString();
+            DataDescription.Text = Properties.Settings.Default.NovaAssistantDataDescription.ToString();
+
             //For now only works on test server
-           
-           
+
+
             mbackend.SelectedIndex = (Properties.Settings.Default.MediaBackend == "Software") ? 1 : 0; 
             string[] tokens = Properties.Settings.Default.DatabaseAddress.Split(':');
             if (tokens.Length == 2)
@@ -81,6 +83,12 @@ namespace ssi
             EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
             Showexport.IsChecked = Properties.Settings.Default.ShowExportDatabase;
             enableworldlevel.IsChecked = Properties.Settings.Default.SRTwordlevel;
+            SystemPrompt.Text = Properties.Settings.Default.NovaAssistantSystemPrompt;
+            Temperature.Text = Properties.Settings.Default.NovaAssistantTemperature;
+            TopK.Text = Properties.Settings.Default.NovaAssistantTopK;
+            TopP.Text = Properties.Settings.Default.NovaAssistantTopP;
+            MaxTokens.Text = Properties.Settings.Default.NovaAssistantMaxtokens;
+
             if (DBHost.Text != Defaults.checkdb)
             {
                 LoginWithLightning.Visibility = Visibility.Hidden;
@@ -156,6 +164,38 @@ namespace ssi
         {
             if (Assistant_Host.Text == "") return "";
             return Assistant_Host.Text + ":" + Assistant_Port.Text;
+        }
+
+        public string Assistant_SystemPrompt()
+        {
+            return SystemPrompt.Text;
+        }
+
+        public string Assistant_Temperature()
+        {
+            return Temperature.Text;
+        }
+
+        public string Data_Description()
+        {
+            return DataDescription.Text;
+        }
+
+    
+
+
+
+        public string Assistant_MaxTokens()
+        {
+            return MaxTokens.Text;
+        }
+        public string Assistant_TopK()
+        {
+            return TopK.Text;
+        }
+        public string Assistant_TopP()
+        {
+            return TopP.Text;
         }
 
 

@@ -27,6 +27,7 @@ using System.Printing;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography;
+using System.Security.Permissions;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -432,7 +433,7 @@ namespace ssi
                                         string[] src = source.Split(':');
 
 
-                                        if ((source == "file") || (source == "image") || (source == "text"))
+                                        if ((source == "file") || (source == "image") || (source == "stream:Video") || (source == "text"))
                                             showresult = true;
 
                                         else
@@ -807,8 +808,32 @@ namespace ssi
             string json = data.ToString(Newtonsoft.Json.Formatting.None);
 
 
+            string anno_min_gap = "";
+            if (FillGapCheckBox.IsChecked == true)
+            {
+                anno_min_gap = FillGapTextBox.Text;
+            }
 
-          
+            string anno_min_dur = "";
+            if (RemoveLabelCheckBox.IsChecked == true)
+            {
+                anno_min_dur = RemoveLabelTextBox.Text;
+            }
+
+
+            string start = "0";
+            string end = "0";
+            string stride = "None";
+
+
+            if (ProcessorOpts.Visibility == System.Windows.Visibility.Visible)
+            {
+                start = StartLengthTextBox.Text;
+                end = EndLengthTextBox.Text;
+                stride = StrideTextBox.Text;
+            }
+       
+
 
 
 
@@ -824,9 +849,42 @@ namespace ssi
                 { new StringContent(chainRightContext), "rightContext" },
                 { new StringContent(frameSize), "frameSize" },
                 { new StringContent(json), "data"  },
+        
                 { new StringContent(jsonoptions), "options" },
                 { new StringContent(force.ToString()), "force"  }
             };
+
+
+            if (ProcessorOpts.Visibility == System.Windows.Visibility.Visible)
+            {
+                if (stride.ToLower() != "none")
+                {
+                    content.Add(new StringContent(stride), "stride");
+                }
+                if (start.ToLower() != "0")
+                {
+                    content.Add(new StringContent(start), "start");
+                }
+                if (end.ToLower() != "0")
+                {
+                    content.Add(new StringContent(end), "end");
+                }
+
+            }
+
+                if (PredictOptionsPanel.Visibility == System.Windows.Visibility.Visible)
+            {
+                if (FillGapCheckBox.IsChecked == true)
+                {
+                    content.Add(new StringContent(anno_min_gap), "anno_min_gap");
+
+                }
+
+                if (FillGapCheckBox.IsChecked == true)
+                {
+                    content.Add(new StringContent(anno_min_dur), "anno_min_dur");
+                }
+            }
 
 
             if (SessionsOverview.Visibility == System.Windows.Visibility.Visible){
@@ -870,6 +928,28 @@ namespace ssi
                 bool ClearUI = true;
                 AddInputUIElements(processor.Inputs, processor.GetTransformers()[0].Multi_role_input);
                 AddOutputUIElements(processor.Outputs, processor.GetTransformers()[0].Multi_role_input);
+
+                bool hasdiscreteoutput = false;
+                foreach (var output in processor.Outputs)
+                {
+                    if (output.SuperType.ToLower() == "annotation" && output.SubType.ToLower() == "discrete")
+                    {
+                        hasdiscreteoutput = true;
+                        break;
+                    }
+
+                }
+
+                if (hasdiscreteoutput)
+                {
+                    PredictOptionsPanel.Visibility = System.Windows.Visibility.Visible;
+                }
+                else
+                {
+                    PredictOptionsPanel.Visibility = System.Windows.Visibility.Hidden;
+                }
+
+
 
                 if (processor.isIterable){
                     ProcessorOpts.Visibility = System.Windows.Visibility.Visible;
@@ -2169,7 +2249,7 @@ namespace ssi
                         origin = input.SuperType;
 
                     }
-                    if (input.SuperType != null && (input.SuperType.ToLower() == "image" || input.SuperType.ToLower() == "text" ||  input.SuperType.ToLower() == "url"))
+                    if (input.SuperType != null && (input.SuperType.ToLower() == "image" || input.SubType.ToLower() == "video" || input.SuperType.ToLower() == "text" ||  input.SuperType.ToLower() == "url"))
                     {
                         type = AnnoScheme.AttributeTypes.NONE;
                         if (input.DefaultName != null && input.DefaultName != "")
@@ -2177,7 +2257,15 @@ namespace ssi
                             content.Add(input.DefaultName);
                         }
                         //else content.Add("");
-                        origin = input.SuperType;
+                        if (input.SubType.ToLower() == "video")
+                        {
+                            origin = input.SuperType + ":" + input.SubType;
+                        }
+                        else
+                        {
+                            origin = input.SuperType;
+                        }
+                    
 
                     }
 
@@ -2580,106 +2668,111 @@ namespace ssi
 
                         if (element.Value.ElementAt(0).GetType().Name == "TextBox")
                         {
+                            bool isactive = true;
 
-                        if (element.Key.Split('.')[1] != "")
-                        {
-                        //TODO -> IMAGE DYNAMIC DEPENDING ON SELECTION
-                          //  -> SOURCE LOGIC
-                            string source = element.Key.Split('.')[1];
-                            string[] src = source.Split(':');
-
-                        if(source  == "image" || source == "video" || source == "audio")
-                        {
-      
-                            if (((TextBox)element.Value.ElementAt(0)).Text.StartsWith("http")){
-                                JObject ob = new JObject
-                                        {
-                                        { "id", element.Key.Split('.')[0] },
-                                        { "type", "input" },
-                                        { "src", "url:" + src[0]},
-                                        { "uri",  ((TextBox)element.Value.ElementAt(0)).Text},
-                                        { "active", "True" }
-                                    };
-                                data.Add(ob);
-
-
-                            }
-                            else
+                            if (element.Value.Count > 2)
                             {
-                                string relativeserverfilepath = handler.SendFiletoServer(((TextBox)element.Value.ElementAt(0)).Text);
-
-                                JObject ob = new JObject
-                                        {
-                                        { "id", element.Key.Split('.')[0] },
-                                        { "type", "input" },
-                                        { "src", "file:" + src[0]},
-                                        { "uri",  relativeserverfilepath},
-                                        { "active", "True" }
-                                    };
-                                data.Add(ob);
+                                isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
                             }
+                    if (element.Key.Split('.')[1] != "")
+                            {
+                            //TODO -> IMAGE DYNAMIC DEPENDING ON SELECTION
+                              //  -> SOURCE LOGIC
+                                string source = element.Key.Split('.')[1];
+                                string[] src = source.Split(':');
+
+                            if(source.ToLower()  == "image" || source.ToLower() == "video" || source.ToLower() == "audio")
+                            {
+      
+                                if (((TextBox)element.Value.ElementAt(0)).Text.StartsWith("http")){
+                                    JObject ob = new JObject
+                                            {
+                                            { "id", element.Key.Split('.')[0] },
+                                            { "type", "input" },
+                                            { "src", "url:" + src[0]},
+                                            { "uri",  ((TextBox)element.Value.ElementAt(0)).Text},
+                                            { "active", isactive }
+                                        };
+                                    data.Add(ob);
+
+
+                                }
+                                else
+                                {
+                                    string relativeserverfilepath = handler.SendFiletoServer(((TextBox)element.Value.ElementAt(0)).Text);
+
+                                    JObject ob = new JObject
+                                            {
+                                            { "id", element.Key.Split('.')[0] },
+                                            { "type", "input" },
+                                            { "src", "file:" + src[0]},
+                                            { "uri",  relativeserverfilepath},
+                                            { "active", isactive }
+                                        };
+                                    data.Add(ob);
+                                }
 
                            
 
 
 
-                        }
+                            }
 
 
-                        else if ((source == "text") || (source == "prompt") || (src.Length > 1) && (src[1] == "text" || src[1] == "prompt"))
-                        {
-                            JObject ob = new JObject
-                                        {
-                                        { "id", element.Key.Split('.')[0] },
-                                        { "type", "input" },
-                                        { "src", "request:text" },
-                                        { "data", ((TextBox)element.Value.ElementAt(0)).Text},
-                                        { "active", "True" }
-                                    };
-                            data.Add(ob);
-                        }
+                            else if ((source == "text") || (source == "prompt") || (src.Length > 1) && (src[1] == "text" || src[1] == "prompt"))
+                            {
+                                JObject ob = new JObject
+                                            {
+                                            { "id", element.Key.Split('.')[0] },
+                                            { "type", "input" },
+                                            { "src", "request:text" },
+                                            { "data", ((TextBox)element.Value.ElementAt(0)).Text},
+                                            { "active", isactive }
+                                        };
+                                data.Add(ob);
+                            }
 
-                        else if (src.Length == 1 || src[1] == "file")
+                            else if (src.Length == 1 || src[1] == "file")
+                                {
+                                    JObject ob = new JObject
+                                            {
+                                            { "id", element.Key.Split('.')[0] },
+                                            { "type", "input" },
+                                            { "src", "file:" + src[0]},
+                                            { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
+                                            { "active", isactive }
+                                        };
+                                    data.Add(ob);
+                                }
+
+                            else if (src.Length == 1 || src[1] == "request")
+                            {
+                                JObject ob = new JObject
+                                            {
+                                            { "id", element.Key.Split('.')[0] },
+                                            { "type", "input" },
+                                            { "src", "request:" + src[0]},
+                                            { "data", ((TextBox)element.Value.ElementAt(0)).Text},
+                                            { "active", isactive }
+                                        };
+                                data.Add(ob);
+                            }
+                            else if (src[1] == "url")
                             {
                                 JObject ob = new JObject
                                         {
                                         { "id", element.Key.Split('.')[0] },
                                         { "type", "input" },
-                                        { "src", "file:" + src[0]},
+                                        { "src", "url:" + src[0] },
                                         { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
-                                        { "active", "True" }
+                                        { "active", isactive }
                                     };
                                 data.Add(ob);
                             }
-
-                        else if (src.Length == 1 || src[1] == "request")
-                        {
-                            JObject ob = new JObject
-                                        {
-                                        { "id", element.Key.Split('.')[0] },
-                                        { "type", "input" },
-                                        { "src", "request:" + src[0]},
-                                        { "data", ((TextBox)element.Value.ElementAt(0)).Text},
-                                        { "active", "True" }
-                                    };
-                            data.Add(ob);
-                        }
-                        else if (src[1] == "url")
-                        {
-                            JObject ob = new JObject
-                                    {
-                                    { "id", element.Key.Split('.')[0] },
-                                    { "type", "input" },
-                                    { "src", "url:" + src[0] },
-                                    { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
-                                    { "active", "True" }
-                                };
-                            data.Add(ob);
-                        }
                           
 
+                            }
                         }
-                    }
 
                 else if (element.Value.ElementAt(0).GetType().Name == "ComboBox")
                         {
@@ -2689,9 +2782,18 @@ namespace ssi
                         if (element.Key.Split('.')[1] != "")
                         {
 
-                            if (element.Key.Split('.')[1].StartsWith("annotation"))
+                       
+
+                        if (element.Key.Split('.')[1].StartsWith("annotation"))
                             {
-                                string role = "";
+                            bool isactive = true;
+
+                                if (element.Value.Count > 3)
+                                {
+                                    isactive = (bool)((CheckBox)element.Value.ElementAt(3)).IsChecked;
+                                }
+
+                            string role = "";
                                 if (element.Value.Count > 1 && ((ComboBox)element.Value.ElementAt(1)).SelectedItem != null)
                                 {
 
@@ -2704,7 +2806,7 @@ namespace ssi
                                         { "type", "input" },
                                         { "src", "file:" + element.Key.Split('.')[1] },
                                         { "uri", "test.annotation" },
-                                        { "active", "True" }
+                                        { "active", isactive }
                                     };
                                     if (first)
                                     {
@@ -2728,7 +2830,7 @@ namespace ssi
                                         { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                         { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                         { "role", role },
-                                        { "active", "True" }
+                                        { "active", isactive }
                                     };
                                     if (first)
                                     {
@@ -2748,7 +2850,12 @@ namespace ssi
                                 }
                                 else if (RolesBox.SelectedItem != null)
                                 {
-                                    foreach (var rol in RolesBox.SelectedItems)
+                                    if (element.Value.Count >2)
+                                    {
+                                        isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
+                                    }
+
+                                foreach (var rol in RolesBox.SelectedItems)
                                     {
                                         role = RolesBox.SelectedItem.ToString();
                                         JObject ob = new JObject
@@ -2758,7 +2865,7 @@ namespace ssi
                                             { "scheme", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                             { "annotator", ((ComboBox)element.Value.ElementAt(2)).SelectedItem.ToString() },
                                             { "role", role },
-                                            { "active", "True" }
+                                            { "active", isactive }
                                         };
                                         if (first)
                                         {
@@ -2778,7 +2885,13 @@ namespace ssi
 
                             else if (element.Key.Split('.')[1].StartsWith("stream"))
                             {
-                                string role = "";
+
+                            bool isactive = true;
+                            if (element.Value.Count > 2)
+                            {
+                                isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
+                            }
+                            string role = "";
                             string subtype = "";
                             Processor processor = (Processor)ProcessorsBox.SelectedItem;
                             ServerInputOutput inpu = processor.Inputs.Find(x => x.ID == element.Key.Split('.')[0]);
@@ -2801,7 +2914,7 @@ namespace ssi
                                     { "src", "db:" + element.Key.Split('.')[1] + ":" + subtype},
                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                     { "role",role},
-                                    { "active", "True" }
+                                    { "active", isactive }
                                 };
                                     if (first)
                                     {
@@ -2824,7 +2937,7 @@ namespace ssi
                                                     { "src", "db:" + element.Key.Split('.')[1]  + ":" + subtype },
                                                     { "name", ((ComboBox)element.Value.ElementAt(0)).SelectedItem.ToString() },
                                                     { "role",role},
-                                                    { "active", "True" }
+                                                    { "active", isactive }
                                                 };
                                         if (first)
                                         {
@@ -2847,6 +2960,8 @@ namespace ssi
             foreach (var element in Outputsresult)
             {
 
+               
+
                 //  if(element.Value.GetType() GetType().ToString() == "System.Windows.Controls.TextBox")
                 {
 
@@ -2855,19 +2970,26 @@ namespace ssi
                         if (element.Key.Split('.')[1] != "")
 
                         {
-                          
+                            bool isactive = true;
+
+                            if (element.Value.Count > 2)
+                            {
+                                isactive = (bool)((CheckBox)element.Value.ElementAt(2)).IsChecked;
+                            }
+
+
                             string source = element.Key.Split('.')[1];
                             string[] src = source.Split(':');
 
-                            if ((source == "text") || (source == "prompt") || (source == "image") || (src.Length > 1) && ( src[1] == "text" || (source == "image") || src[1] == "prompt"))
+                            if ((source == "text") || (source == "prompt") || (source == "image") || (source == "stream:Video") || (src.Length > 1) && ( src[1] == "text" || (source == "image") || src[1] == "prompt"))
                             {
                                 JObject ob = new JObject
                                     {
                                     { "id", element.Key.Split('.')[0] },
                                     { "type", "output" },
                                     { "src", "request:"+ source },
-                                    { "data", ((TextBox)element.Value.ElementAt(0)).Text},
-                                    { "active", "True" }
+                                    { "data", "" },
+                                    { "active", isactive }
                                 };
                                 data.Add(ob);
                             }
@@ -2882,7 +3004,7 @@ namespace ssi
                                     { "type", "output" },
                                     { "src", "file:"+ src[0] },
                                     { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
-                                    { "active", "True" }
+                                    { "active", isactive }
                                 };
                                 data.Add(ob);
                             }
@@ -2897,7 +3019,7 @@ namespace ssi
                                     { "type", "output" },
                                     { "src", "url:" + src[0] },
                                     { "uri", ((TextBox)element.Value.ElementAt(0)).Text},
-                                    { "active", "True" }
+                                    { "active", isactive }
                                 };
                                     data.Add(ob);
                                 }
@@ -3966,5 +4088,12 @@ namespace ssi
             };
             handler.getResultFromServer(content);
         }
+
+        private void Window_Deactivated(object sender, EventArgs e)
+        {
+            Window window = (Window)sender;
+            window.Topmost = true;
+        }
     }
+
 }

@@ -590,9 +590,9 @@ namespace ssi
                     int mwidth = width;
                     int mheight = height;
 
-                    if (signal.Meta.ContainsKey("ratio"))
+                    if (signal.Meta.ContainsKey("size"))
                     {
-                        string[] split = signal.Meta["ratio"].Split(':');
+                        string[] split = signal.Meta["size"].Split(':');
                         int w = Integer.parseInt(split[0]);
                         int h = Integer.parseInt(split[1]);
                         float scale = 1;
@@ -624,7 +624,7 @@ namespace ssi
                         IMedia media = new Face(filename, signal, Face.FaceType.OPENFACE);
                         addMedia(media);
                     }
-                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "openface2") || signal.Meta["type"].Contains("openface2"))
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "openface2") || signal.Meta["type"] == "openface2")
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.OPENFACE2);
                         addMedia(media);
@@ -634,18 +634,31 @@ namespace ssi
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT1);
                         addMedia(media);
                     }
-                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect2" || signal.Meta["type"].Contains("kinect2")))
+                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect2" || signal.Meta["type"] == "kinect2")
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT2);
                         addMedia(media);
                     }
-                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "blazeface") || (signal.Meta.ContainsKey("type") && signal.Meta["type"].Contains("blazeface")))
-                    {
-                   
-
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "blazeface") || (signal.Meta.ContainsKey("type") && signal.Meta["type"] == "blazeface"))
+                    {   
+                        //LEGACY
                         IMedia media = new Face(filename, signal, Face.FaceType.BLAZEFACE, mwidth, mheight);
                         addMedia(media);
                     }
+
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "feature;face") || (signal.Meta.ContainsKey("type") && signal.Meta["type"].Contains("feature;face;landmarks")))
+                    {
+
+                        IMedia media = new Face(filename, signal, Face.FaceType.LANDMARKS, mwidth, mheight);
+                        addMedia(media);
+                    }
+                    else if ((signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "feature;face") || (signal.Meta.ContainsKey("type") && signal.Meta["type"].Contains("feature;face;boundingbox")))
+                    {
+
+                        IMedia media = new Face(filename, signal, Face.FaceType.BOUNDINGBOX, mwidth, mheight);
+                        addMedia(media);
+                    }
+
 
                     else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton")
                     {

@@ -275,7 +275,8 @@ namespace ssi
                             }
                             else if (e.KeyboardDevice.IsKeyDown(Key.A))
                             {
-                                MainHandler.llama2.Show();
+                                LLAMA llama = new LLAMA();
+                                llama.Show();
                                 e.Handled = true;
                             }
                             else if (e.KeyboardDevice.IsKeyDown(Key.C))

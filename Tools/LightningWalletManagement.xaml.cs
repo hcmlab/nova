@@ -381,7 +381,7 @@ namespace ssi
 
             string rnd = RandomString(8);
             string lnaddressname = "user-" + rnd;
-            string pin = await lightning.AddOrChangeLnAddress(lnaddressname, invoice_key, "https://novaannotation.com/");
+            string pin = await lightning.AddOrChangeLnAddress(lnaddressname, invoice_key);
 
             user.ln_addressname = lnaddressname;
             user.ln_addresspin = pin;

@@ -778,5 +778,91 @@ namespace ssi.Properties {
                 this["NovaAssistantHistory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.8")]
+        public string NovaAssistantTemperature {
+            get {
+                return ((string)(this["NovaAssistantTemperature"]));
+            }
+            set {
+                this["NovaAssistantTemperature"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Your name is Nova Assistant. You are an AI assistant.")]
+        public string NovaAssistantSystemPrompt {
+            get {
+                return ((string)(this["NovaAssistantSystemPrompt"]));
+            }
+            set {
+                this["NovaAssistantSystemPrompt"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1024")]
+        public string NovaAssistantMaxtokens {
+            get {
+                return ((string)(this["NovaAssistantMaxtokens"]));
+            }
+            set {
+                this["NovaAssistantMaxtokens"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public string NovaAssistantTopK {
+            get {
+                return ((string)(this["NovaAssistantTopK"]));
+            }
+            set {
+                this["NovaAssistantTopK"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.95")]
+        public string NovaAssistantTopP {
+            get {
+                return ((string)(this["NovaAssistantTopP"]));
+            }
+            set {
+                this["NovaAssistantTopP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("The data you are supposed to analyse is provided to you in semi colon seperated t" +
+            "uple form, where each entry contains the identity of the speaker at position 0 a" +
+            "nd the transcript of a speaker at position 1")]
+        public string NovaAssistantDataDescription {
+            get {
+                return ((string)(this["NovaAssistantDataDescription"]));
+            }
+            set {
+                this["NovaAssistantDataDescription"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("hcai:llama7b")]
+        public string NovaAssistantModel {
+            get {
+                return ((string)(this["NovaAssistantModel"]));
+            }
+            set {
+                this["NovaAssistantModel"] = value;
+            }
+        }
     }
 }

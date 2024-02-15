@@ -27,7 +27,11 @@ namespace ssi
             KINECT2,
             OPENFACE,
             OPENFACE2,
-            BLAZEFACE
+            BLAZEFACE,
+            LANDMARKS,
+            BOUNDINGBOX,
+            MESH,
+            GENERIC
         }
 
         private float KINECT_SMALL_VALUES_BUG_THRES = -10f;
@@ -185,8 +189,8 @@ namespace ssi
 
             else
             {
-                minMax();
-                scale();
+                //minMax();
+                //scale();
             }
 
           
@@ -511,25 +515,25 @@ namespace ssi
                         //double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
 
 
-                        double Y = signal.data[i] * height;
-                        double X = signal.data[i + 1] * width;
+                        double Y1 = signal.data[i] * height;
+                        double X1 = signal.data[i + 1] * width;
 
                         double Y2 = signal.data[i] * height;
                         double X2 = signal.data[i + 3] * width;
 
-                        double Y3 = signal.data[i+2] * height;
+                        double Y3 = signal.data[i + 2] * height;
                         double X3 = signal.data[i + 3] * width;
 
                         double Y4 = signal.data[i + 2] * height;
                         double X4 = signal.data[i + 1] * width;
                         try
                         {
-                            if (X < width && Y < height)
+                            if (X1 < width && Y1 < height)
                             {
-                                writeableBmp.DrawLine((int)X, (int)Y, (int)X2, (int)Y2, SignalColor);
+                                writeableBmp.DrawLine((int)X1, (int)Y1, (int)X2, (int)Y2, SignalColor);
                                 writeableBmp.DrawLine((int)X2, (int)Y2, (int)X3, (int)Y3, SignalColor);
                                 writeableBmp.DrawLine((int)X3, (int)Y3, (int)X4, (int)Y4, SignalColor);
-                                writeableBmp.DrawLine((int)X4, (int)Y4, (int)X, (int)Y, SignalColor);
+                                writeableBmp.DrawLine((int)X4, (int)Y4, (int)X1, (int)Y1, SignalColor);
                                 //writeableBmp.SetPixel((int)X+1, (int)Y+1, SignalColor);
                                 //writeableBmp.SetPixel((int)X-1, (int)Y-1, SignalColor);
                                 //writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
@@ -544,7 +548,7 @@ namespace ssi
                        
 
                 }
-                for (uint j = (index * signal.dim + 4); j < (index * signal.dim + 16); j += 2)
+                for (uint j = (index * signal.dim + 4); j < (index * signal.dim + (signal.dim-1)); j += 2)
                 {
 
                     double X = signal.data[j] * width;
@@ -568,6 +572,82 @@ namespace ssi
 
               }
             }
+
+            else if (facetype == FaceType.BOUNDINGBOX)
+            {
+                if (index < signal.number)
+                {
+                    for (uint i = (index * signal.dim); i < (index * signal.dim + 4); i += 4)
+                    {
+                        //double X = signal.data[i] > 0 ? signal.data[i]  * width   - width/2: 0;
+                        //double Y = signal.data[i + 1] > 0 ?  signal.data[i + 1] * height   + height/2: 0;
+
+
+                        double Y1 = signal.data[i] * height;
+                        double X1 = signal.data[i + 1] * width;
+
+                        double Y2 = signal.data[i] * height;
+                        double X2 = signal.data[i + 3] * width;
+
+                        double Y3 = signal.data[i + 2] * height;
+                        double X3 = signal.data[i + 3] * width;
+
+                        double Y4 = signal.data[i + 2] * height;
+                        double X4 = signal.data[i + 1] * width;
+                        try
+                        {
+                            if (X1 < width && Y1 < height)
+                            {
+                                writeableBmp.DrawLine((int)X1, (int)Y1, (int)X2, (int)Y2, SignalColor);
+                                writeableBmp.DrawLine((int)X2, (int)Y2, (int)X3, (int)Y3, SignalColor);
+                                writeableBmp.DrawLine((int)X3, (int)Y3, (int)X4, (int)Y4, SignalColor);
+                                writeableBmp.DrawLine((int)X4, (int)Y4, (int)X1, (int)Y1, SignalColor);
+                                //writeableBmp.SetPixel((int)X+1, (int)Y+1, SignalColor);
+                                //writeableBmp.SetPixel((int)X-1, (int)Y-1, SignalColor);
+                                //writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+
+
+
+                    }
+                }
+            }
+            else if (facetype == FaceType.LANDMARKS)
+            {
+                if (index < signal.number)
+                {
+
+                    for (uint j = (index * signal.dim); j < (index * signal.dim + (signal.dim - 1)); j += 2)
+                    {
+
+                        double Y = signal.data[j] * height;
+                        double X = signal.data[j + 1] * width;
+
+
+                        try
+                        {
+                            if (X < width && Y < height && X > 0 && Y > 0)
+                            {
+                                writeableBmp.SetPixel((int)X, (int)Y, SignalColor);
+
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+
+                }
+            }
+
 
 
 

@@ -80,7 +80,7 @@ namespace ssi
             stream.FileExt = fileExt.Text;
             stream.Name = name.Text;
             stream.Type = type.Text;
-            stream.SampleRate = int.Parse(sr.Text);
+            stream.SampleRate = float.Parse(sr.Text);
             List<int> usedLabels = new List<int>();
 
 

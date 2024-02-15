@@ -589,10 +589,16 @@ namespace ssi
 
             using (WebClient client = new WebClient())
                 {
-                string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/upload";
-                var response = client.UploadFile(url, filePath);
-                string result = System.Text.Encoding.UTF8.GetString(response);
-                return result;
+                try{
+                    string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/upload";
+                    var response = client.UploadFile(url, filePath);
+                    string result = System.Text.Encoding.UTF8.GetString(response);
+                    return result;
+                }
+                catch (Exception e) {
+                    MessageBox.Show(e.Message);
+                    return null; }
+             
 
                 }
         }
@@ -624,10 +630,11 @@ namespace ssi
                     string filename = FileTools.SaveFileDialog(inputfilename, ".mp4", "Video (*.mp4)|*.mp4", "");
                     if (filename == null) return;
 
-                    Stream t = new FileStream(filename, FileMode.Create);
-                    BinaryWriter b = new BinaryWriter(t);
-                    b.Write(responseContent);
-                    t.Close();
+                    //Stream t = new FileStream(filename, FileMode.Create);
+                    //BinaryWriter b = new BinaryWriter(t);
+                    //b.Write(responseContent);
+                    //t.Close();
+                    File.WriteAllBytes(filename, responseContent);
                     MessageBox.Show("Stored video at " + filename);
                 }
 
