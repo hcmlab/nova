@@ -347,7 +347,12 @@ namespace ssi
                 chain = (Processor)ProcessorsBox.SelectedItem;
                 chain.Name = chain.Name.Split(' ')[0];
                 setSessionList();
-                ModelSpecificOptString = AttributesResult().ToString()
+                var attributes = AttributesResult();
+                if (attributes != null)
+                {
+                    ModelSpecificOptString = attributes.ToString();
+                }
+               
                 ;
 
             });
@@ -987,11 +992,8 @@ namespace ssi
                     PredictOptionsPanel.Visibility = System.Windows.Visibility.Hidden;
                 }
 
-
-
                 if (processor.isIterable){
                     ProcessorOpts.Visibility = System.Windows.Visibility.Visible;
-
                 }
                 else
                 {
