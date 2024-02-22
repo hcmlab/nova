@@ -121,6 +121,9 @@ namespace ssi
             public string SpecificType { get; set; }
 
             public string DefaultName { get; set; }
+            public bool isActive { get; set; }
+
+
         }
 
 
@@ -137,6 +140,7 @@ namespace ssi
                 ExtraAttributes2 = new List<string>();
                 ExtraAttributeType2 = AnnoScheme.AttributeTypes.LIST;
                 Origin = "";
+                IsActive = true;
             }
             public string Label { get; set; }
             public List<string> Attributes { get; set; }
@@ -144,6 +148,7 @@ namespace ssi
             public List<string> ExtraAttributes2 { get; set; }
 
             public string Origin { get; set; }
+            public bool IsActive { get; set; }
 
             public string DefaultValue { get; set; }
             public AnnoScheme.AttributeTypes AttributeType { get; set; }
@@ -1442,6 +1447,12 @@ namespace ssi
                         ServerInputOutput inputoutput = new ServerInputOutput();
                         inputoutput.ID = element["id"].ToString();
                         inputoutput.IO = element["type"].ToString();
+                        inputoutput.isActive = true;
+                        var active = element["default_active"];
+                        if (active != null){
+                            inputoutput.isActive = (bool)(active);
+                        }
+                      
                         var defaultname = element["default_value"];
                         if (defaultname != null)
                         {
@@ -2264,6 +2275,7 @@ namespace ssi
                     string option;
                     string origin = null;
                     bool userchoice = false;
+                    bool isactive = input.isActive;
                     AnnoScheme.AttributeTypes type = AnnoScheme.AttributeTypes.STRING;
                     List<string> content = new List<string>();
 
@@ -2429,7 +2441,7 @@ namespace ssi
 
 
 
-                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, xcontent2, xtype2, origin, userchoice);
+                    AnnoScheme.Attribute attribute = new AnnoScheme.Attribute(name, content, type, xcontent, xtype, xcontent2, xtype2, origin, userchoice, isactive);
                     values.Add(attribute);
                 }
 
@@ -3420,7 +3432,7 @@ namespace ssi
                 foreach (var attribute in Outputs)
                 {
                     if (attribute.Values.Count == 0) attribute.Values.Add("");
-                    outputs[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType, ExtraAttributes = attribute.ExtraValues, ExtraAttributeType = attribute.ExtraAttributeType, ExtraAttributes2 = attribute.ExtraValues2, ExtraAttributeType2 = attribute.ExtraAttributeType2, Origin = attribute.Origin };
+                    outputs[attribute.Name] = new Input() { Label = attribute.Name, DefaultValue = attribute.Values[0], Attributes = attribute.Values, AttributeType = attribute.AttributeType, ExtraAttributes = attribute.ExtraValues, ExtraAttributeType = attribute.ExtraAttributeType, ExtraAttributes2 = attribute.ExtraValues2, ExtraAttributeType2 = attribute.ExtraAttributeType2, Origin = attribute.Origin, IsActive= attribute.IsActive };
 
 
 
@@ -3543,7 +3555,7 @@ namespace ssi
 
                         CheckBox cbox = new CheckBox()
                         {
-                            IsChecked = true
+                            IsChecked = element.Value.IsActive
                         };
                         cbox.Margin = margin;
                         outputGrid.Children.Add(cbox);
