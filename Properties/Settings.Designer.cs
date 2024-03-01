@@ -864,5 +864,17 @@ namespace ssi.Properties {
                 this["NovaAssistantModel"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool NovaAssistantEnforceDeterminism {
+            get {
+                return ((bool)(this["NovaAssistantEnforceDeterminism"]));
+            }
+            set {
+                this["NovaAssistantEnforceDeterminism"] = value;
+            }
+        }
     }
 }

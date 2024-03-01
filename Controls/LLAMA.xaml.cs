@@ -172,6 +172,7 @@ namespace ssi.Controls
                 string datastr = "";
                 string datadescr = "";
                 string systemprompt = Properties.Settings.Default.NovaAssistantSystemPrompt;
+                bool enforcedtermism = Properties.Settings.Default.NovaAssistantEnforceDeterminism;
                 float temperature = float.Parse(Properties.Settings.Default.NovaAssistantTemperature);
                 int maxtokens = int.Parse(Properties.Settings.Default.NovaAssistantMaxtokens);
                 int topk = int.Parse(Properties.Settings.Default.NovaAssistantTopK);
@@ -235,7 +236,9 @@ namespace ssi.Controls
                             if (ModelBox.SelectedItem.ToString() != "")
                             {
                                 model = ModelBox.SelectedItem.ToString().Split('/')[1];
+                                
                                 provider = ModelBox.SelectedItem.ToString().Split('/')[0];
+                               
                             }
                            
                         });
@@ -243,8 +246,7 @@ namespace ssi.Controls
 
                 var payload = new
                 {
-                    system_prompt = systemprompt,
-                    data_desc = datadescr,
+                    system_prompt = systemprompt, // + " Respond using JSON",
                     data = datastr,
                     model = model,
                     provider = provider,
@@ -253,8 +255,10 @@ namespace ssi.Controls
                     max_new_tokens = maxtokens,
                     top_p = topP,
                     top_k = topk,
-                    history = dict_users[user]["history"]
-                    };
+                    history = dict_users[user]["history"],
+                    enforce_determinism = enforcedtermism,
+                    //esp_format = "json",
+                };
 
                     //answer = await PostStream(url, payload);
                     string reply = "";

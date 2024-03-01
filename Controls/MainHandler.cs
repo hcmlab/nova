@@ -780,6 +780,7 @@ namespace ssi
                 Properties.Settings.Default.NovaAssistantSystemPrompt = s.Assistant_SystemPrompt();
                 Properties.Settings.Default.NovaAssistantTemperature = s.Assistant_Temperature();
                 Properties.Settings.Default.NovaAssistantDataDescription = s.Data_Description();
+                Properties.Settings.Default.NovaAssistantEnforceDeterminism = s.Enfoce_Determinism();
                 Properties.Settings.Default.NovaAssistantMaxtokens = s.Assistant_MaxTokens();
                 Properties.Settings.Default.NovaAssistantTopK = s.Assistant_TopK();
                 Properties.Settings.Default.NovaAssistantTopP = s.Assistant_TopP();

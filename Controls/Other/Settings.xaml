@@ -258,6 +258,7 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
                         </Grid.RowDefinitions>
                 <Label Grid.Column="0" Grid.Row="0">Host:</Label>
                 <TextBox Grid.Column="1" Grid.Row="0" x:Name="Assistant_Host" Margin="5,3,5,2" GotKeyboardFocus="Assistant_Host_GotFocus" GotMouseCapture="Assistant_Host_GotMouseCapture"/>
@@ -276,7 +277,11 @@
                 <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="6" Name="TopP" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
                 <Label Grid.Column="0" Grid.Row="7">TopK:</Label>
                 <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="7" Name="TopK" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
-            </Grid>
+                <Label Grid.Column="0" Grid.Row="8">Enforce Determinism:</Label>
+                 <CheckBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="8" Name="Determinism" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
+
+
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

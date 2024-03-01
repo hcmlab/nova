@@ -212,5 +212,8 @@
     <Setting Name="NovaAssistantModel" Type="System.String" Scope="User">
       <Value Profile="(Default)">hcai:llama7b</Value>
     </Setting>
+    <Setting Name="NovaAssistantEnforceDeterminism" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
