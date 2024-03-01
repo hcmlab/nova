@@ -590,7 +590,7 @@ public enum Mode
             }
             catch (Exception e)
             {
-                MessageTools.Error(e.ToString());
+                MessageTools.Error(e.ToString()  + " in file: " + chain.Path);
                 return false;
             }
 
