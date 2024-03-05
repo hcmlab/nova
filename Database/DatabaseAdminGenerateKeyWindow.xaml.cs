@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Forms;
 
@@ -55,10 +56,15 @@ namespace ssi
             }
             databases = databases.Remove(databases.Length - 1);
             dynamic requestform = await MainHandler.GenerateToken(databases, validFor);
-
-            KeyLabel.Content = requestform["accessToken"];
-            System.Windows.Clipboard.SetText(KeyLabel.Content.ToString());
-            KeyInfo.Content = "Copied to clipboard";
+            try{
+                KeyLabel.Content = requestform["accessToken"];
+                System.Windows.Clipboard.SetText(KeyLabel.Content.ToString());
+                KeyInfo.Content = "Copied to clipboard";
+            }
+            catch(Exception ex) {
+                KeyLabel.Content = "Error requesting token";
+            }
+     
 
             //DialogResult = false;
         }
