@@ -30,6 +30,8 @@ namespace ssi
         public class Label
         {
             public string Name { get; set; }
+            public string Description { get; set; }
+            public string Examples { get; set; }
             public Color Color { get; set; }
 
             public Label(string name, Color color)
@@ -76,6 +78,8 @@ namespace ssi
         {
             Type = TYPE.FREE;
             Name = "";
+            Description = "";
+            Examples = "";
             Labels = new List<Label>();
             LabelAttributes = new List<Attribute>();
             MinScore = 0;
@@ -86,11 +90,14 @@ namespace ssi
             DefaultLabel = "";
             DefaultColor = Color.FromRgb(0, 0, 0);
             toSave = false;
+
         }
 
         public List<Attribute> LabelAttributes { get; set; }
 
         public string Name { get; set; }
+        public string Description { get; set; }
+        public string Examples { get; set; }
 
         public bool toSave { get; set; }
 

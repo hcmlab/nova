@@ -1885,6 +1885,8 @@ namespace ssi
 
             BsonDocument document = new BsonDocument();
             BsonElement documentName = new BsonElement("name", scheme.Name);
+            BsonElement documentDescription = new BsonElement("description", scheme.Description);
+            BsonElement documentExamples = new BsonElement("examples", scheme.Examples);
             BsonElement documentType = new BsonElement("type", scheme.Type.ToString());
             BsonElement documentIsValid = new BsonElement("isValid", true);
             BsonElement documentSr = new BsonElement("sr", scheme.SampleRate);
@@ -1900,6 +1902,8 @@ namespace ssi
 
 
             document.Add(documentName);
+            document.Add(documentDescription);
+            document.Add(documentExamples);
             document.Add(documentType);
 
 
@@ -2142,6 +2146,19 @@ namespace ssi
 
 
                 scheme.Name = annoSchemeDocument["name"].ToString();
+                if (annoSchemeDocument.Contains("description"))
+                {
+                    scheme.Description = annoSchemeDocument["description"].ToString();
+                }
+                else scheme.Description = "";
+
+                if (annoSchemeDocument.Contains("examples"))
+                {
+                    scheme.Examples = annoSchemeDocument["examples"].ToString();
+                }
+                else scheme.Examples = "";
+
+
                 scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), annoSchemeDocument["type"].ToString());
                 if (scheme.Type == AnnoScheme.TYPE.CONTINUOUS)
                 {

@@ -42,7 +42,7 @@ namespace ssi
        
                     Title = "Train Bayesian Network  ";
                     ApplyButton.Content = "Create Samples";
-                    ApplyButton2.Content = "Train";
+                    //ApplyButton2.Content = "Train";
                     ShowAllSessionsCheckBox.Visibility = Visibility.Collapsed;
                     TrainOptionsPanel.Visibility = Visibility.Visible;
                     ForceCheckBox.Visibility = Visibility.Visible;
@@ -95,9 +95,9 @@ namespace ssi
 
 
 
-        private void Apply2_Click(object sender, RoutedEventArgs e)
+      /*  private void Apply2_Click(object sender, RoutedEventArgs e)
         {
-            string networkrDir = Properties.Settings.Default.CMLDirectory + "\\" +
+          /*  string networkrDir = Properties.Settings.Default.CMLDirectory + "\\" +
                  Defaults.CML.FusionFolderName + "\\" +
                  Defaults.CML.FusionBayesianNetworkFolderName + "\\" + NetworkSelectionBox.SelectedItem + ".xdsl";
 
@@ -111,16 +111,16 @@ namespace ssi
             bool isdynamic = tempsteps > 0 ? true : false;
 
             logTextBox.Text += handler.CMLTrainBayesianNetwork(networkrDir, datasetDir, isdynamic);
-        }
+        }*/
 
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
 
-            Properties.Settings.Default.SettingCMLDefaultBN = NetworkSelectionBox.SelectedItem.ToString();
+            //Properties.Settings.Default.SettingCMLDefaultBN = NetworkSelectionBox.SelectedItem.ToString();
             Properties.Settings.Default.CMLDefaultAnnotator = AnnotatorsBox.SelectedItem.ToString();
             Properties.Settings.Default.CMLDefaultRole = RolesBox.SelectedItem.ToString();
             Properties.Settings.Default.CMLDefaultScheme = SchemesBox.SelectedItem.ToString();
-            Properties.Settings.Default.CMLDefaultTrainer = NetworkSelectionBox.SelectedItem.ToString();
+           // Properties.Settings.Default.CMLDefaultTrainer = NetworkSelectionBox.SelectedItem.ToString();
             Properties.Settings.Default.Save();
 
             bool force = ForceCheckBox.IsChecked.Value;
@@ -131,9 +131,25 @@ namespace ssi
 
             logTextBox.Text = "";
 
-            string networkrDir = Properties.Settings.Default.CMLDirectory + "\\" +
+           /* string networkrDir = Properties.Settings.Default.CMLDirectory + "\\" +
                 Defaults.CML.FusionFolderName + "\\" +
-                Defaults.CML.FusionBayesianNetworkFolderName + "\\" + NetworkSelectionBox.SelectedItem + ".xdsl";
+                Defaults.CML.FusionBayesianNetworkFolderName + "\\" + NetworkSelectionBox.SelectedItem + ".xdsl";*/
+           
+            if(!Directory.Exists(Properties.Settings.Default.CMLDirectory + "\\" + Defaults.CML.FusionFolderName))
+            {
+                Directory.CreateDirectory(Properties.Settings.Default.CMLDirectory + "\\" +
+            Defaults.CML.FusionFolderName);
+            }
+            if (!Directory.Exists(Properties.Settings.Default.CMLDirectory + "\\" + Defaults.CML.FusionFolderName + "\\" +
+           Defaults.CML.FusionBayesianNetworkFolderName))
+            {
+                Directory.CreateDirectory(Properties.Settings.Default.CMLDirectory + "\\" +
+           Defaults.CML.FusionFolderName + "\\" +
+           Defaults.CML.FusionBayesianNetworkFolderName);
+
+            }
+
+            
 
             string datasetDir = Properties.Settings.Default.CMLDirectory + "\\" +
                Defaults.CML.FusionFolderName + "\\" +
@@ -253,6 +269,9 @@ namespace ssi
 
                 if (roles.Find(n => n == annoLists[a].Meta.Role) == null) roles.Add(annoLists[a].Meta.Role);
             }
+
+            headline += "from" + seperator;
+            headline += "to" + seperator;
 
             for (int a = 0; a < newLists.Count; a++)
             {
@@ -387,6 +406,8 @@ namespace ssi
 
                         for (int i = 0; i < minSize; i++)
                         {
+                            headline += ((i * chunksize) / 1000.0).ToString("####0.00") + seperator;
+                            headline += ((i * chunksize + chunksize) / 1000.0).ToString("####0.00") + seperator;
                             for (int a = 0; a < newlists.Count; a++)
                             {
                                 if (newlists[a].Meta.Role == role)
@@ -584,6 +605,8 @@ namespace ssi
             bool skipwarning = false;
 
             string[][] history = new string[annoLists.Count][];
+            headline += "from" + seperator;
+            headline += "to" + seperator;
 
             for (int a = 0; a < annoLists.Count; a++)
             {
@@ -591,7 +614,9 @@ namespace ssi
 
                 if (ishead)
                 {
+
                     headline += annoLists[a].Meta.Role + "_" + annoLists[a].Scheme.Name + seperator;
+                 
 
                     for (int i = 0; i < tempsteps; i++)
                     {
@@ -715,6 +740,8 @@ namespace ssi
 
                     for (int i = 0; i < minSize; i++)
                     {
+                        headline += ((i*chunksize) / 1000.0).ToString("####0.00") +  seperator;
+                        headline += ((i * chunksize+chunksize) / 1000.0).ToString("####0.00") + seperator;
                         for (int a = 0; a < newlists.Count; a++)
                         {
                             if (newlists[a].Scheme.Type == AnnoScheme.TYPE.CONTINUOUS && discretisizeeckbox.IsChecked == true)
@@ -1052,7 +1079,7 @@ namespace ssi
 
         private void SessionsBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            TrainerPathComboBoxindex = NetworkSelectionBox.SelectedIndex;
+           /* TrainerPathComboBoxindex = NetworkSelectionBox.SelectedIndex;
             NetworkSelectionBox.Items.Clear();
             List<string> nets = getBayesianNetworks();
             foreach (string net in nets)
@@ -1070,7 +1097,7 @@ namespace ssi
             {
                 NetworkSelectionBox.SelectedIndex = TrainerPathComboBoxindex;
             }
-
+           */
             Update();
         }
 
@@ -1092,7 +1119,7 @@ namespace ssi
                 {
                     networks.Add(network);
                 }
-                NetworkSelectionBox.SelectedItem = Properties.Settings.Default.SettingCMLDefaultBN;
+                //NetworkSelectionBox.SelectedItem = Properties.Settings.Default.SettingCMLDefaultBN;
 
                 // }
             }
@@ -1121,7 +1148,7 @@ namespace ssi
 
         private void TrainerPathComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (NetworkSelectionBox.SelectedItem != null)
+           /* if (NetworkSelectionBox.SelectedItem != null)
             {
                 string trainer = (string)NetworkSelectionBox.SelectedItem;
 
@@ -1134,15 +1161,14 @@ namespace ssi
                 namebox.Text = NetworkSelectionBox.SelectedItem.ToString() + ".txt";
 
                 // TrainerNameTextBox.Text = mode == Mode.COMPLETE ? Path.GetFileName(tempTrainerPath) : database;
-            }
+            }*/
         }
 
         private void Update()
         {
             bool enable = false;
 
-            if (NetworkSelectionBox.Items.Count > 0
-                && DatabasesBox.SelectedItem != null
+            if ( DatabasesBox.SelectedItem != null
                 && SessionsBox.SelectedItem != null
                 && RolesBox.SelectedItem != null
                 && AnnotatorsBox.SelectedItem != null
@@ -1152,10 +1178,10 @@ namespace ssi
             }
 
             ApplyButton.IsEnabled = enable;
-            ApplyButton2.IsEnabled = enable;
+            //ApplyButton2.IsEnabled = enable;
             TrainOptionsPanel.IsEnabled = enable;
             ForceCheckBox.IsEnabled = enable;
-            NetworkSelectionBox.IsEnabled = enable;
+            //NetworkSelectionBox.IsEnabled = enable;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)

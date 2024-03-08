@@ -23,7 +23,7 @@
                 <ColumnDefinition Width="120" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="InputBox" KeyDown="InputBox_KeyDown" Margin="10,10,10,10" Grid.Row="1" Background="GhostWhite" Width="Auto" Height="40" Grid.Column="0"></TextBox>
+            <TextBox x:Name="InputBox" KeyDown="InputBox_KeyDown"  AcceptsReturn="False" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="10,10,10,10" Grid.Row="1" Background="GhostWhite" Width="Auto" Height="40" Grid.Column="0"></TextBox>
 
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>

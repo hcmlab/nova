@@ -155,7 +155,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Bayesian Network</Label>
-                <ComboBox Name="NetworkSelectionBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"  ></ComboBox>
+                <!--<ComboBox Name="NetworkSelectionBox" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" SelectionChanged="TrainerPathComboBox_SelectionChanged"  ></ComboBox>-->
 
             </Grid>
 
@@ -218,7 +218,7 @@
 
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <Button Content="Apply" x:Name="ApplyButton" Click="Apply_Click" Width="85" Height="30"/>
-                    <Button Content="Train" x:Name="ApplyButton2" Click="Apply2_Click" Width="85" Margin="15,0" Height="30"/>
+                    <!--<Button Content="Train" x:Name="ApplyButton2" Click="Apply2_Click" Width="85" Margin="15,0" Height="30"/>-->
                     <CheckBox x:Name="ForceCheckBox" Margin="5" VerticalAlignment="Center" Content="Force"/>
                 </StackPanel>
             </DockPanel>

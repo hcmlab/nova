@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ssi.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -64,6 +65,17 @@ namespace ssi
         {
             DialogResult = false;
             Close();
+        }
+
+        private void Description_Click(object sender, RoutedEventArgs e)
+        {
+            DescriptionWindow aaw = new DescriptionWindow(ref scheme);
+            aaw.ShowDialog();
+            if (aaw.DialogResult != true)
+            {
+                return;
+            }
+
         }
     }
 }

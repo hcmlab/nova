@@ -88,7 +88,7 @@ namespace ssi.Controls
   
                 ModelBox.ItemsSource = res;
                 ModelBox.SelectedItem = Properties.Settings.Default.NovaAssistantModel;
-                if  (ModelBox.SelectedItem.ToString() == "")
+                if  (ModelBox.SelectedItem == null || ModelBox.SelectedItem.ToString() == "")
                 {
                     ModelBox.SelectedIndex = 0;
                 }
@@ -439,17 +439,26 @@ namespace ssi.Controls
 
     private void InputBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
-        if (e.Key == System.Windows.Input.Key.Return)
-        {
-            e.Handled = true;
-            CallLlama();
-        }
-        else if (e.Key == System.Windows.Input.Key.Escape || e.Key == Key.A && Keyboard.IsKeyDown(Key.LeftCtrl))
-        {
-            e.Handled = true;
-            //this.DialogResult = false;
-            this.Hide();
-        }
+
+            if (e.Key == Key.Return)
+            {
+              
+               // if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                {
+                    //MessageBox.Show("Shift + Enter pressed");
+                    e.Handled = true;
+                    CallLlama();
+                }
+            }
+
+                else if (e.Key == System.Windows.Input.Key.Escape || e.Key == Key.A && Keyboard.IsKeyDown(Key.LeftCtrl))
+                {
+                    e.Handled = true;
+
+
+                    //this.DialogResult = false;
+                    this.Hide();
+                }
 
     }
 

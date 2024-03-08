@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using ssi.Controls;
+using System.Windows;
 using System.Windows.Media;
 
 namespace ssi
@@ -46,5 +47,14 @@ namespace ssi
 
         }
 
+        private void Description_Click(object sender, RoutedEventArgs e)
+        {
+            DescriptionWindow aaw = new DescriptionWindow(ref scheme);
+            aaw.ShowDialog();
+            if (aaw.DialogResult != true)
+            {
+                return;
+            }
+        }
     }
 }

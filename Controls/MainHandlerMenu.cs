@@ -52,7 +52,7 @@ namespace ssi
             control.databaseManageUsersMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.DBADMIN) ? Visibility.Visible : Visibility.Collapsed;
 
 
-            control.fusionmenu.Visibility = (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\bayesfusion.exe") == true) ? Visibility.Visible : Visibility.Collapsed;
+            //control.fusionmenu.Visibility = (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\bayesfusion.exe") == true) ? Visibility.Visible : Visibility.Collapsed;
 
             // annotation
             control.annoNewMenu.IsEnabled = ((Time.TotalDuration > 0) == true);

@@ -512,6 +512,9 @@
     <Compile Include="Controls\Annotation\Polygon\DatabaseSaveProgress.xaml.cs">
       <DependentUpon>DatabaseSaveProgress.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DescriptionWindow.xaml.cs">
+      <DependentUpon>DescriptionWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ImageView.xaml.cs">
       <DependentUpon>ImageView.xaml</DependentUpon>
     </Compile>
@@ -766,6 +769,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Annotation\Polygon\DatabaseSaveProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\DescriptionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

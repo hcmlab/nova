@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ssi.Controls;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -148,6 +149,16 @@ namespace ssi
                 return;
             }
 
+        }
+
+        private void Description_Click(object sender, RoutedEventArgs e)
+        {
+            DescriptionWindow aaw = new DescriptionWindow(ref scheme);
+            aaw.ShowDialog();
+            if (aaw.DialogResult != true)
+            {
+                return;
+            }
         }
     }
 }
