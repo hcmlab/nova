@@ -1886,7 +1886,7 @@ namespace ssi
             BsonDocument document = new BsonDocument();
             BsonElement documentName = new BsonElement("name", scheme.Name);
             BsonElement documentDescription = new BsonElement("description", scheme.Description);
-            BsonElement documentExamples = new BsonElement("examples", scheme.Examples);
+ 
             BsonElement documentType = new BsonElement("type", scheme.Type.ToString());
             BsonElement documentIsValid = new BsonElement("isValid", true);
             BsonElement documentSr = new BsonElement("sr", scheme.SampleRate);
@@ -1903,7 +1903,6 @@ namespace ssi
 
             document.Add(documentName);
             document.Add(documentDescription);
-            document.Add(documentExamples);
             document.Add(documentType);
 
 
@@ -1930,6 +1929,21 @@ namespace ssi
 
 
             document.Add("attributes", attributes);
+
+
+            BsonArray examples = new BsonArray();
+            foreach (AnnoScheme.Example example in scheme.Examples)
+            {
+
+                examples.Add(new BsonDocument() {
+                    { "value", example.Value },
+                    { "label", example.Annotation },
+                    { "isValid", true } });
+            }
+
+
+
+            document.Add("examples", examples);
 
             if (scheme.Type == AnnoScheme.TYPE.DISCRETE)
             {
@@ -2142,7 +2156,19 @@ namespace ssi
                         scheme.LabelAttributes.Add(attr);
                     }
                 }
-                
+
+
+                if (annoSchemeDocument.Contains("examples"))
+                {
+                    BsonArray examplesArray = annoSchemeDocument["examples"].AsBsonArray;
+                    foreach (BsonDocument doc in examplesArray)
+                    {
+
+                        AnnoScheme.Example attr = new AnnoScheme.Example(doc["value"].ToString(), doc["label"].ToString());
+                        scheme.Examples.Add(attr);
+                    }
+                }
+
 
 
                 scheme.Name = annoSchemeDocument["name"].ToString();
@@ -2152,11 +2178,7 @@ namespace ssi
                 }
                 else scheme.Description = "";
 
-                if (annoSchemeDocument.Contains("examples"))
-                {
-                    scheme.Examples = annoSchemeDocument["examples"].ToString();
-                }
-                else scheme.Examples = "";
+       
 
 
                 scheme.Type = (AnnoScheme.TYPE)Enum.Parse(typeof(AnnoScheme.TYPE), annoSchemeDocument["type"].ToString());

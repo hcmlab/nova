@@ -68,10 +68,11 @@
             </ListView.View>
         </ListView>
 
-        <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0,0,5,0" Orientation="Horizontal" >
             <Button Style="{StaticResource MyButton}" Name="AddLabel" Content="ADD" Click="AddLabel_Click"/>
             <Button Style="{StaticResource MyButton}" Name="DeleteLabel" Content="REMOVE" Click="DeleteLabel_Click"/>
             <Button Style="{StaticResource MyButton}" Name="Description" Content="DESCRIPTION" Click="Description_Click"/>
+            <Button Style="{StaticResource MyButton}" Name="Examples" Content="EXAMPLES" Click="Examples_Click"/>
             <Button Style="{StaticResource MyButton}" Name="Attributes" Content="ATTRIBUTES" Click="Attributes_Click"/>
         </StackPanel>
 

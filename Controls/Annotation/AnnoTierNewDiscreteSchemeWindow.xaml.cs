@@ -28,7 +28,7 @@ namespace ssi
             items = new ObservableCollection<Label>();
             foreach (AnnoScheme.Label label in scheme.Labels)
             {
-                items.Add(new Label() { Name = label.Name, Color = label.Color });
+                items.Add(new Label() { Name = label.Name, Color = label.Color, ID = label.ID });
             }
             LabelsListBox.ItemsSource = items;
 
@@ -100,11 +100,15 @@ namespace ssi
                     {
                         AnnoList list = AnnoList.LoadfromFile(filenames[0]);
 
+                        scheme.Examples = list.Scheme.Examples;
+                        scheme.LabelAttributes = list.Scheme.LabelAttributes;
+                        scheme.Description = list.Scheme.Description;   
+
                         if (list.Scheme.Type == AnnoScheme.TYPE.DISCRETE)
                         {
                             foreach (var item in list.Scheme.Labels)
                             {
-                                Label label = new Label() { Name = item.Name, Color = item.Color };
+                                Label label = new Label() { Name = item.Name, Color = item.Color, ID = item.ID};
                                 if (!items.Contains(label) && label.Name != "GARBAGE" && label.Name != "") items.Add(label);
                             }
                         }
@@ -138,6 +142,8 @@ namespace ssi
         {
             public string Name { get; set; }
             public Color Color { get; set; }
+
+            public int ID { get; set; }
         }
 
         private void Attributes_Click(object sender, RoutedEventArgs e)
@@ -154,6 +160,18 @@ namespace ssi
         private void Description_Click(object sender, RoutedEventArgs e)
         {
             DescriptionWindow aaw = new DescriptionWindow(ref scheme);
+            aaw.ShowDialog();
+            if (aaw.DialogResult != true)
+            {
+                return;
+            }
+        }
+
+ 
+
+        private void Examples_Click(object sender, RoutedEventArgs e)
+        {
+            AnnoTierExamplesWindow aaw = new AnnoTierExamplesWindow(ref scheme);
             aaw.ShowDialog();
             if (aaw.DialogResult != true)
             {

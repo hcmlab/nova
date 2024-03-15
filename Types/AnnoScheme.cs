@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
+using static ssi.AnnoScheme;
+using Attribute = System.Attribute;
 
 namespace ssi
 { 
@@ -30,14 +32,31 @@ namespace ssi
         public class Label
         {
             public string Name { get; set; }
+
+            public int ID { get; set; }
             public string Description { get; set; }
-            public string Examples { get; set; }
+
             public Color Color { get; set; }
 
-            public Label(string name, Color color)
+            public Label(string name, Color color, int id =-1)
             {
                 Name = name;
                 Color = color;
+                ID = id;
+            }
+        }
+
+
+        public class Example
+        {
+            public string Value { get; set; }
+            public string Annotation { get; set; }
+
+
+            public Example(string value, string anno)
+            {
+                Value = value;
+                Annotation = anno;
             }
         }
 
@@ -70,6 +89,9 @@ namespace ssi
                 Origin = origin;
                 IsActive = isActive;
             }
+
+
+
             public string Origin { get; set; }
         }
 
@@ -79,9 +101,9 @@ namespace ssi
             Type = TYPE.FREE;
             Name = "";
             Description = "";
-            Examples = "";
             Labels = new List<Label>();
             LabelAttributes = new List<Attribute>();
+            Examples = new List<Example>();
             MinScore = 0;
             MaxScore = 1;
             SampleRate = 1;
@@ -97,7 +119,7 @@ namespace ssi
 
         public string Name { get; set; }
         public string Description { get; set; }
-        public string Examples { get; set; }
+        public List<Example> Examples { get; set; }
 
         public bool toSave { get; set; }
 

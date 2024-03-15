@@ -7,7 +7,7 @@
          xmlns:sys="clr-namespace:System;assembly=mscorlib"
           xmlns:p="clr-namespace:PropertyTools.Wpf;assembly=PropertyTools.Wpf"
         mc:Ignorable="d"
-        Title="New Discrete Scheme" Height="450" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Style="{StaticResource WinAll}">
+        Title="Label Attributes" Height="450" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Style="{StaticResource WinAll}">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="MyButton" >
@@ -21,7 +21,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="20"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
@@ -33,7 +33,6 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Label Grid.Row="3" Grid.Column="0" Margin="5">Label names</Label>
         <ListView Name="LabelsListBox" Grid.Row="3" Grid.Column="1" Margin="5,5,5,0" SelectionMode="Single">
             <ListView.View>
                 <GridView>
@@ -60,7 +59,7 @@
             </ListView.View>
         </ListView>
 
-        <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,5,0" Orientation="Horizontal" HorizontalAlignment="Left">
             <Button Style="{StaticResource MyButton}" Name="AddLabel" Content="ADD" Click="AddLabel_Click"/>
             <Button Style="{StaticResource MyButton}" Name="DeleteLabel" Content="REM" Click="DeleteLabel_Click"/>
         </StackPanel>

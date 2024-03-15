@@ -364,7 +364,11 @@ namespace ssi
 
             string database = DatabaseHandler.DatabaseName;
             
-
+            if (annotator == null)
+            {
+                annotator = new DatabaseAnnotator();
+                annotator.Name = "";
+            }
             int result = GetDeterministicHashCode("database" + database + "annotator" + annotator.Name + "sessions" + sessionList + "username" + Properties.Settings.Default.MongoDBUser + "chain" + chain.Name + "opts" + ModelSpecificOptString);
 
             var jobIDhash = (Math.Abs(result)).ToString();
@@ -928,7 +932,7 @@ namespace ssi
 
                 }
 
-                if (FillGapCheckBox.IsChecked == true)
+                if (RemoveLabelCheckBox.IsChecked == true)
                 {
                     content.Add(new StringContent(anno_min_dur), "anno_min_dur");
                 }
@@ -2555,6 +2559,44 @@ namespace ssi
                                 {
                                     xcontent2.Add(item.ToString());
                                 }
+                            }
+
+                            else if (attributes[2].StartsWith("$(inputlabels"))
+                            {
+
+                                var input_value = attributes[2].Split('_')[1].Replace(")", "");
+                                
+
+                                foreach (var item in (Inputsresult))
+                                {
+                                    if (item.Key.Split('.')[0] == input_value)
+                                    {
+
+                                        var scheme = ((ComboBox)item.Value.ElementAt(0)).SelectedItem.ToString();
+                                        var annotator = ((ComboBox)item.Value.ElementAt(2)).SelectedItem.ToString();
+                                        var role = ((ComboBox)item.Value.ElementAt(1)).SelectedItem.ToString();
+                                        var database = DatabasesBox.SelectedItem.ToString();
+                                        var session = SessionsBox.Items.GetItemAt(0).ToString();
+
+                                        ObjectId id = DatabaseHandler.GetAnnotationId(role, scheme, annotator, session);
+
+
+                                        AnnoList list = DatabaseHandler.LoadAnnoList(id);
+
+                                       foreach (AnnoListItem ali in list)
+                                        {
+                                            xcontent2.Add(ali.Label);
+
+                                        }
+
+                                        break;
+                                    }
+
+
+                                    
+                                }
+
+                                origin = "anno";
                             }
 
                             else if (attributes[2].StartsWith("$(io_input_id"))
@@ -4222,8 +4264,8 @@ namespace ssi
 
         private void Window_Deactivated(object sender, EventArgs e)
         {
-            Window window = (Window)sender;
-            window.Topmost = true;
+           // Window window = (Window)sender;
+           // window.Topmost = true;
         }
     }
 

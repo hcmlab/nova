@@ -16,6 +16,9 @@ using static ExCSS.AttributeSelectorFactory;
 using Octokit;
 using FileMode = System.IO.FileMode;
 using static System.Net.Mime.MediaTypeNames;
+using System.Drawing.Printing;
+using static MongoDB.Driver.WriteConcern;
+using static ssi.AnnoScheme;
 
 namespace ssi
 {
@@ -398,6 +401,57 @@ namespace ssi
                 {
                     if (meta.Attributes["role"] != null) list.Meta.Role = meta.Attributes["role"].Value;
                     if (meta.Attributes["annotator"] != null) list.Meta.Annotator = meta.Attributes["annotator"].Value;
+                    if (meta.Attributes["description"] != null) list.Scheme.Description = meta.Attributes["description"].Value;
+                   
+
+                    foreach (XmlNode item in meta)
+
+                    {
+                        if (item.Name == "attribute")
+                        {
+                            AnnoScheme.AttributeTypes attributetype = new AnnoScheme.AttributeTypes();
+                            if (item.Attributes["type"].Value == "bool")
+                            {
+                                attributetype = AnnoScheme.AttributeTypes.BOOLEAN;
+                            }
+                            else if (item.Attributes["type"].Value == "string")
+                            {
+                                attributetype = AnnoScheme.AttributeTypes.STRING;
+                            }
+                            else if (item.Attributes["type"].Value == "list")
+                            {
+                                attributetype = AnnoScheme.AttributeTypes.LIST;
+                            }
+
+                            List<string> values = new List<string>();
+
+                            string[] items = item.Attributes["values"].Value.Split(',');
+                            foreach (string i in items)
+                            {
+                                values.Add(i);
+                            }
+
+                            if(attributetype == AnnoScheme.AttributeTypes.BOOLEAN && values.Count == 1)
+                            {
+                                values.Clear();
+                                values.Add("False");
+                                values.Add("True");
+                            }
+
+                            AnnoScheme.Attribute lcp = new AnnoScheme.Attribute(item.Attributes["name"].Value, values, attributetype);
+                            list.Scheme.LabelAttributes.Add(lcp);
+
+
+                        }
+                        else if (item.Name == "example")
+                        {
+
+                            AnnoScheme.Example lcp = new AnnoScheme.Example(item.Attributes["value"].Value, item.Attributes["label"].Value);
+                            list.Scheme.Examples.Add(lcp);
+
+
+                        }
+                    }
                 }
 
                 XmlNode scheme = annotation.SelectSingleNode("scheme");
@@ -440,11 +494,11 @@ namespace ssi
 
                         Color color = Defaults.Colors.Foreground;
                         if (item.Attributes["color"] != null) color = (Color)ColorConverter.ConvertFromString(item.Attributes["color"].Value);
-                        AnnoScheme.Label lcp = new AnnoScheme.Label(item.Attributes["name"].Value, color);
+                        AnnoScheme.Label lcp = new AnnoScheme.Label(item.Attributes["name"].Value, color,  int.Parse(item.Attributes["id"].Value));
                         list.Scheme.Labels.Add(lcp);
                     }
 
-                    AnnoScheme.Label garbage = new AnnoScheme.Label("GARBAGE", Defaults.Colors.Foreground);
+                    AnnoScheme.Label garbage = new AnnoScheme.Label("GARBAGE", Defaults.Colors.Foreground, -1);
                     list.Scheme.Labels.Add(garbage);
                 }
                 else if (list.Scheme.Type == AnnoScheme.TYPE.FREE)
