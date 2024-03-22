@@ -235,9 +235,16 @@ namespace ssi.Controls
                         {
                             if (ModelBox.SelectedItem.ToString() != "")
                             {
-                                model = ModelBox.SelectedItem.ToString().Split('/')[1];
+                                var split = ModelBox.SelectedItem.ToString().Split('/');
+                                provider = split[0];
+                                for (int i = 1; i < split.Length; i++) {
+                                    model = model + split[i] + "/";
+                                }
+                                model = model.TrimEnd('/');
+
+                               // model = ModelBox.SelectedItem.ToString().Split('/')[1];
                                 
-                                provider = ModelBox.SelectedItem.ToString().Split('/')[0];
+                               
                                
                             }
                            
