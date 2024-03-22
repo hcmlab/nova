@@ -2158,7 +2158,7 @@ namespace ssi
                 }
 
 
-                if (annoSchemeDocument.Contains("examples"))
+                if (annoSchemeDocument.Contains("examples") && annoSchemeDocument["examples"] != "")
                 {
                     BsonArray examplesArray = annoSchemeDocument["examples"].AsBsonArray;
                     foreach (BsonDocument doc in examplesArray)

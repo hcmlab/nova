@@ -585,7 +585,13 @@ namespace ssi
                                 SelectSegmentStart();
                                 e.Handled = true;
                             }
-                        
+
+                            else if (e.KeyboardDevice.IsKeyDown(Key.F))
+                            {
+                                ExpandLabel();
+                                e.Handled = true;
+                            }
+
                             else if ((e.KeyboardDevice.IsKeyDown(Key.W)))
                             {
                                 CreateOrSelectAnnotation();
@@ -710,6 +716,19 @@ namespace ssi
            
 
 
+        }
+
+
+        private void ExpandLabel()
+        {
+            if (AnnoTierStatic.Label != null && AnnoTierStatic.Selected.IsDiscreteOrFree && isKeyDown == false)
+            {
+                AnnoTierStatic.Label.Item.Start = 0;
+                AnnoTierStatic.Label.Item.Stop = MainHandler.Time.TotalDuration;
+          
+                AnnoTierStatic.Label.select(true);
+                isKeyDown = true;
+            }
         }
 
         private void SelectSegmentStart()
