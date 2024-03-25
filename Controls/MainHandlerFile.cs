@@ -629,12 +629,12 @@ namespace ssi
                         IMedia media = new Face(filename, signal, Face.FaceType.OPENFACE2);
                         addMedia(media);
                     }
-                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && (signal.Meta["type"] == "kinect1" || signal.Meta["type"] == "kinect"))
+                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && (signal.Meta["type"] == "kinect1"))
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT1);
                         addMedia(media);
                     }
-                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect2" || signal.Meta["type"] == "kinect2")
+                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "face" && signal.Meta.ContainsKey("type") && signal.Meta["type"] == "kinect2")
                     {
                         IMedia media = new Face(filename, signal, Face.FaceType.KINECT2);
                         addMedia(media);
