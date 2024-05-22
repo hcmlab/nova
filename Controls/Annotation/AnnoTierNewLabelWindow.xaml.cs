@@ -154,6 +154,9 @@ namespace ssi
                     {
                         firstTextBox = textBox;
                     }
+                        //textBox.Height =
+                        //textBox.Width = this.Width;
+                        textBox.TextWrapping = TextWrapping.Wrap;
                     Thickness margin = textBox.Margin; margin.Top = 5; margin.Right = 5; margin.Bottom = 5; textBox.Margin = margin;
                     result.Add(element.Key, textBox);
                     inputGrid.Children.Add(textBox);
