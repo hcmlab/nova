@@ -410,15 +410,15 @@ namespace ssi
                         if (item.Name == "attribute")
                         {
                             AnnoScheme.AttributeTypes attributetype = new AnnoScheme.AttributeTypes();
-                            if (item.Attributes["type"].Value == "bool")
+                            if (item.Attributes["type"].Value.ToLower() == "bool")
                             {
                                 attributetype = AnnoScheme.AttributeTypes.BOOLEAN;
                             }
-                            else if (item.Attributes["type"].Value == "string")
+                            else if (item.Attributes["type"].Value.ToLower() == "string")
                             {
                                 attributetype = AnnoScheme.AttributeTypes.STRING;
                             }
-                            else if (item.Attributes["type"].Value == "list")
+                            else if (item.Attributes["type"].Value.ToLower() == "list")
                             {
                                 attributetype = AnnoScheme.AttributeTypes.LIST;
                             }

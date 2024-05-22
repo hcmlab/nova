@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.8.1";
+        public static string BuildVersion = "1.2.8.2";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -116,7 +116,7 @@ namespace ssi
         public MainHandler(MainControl view)
         {
             control = view;
-
+            //var result = listenAsync();
             //TEST
             //DatabaseHandler.ExportMultipleCSV();
             //batchConvertNoldus("W:\\nova\\data\\DFG-PP_T5");

@@ -455,6 +455,9 @@
       <HintPath>References\Tamir.SharpSSH.dll</HintPath>
     </Reference>
     <Reference Include="UIAutomationProvider" />
+    <Reference Include="websocket-sharp, Version=1.0.1.0, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <HintPath>packages\WebSocketSharp-netstandard.1.0.1\lib\net45\websocket-sharp.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -524,6 +527,7 @@
     <Compile Include="Controls\LLAMA.xaml.cs">
       <DependentUpon>LLAMA.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\MainHandlerWS.cs" />
     <Compile Include="Controls\MainHandlerAnnotation.cs" />
     <Compile Include="Controls\MainHandlerCML.cs" />
     <Compile Include="Controls\MainHandlerDatabase.cs" />

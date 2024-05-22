@@ -97,8 +97,8 @@ namespace ssi
             {
                 meta = meta.Replace("attributes:{", "");
                 meta = meta.Replace("}}", "}");
-                string[] split = meta.Split(',');
-                foreach(string s in split)
+                string[] split = meta.Split(new string[] { "}," }, StringSplitOptions.None);
+                foreach (string s in split)
                 {
                     if (s.Contains(name))
                     {
