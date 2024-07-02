@@ -22,7 +22,7 @@ The latest binaries can always be found [here](https://github.com/hcmlab/nova/re
 
 <strong>Help, I opened a video but it doesn't show up</strong>
 
-Please make sure you installed the according Video Codec on your System. E.g. [Shark007 Codecs](https://shark007.net/index.html) might be a good solution for most missing codecs, which enable you to control audio/video codecs with dedicated GUI. Also make sure you installed a Visual Studio 2015 redistribution package if it doesn't come with your system.
+Please make sure you installed the according Video Codec on your System. E.g. The K-Lite Codec Pack might be a good solution for most missing codecs. Also make sure you installed a Visual Studio 2015 redistribution package if it doesn't come with your system.
 
 
 <strong>I don't know what to do, where can I get help?</strong>
