@@ -637,6 +637,9 @@
     <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Interfaces\IDrawUnit.cs" />
     <Compile Include="Interfaces\IPointList.cs" />
+    <Compile Include="Nostr\NostrDVM.xaml.cs">
+      <DependentUpon>NostrDVM.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Tools\Lightning.cs" />
     <Compile Include="Tools\LightningTipps.xaml.cs">
@@ -1004,6 +1007,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Nostr\NostrDVM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Tools\LightningTipps.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1177,6 +1184,14 @@
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\AWSSDK.SecurityToken.3.7.100.14\analyzers\dotnet\cs\AWSSDK.SecurityToken.CodeAnalysis.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="native\linux-arm64\" />
+    <Folder Include="native\linux-x64\" />
+    <Folder Include="native\osx-arm64\" />
+    <Folder Include="native\osx-x64\" />
+    <Folder Include="native\win-x64\" />
+    <Folder Include="native\win-x86\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Fody.2.4.1\build\Fody.targets" Condition="Exists('packages\Fody.2.4.1\build\Fody.targets')" />

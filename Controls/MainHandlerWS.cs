@@ -17,6 +17,7 @@ namespace ssi
     public partial class MainHandler
     {
 
+        public string LatestNostrFeedback = "";
 
     public static class Secp256k1Wrapper
     {
@@ -117,8 +118,79 @@ namespace ssi
                 return bytes;
             }
 
-          
 
+            public static byte[] getPublickey(string private_kex)
+            {
+
+                var privateKey = HexToByteArray(private_kex);
+
+                var secp256k1 = new Secp256k1();
+                var publicKey = new byte[Secp256k1.PUBKEY_LENGTH];
+                secp256k1.PublicKeyCreate(publicKey, privateKey);
+
+
+                return publicKey;
+            }
+
+            public static string getPublickeyHex(string private_kex)
+            {
+
+                var privateKey = HexToByteArray(private_kex);
+
+                var secp256k1 = new Secp256k1();
+                var publicKey = new byte[Secp256k1.PUBKEY_LENGTH];
+                secp256k1.PublicKeyCreate(publicKey, privateKey);
+
+
+
+                var serializedCompressedPublicKey = new byte[Secp256k1.SERIALIZED_COMPRESSED_PUBKEY_LENGTH];
+                secp256k1.PublicKeySerialize(serializedCompressedPublicKey, publicKey, Flags.SECP256K1_EC_COMPRESSED);
+
+
+
+                var hexStringPublic = BitConverter.ToString(serializedCompressedPublicKey).ToLower();
+                hexStringPublic = hexStringPublic.Replace("-", "");
+                hexStringPublic = hexStringPublic.Substring(2, hexStringPublic.Length - 2);
+                Console.WriteLine(hexStringPublic);
+                return hexStringPublic;
+            }
+
+
+            public static byte[] HexToByteArray(string hex)
+            {
+                hex = hex.Replace(" ", "").Replace("-", "");
+
+                var numberChars = hex.Length;
+                var bytes = new byte[numberChars / 2];
+                for (var i = 0; i < numberChars; i += 2)
+                    bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+                return bytes;
+            }
+
+
+            public static KeyPairHex createKeys()
+            {
+                var secp256k1 = new Secp256k1();
+                var privateKey = new byte[Secp256k1.PRIVKEY_LENGTH];
+                var rnd = System.Security.Cryptography.RandomNumberGenerator.Create();
+                do { rnd.GetBytes(privateKey); }
+                while (!secp256k1.SecretKeyVerify(privateKey));
+
+                var hexStringPrivate = BitConverter.ToString(privateKey).ToLower();
+                hexStringPrivate = hexStringPrivate.Replace("-", "");
+                Console.WriteLine(hexStringPrivate);
+
+                string hexStringPublic = SchnorrSigner.getPublickeyHex(hexStringPrivate);
+
+
+                return new KeyPairHex()
+                {
+                    PrivateKeyHex = hexStringPrivate,
+                    PublicKeyHex = hexStringPublic
+                };
+
+
+            }
 
         }
 
@@ -140,6 +212,7 @@ namespace ssi
         public async Task listenNostr()
         {
 
+            //var ws = new WebSocket("wss://dvms.f7z.io");
             var ws = new WebSocket("wss://relay.damus.io");
             ws.OnMessage += (sender, e) => Console.WriteLine("Received: " + e.Data);
 
@@ -175,98 +248,64 @@ namespace ssi
 
 
 
-        public byte[] getPublickey(string private_kex)
-        {
-
-            var privateKey = HexToByteArray(private_kex);
-
-            var secp256k1 = new Secp256k1();
-            var publicKey = new byte[Secp256k1.PUBKEY_LENGTH];
-            secp256k1.PublicKeyCreate(publicKey, privateKey);
-
-
-            return publicKey;
-        }
-
-        public string getPublickeyHex(string private_kex)
-        {
-
-            var privateKey = HexToByteArray(private_kex);
-
-            var secp256k1 = new Secp256k1();
-            var publicKey = new byte[Secp256k1.PUBKEY_LENGTH];
-            secp256k1.PublicKeyCreate(publicKey, privateKey);
-
-
-
-            var serializedCompressedPublicKey = new byte[Secp256k1.SERIALIZED_COMPRESSED_PUBKEY_LENGTH];
-            secp256k1.PublicKeySerialize(serializedCompressedPublicKey, publicKey, Flags.SECP256K1_EC_COMPRESSED);
-
-
-
-            var hexStringPublic = BitConverter.ToString(serializedCompressedPublicKey).ToLower();
-            hexStringPublic = hexStringPublic.Replace("-", "");
-            hexStringPublic = hexStringPublic.Substring(2, hexStringPublic.Length - 2);
-            Console.WriteLine(hexStringPublic);
-            return hexStringPublic;
-        }
-
-
-        public byte[] HexToByteArray(string hex)
-        {
-            hex = hex.Replace(" ", "").Replace("-", "");
-
-            var numberChars = hex.Length;
-            var bytes = new byte[numberChars / 2];
-            for (var i = 0; i < numberChars; i += 2)
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-            return bytes;
-        }
-
-
-        public KeyPairHex createKeys()
-        {
-            var secp256k1 = new Secp256k1();
-            var privateKey = new byte[Secp256k1.PRIVKEY_LENGTH];
-            var rnd = System.Security.Cryptography.RandomNumberGenerator.Create();
-            do { rnd.GetBytes(privateKey); }
-            while (!secp256k1.SecretKeyVerify(privateKey));
-
-            var hexStringPrivate = BitConverter.ToString(privateKey).ToLower();
-            hexStringPrivate = hexStringPrivate.Replace("-", "");
-            Console.WriteLine(hexStringPrivate);
-
-            string hexStringPublic = getPublickeyHex(hexStringPrivate);
        
 
-            return new KeyPairHex()
-            {
-                PrivateKeyHex = hexStringPrivate,
-                PublicKeyHex = hexStringPublic
-            }; 
 
 
-        }
 
 
-        public async Task sendNostr(string private_key_hex)
+
+        public async Task sendNostr(string private_key_hex, string content)
         {
+            LatestNostrFeedback = "";
             var secp256k1 = new Secp256k1();
-            byte[] privateKey = HexToByteArray(private_key_hex);
-            string publickeyhex = getPublickeyHex(private_key_hex);
+            byte[] privateKey = SchnorrSigner.HexToByteArray(private_key_hex);
+            string publickeyhex = SchnorrSigner.getPublickeyHex(private_key_hex);
 
-            var ws = new WebSocket("wss://relay.damus.io");
+
+           var ws = new WebSocket("wss://relay.damus.io");
+            //var ws = new WebSocket("wss://dvms.f7z.io");
+            // var ws2 = new WebSocket("wss://dvms.f7z.io");
             //var ws = new WebSocket("wss://nostr.mom");
-            ws.OnMessage += (sender, ex) => Console.WriteLine("Nostr Received: " + ex.Data);
+            ws.OnMessage += (sender, ex) =>
+            {
+                try
+                {
+                    Console.WriteLine("Nostr Received: " + ex.Data);
+                    LatestNostrFeedback = ex.Data;
+                }
+                catch { Console.WriteLine("error"); }
+
+               
+
+
+            };
+                
+              
 
             ws.Connect();
          
-            DateTime currentTime = DateTime.UtcNow;
-            long created_at = ((DateTimeOffset)currentTime).ToUnixTimeSeconds();
+            long created_at = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
             //created_at = 1720464386;
-            int kind = 1;
-            string content = "Hello Daki";
-            JArray tags = new JArray();
+            int kind = 5100;
+            JArray tags = new JArray  {
+
+           
+
+        
+            };
+
+
+            JArray iTag = new JArray
+                {
+                    "i", "A super nova","text"
+                };
+
+
+            tags.Add(iTag);
+
+
+
 
             JArray evt = new JArray
             {

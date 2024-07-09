@@ -116,10 +116,7 @@ namespace ssi
         public MainHandler(MainControl view)
         {
             control = view;
-            //var result = listenNostr();
-            //KeyPairHex keys = createKeys();
-            string pk = "27da5b78f4b1d1c33817f76cf4c40b733e99cd192585ea1b711142682c3594b9";
-            var test = sendNostr(pk);
+ 
             //TEST
             //DatabaseHandler.ExportMultipleCSV();
             //batchConvertNoldus("W:\\nova\\data\\DFG-PP_T5");
@@ -265,7 +262,8 @@ namespace ssi
             control.supportMenu.Click += support_Click;
 
             control.AssistantMenu.Click += AssistantMenu_Click;
-            if(Properties.Settings.Default.NovaAssistantAddress == "")
+            control.NostrDVMMenu.Click += DVMMenu_Click;
+            if (Properties.Settings.Default.NovaAssistantAddress == "")
             {
                 control.AssistantMenu.Visibility = Visibility.Collapsed;
             }
@@ -488,7 +486,14 @@ namespace ssi
             LLAMA llama = new LLAMA();
             llama.Show();
         }
+        private void DVMMenu_Click(object sender, RoutedEventArgs e)
+        {
+            NostrDVM dvm = new NostrDVM(this);
+            dvm.Show();
+        }
 
+
+        
         private void DatabaseNovaServerMenu_Click(object sender, RoutedEventArgs e)
         {
             DatabaseNovaServerWindow window = new DatabaseNovaServerWindow(this);
