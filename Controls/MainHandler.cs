@@ -116,7 +116,10 @@ namespace ssi
         public MainHandler(MainControl view)
         {
             control = view;
-            //var result = listenAsync();
+            //var result = listenNostr();
+            //KeyPairHex keys = createKeys();
+            string pk = "27da5b78f4b1d1c33817f76cf4c40b733e99cd192585ea1b711142682c3594b9";
+            var test = sendNostr(pk);
             //TEST
             //DatabaseHandler.ExportMultipleCSV();
             //batchConvertNoldus("W:\\nova\\data\\DFG-PP_T5");
