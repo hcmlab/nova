@@ -488,7 +488,7 @@ namespace ssi
         }
         private void DVMMenu_Click(object sender, RoutedEventArgs e)
         {
-            NostrDVM dvm = new NostrDVM(this);
+            NostrDVM dvm = new NostrDVM();
             dvm.Show();
         }
 

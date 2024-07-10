@@ -4,12 +4,14 @@ using Newtonsoft.Json.Linq;
 using OxyPlot.Reporting;
 using Secp256k1Net;
 using System;
+using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -17,10 +19,12 @@ using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using ThirdParty.BouncyCastle.Utilities.IO.Pem;
 using WebSocketSharp;
 
 using static ssi.MainHandler;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Controls.Button;
 using Image = System.Windows.Controls.Image;
 
@@ -30,53 +34,92 @@ namespace ssi
     /// <summary>
     /// Interaktionslogik für NostrDVM.xaml
     /// </summary>
-    public partial class NostrDVM : Window
+    public partial class NostrDVM : System.Windows.Window
     {
-        MainHandler handler;
+        List<string> seenEvents = new List<string>();
+
         System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph();
-        string pk = "27da5b78f4b1d1c33817f76cf4c40b733e99cd192585ea1b711142682c3594b9";
+        string pk = "27da5b78f4b1d1c33817f76cf4c40b733e99cd192585ea1b711142682c3594b9"; 
+        
+        List<string> relays = new List<string>
+            {
+                "wss://relay.primal.net",
+                "wss://nos.lol/",
+                "wss://nostr.mom/"
+            };
 
-        string RELAY = "wss://relay.primal.net";
-
-        public NostrDVM(MainHandler mh)
+        public NostrDVM()
         {
             InitializeComponent();
-            handler = mh;
             _ = listenNostr(pk);
             ReplyBox.Document = new FlowDocument(paragraph);
-            //KeyPairHex keys = handler.createKeys();
-
-        }
-
-
-        public JToken getTag(JArray tags, string parseBy)
-        {
            
-            foreach (var tag in tags
-                .Where(obj => obj[0].Value<string>() == parseBy))
-            {
-                return tag;
-            }
-            return null;
         }
 
-        private BitmapImage DownloadImage(string url)
+
+
+        public NIP89 getDVMInfo(NostrSigner signer, string dvmkey )
         {
-            BitmapImage bitmap = new BitmapImage();
-            using (WebClient client = new WebClient())
+
+            NIP89 info = new NIP89();
+            NostrClient client = new NostrClient(signer);
+
+            foreach (string relay in relays)
             {
-                byte[] imageBytes = client.DownloadData(url);
-                using (MemoryStream ms = new MemoryStream(imageBytes))
+                client.addRelay(relay);
+            }
+
+            client.connect();
+
+            client.OnResponse += (sender, note) =>
+            {
+                string content = note["content"];
+                Console.WriteLine(content);
+                info = DVM.parseNIP89(content);
+                client.disconnect();
+               
+            };
+
+
+            JArray kinds = new JArray
+                    {
+                        31990,
+                    };
+
+            JArray authors = new JArray
+                    {
+                        dvmkey
+                    };
+
+
+            JObject filter = new JObject
+                    {
+                        { "kinds", kinds },
+                        { "authors", authors }
+
+                    };
+
+
+            client.get_events_of(filter);
+
+            int timeoutms = 2000;
+            int step = 200;
+            while(timeoutms > 0)
+            {
+                if (info.name  == null){
+                    timeoutms = timeoutms - step;
+                    System.Threading.Thread.Sleep(step);
+                }
+                else
                 {
-                    bitmap.BeginInit();
-                    bitmap.StreamSource = ms;
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
+                    return info;
                 }
             }
-            return bitmap;
-        }
 
+            info.name = dvmkey;
+            return info;
+        }
+     
 
 
         public async Task listenNostr(string private_key_hex)
@@ -84,257 +127,259 @@ namespace ssi
             byte[] privateKey = SchnorrSigner.HexToByteArray(private_key_hex);
             string publickeyhex = SchnorrSigner.getPublickeyHex(private_key_hex);
 
+            NostrSigner signer = new NostrSigner(pk);
+            NostrClient client = new NostrClient(signer);
 
-            var ws = new WebSocket(RELAY);
-            ws.OnMessage += (sender, e) =>
+            foreach (string relay in relays)
             {
-                this.Dispatcher.Invoke(() =>
+                client.addRelay(relay);
+            }
+
+            client.connect();
+
+
+            client.OnResponse += (sender, note) =>
+            {
+
+                try
                 {
-                    dynamic json = JsonConvert.DeserializeObject<dynamic>(e.Data);
-                    try
+                   // dynamic note = client.extractNote(e.Data);
                     {
-                        dynamic note = JsonConvert.DeserializeObject<dynamic>(json[2].ToString());
 
-                        JToken AmountTag = getTag(note["tags"], "amount");
-                        paragraph.Inlines.Add(new Bold(new Run(note["pubkey"].ToString() + ": "))
+                        this.Dispatcher.Invoke(() =>
                         {
-                            Foreground = System.Windows.Media.Brushes.Green
-                        });
 
-                         string content = note["content"];
 
-                        if (content.Contains("https://") && note["kind"] != "7000")
-                        {
+                            JToken AmountTag = getTag(note["tags"], "amount");
+                            NIP89 info = getDVMInfo(signer, note["pubkey"].ToString());
+
+                            paragraph.Inlines.Add(new Bold(new Run(info.name + ": "))
+                            {
+                                Foreground = System.Windows.Media.Brushes.Green
+                            });
+
+                            string content = note["content"];
+                            if(content == "")
+                            //Some DVMS might have the status message in the 3rd tag in status instead of content
+                            {
+                                JToken StatusTag = getTag(note["tags"], "status");
+                                if(StatusTag.ToList().Count() > 2)
+                                {
+                                    content = StatusTag[2].ToString();
+                                }
+                            }
+
                           
 
-                            BitmapImage bitmap = DownloadImage(content);
-
-                            Image image = new Image
+                            if (content.Contains("https://") && note["kind"] != "7000")
                             {
-                                Source = bitmap,
-                                Width = 300, // bitmap.Width, // Set desired width
-                                Height = 300// bitmap.Height // Set desired height
-                            };
-
-                            InlineUIContainer container = new InlineUIContainer(image);
-
-                            System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph(container);
-
-                            ReplyBox.Document.Blocks.Add(paragraph);
-
-                        }
 
 
-                        paragraph.Inlines.Add(new Run(content)
-                        {
-                            
-                           Foreground =  note["kind"] != "7000" ? System.Windows.Media.Brushes.Blue :  System.Windows.Media.Brushes.Orange
+                                BitmapImage bitmap = DownloadImage(content);
 
-                        }); ;
-                       
-
-                        if (AmountTag != null)
-                        {
-                            //paragraph.Inlines.Add(AmountTag[2].ToString());
-                            Button zapButton = new Button();
-                            zapButton.Background = Brushes.Gold;
-                            zapButton.BorderBrush = Brushes.Black;
-                            zapButton.Height = 20;
-                            zapButton.Width = 50;
-                            zapButton.Margin = new Thickness(10, 0, 0, 0);
-                            zapButton.Content = "\u26a1 Zap";
-                            zapButton.IsEnabled = true;
-
-                            zapButton.Click += async (sender2, EventArgs) => {
-
-
-                                paragraph.Inlines.Add(new Bold(new Run("Paying Lightning invoice..."))
+                                Image image = new Image
                                 {
-                                    Foreground = System.Windows.Media.Brushes.Gold
-                                });
-                                Lightning lightning = new Lightning();
-                                await lightning.PayInvoice(MainHandler.myWallet, AmountTag[2].ToString());
-                                 paragraph.Inlines.Add(new LineBreak());
-                            
-                            
-                            };
-                            
+                                    Source = bitmap,
+                                    Width = 300, // bitmap.Width, // Set desired width
+                                    Height = 300// bitmap.Height // Set desired height
+                                };
+
+                                InlineUIContainer container = new InlineUIContainer(image);
+
+                                System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph(container);
+
+                                ReplyBox.Document.Blocks.Add(paragraph);
+
+                            }
 
 
-                            paragraph.Inlines.Add(zapButton);   
+                            paragraph.Inlines.Add(new Run(content)
+                            {
+
+                                Foreground = note["kind"] != "7000" ? System.Windows.Media.Brushes.Blue : System.Windows.Media.Brushes.Orange
+
+                            }); ;
 
 
-                        }
+                            if (AmountTag != null)
+                            {
+                                //paragraph.Inlines.Add(AmountTag[2].ToString());
+
+                                if (AmountTag.ToList().Count < 3)
+                                {
+                                    paragraph.Inlines.Add(new Run(info.lud16)
+                                    {
+
+                                        Foreground = System.Windows.Media.Brushes.Orange
+
+                                    }); ;
+
+                                }
+                                
+                                
+                                
+                                else if (MainHandler.myWallet != null)
+                                {
 
 
-                        paragraph.Inlines.Add(new LineBreak());
+                                    Button zapButton = new Button();
+                                    zapButton.Background = Brushes.Gold;
+                                    zapButton.BorderBrush = Brushes.Black;
+                                    zapButton.Height = 20;
+                                    zapButton.Width = 50;
+                                    zapButton.Margin = new Thickness(10, 0, 0, 0);
+                                    zapButton.Content = "\u26a1 Zap";
+                                    zapButton.IsEnabled = true;
 
+                                    zapButton.Click += async (sender2, EventArgs) =>
+                                    {
+
+
+                                        paragraph.Inlines.Add(new Bold(new Run("Paying Lightning invoice..."))
+                                        {
+                                            Foreground = System.Windows.Media.Brushes.Gold
+                                        });
+
+
+                                        Lightning lightning = new Lightning();
+                                        await lightning.PayInvoice(MainHandler.myWallet, AmountTag[2].ToString());
+                                        paragraph.Inlines.Add(new Bold(new Run("... Success"))
+                                        {
+                                            Foreground = System.Windows.Media.Brushes.Green
+                                        });
+                                        paragraph.Inlines.Add(new LineBreak());
+
+
+                                    };
+
+                                    paragraph.Inlines.Add(zapButton);
+
+                                }
+                                else
+                                {
+                                    paragraph.Inlines.Add(new Bold(new Run(AmountTag[2].ToString()))
+                                    {
+                                        Foreground = System.Windows.Media.Brushes.Gold
+                                    });
+
+                                }
+
+
+                            }
+
+                        
+
+                            paragraph.Inlines.Add(new LineBreak());
+
+
+
+                        });
+
+                        Console.WriteLine("Received: " + note);
                     }
-                    catch { Console.WriteLine("No content"); }
-                 
-                }); 
-               
-                Console.WriteLine("Received: " + e.Data);
+                }
+
+                catch (Exception ex2)
+                {
+                    Console.WriteLine(ex2.Message);
+                }
+
+
             };
 
-            ws.Connect();
+                try
+                {
+                    JArray kinds = new JArray
+                    {
+                        7000, 6100
+                    };
 
-            string subscriptionid = "asdjnasdlkjashdajskdhasjdasd";
-            JArray array = new JArray();
-            JArray kinds = new JArray
-            {
-                7000, 6100
-            };
-
-            JArray ptags = new JArray
-            {
-               publickeyhex
-            };
+                    JArray ptags = new JArray
+                    {
+                        publickeyhex
+                    };
 
 
-            JObject filter = new JObject
-            {
-                { "kinds", kinds} ,
-                { "since", ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds() },
-                { "#p", ptags }
-            };
-        // { "#p","27da5b78f4b1d1c33817f76cf4c40b733e99cd192585ea1b711142682c3594b9"}
-
-    
-
-            array.Add("REQ");
-            array.Add(subscriptionid);
-            array.Add(filter);
-
-            Console.WriteLine(array.ToString());
-            ws.Send(array.ToString());
-
-            Console.ReadKey(true);
-            ws.Close();
+                    JObject filter = new JObject
+                    {
+                        { "kinds", kinds },
+                        { "since", NostrTime.Now() },
+                        { "#p", ptags }
+                    };
 
 
+                    client.get_events(filter);
 
-        }
+                   
+                    client.disconnect();
+
+
+                }
+                catch (Exception ex) {
+                    Console.WriteLine(ex.ToString());
+                }
+
+            }
+        
+
 
         public async Task sendNostr(string private_key_hex, string content)
         {
-
-        
             var secp256k1 = new Secp256k1();
             byte[] privateKey = SchnorrSigner.HexToByteArray(private_key_hex);
             string publickeyhex = SchnorrSigner.getPublickeyHex(private_key_hex);
 
 
-            var ws = new WebSocket(RELAY);
-            ws.OnMessage += (sender, ex) =>
+            NostrSigner signer = new NostrSigner(pk);
+            NostrClient client = new NostrClient(signer);
+
+            foreach (string relay in relays)
+            {
+                client.addRelay(relay);
+            }
+
+            client.connect();
+
+
+            client.OnResponse += (sender, note) =>
             {
                 try
                 {
-                    Console.WriteLine("Nostr Received: " + ex.Data);
+                    Console.WriteLine("Nostr Received: " + note);
    
                 }
                 catch { Console.WriteLine("error"); }
 
-
-
-
             };
 
+     
 
-
-            ws.Connect();
-
-            long created_at = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
-            //created_at = 1720464386;
+          
             int kind = 5100;
-            JArray tags = new JArray
-            {
-
-
-
-
-            };
-
-
+            JArray tags = new JArray();
+      
             JArray iTag = new JArray
                 {
                     "i", content ,"text"
                 };
 
 
+
             tags.Add(iTag);
 
 
+            NostrEvent evt = new NostrEvent("", kind, tags, publickeyhex, NostrTime.Now());
+            JObject signedEvent = client.signer.Sign(evt.UnsignedEvent());
 
 
-            JArray evt = new JArray
-            {
-                  0,
-                  publickeyhex,
-                  created_at,
-                  kind,
-                  tags,
-                  content
-            };
-
-
-
-
-            string stringifiedevent = JsonConvert.SerializeObject(evt);
-
-            Console.WriteLine(stringifiedevent);
-            var msgBytes = Encoding.UTF8.GetBytes(stringifiedevent);
-            var msgHash = System.Security.Cryptography.SHA256.Create().ComputeHash(msgBytes);
-            string id = BitConverter.ToString(msgHash).ToLower().Replace("-", "");
-
-
-
-            // Sign the message
-            string signature = SchnorrSigner.SignMessage(msgHash, private_key_hex);
-
-            // bool isValid = SchnorrSigner2.VerifyMessage(id, signature, publickeyhex);
-
-            // Output the signature
-            Console.WriteLine("Schnorr Signature C Library: " + signature);
-
-            JObject signed_event = new JObject
-            {
-                { "id", id  },
-                { "pubkey", publickeyhex },
-                { "created_at", created_at },
-                { "kind", kind },
-                { "tags", tags },
-                { "content", content },
-                { "sig", signature }
-            };
-
-
-
-            JArray array = new JArray
-            {
-                "EVENT",
-                signed_event
-            };
-
-            Console.WriteLine(array.ToString());
-            ws.Send(array.ToString());
+            client.send(signedEvent);
 
             Console.ReadKey(true);
-            ws.Close();
-
-
-
-
-
-
+            client.disconnect();
 
         }
 
-        private void ButtonOnClick(object sender, RoutedEventArgs e)
-        {
-        
-        }
-
+  
         private void DVM_Send_Click(object sender, RoutedEventArgs e)
         {
             

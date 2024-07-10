@@ -530,7 +530,7 @@
     <Compile Include="Controls\LLAMA.xaml.cs">
       <DependentUpon>LLAMA.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\MainHandlerWS.cs" />
+    <Compile Include="Controls\MainHandlerNostr.cs" />
     <Compile Include="Controls\MainHandlerAnnotation.cs" />
     <Compile Include="Controls\MainHandlerCML.cs" />
     <Compile Include="Controls\MainHandlerDatabase.cs" />

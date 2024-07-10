@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Tamir.SharpSsh;
 
@@ -245,6 +246,25 @@ namespace ssi
 
             if (!iscanceled) await control.Dispatcher.BeginInvoke(new Action<string>(FinishedDownload), DispatcherPriority.Normal, localpath);
         }
+
+
+        public static BitmapImage DownloadImage(string url)
+        {
+            BitmapImage bitmap = new BitmapImage();
+            using (WebClient client = new WebClient())
+            {
+                byte[] imageBytes = client.DownloadData(url);
+                using (MemoryStream ms = new MemoryStream(imageBytes))
+                {
+                    bitmap.BeginInit();
+                    bitmap.StreamSource = ms;
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                }
+            }
+            return bitmap;
+        }
+
 
         private async Task httpPost(string URL, string localpath)
         {
