@@ -175,7 +175,7 @@ namespace ssi
             public static string getPublickeyHex(string private_kex)
             {
 
-                var privateKey = HexToByteArray(private_kex);
+                var privateKey = Keys.Parse(private_kex);
 
                 var secp256k1 = new Secp256k1();
                 var publicKey = new byte[Secp256k1.PUBKEY_LENGTH];
@@ -193,17 +193,6 @@ namespace ssi
                 hexStringPublic = hexStringPublic.Substring(2, hexStringPublic.Length - 2);
                 Console.WriteLine(hexStringPublic);
                 return hexStringPublic;
-            }
-
-            public static byte[] HexToByteArray(string hex)
-            {
-                hex = hex.Replace(" ", "").Replace("-", "");
-
-                var numberChars = hex.Length;
-                var bytes = new byte[numberChars / 2];
-                for (var i = 0; i < numberChars; i += 2)
-                    bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-                return bytes;
             }
 
 
@@ -370,14 +359,8 @@ namespace ssi
                 ws.OnMessage += (sender, ex) =>
                 {
 
-                    dynamic note = extractNote(ex.Data);
-                    if (note == "OK")
-                    {
-                        Console.Write("From relay: " + ws.Url + ":  OK\n");
-
-                    }
-
-                    else if (note != null && !checkSeenEvents(note))
+                    dynamic note = extractNote(ex.Data, ws);
+                    if (note != null && !checkSeenEvents(note))
                     {
                         Console.Write("From relay: " + ws.Url + ": ");
                         OnResponse(sender, note);
@@ -461,7 +444,7 @@ namespace ssi
 
 
 
-            public dynamic extractNote(string evt)
+            public dynamic extractNote(string evt, WebSocket ws)
             {
                 dynamic json = JsonConvert.DeserializeObject<dynamic>(evt);
                 try
@@ -471,16 +454,31 @@ namespace ssi
                         dynamic note = JsonConvert.DeserializeObject<dynamic>(json[2].ToString());
                         return note;
                     }
+                    // Just print the others for now
                     else if (json[0] == "OK")
                     {
-                        return "OK";
+                        Console.Write("[" + ws.Url + "]:\n" + json.ToString() + "\n\n");
+                        return null;
+                    }
+                    else if (json[0] == "EOSE")
+                    {
+                        Console.Write("[" + ws.Url + "]:\n " + json.ToString() + "\n\n");
+                        return null;
+                    }
+                    else if (json[0] == "CLOSED")
+                    {
+                        Console.Write("[" + ws.Url + "]:\n " + json.ToString() + "\n\n");
+                        return null;
+                    }
+                    else if (json[0] == "NOTICE")
+                    {
+                        Console.Write("[" + ws.Url + "]:\n " + json.ToString() + "\n\n");
+                        return null;
                     }
                     else
                     {
                         return null;
                     }
-
-                    //if (json[0] != "EOSE" && json[0] != "OK")
                 }
                 catch
                 {
@@ -493,17 +491,14 @@ namespace ssi
             {
                 try
                 {
-                    //dynamic note = extractNote(evt);
                     string id = note["id"];
                     if (!seenEvents.Contains(id))
                     {
                         seenEvents.Add(id);
                         return false;
                     }
-                    else
-                    {
-                        return true;
-                    }
+                    else return true;
+
                 }
 
                 catch (Exception ex)
@@ -514,7 +509,6 @@ namespace ssi
 
             public static JToken getTag(JArray tags, string parseBy)
             {
-
                 foreach (var tag in tags
                     .Where(obj => obj[0].Value<string>() == parseBy))
                 {
@@ -522,7 +516,6 @@ namespace ssi
                 }
                 return null;
             }
-
 
             public event EventHandler<dynamic> OnResponse;
 
@@ -537,9 +530,7 @@ namespace ssi
 
             public NostrEvent Sign(NostrEvent nostr_event)
             {
-
                 var unsigned_event = nostr_event.UnsignedEvent();
-
                 string stringifiedevent = JsonConvert.SerializeObject(unsigned_event);
 
                 Console.WriteLine(stringifiedevent);
@@ -572,10 +563,6 @@ namespace ssi
                 return nostr_event;
 
             }
-
-
-
-
         }
 
     }
