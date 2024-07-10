@@ -46,53 +46,41 @@ namespace ssi
             public static extern int secp256k1_keypair_create(IntPtr context, IntPtr keypair, byte[] seckey);
 
 
+            public static byte[] SignSchnorr(byte[] message, byte[] seckey, byte[] nonce)
+            {
+                const uint SECP256K1_CONTEXT_SIGN = (1 << 0);
 
+                IntPtr context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
+                byte[] signature = new byte[64];
 
+                IntPtr keypair = Marshal.AllocHGlobal(96);
+ 
+                int res = secp256k1_keypair_create(context, keypair, seckey);
+                Console.WriteLine("RES: " + res);
 
+                int result = secp256k1_schnorrsig_sign32(context, signature, message, keypair, nonce);
+                secp256k1_context_destroy(context);
 
-
-
-
-                public static byte[] SignSchnorr(byte[] message, byte[] seckey, byte[] nonce)
-                {
-                    const uint SECP256K1_CONTEXT_SIGN = (1 << 0);
-
-                    IntPtr context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
-                    byte[] signature = new byte[64];
-
-                    IntPtr keypair = Marshal.AllocHGlobal(96);
-                
-
-
-
-
-                    int res = secp256k1_keypair_create(context, keypair, seckey);
-                    Console.WriteLine("RES: " + res);
-
-                   // string test = BitConverter.ToString(keypair).Replace("-", "").ToLower();
-    
-
-                    int result = secp256k1_schnorrsig_sign32(context, signature, message, keypair, nonce);
-                    secp256k1_context_destroy(context);
-
-             
-
-
-
-                    if (result == 1)
-                    {
-                        Console.WriteLine("Signature successfully created.");
-                        // Do something with the signature
-                    }
-                    else
-                    {
-                        Console.WriteLine("Failed to create signature.");
-                    }
-                    return signature;
-                }
-
-      
+                return signature;
             }
+
+            public static bool VerifySchnorr(byte[] message, byte[] signature, byte[] pubkey)
+            {   
+                
+                const uint SECP256K1_CONTEXT_VERIFY = 1 << 0;
+                IntPtr context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
+                if (context == IntPtr.Zero)
+                    throw new Exception("Failed to create secp256k1 context for verification.");
+
+                int result = secp256k1_schnorrsig_verify(context, signature, message, 32, pubkey);
+
+                secp256k1_context_destroy(context);
+
+                return result == 1;
+            }
+
+
+        }
 
 
         public class NostrTime
@@ -107,7 +95,7 @@ namespace ssi
         public class SchnorrSigner
             {
 
-                public static string SignMessage(byte[] messageBytes, string privateKeyHex)
+                public static byte[] SignMessage(byte[] messageBytes, string privateKeyHex)
                 {
                     //var messageBytes = Encoding.UTF8.GetBytes(message);
                     var privateKeyBytes = HexStringToByteArray(privateKeyHex);
@@ -117,13 +105,21 @@ namespace ssi
                     new Random().NextBytes(nonce);
 
                     var signatureBytes = Secp256k1Wrapper.SignSchnorr(messageBytes, privateKeyBytes, nonce);
-                    Console.WriteLine(signatureBytes);
-
-                    return BitConverter.ToString(signatureBytes).Replace("-", "").ToLower();
+                
+                    return signatureBytes;
                 }
 
+            public static bool VerifyMessage(byte[] messageBytes, byte[] signature, byte[] pubkey)
+            {
 
-                private static byte[] HexStringToByteArray(string hex)
+                bool isValid = Secp256k1Wrapper.VerifySchnorr(messageBytes, signature, pubkey);
+                Console.WriteLine(isValid);
+
+                return isValid;
+            }
+
+
+            private static byte[] HexStringToByteArray(string hex)
                 {
                     int NumberChars = hex.Length;
                     byte[] bytes = new byte[NumberChars / 2];
@@ -501,7 +497,13 @@ namespace ssi
                 string id = BitConverter.ToString(msgHash).ToLower().Replace("-", "");
 
                 // Sign the message
-                string signature = SchnorrSigner.SignMessage(msgHash, this.PrivateKey);
+                byte[] signatureBytes = SchnorrSigner.SignMessage(msgHash, this.PrivateKey);
+                string signature = BitConverter.ToString(signatureBytes).Replace("-", "").ToLower();
+
+
+                byte[] publickey = SchnorrSigner.getPublickey(this.PrivateKey);
+                bool isValid = SchnorrSigner.VerifyMessage(msgHash, signatureBytes, publickey);
+                Console.WriteLine("Valid Signature: " + isValid);
 
                 // Output the signature
                 Console.WriteLine("Schnorr Signature C Library: " + signature);
