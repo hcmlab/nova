@@ -36,7 +36,6 @@ namespace ssi
     /// </summary>
     public partial class NostrDVM : System.Windows.Window
     {
-        List<string> seenEvents = new List<string>();
 
         System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph();
         string pk = "27da5b78f4b1d1c33817f76cf4c40b733e99cd192585ea1b711142682c3594b9"; 
@@ -96,7 +95,6 @@ namespace ssi
                     {
                         { "kinds", kinds },
                         { "authors", authors }
-
                     };
 
 
@@ -124,8 +122,8 @@ namespace ssi
 
         public async Task listenNostr(string private_key_hex)
         {
-            byte[] privateKey = SchnorrSigner.HexToByteArray(private_key_hex);
-            string publickeyhex = SchnorrSigner.getPublickeyHex(private_key_hex);
+            byte[] privateKey = MainHandler.Keys.Parse(private_key_hex);
+            string publickeyhex = MainHandler.Keys.getPublickeyHex(private_key_hex);
 
             NostrSigner signer = new NostrSigner(pk);
             NostrClient client = new NostrClient(signer);
@@ -150,7 +148,7 @@ namespace ssi
                         {
 
 
-                            JToken AmountTag = getTag(note["tags"], "amount");
+                            JToken AmountTag = NostrClient.getTag(note["tags"], "amount");
                             NIP89 info = getDVMInfo(signer, note["pubkey"].ToString());
 
                             paragraph.Inlines.Add(new Bold(new Run(info.name + ": "))
@@ -162,7 +160,7 @@ namespace ssi
                             if(content == "")
                             //Some DVMS might have the status message in the 3rd tag in status instead of content
                             {
-                                JToken StatusTag = getTag(note["tags"], "status");
+                                JToken StatusTag = NostrClient.getTag(note["tags"], "status");
                                 if(StatusTag.ToList().Count() > 2)
                                 {
                                     content = StatusTag[2].ToString();
@@ -323,11 +321,11 @@ namespace ssi
         
 
 
-        public async Task sendNostr(string private_key_hex, string content)
+        public void sendNostr(string private_key_hex, string content)
         {
             var secp256k1 = new Secp256k1();
-            byte[] privateKey = SchnorrSigner.HexToByteArray(private_key_hex);
-            string publickeyhex = SchnorrSigner.getPublickeyHex(private_key_hex);
+            byte[] privateKey = MainHandler.Keys.Parse(private_key_hex);
+            string publickeyhex = MainHandler.Keys.getPublickeyHex(private_key_hex);
 
 
             NostrSigner signer = new NostrSigner(pk);
@@ -352,24 +350,15 @@ namespace ssi
 
             };
 
-     
-
-          
             int kind = 5100;
-            JArray tags = new JArray();
-      
-            JArray iTag = new JArray
-                {
-                    "i", content ,"text"
-                };
-
-
-
+            List<Tag> tags = new List<Tag>();
+            string[] tag  =  {"i", content, "text"};
+            Tag iTag = new Tag(tag);
             tags.Add(iTag);
 
 
-            NostrEvent evt = new NostrEvent("", kind, tags, publickeyhex, NostrTime.Now());
-            JObject signedEvent = client.signer.Sign(evt.UnsignedEvent());
+            NostrEvent unsigned_event = new NostrEvent("", kind, tags, publickeyhex, NostrTime.Now());
+            NostrEvent signedEvent = client.signer.Sign(unsigned_event);
 
 
             client.send(signedEvent);
@@ -384,7 +373,7 @@ namespace ssi
         {
             
             string text = text_box.Text;
-            _ = sendNostr(pk, text);
+            sendNostr(pk, text);
             
         }
 
