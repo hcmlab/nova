@@ -363,7 +363,7 @@ namespace ssi
 
             client.send(signedEvent);
 
-            Console.ReadKey(true);
+            Console.Read();
             client.disconnect();
 
         }
