@@ -266,8 +266,10 @@ namespace ssi
             {
                 control.AssistantMenu.Visibility = Visibility.Collapsed;
             }
+
+            bool ENABLE_DVM = false; //fix dependencies first
           
-            if (Properties.Settings.Default.EnableLightning == true)
+            if (Properties.Settings.Default.EnableLightning == true && ENABLE_DVM)
             {
                 control.NostrDVMMenu.Visibility = Visibility.Visible;
                 control.NostrDVMMenu.Click += DVMMenu_Click;
