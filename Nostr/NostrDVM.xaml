@@ -1,0 +1,30 @@
+﻿<Window x:Class="ssi.NostrDVM"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ssi"
+        mc:Ignorable="d"
+        Title="NostrDVM" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="80"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            
+        </Grid>
+        <ScrollViewer x:Name="Scrollviewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <RichTextBox Margin="10,10,10,10"  IsDocumentEnabled="True" SizeChanged="result_SizeChanged"  x:Name="ReplyBox" Height="Auto" Width="Auto" Grid.Row="0">
+                <!--TextWrapping="Wrap"-->
+            </RichTextBox>
+        </ScrollViewer>
+        
+
+
+        <TextBox x:Name="text_box" Grid.Row="1">A Supernova</TextBox>
+        <Button x:Name="dvm_send" Grid.Row="2" Height="30" Width="70" Click="DVM_Send_Click">Request</Button>
+    </Grid>
+</Window>

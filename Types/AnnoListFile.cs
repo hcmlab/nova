@@ -1297,8 +1297,11 @@ namespace ssi
                             end = double.Parse(endtmp, CultureInfo.InvariantCulture) / 1000;
                             id = alignable_annotation.Attributes.GetNamedItem("ANNOTATION_ID").Value.ToString();
                             label = alignable_annotation.FirstChild.InnerText.Replace(';', ',');
-                           
-
+                            if (label == "" || label == " " || label == null)
+                            {
+                                continue;
+                            }
+                        
                             AnnoScheme.Label l = new AnnoScheme.Label(label, Colors.Black);
 
 

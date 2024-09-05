@@ -499,3 +499,11 @@ libmongocrypt.dylib
 bin/ZstdSharp.dll
 bin/Microsoft.Bcl.AsyncInterfaces.dll
 bin/System.Data.SqlClient.xml
+bin/Secp256k1.Net.dll
+bin/native/win-x86/secp256k1.dll
+bin/Secp256k1.Net.xml
+bin/native/win-x64/secp256k1.dll
+bin/native/osx-x64/libsecp256k1.dylib
+bin/native/osx-arm64/libsecp256k1.dylib
+bin/native/linux-x64/libsecp256k1.so
+bin/native/linux-arm64/libsecp256k1.so

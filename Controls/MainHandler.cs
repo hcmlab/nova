@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.8.2";
+        public static string BuildVersion = "1.2.8.3";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -116,7 +116,7 @@ namespace ssi
         public MainHandler(MainControl view)
         {
             control = view;
-            //var result = listenAsync();
+ 
             //TEST
             //DatabaseHandler.ExportMultipleCSV();
             //batchConvertNoldus("W:\\nova\\data\\DFG-PP_T5");
@@ -262,9 +262,15 @@ namespace ssi
             control.supportMenu.Click += support_Click;
 
             control.AssistantMenu.Click += AssistantMenu_Click;
-            if(Properties.Settings.Default.NovaAssistantAddress == "")
+            if (Properties.Settings.Default.NovaAssistantAddress == "")
             {
                 control.AssistantMenu.Visibility = Visibility.Collapsed;
+            }
+          
+            if (Properties.Settings.Default.EnableLightning == true)
+            {
+                control.NostrDVMMenu.Visibility = Visibility.Visible;
+                control.NostrDVMMenu.Click += DVMMenu_Click;
             }
 
 
@@ -485,7 +491,14 @@ namespace ssi
             LLAMA llama = new LLAMA();
             llama.Show();
         }
+        private void DVMMenu_Click(object sender, RoutedEventArgs e)
+        {
+            NostrDVM dvm = new NostrDVM();
+            dvm.Show();
+        }
 
+
+        
         private void DatabaseNovaServerMenu_Click(object sender, RoutedEventArgs e)
         {
             DatabaseNovaServerWindow window = new DatabaseNovaServerWindow(this);

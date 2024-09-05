@@ -56,6 +56,7 @@ using ListView = System.Windows.Controls.ListView;
 using Path = System.IO.Path;
 using TextBox = System.Windows.Controls.TextBox;
 
+
 namespace ssi
 {
     /// <summary>
@@ -3087,7 +3088,7 @@ namespace ssi
                             string source = element.Key.Split('.')[1];
                             string[] src = source.Split(':');
 
-                            if ((source == "text") || (source == "prompt") || (source == "image") || (source == "stream:Video") || (src.Length > 1) && ( src[1] == "text" || (source == "image") || src[1] == "prompt"))
+                            if ((source == "text") || (source == "prompt") || (source == "image") || (source == "stream:Video") || (source == "stream:Audio") || (src.Length > 1) && ( src[1] == "text" || (source == "image") || src[1] == "prompt"))
                             {
                                 JObject ob = new JObject
                                     {
