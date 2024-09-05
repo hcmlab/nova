@@ -126,7 +126,7 @@
             <MenuItem Header="ASSISTANT" Name="AssistantMenu">
             </MenuItem>
 
-            <MenuItem Header="NOSTR DVM" Name="NostrDVMMenu">
+            <MenuItem Header="NOSTR DVM" Name="NostrDVMMenu" Visibility="Collapsed">
             </MenuItem>
 
             <MenuItem Header="?">
