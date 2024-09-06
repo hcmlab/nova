@@ -1092,7 +1092,7 @@ namespace ssi
         #region IMPORT
 
         
-        private void BatchConvertElanAnnotations(string parentDiretory)
+        public static void BatchConvertElanAnnotations(string parentDiretory)
         {
             DirectoryInfo directory = new DirectoryInfo(parentDiretory);
             DirectoryInfo[] directories = directory.GetDirectories();
@@ -1107,6 +1107,7 @@ namespace ssi
                     foreach (AnnoList list in lists)
                     {
                         list.Scheme.Name = convert_uml(list.Scheme.Name);
+                        list.Scheme.Name = list.Scheme.Name.Replace(" ", "_");
 
                         string saveto = folder.FullName + "\\" + list.Meta.Role + "." + list.Scheme.Name + ".annotation";
                         list.Source.StoreToFile = true;
@@ -1242,7 +1243,7 @@ namespace ssi
         }
 
 
-        private void batchConvertNoldus (string directory)
+        public static void batchConvertNoldus (string directory)
         {
             string[] dirs = Directory.GetDirectories(directory, "*", SearchOption.AllDirectories);
                 foreach(string dir in dirs)

@@ -1270,7 +1270,9 @@ namespace ssi
                     {
                        role = tier.Attributes.GetNamedItem("PARTICIPANT").Value.ToString();
                     }
-                    catch { }
+                    catch {
+                        role = "role";
+                    }
 
                     bool hasreftrack = false;
                     AnnoList refList = new AnnoList();
@@ -1296,7 +1298,7 @@ namespace ssi
                             endtmp = (from kvp in time_order_list where kvp.Key == alignable_annotation.Attributes.GetNamedItem("TIME_SLOT_REF2").Value.ToString() select kvp.Value).ToList()[0];
                             end = double.Parse(endtmp, CultureInfo.InvariantCulture) / 1000;
                             id = alignable_annotation.Attributes.GetNamedItem("ANNOTATION_ID").Value.ToString();
-                            label = alignable_annotation.FirstChild.InnerText.Replace(';', ',');
+                            label = alignable_annotation.FirstChild.InnerText.Replace(';', ',').Replace(", ", "_");
                             if (label == "" || label == " " || label == null)
                             {
                                 continue;

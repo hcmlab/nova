@@ -86,6 +86,8 @@
                 <MenuItem Header="Convert Signal" Name="convertSignalMenu">
                     <MenuItem Header="To Continuous Annotation" Name="convertSignalToAnnoContinuousMenu" />
                 </MenuItem>
+                <MenuItem Header="Batch Tools" Name="BatchToolsMenu" Visibility="Visible">
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="LEARNING" Name="databaseCMLMenu">
              
@@ -128,6 +130,8 @@
 
             <MenuItem Header="NOSTR DVM" Name="NostrDVMMenu" Visibility="Collapsed">
             </MenuItem>
+
+          
 
             <MenuItem Header="?">
                 <MenuItem Header="Buy us a coffee ☕"  Name="supportMenu" />

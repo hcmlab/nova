@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.8.3";
+        public static string BuildVersion = "1.2.8.4";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -116,10 +116,11 @@ namespace ssi
         public MainHandler(MainControl view)
         {
             control = view;
- 
+
             //TEST
             //DatabaseHandler.ExportMultipleCSV();
-            //batchConvertNoldus("W:\\nova\\data\\DFG-PP_T5");
+         
+           
 
             // Shadow box
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
@@ -275,6 +276,8 @@ namespace ssi
                 control.NostrDVMMenu.Click += DVMMenu_Click;
             }
 
+
+            control.BatchToolsMenu.Click += BatchToolsMenu_Click;
 
             //PYTHON
             //if(ENABLE_PYTHON) startExplainableThread();
@@ -486,6 +489,12 @@ namespace ssi
             // allow drag and drop
 
             control.Drop += controlDrop;
+        }
+
+        private void BatchToolsMenu_Click(object sender, RoutedEventArgs e)
+        {
+            BatchTools batchtools = new BatchTools();
+            batchtools.Show();
         }
 
         private void AssistantMenu_Click(object sender, RoutedEventArgs e)
