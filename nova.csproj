@@ -645,7 +645,9 @@
     <Compile Include="Tools\LightningTipps.xaml.cs">
       <DependentUpon>LightningTipps.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\NovaServerNostr.cs" />
+    <Compile Include="Tools\BatchTools.xaml.cs">
+      <DependentUpon>BatchTools.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\PluginCaller.cs" />
     <Compile Include="Tools\Polygon Helper\DataGridChecker.cs" />
     <Compile Include="Tools\Polygon Helper\DrawUnit.cs" />
@@ -1014,6 +1016,10 @@
     <Page Include="Tools\LightningTipps.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\BatchTools.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Tools\PatternBrushes.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -43,8 +43,8 @@ namespace ssi
         List<string> relays = new List<string>
             {
                 "wss://relay.primal.net",
-                "wss://nos.lol/",
-                "wss://nostr.mom/"
+                "wss://nostr.mom/",
+                "wss://nostr.oxtr.dev/"
             };
 
         public NostrDVM()
