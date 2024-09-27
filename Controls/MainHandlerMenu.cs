@@ -40,7 +40,7 @@ namespace ssi
             control.databaseLoadSessionMenu.IsEnabled = isConnected;
             control.databasePasswordMenu.IsEnabled = isConnected;
             control.databaseUpdateMenu.IsEnabled = isConnected;
-            control.bountiesMenu.IsEnabled = isConnected;
+            //control.bountiesMenu.IsEnabled = isConnected;
 
             control.databaseCMLMenu.IsEnabled = isConnected;
             control.databaseCMLCompleteStepMenu.IsEnabled = isConnectedAndHasSession;

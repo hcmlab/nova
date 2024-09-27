@@ -54,8 +54,8 @@
                     <TextBox Grid.Row="3" Name="DefaultZoom" Margin="5,0,5,5" PreviewTextInput="NumberValidationTextBox" />
                     <Label Grid.Row="4" Content="Draw wavform from video (might be slower) :"  />
                     <CheckBox Grid.Row="5" Name="DrawwaveformCheckbox" Margin="5,0,5,5" />
-                    <Label Grid.Row="6" Content="Enable Lightning Network (Experimental, requires restart)"  />
-                    <CheckBox Grid.Row="7" Name="EnableLightningCheckbox" Margin="5,0,5,5" />
+                    <!--<Label Grid.Row="6" Content="Enable Lightning Network (Experimental, requires restart)"  />
+                    <CheckBox Grid.Row="7" Name="EnableLightningCheckbox" Margin="5,0,5,5" />-->
                     <Label Grid.Row="8" Content="Check for updates on startup:"  />
                     <CheckBox Grid.Row="9" Name="UpdatesCheckbox" Margin="5,0,5,5" />
                     <Label Grid.Row="10" Content="Mediabackend: (requires restart)"  />

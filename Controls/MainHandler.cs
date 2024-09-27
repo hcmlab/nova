@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.8.4";
+        public static string BuildVersion = "1.2.8.5";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -341,8 +341,8 @@ namespace ssi
             control.databaseConnectMenu.Click += DatabaseConnectMenu_Click;
             control.databasePasswordMenu.Click += DatabasePassMenu_Click;
 
-            control.databasecreateBountyMenu.Click += DatabaseCreateBounty_Click;
-            control.databasehuntBountyMenu.Click += DatabaseHuntBounty_Click;
+            //control.databasecreateBountyMenu.Click += DatabaseCreateBounty_Click;
+            //control.databasehuntBountyMenu.Click += DatabaseHuntBounty_Click;
             if (Properties.Settings.Default.DatabaseAutoLogin)
             {
                 databaseConnect();

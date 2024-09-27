@@ -80,7 +80,7 @@ namespace ssi
             OverwriteAnnotation.IsChecked = Properties.Settings.Default.DatabaseAskBeforeOverwrite;
             DownloadDirectory.Text = Properties.Settings.Default.DatabaseDirectory;
             CMLDirectory.Text = Properties.Settings.Default.CMLDirectory;
-            EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
+            //EnableLightningCheckbox.IsChecked =  Properties.Settings.Default.EnableLightning;
             Showexport.IsChecked = Properties.Settings.Default.ShowExportDatabase;
             enableworldlevel.IsChecked = Properties.Settings.Default.SRTwordlevel;
             SystemPrompt.Text = Properties.Settings.Default.NovaAssistantSystemPrompt;
@@ -253,7 +253,7 @@ namespace ssi
 
         public bool EnableLightning()
         {
-            return (EnableLightningCheckbox.IsChecked == true);
+            return false; // (EnableLightningCheckbox.IsChecked == true);
         }
 
         public string ContinuousHotkeyLevels()
@@ -642,16 +642,16 @@ namespace ssi
         private void DBHost_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             //For now only works on test server
-            if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
-            {
-                LoginWithLightning.Visibility = Visibility.Hidden;
-                RegisterButton.Visibility = Visibility.Hidden;
-                Properties.Settings.Default.LoggedInWithLightning = false;
-                Properties.Settings.Default.Save();
+            //if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
+            //{
+            //    LoginWithLightning.Visibility = Visibility.Hidden;
+            //    RegisterButton.Visibility = Visibility.Hidden;
+            //    Properties.Settings.Default.LoggedInWithLightning = false;
+            //    Properties.Settings.Default.Save();
 
              
-            }
-            else
+            //}
+            //else
             {
                 LoginWithLightning.Visibility = Visibility.Visible;
                 RegisterButton.Visibility = Visibility.Visible;

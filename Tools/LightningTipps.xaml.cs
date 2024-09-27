@@ -37,7 +37,7 @@ namespace ssi
         private async void GenerateInvoice_Click(object sender, RoutedEventArgs e)
         {
             clipboard.Content = "Creating invoice, please wait..";
-            Lightning.LightningInvoice invoice = await lightning.CreateInvoice(Defaults.Lightning.LNTippingInvoiceID, Convert.ToUInt32(DepositSats.Text), "NOVA Tipp (External)");
+            Lightning.LightningInvoice invoice = await lightning.CreateInvoice(Defaults.Lightning.LNTippingInvoiceID, Convert.ToUInt32(DepositSats.Text), "NOVA Tip (External)");
             DepositAdress.Text = invoice.payment_request;
             System.Windows.Clipboard.SetText(invoice.payment_request);
             clipboard.Content = "Copied to clipboard";
@@ -61,7 +61,7 @@ namespace ssi
         private async void Withdraw_Click(object sender, RoutedEventArgs e)
         {
             //DemoCode
-            Lightning.LightningInvoice invoice = await lightning.CreateInvoice(Defaults.Lightning.LNTippingInvoiceID, Convert.ToUInt32(DepositSats.Text), "NOVA Tipp (Internal)");
+            Lightning.LightningInvoice invoice = await lightning.CreateInvoice(Defaults.Lightning.LNTippingInvoiceID, Convert.ToUInt32(DepositSats.Text), "NOVA Tip (Internal)");
             if (MainHandler.myWallet == null)
             {
                 LightningWalletMangement ln = new LightningWalletMangement(handler);

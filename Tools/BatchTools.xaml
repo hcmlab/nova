@@ -25,6 +25,16 @@
              VerticalContentAlignment="Center"  IsChecked="True">Elan Format</RadioButton>
             <RadioButton Name="noldus" DockPanel.Dock="Top"
              VerticalContentAlignment="Center">Noldus Format</RadioButton>
+
+            <!--<DockPanel x:Name="database"  Visibility="Visible">
+            <Label DockPanel.Dock="Top"
+  VerticalContentAlignment="Center">Database:</Label>
+            <RadioButton Name="download" DockPanel.Dock="Top"
+VerticalContentAlignment="Center">Download</RadioButton>
+            <RadioButton Name="upload" DockPanel.Dock="Top"
+  VerticalContentAlignment="Center"  IsChecked="True">Upload</RadioButton>
+        </DockPanel>-->
+
         </DockPanel>
 
         <DockPanel Grid.Row="2" LastChildFill="True" Grid.ColumnSpan="2">

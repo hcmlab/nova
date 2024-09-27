@@ -16,6 +16,7 @@ using Svg;
 using System.Windows.Input;
 using System.Xml.Linq;
 using System.Net.Http.Headers;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace ssi
 {
@@ -486,7 +487,8 @@ namespace ssi
         {
   
             WebClient client = new WebClient();
-            Stream stream = client.OpenRead("https://chart.googleapis.com/chart?cht=qr&chl=" + payment_request + "&chs=200x200&chld=M|0");
+            var qr_code = "https://qrcode.tec-it.com/API/QRCode?data=" + payment_request + "&backcolor=%23ffffff&size=small&quietzone=1&errorcorrection=H";
+            Stream stream = client.OpenRead(qr_code);
             Bitmap bitmap; bitmap = new Bitmap(stream);
             stream.Flush();
             stream.Close();
