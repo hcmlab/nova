@@ -159,14 +159,15 @@ namespace ssi
 
         private void AddDB_Click(object sender, RoutedEventArgs e)
         {
-            if (DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, DatabaseBox.SelectedItem.ToString()) < 4)
-            {
-                MessageBox.Show("Only Server Admins can use this feature");
-                return;
-            }
+          
 
             try
             {
+                if (DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, DatabaseBox.SelectedItem.ToString()) < 4)
+                {
+                    MessageBox.Show("Only Server Admins can use this feature");
+                    return;
+                }
                 DatabaseDBMeta meta = new DatabaseDBMeta();
                 DatabaseAdminDBMeta dialog = new DatabaseAdminDBMeta(ref meta);
                 dialog.ShowDialog();
