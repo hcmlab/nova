@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -17,21 +18,31 @@ namespace ssi
         {           
             InitializeComponent();
 
-            this.db = db;
-
-            NameField.Text = db.Name;
-            DescriptionField.Text = db.Description;
-            ServerField.Text = db.Server;
-            AuthentificationBox.IsChecked = db.ServerAuth;
-            if (db.UrlFormat == UrlFormat.NEXTCLOUD)
+            try
             {
-                UrlFormatNextCloud.IsChecked = true;
+                this.db = db;
+
+                NameField.Text = db.Name;
+                DescriptionField.Text = db.Description;
+                ServerField.Text = db.Server;
+                AuthentificationBox.IsChecked = db.ServerAuth;
+                if (db.UrlFormat == UrlFormat.NEXTCLOUD)
+                {
+                    UrlFormatNextCloud.IsChecked = true;
+                }
+
+                else
+                {
+                    UrlFormatGeneral.IsChecked = true;
+                }
             }
 
-            else
-            {
-                UrlFormatGeneral.IsChecked = true;
-            }
+            catch(Exception ex) {
+                Console.Write(ex.Message);
+                    
+                    }
+
+          
             
         }
 
