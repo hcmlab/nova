@@ -301,7 +301,7 @@ namespace ssi
                 }
             }
             catch (Exception e)
-            { MessageBox.Show("Auth check: " + e.Message);
+            {
             }
 
             return auth;
