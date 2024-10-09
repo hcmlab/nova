@@ -163,14 +163,21 @@ namespace ssi
 
             try
             {
-                if (DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, DatabaseBox.SelectedItem.ToString()) < 4)
+                try
                 {
-                    MessageBox.Show("Only Server Admins can use this feature");
-                    return;
+                    if (DatabaseHandler.CheckAuthentication(Properties.Settings.Default.MongoDBUser, DatabaseBox.SelectedItem.ToString()) < 4)
+                    {
+                        MessageBox.Show("Only Server Admins can use this feature");
+                        return;
+                    }
+
                 }
+                catch (Exception ex) {
+                MessageBox.Show("Menu: Auth check: " + ex.ToString());
+                }
+               
 
 
-                MessageBox.Show("Checked auth");
                 DatabaseDBMeta meta = new DatabaseDBMeta();
                 DatabaseAdminDBMeta dialog = new DatabaseAdminDBMeta(ref meta);
                 dialog.ShowDialog();
