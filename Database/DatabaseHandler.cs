@@ -286,6 +286,7 @@ namespace ssi
             int auth = 0;
             try
             {
+                
                 var adminDB = client.GetDatabase("admin");
                 var cmd = new BsonDocument("usersInfo", user);
                 var queryResult = adminDB.RunCommand<BsonDocument>(cmd);
@@ -299,8 +300,9 @@ namespace ssi
                     else if ((roles[i]["role"].ToString() == "readAnyDatabase") && auth <= 1) { auth = 1; }
                 }
             }
-            catch
-            { }
+            catch (Exception e)
+            { MessageBox.Show("Auth check: " + e.Message);
+            }
 
             return auth;
         }

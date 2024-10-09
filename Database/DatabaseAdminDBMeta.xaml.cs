@@ -38,7 +38,7 @@ namespace ssi
             }
 
             catch(Exception ex) {
-                Console.Write(ex.Message);
+                Console.Write("Internal: " + ex.Message);
                     
                     }
 

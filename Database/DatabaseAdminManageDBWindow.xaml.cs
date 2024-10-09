@@ -168,6 +168,9 @@ namespace ssi
                     MessageBox.Show("Only Server Admins can use this feature");
                     return;
                 }
+
+
+                MessageBox.Show("Checked auth");
                 DatabaseDBMeta meta = new DatabaseDBMeta();
                 DatabaseAdminDBMeta dialog = new DatabaseAdminDBMeta(ref meta);
                 dialog.ShowDialog();
@@ -184,7 +187,7 @@ namespace ssi
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("Menu: "  + ex.Message);
             }
         }
 
