@@ -173,7 +173,7 @@ namespace ssi
 
                 }
                 catch (Exception ex) {
-                MessageBox.Show("Menu: Auth check: " + ex.ToString());
+              
                 }
                
 
