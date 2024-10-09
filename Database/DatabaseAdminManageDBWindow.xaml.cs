@@ -165,18 +165,25 @@ namespace ssi
                 return;
             }
 
-            DatabaseDBMeta meta = new DatabaseDBMeta();
-
-            DatabaseAdminDBMeta dialog = new DatabaseAdminDBMeta(ref meta);
-            dialog.ShowDialog();
-
-            if (dialog.DialogResult == true)
+            try
             {
-                if (DatabaseHandler.AddDB(meta))
+                DatabaseDBMeta meta = new DatabaseDBMeta();
+                DatabaseAdminDBMeta dialog = new DatabaseAdminDBMeta(ref meta);
+                dialog.ShowDialog();
+
+                if (dialog.DialogResult == true)
                 {
-                    GetDatabases(meta.Name);
-                    Refresh();
+                    if (DatabaseHandler.AddDB(meta))
+                    {
+                        GetDatabases(meta.Name);
+                        Refresh();
+
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 

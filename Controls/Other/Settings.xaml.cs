@@ -97,26 +97,26 @@ namespace ssi
                 Properties.Settings.Default.LoggedInWithLightning = false;
                 Properties.Settings.Default.Save();
             }
-            else
-            {
-                LoginWithLightning.Visibility = Visibility.Visible;
-                RegisterButton.Visibility = Visibility.Visible;
-            }
-            if (Properties.Settings.Default.LoggedInWithLightning)
-            {
-                LoginWithLightning.Content = "\u26a1 Logout of Lightning";
-                this.DBPassword.Visibility = Visibility.Collapsed;
-                this.passwordtext.Visibility = Visibility.Collapsed;
-                this.DBUser.IsEnabled = false;
-            }
-            else
-            {
-                LoginWithLightning.Content = "\u26a1 Login with Lightning";
-                this.DBPassword.Visibility = Visibility.Visible;
-                this.passwordtext.Visibility = Visibility.Visible;
-                this.DBUser.IsEnabled = true;
+            //else
+            //{
+            //    LoginWithLightning.Visibility = Visibility.Visible;
+            //    RegisterButton.Visibility = Visibility.Visible;
+            //}
+            //if (Properties.Settings.Default.LoggedInWithLightning)
+            //{
+            //    LoginWithLightning.Content = "\u26a1 Logout of Lightning";
+            //    this.DBPassword.Visibility = Visibility.Collapsed;
+            //    this.passwordtext.Visibility = Visibility.Collapsed;
+            //    this.DBUser.IsEnabled = false;
+            //}
+            //else
+            //{
+            //    LoginWithLightning.Content = "\u26a1 Login with Lightning";
+            //    this.DBPassword.Visibility = Visibility.Visible;
+            //    this.passwordtext.Visibility = Visibility.Visible;
+            //    this.DBUser.IsEnabled = true;
 
-            }
+            //}
 
 
         }
@@ -644,18 +644,18 @@ namespace ssi
             //For now only works on test server
             //if (DBHost.Text != MainHandler.Decode("MTM3LjI1MC4xNzEuMjMz"))
             //{
-            //    LoginWithLightning.Visibility = Visibility.Hidden;
-            //    RegisterButton.Visibility = Visibility.Hidden;
-            //    Properties.Settings.Default.LoggedInWithLightning = false;
-            //    Properties.Settings.Default.Save();
+                LoginWithLightning.Visibility = Visibility.Hidden;
+                RegisterButton.Visibility = Visibility.Hidden;
+                Properties.Settings.Default.LoggedInWithLightning = false;
+                Properties.Settings.Default.Save();
 
              
             //}
             //else
-            {
-                LoginWithLightning.Visibility = Visibility.Visible;
-                RegisterButton.Visibility = Visibility.Visible;
-            }
+            //{
+            //    LoginWithLightning.Visibility = Visibility.Visible;
+            //    RegisterButton.Visibility = Visibility.Visible;
+            //}
         }
 
         private async void Register_Click(object sender, RoutedEventArgs e)
