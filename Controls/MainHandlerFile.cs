@@ -37,6 +37,8 @@ using WPFMediaKit.DirectShow.Controls;
 using Tamir.SharpSsh.java.lang;
 using NDtw;
 using System.Windows.Media.Media3D;
+using MongoDB.Driver.Core.Misc;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace ssi
 {
@@ -660,7 +662,7 @@ namespace ssi
                     }
 
 
-                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton")
+                    else if (signal.Meta.ContainsKey("name") && signal.Meta["name"] == "skeleton" || (signal.Meta.ContainsKey("type") && signal.Meta["type"].Contains("feature;body;skeleton")))
                     {
                         IMedia media = new Skeleton(filename, signal, mwidth, mheight);
                         addMedia(media);

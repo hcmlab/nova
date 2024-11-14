@@ -14,6 +14,10 @@ using WPFMediaKit.DirectShow.Controls;
 
 namespace ssi
 {
+    class TestArgs : EventArgs
+    {
+        public bool scale { get; set; }
+    }
     public class Skeleton : Image, IMedia, INotifyPropertyChanged
     {
         public enum SkeletonType
@@ -34,6 +38,7 @@ namespace ssi
 
         private int width;
         private int height;
+        private bool normalized = false;
 
         private int numJoints = 0;
         private int jointValues = 0;
@@ -97,20 +102,28 @@ namespace ssi
                 int.TryParse(signal.Meta["num"], out numSkeletons);
             }
 
+            this.normalized = false;
+            if (signal.Meta.ContainsKey("normalized"))
+            {
+                bool.TryParse(signal.Meta["normalized"], out this.normalized);
+            }
+
+
+
             numJoints = 0;
             if (signal.Meta.ContainsKey("type"))
             {
-                if (signal.Meta["type"] == "ssi")
+                if (signal.Meta["type"].Contains("ssi") || signal.Meta["type"].Contains("blazepose"))
                 {
                     skelType = SkeletonType.SSI;
                     numJoints = 25;
                 }
-                else if (signal.Meta["type"] == "kinect1")
+                else if (signal.Meta["type"].Contains("kinect1"))
                 {
                     skelType = SkeletonType.KINECT1;
                     numJoints = 20;
                 }
-                else if (signal.Meta["type"] == "kinect2")
+                else if (signal.Meta["type"].Contains("kinect2"))
                 {
                     skelType = SkeletonType.KINECT2;
                     numJoints = 25;
@@ -133,8 +146,14 @@ namespace ssi
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(1000.0 / signal.rate);
-            timer.Tick += new EventHandler(Draw);
+            TestArgs args = new TestArgs();
+           
+            args.scale = true;
+           // timer.Tick += (sender, e) => Draw(sender, args);
+
+           timer.Tick += new EventHandler(Draw);
         }
+
 
         public void Draw(object myObject, EventArgs myEventArgs)
         {
@@ -166,6 +185,7 @@ namespace ssi
 
                 //Kinect Stream Resolution
                 uint dim = signal.dim;
+              
 
                 for (int s = 0; s < numSkeletons; s++)
                 {
@@ -176,13 +196,25 @@ namespace ssi
                             switch (skelType)
                             {
                                 case SkeletonType.SSI:
-                                    {
+                                     {
+                                        if (this.normalized)
+                                        {
+                                            points[i].X = (int)(signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 0] * width * 75 / width + width / 2);
+                                            points[i].Y = (int)(height - signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 1] * height* 75 / height - height / 2);
+                                            confs[i] = (float)(signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 3]);
+                                            break;
+
+                                        }
+                                        else
+                                        {
+                                            points[i].X = (int)(signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 0] * 75 / width + width / 2);
+                                            points[i].Y = (int)(height - signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 1] * 75 / height - height / 2);
+                                            confs[i] = (float)(signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 3]);
+                                            break;
+                                        }
 
                                       
-                                        points[i].X = (int)(signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 0] * 75 / width + width / 2);
-                                        points[i].Y = (int)(height - signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 1] * 75 / height - height / 2);
-                                        confs[i] =    (float)(signal.data[s * dim / numSkeletons + (index * dim) + i * jointValues + 3]);
-                                        break;
+                                      
                                     }
                                 case SkeletonType.KINECT1:
                                     {
@@ -229,8 +261,8 @@ namespace ssi
                                 if (confs[21] > 0.1 && confs[20] > 0.1)
                                     writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[20].X, (int)points[20].Y, getColor(25, true)); //Left Ear to Nose
 
-                                if (confs[21] > 0.1 && confs[20] > 0.1)
-                                    writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[20].X, (int)points[20].Y, getColor(25, true)); //Left Ear to Nose
+                                if (confs[22] > 0.1 && confs[20] > 0.1)
+                                    writeableBmp.DrawLine((int)points[22].X, (int)points[22].Y, (int)points[20].X, (int)points[20].Y, getColor(25, true)); //Right Ear to Nose
 
                                 if (confs[21] > 0.1 && confs[24] > 0.1)
                                     writeableBmp.DrawLine((int)points[21].X, (int)points[21].Y, (int)points[24].X, (int)points[24].Y, getColor(25, true)); //Left Ear to Chin

@@ -4664,6 +4664,20 @@ namespace ssi
                 length = (int)Math.Max(length, signals.Max(e => e.number));
             }
 
+            else
+            {
+                length = int.MaxValue;
+                
+                foreach (DatabaseAnnotation anno in annos)
+                {
+                    AnnoList annoList = LoadAnnoList(anno, false);
+                    if (annoList.Count < length)
+                    {
+                        length = (int)( annoList[annoList.Count-1].Stop  * sr);
+                    }
+                }
+            }
+
 
             foreach (DatabaseAnnotation annotation in annos)
             {
