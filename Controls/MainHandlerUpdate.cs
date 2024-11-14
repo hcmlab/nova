@@ -236,7 +236,7 @@ namespace ssi
 
         private void aboutMenu_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human-Centered Artificial Intelligence 2021\nLead Developer: Tobias Baur, Johannes Wagner, Alexander Heimerl & Dominik Schiller\nnova@hcai.eu");
+            MessageBox.Show("All rights reserved.\n© University of Augsburg, Lab for Human-Centered Artificial Intelligence 2012-2025\nLead Developer: Tobias Baur, Johannes Wagner, Alexander Heimerl & Dominik Schiller\nnova@hcai.eu");
          
         }
 

@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.2.9.1";
+        public static string BuildVersion = "1.2.9.2";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -260,7 +260,7 @@ namespace ssi
             control.updateCMLMenu.Click += updateCML_Click;
             control.updatePythonMenu.Click += updatePython_Click;
             control.aboutMenu.Click += aboutMenu_Click;
-            control.supportMenu.Click += support_Click;
+            //control.supportMenu.Click += support_Click;
 
             control.AssistantMenu.Click += AssistantMenu_Click;
             if (Properties.Settings.Default.NovaAssistantAddress == "")

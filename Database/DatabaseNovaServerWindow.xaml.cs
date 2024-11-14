@@ -651,7 +651,7 @@ namespace ssi
      
                 case Mode.PROCESS:
 
-                    Title = "NOVA SERVER";
+                    Title = "DISCOVER SERVER";
                     ApplyButton.Content = "Send";
                     //TrainerLabel.Content = "Processor";
 
@@ -1542,7 +1542,7 @@ namespace ssi
             }
             catch
                 {
-                    Console.WriteLine("No Connection to a Nova Server instance");
+                    Console.WriteLine("No Connection to a Discover Server instance");
                 }
 
        

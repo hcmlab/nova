@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ssi" Deactivated="Window_Deactivated"
-        Title="NOVA SERVER" Height="800" Width="1400" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing" Closed="Window_Closed"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
+        Title="DISCOVER" Height="800" Width="1400" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing" Closed="Window_Closed"  Icon="..\Resources\ui.ico" Style="{StaticResource WinAll}">
 
     <Window.Resources>
 
@@ -382,7 +382,7 @@
                     <Button Content="Apply" x:Name="ApplyButton" IsEnabled="False"  Click="Apply_Click" Width="75" Margin="5" Height="30"/>
                     <CheckBox x:Name="ForceCheckBox" Margin="5" VerticalAlignment="Center" Content="Force"/>
                 </StackPanel>
-                <GroupBox Name="statusBox" Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Nova-Server">
+                <GroupBox Name="statusBox" Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="1" Margin="0,5,5,0" Header="Discover-Server">
                     <Label Name="statusLabel" HorizontalContentAlignment="Center" Foreground="red" Content="No connection to server!" Width="160" Height="30"/>
                 </GroupBox>
             </DockPanel>

@@ -195,7 +195,7 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="NOVA Server">
+            <TabItem Header="DISCOVER">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -211,7 +211,7 @@
                         <ColumnDefinition Width="23*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0"  Content="Nova server:" Grid.ColumnSpan="2"/>
+                    <Label Grid.Row="0" Grid.Column="0"  Content="Discover Server settings:" Grid.ColumnSpan="2"/>
                     <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -232,7 +232,7 @@
                    
                 </Grid>
             </TabItem>
-            <TabItem Header="NOVA Assistant">
+            <TabItem Header="LENS">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition></RowDefinition>
@@ -241,8 +241,8 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
-                
-            <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Label Grid.Row="0" Grid.Column="0"  Content="Lens LLM Assistant server settings:" Grid.ColumnSpan="2"/>
+                    <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>

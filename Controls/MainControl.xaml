@@ -111,7 +111,7 @@
                    
                 </MenuItem>-->
               
-                <MenuItem Header="Nova-Server AI" Name="databaseNovaServerMenu"/>
+                <MenuItem Header="DISCOVER Server" Name="databaseNovaServerMenu"/>
                 <MenuItem Header="Complete Current Annotation" Name="databaseCMLCompleteStepMenu" InputGestureText="Ctrl+L"/>
             </MenuItem>
 
@@ -125,7 +125,7 @@
                 </MenuItem>
             </MenuItem>
 
-            <MenuItem Header="ASSISTANT" Name="AssistantMenu">
+            <MenuItem Header="LENS" Name="AssistantMenu">
             </MenuItem>
 
             <MenuItem Header="NOSTR DVM" Name="NostrDVMMenu" Visibility="Collapsed">
@@ -134,7 +134,7 @@
           
 
             <MenuItem Header="?">
-                <MenuItem Header="Buy us a coffee ☕"  Name="supportMenu" />
+                <!--<MenuItem Header="Buy us a coffee ☕"  Name="supportMenu" />-->
                 <MenuItem Header="About"  Name="aboutMenu" />
                 <MenuItem Header="Documentation"  Name="helpDocumentationMenu" />
                 <MenuItem Header="Shortcuts"  Name="helpShortcutsMenu" />
