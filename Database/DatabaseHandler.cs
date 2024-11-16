@@ -4666,14 +4666,14 @@ namespace ssi
 
             else
             {
-                length = int.MaxValue;
+                length = 0;
                 
                 foreach (DatabaseAnnotation anno in annos)
                 {
                     AnnoList annoList = LoadAnnoList(anno, false);
-                    if (annoList.Count < length)
+                    if (annoList[annoList.Count - 1].Stop > length)
                     {
-                        length = (int)( annoList[annoList.Count-1].Stop  * sr);
+                        length = (int)(annoList[annoList.Count-1].Stop  * sr);
                     }
                 }
             }
