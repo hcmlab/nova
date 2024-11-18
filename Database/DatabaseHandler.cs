@@ -4671,10 +4671,14 @@ namespace ssi
                 foreach (DatabaseAnnotation anno in annos)
                 {
                     AnnoList annoList = LoadAnnoList(anno, false);
-                    if (annoList[annoList.Count - 1].Stop > length)
+                    if (annoList.Count > 0)
                     {
-                        length = (int)(annoList[annoList.Count-1].Stop  * sr);
+                        if (annoList[annoList.Count - 1].Stop > length)
+                        {
+                            length = (int)(annoList[annoList.Count - 1].Stop * sr);
+                        }
                     }
+                  
                 }
             }
 
