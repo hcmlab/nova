@@ -4630,13 +4630,15 @@ namespace ssi
 
             double time = 0;
             double sr = 25;
+            double srtime = 0.04;
 
             if (signals.Count > 0)
             {
                 sr = signals[0].rate;
+                srtime = 1/ sr;
             }
 
-            double srtime = 1 / sr;
+            
 
             //Fetch actual Annolists from DatabaseAnnotations
             List<AnnoList> annoLists = new List<AnnoList>();
@@ -4666,20 +4668,20 @@ namespace ssi
 
             else
             {
-                length = 0;
                 
                 foreach (DatabaseAnnotation anno in annos)
                 {
                     AnnoList annoList = LoadAnnoList(anno, false);
                     if (annoList.Count > 0)
                     {
-                        if (annoList[annoList.Count - 1].Stop > length)
+                        if (annoList[annoList.Count - 1].Stop * sr > length)
                         {
-                            length = (int)(annoList[annoList.Count - 1].Stop * sr);
+                            length =  (int)(annoList[annoList.Count - 1].Stop * sr);
                         }
                     }
                   
                 }
+             
             }
 
 
@@ -4717,7 +4719,7 @@ namespace ssi
                 dictobject.Add("Session", session.Name);
 
                 //Add time to columns
-                dictobject.Add("Time", time);
+                dictobject.Add("Time", Math.Round(time, 2));
                 time += srtime;
 
 
