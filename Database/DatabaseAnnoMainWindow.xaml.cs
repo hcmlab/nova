@@ -875,7 +875,7 @@ namespace ssi
 
            if(DatabaseHandler.ExportMultipleCSV(selectedAnnos, selectedStreams, (DatabaseSession)SessionsBox.SelectedItem))
             {
-                MessageTools.Information("Sucessfully exported data to csv");
+                MessageTools.Information("Sucessfully exported data to csv with " + Properties.Settings.Default.DefaultDiscreteSampleRate.ToString()  + " hz.\nAdapt sample rate in Settings->Annotations->Discrete Samplerate");
             };
 
         }

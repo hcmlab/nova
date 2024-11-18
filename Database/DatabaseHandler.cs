@@ -4630,15 +4630,21 @@ namespace ssi
 
             double time = 0;
             double sr = 25;
-            double srtime = 0.04;
-
-            if (signals.Count > 0)
+            if (Properties.Settings.Default.DefaultDiscreteSampleRate != 0)
             {
-                sr = signals[0].rate;
-                srtime = 1/ sr;
+                sr = Properties.Settings.Default.DefaultDiscreteSampleRate;
             }
 
-            
+
+            //if (signals.Count > 0)
+            //{
+            //    sr = signals[0].rate;
+     
+            //}
+             
+            double srtime = Math.Round(1 / sr, 2);
+
+
 
             //Fetch actual Annolists from DatabaseAnnotations
             List<AnnoList> annoLists = new List<AnnoList>();
