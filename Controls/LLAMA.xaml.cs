@@ -177,6 +177,7 @@ namespace ssi.Controls
                 int maxtokens = int.Parse(Properties.Settings.Default.NovaAssistantMaxtokens);
                 int topk = int.Parse(Properties.Settings.Default.NovaAssistantTopK);
                 float topP = float.Parse(Properties.Settings.Default.NovaAssistantTopP);
+                int num_ctx = int.Parse(Properties.Settings.Default.NovaAssistantNum_ctx);
                 bool contextaware = true;
 
    
@@ -259,6 +260,7 @@ namespace ssi.Controls
                     provider = provider,
                     message = message,
                     temperature = temperature,
+                    num_ctx = num_ctx,
                     max_new_tokens = maxtokens,
                     top_p = topP,
                     top_k = topk,

@@ -826,6 +826,7 @@ namespace ssi
                 Properties.Settings.Default.EnableLightning = s.EnableLightning();
                 Properties.Settings.Default.MediaBackend = s.Mediabackend();
                 Properties.Settings.Default.SRTwordlevel = s.EnableSRTWordlevel();
+                Properties.Settings.Default.NovaAssistantNum_ctx = s.Num_ctx();
 
                 Properties.Settings.Default.Save();
                 if (Properties.Settings.Default.NovaAssistantAddress == "")

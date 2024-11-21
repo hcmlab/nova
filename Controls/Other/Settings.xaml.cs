@@ -89,6 +89,7 @@ namespace ssi
             TopP.Text = Properties.Settings.Default.NovaAssistantTopP;
             MaxTokens.Text = Properties.Settings.Default.NovaAssistantMaxtokens;
             Determinism.IsChecked = Properties.Settings.Default.NovaAssistantEnforceDeterminism;
+            num_ctx.Text = Properties.Settings.Default.NovaAssistantNum_ctx;
 
             if (DBHost.Text != Defaults.checkdb)
             {
@@ -186,6 +187,11 @@ namespace ssi
         public bool Enfoce_Determinism()
         {
             return Determinism.IsChecked == true;
+        }
+
+        public string Num_ctx()
+        {
+            return num_ctx.Text;
         }
 
 

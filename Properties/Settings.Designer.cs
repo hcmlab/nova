@@ -888,5 +888,17 @@ namespace ssi.Properties {
                 this["NostrDVM"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2024")]
+        public string NovaAssistantNum_ctx {
+            get {
+                return ((string)(this["NovaAssistantNum_ctx"]));
+            }
+            set {
+                this["NovaAssistantNum_ctx"] = value;
+            }
+        }
     }
 }

@@ -218,5 +218,8 @@
     <Setting Name="NostrDVM" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="NovaAssistantNum_ctx" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2024</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
