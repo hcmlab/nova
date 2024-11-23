@@ -891,7 +891,7 @@ namespace ssi.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2024")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2028")]
         public string NovaAssistantNum_ctx {
             get {
                 return ((string)(this["NovaAssistantNum_ctx"]));

@@ -278,7 +278,7 @@
                 <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="6" Name="TopP" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
                 <Label Grid.Column="0" Grid.Row="7">TopK:</Label>
                 <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="7" Name="TopK" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
-                <Label Grid.Column="0" Grid.Row="8">Num_ctx:</Label>
+                <Label Grid.Column="0" Grid.Row="8">NumCtx:</Label>
                         <TextBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="8" Name="num_ctx" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
                 <Label Grid.Column="0" Grid.Row="9">Enforce Determinism:</Label>
                 <CheckBox Grid.Column="1" Width="30" HorizontalAlignment="Left" Grid.Row="9" Name="Determinism" Margin="5,0,5,2" Height="21" VerticalAlignment="Bottom" />
