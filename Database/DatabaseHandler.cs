@@ -4831,7 +4831,7 @@ namespace ssi
             return Name;
         }
 
-        //public bool hasMatchingAnnotations { get; set; }
+        public bool hasMatchingAnnotations { get; set; }
     }
 
     public class DatabaseUser
