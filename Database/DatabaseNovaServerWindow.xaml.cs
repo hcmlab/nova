@@ -1368,7 +1368,7 @@ namespace ssi
                 processor.Category = "0";
                 processor.Description = "";
                 processor.Backend = "NOVA-SERVER";
-                processor.showOpts = false;
+                processor.showOpts = true;
                 processor.isTrained = ((bool)chainobject["info_trained"]);
                 if (!processor.isTrained)
                     { return false; }
