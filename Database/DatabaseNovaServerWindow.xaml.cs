@@ -1411,10 +1411,10 @@ namespace ssi
                     processor.isIterable = ((bool)chainobject["meta_is_iterable"]);
                 }
 
-                var showOpts = chainobject["enable_post_process"];
+                var showOpts = chainobject["meta_enable_post_process"];
                 if (showOpts != null)
                 {
-                    processor.enable_post_process = ((bool)chainobject["enable_post_process"]);
+                    processor.enable_post_process = ((bool)chainobject["meta_enable_post_process"]);
                 }
 
                 //var elements = chainobject["links"];
