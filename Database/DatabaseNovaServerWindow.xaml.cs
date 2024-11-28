@@ -993,7 +993,7 @@ namespace ssi
 
                 }
 
-                if (hasdiscreteoutput)
+                if (hasdiscreteoutput && processor.enable_post_process)
                 {
                     PredictOptionsPanel.Visibility = System.Windows.Visibility.Visible;
                 }
@@ -1002,7 +1002,7 @@ namespace ssi
                     PredictOptionsPanel.Visibility = System.Windows.Visibility.Hidden;
                 }
 
-                if (processor.isIterable && processor.showOpts){
+                if (processor.isIterable){
                     ProcessorOpts.Visibility = System.Windows.Visibility.Visible;
                 }
                 else
@@ -1279,7 +1279,7 @@ namespace ssi
             public bool isIterable { get; set; }
 
             public bool isTrained { get; set; }
-            public bool showOpts { get; set; }
+            public bool enable_post_process { get; set; }
             public List<ServerInputOutput> Inputs { get; set; }
             public List<ServerInputOutput> Outputs { get; set; }
 
@@ -1368,7 +1368,7 @@ namespace ssi
                 processor.Category = "0";
                 processor.Description = "";
                 processor.Backend = "NOVA-SERVER";
-                processor.showOpts = true;
+                processor.enable_post_process = true;
                 processor.isTrained = ((bool)chainobject["info_trained"]);
                 if (!processor.isTrained)
                     { return false; }
@@ -1411,10 +1411,10 @@ namespace ssi
                     processor.isIterable = ((bool)chainobject["meta_is_iterable"]);
                 }
 
-                var showOpts = chainobject["show_options"];
+                var showOpts = chainobject["enable_post_process"];
                 if (showOpts != null)
                 {
-                    processor.showOpts = ((bool)chainobject["show_options"]);
+                    processor.enable_post_process = ((bool)chainobject["enable_post_process"]);
                 }
 
                 //var elements = chainobject["links"];
