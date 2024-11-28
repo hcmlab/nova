@@ -1002,7 +1002,7 @@ namespace ssi
                     PredictOptionsPanel.Visibility = System.Windows.Visibility.Hidden;
                 }
 
-                if (processor.isIterable){
+                if (processor.isIterable && processor.showOpts){
                     ProcessorOpts.Visibility = System.Windows.Visibility.Visible;
                 }
                 else
@@ -1279,6 +1279,7 @@ namespace ssi
             public bool isIterable { get; set; }
 
             public bool isTrained { get; set; }
+            public bool showOpts { get; set; }
             public List<ServerInputOutput> Inputs { get; set; }
             public List<ServerInputOutput> Outputs { get; set; }
 
@@ -1367,6 +1368,7 @@ namespace ssi
                 processor.Category = "0";
                 processor.Description = "";
                 processor.Backend = "NOVA-SERVER";
+                processor.showOpts = false;
                 processor.isTrained = ((bool)chainobject["info_trained"]);
                 if (!processor.isTrained)
                     { return false; }
@@ -1407,6 +1409,12 @@ namespace ssi
                 if (isiterable != null)
                 {
                     processor.isIterable = ((bool)chainobject["meta_is_iterable"]);
+                }
+
+                var showOpts = chainobject["show_options"];
+                if (showOpts != null)
+                {
+                    processor.showOpts = ((bool)chainobject["show_options"]);
                 }
 
                 //var elements = chainobject["links"];
