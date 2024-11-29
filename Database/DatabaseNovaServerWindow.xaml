@@ -43,7 +43,7 @@
                 </DataTrigger>
                 <!-- When a file is missing color it red. -->
                 <DataTrigger Binding="{Binding hasMatchingAnnotations, Converter={StaticResource StreamColorConverter}}" Value="-1">
-                    <Setter Property="Foreground" Value="{StaticResource IsMissingBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource ExistsBrush}" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
