@@ -39,7 +39,8 @@ namespace ssi
                
                 foreach (var item in RoleBox.Items)
                 {
-                    if (item.ToString().Contains(annotator.Role))
+                    var comboBoxItem = item as ComboBoxItem;
+                    if (comboBoxItem.Content.Equals(annotator.Role))
                     {
                         RoleBox.SelectedItem = item;
                     }

@@ -62,7 +62,7 @@ namespace ssi
             }
             else
             {
-                MessageTools.Warning("Unable to connect to database, please check your settings\nIf you created a new account, please restart the Software");
+                MessageTools.Warning("Unable to connect to database, please check your settings.\nIf you created a new account, please restart the Software.");
                 Properties.Settings.Default.DatabaseAutoLogin = false;
                 Properties.Settings.Default.Save();                           
             }
