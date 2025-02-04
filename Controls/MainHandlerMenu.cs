@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Linq;
 
 namespace ssi
 {
@@ -48,8 +49,11 @@ namespace ssi
             control.databaseCMLMergeAnnotationsMenu.IsEnabled = isConnected && (authentication > DatabaseAuthentication.READ);
             //control.databaseCMLTrainAndPredictMenu.IsEnabled = isConnected && (authentication > DatabaseAuthentication.READ);            
 
+           
+
             control.databaseAdminMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.READWRITE) ? Visibility.Visible : Visibility.Collapsed;
-            control.databaseManageUsersMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.DBADMIN) ? Visibility.Visible : Visibility.Collapsed;
+            control.databaseManageUsersMenu.Visibility = isConnected && (authentication > DatabaseAuthentication.READWRITE) ? Visibility.Visible : Visibility.Collapsed;
+
 
 
             //control.fusionmenu.Visibility = (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\bayesfusion.exe") == true) ? Visibility.Visible : Visibility.Collapsed;
