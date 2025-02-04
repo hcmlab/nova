@@ -37,7 +37,7 @@ namespace ssi
                 NameBox.SelectedIndex = 0;
                 NameBox.IsEnabled = false;
                
-                foreach (var item in RoleBox.Items )
+                foreach (var item in RoleBox.Items)
                 {
                     var comboBoxItem = item as ComboBoxItem;
                     if (comboBoxItem.Content.Equals(annotator.Role))
