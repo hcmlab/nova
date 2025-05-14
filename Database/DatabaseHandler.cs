@@ -1,10 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using Dicom;
-using DnsClient;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Octokit;
 using ssi.Controls.Annotation.Polygon;
 using System;
 using System.Collections.Generic;
@@ -12,13 +9,10 @@ using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
-using System.Web.UI.DataVisualization.Charting;
 using System.Windows;
 using System.Windows.Media;
-using static System.Runtime.InteropServices.Marshal;
 
 namespace ssi
 {
@@ -837,7 +831,7 @@ namespace ssi
             return true;
         }
 
-        private static bool AddOrUpdateDBMeta(DatabaseDBMeta meta)
+        private static bool AddOrEditDBMeta(DatabaseDBMeta meta, string old_name)
         {
             if (meta.Name == "")
             {
@@ -853,7 +847,7 @@ namespace ssi
             };
 
             var builder = Builders<BsonDocument>.Filter;
-            var filter = builder.Eq("name", meta.Name);
+            var filter = builder.Eq("name", old_name);
             ReplaceOptions updateOptions = new ReplaceOptions();
             updateOptions.IsUpsert = true;
 
@@ -874,12 +868,65 @@ namespace ssi
                 return false;
             }
 
-            if (name != meta.Name)
+            if (meta.Name == "")
             {
                 return false;
             }
 
-            return AddOrUpdateDBMeta(meta);
+            /* In case of edit to name of database, check if new name exists*/
+            if (name != meta.Name && DatabaseExists(meta.Name))
+            {
+                return false;
+            }
+
+            /* In case of edit to name of database, the whole database must be copied and dropped*/
+            /* This is DANGEROUS command */
+            if (name != meta.Name && !DatabaseExists(meta.Name))
+            {
+                renameDatabase(name, meta.Name);
+                database = client.GetDatabase(meta.Name);
+                AddOrEditDBMeta(meta,name);
+                return true;
+            }
+
+            var result = AddOrEditDBMeta(meta, meta.Name);
+
+            return true;
+        }
+
+        /// <summary>
+        ///  Renames old database to new database by copying all its collected contents
+        ///  TODO: Add checks and balances to ensure all items were transferred correctly over
+        ///  Disclaimer: use at own risk and adjust to your needs
+        /// </summary>
+        /// <param name="currentName"></param>
+        /// <param name="newName"></param>
+        public static void renameDatabase(string currentName, string newName)
+        {
+
+            var newDb = client.GetDatabase(newName); //get an instance of the new db
+
+            var CurrentDb = client.GetDatabase(currentName); //get an instance of the current db
+
+            foreach (BsonDocument Col in CurrentDb.ListCollections().ToList()) //work thru all collections in the current db
+            {
+                string name = Col["name"].AsString; //getting collection name
+
+                //collection of items to copy from source collection
+                dynamic collectionItems = CurrentDb.GetCollection<dynamic>(name).Find(Builders<dynamic>.Filter.Empty).ToList();
+
+                //getting instance of new collection to store the current db collection items
+                dynamic destinationCollection = newDb.GetCollection<dynamic>(name);
+
+                if((collectionItems as List<object>).Any())
+                {
+                    //insert the source items into the new destination database collection
+                    destinationCollection.InsertMany(collectionItems);
+                }
+            }
+
+            //removing the old datbase
+            client.DropDatabase(currentName);
         }
 
         public static bool AddDB(DatabaseDBMeta meta)
@@ -908,7 +955,7 @@ namespace ssi
             database.CreateCollection(DatabaseDefinitionCollections.Subjects);
             database.CreateCollection(DatabaseDefinitionCollections.Bounties);
 
-            AddOrUpdateDBMeta(meta);
+            AddOrEditDBMeta(meta, meta.Name);
 
             return true;
         }

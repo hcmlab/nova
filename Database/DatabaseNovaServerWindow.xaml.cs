@@ -1033,7 +1033,7 @@ namespace ssi
 
                 this.ApplyButton.IsEnabled = true;
                 pythonCaseOn = false;
-                this.statusLabel.Visibility = System.Windows.Visibility.Collapsed;
+                this.statusLabel.Visibility = System.Windows.Visibility.Visible;//.Collapsed;
 
                 this.Cancel_Button.Visibility = System.Windows.Visibility.Collapsed;
                 this.ModelSpecificOptions.Visibility = System.Windows.Visibility.Collapsed;

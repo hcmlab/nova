@@ -140,7 +140,7 @@ namespace ssi
                 string db = DatabaseBox.SelectedItem.ToString();
                 DatabaseHandler.ChangeDatabase(db);
 
-                if (DatabaseHandler.CheckAuthentication(db) > 3)
+                if (DatabaseHandler.CheckAuthentication(db) >= 3)
                 {
                     AddAnnotator.IsEnabled = true;
                     DeleteAnnotator.IsEnabled = true;
@@ -215,13 +215,15 @@ namespace ssi
                 if (DatabaseHandler.GetDBMeta(ref meta))
                 {
                     DatabaseAdminDBMeta dialog = new DatabaseAdminDBMeta(ref meta);
+                    String old_db_name = meta.Name;
                     dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     dialog.ShowDialog();
 
                     if (dialog.DialogResult == true)
                     {
-                        DatabaseHandler.UpdateDBMeta(meta.Name, meta);
-                        GetAnnotators();
+                        DatabaseHandler.UpdateDBMeta(old_db_name, meta);
+                        GetDatabases(meta.Name);
+                        Refresh();
                     }
                 }
             }
