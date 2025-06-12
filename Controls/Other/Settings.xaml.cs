@@ -68,6 +68,15 @@ namespace ssi
             EnableLightningCheckbox.IsChecked = Properties.Settings.Default.EnableLightning;
             Showexport.IsChecked = Properties.Settings.Default.ShowExportDatabase;
             enableworldlevel.IsChecked = Properties.Settings.Default.SRTwordlevel;
+            SystemPrompt.Text = Properties.Settings.Default.NovaAssistantSystemPrompt;
+            Temperature.Text = Properties.Settings.Default.NovaAssistantTemperature;
+            TopK.Text = Properties.Settings.Default.NovaAssistantTopK;
+            TopP.Text = Properties.Settings.Default.NovaAssistantTopP;
+            MaxTokens.Text = Properties.Settings.Default.NovaAssistantMaxtokens;
+            Determinism.IsChecked = Properties.Settings.Default.NovaAssistantEnforceDeterminism;
+            num_ctx.Text = Properties.Settings.Default.NovaAssistantNum_ctx;
+            UseTLS.IsChecked = Properties.Settings.Default.UseTLS;
+
             if (DBHost.Text != Defaults.checkdb)
             {
                 LoginWithLightning.Visibility = Visibility.Hidden;
@@ -229,6 +238,11 @@ namespace ssi
         public bool DBAskforOverwrite()
         {
             return (OverwriteAnnotation.IsChecked == true);
+        }
+
+        public bool UseTLSToggle()
+        {
+            return (UseTLS.IsChecked == true);
         }
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
