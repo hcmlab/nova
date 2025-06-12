@@ -167,7 +167,6 @@ namespace ssi
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
 
                     settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
-                    //settings.UseTls = true;
 
                     client = new MongoClient(settings);
 
