@@ -92,7 +92,15 @@ namespace ssi
             Properties.Settings.Default.DatabaseAddress = address;
             Properties.Settings.Default.Save();
 
-            clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address;
+            if (Properties.Settings.Default.UseTLS)
+            {
+                clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address + "?tls=true&tlsInsecure=true";
+            }
+            else
+            {
+                clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address;
+            }
+
 
 
 
@@ -159,6 +167,7 @@ namespace ssi
                     MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(clientAddress));
 
                     settings.ReadEncoding = new UTF8Encoding(false, throwOnInvalidBytes);
+                    //settings.UseTls = true;
 
                     client = new MongoClient(settings);
 

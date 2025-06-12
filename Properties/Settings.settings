@@ -221,5 +221,8 @@
     <Setting Name="NovaAssistantNum_ctx" Type="System.String" Scope="User">
       <Value Profile="(Default)">2028</Value>
     </Setting>
+    <Setting Name="UseTLS" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

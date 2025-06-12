@@ -90,6 +90,7 @@ namespace ssi
             MaxTokens.Text = Properties.Settings.Default.NovaAssistantMaxtokens;
             Determinism.IsChecked = Properties.Settings.Default.NovaAssistantEnforceDeterminism;
             num_ctx.Text = Properties.Settings.Default.NovaAssistantNum_ctx;
+            UseTLS.IsChecked = Properties.Settings.Default.UseTLS;
 
             if (DBHost.Text != Defaults.checkdb)
             {
@@ -312,6 +313,11 @@ namespace ssi
         public bool DBAskforOverwrite()
         {
             return (OverwriteAnnotation.IsChecked == true);
+        }
+
+        public bool UseTLSToggle()
+        {
+            return (UseTLS.IsChecked == true);
         }
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
