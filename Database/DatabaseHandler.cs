@@ -92,9 +92,13 @@ namespace ssi
             Properties.Settings.Default.DatabaseAddress = address;
             Properties.Settings.Default.Save();
 
-            if (Properties.Settings.Default.UseTLS)
+            if (Properties.Settings.Default.UseTLS && !Properties.Settings.Default.SignedCertificatesOnly)
             {
                 clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address + "?tls=true&tlsInsecure=true";
+            }
+            else if (Properties.Settings.Default.UseTLS && Properties.Settings.Default.SignedCertificatesOnly)
+            {
+                clientAddress = "mongodb://" + user + ":" + MainHandler.Decode(password) + "@" + address + "?tls=true";
             }
             else
             {

@@ -30,7 +30,10 @@ namespace ssi
     public partial class MainHandler
     {
 
-        private static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new HttpClient(new HttpClientHandler()
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        });
         private void databaseCMLExtractFeatures_Click(object sender, RoutedEventArgs e)
         {
             DatabaseCMLExtractFeaturesWindow dialog = new DatabaseCMLExtractFeaturesWindow(this, DatabaseCMLExtractFeaturesWindow.Mode.EXTRACT);
@@ -463,7 +466,7 @@ namespace ssi
             try
             {
                 string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/train";
+                string url = "https://" + tokens[0] + ":" + tokens[1] + "/train";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -487,7 +490,7 @@ namespace ssi
             try
             {
                 string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/process";
+                string url = "https://" + tokens[0] + ":" + tokens[1] + "/process";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -511,7 +514,7 @@ namespace ssi
             try
             {
                 string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                string url = "http://" + tokens[0] + ":" + tokens[1] + "/process";
+                string url = "https://" + tokens[0] + ":" + tokens[1] + "/process";
                 var response = await client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -543,7 +546,7 @@ namespace ssi
                 try
                 {
                     string[] tokens = Properties.Settings.Default.NovaServerAddress.Split(':');
-                    string url = "http://" + tokens[0] + ":" + tokens[1] + "/predict";
+                    string url = "https://" + tokens[0] + ":" + tokens[1] + "/predict";
                     response = await client.PostAsync(url, content);
                     responseString = await response.Content.ReadAsStringAsync();
                     explanationDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
@@ -597,7 +600,7 @@ namespace ssi
             using (WebClient client = new WebClient())
                 {
                 try{
-                    string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/upload";
+                    string url = "https://" + Properties.Settings.Default.NovaServerAddress + "/upload";
                     var response = client.UploadFile(url, filePath);
                     string result = System.Text.Encoding.UTF8.GetString(response);
                     return result;
@@ -614,7 +617,7 @@ namespace ssi
         public async void getResultFromServer(MultipartFormDataContent content)
         {
            
-            string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/fetch_result";
+            string url = "https://" + Properties.Settings.Default.NovaServerAddress + "/fetch_result";
 
             try
             {
@@ -700,7 +703,7 @@ namespace ssi
 
         public Dictionary<string, string> getLogFromServer(MultipartFormDataContent content)
         {
-            string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/log";
+            string url = "https://" + Properties.Settings.Default.NovaServerAddress + "/log";
 
             var response = client.PostAsync(url, content).Result;
             var responseContent = response.Content;
@@ -713,7 +716,7 @@ namespace ssi
         public Dictionary<string, string> getStatusFromServer(MultipartFormDataContent content)
         {
   
-            string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/job_status";
+            string url = "https://" + Properties.Settings.Default.NovaServerAddress + "/job_status";
 
             var response = client.PostAsync(url, content).Result;
             var responseContent = response.Content;
@@ -727,7 +730,7 @@ namespace ssi
 
         public JObject get_info_from_server(MultipartFormDataContent content)
         {
-            string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/cml_info";
+            string url = "https://" + Properties.Settings.Default.NovaServerAddress + "/cml_info";
 
             var response = client.PostAsync(url, content).Result;
             var responseContent = response.Content;
@@ -742,7 +745,7 @@ namespace ssi
         {
             try
             {
-                string url = "http://" + Properties.Settings.Default.NovaServerAddress + "/cancel";
+                string url = "https://" + Properties.Settings.Default.NovaServerAddress + "/cancel";
                 var response = client.PostAsync(url, content).Result;
 
                 var responseContent = response.Content;

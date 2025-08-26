@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.3.0.2";
+        public static string BuildVersion = "1.3.0.3";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -119,8 +119,11 @@ namespace ssi
 
             //TEST
             //DatabaseHandler.ExportMultipleCSV();
-         
-           
+
+            if (Properties.Settings.Default.UseTLS)
+            {
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+            }
 
             // Shadow box
             control.shadowBoxCancelButton.Click += shadowBoxCancel_Click;
@@ -828,6 +831,7 @@ namespace ssi
                 Properties.Settings.Default.SRTwordlevel = s.EnableSRTWordlevel();
                 Properties.Settings.Default.NovaAssistantNum_ctx = s.Num_ctx();
                 Properties.Settings.Default.UseTLS = s.UseTLSToggle();
+                Properties.Settings.Default.SignedCertificatesOnly = s.SignedCertificatesOnlyToggle();
 
                 Properties.Settings.Default.Save();
                 if (Properties.Settings.Default.NovaAssistantAddress == "")

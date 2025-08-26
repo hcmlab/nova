@@ -91,7 +91,7 @@ namespace ssi
             Determinism.IsChecked = Properties.Settings.Default.NovaAssistantEnforceDeterminism;
             num_ctx.Text = Properties.Settings.Default.NovaAssistantNum_ctx;
             UseTLS.IsChecked = Properties.Settings.Default.UseTLS;
-
+            SignedCertificatesOnly.IsChecked = Properties.Settings.Default.SignedCertificatesOnly;
             if (DBHost.Text != Defaults.checkdb)
             {
                 LoginWithLightning.Visibility = Visibility.Hidden;
@@ -318,6 +318,11 @@ namespace ssi
         public bool UseTLSToggle()
         {
             return (UseTLS.IsChecked == true);
+        }
+
+        public bool SignedCertificatesOnlyToggle()
+        {
+            return (SignedCertificatesOnly.IsChecked == true);
         }
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)

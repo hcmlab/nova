@@ -8,6 +8,11 @@
         WindowStyle="ToolWindow"
         WindowStartupLocation="CenterOwner"
         Title="Settings" SizeToContent="WidthAndHeight" Width="350" KeyDown="Window_KeyDown" Style="{StaticResource WinAll}">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
     <Grid>
 
         <Grid.RowDefinitions>
@@ -194,6 +199,7 @@
                     <CheckBox Grid.Row="11" Name="OverwriteAnnotation" Margin="5,0,5,5" Grid.ColumnSpan="2">Always ask before overwriting an annotation</CheckBox>
                     <CheckBox Grid.Row="12" Name="Showexport" Margin="5,0,5,5" Grid.ColumnSpan="2">Show export to csv in Database menu</CheckBox>
                     <CheckBox Grid.Row="13" Name="UseTLS" Margin="5,0,5,5" Grid.ColumnSpan="2">Use TLS</CheckBox>
+                    <CheckBox Grid.Row="13" Name="SignedCertificatesOnly" Visibility="{Binding IsChecked, ElementName=UseTLS,Converter={StaticResource BoolToVis}}" Margin="105,0,5,5" Grid.ColumnSpan="2">Only allow signed certificates</CheckBox>
                 </Grid>
             </TabItem>
             <TabItem Header="DISCOVER">
