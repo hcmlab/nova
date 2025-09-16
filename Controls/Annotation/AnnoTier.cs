@@ -444,10 +444,15 @@ namespace ssi
 
 
             int currentlevel =  (int)((numberOfLevels) - (yPos / step));
-            if (currentlevel == numberOfLevels) currentlevel -= 1;
 
-            if (up && currentlevel < numberOfLevels) level = currentlevel + 1;
+            // Fixes the bug of annotating above 1 and being stuck at that location
+            if (currentlevel >= numberOfLevels) currentlevel -= 1;
+
+            if (up && currentlevel < numberOfLevels - 1) level = currentlevel + 1;
             else if(!up && currentlevel > 0) level = currentlevel -1;
+
+            
+
 
             continuousSegmentToPosition(level);
 
