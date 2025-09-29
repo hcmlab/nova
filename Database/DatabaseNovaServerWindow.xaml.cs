@@ -23,6 +23,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Printing;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography;
@@ -77,6 +78,10 @@ namespace ssi
         List<string> AllUsedRoles = new List<string>();
         List<string> AllUsedStreams = new List<string>();
         List<string> AllUsedSchemes = new List<string>();
+
+        string activeLogJobId = "";
+        string activeStatusJobId = "";
+        int sleepTimerJobRequest = 3000;
 
         JArray data = new JArray();
 
@@ -292,7 +297,7 @@ namespace ssi
 
            Processor trainer = (Processor)ProcessorsBox.SelectedItem;
 
-            if (trainer != null && (trainer.Backend.ToUpper() == "PYTHON" || trainer.Backend.ToUpper() == "NOVA-SERVER"))
+            /*if (trainer != null && (trainer.Backend.ToUpper() == "PYTHON" || trainer.Backend.ToUpper() == "NOVA-SERVER"))
             {
                 logThread = new Thread(new ThreadStart(NovaSeverGetLog));
                 statusThread = new Thread(new ThreadStart(NovaServerGetStatus));
@@ -300,7 +305,7 @@ namespace ssi
                 statusThread.Start();
             }
 
-            UpdateFrontEnd();
+            UpdateFrontEnd();*/
 
             Loaded += Window_Loaded;
         }
@@ -385,11 +390,25 @@ namespace ssi
         private void NovaSeverGetLog()
         {
             Dictionary<string, string> response = null;
-            while (pythonCaseOn)
+            int counter = 0;
+
+            var jobIDhash = getIdHash();
+            if (!activeLogJobId.Equals(jobIDhash))
+            {
+                activeLogJobId = jobIDhash;
+            }
+            else //Stop multiple threads with same job id
+            {
+                return;
+            }
+
+            while (pythonCaseOn && activeLogJobId.Equals(jobIDhash))
             {
                 // MultipartFormDataContent content = getContent();
 
-                var jobIDhash = getIdHash();
+                
+                counter++;
+                Console.WriteLine("LOG ID"+jobIDhash+ " Counter:"+ counter);
 
                 var content = new MultipartFormDataContent
                 {
@@ -413,7 +432,7 @@ namespace ssi
                     }
                 }
 
-                Thread.Sleep(1500);
+                Thread.Sleep(sleepTimerJobRequest);
             }
         }
 
@@ -421,11 +440,25 @@ namespace ssi
         {
             Dictionary<string, string> response = null;
             bool updatedb = false;
-          
-            while (pythonCaseOn)
+            int counter = 0;
+
+            var jobIDhash = getIdHash();
+
+            if (!activeStatusJobId.Equals(jobIDhash))
             {
-                var jobIDhash = getIdHash();
-             
+                activeStatusJobId = jobIDhash;
+            }
+            else //Stop multiple threads with same job id
+            {
+                return;
+            }
+
+            while (pythonCaseOn && activeStatusJobId.Equals(jobIDhash))
+            {
+                
+                counter++;
+                Console.WriteLine("Status ID" + jobIDhash + " Counter:" + counter);
+
                 var content = new MultipartFormDataContent
                 {
                     { new StringContent(jobIDhash), "jobID"  }
@@ -540,13 +573,14 @@ namespace ssi
                         logTextBox.Text = "Please select database, schema, stream, session, annotator and the trainer script!";
                     });
                 }
-                Thread.Sleep(1500);
+                Thread.Sleep(sleepTimerJobRequest);
+                
             }
 
             this.Dispatcher.Invoke(() =>
             {
                 this.ApplyButton.IsEnabled = true;
-                logTextBox.Text = "";
+                //logTextBox.Text = "";
             });
         }
 

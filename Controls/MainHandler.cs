@@ -23,7 +23,7 @@ namespace ssi
     {
 
         //Config
-        public static string BuildVersion = "1.3.0.4";
+        public static string BuildVersion = "1.3.0.5";
         public static MEDIABACKEND MediaBackend = (Properties.Settings.Default.MediaBackend == "Hardware") ? MEDIABACKEND.MEDIAKIT : MEDIABACKEND.MEDIA;
         public static bool ENABLE_PYTHON = Properties.Settings.Default.EnablePython;
         public static bool ENABLE_LIGHTNING = Properties.Settings.Default.EnableLightning;
@@ -73,6 +73,7 @@ namespace ssi
         public static List<AnnoList> annoLists = new List<AnnoList>();
         public static MediaList mediaList = new MediaList();
         public static List<MediaBox> mediaBoxes = new List<MediaBox>();
+
 
         private bool playIsPlaying = false;
         private double playSampleRate = Defaults.DefaultSampleRate;
