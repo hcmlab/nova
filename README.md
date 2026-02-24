@@ -17,6 +17,22 @@ The Cooperative Machine Learning capabilities allow to train and evaluate machin
 
 The latest binaries can always be found [here](https://github.com/hcmlab/nova/releases).  
 
+
+## DISCOVER (optional companion server)
+
+If you want to go beyond manual annotation, pair NOVA with **[DISCOVER](https://github.com/hcmlab/discover)**: an open-source, modular server for computational, data-driven exploration of human behavior data. DISCOVER is designed to integrate with NOVA, so you can run analysis modules on your NOVA data/annotations from within the UI.
+
+**Quick start**
+1. Install DISCOVER: `pip install hcai-discover`
+2. Start the server: `discover` (optionally set `--host` / `--port`)
+3. In NOVA, open **Settings** (gear icon) → **DISCOVER** tab → enter the server host/port and apply.
+
+**Links**
+- DISCOVER repo: https://github.com/hcmlab/discover
+- DISCOVER documentation: https://hcmlab.github.io/discover/
+- DISCOVER modules: https://github.com/hcmlab/discover-modules
+
+
 ## FAQ:
 
 
