@@ -271,7 +271,7 @@ NOVA provides several statistical meassures to investigate the agreement between
 
 	where $K$ defines the number of components (K-items or testlets) 
 	
-	$\bar{r}$ is the mean of the $K(K-1)/2} K(K-1)/2$ non-redundant correlation coefficients
+	$\bar{r}$ is the mean of the $K(K-1)/2$ non-redundant correlation coefficients
 
 * Spearman Correlation:
 
@@ -357,8 +357,8 @@ We will describe two strategies: a) set up MongoDB with Docker *or* b) set up Mo
 First, we install Docker (<https://www.docker.com/>) and run:
 
 ~~~~
-docker pull mongo:3.6.0  
-docker run -d -p 27017-27019:27017-27019 --name nova mongo:3.6.0
+docker pull mongo:3.6  
+docker run -d --restart unless-stopped -p 27017-27019:27017-27019 --name nova mongo:3.6
 
 
 ~~~~
@@ -377,12 +377,13 @@ MongoDB now runs on 127.0.0.1:27017 and we can connect to it:
 
 
 ~~~~
-
 docker exec -it nova bash
+~~~~
 
-Enter:
+*Press <kbd>Enter</kbd>.*
+
+~~~~
 mongo
-
 ~~~~
 
 *or*
@@ -397,10 +398,12 @@ We add an administrator:
 use admin
 db.createUser({ user: 'admin', pwd: 'PASSWORD', roles: [ { role: "root", db: "admin" } ],  customData: {fullname: "ADMIN", email: ' ', expertise: NumberInt(0)}}); 
 exit
+~~~~
 
-Enter:
+*Press <kbd>Enter</kbd>.*
+
+~~~~
 exit
-
 ~~~~
    
 And reconnect afterwards:
@@ -440,11 +443,39 @@ db.createUser({ user: 'gold', pwd: 'PASSWORD1', roles: [ { role: "readWriteAnyDa
 db.createUser({ user: 'system', pwd: 'PASSWORD2', roles: [ { role: "readWriteAnyDatabase", db: "admin" }, {"role" : "changeOwnPasswordCustomDataRole", "db" : "admin"} ], customData: {fullname: 'SYSTEM', email: ' ', expertise: NumberInt(0)} });
 ~~~~			
 
-We can now test the server:		
+We can now test the server:
 
-~~~~			
+~~~~
 show dbs
-~~~~			
+~~~~
+
+If MongoDB runs on a different machine than NOVA, we recommend enabling TLS. A minimal container setup is:
+
+1) Create a server certificate and key on the MongoDB host (use your CA or self-signed for testing) and place them in one PEM file, e.g. `mongo.pem`.
+
+2) Start MongoDB with TLS enabled:
+
+~~~~
+docker run -d --restart unless-stopped \
+  -p 27017:27017 \
+  -v /path/to/certs:/certs:ro \
+  --name nova \
+  mongo:3.6.0 \
+  --auth \
+  --tlsMode requireTLS \
+  --tlsCertificateKeyFile /certs/mongo.pem \
+  --tlsCAFile /certs/ca.pem
+~~~~
+
+3) Connect with TLS from NOVA or the shell (example):
+
+~~~~
+mongo --tls --host <mongo-host> --port 27017 \
+  --tlsCAFile /path/to/ca.pem \
+  -u admin -p PASSWORD --authenticationDatabase admin
+~~~~
+
+Make sure the host name in the certificate matches the address NOVA uses to connect (or include it in the certificate SANs).
 
 To connect to the MongoDB server in NOVA, we open the settings by clicking the wheel in the menu and switch to the 'Database' tab. Here we enter the host and port number of the MongoDB server and the user credentials. The dialog also allows it to customize the download and CML directory. After applying the changes, NOVA tries to connect to MongoDB. If a connection is established it will be displayed in the status bar.
 

@@ -507,3 +507,5 @@ bin/native/osx-x64/libsecp256k1.dylib
 bin/native/osx-arm64/libsecp256k1.dylib
 bin/native/linux-x64/libsecp256k1.so
 bin/native/linux-arm64/libsecp256k1.so
+docs/.venv-pandoc/
+.DS_Store
