@@ -85,13 +85,13 @@ namespace ssi
 
         private void helpDocumentationMenu_Click(object sender, RoutedEventArgs e)
         {            
-            System.Diagnostics.Process.Start("https://rawgit.com/hcmlab/nova/master/docs/index.html");
+            System.Diagnostics.Process.Start("https://raw.githack.com/hcmlab/nova/master/docs/index.html");
         }
 
         private void helpShortcutsMenu_Click(object sender, RoutedEventArgs e)
         {
 
-            System.Diagnostics.Process.Start("https://rawgit.com/hcmlab/nova/master/docs/index.html#shortcut-cheat-sheet");
+            System.Diagnostics.Process.Start("https://raw.githack.com/hcmlab/nova/master/docs/index.html#shortcut-cheat-sheet");
         }
 
 

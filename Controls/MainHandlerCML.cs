@@ -256,6 +256,8 @@ namespace ssi
             arguments["balance"] = balance;
             arguments["username"] = username;
             arguments["password"] = password;
+            if (Properties.Settings.Default.UseTLS) arguments["tls"] = null;
+            if (Properties.Settings.Default.SignedCertificatesOnly) arguments["verify"] = null;
             arguments["cmlbegintime"] = cmlbegintime;
             if (multisessionpath != null && !complete) arguments["multisession"] = "\"" + multisessionpath + "\"";
             if (complete) arguments["cooperative"] = null;
@@ -288,6 +290,8 @@ namespace ssi
             arguments["list"] = sessions;
             arguments["username"] = username;
             arguments["password"] = password;
+            if (Properties.Settings.Default.UseTLS) arguments["tls"] = null;
+            if (Properties.Settings.Default.SignedCertificatesOnly) arguments["verify"] = null;
             if (loso) arguments["loso"] = null;
 
             return runCMLTool("cmltrain", "eval", parameters, arguments, "cml-eval");
@@ -336,6 +340,8 @@ namespace ssi
             arguments["mindur"] = minDur;
             arguments["username"] = username;
             arguments["password"] = password;
+            if (Properties.Settings.Default.UseTLS) arguments["tls"] = null;
+            if (Properties.Settings.Default.SignedCertificatesOnly) arguments["verify"] = null;
             arguments["cmlbegintime"] = cmlbegintime;
             if (complete) arguments["cooperative"] = null;
 
