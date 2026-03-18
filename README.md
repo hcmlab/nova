@@ -43,7 +43,7 @@ Please make sure you installed the according Video Codec on your System. E.g. [S
 
 <strong>I don't know what to do, where can I get help?</strong>
 
-The offical documentation can be found [here](https://rawgit.com/hcmlab/nova/master/docs/index.html). If you run into trouble, please create an issue on git.
+The offical documentation can be found [here](https://raw.githack.com/hcmlab/nova/master/docs/index.html). If you run into trouble, please create an issue on git.
 
 
 <strong>Will NOVA run on my Mac/Linux Machine?</strong>
